@@ -210,7 +210,7 @@ describe('EngineLogic', () => {
         EngineLogic.actions.initializeEngine();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine');
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines/some-engine');
         expect(EngineLogic.actions.setEngineData).toHaveBeenCalledWith(mockEngineData);
       });
 

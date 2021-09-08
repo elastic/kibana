@@ -22,11 +22,13 @@ import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
+  isSingleColumn?: boolean;
   link?: ReactNode;
 }
 
 export function ServiceOverviewDependenciesTable({
   fixedHeight,
+  isSingleColumn = true,
   link,
 }: ServiceOverviewDependenciesTableProps) {
   const {
@@ -122,6 +124,7 @@ export function ServiceOverviewDependenciesTable({
     <DependenciesTable
       dependencies={dependencies}
       fixedHeight={fixedHeight}
+      isSingleColumn={isSingleColumn}
       title={i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableTitle',
         {

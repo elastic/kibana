@@ -11,7 +11,7 @@ export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     write: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
+      enabled: schema.boolean({ defaultValue: false }),
     }),
     unsafe: schema.object({
       legacyMultiTenancy: schema.object({
