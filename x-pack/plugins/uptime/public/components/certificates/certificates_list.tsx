@@ -7,9 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { useSelector } from 'react-redux';
 import { Direction, EuiBasicTable } from '@elastic/eui';
-import { certificatesSelector } from '../../state/certificates/certificates';
 import { CertStatus } from './cert_status';
 import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
@@ -42,8 +40,8 @@ interface Props {
   onChange: (page: Page, sort: CertSort) => void;
 }
 
-export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
-  const { data: certificates, loading } = useSelector(certificatesSelector);
+export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onChange }) => {
+  console.log(certificates);
 
   const onTableChange = (newVal: Partial<Props>) => {
     onChange(newVal.page as Page, newVal.sort as CertSort);
@@ -100,7 +98,7 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
 
   return (
     <EuiBasicTable
-      loading={loading}
+      loading={certificates.loading}
       columns={columns}
       items={certificates?.certs ?? []}
       pagination={pagination}

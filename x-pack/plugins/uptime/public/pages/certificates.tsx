@@ -14,6 +14,7 @@ import { getDynamicSettings } from '../state/actions/dynamic_settings';
 import { UptimeRefreshContext } from '../contexts';
 import { getCertificatesAction } from '../state/certificates/certificates';
 import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
+import { useCertSearch } from '../components/certificates/use_cert_search';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
@@ -57,6 +58,14 @@ export const CertificatesPage: React.FC = () => {
     );
   }, [dispatch, page, search, sort.direction, sort.field, lastRefresh]);
 
+  const certificates = useCertSearch({
+    size: page.size,
+    pageIndex: page.index,
+    search: '',
+    sortBy: sort.field,
+    direction: sort.direction,
+  });
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -70,6 +79,7 @@ export const CertificatesPage: React.FC = () => {
           localStorage.setItem(LOCAL_STORAGE_KEY, pageVal.size.toString());
         }}
         sort={sort}
+        certificates={certificates}
       />
     </>
   );

@@ -60,6 +60,7 @@ export {
 
 export const LazyAlertsFlyout = lazy(() => import('./pages/alerts/alerts_flyout'));
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
+export { useEsSearch, createEsParams } from './hooks/use_es_search';
 
 export * from './typings';
 

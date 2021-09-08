@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 
 export const GetCertsParamsType = t.intersection([
   t.type({
-    index: t.number,
+    pageIndex: t.number,
     size: t.number,
     sortBy: t.string,
     direction: t.string,
@@ -48,6 +48,7 @@ export const CertType = t.intersection([
 export const CertResultType = t.type({
   certs: t.array(CertType),
   total: t.number,
+  loading: t.boolean,
 });
 
 export type Cert = t.TypeOf<typeof CertType>;
