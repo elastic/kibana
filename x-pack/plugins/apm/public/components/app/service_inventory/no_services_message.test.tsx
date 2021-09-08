@@ -22,13 +22,9 @@ describe('NoServicesMessage', () => {
         describe(`when historicalDataFound is ${historicalDataFound}`, () => {
           it('renders', () => {
             expect(() =>
-              render(
-                <NoServicesMessage
-                  status={status}
-                  historicalDataFound={historicalDataFound}
-                />,
-                { wrapper: Wrapper }
-              )
+              render(<NoServicesMessage status={status} />, {
+                wrapper: Wrapper,
+              })
             ).not.toThrowError();
           });
         });
