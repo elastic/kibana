@@ -42,18 +42,16 @@ export default ({ getService }: FtrProviderContext) => {
 
       const messagesDict = keyBy(body.messages, 'job_id');
 
-      expect(omit(messagesDict.test_get_job_audit_messages_2, 'timestamp')).to.eql({
+      expect(omit(messagesDict.test_get_job_audit_messages_2, ['timestamp', 'node_name'])).to.eql({
         job_id: 'test_get_job_audit_messages_2',
         message: 'Job created',
         level: 'info',
-        node_name: 'node-01',
         job_type: 'anomaly_detector',
       });
-      expect(omit(messagesDict.test_get_job_audit_messages_1, 'timestamp')).to.eql({
+      expect(omit(messagesDict.test_get_job_audit_messages_1, ['timestamp', 'node_name'])).to.eql({
         job_id: 'test_get_job_audit_messages_1',
         message: 'Job created',
         level: 'info',
-        node_name: 'node-01',
         job_type: 'anomaly_detector',
       });
       expect(body.notificationIndices).to.eql(['.ml-notifications-000002']);
@@ -67,11 +65,10 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       expect(body.messages.length).to.eql(1);
-      expect(omit(body.messages[0], 'timestamp')).to.eql({
+      expect(omit(body.messages[0], ['timestamp', 'node_name'])).to.eql({
         job_id: 'test_get_job_audit_messages_1',
         message: 'Job created',
         level: 'info',
-        node_name: 'node-01',
         job_type: 'anomaly_detector',
       });
       expect(body.notificationIndices).to.eql(['.ml-notifications-000002']);
@@ -85,11 +82,10 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       expect(body.messages.length).to.eql(1);
-      expect(omit(body.messages[0], 'timestamp')).to.eql({
+      expect(omit(body.messages[0], ['timestamp', 'node_name'])).to.eql({
         job_id: 'test_get_job_audit_messages_1',
         message: 'Job created',
         level: 'info',
-        node_name: 'node-01',
         job_type: 'anomaly_detector',
       });
       expect(body.notificationIndices).to.eql(['.ml-notifications-000002']);

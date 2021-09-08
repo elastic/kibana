@@ -68,7 +68,7 @@ export const SampleResponseLogic = kea<MakeLogicType<SampleResponseValues, Sampl
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
-      const url = `/api/app_search/engines/${engineName}/search`;
+      const url = `/internal/app_search/engines/${engineName}/search`;
 
       try {
         const response = await http.post(url, {
