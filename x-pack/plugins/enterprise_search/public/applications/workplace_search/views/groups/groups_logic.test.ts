@@ -222,7 +222,7 @@ describe('GroupsLogic', () => {
         http.get.mockReturnValue(Promise.resolve(groupsResponse));
 
         GroupsLogic.actions.initializeGroups();
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/groups');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/groups');
         await nextTick();
         expect(onInitializeGroupsSpy).toHaveBeenCalledWith(groupsResponse);
       });
@@ -270,7 +270,7 @@ describe('GroupsLogic', () => {
         GroupsLogic.actions.getSearchResults();
         jest.advanceTimersByTime(TIMEOUT);
         await nextTick();
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups/search', payload);
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/groups/search', payload);
         expect(setSearchResultsSpy).toHaveBeenCalledWith(groups);
       });
 
@@ -284,7 +284,7 @@ describe('GroupsLogic', () => {
         // Account for `breakpoint` that debounces filter value.
         jest.advanceTimersByTime(TIMEOUT);
         await nextTick();
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups/search', payload);
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/groups/search', payload);
         expect(setSearchResultsSpy).toHaveBeenCalledWith(groups);
       });
 
@@ -305,7 +305,7 @@ describe('GroupsLogic', () => {
         http.get.mockReturnValue(Promise.resolve(users));
 
         GroupsLogic.actions.fetchGroupUsers('123');
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/groups/123/group_users');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/groups/123/group_users');
         await nextTick();
         expect(setGroupUsersSpy).toHaveBeenCalledWith(users);
       });
@@ -328,7 +328,7 @@ describe('GroupsLogic', () => {
         http.post.mockReturnValue(Promise.resolve(groups[0]));
 
         GroupsLogic.actions.saveNewGroup();
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups', {
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/groups', {
           body: JSON.stringify({ group_name: GROUP_NAME }),
           headers,
         });

@@ -30,7 +30,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       before(async () => {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': false,
           'visualization:visualize:legacyPieChartsLibrary': false,
         });
         await browser.refresh();
@@ -38,7 +37,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       after(async () => {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': true,
           'visualization:visualize:legacyPieChartsLibrary': true,
         });
         await browser.refresh();
@@ -59,7 +57,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       this.tags('ciGroup9');
 
       loadTestFile(require.resolve('./_embedding_chart'));
-      loadTestFile(require.resolve('./_area_chart'));
       loadTestFile(require.resolve('./_data_table'));
       loadTestFile(require.resolve('./_data_table_nontimeindex'));
       loadTestFile(require.resolve('./_data_table_notimeindex_filters'));
@@ -81,10 +78,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('visualize ciGroup4', function () {
       this.tags('ciGroup4');
 
-      loadTestFile(require.resolve('./_line_chart_split_series'));
-      loadTestFile(require.resolve('./_line_chart_split_chart'));
       loadTestFile(require.resolve('./_pie_chart'));
-      loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_markdown_vis'));
       loadTestFile(require.resolve('./_shared_item'));
       loadTestFile(require.resolve('./_lab_mode'));
@@ -97,8 +91,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       this.tags('ciGroup12');
 
       loadTestFile(require.resolve('./_tag_cloud'));
-      loadTestFile(require.resolve('./_vertical_bar_chart'));
-      loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
       loadTestFile(require.resolve('./_tsvb_chart'));
       loadTestFile(require.resolve('./_tsvb_time_series'));
       loadTestFile(require.resolve('./_tsvb_markdown'));
