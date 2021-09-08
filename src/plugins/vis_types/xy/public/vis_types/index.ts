@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { getAreaVisTypeDefinition } from './area';
-import { getLineVisTypeDefinition } from './line';
-import { getHistogramVisTypeDefinition } from './histogram';
-import { getHorizontalBarVisTypeDefinition } from './horizontal_bar';
+import { areaVisTypeDefinition } from './area';
+import { lineVisTypeDefinition } from './line';
+import { histogramVisTypeDefinition } from './histogram';
+import { horizontalBarVisTypeDefinition } from './horizontal_bar';
 
 export const visTypesDefinitions = [
-  getAreaVisTypeDefinition(),
-  getLineVisTypeDefinition(),
-  getHistogramVisTypeDefinition(),
-  getHorizontalBarVisTypeDefinition(),
+  areaVisTypeDefinition,
+  lineVisTypeDefinition,
+  histogramVisTypeDefinition,
+  horizontalBarVisTypeDefinition,
 ];

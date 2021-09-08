@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to save and load', async function () {
-      const vizName = 'Visualization Line split series - chart library';
+      const vizName = 'Visualization Line split series';
 
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName);
 

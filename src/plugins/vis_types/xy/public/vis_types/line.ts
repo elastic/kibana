@@ -22,13 +22,12 @@ import {
   AxisMode,
   ThresholdLineStyle,
   InterpolationMode,
-  XyVisTypeDefinition,
 } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
-import { getOptionTabs } from '../editor/common_config';
+import { optionTabs } from '../editor/common_config';
 
-export const getLineVisTypeDefinition = (): XyVisTypeDefinition => ({
+export const lineVisTypeDefinition = {
   name: 'line',
   title: i18n.translate('visTypeXy.line.lineTitle', { defaultMessage: 'Line' }),
   icon: 'visLine',
@@ -126,7 +125,7 @@ export const getLineVisTypeDefinition = (): XyVisTypeDefinition => ({
     },
   },
   editorConfig: {
-    optionTabs: getOptionTabs(),
+    optionTabs,
     schemas: [
       {
         group: AggGroupNames.Metrics,
@@ -175,4 +174,4 @@ export const getLineVisTypeDefinition = (): XyVisTypeDefinition => ({
     ],
   },
   requiresSearch: true,
-});
+};

@@ -112,8 +112,8 @@ export class VisualizePageObject extends FtrService {
     });
   }
 
-  public async clickRefresh(isNewLibrary = false) {
-    if ((await this.visChart.isNewChartsLibraryEnabled()) || isNewLibrary) {
+  public async clickRefresh(isNewChartLibrary = false) {
+    if ((await this.visChart.isNewChartsLibraryEnabled()) || isNewChartLibrary) {
       await this.elasticChart.setNewChartUiDebugFlag();
     }
     await this.queryBar.clickQuerySubmitButton();

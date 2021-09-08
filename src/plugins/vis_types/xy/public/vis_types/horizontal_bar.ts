@@ -20,15 +20,14 @@ import {
   ScaleType,
   AxisMode,
   ThresholdLineStyle,
-  XyVisTypeDefinition,
   InterpolationMode,
 } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
-import { getOptionTabs } from '../editor/common_config';
+import { optionTabs } from '../editor/common_config';
 import { defaultCountLabel, LabelRotation } from '../../../../charts/public';
 
-export const getHorizontalBarVisTypeDefinition = (): XyVisTypeDefinition => ({
+export const horizontalBarVisTypeDefinition = {
   name: 'horizontal_bar',
   title: i18n.translate('visTypeXy.horizontalBar.horizontalBarTitle', {
     defaultMessage: 'Horizontal bar',
@@ -128,7 +127,7 @@ export const getHorizontalBarVisTypeDefinition = (): XyVisTypeDefinition => ({
     },
   },
   editorConfig: {
-    optionTabs: getOptionTabs(),
+    optionTabs,
     schemas: [
       {
         group: AggGroupNames.Metrics,
@@ -183,4 +182,4 @@ export const getHorizontalBarVisTypeDefinition = (): XyVisTypeDefinition => ({
     ],
   },
   requiresSearch: true,
-});
+};
