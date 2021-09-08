@@ -37,10 +37,12 @@ let persistAlertInstances = false; // eslint-disable-line prefer-const
 
 type TestRuleState = Record<string, unknown> & {
   aRuleStateKey: string;
+  groups: string[];
 };
 
 const initialRuleState: TestRuleState = {
   aRuleStateKey: 'INITIAL_RULE_STATE_VALUE',
+  groups: [],
 };
 
 const mockOptions = {
