@@ -29,6 +29,7 @@ export const MappingErrorPage = () => {
 
   return (
     <EuiEmptyPrompt
+      data-test-subj="xpack.uptime.mappingsErrorPage"
       iconColor="danger"
       iconType="cross"
       title={
