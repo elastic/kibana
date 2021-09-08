@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiExpression } from '@elastic/eui';
+import { CommonProps, EuiExpression } from '@elastic/eui';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   CONDITION_OS,
@@ -22,6 +22,7 @@ import {
   CONDITION_OPERATOR_TYPE_LIST,
 } from './translations';
 import { ArtifactInfo } from '../types';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 const OS_LABELS = Object.freeze({
   linux: OS_LINUX,
@@ -38,32 +39,39 @@ const OPERATOR_TYPE_LABELS = Object.freeze({
   [ListOperatorTypeEnum.LIST]: CONDITION_OPERATOR_TYPE_LIST,
 });
 
-export type CriteriaConditionsProps = Pick<ArtifactInfo, 'os' | 'entries'>;
+export type CriteriaConditionsProps = Pick<ArtifactInfo, 'os' | 'entries'> &
+  Pick<CommonProps, 'data-test-subj'>;
 
-export const CriteriaConditions = memo<CriteriaConditionsProps>(({ os, entries }) => {
-  return (
-    <div>
-      <div>
-        <strong>
-          <EuiExpression description={''} value={CONDITION_OS} />
-          <EuiExpression
-            description={CONDITION_OPERATOR_TYPE_MATCH}
-            value={OS_LABELS[os as keyof typeof OS_LABELS] ?? os}
-          />
-        </strong>
-      </div>
-      {entries.map(({ field, type, value }) => {
-        return (
-          <div>
-            <EuiExpression description={CONDITION_AND} value={field} color="subdued" />
+export const CriteriaConditions = memo<CriteriaConditionsProps>(
+  ({ os, entries, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
+    return (
+      <div data-test-subj={dataTestSubj}>
+        <div data-test-subj={getTestId('os')}>
+          <strong>
+            <EuiExpression description={''} value={CONDITION_OS} />
             <EuiExpression
-              description={OPERATOR_TYPE_LABELS[type as keyof typeof OPERATOR_TYPE_LABELS] ?? type}
-              value={value}
+              description={CONDITION_OPERATOR_TYPE_MATCH}
+              value={OS_LABELS[os as keyof typeof OS_LABELS] ?? os}
             />
-          </div>
-        );
-      })}
-    </div>
-  );
-});
+          </strong>
+        </div>
+        {entries.map(({ field, type, value }) => {
+          return (
+            <div data-test-subj={getTestId('condition')}>
+              <EuiExpression description={CONDITION_AND} value={field} color="subdued" />
+              <EuiExpression
+                description={
+                  OPERATOR_TYPE_LABELS[type as keyof typeof OPERATOR_TYPE_LABELS] ?? type
+                }
+                value={value}
+              />
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+);
 CriteriaConditions.displayName = 'CriteriaConditions';

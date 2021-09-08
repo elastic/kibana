@@ -16,6 +16,7 @@ import { EffectScopeProps } from './components/effect_scope';
 import { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_support/context_menu_item_nav_by_rotuer';
 import { AnyArtifact } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
+import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 const CardContainerPanel = styled(EuiPanel)`
   &.artifactEntryCard + &.artifactEntryCard {
@@ -44,8 +45,15 @@ export interface ArtifactEntryCardProps extends CommonProps {
  * This component is a TS Generic that allows you to set what the Item type is
  */
 export const ArtifactEntryCard = memo(
-  ({ item, policies, actions, ...commonProps }: ArtifactEntryCardProps) => {
+  ({
+    item,
+    policies,
+    actions,
+    'data-test-subj': dataTestSubj,
+    ...commonProps
+  }: ArtifactEntryCardProps) => {
     const artifact = useNormalizedArtifact(item);
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     // create the policy links for each policy listed in the artifact record by grabbing the
     // navigation data from the `policies` prop (if any)
@@ -66,6 +74,7 @@ export const ArtifactEntryCard = memo(
       <CardContainerPanel
         hasBorder={true}
         {...commonProps}
+        data-test-subj={dataTestSubj}
         paddingSize="none"
         className="artifactEntryCard"
       >
@@ -75,17 +84,21 @@ export const ArtifactEntryCard = memo(
             createdDate={artifact.created_at}
             updatedDate={artifact.updated_at}
             actions={actions}
+            data-test-subj={getTestId('header')}
           />
           <CardSubHeader
             createdBy={artifact.created_by}
             updatedBy={artifact.updated_by}
             policies={policyNavLinks}
+            data-test-subj={getTestId('subHeader')}
           />
 
           <EuiSpacer size="m" />
 
           <EuiText>
-            <p>{artifact.description || getEmptyValue()}</p>
+            <p data-test-subj={getTestId('description')}>
+              {artifact.description || getEmptyValue()}
+            </p>
           </EuiText>
         </EuiPanel>
 
@@ -95,6 +108,7 @@ export const ArtifactEntryCard = memo(
           <CriteriaConditions
             os={artifact.os as CriteriaConditionsProps['os']}
             entries={artifact.entries}
+            data-test-subj={getTestId('criteriaConditions')}
           />
         </EuiPanel>
       </CardContainerPanel>

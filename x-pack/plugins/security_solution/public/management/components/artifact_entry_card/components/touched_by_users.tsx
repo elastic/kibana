@@ -6,46 +6,72 @@
  */
 
 import React, { memo } from 'react';
-import { EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { CommonProps, EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CREATED_BY, LAST_UPDATED_BY } from './translations';
 import { TextValueDisplay } from './text_value_display';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
-export interface TouchedByUsersProps {
+export interface TouchedByUsersProps extends Pick<CommonProps, 'data-test-subj'> {
   createdBy: string;
   updatedBy: string;
 }
 
-export const TouchedByUsers = memo<TouchedByUsersProps>(({ createdBy, updatedBy }) => {
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <UserName label={CREATED_BY} value={createdBy} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <UserName label={LAST_UPDATED_BY} value={createdBy} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+export const TouchedByUsers = memo<TouchedByUsersProps>(
+  ({ createdBy, updatedBy, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
+    return (
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="l"
+        responsive={false}
+        data-test-subj={dataTestSubj}
+      >
+        <EuiFlexItem grow={false}>
+          <UserName label={CREATED_BY} value={createdBy} data-test-subj={getTestId('createdBy')} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <UserName
+            label={LAST_UPDATED_BY}
+            value={updatedBy}
+            data-test-subj={getTestId('updatedBy')}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 TouchedByUsers.displayName = 'TouchedByUsers';
 
-interface UserNameProps {
+interface UserNameProps extends Pick<CommonProps, 'data-test-subj'> {
   label: string;
   value: string;
 }
 
-const UserName = memo<UserNameProps>(({ label, value }) => {
+const UserName = memo<UserNameProps>(({ label, value, 'data-test-subj': dataTestSubj }) => {
+  const getTestId = useTestIdGenerator(dataTestSubj);
+
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m" wrap={false} responsive={false}>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="m"
+      wrap={false}
+      responsive={false}
+      data-test-subj={dataTestSubj}
+    >
       <EuiFlexItem grow={false}>
-        <EuiBadge>{label}</EuiBadge>
+        <EuiBadge data-test-subj={getTestId('label')}>{label}</EuiBadge>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center" wrap={false}>
           <EuiFlexItem grow={false}>
-            <EuiAvatar name={value} size="s" />
+            <EuiAvatar name={value} size="s" data-test-subj={getTestId('avatar')} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} className="eui-textTruncate">
+          <EuiFlexItem
+            grow={false}
+            className="eui-textTruncate"
+            data-test-subj={getTestId('value')}
+          >
             <TextValueDisplay>{value}</TextValueDisplay>
           </EuiFlexItem>
         </EuiFlexGroup>

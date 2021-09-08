@@ -122,6 +122,7 @@ export const TrustedAppsGrid = memo(() => {
         cachedCardProps[trustedApp.id] = {
           item: trustedApp,
           policies,
+          'data-test-subj': 'trustedAppCard',
           actions: [
             {
               icon: 'controlsHorizontal',

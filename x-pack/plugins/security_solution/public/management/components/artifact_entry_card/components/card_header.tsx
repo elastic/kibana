@@ -6,11 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { CommonProps, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { DateFieldValue } from './date_field_value';
 import { ActionsContextMenu, ActionsContextMenuProps } from '../../actions_context_menu';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
-export interface CardHeaderProps {
+export interface CardHeaderProps extends Pick<CommonProps, 'data-test-subj'> {
   name: string;
   createdDate: string;
   updatedDate: string;
@@ -18,35 +19,51 @@ export interface CardHeaderProps {
   actions?: ActionsContextMenuProps['items'];
 }
 
-export const CardHeader = memo<CardHeaderProps>(({ name, createdDate, updatedDate, actions }) => {
-  return (
-    <EuiFlexGroup responsive={false}>
-      <EuiFlexItem grow={true}>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={true}>
-            <EuiTitle size="s">
-              <h3>{name}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} gutterSize="xl">
-              <EuiFlexItem grow={false}>
-                <DateFieldValue date={updatedDate} type="update" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DateFieldValue date={createdDate} type="create" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      {actions && actions.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <ActionsContextMenu items={actions} icon="boxesHorizontal" />
+export const CardHeader = memo<CardHeaderProps>(
+  ({ name, createdDate, updatedDate, actions, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
+    return (
+      <EuiFlexGroup responsive={false} data-test-subj={dataTestSubj}>
+        <EuiFlexItem grow={true}>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={true}>
+              <EuiTitle size="s">
+                <h3 data-test-subj={getTestId('title')}>{name}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="xl">
+                <EuiFlexItem grow={false}>
+                  <DateFieldValue
+                    date={updatedDate}
+                    type="update"
+                    data-test-subj={getTestId('updated')}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <DateFieldValue
+                    date={createdDate}
+                    type="create"
+                    data-test-subj={getTestId('created')}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-});
+        {actions && actions.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <ActionsContextMenu
+              items={actions}
+              icon="boxesHorizontal"
+              data-test-subj={getTestId('actions')}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }
+);
 
 CardHeader.displayName = 'CardHeader';

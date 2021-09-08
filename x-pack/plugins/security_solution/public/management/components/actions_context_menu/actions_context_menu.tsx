@@ -64,6 +64,7 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
         anchorPosition="downRight"
         panelPaddingSize="none"
         panelProps={panelProps}
+        data-test-subj={dataTestSubj}
         button={
           <EuiButtonIcon
             data-test-subj={getTestId('button')}
@@ -77,7 +78,7 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
         isOpen={isOpen}
         closePopover={handleCloseMenu}
       >
-        <EuiContextMenuPanel items={menuItems} />
+        <EuiContextMenuPanel items={menuItems} data-test-subj={getTestId('contextMenuPanel')} />
       </EuiPopover>
     );
   }

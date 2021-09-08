@@ -6,38 +6,48 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { CommonProps, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { CREATED, LAST_UPDATED } from './translations';
 import {
   FormattedRelativePreferenceDate,
   FormattedRelativePreferenceDateProps,
 } from '../../../../common/components/formatted_date';
 import { TextValueDisplay } from './text_value_display';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
-export interface DateFieldProps {
+export interface DateFieldProps extends Pick<CommonProps, 'data-test-subj'> {
   date: FormattedRelativePreferenceDateProps['value'];
   type: 'update' | 'create';
 }
 
-export const DateFieldValue = memo<DateFieldProps>(({ date, type }) => {
-  return (
-    <EuiFlexGroup responsive={false} gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="calendar" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <EuiFlexGroup responsive={false} direction="column" alignItems="flexStart" gutterSize="xs">
-          <EuiFlexItem className="eui-textTruncate">
-            <TextValueDisplay>{type === 'update' ? LAST_UPDATED : CREATED}</TextValueDisplay>
-          </EuiFlexItem>
-          <EuiFlexItem className="eui-textTruncate">
-            <TextValueDisplay bold>
-              <FormattedRelativePreferenceDate value={date} dateFormat="M/D/YYYY" />
-            </TextValueDisplay>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+export const DateFieldValue = memo<DateFieldProps>(
+  ({ date, type, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
+    return (
+      <EuiFlexGroup responsive={false} gutterSize="m" data-test-subj={dataTestSubj}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="calendar" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiFlexGroup
+            responsive={false}
+            direction="column"
+            alignItems="flexStart"
+            gutterSize="xs"
+          >
+            <EuiFlexItem className="eui-textTruncate" data-test-subj={getTestId('label')}>
+              <TextValueDisplay>{type === 'update' ? LAST_UPDATED : CREATED}</TextValueDisplay>
+            </EuiFlexItem>
+            <EuiFlexItem className="eui-textTruncate" data-test-subj={getTestId('value')}>
+              <TextValueDisplay bold>
+                <FormattedRelativePreferenceDate value={date} dateFormat="M/D/YYYY" />
+              </TextValueDisplay>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 DateFieldValue.displayName = 'DateField';
