@@ -597,7 +597,7 @@ const useDataVisualizerGridData = (
   const extendedColumns = useMemo(() => {
     const actions = getActions(
       input.indexPattern,
-      services,
+      { lens: services.lens },
       {
         searchQueryLanguage,
         searchString,
