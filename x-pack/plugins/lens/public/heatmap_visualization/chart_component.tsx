@@ -125,7 +125,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const tableId = Object.keys(data.tables)[0];
   const table = data.tables[tableId];
 
-  const paletteParams = args.palette?.params as CustomPaletteState;
+  const paletteParams = args.palette?.params;
 
   const xAxisColumnIndex = table.columns.findIndex((v) => v.id === args.xAccessor);
   const yAxisColumnIndex = table.columns.findIndex((v) => v.id === args.yAccessor);

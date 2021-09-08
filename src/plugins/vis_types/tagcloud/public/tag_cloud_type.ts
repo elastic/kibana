@@ -14,66 +14,73 @@ import { getTagCloudOptions } from './components/get_tag_cloud_options';
 import { toExpressionAst } from './to_ast';
 import { TagCloudVisDependencies } from './plugin';
 
-export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependencies) => ({
-  name: 'tagcloud',
-  title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag cloud' }),
-  icon: 'visTagCloud',
-  getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.filter];
-  },
-  description: i18n.translate('visTypeTagCloud.vis.tagCloudDescription', {
-    defaultMessage: 'Display word frequency with font size.',
-  }),
-  visConfig: {
-    defaults: {
-      scale: 'linear',
-      orientation: 'single',
-      minFontSize: 18,
-      maxFontSize: 72,
-      showLabel: true,
-      palette: {
-        name: 'default',
-        type: 'palette',
+export const getTagCloudVisTypeDefinition = async ({ palettes }: TagCloudVisDependencies) => {
+  const defaultPalette = (await palettes.getPalettes()).get('default');
+  const colors = defaultPalette.getCategoricalColors(10);
+  return {
+    name: 'tagcloud',
+    title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag cloud' }),
+    icon: 'visTagCloud',
+    getSupportedTriggers: () => {
+      return [VIS_EVENT_TO_TRIGGER.filter];
+    },
+    description: i18n.translate('visTypeTagCloud.vis.tagCloudDescription', {
+      defaultMessage: 'Display word frequency with font size.',
+    }),
+    visConfig: {
+      defaults: {
+        scale: 'linear',
+        orientation: 'single',
+        minFontSize: 18,
+        maxFontSize: 72,
+        showLabel: true,
+        palette: {
+          name: 'default',
+          type: 'palette',
+          params: {
+            colors,
+          },
+        },
       },
     },
-  },
-  toExpressionAst,
-  editorConfig: {
-    optionsTemplate: getTagCloudOptions({
-      palettes,
-    }),
-    schemas: [
-      {
-        group: AggGroupNames.Metrics,
-        name: 'metric',
-        title: i18n.translate('visTypeTagCloud.vis.schemas.metricTitle', {
-          defaultMessage: 'Tag size',
-        }),
-        min: 1,
-        max: 1,
-        aggFilter: [
-          '!std_dev',
-          '!percentiles',
-          '!percentile_ranks',
-          '!derivative',
-          '!geo_bounds',
-          '!geo_centroid',
-          '!filtered_metric',
-          '!single_percentile',
-        ],
-        defaults: [{ schema: 'metric', type: 'count' }],
-      },
-      {
-        group: AggGroupNames.Buckets,
-        name: 'segment',
-        title: i18n.translate('visTypeTagCloud.vis.schemas.segmentTitle', {
-          defaultMessage: 'Tags',
-        }),
-        min: 1,
-        max: 1,
-        aggFilter: ['terms', 'significant_terms'],
-      },
-    ],
-  },
-  requiresSearch: true,
-});
+    toExpressionAst,
+    editorConfig: {
+      optionsTemplate: getTagCloudOptions({
+        palettes,
+      }),
+      schemas: [
+        {
+          group: AggGroupNames.Metrics,
+          name: 'metric',
+          title: i18n.translate('visTypeTagCloud.vis.schemas.metricTitle', {
+            defaultMessage: 'Tag size',
+          }),
+          min: 1,
+          max: 1,
+          aggFilter: [
+            '!std_dev',
+            '!percentiles',
+            '!percentile_ranks',
+            '!derivative',
+            '!geo_bounds',
+            '!geo_centroid',
+            '!filtered_metric',
+            '!single_percentile',
+          ],
+          defaults: [{ schema: 'metric', type: 'count' }],
+        },
+        {
+          group: AggGroupNames.Buckets,
+          name: 'segment',
+          title: i18n.translate('visTypeTagCloud.vis.schemas.segmentTitle', {
+            defaultMessage: 'Tags',
+          }),
+          min: 1,
+          max: 1,
+          aggFilter: ['terms', 'significant_terms'],
+        },
+      ],
+    },
+    requiresSearch: true,
+  };
+};

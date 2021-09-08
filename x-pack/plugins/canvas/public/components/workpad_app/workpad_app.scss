@@ -73,6 +73,9 @@ $canvasLayoutFontSize: $euiFontSizeS;
   .euiPanel {
     margin-bottom: $euiSizeS;
   }
+  .euiPanel.euiSplitPanel__inner {
+    margin-bottom: 0;
+  }
 }
 
 .canvasLayout__footer {

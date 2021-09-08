@@ -37,7 +37,9 @@ export class TagCloudPlugin implements Plugin<void, void> {
       palettes: charts.palettes,
     };
 
-    visualizations.createBaseVisualization(getTagCloudVisTypeDefinition(visualizationDependencies));
+    getTagCloudVisTypeDefinition(visualizationDependencies).then((definition) =>
+      visualizations.createBaseVisualization(definition)
+    );
   }
 
   public start(core: CoreStart) {}

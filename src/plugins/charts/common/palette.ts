@@ -35,11 +35,12 @@ export interface SystemPaletteArguments {
   name: string;
 }
 
-export interface PaletteOutput<T = unknown> {
+export interface PaletteOutput<T = { [key: string]: unknown }> {
   type: 'palette';
   name: string;
   params?: T;
 }
+
 export const defaultCustomColors = [
   // This set of defaults originated in Canvas, which, at present, is the primary
   // consumer of this function.  Changing this default requires a change in Canvas

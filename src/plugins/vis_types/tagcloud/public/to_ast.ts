@@ -25,6 +25,13 @@ const prepareDimension = (params: SchemaConfig) => {
   return buildExpression([visdimension]);
 };
 
+const preparePalette = (params: Record<string, unknown>) => {
+  const { colors, stops, range, gradient, continuity, rangeMin, rangeMax } = params ?? {};
+  const args = { color: colors, stop: stops, range, gradient, continuity, rangeMin, rangeMax };
+  const palette = buildExpressionFunction('palette', args);
+  return buildExpression([palette]);
+};
+
 export const toExpressionAst: VisToExpressionAst<TagCloudVisParams> = (vis, params) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: buildExpression([
@@ -47,7 +54,7 @@ export const toExpressionAst: VisToExpressionAst<TagCloudVisParams> = (vis, para
     maxFontSize,
     showLabel,
     metric: prepareDimension(schemas.metric[0]),
-    palette: palette?.name,
+    palette: preparePalette(palette?.params ?? {}),
   });
 
   if (schemas.segment) {
