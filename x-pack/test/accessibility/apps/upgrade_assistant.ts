@@ -53,6 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Overview page', () => {
       beforeEach(async () => {
+        await PageObjects.upgradeAssistant.navigateToPage();
         await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
           return testSubjects.exists('overview');
         });
