@@ -28,7 +28,7 @@ To add a layer that requests data from {es} to your map, click *Add layer*, then
 
 [float]
 [[maps-narrow-layer-by-global-search]]
-==== Free text search and field-based search
+==== Narrow layers by global search
 
 Layers that request data from {es} are narrowed when you submit a <<kibana-concepts-searching-your-data, search>>.
 Layers narrowed by semi-structured search and filters contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
@@ -41,7 +41,7 @@ You can prevent the global search from applying to a layer by configuring the fo
 
 [float]
 [[maps-narrow-layer-by-global-time]]
-==== Restrict layers by time
+==== Narrow layers by global time filter
 
 Layers that request data from {es} using an <<index-patterns, index pattern>> with a configured time field are narrowed by the <<set-time-filter, global time filter>>.
 These layers contain the clock icon image:maps/images/clock_icon.png[clock icon] next to the layer name in the legend.
