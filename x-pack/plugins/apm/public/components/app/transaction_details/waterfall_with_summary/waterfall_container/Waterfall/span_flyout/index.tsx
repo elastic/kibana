@@ -74,13 +74,11 @@ function getSpanTypes(span: Span) {
   };
 }
 
-const SpanBadge = euiStyled(EuiBadge)`
-  display: inline-block;
-  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
-`;
-
-const HttpInfoContainer = euiStyled('div')`
-  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
+const ContainerWithMarginRight = euiStyled.div`
+  /* add margin to all direct descendants */
+  & > * {
+    margin-right: ${({ theme }) => theme.eui.euiSizeXS};
+  }
 `;
 
 interface Props {
@@ -174,15 +172,13 @@ export function SpanFlyout({
                   />
                 )}
               </>,
-              <>
+              <ContainerWithMarginRight>
                 {spanHttpUrl && (
-                  <HttpInfoContainer>
-                    <HttpInfoSummaryItem
-                      method={spanHttpMethod}
-                      url={spanHttpUrl}
-                      status={spanHttpStatusCode}
-                    />
-                  </HttpInfoContainer>
+                  <HttpInfoSummaryItem
+                    method={spanHttpMethod}
+                    url={spanHttpUrl}
+                    status={spanHttpStatusCode}
+                  />
                 )}
                 <EuiToolTip
                   content={i18n.translate(
@@ -190,7 +186,7 @@ export function SpanFlyout({
                     { defaultMessage: 'Type' }
                   )}
                 >
-                  <SpanBadge color="hollow">{spanTypes.spanType}</SpanBadge>
+                  <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
                 </EuiToolTip>
                 {spanTypes.spanSubtype && (
                   <EuiToolTip
@@ -199,9 +195,7 @@ export function SpanFlyout({
                       { defaultMessage: 'Subtype' }
                     )}
                   >
-                    <SpanBadge color="hollow">
-                      {spanTypes.spanSubtype}
-                    </SpanBadge>
+                    <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
                   </EuiToolTip>
                 )}
                 {spanTypes.spanAction && (
@@ -211,13 +205,14 @@ export function SpanFlyout({
                       { defaultMessage: 'Action' }
                     )}
                   >
-                    <SpanBadge color="hollow">{spanTypes.spanAction}</SpanBadge>
+                    <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
                   </EuiToolTip>
                 )}
-                <SyncBadge sync={span.span.sync} />
 
                 <FailureBadge outcome={span.event?.outcome} />
-              </>,
+
+                <SyncBadge sync={span.span.sync} />
+              </ContainerWithMarginRight>,
             ]}
           />
           <EuiHorizontalRule />
