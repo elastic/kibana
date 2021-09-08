@@ -585,6 +585,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.fileaccess',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.fileaccess',
+      {
+        defaultMessage:
+          'Report limited file access (read) events. Paths are not user-configurable. Default value is true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.registryaccess',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.registryaccess',
+      {
+        defaultMessage:
+          'Report limited registry access (queryvalue, savekey) events. Paths are not user-configurable. Default value is true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.diagnostic.enabled',
     first_supported_version: '7.11',
     documentation: i18n.translate(
