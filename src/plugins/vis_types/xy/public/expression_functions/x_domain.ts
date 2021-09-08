@@ -15,6 +15,8 @@ import { getAdjustedInterval } from '../../common';
 import { XDomainArguments, ExpressionValueXDomain } from '../types';
 import { getValueByAccessor } from '../utils/accessors';
 
+export const X_DOMAIN_EXPRESSION = 'x_domain';
+
 export const getAdjustedDomain = (
   data: Datatable['rows'],
   column: ExpressionValueVisDimension,
@@ -54,11 +56,11 @@ export const xDomain = (): ExpressionFunctionDefinition<
   XDomainArguments,
   ExpressionValueXDomain
 > => ({
-  name: 'x_domain',
+  name: X_DOMAIN_EXPRESSION,
   help: i18n.translate('visTypeXy.function.valueaxis.help', {
     defaultMessage: 'Generates value axis object',
   }),
-  type: 'x_domain',
+  type: X_DOMAIN_EXPRESSION,
   args: {
     minInterval: {
       types: ['number'],
@@ -146,30 +148,28 @@ export const xDomain = (): ExpressionFunctionDefinition<
     } = args;
 
     const domain = { min, max, minInterval, logBase, coordinates };
-    const shouldReturnPlainDomain = !(
+    const shouldReturnAdjustedDomain =
       context?.rows &&
       column &&
       intervalUnit &&
       timezone &&
-      (intervalValue ?? false) &&
-      (min ?? false) &&
-      (max ?? false)
-    );
+      intervalValue !== undefined &&
+      min !== undefined &&
+      max !== undefined &&
+      minInterval !== undefined;
 
-    if (shouldReturnPlainDomain) {
-      return {
-        type: 'x_domain',
-        ...domain,
-      };
+    if (!shouldReturnAdjustedDomain) {
+      return { type: X_DOMAIN_EXPRESSION, ...domain };
     }
+
     const adjusted = getAdjustedDomain(
       context?.rows ?? [],
       column,
       {
-        min: min as number,
-        max: max as number,
-        minInterval: minInterval as number,
-        intervalValue: intervalValue as number,
+        min,
+        max,
+        minInterval,
+        intervalValue,
         intervalUnit,
       },
       timezone,
@@ -177,7 +177,7 @@ export const xDomain = (): ExpressionFunctionDefinition<
     );
 
     return {
-      type: 'x_domain',
+      type: X_DOMAIN_EXPRESSION,
       ...domain,
       adjusted,
     };
