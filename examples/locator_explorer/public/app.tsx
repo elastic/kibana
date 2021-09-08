@@ -19,7 +19,8 @@ import { EuiFieldText } from '@elastic/eui';
 import { EuiPageHeader } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { AppMountParameters } from '../../../src/core/public';
-import { formatSearchParams, SharePluginSetup } from '../../../src/plugins/share/public';
+import { SharePluginSetup } from '../../../src/plugins/share/public';
+import { formatSearchParams } from '../../../src/plugins/share/common';
 import {
   HelloLocatorV1Params,
   HelloLocatorV2Params,
