@@ -50,7 +50,14 @@ export const makeConfigureStore = (
     optimizingMiddleware(),
     timeRangeMiddleware(storeDeps.lensServices.data),
   ];
-  // if (process.env.NODE_ENV === 'development') middleware.push(logger);
+  if (process.env.NODE_ENV === 'development') {
+    middleware.push(
+      createLogger({
+        // @ts-ignore
+        predicate: () => window.ELASTIC_LENS_LOGGER,
+      })
+    );
+  }
 
   return configureStore({
     reducer,
