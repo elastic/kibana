@@ -110,6 +110,9 @@ describe('When using the Trusted App Form', () => {
   const getAllValidationErrors = (): HTMLElement[] => {
     return Array.from(renderResult.container.querySelectorAll('.euiFormErrorText'));
   };
+  const getAllValidationWarnings = (): HTMLElement[] => {
+    return Array.from(renderResult.container.querySelectorAll('.euiFormHelpText'));
+  };
 
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
@@ -406,6 +409,49 @@ describe('When using the Trusted App Form', () => {
               operator: 'included',
               type: 'match',
               value: 'e50fb1a0e5fff590ece385082edc6c41',
+            },
+          ],
+        },
+      });
+    });
+
+    it('should not validate form to true if name input is empty', () => {
+      const props = {
+        name: 'some name',
+        description: '',
+        effectScope: {
+          type: 'global',
+        },
+        os: OperatingSystem.WINDOWS,
+        entries: [
+          { field: ConditionEntryField.PATH, operator: 'included', type: 'wildcard', value: 'x' },
+        ],
+      } as NewTrustedApp;
+
+      formProps.trustedApp = props;
+      render();
+
+      formProps.trustedApp = {
+        ...props,
+        name: '',
+      };
+      rerender();
+
+      expect(getAllValidationErrors()).toHaveLength(0);
+      expect(getAllValidationWarnings()).toHaveLength(1);
+      expect(formProps.onChange).toHaveBeenLastCalledWith({
+        isValid: false,
+        item: {
+          name: '',
+          description: '',
+          os: OperatingSystem.WINDOWS,
+          effectScope: { type: 'global' },
+          entries: [
+            {
+              field: ConditionEntryField.PATH,
+              operator: 'included',
+              type: 'wildcard',
+              value: 'x',
             },
           ],
         },
