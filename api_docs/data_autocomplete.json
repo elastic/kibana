@@ -385,7 +385,7 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-public.args",
+            "id": "def-public.QuerySuggestionGetFn.$1",
             "type": "Object",
             "tags": [],
             "label": "args",

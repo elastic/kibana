@@ -132,7 +132,7 @@
                 "children": [
                   {
                     "parentPluginId": "advancedSettings",
-                    "id": "def-public.id",
+                    "id": "def-public.ComponentRegistry.setup.register.$1",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "id",
@@ -145,7 +145,7 @@
                   },
                   {
                     "parentPluginId": "advancedSettings",
-                    "id": "def-public.component",
+                    "id": "def-public.ComponentRegistry.setup.register.$2",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "component",
@@ -158,7 +158,7 @@
                   },
                   {
                     "parentPluginId": "advancedSettings",
-                    "id": "def-public.allowOverride",
+                    "id": "def-public.ComponentRegistry.setup.register.$3",
                     "type": "boolean",
                     "tags": [],
                     "label": "allowOverride",
@@ -209,7 +209,7 @@
                 "children": [
                   {
                     "parentPluginId": "advancedSettings",
-                    "id": "def-public.id",
+                    "id": "def-public.ComponentRegistry.start.get.$1",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "id",
@@ -251,7 +251,7 @@
         "children": [
           {
             "parentPluginId": "advancedSettings",
-            "id": "def-public.props",
+            "id": "def-public.LazyField.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
