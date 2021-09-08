@@ -30,11 +30,12 @@ export const NoDataPage = () => {
   const clusterUuid = state.cluster_uuid;
   const ccs = state.ccs;
 
-  // TODO should we set these?
-  const [clusters, setClusters] = useState([] as any);
-
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // TODO work on porting these checkers over
+  // const checkers = [new ClusterSettingsChecker($http), new NodeSettingsChecker($http)];
+  // await startChecks(checkers, updateModel);
 
   const model = {
     errors: [], // errors can happen from trying to check or set ES settings
@@ -73,8 +74,6 @@ export const NoDataPage = () => {
 
       if (clusters && clusters.length) {
         setShouldRedirect(true);
-        // TODO should this return?
-        // return clusters;
       }
     } catch (err) {
       // TODO something useful with the error reason
