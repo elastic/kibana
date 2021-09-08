@@ -15,6 +15,7 @@ import {
 } from '../../../../../../src/plugins/visualizations/public';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import { DiscoverAppLocator } from '../../../../../../src/plugins/discover/public';
+import { sharePluginMock } from '../../../../../../src/plugins/share/public/mocks';
 
 const i18nTranslateSpy = (i18n.translate as unknown) as jest.SpyInstance;
 
@@ -31,6 +32,7 @@ afterEach(() => {
 const setup = () => {
   const core = coreMock.createStart();
   const locator: DiscoverAppLocator = {
+    ...sharePluginMock.createLocator(),
     getLocation: jest.fn(() =>
       Promise.resolve({
         app: 'discover',
@@ -38,13 +40,6 @@ const setup = () => {
         state: {},
       })
     ),
-    navigate: jest.fn(async () => {}),
-    getUrl: jest.fn(),
-    useUrl: jest.fn(),
-    extract: jest.fn(),
-    inject: jest.fn(),
-    telemetry: jest.fn(),
-    migrations: {},
   };
 
   const plugins: PluginDeps = {

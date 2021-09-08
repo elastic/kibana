@@ -7,6 +7,7 @@
  */
 
 import { DiscoverSetup, DiscoverStart } from '.';
+import { sharePluginMock } from '../../share/public/mocks';
 
 export type Setup = jest.Mocked<DiscoverSetup>;
 export type Start = jest.Mocked<DiscoverStart>;
@@ -16,16 +17,7 @@ const createSetupContract = (): Setup => {
     docViews: {
       addDocView: jest.fn(),
     },
-    locator: {
-      getLocation: jest.fn(),
-      getUrl: jest.fn(),
-      useUrl: jest.fn(),
-      navigate: jest.fn(),
-      extract: jest.fn(),
-      inject: jest.fn(),
-      telemetry: jest.fn(),
-      migrations: {},
-    },
+    locator: sharePluginMock.createLocator(),
   };
   return setupContract;
 };
@@ -36,16 +28,7 @@ const createStartContract = (): Start => {
     urlGenerator: ({
       createUrl: jest.fn(),
     } as unknown) as DiscoverStart['urlGenerator'],
-    locator: {
-      getLocation: jest.fn(),
-      getUrl: jest.fn(),
-      useUrl: jest.fn(),
-      navigate: jest.fn(),
-      extract: jest.fn(),
-      inject: jest.fn(),
-      telemetry: jest.fn(),
-      migrations: {},
-    },
+    locator: sharePluginMock.createLocator(),
   };
   return startContract;
 };
