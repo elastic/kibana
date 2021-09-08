@@ -114,7 +114,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     ),
   });
 
-  const { setFieldValue, submit } = form;
+  const { setFieldValue, submit, isSubmitting } = form;
 
   const actionId = useMemo(() => data?.actions[0].action_id, [data?.actions]);
   const agentIds = useMemo(() => data?.actions[0].agents, [data?.actions]);
@@ -185,7 +185,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiButton disabled={!agentSelected || !queryValueProvided} onClick={submit}>
+            <EuiButton
+              disabled={!agentSelected || !queryValueProvided || isSubmitting}
+              onClick={submit}
+            >
               <FormattedMessage
                 id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
                 defaultMessage="Submit"
@@ -196,13 +199,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       </>
     ),
     [
-      agentSelected,
-      permissions.writeSavedQueries,
-      handleShowSaveQueryFlout,
       queryComponentProps,
+      singleAgentMode,
+      permissions.writeSavedQueries,
+      agentSelected,
       queryValueProvided,
       resultsStatus,
-      singleAgentMode,
+      handleShowSaveQueryFlout,
+      isSubmitting,
       submit,
     ]
   );

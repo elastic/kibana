@@ -10,7 +10,7 @@ import { registry } from '../../../common/registry';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
-  const noAccessUser = getService('supertestAsNoAccessUser');
+  const noAccessUser = getService('legacySupertestAsNoAccessUser');
 
   function getJobs() {
     return noAccessUser.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
