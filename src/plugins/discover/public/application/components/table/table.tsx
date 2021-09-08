@@ -145,3 +145,7 @@ export const DocViewerTable = ({
     />
   );
 };
+
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default DocViewerTable;
