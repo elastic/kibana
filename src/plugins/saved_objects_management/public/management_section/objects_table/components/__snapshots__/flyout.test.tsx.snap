@@ -195,9 +195,6 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           "put": [MockFunction],
         },
         "state": Object {
-          "conflictedIndexPatterns": undefined,
-          "conflictedSavedObjectsLinkedToSavedSearches": undefined,
-          "conflictedSearchDocs": undefined,
           "conflictingRecord": undefined,
           "error": undefined,
           "failedImports": Array [
