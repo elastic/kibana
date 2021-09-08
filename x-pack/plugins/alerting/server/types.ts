@@ -7,6 +7,9 @@
 
 import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ApiResponse, TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { SearchResponse } from '@elastic/elasticsearch/api/types';
+import { ESSearchRequest } from 'src/core/types/elasticsearch';
 import { PublicAlertInstance } from './alert_instance';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -75,6 +78,10 @@ export interface AlertServices<
   alertInstanceFactory: (
     id: string
   ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+  abortableEsClient: (
+    query: ESSearchRequest,
+    asInternalUser: boolean
+  ) => TransportRequestPromise<ApiResponse<SearchResponse<unknown>, unknown>>;
 }
 
 export interface AlertExecutorOptions<

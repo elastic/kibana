@@ -8,6 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
+import { BehaviorSubject } from 'rxjs';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -51,6 +52,7 @@ import {
 } from '../../common';
 import { NormalizedAlertType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
+import { createAbortableEsClientFactory } from '../alert_instance/create_abortable_es_client_factory';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -90,6 +92,7 @@ export class TaskRunner<
     RecoveryActionGroupId
   >;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
+  private cancelled$: BehaviorSubject<boolean>;
 
   constructor(
     alertType: NormalizedAlertType<
@@ -109,6 +112,7 @@ export class TaskRunner<
     this.alertType = alertType;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
+    this.cancelled$ = new BehaviorSubject<boolean>(false);
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -281,6 +285,11 @@ export class TaskRunner<
               InstanceContext,
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
             >(alertInstances),
+            abortableEsClient: createAbortableEsClientFactory({
+              scopedClusterClient: services.scopedClusterClient,
+              cancelled$: this.cancelled$,
+              logger: this.logger,
+            }),
           },
           params,
           state: alertTypeState as State,
@@ -648,6 +657,10 @@ export class TaskRunner<
         return { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL };
       }),
     };
+  }
+
+  async cancel(): Promise<void> {
+    this.cancelled$.next(true);
   }
 }
 
