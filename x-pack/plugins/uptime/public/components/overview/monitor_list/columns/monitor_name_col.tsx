@@ -41,10 +41,12 @@ export const MonitorNameColumn = ({ summary }: Props) => {
   const linkParameters = stringifyUrlParams(params, true);
 
   const currFilters = parseCurrentFilters(params.filters);
+  const currExcludedFilters = parseCurrentFilters(params.excludedFilters);
 
   const [filterType, setFilterType] = useState<string[]>(currFilters.get('monitor.type') ?? []);
+  const excludedFilters = React.useRef<string[]>(currExcludedFilters.get('tags') ?? []);
 
-  useFilterUpdate('monitor.type', filterType);
+  useFilterUpdate('monitor.type', filterType, excludedFilters.current);
 
   const filterLabel = i18n.translate('xpack.uptime.monitorList.monitorType.filter', {
     defaultMessage: 'Filter all monitors with type {type}',

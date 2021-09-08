@@ -22,8 +22,8 @@ const Container = styled(EuiFilterGroup)`
 export const FilterGroup = () => {
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{
     fieldName: string;
-    values?: string[];
-    notValues?: string[];
+    values: string[];
+    notValues: string[];
   }>({ fieldName: '', values: [], notValues: [] });
 
   useFilterUpdate(
@@ -39,7 +39,7 @@ export const FilterGroup = () => {
   const indexPattern = useIndexPattern();
 
   const onFilterFieldChange = useCallback(
-    (fieldName: string, values?: string[], notValues?: string[]) => {
+    (fieldName: string, values: string[], notValues: string[]) => {
       setUpdatedFieldValues({ fieldName, values, notValues });
     },
     []
@@ -58,7 +58,9 @@ export const FilterGroup = () => {
               label={label}
               selectedValue={selectedItems}
               excludedValue={excludedItems}
-              onChange={(values, notValues) => onFilterFieldChange(field, values, notValues)}
+              onChange={(values, notValues) =>
+                onFilterFieldChange(field, values ?? [], notValues ?? [])
+              }
               asCombobox={false}
               asFilterButton={true}
               forceOpen={false}
