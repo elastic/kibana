@@ -7,12 +7,15 @@
 
 import React, { Fragment } from 'react';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { CommonAlertParamDetails } from '../../../../common/types/alerts';
 import { AlertParamDuration } from '../../flyout_expressions/alert_param_duration';
 import { AlertParamType } from '../../../../common/enums';
 import { AlertParamPercentage } from '../../flyout_expressions/alert_param_percentage';
 import { AlertParamNumber } from '../../flyout_expressions/alert_param_number';
 import { AlertParamTextField } from '../../flyout_expressions/alert_param_textfield';
+import { MonitoringConfig } from '../../../types';
+import { useDerivedIndexPattern } from './use_derived_index_pattern';
 
 export interface Props {
   alertParams: { [property: string]: any };
@@ -20,10 +23,14 @@ export interface Props {
   setAlertProperty: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
   paramDetails: CommonAlertParamDetails;
+  data: DataPublicPluginStart;
+  config?: MonitoringConfig;
 }
 
 export const Expression: React.FC<Props> = (props) => {
-  const { alertParams, paramDetails, setAlertParams, errors } = props;
+  const { alertParams, paramDetails, setAlertParams, errors, config, data } = props;
+
+  const { loading, derivedIndexPattern } = useDerivedIndexPattern(data, config);
 
   const alertParamsUi = Object.keys(paramDetails).map((alertParamName) => {
     const details = paramDetails[alertParamName];

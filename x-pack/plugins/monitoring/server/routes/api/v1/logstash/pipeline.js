@@ -10,7 +10,7 @@ import { handleError } from '../../../../lib/errors';
 import { getPipelineVersions } from '../../../../lib/logstash/get_pipeline_versions';
 import { getPipeline } from '../../../../lib/logstash/get_pipeline';
 import { getPipelineVertex } from '../../../../lib/logstash/get_pipeline_vertex';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { INDEX_PATTERN_LOGSTASH } from '../../../../../common/constants';
 
 function getPipelineVersion(versions, pipelineHash) {

@@ -85,7 +85,7 @@ export class MonitoringPlugin
       });
     }
 
-    this.registerAlerts(plugins);
+    this.registerAlerts(plugins, monitoring);
 
     const app: App = {
       id,
@@ -191,11 +191,11 @@ export class MonitoringPlugin
     ];
   }
 
-  private registerAlerts(plugins: MonitoringSetupPluginDependencies) {
+  private registerAlerts(plugins: MonitoringSetupPluginDependencies, config: MonitoringConfig) {
     const {
       triggersActionsUi: { ruleTypeRegistry },
     } = plugins;
-    ruleTypeRegistry.register(createCpuUsageAlertType());
+    ruleTypeRegistry.register(createCpuUsageAlertType(config));
     ruleTypeRegistry.register(createDiskUsageAlertType());
     ruleTypeRegistry.register(createMemoryUsageAlertType());
     ruleTypeRegistry.register(createMissingMonitoringDataAlertType());
