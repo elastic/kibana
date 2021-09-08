@@ -338,7 +338,6 @@ export function DiscoverSidebar({
               onChange={onChangeFieldSearch}
               value={fieldFilter.name}
               types={fieldTypes}
-              useNewFieldsApi={useNewFieldsApi}
             />
           </form>
         </EuiFlexItem>

@@ -120,6 +120,13 @@ export const SplitByTermsUI = ({
                 description="This labels a field selector allowing the user to chose 'by' which field to group."
               />
             }
+            restrict={[
+              KBN_FIELD_TYPES.NUMBER,
+              KBN_FIELD_TYPES.BOOLEAN,
+              KBN_FIELD_TYPES.DATE,
+              KBN_FIELD_TYPES.IP,
+              KBN_FIELD_TYPES.STRING,
+            ]}
             data-test-subj="groupByField"
             indexPattern={indexPattern}
             onChange={handleSelectChange('terms_field')}

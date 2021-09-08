@@ -104,7 +104,7 @@ export const ApiLogsLogic = kea<MakeLogicType<ApiLogsValues, ApiLogsActions>>({
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/api/app_search/engines/${engineName}/api_logs`, {
+        const response = await http.get(`/internal/app_search/engines/${engineName}/api_logs`, {
           query: {
             'page[current]': values.meta.page.current,
             'filters[date][from]': getDateString(-1),

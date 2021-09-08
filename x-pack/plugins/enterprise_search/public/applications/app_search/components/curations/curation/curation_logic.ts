@@ -169,7 +169,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
 
       try {
         const response = await http.get(
-          `/api/app_search/engines/${engineName}/curations/${props.curationId}`,
+          `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           { query: { skip_record_analytics: 'true' } }
         );
         actions.onCurationLoad(response);
@@ -189,7 +189,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
 
       try {
         const response = await http.put(
-          `/api/app_search/engines/${engineName}/curations/${props.curationId}`,
+          `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           {
             body: JSON.stringify({
               queries: values.queries,

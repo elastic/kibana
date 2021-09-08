@@ -17,6 +17,7 @@ import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from '.
 import type { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
 import { initialTGridState } from '../store/t_grid/reducer';
 import { createStore } from '../store/t_grid';
+import { TGridLoading } from '../components/t_grid/shared';
 
 const initializeStore = ({
   store,
@@ -51,7 +52,7 @@ export const getTGridLazy = (
 ) => {
   initializeStore({ store, storage, setStore });
   return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
+    <Suspense fallback={<TGridLoading height={props.type === 'standalone' ? 'tall' : 'short'} />}>
       <TimelineLazy {...props} store={store} storage={storage} data={data} setStore={setStore} />
     </Suspense>
   );

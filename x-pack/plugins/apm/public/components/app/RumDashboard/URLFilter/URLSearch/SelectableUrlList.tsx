@@ -27,7 +27,6 @@ import {
   EuiIcon,
   EuiBadge,
   EuiButtonIcon,
-  EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -100,9 +99,6 @@ export function SelectableUrlList({
       onTermChange();
       onApply();
       setPopoverIsOpen(false);
-      if (searchRef) {
-        searchRef.blur();
-      }
     }
   };
 
@@ -120,15 +116,11 @@ export function SelectableUrlList({
 
   const closePopover = () => {
     setPopoverIsOpen(false);
-    if (searchRef) {
-      searchRef.blur();
-    }
   };
 
   // @ts-ignore - not sure, why it's not working
   useEvent('keydown', onEnterKey, searchRef);
   useEvent('escape', () => setPopoverIsOpen(false), searchRef);
-  useEvent('blur', () => setPopoverIsOpen(false), searchRef);
 
   useEffect(() => {
     if (searchRef && initialValue) {
@@ -207,65 +199,63 @@ export function SelectableUrlList({
       allowExclusions={true}
     >
       {(list, search) => (
-        <EuiOutsideClickDetector onOutsideClick={() => closePopover()}>
-          <EuiPopover
-            panelPaddingSize="none"
-            isOpen={popoverIsOpen}
-            display={'block'}
-            button={search}
-            closePopover={closePopover}
-            style={{ minWidth: 400 }}
-            anchorPosition="downLeft"
-            ownFocus={false}
+        <EuiPopover
+          panelPaddingSize="none"
+          isOpen={popoverIsOpen}
+          display={'block'}
+          button={search}
+          closePopover={closePopover}
+          style={{ minWidth: 400 }}
+          anchorPosition="downLeft"
+          ownFocus={false}
+        >
+          <div
+            style={{
+              width: searchRef?.getBoundingClientRect().width ?? 600,
+              maxWidth: '100%',
+            }}
           >
-            <div
-              style={{
-                width: searchRef?.getBoundingClientRect().width ?? 600,
-                maxWidth: '100%',
-              }}
-            >
-              <PopOverTitle />
-              {searchValue && (
-                <StyledRow darkMode={darkMode}>
-                  <EuiText size="s">
-                    <FormattedMessage
-                      id="xpack.apm.ux.url.hitEnter.include"
-                      defaultMessage="Hit {icon} or click apply to include all urls matching {searchValue}"
-                      values={{
-                        searchValue: <strong>{searchValue}</strong>,
-                        icon: (
-                          <EuiBadge color="hollow">
-                            Enter <EuiIcon type="returnKey" />
-                          </EuiBadge>
-                        ),
-                      }}
-                    />
-                  </EuiText>
-                </StyledRow>
-              )}
-              {list}
-              <EuiPopoverFooter paddingSize="s">
-                <EuiFlexGroup style={{ justifyContent: 'flex-end' }}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      fill
-                      size="s"
-                      onClick={() => {
-                        onTermChange();
-                        onApply();
-                        closePopover();
-                      }}
-                    >
-                      {i18n.translate('xpack.apm.apply.label', {
-                        defaultMessage: 'Apply',
-                      })}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPopoverFooter>
-            </div>
-          </EuiPopover>
-        </EuiOutsideClickDetector>
+            <PopOverTitle />
+            {searchValue && (
+              <StyledRow darkMode={darkMode}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.apm.ux.url.hitEnter.include"
+                    defaultMessage="Hit {icon} or click apply to include all urls matching {searchValue}"
+                    values={{
+                      searchValue: <strong>{searchValue}</strong>,
+                      icon: (
+                        <EuiBadge color="hollow">
+                          Enter <EuiIcon type="returnKey" />
+                        </EuiBadge>
+                      ),
+                    }}
+                  />
+                </EuiText>
+              </StyledRow>
+            )}
+            {list}
+            <EuiPopoverFooter paddingSize="s">
+              <EuiFlexGroup style={{ justifyContent: 'flex-end' }}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    size="s"
+                    onClick={() => {
+                      onTermChange();
+                      onApply();
+                      closePopover();
+                    }}
+                  >
+                    {i18n.translate('xpack.apm.apply.label', {
+                      defaultMessage: 'Apply',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopoverFooter>
+          </div>
+        </EuiPopover>
       )}
     </EuiSelectable>
   );

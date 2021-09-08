@@ -27,7 +27,10 @@ describe('request logging', () => {
   describe('http server response logging', () => {
     describe('configuration', () => {
       it('does not log with a default config', async () => {
-        const root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+        const root = kbnTestServer.createRoot({
+          plugins: { initialize: false },
+          elasticsearch: { skipStartupConnectionCheck: true },
+        });
         await root.preboot();
         const { http } = await root.setup();
 
@@ -69,6 +72,7 @@ describe('request logging', () => {
           plugins: {
             initialize: false,
           },
+          elasticsearch: { skipStartupConnectionCheck: true },
         });
         await root.preboot();
         const { http } = await root.setup();
@@ -116,6 +120,7 @@ describe('request logging', () => {
         plugins: {
           initialize: false,
         },
+        elasticsearch: { skipStartupConnectionCheck: true },
       };
 
       beforeEach(() => {
@@ -327,6 +332,7 @@ describe('request logging', () => {
             plugins: {
               initialize: false,
             },
+            elasticsearch: { skipStartupConnectionCheck: true },
           });
           await root.preboot();
           const { http } = await root.setup();
@@ -426,6 +432,7 @@ describe('request logging', () => {
             plugins: {
               initialize: false,
             },
+            elasticsearch: { skipStartupConnectionCheck: true },
           });
           await root.preboot();
           const { http } = await root.setup();
