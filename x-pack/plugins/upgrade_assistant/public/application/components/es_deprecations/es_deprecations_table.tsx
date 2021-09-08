@@ -45,7 +45,7 @@ const i18nTexts = {
   noDeprecationsMessage: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.table.noDeprecationsMessage',
     {
-      defaultMessage: 'No Elasticsearch deprecation warnings found',
+      defaultMessage: 'No Elasticsearch deprecation issues found',
     }
   ),
   typeFilterLabel: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.typeFilterLabel', {
