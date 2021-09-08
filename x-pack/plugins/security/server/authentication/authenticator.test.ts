@@ -1478,6 +1478,29 @@ describe('Authenticator', () => {
         );
         expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
       });
+
+      it('redirects to the Login Selector with auth provider hint when needed.', async () => {
+        const request = httpServerMock.createKibanaRequest({
+          query: { [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]: 'custom1' },
+        });
+
+        // Includes hint if there is no active session.
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.redirectTo(
+            '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath%3Fauth_provider_hint%3Dcustom1&auth_provider_hint=custom1'
+          )
+        );
+
+        // Includes hint if session is unauthenticated.
+        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: undefined });
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.redirectTo(
+            '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath%3Fauth_provider_hint%3Dcustom1&auth_provider_hint=custom1'
+          )
+        );
+
+        expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
+      });
     });
 
     describe('with Access Agreement', () => {
