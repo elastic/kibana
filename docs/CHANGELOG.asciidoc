@@ -231,6 +231,18 @@ The `logging.useUTC` setting has been removed. For more information, refer to {k
 The default timezone is UTC. To change the timezone, set `logging.timezone: false` in kibana.yml. Change the timezone when the system, such as a docker container, is configured for a nonlocal timezone.  
 ====  
 
+[discrete]
+[[breaking-32049]]
+.Removed environment variables `CONFIG_PATH` and `DATA_PATH`
+[%collapsible]
+====
+*Details* +
+The environment variables `CONFIG_PATH` and `DATA_PATH` have been removed.  For more information, refer to {kibana-pull}32049[#32049]
+
+*Impact* +
+Use the environment variable `KBN_PATH_CONF` instead of `CONFIG_PATH`.  Use the setting `path.data` instead of `DATA_PATH`.
+====
+
 // end::notable-breaking-changes[]
 
 [float]
