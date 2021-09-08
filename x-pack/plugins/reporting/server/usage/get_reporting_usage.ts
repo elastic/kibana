@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import type { ReportingConfig } from '../';
 import type { ExportTypesRegistry } from '../lib/export_types_registry';
 import type { GetLicense } from './';
-import { decorateRangeStats } from './decorate_range_stats';
+import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import type {
   AggregationResultBuckets,
@@ -108,11 +108,16 @@ type RangeStatSets = Partial<RangeStats> & {
 type ESResponse = Partial<estypes.SearchResponse>;
 
 async function handleResponse(response: ESResponse): Promise<Partial<RangeStatSets>> {
-  const buckets = get(response, 'aggregations.ranges.buckets');
+  const buckets = get(response, 'aggregations.ranges.buckets') as Record<
+    'all' | 'last7Days',
+    AggregationResultBuckets
+  >;
+
   if (!buckets) {
     return {};
   }
-  const { last7Days, all } = buckets as any;
+
+  const { all, last7Days } = buckets;
 
   const last7DaysUsage = last7Days ? getAggStats(last7Days) : {};
   const allUsage = all ? getAggStats(all) : {};
@@ -196,8 +201,8 @@ export async function getReportingUsage(
           available: true,
           browser_type: browserType,
           enabled: true,
-          last7Days: decorateRangeStats(last7Days, availability),
-          ...decorateRangeStats(all, availability),
+          last7Days: getExportStats(last7Days, availability, exportTypesHandler),
+          ...getExportStats(all, availability, exportTypesHandler),
         };
       }
     );
