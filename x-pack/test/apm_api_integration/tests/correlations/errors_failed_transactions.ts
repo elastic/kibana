@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     query: {
       start: range.start,
       end: range.end,
-      fieldNames: 'user_agent.name,user_agent.os.name,url.original',
+      fieldNames: 'http.response.status_code,user_agent.name,user_agent.os.name,url.original',
       environment: 'ENVIRONMENT_ALL',
       kuery: '',
     },
@@ -40,8 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/109660
-  registry.when.skip(
+  registry.when(
     'correlations errors failed transactions with data and default args',
     { config: 'trial', archives: ['apm_8.0.0'] },
     () => {
@@ -66,8 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const sortedFieldNames = significantTerms.map(({ fieldName }) => fieldName).sort();
         expectSnapshot(sortedFieldNames).toMatchInline(`
           Array [
-            "user_agent.name",
-            "user_agent.name",
+            "http.response.status_code",
           ]
         `);
       });
@@ -76,7 +74,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { significantTerms } = response.body;
         expectSnapshot(significantTerms.map((term) => term.timeseries.length)).toMatchInline(`
           Array [
-            31,
             31,
           ]
         `);
