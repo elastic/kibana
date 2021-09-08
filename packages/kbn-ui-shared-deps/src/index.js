@@ -101,6 +101,7 @@ exports.externals = {
   '@elastic/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
   'rison-node': '__kbnSharedDeps__.RisonNode',
   history: '__kbnSharedDeps__.History',
+  classnames: '__kbnSharedDeps__.Classnames',
 };
 
 /**
