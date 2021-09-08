@@ -65,7 +65,9 @@ export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold,
             <EuiExpression
               description={thresholdPrefix}
               uppercase={true}
-              value={`${comparator ? ComparatorToi18nMap[comparator] : ''} ${value ? value : ''}`}
+              value={`${comparator ? ComparatorToi18nMap[comparator] : ''} ${
+                typeof value === 'number' ? value : ''
+              }`}
               isActive={isThresholdPopoverOpen}
               onClick={() => setThresholdPopoverOpenState(!isThresholdPopoverOpen)}
             />
