@@ -68,7 +68,7 @@ describe('Overview - Fix deprecation issues step', () => {
       expect(exists(`fixIssuesStep-complete`)).toBe(true);
     });
 
-    test('Its incomplete when there are critical deprecations', async () => {
+    test(`It's incomplete when there are critical deprecations`, async () => {
       const { exists } = testBed;
 
       expect(exists(`fixIssuesStep-incomplete`)).toBe(true);

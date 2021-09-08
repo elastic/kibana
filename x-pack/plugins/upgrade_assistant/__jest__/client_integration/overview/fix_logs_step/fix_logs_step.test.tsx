@@ -52,7 +52,7 @@ describe('Overview - Fix deprecation logs step', () => {
       expect(exists(`fixLogsStep-complete`)).toBe(true);
     });
 
-    test('Its incomplete when there are deprecation logs since last checkpoint', async () => {
+    test(`It's incomplete when there are deprecation logs since last checkpoint`, async () => {
       httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
 
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
