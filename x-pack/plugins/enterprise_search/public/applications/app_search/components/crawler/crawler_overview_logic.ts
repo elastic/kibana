@@ -25,14 +25,14 @@ export const CrawlerOverviewLogic = kea<MakeLogicType<{}, CrawlerOverviewActions
   actions: {
     deleteDomain: (domain) => ({ domain }),
   },
-  listeners: ({ actions, values }) => ({
+  listeners: () => ({
     deleteDomain: async ({ domain }) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
       try {
         const response = await http.delete(
-          `/api/app_search/engines/${engineName}/crawler/domains/${domain.id}`,
+          `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}`,
           {
             query: {
               respond_with: 'crawler_details',

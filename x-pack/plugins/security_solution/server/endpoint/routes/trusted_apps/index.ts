@@ -11,6 +11,7 @@ import {
   GetTrustedAppsRequestSchema,
   PostTrustedAppCreateRequestSchema,
   PutTrustedAppUpdateRequestSchema,
+  GetTrustedAppsSummaryRequestSchema,
 } from '../../../../common/endpoint/schema/trusted_apps';
 import {
   TRUSTED_APPS_CREATE_API,
@@ -90,7 +91,7 @@ export const registerTrustedAppsRoutes = (
   router.get(
     {
       path: TRUSTED_APPS_SUMMARY_API,
-      validate: false,
+      validate: GetTrustedAppsSummaryRequestSchema,
       options: { authRequired: true },
     },
     getTrustedAppsSummaryRouteHandler(endpointAppContext)
