@@ -24,9 +24,9 @@ export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
 
 interface QueryParams {
   params: SearchStrategyParams;
-  fieldFilter?: FieldValuePair[];
+  termFilters?: FieldValuePair[];
 }
-export const getQueryWithParams = ({ params, fieldFilter }: QueryParams) => {
+export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
   const {
     environment,
     kuery,
@@ -45,7 +45,7 @@ export const getQueryWithParams = ({ params, fieldFilter }: QueryParams) => {
     })
   ) as Setup & SetupTimeRange;
 
-  const filters = getCorrelationsFilters({
+  const correlationFilters = getCorrelationsFilters({
     setup,
     environment,
     kuery,
@@ -57,8 +57,8 @@ export const getQueryWithParams = ({ params, fieldFilter }: QueryParams) => {
   return {
     bool: {
       filter: [
-        ...filters,
-        ...(Array.isArray(fieldFilter) ? fieldFilter.map(getTermsQuery) : []),
+        ...correlationFilters,
+        ...(Array.isArray(termFilters) ? termFilters.map(getTermsQuery) : []),
       ] as estypes.QueryDslQueryContainer[],
     },
   };

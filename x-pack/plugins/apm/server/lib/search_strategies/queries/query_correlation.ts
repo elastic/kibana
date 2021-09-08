@@ -38,9 +38,9 @@ export const getTransactionDurationCorrelationRequest = (
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],
   totalDocCount: number,
-  fieldFilter?: FieldValuePair[]
+  termFilters?: FieldValuePair[]
 ): estypes.SearchRequest => {
-  const query = getQueryWithParams({ params, fieldFilter });
+  const query = getQueryWithParams({ params, termFilters });
 
   const bucketCorrelation: BucketCorrelation = {
     buckets_path: 'latency_ranges>_count',
@@ -92,7 +92,7 @@ export const fetchTransactionDurationCorrelation = async (
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],
   totalDocCount: number,
-  fieldFilter?: FieldValuePair[]
+  termFilters?: FieldValuePair[]
 ): Promise<{
   ranges: unknown[];
   correlation: number | null;
@@ -105,7 +105,7 @@ export const fetchTransactionDurationCorrelation = async (
       ranges,
       fractions,
       totalDocCount,
-      fieldFilter
+      termFilters
     )
   );
 

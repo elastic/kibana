@@ -23,9 +23,9 @@ import { SIGNIFICANT_VALUE_DIGITS } from '../constants';
 export const getTransactionDurationPercentilesRequest = (
   params: SearchStrategyParams,
   percents?: number[],
-  fieldFilter?: FieldValuePair[]
+  termFilters?: FieldValuePair[]
 ): estypes.SearchRequest => {
-  const query = getQueryWithParams({ params, fieldFilter });
+  const query = getQueryWithParams({ params, termFilters });
 
   return {
     ...getRequestBase(params),
@@ -52,10 +52,10 @@ export const fetchTransactionDurationPercentiles = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   percents?: number[],
-  fieldFilter?: FieldValuePair[]
+  termFilters?: FieldValuePair[]
 ): Promise<{ totalDocs: number; percentiles: Record<string, number> }> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationPercentilesRequest(params, percents, fieldFilter)
+    getTransactionDurationPercentilesRequest(params, percents, termFilters)
   );
 
   // return early with no results if the search didn't return any documents

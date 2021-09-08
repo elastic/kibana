@@ -99,7 +99,7 @@ describe('correlations', () => {
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
         },
-        fieldFilter: [
+        termFilters: [
           {
             fieldName: 'actualFieldName',
             fieldValue: 'actualFieldValue',

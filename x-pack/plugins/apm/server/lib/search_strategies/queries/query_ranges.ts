@@ -22,9 +22,9 @@ import { getRequestBase } from './get_request_base';
 export const getTransactionDurationRangesRequest = (
   params: SearchStrategyParams,
   rangesSteps: number[],
-  fieldFilter?: FieldValuePair[]
+  termFilters?: FieldValuePair[]
 ): estypes.SearchRequest => {
-  const query = getQueryWithParams({ params, fieldFilter });
+  const query = getQueryWithParams({ params, termFilters });
 
   const ranges = rangesSteps.reduce(
     (p, to) => {
@@ -59,10 +59,10 @@ export const fetchTransactionDurationRanges = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   rangesSteps: number[],
-  fieldFilter?: FieldValuePair[]
+  termFilters?: FieldValuePair[]
 ): Promise<Array<{ key: number; doc_count: number }>> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationRangesRequest(params, rangesSteps, fieldFilter)
+    getTransactionDurationRangesRequest(params, rangesSteps, termFilters)
   );
 
   if (resp.body.aggregations === undefined) {
