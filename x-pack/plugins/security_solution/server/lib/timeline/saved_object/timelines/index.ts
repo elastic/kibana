@@ -36,6 +36,7 @@ import { timelineSavedObjectType } from '../../saved_object_mappings/';
 import { draftTimelineDefaults } from '../../utils/default_timeline';
 import { AuthenticatedUser } from '../../../../../../security/server';
 import { Maybe } from '../../../../../common/search_strategy';
+import { timelineFieldsMigrator } from './field_migrator';
 export { pickSavedTimeline } from './pick_saved_timeline';
 export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 
@@ -515,8 +516,15 @@ const getSavedTimeline = async (request: FrameworkRequest, timelineId: string) =
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
 
   const savedObjectsClient = request.context.core.savedObjects.client;
-  const savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
-  const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
+  const savedObject = await savedObjectsClient.get<{ hello: string }>(
+    timelineSavedObjectType,
+    timelineId
+  );
+
+  const timelineSaveObject = convertSavedObjectToSavedTimeline(
+    timelineFieldsMigrator.populateFieldsFromReferences(savedObject)
+  );
+
   const timelineWithNotesAndPinnedEvents = await Promise.all([
     note.getNotesByTimelineId(request, timelineSaveObject.savedObjectId),
     pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineSaveObject.savedObjectId),
@@ -540,7 +548,10 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
   const savedObjects = await savedObjectsClient.find(options);
   const timelinesWithNotesAndPinnedEvents = await Promise.all(
     savedObjects.saved_objects.map(async (savedObject) => {
-      const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
+      const migratedSO = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
+
+      const timelineSaveObject = convertSavedObjectToSavedTimeline(migratedSO);
+
       return Promise.all([
         note.getNotesByTimelineId(request, timelineSaveObject.savedObjectId),
         pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineSaveObject.savedObjectId),

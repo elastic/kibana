@@ -7,21 +7,23 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import { SavedObjectReference } from 'kibana/server';
+import { SavedObject, SavedObjectReference } from 'kibana/server';
 
 interface Field {
   path: string;
   type: string;
   name: string;
 }
-
 export class FieldMigrator {
   constructor(private readonly fieldsToMigrate: Field[]) {}
 
-  public extractFieldsToReferences(
-    data: unknown,
-    existingReferences: SavedObjectReference[] = []
-  ): { transformedFields: unknown; references: SavedObjectReference[] } {
+  public extractFieldsToReferences({
+    data,
+    existingReferences = [],
+  }: {
+    data: unknown;
+    existingReferences?: SavedObjectReference[];
+  }): { transformedFields: unknown; references: SavedObjectReference[] } {
     const copyOfData = _.cloneDeep(data);
 
     const references = createReferenceMap(existingReferences);
@@ -44,16 +46,10 @@ export class FieldMigrator {
     return { transformedFields: copyOfData, references: Array.from(references.values()) };
   }
 
-  public populateFieldsFromReferences({
-    dataReturnedFromRequest,
-    savedObjectReferences = [],
-  }: {
-    dataReturnedFromRequest: object;
-    savedObjectReferences?: SavedObjectReference[];
-  }): object {
-    const dataToManipulate = _.cloneDeep(dataReturnedFromRequest);
+  public populateFieldsFromReferences(data: SavedObject): object {
+    const dataToManipulate = _.cloneDeep(data);
 
-    const references = createReferenceMap(savedObjectReferences);
+    const references = createReferenceMap(data.references);
 
     for (const field of this.fieldsToMigrate) {
       const reference = references.get(field.name);
@@ -71,15 +67,13 @@ export class FieldMigrator {
   public populateFieldsFromReferencesForPatch({
     dataBeforeRequest,
     dataReturnedFromRequest,
-    savedObjectReferences = [],
   }: {
     dataBeforeRequest: object;
-    dataReturnedFromRequest: object;
-    savedObjectReferences?: SavedObjectReference[];
+    dataReturnedFromRequest: SavedObject;
   }): object {
     const dataToManipulate = _.cloneDeep(dataReturnedFromRequest);
 
-    const references = createReferenceMap(savedObjectReferences);
+    const references = createReferenceMap(dataReturnedFromRequest.references);
 
     for (const field of this.fieldsToMigrate) {
       const reference = references.get(field.name);

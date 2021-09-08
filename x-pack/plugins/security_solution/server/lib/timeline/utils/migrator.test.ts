@@ -12,7 +12,7 @@ describe('FieldMigrator', () => {
     it('migrates the hello field to references and removes it from the transformed result', () => {
       const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
 
-      const result = migrator.extractFieldsToReferences({ hello: '1', awesome: '2' });
+      const result = migrator.extractFieldsToReferences({ data: { hello: '1', awesome: '2' } });
 
       expect(result.transformedFields).toEqual({
         awesome: '2',
@@ -24,7 +24,7 @@ describe('FieldMigrator', () => {
     it('ignores a field that does not exist and returns an empty references result', () => {
       const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
 
-      const result = migrator.extractFieldsToReferences({ awesome: '2' });
+      const result = migrator.extractFieldsToReferences({ data: { awesome: '2' } });
 
       expect(result.transformedFields).toEqual({
         awesome: '2',
@@ -36,9 +36,10 @@ describe('FieldMigrator', () => {
     it('ignores a field that does not exist and preserves the original references', () => {
       const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
 
-      const result = migrator.extractFieldsToReferences({ awesome: '2' }, [
-        { id: '1', name: 'awesome', type: 'someType' },
-      ]);
+      const result = migrator.extractFieldsToReferences({
+        data: { awesome: '2' },
+        existingReferences: [{ id: '1', name: 'awesome', type: 'someType' }],
+      });
 
       expect(result.transformedFields).toEqual({
         awesome: '2',
@@ -53,7 +54,9 @@ describe('FieldMigrator', () => {
         { path: 'a', type: 'aType', name: 'aName' },
       ]);
 
-      const result = migrator.extractFieldsToReferences({ hello: '1', awesome: '2', a: 'aId' });
+      const result = migrator.extractFieldsToReferences({
+        data: { hello: '1', awesome: '2', a: 'aId' },
+      });
 
       expect(result.transformedFields).toEqual({
         awesome: '2',
@@ -69,9 +72,11 @@ describe('FieldMigrator', () => {
       const migrator = new FieldMigrator([{ path: 'a.hello', type: 'type', name: 'name' }]);
 
       const result = migrator.extractFieldsToReferences({
-        outerHello: '1',
-        awesome: '2',
-        a: { hello: '1' },
+        data: {
+          outerHello: '1',
+          awesome: '2',
+          a: { hello: '1' },
+        },
       });
 
       expect(result.transformedFields).toEqual({
@@ -87,8 +92,10 @@ describe('FieldMigrator', () => {
       const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
 
       const result = migrator.extractFieldsToReferences({
-        awesome: '2',
-        hello: undefined,
+        data: {
+          awesome: '2',
+          hello: undefined,
+        },
       });
 
       expect(result.transformedFields).toEqual({
@@ -101,12 +108,12 @@ describe('FieldMigrator', () => {
     it("preserves the reference for a field when it isn't in the object", () => {
       const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
 
-      const result = migrator.extractFieldsToReferences(
-        {
+      const result = migrator.extractFieldsToReferences({
+        data: {
           awesome: '2',
         },
-        [{ id: '1', name: 'name', type: 'type' }]
-      );
+        existingReferences: [{ id: '1', name: 'name', type: 'type' }],
+      });
 
       expect(result.transformedFields).toEqual({
         awesome: '2',
@@ -123,11 +130,11 @@ describe('FieldMigrator', () => {
       expect(
         migrator.populateFieldsFromReferencesForPatch({
           dataBeforeRequest: { hello: '1' },
-          dataReturnedFromRequest: {},
-          savedObjectReferences: [{ id: '1', name: 'name', type: 'type' }],
+          dataReturnedFromRequest: { references: [{ id: '1', name: 'name', type: 'type' }] },
         })
       ).toEqual({
         hello: '1',
+        references: [{ id: '1', name: 'name', type: 'type' }],
       });
     });
 
@@ -160,13 +167,19 @@ describe('FieldMigrator', () => {
 
       expect(
         migrator.populateFieldsFromReferencesForPatch({
-          dataReturnedFromRequest: { awesome: '5' },
-          dataBeforeRequest: { awesome: '5', hello: '1' },
-          savedObjectReferences: [{ id: '1', name: 'name', type: 'type' }],
+          dataReturnedFromRequest: {
+            awesome: '5',
+            references: [{ id: '1', name: 'name', type: 'type' }],
+          },
+          dataBeforeRequest: {
+            awesome: '5',
+            hello: '1',
+          },
         })
       ).toEqual({
         awesome: '5',
         hello: '1',
+        references: [{ id: '1', name: 'name', type: 'type' }],
       });
     });
 
@@ -175,9 +188,23 @@ describe('FieldMigrator', () => {
 
       expect(
         migrator.populateFieldsFromReferencesForPatch({
+          dataReturnedFromRequest: { awesome: '5', references: [] },
+          dataBeforeRequest: { awesome: '5', hello: '1' },
+        })
+      ).toEqual({
+        awesome: '5',
+        hello: '1',
+        references: [],
+      });
+    });
+
+    it('sets the hello field to 1 when it exists in the data before the request and when references is undefined', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      expect(
+        migrator.populateFieldsFromReferencesForPatch({
           dataReturnedFromRequest: { awesome: '5' },
           dataBeforeRequest: { awesome: '5', hello: '1' },
-          savedObjectReferences: [],
         })
       ).toEqual({
         awesome: '5',
@@ -190,12 +217,17 @@ describe('FieldMigrator', () => {
 
       expect(
         migrator.populateFieldsFromReferencesForPatch({
-          dataReturnedFromRequest: { awesome: '5' },
-          dataBeforeRequest: { awesome: '5' },
-          savedObjectReferences: [{ id: '1', name: 'name', type: 'type' }],
+          dataReturnedFromRequest: {
+            awesome: '5',
+            references: [{ id: '1', name: 'name', type: 'type' }],
+          },
+          dataBeforeRequest: {
+            awesome: '5',
+          },
         })
       ).toEqual({
         awesome: '5',
+        references: [{ id: '1', name: 'name', type: 'type' }],
       });
     });
   });
@@ -206,11 +238,11 @@ describe('FieldMigrator', () => {
 
       expect(
         migrator.populateFieldsFromReferences({
-          dataReturnedFromRequest: {},
-          savedObjectReferences: [{ id: '1', name: 'name', type: 'type' }],
+          references: [{ id: '1', name: 'name', type: 'type' }],
         })
       ).toEqual({
         hello: '1',
+        references: [{ id: '1', name: 'name', type: 'type' }],
       });
     });
 
@@ -219,12 +251,13 @@ describe('FieldMigrator', () => {
 
       expect(
         migrator.populateFieldsFromReferences({
-          dataReturnedFromRequest: { bananas: 'awesome' },
-          savedObjectReferences: [{ id: '1', name: 'name', type: 'type' }],
+          bananas: 'awesome',
+          references: [{ id: '1', name: 'name', type: 'type' }],
         })
       ).toEqual({
         bananas: 'awesome',
         hello: '1',
+        references: [{ id: '1', name: 'name', type: 'type' }],
       });
     });
 
@@ -233,10 +266,18 @@ describe('FieldMigrator', () => {
 
       expect(
         migrator.populateFieldsFromReferences({
-          dataReturnedFromRequest: {},
-          savedObjectReferences: [],
+          references: [],
         })
       ).toEqual({
+        hello: null,
+        references: [],
+      });
+    });
+
+    it('sets hello to null when references is undefined', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      expect(migrator.populateFieldsFromReferences({})).toEqual({
         hello: null,
       });
     });
@@ -249,12 +290,12 @@ describe('FieldMigrator', () => {
 
       expect(
         migrator.populateFieldsFromReferences({
-          dataReturnedFromRequest: {},
-          savedObjectReferences: [],
+          references: [],
         })
       ).toEqual({
         hello: null,
         hi: null,
+        references: [],
       });
     });
   });
