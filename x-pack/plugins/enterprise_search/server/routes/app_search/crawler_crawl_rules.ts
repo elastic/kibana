@@ -15,7 +15,7 @@ export function registerCrawlerCrawlRulesRoutes({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -39,7 +39,7 @@ export function registerCrawlerCrawlRulesRoutes({
   router.put(
     {
       path:
-        '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
+        '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -65,7 +65,7 @@ export function registerCrawlerCrawlRulesRoutes({
   router.delete(
     {
       path:
-        '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
+        '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),

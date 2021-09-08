@@ -53,7 +53,7 @@ export const ManageCrawlsPopoverLogic = kea<
       }
 
       try {
-        await http.post(`/api/app_search/engines/${engineName}/crawler/process_crawls`, {
+        await http.post(`/internal/app_search/engines/${engineName}/crawler/process_crawls`, {
           body: JSON.stringify(requestBody),
         });
 
