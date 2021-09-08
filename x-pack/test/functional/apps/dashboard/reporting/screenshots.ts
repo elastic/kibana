@@ -39,7 +39,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.load(ecommerceSOPath);
       await browser.setWindowSize(1600, 850);
 
-      await security.testUser.setRoles(['reporting_user']); // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+      await security.role.create('test_dashboard_user', {
+        elasticsearch: {
+          cluster: [],
+          indices: [
+            {
+              names: ['ecommerce'],
+              privileges: ['read'],
+              field_security: { grant: ['*'], except: [] },
+            },
+          ],
+          run_as: [],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: { dashboard: ['minimal_all'] }, // no sub-feature privileges needed
+          },
+        ],
+      });
+
+      await security.testUser.setRoles([
+        'test_dashboard_user',
+        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See the xpack.reporting.roles.enabled setting
+      ]);
     });
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');

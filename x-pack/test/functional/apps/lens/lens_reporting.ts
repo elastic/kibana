@@ -19,7 +19,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/reporting');
       await security.testUser.setRoles(
-        ['test_logstash_reader', 'global_dashboard_read', 'reporting_user'], // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+        [
+          'test_logstash_reader',
+          'global_dashboard_read',
+          'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+        ],
         false
       );
     });

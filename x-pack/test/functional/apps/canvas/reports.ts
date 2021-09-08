@@ -21,7 +21,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Canvas PDF Report Generation', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
-      await security.testUser.setRoles(['kibana_admin', 'reporting_user']); // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+      await security.role.create('test_canvas_user', {
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: { canvas: ['read'] },
+          },
+        ],
+      });
+      await security.testUser.setRoles([
+        'kibana_admin', // FIXME remove this
+        'test_canvas_user',
+        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+      ]);
       await kibanaServer.importExport.load(archive);
       await browser.setWindowSize(1600, 850);
     });
