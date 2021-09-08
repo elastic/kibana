@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/dom';
+import { screen } from '@testing-library/dom';
 import { render, mockAppIndexPattern } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
 import * as obsvInd from './utils/observability_index_patterns';
