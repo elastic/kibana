@@ -185,7 +185,35 @@ describe('useHoverActionItems', () => {
     });
   });
 
-  test('if isCaseView is true, ShowTopNButton should enable popOver', async () => {
+  test('if not on CaseView, overflow button is enabled, ShowTopNButton should disable popOver (e.g.: alerts flyout)', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          enableOverflowButton: true,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+      expect(result.current.allActionItems[4].props.enablePopOver).toEqual(false);
+    });
+  });
+
+  test('if not on CaseView, overflow button is disabled, ShowTopNButton should disable popOver (e.g.: alerts table - reason field)', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          enableOverflowButton: false,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+      expect(result.current.allActionItems[4].props.enablePopOver).toEqual(false);
+    });
+  });
+
+  test('if on CaseView, ShowTopNButton should enable popOver', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => {
         const testProps = {
@@ -201,22 +229,7 @@ describe('useHoverActionItems', () => {
     });
   });
 
-  test('if isCaseView is false, ShowTopNButton should disable popOver if overflow button is enabled', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => {
-        const testProps = {
-          ...defaultProps,
-          isCaseView: false,
-          enableOverflowButton: true,
-        };
-        return useHoverActionItems(testProps);
-      });
-      await waitForNextUpdate();
-      expect(result.current.allActionItems[4].props.enablePopOver).toEqual(false);
-    });
-  });
-
-  test('if isCaseView is true, it should show all items when shoTopN is true', async () => {
+  test('if on CaseView, it should show all items when shoTopN is true', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => {
         const testProps = {
