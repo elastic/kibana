@@ -284,10 +284,8 @@ export class ReportInfoButton extends Component<Props, State> {
       });
     }
 
-    let buttonIconType = 'iInCircle';
     let buttonColor: 'primary' | 'danger' | 'warning' = 'primary';
     if (job.getWarnings() || job.getError()) {
-      buttonIconType = 'alert';
       buttonColor = 'danger';
     }
     if (job.getWarnings()) {
@@ -299,7 +297,7 @@ export class ReportInfoButton extends Component<Props, State> {
         <EuiToolTip position="top" content={message}>
           <EuiButtonIcon
             onClick={this.showFlyout}
-            iconType={buttonIconType}
+            iconType="iInCircle"
             color={buttonColor}
             data-test-subj="reportInfoButton"
             aria-label={i18n.translate('xpack.reporting.listing.table.showReportInfoAriaLabel', {

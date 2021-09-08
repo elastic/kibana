@@ -42,7 +42,7 @@ export const ViewInAppLink: FunctionComponent<Props> = ({ job }) => {
 
   return (
     <EuiToolTip content={i18nTexts.label}>
-      <EuiButtonIcon target="_blank" aria-label={i18nTexts.label} iconType="eye" href={href} />
+      <EuiButtonIcon target="_blank" aria-label={i18nTexts.label} iconType="popout" href={href} />
     </EuiToolTip>
   );
 };

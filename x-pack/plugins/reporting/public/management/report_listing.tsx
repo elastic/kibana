@@ -13,6 +13,7 @@ import {
   EuiPageHeader,
   EuiSpacer,
   EuiBasicTableColumn,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -286,20 +287,35 @@ class ReportListingUi extends Component<Props, State> {
       {
         field: 'title',
         name: i18n.translate('xpack.reporting.listing.tableColumns.reportTitle', {
-          defaultMessage: 'Report',
+          defaultMessage: 'Title',
         }),
         width: tableColumnWidths.title,
         render: (objectTitle: string, job) => {
+          const deprecationMessage = job.getDeprecatedMessage();
           return (
-            <div data-test-subj="reportingListItemObjectTitle">
-              <ReportDownloadLink
-                disabled={
-                  job.status !== JOB_STATUSES.COMPLETED && job.status !== JOB_STATUSES.WARNINGS
-                }
-                objectTitle={objectTitle}
-                job={job}
-              />
-            </div>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="flexStart"
+              gutterSize="s"
+              wrap={false}
+              responsive={false}
+              data-test-subj="reportingListItemObjectTitle"
+            >
+              {Boolean(deprecationMessage) && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip color="warning" type="alert" content={deprecationMessage} />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <ReportDownloadLink
+                  disabled={
+                    job.status !== JOB_STATUSES.COMPLETED && job.status !== JOB_STATUSES.WARNINGS
+                  }
+                  objectTitle={objectTitle}
+                  job={job}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
         mobileOptions: ({

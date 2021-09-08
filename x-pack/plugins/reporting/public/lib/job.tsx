@@ -212,15 +212,20 @@ export class Job {
     }
   }
 
+  getDeprecatedMessage(): undefined | string {
+    if (this.isDeprecated) {
+      return i18n.translate('xpack.reporting.jobWarning.exportTypeDeprecated', {
+        defaultMessage:
+          'This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.',
+      });
+    }
+  }
+
   getWarnings() {
     const warnings: string[] = [];
-    if (this.isDeprecated) {
-      warnings.push(
-        i18n.translate('xpack.reporting.jobWarning.exportTypeDeprecated', {
-          defaultMessage:
-            'This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.',
-        })
-      );
+    const deprecatedMessage = this.getDeprecatedMessage();
+    if (deprecatedMessage) {
+      warnings.push(deprecatedMessage);
     }
 
     if (this.csv_contains_formulas) {

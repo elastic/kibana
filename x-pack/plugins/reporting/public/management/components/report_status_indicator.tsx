@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiHealth, EuiToolTip, IconColor } from '@elastic/eui';
+import { EuiHealth, IconColor } from '@elastic/eui';
 
 import type { Job } from '../../lib/job';
 import { JOB_STATUSES } from '../../../common/constants';
@@ -18,12 +18,12 @@ interface Props {
 
 const i18nTexts = {
   completed: i18n.translate('xpack.reporting.statusIndicator.completedLabel', {
-    defaultMessage: 'Completed',
+    defaultMessage: 'Done',
   }),
   completedWithWarnings: i18n.translate(
     'xpack.reporting.statusIndicator.completedWithWarningsLabel',
     {
-      defaultMessage: 'Completed with warnings',
+      defaultMessage: 'Done, issues detected',
     }
   ),
   pending: i18n.translate('xpack.reporting.statusIndicator.pendingLabel', {
