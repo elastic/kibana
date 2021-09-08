@@ -94,6 +94,21 @@ export async function ensurePreconfiguredOutputs(
   );
 }
 
+export async function cleanPreconfiguredOutputs(
+  soClient: SavedObjectsClientContract,
+  outputs: PreconfiguredOutput[]
+) {
+  const existingPreconfiguredOutput = await outputService.listPreconfigured(soClient);
+  const logger = appContextService.getLogger();
+
+  for (const output of existingPreconfiguredOutput.items) {
+    if (!outputs.find(({ id }) => output.id === id)) {
+      logger.info(`Deleting preconfigured output ${output.id}`);
+      await outputService.delete(soClient, output.id);
+    }
+  }
+}
+
 export async function ensurePreconfiguredPackagesAndPolicies(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,

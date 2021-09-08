@@ -16,6 +16,7 @@ import { SO_SEARCH_LIMIT, DEFAULT_PACKAGES } from '../constants';
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import {
+  cleanPreconfiguredOutputs,
   ensurePreconfiguredOutputs,
   ensurePreconfiguredPackagesAndPolicies,
 } from './preconfiguration';
@@ -96,6 +97,8 @@ async function createSetupSideEffects(
     packages,
     defaultOutput
   );
+
+  await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);
 
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
   await ensureAgentActionPolicyChangeExists(soClient, esClient);

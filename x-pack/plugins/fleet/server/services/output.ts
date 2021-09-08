@@ -113,6 +113,10 @@ class OutputService {
     };
   }
 
+  public async delete(soClient: SavedObjectsClientContract, id: string) {
+    return soClient.delete(SAVED_OBJECT_TYPE, id);
+  }
+
   public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
     const updateData = { ...data };
 
@@ -125,6 +129,27 @@ class OutputService {
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
     }
+  }
+
+  public async listPreconfigured(soClient: SavedObjectsClientContract) {
+    const outputs = await soClient.find<OutputSOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      filter: `${SAVED_OBJECT_TYPE}.attributes.is_preconfigured:true`,
+      page: 1,
+      perPage: 10000,
+    });
+
+    return {
+      items: outputs.saved_objects.map<Output>((outputSO) => {
+        return {
+          id: outputSO.id,
+          ...outputSO.attributes,
+        };
+      }),
+      total: outputs.total,
+      page: 1,
+      perPage: 10000,
+    };
   }
 
   public async list(soClient: SavedObjectsClientContract) {

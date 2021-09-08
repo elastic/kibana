@@ -20,6 +20,7 @@ import {
   ensurePreconfiguredPackagesAndPolicies,
   comparePreconfiguredPolicyToCurrent,
   ensurePreconfiguredOutputs,
+  cleanPreconfiguredOutputs,
 } from './preconfiguration';
 import { outputService } from './output';
 
@@ -580,5 +581,56 @@ describe('output preconfiguration', () => {
 
     expect(mockedOutputService.create).not.toBeCalled();
     expect(mockedOutputService.update).not.toBeCalled();
+  });
+
+  it('should not delete non deleted preconfigured output', async () => {
+    const soClient = savedObjectsClientMock.create();
+    mockedOutputService.listPreconfigured.mockResolvedValue({
+      items: [{ id: 'output1' } as Output, { id: 'output2' } as Output],
+      page: 1,
+      perPage: 10000,
+      total: 1,
+    });
+    await cleanPreconfiguredOutputs(soClient, [
+      {
+        id: 'output1',
+        is_default: false,
+        name: 'Output 1',
+        type: 'elasticsearch',
+        hosts: ['http://es.co:9201'],
+      },
+      {
+        id: 'output2',
+        is_default: false,
+        name: 'Output 2',
+        type: 'elasticsearch',
+        hosts: ['http://es.co:9201'],
+      },
+    ]);
+
+    expect(mockedOutputService.delete).not.toBeCalled();
+  });
+
+  it('should delete deleted preconfigured output', async () => {
+    const soClient = savedObjectsClientMock.create();
+    mockedOutputService.listPreconfigured.mockResolvedValue({
+      items: [{ id: 'output1' } as Output, { id: 'output2' } as Output],
+      page: 1,
+      perPage: 10000,
+      total: 1,
+    });
+    await cleanPreconfiguredOutputs(soClient, [
+      {
+        id: 'output1',
+        is_default: false,
+        name: 'Output 1',
+        type: 'elasticsearch',
+        hosts: ['http://es.co:9201'],
+      },
+    ]);
+
+    expect(mockedOutputService.delete).toBeCalled();
+    expect(mockedOutputService.delete).toBeCalledTimes(1);
+    expect(mockedOutputService.delete.mock.calls[0][1]).toEqual('output2');
   });
 });
