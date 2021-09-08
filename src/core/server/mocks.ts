@@ -169,6 +169,9 @@ function createCoreSetupMock({
     metrics: metricsServiceMock.createSetupContract(),
     deprecations: deprecationsServiceMock.createSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
+    coreUsageData: {
+      registerUsageCounter: coreUsageDataServiceMock.createSetupContract().registerUsageCounter,
+    },
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
@@ -222,6 +225,7 @@ function createInternalCoreSetupMock() {
     metrics: metricsServiceMock.createInternalSetupContract(),
     deprecations: deprecationsServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
+    coreUsageData: coreUsageDataServiceMock.createSetupContract(),
   };
   return setupDeps;
 }

@@ -17,6 +17,7 @@ import {
   PostTrustedAppCreateRequest,
   PutTrustedAppsRequestParams,
   PutTrustedAppUpdateRequest,
+  GetTrustedAppsSummaryRequest,
 } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
 
@@ -216,13 +217,18 @@ export const getTrustedAppsUpdateRouteHandler = (
 
 export const getTrustedAppsSummaryRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<unknown, unknown, unknown, SecuritySolutionRequestHandlerContext> => {
+): RequestHandler<
+  unknown,
+  GetTrustedAppsSummaryRequest,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
     try {
       return res.ok({
-        body: await getTrustedAppsSummary(exceptionListClientFromContext(context)),
+        body: await getTrustedAppsSummary(exceptionListClientFromContext(context), req.query),
       });
     } catch (error) {
       return errorHandler(logger, res, error);

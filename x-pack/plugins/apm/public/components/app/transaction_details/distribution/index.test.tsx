@@ -16,7 +16,7 @@ import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import type { IKibanaSearchResponse } from 'src/plugins/data/public';
 import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
-import type { SearchServiceRawResponse } from '../../../../../common/search_strategies/correlations/types';
+import type { LatencyCorrelationsRawResponse } from '../../../../../common/search_strategies/latency_correlations/types';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -32,7 +32,7 @@ function Wrapper({
   dataSearchResponse,
 }: {
   children?: ReactNode;
-  dataSearchResponse: IKibanaSearchResponse<SearchServiceRawResponse>;
+  dataSearchResponse: IKibanaSearchResponse<LatencyCorrelationsRawResponse>;
 }) {
   const mockDataSearch = jest.fn(() => of(dataSearchResponse));
 
@@ -101,18 +101,22 @@ describe('transaction_details/distribution', () => {
 
   describe('TransactionDistribution', () => {
     it('shows loading indicator when the service is running and returned no results yet', async () => {
-      const onHasData = jest.fn();
       render(
         <Wrapper
           dataSearchResponse={{
             isRunning: true,
-            rawResponse: { ccsWarning: false, took: 1234, values: [], log: [] },
+            rawResponse: {
+              ccsWarning: false,
+              took: 1234,
+              latencyCorrelations: [],
+              log: [],
+            },
           }}
         >
           <TransactionDistribution
             onChartSelection={jest.fn()}
             onClearSelection={jest.fn()}
-            onHasData={onHasData}
+            traceSamples={[]}
           />
         </Wrapper>
       );
@@ -120,23 +124,26 @@ describe('transaction_details/distribution', () => {
       await waitFor(() => {
         expect(screen.getByTestId('apmCorrelationsChart')).toBeInTheDocument();
         expect(screen.getByTestId('loading')).toBeInTheDocument();
-        expect(onHasData).toHaveBeenLastCalledWith(false);
       });
     });
 
     it("doesn't show loading indicator when the service isn't running", async () => {
-      const onHasData = jest.fn();
       render(
         <Wrapper
           dataSearchResponse={{
             isRunning: false,
-            rawResponse: { ccsWarning: false, took: 1234, values: [], log: [] },
+            rawResponse: {
+              ccsWarning: false,
+              took: 1234,
+              latencyCorrelations: [],
+              log: [],
+            },
           }}
         >
           <TransactionDistribution
             onChartSelection={jest.fn()}
             onClearSelection={jest.fn()}
-            onHasData={onHasData}
+            traceSamples={[]}
           />
         </Wrapper>
       );
@@ -144,7 +151,6 @@ describe('transaction_details/distribution', () => {
       await waitFor(() => {
         expect(screen.getByTestId('apmCorrelationsChart')).toBeInTheDocument();
         expect(screen.queryByTestId('loading')).toBeNull(); // it doesn't exist
-        expect(onHasData).toHaveBeenLastCalledWith(false);
       });
     });
   });
