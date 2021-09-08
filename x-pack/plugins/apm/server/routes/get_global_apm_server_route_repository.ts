@@ -72,10 +72,10 @@ export type APMServerRouteRepository = ReturnType<
 // Ensure no APIs return arrays (or, by proxy, the any type),
 // to guarantee compatibility with _inspect.
 
-type CompositeEndpoint = EndpointOf<APMServerRouteRepository>;
+export type APIEndpoint = EndpointOf<APMServerRouteRepository>;
 
 type EndpointReturnTypes = {
-  [Endpoint in CompositeEndpoint]: ReturnOf<APMServerRouteRepository, Endpoint>;
+  [Endpoint in APIEndpoint]: ReturnOf<APMServerRouteRepository, Endpoint>;
 };
 
 type ArrayLikeReturnTypes = PickByValue<EndpointReturnTypes, any[]>;

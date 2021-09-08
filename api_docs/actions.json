@@ -463,7 +463,7 @@
             "children": [
               {
                 "parentPluginId": "actions",
-                "id": "def-server.options",
+                "id": "def-server.ActionType.executor.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -653,7 +653,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly to: string[]; readonly message: string; readonly cc: string[]; readonly bcc: string[]; readonly subject: string; readonly kibanaFooterLink: Readonly<{} & { path: string; text: string; }>; }"
+          "{ readonly to: string[]; readonly message: string; readonly subject: string; readonly cc: string[]; readonly bcc: string[]; readonly kibanaFooterLink: Readonly<{} & { path: string; text: string; }>; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/email.ts",
         "deprecated": false,
@@ -875,7 +875,7 @@
             "section": "def-common.ActionType",
             "text": "ActionType"
           },
-          "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; }"
+          "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; }"
         ],
         "path": "x-pack/plugins/actions/server/index.ts",
         "deprecated": false,
@@ -1091,6 +1091,36 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.isPreconfiguredConnector",
+          "type": "Function",
+          "tags": [],
+          "label": "isPreconfiguredConnector",
+          "description": [],
+          "signature": [
+            "(connectorId: string) => boolean"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginSetupContract.isPreconfiguredConnector.$1",
+              "type": "string",
+              "tags": [],
+              "label": "connectorId",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -1135,7 +1165,7 @@
             },
             {
               "parentPluginId": "actions",
-              "id": "def-server.PluginStartContract.isActionTypeEnabled.$2.options",
+              "id": "def-server.PluginStartContract.isActionTypeEnabled.$2",
               "type": "Object",
               "tags": [],
               "label": "options",
@@ -1145,7 +1175,7 @@
               "children": [
                 {
                   "parentPluginId": "actions",
-                  "id": "def-server.PluginStartContract.isActionTypeEnabled.$2.options.notifyUsage",
+                  "id": "def-server.PluginStartContract.isActionTypeEnabled.$2.notifyUsage",
                   "type": "boolean",
                   "tags": [],
                   "label": "notifyUsage",
@@ -1201,7 +1231,7 @@
             },
             {
               "parentPluginId": "actions",
-              "id": "def-server.PluginStartContract.isActionExecutable.$3.options",
+              "id": "def-server.PluginStartContract.isActionExecutable.$3",
               "type": "Object",
               "tags": [],
               "label": "options",
@@ -1211,7 +1241,7 @@
               "children": [
                 {
                   "parentPluginId": "actions",
-                  "id": "def-server.PluginStartContract.isActionExecutable.$3.options.notifyUsage",
+                  "id": "def-server.PluginStartContract.isActionExecutable.$3.notifyUsage",
                   "type": "boolean",
                   "tags": [],
                   "label": "notifyUsage",
@@ -1248,7 +1278,7 @@
               "section": "def-server.ActionsClient",
               "text": "ActionsClient"
             },
-            ", \"get\" | \"delete\" | \"create\" | \"update\" | \"execute\" | \"getAll\" | \"getBulk\" | \"enqueueExecution\" | \"ephemeralEnqueuedExecution\" | \"listTypes\" | \"isActionTypeEnabled\">>"
+            ", \"get\" | \"delete\" | \"create\" | \"update\" | \"execute\" | \"getAll\" | \"getBulk\" | \"enqueueExecution\" | \"ephemeralEnqueuedExecution\" | \"listTypes\" | \"isActionTypeEnabled\" | \"isPreconfigured\">>"
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
@@ -1820,6 +1850,20 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.INTERNAL_BASE_ACTION_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_BASE_ACTION_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/actions\""
+        ],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.RewriteRequestCase",
         "type": "Type",
         "tags": [],
@@ -1842,7 +1886,7 @@
         "children": [
           {
             "parentPluginId": "actions",
-            "id": "def-common.requested",
+            "id": "def-common.RewriteRequestCase.$1",
             "type": "Object",
             "tags": [],
             "label": "requested",
@@ -1888,7 +1932,7 @@
         "children": [
           {
             "parentPluginId": "actions",
-            "id": "def-common.responded",
+            "id": "def-common.RewriteResponseCase.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "responded",

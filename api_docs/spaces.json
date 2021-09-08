@@ -1173,7 +1173,7 @@
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-public.props",
+                "id": "def-public.SpacesApiUiComponent.getSpacesContextProvider.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1212,7 +1212,7 @@
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-public.props",
+                "id": "def-public.SpacesApiUiComponent.getShareToSpaceFlyout.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1251,7 +1251,7 @@
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-public.props",
+                "id": "def-public.SpacesApiUiComponent.getCopyToSpaceFlyout.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1290,7 +1290,7 @@
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-public.props",
+                "id": "def-public.SpacesApiUiComponent.getSpaceList.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1329,7 +1329,7 @@
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-public.props",
+                "id": "def-public.SpacesApiUiComponent.getLegacyUrlConflict.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1368,7 +1368,7 @@
             "children": [
               {
                 "parentPluginId": "spaces",
-                "id": "def-public.props",
+                "id": "def-public.SpacesApiUiComponent.getSpaceAvatar.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1680,7 +1680,7 @@
         "children": [
           {
             "parentPluginId": "spaces",
-            "id": "def-public.props",
+            "id": "def-public.LazyComponentFn.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -3111,7 +3111,7 @@
         "children": [
           {
             "parentPluginId": "spaces",
-            "id": "def-server.request",
+            "id": "def-server.SpacesClientRepositoryFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -3131,7 +3131,7 @@
           },
           {
             "parentPluginId": "spaces",
-            "id": "def-server.savedObjectsStart",
+            "id": "def-server.SpacesClientRepositoryFactory.$2",
             "type": "Object",
             "tags": [],
             "label": "savedObjectsStart",
@@ -3194,7 +3194,7 @@
         "children": [
           {
             "parentPluginId": "spaces",
-            "id": "def-server.request",
+            "id": "def-server.SpacesClientWrapper.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -3214,7 +3214,7 @@
           },
           {
             "parentPluginId": "spaces",
-            "id": "def-server.baseClient",
+            "id": "def-server.SpacesClientWrapper.$2",
             "type": "Object",
             "tags": [],
             "label": "baseClient",

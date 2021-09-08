@@ -562,7 +562,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-public.props",
+                "id": "def-public.PackageAssetsExtension.Component.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -661,7 +661,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-public.props",
+                "id": "def-public.PackageCustomExtension.Component.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -893,7 +893,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-public.props",
+                "id": "def-public.PackagePolicyCreateExtension.Component.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -965,7 +965,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-public.PackagePolicyCreateExtensionComponentProps.onChange.$1.opts",
+                "id": "def-public.PackagePolicyCreateExtensionComponentProps.onChange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
@@ -975,7 +975,7 @@
                 "children": [
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-public.PackagePolicyCreateExtensionComponentProps.onChange.$1.opts.isValid",
+                    "id": "def-public.PackagePolicyCreateExtensionComponentProps.onChange.$1.isValid",
                     "type": "boolean",
                     "tags": [],
                     "label": "isValid",
@@ -987,7 +987,7 @@
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-public.PackagePolicyCreateExtensionComponentProps.onChange.$1.opts.updatedPolicy",
+                    "id": "def-public.PackagePolicyCreateExtensionComponentProps.onChange.$1.updatedPolicy",
                     "type": "Object",
                     "tags": [],
                     "label": "updatedPolicy",
@@ -1097,7 +1097,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-public.props",
+                "id": "def-public.PackagePolicyEditExtension.Component.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -1190,7 +1190,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-public.PackagePolicyEditExtensionComponentProps.onChange.$1.opts",
+                "id": "def-public.PackagePolicyEditExtensionComponentProps.onChange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
@@ -1200,7 +1200,7 @@
                 "children": [
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-public.PackagePolicyEditExtensionComponentProps.onChange.$1.opts.isValid",
+                    "id": "def-public.PackagePolicyEditExtensionComponentProps.onChange.$1.isValid",
                     "type": "boolean",
                     "tags": [],
                     "label": "isValid",
@@ -1212,7 +1212,7 @@
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-public.PackagePolicyEditExtensionComponentProps.onChange.$1.opts.updatedPolicy",
+                    "id": "def-public.PackagePolicyEditExtensionComponentProps.onChange.$1.updatedPolicy",
                     "type": "Object",
                     "tags": [],
                     "label": "updatedPolicy",
@@ -1585,7 +1585,7 @@
         "children": [
           {
             "parentPluginId": "fleet",
-            "id": "def-public.extensionPoint",
+            "id": "def-public.UIExtensionRegistrationCallback.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "extensionPoint",
@@ -2295,7 +2295,7 @@
           "children": [
             {
               "parentPluginId": "fleet",
-              "id": "def-public.extensionPoint",
+              "id": "def-public.FleetStart.registerExtension.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "extensionPoint",
@@ -2500,7 +2500,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.soClient",
+                "id": "def-server.AgentPolicyServiceInterface.get.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -2813,7 +2813,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.id",
+                "id": "def-server.AgentPolicyServiceInterface.get.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -2823,7 +2823,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.withPackagePolicies",
+                "id": "def-server.AgentPolicyServiceInterface.get.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "withPackagePolicies",
@@ -2865,7 +2865,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.soClient",
+                "id": "def-server.AgentPolicyServiceInterface.list.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -3178,7 +3178,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.options",
+                "id": "def-server.AgentPolicyServiceInterface.list.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -3215,7 +3215,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.soClient",
+                "id": "def-server.AgentPolicyServiceInterface.getDefaultAgentPolicyId.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -3560,7 +3560,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.soClient",
+                "id": "def-server.AgentPolicyServiceInterface.getFullAgentPolicy.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -3873,7 +3873,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.id",
+                "id": "def-server.AgentPolicyServiceInterface.getFullAgentPolicy.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -3883,7 +3883,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.options",
+                "id": "def-server.AgentPolicyServiceInterface.getFullAgentPolicy.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -3928,7 +3928,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.soClient",
+                "id": "def-server.AgentPolicyServiceInterface.getByIds.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -4241,7 +4241,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.ids",
+                "id": "def-server.AgentPolicyServiceInterface.getByIds.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "ids",
@@ -4254,7 +4254,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.options",
+                "id": "def-server.AgentPolicyServiceInterface.getByIds.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -4316,7 +4316,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.esClient",
+                "id": "def-server.AgentService.getAgent.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "esClient",
@@ -4324,7 +4324,7 @@
                 "signature": [
                   "Pick<",
                   "KibanaClient",
-                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"count\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
                   "TransportRequestParams",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -4339,7 +4339,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.agentId",
+                "id": "def-server.AgentService.getAgent.$2",
                 "type": "string",
                 "tags": [],
                 "label": "agentId",
@@ -4608,7 +4608,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.esClient",
+                "id": "def-server.AgentService.listAgents.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "esClient",
@@ -4616,7 +4616,7 @@
                 "signature": [
                   "Pick<",
                   "KibanaClient",
-                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"count\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
                   "TransportRequestParams",
                   ", options?: ",
                   "TransportRequestOptions",
@@ -4631,7 +4631,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.options",
+                "id": "def-server.AgentService.listAgents.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -5195,7 +5195,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.options",
+                "id": "def-server.PackageService.getInstallation.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -5318,7 +5318,7 @@
         "children": [
           {
             "parentPluginId": "fleet",
-            "id": "def-server.newPackagePolicy",
+            "id": "def-server.PostPackagePolicyCreateCallback.$1",
             "type": "Object",
             "tags": [],
             "label": "newPackagePolicy",
@@ -5337,7 +5337,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.context",
+            "id": "def-server.PostPackagePolicyCreateCallback.$2",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -5356,7 +5356,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.request",
+            "id": "def-server.PostPackagePolicyCreateCallback.$3",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -5403,7 +5403,7 @@
         "children": [
           {
             "parentPluginId": "fleet",
-            "id": "def-server.deletedPackagePolicies",
+            "id": "def-server.PostPackagePolicyDeleteCallback.$1",
             "type": "Object",
             "tags": [],
             "label": "deletedPackagePolicies",
@@ -5474,7 +5474,7 @@
         "children": [
           {
             "parentPluginId": "fleet",
-            "id": "def-server.updatePackagePolicy",
+            "id": "def-server.PutPackagePolicyUpdateCallback.$1",
             "type": "Object",
             "tags": [],
             "label": "updatePackagePolicy",
@@ -5493,7 +5493,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.context",
+            "id": "def-server.PutPackagePolicyUpdateCallback.$2",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -5512,7 +5512,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.request",
+            "id": "def-server.PutPackagePolicyUpdateCallback.$3",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -6361,7 +6361,7 @@
         "children": [
           {
             "parentPluginId": "fleet",
-            "id": "def-common.o",
+            "id": "def-common.entries.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "o",
@@ -6391,7 +6391,7 @@
             "section": "def-common.FullAgentPolicy",
             "text": "FullAgentPolicy"
           },
-          ") => string"
+          ", toYaml: (obj: any, opts?: jsyaml.DumpOptions | undefined) => string) => string"
         ],
         "path": "x-pack/plugins/fleet/common/services/full_agent_policy_to_yaml.ts",
         "deprecated": false,
@@ -6411,6 +6411,20 @@
                 "section": "def-common.FullAgentPolicy",
                 "text": "FullAgentPolicy"
               }
+            ],
+            "path": "x-pack/plugins/fleet/common/services/full_agent_policy_to_yaml.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.fullAgentPolicyToYaml.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "toYaml",
+            "description": [],
+            "signature": [
+              "typeof jsyaml.safeDump"
             ],
             "path": "x-pack/plugins/fleet/common/services/full_agent_policy_to_yaml.ts",
             "deprecated": false,
@@ -6981,7 +6995,7 @@
             "section": "def-common.PackageInfo",
             "text": "PackageInfo"
           },
-          ") => ",
+          ", safeLoadYaml: (yaml: string) => any) => ",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -7032,6 +7046,20 @@
             "path": "x-pack/plugins/fleet/common/services/validate_package_policy.ts",
             "deprecated": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.validatePackagePolicy.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "safeLoadYaml",
+            "description": [],
+            "signature": [
+              "(yaml: string) => any"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/validate_package_policy.ts",
+            "deprecated": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -7061,7 +7089,7 @@
             "section": "def-common.RegistryVarsEntry",
             "text": "RegistryVarsEntry"
           },
-          ") => string[] | null"
+          ", varName: string, safeLoadYaml: (yaml: string) => any) => string[] | null"
         ],
         "path": "x-pack/plugins/fleet/common/services/validate_package_policy.ts",
         "deprecated": false,
@@ -7101,6 +7129,34 @@
                 "section": "def-common.RegistryVarsEntry",
                 "text": "RegistryVarsEntry"
               }
+            ],
+            "path": "x-pack/plugins/fleet/common/services/validate_package_policy.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.validatePackagePolicyConfig.$3",
+            "type": "string",
+            "tags": [],
+            "label": "varName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/validate_package_policy.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.validatePackagePolicyConfig.$4",
+            "type": "Function",
+            "tags": [],
+            "label": "safeLoadYaml",
+            "description": [],
+            "signature": [
+              "(yaml: string) => any"
             ],
             "path": "x-pack/plugins/fleet/common/services/validate_package_policy.ts",
             "deprecated": false,

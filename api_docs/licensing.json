@@ -628,19 +628,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "licensing",
-        "id": "def-public.LICENSE_TYPE",
-        "type": "Enum",
-        "tags": [],
-        "label": "LICENSE_TYPE",
-        "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "licensing",
@@ -2409,7 +2397,7 @@
         "children": [
           {
             "parentPluginId": "licensing",
-            "id": "def-server.license",
+            "id": "def-server.CheckLicense.$1",
             "type": "Object",
             "tags": [],
             "label": "license",

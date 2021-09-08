@@ -3046,7 +3046,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.request",
+                "id": "def-server.HttpAuth.get.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -3092,7 +3092,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.request",
+                "id": "def-server.HttpAuth.isAuthenticated.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -4089,9 +4089,9 @@
               " | null; (detailed: false): ",
               "PeerCertificate",
               " | null; (detailed?: boolean | undefined): ",
-              "DetailedPeerCertificate",
-              " | ",
               "PeerCertificate",
+              " | ",
+              "DetailedPeerCertificate",
               " | null; }"
             ],
             "path": "src/core/server/http/router/socket.ts",
@@ -4127,9 +4127,9 @@
               " | null; (detailed: false): ",
               "PeerCertificate",
               " | null; (detailed?: boolean | undefined): ",
-              "DetailedPeerCertificate",
-              " | ",
               "PeerCertificate",
+              " | ",
+              "DetailedPeerCertificate",
               " | null; }"
             ],
             "path": "src/core/server/http/router/socket.ts",
@@ -4167,9 +4167,9 @@
               " | null; (detailed: false): ",
               "PeerCertificate",
               " | null; (detailed?: boolean | undefined): ",
-              "DetailedPeerCertificate",
-              " | ",
               "PeerCertificate",
+              " | ",
+              "DetailedPeerCertificate",
               " | null; }"
             ],
             "path": "src/core/server/http/router/socket.ts",
@@ -4230,7 +4230,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.IKibanaSocket.renegotiate.$1.options",
+                "id": "def-server.IKibanaSocket.renegotiate.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -4240,7 +4240,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.IKibanaSocket.renegotiate.$1.options.rejectUnauthorized",
+                    "id": "def-server.IKibanaSocket.renegotiate.$1.rejectUnauthorized",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "rejectUnauthorized",
@@ -4253,7 +4253,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.IKibanaSocket.renegotiate.$1.options.requestCert",
+                    "id": "def-server.IKibanaSocket.renegotiate.$1.requestCert",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "requestCert",
@@ -4546,7 +4546,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.route",
+                "id": "def-server.IRouter.get.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
@@ -4566,7 +4566,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.IRouter.get.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -4778,7 +4778,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.context",
+                    "id": "def-server.IRouter.get.$2.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "context",
@@ -4791,7 +4791,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.request",
+                    "id": "def-server.IRouter.get.$2.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -4811,7 +4811,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.response",
+                    "id": "def-server.IRouter.get.$2.$3",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "response",
@@ -5034,7 +5034,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.route",
+                "id": "def-server.IRouter.post.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
@@ -5054,7 +5054,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.IRouter.post.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -5266,7 +5266,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.context",
+                    "id": "def-server.IRouter.post.$2.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "context",
@@ -5279,7 +5279,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.request",
+                    "id": "def-server.IRouter.post.$2.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -5299,7 +5299,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.response",
+                    "id": "def-server.IRouter.post.$2.$3",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "response",
@@ -5522,7 +5522,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.route",
+                "id": "def-server.IRouter.put.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
@@ -5542,7 +5542,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.IRouter.put.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -5754,7 +5754,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.context",
+                    "id": "def-server.IRouter.put.$2.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "context",
@@ -5767,7 +5767,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.request",
+                    "id": "def-server.IRouter.put.$2.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -5787,7 +5787,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.response",
+                    "id": "def-server.IRouter.put.$2.$3",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "response",
@@ -6010,7 +6010,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.route",
+                "id": "def-server.IRouter.patch.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
@@ -6030,7 +6030,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.IRouter.patch.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -6242,7 +6242,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.context",
+                    "id": "def-server.IRouter.patch.$2.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "context",
@@ -6255,7 +6255,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.request",
+                    "id": "def-server.IRouter.patch.$2.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -6275,7 +6275,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.response",
+                    "id": "def-server.IRouter.patch.$2.$3",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "response",
@@ -6498,7 +6498,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.route",
+                "id": "def-server.IRouter.delete.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
@@ -6518,7 +6518,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.IRouter.delete.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -6730,7 +6730,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.context",
+                    "id": "def-server.IRouter.delete.$2.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "context",
@@ -6743,7 +6743,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.request",
+                    "id": "def-server.IRouter.delete.$2.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -6763,7 +6763,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.response",
+                    "id": "def-server.IRouter.delete.$2.$3",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "response",
@@ -7184,7 +7184,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.IRouter.handleLegacyErrors.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -7222,7 +7222,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.context",
+                    "id": "def-server.IRouter.handleLegacyErrors.$1.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "context",
@@ -7235,7 +7235,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.request",
+                    "id": "def-server.IRouter.handleLegacyErrors.$1.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -7255,7 +7255,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.response",
+                    "id": "def-server.IRouter.handleLegacyErrors.$1.$3",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "response",
@@ -7389,7 +7389,7 @@
                 "section": "def-server.RouteConfigOptions",
                 "text": "RouteConfigOptions"
               },
-              "<Method>, \"timeout\" | \"tags\" | \"authRequired\" | \"xsrfRequired\">> : Required<",
+              "<Method>, \"tags\" | \"timeout\" | \"authRequired\" | \"xsrfRequired\">> : Required<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -8833,7 +8833,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.AuthenticationHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -8853,7 +8853,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.response",
+            "id": "def-server.AuthenticationHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -8994,7 +8994,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.toolkit",
+            "id": "def-server.AuthenticationHandler.$3",
             "type": "Object",
             "tags": [],
             "label": "toolkit",
@@ -9112,7 +9112,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.GetAuthHeaders.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -9167,7 +9167,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.GetAuthState.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -9280,7 +9280,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.IsAuthenticated.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -9327,7 +9327,7 @@
             "section": "def-server.RouteConfigOptions",
             "text": "RouteConfigOptions"
           },
-          "<Method>, \"timeout\" | \"tags\" | \"authRequired\" | \"xsrfRequired\">> : Required<",
+          "<Method>, \"tags\" | \"timeout\" | \"authRequired\" | \"xsrfRequired\">> : Required<",
           {
             "pluginId": "core",
             "scope": "server",
@@ -9857,7 +9857,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.OnPostAuthHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -9877,7 +9877,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.response",
+            "id": "def-server.OnPostAuthHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -10018,7 +10018,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.toolkit",
+            "id": "def-server.OnPostAuthHandler.$3",
             "type": "Object",
             "tags": [],
             "label": "toolkit",
@@ -10204,7 +10204,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.OnPreAuthHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -10224,7 +10224,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.response",
+            "id": "def-server.OnPreAuthHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -10365,7 +10365,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.toolkit",
+            "id": "def-server.OnPreAuthHandler.$3",
             "type": "Object",
             "tags": [],
             "label": "toolkit",
@@ -10427,7 +10427,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.OnPreResponseHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -10447,7 +10447,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.preResponse",
+            "id": "def-server.OnPreResponseHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "preResponse",
@@ -10466,7 +10466,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.toolkit",
+            "id": "def-server.OnPreResponseHandler.$3",
             "type": "Object",
             "tags": [],
             "label": "toolkit",
@@ -10652,7 +10652,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.OnPreRoutingHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -10672,7 +10672,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.response",
+            "id": "def-server.OnPreRoutingHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -10813,7 +10813,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.toolkit",
+            "id": "def-server.OnPreRoutingHandler.$3",
             "type": "Object",
             "tags": [],
             "label": "toolkit",
@@ -10898,7 +10898,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.context",
+            "id": "def-server.RequestHandler.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "context",
@@ -10911,7 +10911,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.RequestHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -10931,7 +10931,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.response",
+            "id": "def-server.RequestHandler.$3",
             "type": "Uncategorized",
             "tags": [],
             "label": "response",
@@ -11167,7 +11167,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.context",
+            "id": "def-server.RequestHandlerContextProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -11180,7 +11180,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.rest",
+            "id": "def-server.RequestHandlerContextProvider.$2",
             "type": "Object",
             "tags": [],
             "label": "rest",
@@ -11782,7 +11782,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.handler",
+            "id": "def-server.RequestHandlerWrapper.$1",
             "type": "Function",
             "tags": [],
             "label": "handler",
@@ -11820,7 +11820,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.context",
+                "id": "def-server.RequestHandlerWrapper.$1.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -11833,7 +11833,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.request",
+                "id": "def-server.RequestHandlerWrapper.$1.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -11853,7 +11853,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.response",
+                "id": "def-server.RequestHandlerWrapper.$1.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "response",
@@ -12157,7 +12157,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.route",
+            "id": "def-server.RouteRegistrar.$1",
             "type": "Object",
             "tags": [],
             "label": "route",
@@ -12177,7 +12177,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.handler",
+            "id": "def-server.RouteRegistrar.$2",
             "type": "Function",
             "tags": [],
             "label": "handler",
@@ -12389,7 +12389,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.context",
+                "id": "def-server.RouteRegistrar.$2.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -12402,7 +12402,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.request",
+                "id": "def-server.RouteRegistrar.$2.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -12422,7 +12422,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.response",
+                "id": "def-server.RouteRegistrar.$2.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "response",
@@ -12472,7 +12472,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.data",
+            "id": "def-server.RouteValidationFunction.$1",
             "type": "Any",
             "tags": [],
             "label": "data",
@@ -12485,7 +12485,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.validationResult",
+            "id": "def-server.RouteValidationFunction.$2",
             "type": "Object",
             "tags": [],
             "label": "validationResult",
