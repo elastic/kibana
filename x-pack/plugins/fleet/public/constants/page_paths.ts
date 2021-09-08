@@ -65,9 +65,10 @@ export const FLEET_ROUTING_PATHS = {
   add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
 };
 
+export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
-  integrations_all: '/browse',
+  integrations_all: '/browse/:category?',
   integrations_installed: '/installed',
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',

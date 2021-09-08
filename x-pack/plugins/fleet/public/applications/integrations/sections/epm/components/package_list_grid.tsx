@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { Fragment, useCallback, useState } from 'react';
+import { Redirect, useLocation, useHistory, useParams } from 'react-router-dom';
 import type { Query } from '@elastic/eui';
 import {
   EuiFlexGrid,
@@ -27,10 +28,13 @@ import { Loading } from '../../../components';
 import type { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../../../hooks';
 
+import { INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../../constants';
+
 import { PackageCard } from './package_card';
 
 interface ListProps {
   isLoading?: boolean;
+  category: string;
   controls?: ReactNode;
   title: string;
   list: PackageList;
@@ -40,6 +44,7 @@ interface ListProps {
 
 export function PackageListGrid({
   isLoading,
+  category,
   controls,
   title,
   list,
@@ -52,6 +57,8 @@ export function PackageListGrid({
   const [searchTerm, setSearchTerm] = useState('');
   const localSearchRef = useLocalSearch(list);
 
+  const history = useHistory();
+
   const onQueryChange = ({
     // eslint-disable-next-line @typescript-eslint/no-shadow
     query,
@@ -62,6 +69,7 @@ export function PackageListGrid({
     queryText: string;
     error: { message: string } | null;
   }) => {
+    history.push(`/browse/${category}?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query.text}`);
     if (!error) {
       setQuery(query);
       setSearchTerm(userInput);

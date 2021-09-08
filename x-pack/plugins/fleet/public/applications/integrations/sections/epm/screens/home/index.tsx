@@ -6,12 +6,12 @@
  */
 
 import React, { memo, useState, useMemo } from 'react';
-import { Switch, Route, useLocation, useHistory } from 'react-router-dom';
+import { Switch, Route, useLocation, useHistory, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
 
 import { installationStatuses } from '../../../../../../../common/constants';
-import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
+import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
 import { useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
 import { DefaultLayout } from '../../../../layouts';
@@ -19,6 +19,10 @@ import type { CategorySummaryItem, PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import { CategoryFacets } from './category_facets';
+
+export interface CategoryParams {
+  category?: string;
+}
 
 export const EPMHomePage: React.FC = memo(() => {
   return (
@@ -138,9 +142,12 @@ const InstalledPackages: React.FC = memo(() => {
 const AvailablePackages: React.FC = memo(() => {
   useBreadcrumbs('integrations_all');
   const history = useHistory();
+  const { category } = useParams<CategoryParams>();
+  const selectedCategory = category || '';
+
   const queryParams = new URLSearchParams(useLocation().search);
-  const initialCategory = queryParams.get('category') || '';
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
+
   const { data: allCategoryPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages({
     category: '',
   });
@@ -182,16 +189,19 @@ const AvailablePackages: React.FC = memo(() => {
     [allPackages?.length, categoriesRes]
   );
 
+  function setSelectedCategory(categoryId: string) {
+    const url = searchParam
+      ? `/browse/${categoryId}?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchParam}`
+      : `/browse/${categoryId}`;
+    history.push(url);
+  }
+
   const controls = categories ? (
     <CategoryFacets
       isLoading={isLoadingCategories || isLoadingAllPackages}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategorySummaryItem) => {
-        // clear category query param in the url
-        if (queryParams.get('category')) {
-          history.push({});
-        }
         setSelectedCategory(id);
       }}
     />
@@ -202,8 +212,11 @@ const AvailablePackages: React.FC = memo(() => {
       isLoading={isLoadingCategoryPackages}
       title={title}
       controls={controls}
+      category={selectedCategory}
       list={packages}
-      setSelectedCategory={setSelectedCategory}
+      setSelectedCategory={(categoryId) => {
+        setSelectedCategory(categoryId);
+      }}
       showMissingIntegrationMessage
     />
   );
