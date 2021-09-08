@@ -32,6 +32,7 @@ interface StepProps extends OverviewStepProps {
 }
 
 const FixIssuesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
+  // We consider ES and Kibana issues to be fixed when there are 0 critical issues.
   const [isEsFixed, setIsEsFixed] = useState(false);
   const [isKibanaFixed, setIsKibanaFixed] = useState(false);
 
