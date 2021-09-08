@@ -96,7 +96,7 @@ function getProps(timefield?: string) {
   }) as DataCharts$;
 
   return {
-    resetQuery: jest.fn(),
+    resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchDataChart$: charts$,
     savedSearchDataTotalHits$: totalHits$,
