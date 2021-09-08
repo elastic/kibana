@@ -2,35 +2,69 @@
 [[maps-search]]
 == Search geographic data
 
-Search across the layers in your map to focus in on just the data you want.
+Search across the layers in your map to focus on just the data you want. Combine free text search with field-based search using the <<kuery-query,{kib} Query Language>>. Set the time filter to restrict layers by time.
 
-Layers that request data from {es} are narrowed when you submit a <<kibana-concepts-searching-your-data, search request>>.
-Layers narrowed by semi-structured search and filters contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
-
-Layers that request data from {es} using an <<index-patterns, index pattern>> with a configured time field are narrowed by the <<set-time-filter, global time filter>>.
-These layers contain the clock icon image:maps/images/clock_icon.png[clock icon] next to the layer name in the legend. Use the time slider to quickly select time slices within the global time filter range.
-Click previous and next buttons to advance the time slice backward or forward. Click play to animate your spatial temporal data.
-
-You can create a layer that requests data from {es} from the following:
-
-* <<vector-layer>> with:
-
-** Documents
-
-** Clusters and grid
-
-** Point to point
-
-** <<terms-join>>
-
-** Top hits per entity
-
-** Tracks
-
-* <<heatmap-layer>>
+This image shows an example of a search and time filter narrowing results.
 
 [role="screenshot"]
 image::maps/images/global_search_bar.png[]
+
+Only layers requesting data from {es} are narrowed by search and time filter.
+To add a layer that requests data from {es} to your map, click *Add layer*, then select one of the following:
+
+* Documents
+
+* <<terms-join, Choropleth>>
+
+* Clusters and grid
+
+* <<heatmap-layer, Heat map>>
+
+* Point to point
+
+* Top hits per entity
+
+* Tracks
+
+[float]
+[[maps-narrow-layer-by-global-search]]
+==== Free text search and field-based search
+
+Layers that request data from {es} are narrowed when you submit a <<kibana-concepts-searching-your-data, search>>.
+Layers narrowed by semi-structured search and filters contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
+
+You can prevent the global search from applying to a layer by configuring the following:
+
+* In *Filtering*, clear the *Apply global search to layer data* checkbox to turn off global search for the layer source.
+
+* In *Term joins*, clear the *Apply global search to join* checkbox to turn off global search for the <<terms-join, term join>>.
+
+[float]
+[[maps-narrow-layer-by-global-time]]
+==== Restrict layers by time
+
+Layers that request data from {es} using an <<index-patterns, index pattern>> with a configured time field are narrowed by the <<set-time-filter, global time filter>>.
+These layers contain the clock icon image:maps/images/clock_icon.png[clock icon] next to the layer name in the legend.
+
+Click image:maps/images/timeslider_toggle_icon.png[timeslider icon] to open the time slider. Use the time slider to quickly select time slices within the global time filter range.
+Click previous and next buttons to advance the time slice backward or forward. Click play to animate your spatial temporal data.
+
+You can prevent the global time filter from applying to a layer by configuring the following:
+
+* In *Filtering*, clear the *Apply global time to layer data* checkbox to turn off the global time filter for the layer source.
+
+* In *Term joins*, clear the *Apply global time to join* checkbox to turn off the global time filter for the <<terms-join, term join>>.
+
+[float]
+[[maps-refresh-layer]]
+==== Refresh layer data
+
+Layers that request data from {es} re-fetch data when <<set-time-filter, automatic refresh>> fires and when you click *Refresh*.
+
+You can prevent refreshing layer data by configuring the following:
+
+* In *Filtering*, clear the *Apply global refresh to layer data* checkbox to turn off refresh for the layer source.
+
 
 [role="xpack"]
 [[maps-create-filter-from-map]]
@@ -114,13 +148,9 @@ The most common cause for empty layers are searches for a field that exists in o
 
 [float]
 [[maps-disable-search-for-layer]]
-==== Disable search for a layer
+==== Disable global search for a layer
 
-You can prevent the search bar from applying search context to a layer by configuring the following:
-
-* In *Filtering*, clear the *Apply global filter to layer data* checkbox to turn off the global search context for the layer source.
-
-* In *Term joins*, clear the *Apply global filter to join* checkbox to turn off the global search context for the <<terms-join, term join>>.
+One strategy for eliminating empty layers from cross index searches is to <<maps-narrow-layer-by-global-search, disable global search for a layer>>.
 
 [float]
 [[maps-add-index-search]]
