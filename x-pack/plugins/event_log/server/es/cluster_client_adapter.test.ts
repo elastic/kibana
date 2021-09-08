@@ -31,7 +31,7 @@ beforeEach(() => {
     logger,
     elasticsearchClientPromise: Promise.resolve(clusterClient),
     wait: () => Promise.resolve(true),
-    kibanaVersion: '8.0.0'
+    kibanaVersion: '8.0.0',
   });
 });
 
