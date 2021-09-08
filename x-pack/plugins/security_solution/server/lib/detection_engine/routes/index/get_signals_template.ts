@@ -16,6 +16,7 @@ import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
 import otherMapping from './other_mappings.json';
 import aadFieldConversion from './signal_aad_mapping.json';
+import signalExtraFields from './signal_extra_fields.json';
 
 /**
   @constant
@@ -99,6 +100,49 @@ export const createSignalsFieldAliases = () => {
   return fieldAliases;
 };
 
+export const backwardsCompatibilityMappings = [
+  {
+    minVersion: 0,
+    // Version 45 shipped with 7.14
+    maxVersion: 45,
+    mapping: {
+      runtime: {
+        'host.os.name.caseless': {
+          type: 'keyword',
+          script: {
+            source:
+              "if(doc['host.os.name'].size()!=0) emit(doc['host.os.name'].value.toLowerCase());",
+          },
+        },
+      },
+      properties: {
+        // signalExtraFields contains the field mappings that have been added to the signals indices over time.
+        // We need to include these here because we can't add an alias for a field that isn't in the mapping,
+        // and we want to apply the aliases to all old signals indices at the same time.
+        ...signalExtraFields,
+        ...createSignalsFieldAliases(),
+      },
+    },
+  },
+];
+
+export const createBackwardsCompatibilityMapping = (version: number) => {
+  const mappings = backwardsCompatibilityMappings
+    .filter((mapping) => version <= mapping.maxVersion && version >= mapping.minVersion)
+    .map((mapping) => mapping.mapping);
+  if (mappings.length === 0) {
+    return undefined;
+  }
+  const meta = {
+    _meta: {
+      version,
+      [ALIAS_VERSION_FIELD]: SIGNALS_FIELD_ALIASES_VERSION,
+    },
+  };
+
+  return merge({}, ...mappings, meta);
+};
+
 export const getRbacRequiredFields = (spaceId: string) => {
   return {
     [SPACE_IDS]: {
@@ -119,17 +163,6 @@ export const getRbacRequiredFields = (spaceId: string) => {
     [ALERT_RULE_TYPE_ID]: {
       type: 'constant_keyword',
       value: 'siem.signals',
-    },
-  };
-};
-
-export const getBackwardsCompatibilityRuntimeFields = () => {
-  return {
-    'host.os.name.caseless': {
-      type: 'keyword',
-      script: {
-        source: "emit(doc['host.os.name'].value.toLowerCase())",
-      },
     },
   };
 };
