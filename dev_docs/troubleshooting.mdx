@@ -1,0 +1,16 @@
+---
+id: kibTroubleshooting
+slug: /kibana-dev-docs/troubleshooting
+title: Troubleshooting
+summary: A collection of tips for working around strange issues.
+date: 2021-09-08
+tags: ['kibana', 'onboarding', 'dev', 'troubleshooting']
+---
+
+### Typescript issues
+
+If you run into some really head-scratching ts errors, and are starting to question your sanity, try to run `git clean` to clear your typescript cache. Sometimes it can get mixed up when switching branches and show errors that are totally wrong.
+
+```
+git clean -fdxn -e /config -e /.vscode
+```
