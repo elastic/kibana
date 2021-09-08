@@ -110,6 +110,21 @@ export interface CoreUsageStats {
   'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no'?: number;
   'apiCalls.savedObjectsExport.allTypesSelected.yes'?: number;
   'apiCalls.savedObjectsExport.allTypesSelected.no'?: number;
+  // Legacy Dashboard Import/Export API
+  'apiCalls.legacyDashboardExport.total'?: number;
+  'apiCalls.legacyDashboardExport.namespace.default.total'?: number;
+  'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes'?: number;
+  'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no'?: number;
+  'apiCalls.legacyDashboardExport.namespace.custom.total'?: number;
+  'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes'?: number;
+  'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no'?: number;
+  'apiCalls.legacyDashboardImport.total'?: number;
+  'apiCalls.legacyDashboardImport.namespace.default.total'?: number;
+  'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes'?: number;
+  'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no'?: number;
+  'apiCalls.legacyDashboardImport.namespace.custom.total'?: number;
+  'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes'?: number;
+  'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no'?: number;
   // Saved Objects Repository counters
   'savedObjectsRepository.resolvedOutcome.exactMatch'?: number;
   'savedObjectsRepository.resolvedOutcome.aliasMatch'?: number;
