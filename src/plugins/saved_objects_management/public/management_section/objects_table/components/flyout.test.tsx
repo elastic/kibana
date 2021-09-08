@@ -33,7 +33,7 @@ describe('Flyout', () => {
   };
 
   beforeEach(() => {
-    const { http, overlays } = coreMock.createStart();
+    const { http } = coreMock.createStart();
     const search = dataPluginMock.createStartContract().search;
     const basePath = httpServiceMock.createBasePath();
 
@@ -47,7 +47,6 @@ describe('Flyout', () => {
           { id: '2', attributes: {} },
         ]),
       } as any,
-      overlays,
       http,
       allowedTypes: ['search', 'index-pattern', 'visualization'],
       serviceRegistry: serviceRegistryMock.create(),
@@ -140,9 +139,6 @@ describe('Flyout', () => {
         overwrite: true,
       });
       expect(component.state()).toMatchObject({
-        conflictedIndexPatterns: undefined,
-        conflictedSavedObjectsLinkedToSavedSearches: undefined,
-        conflictedSearchDocs: undefined,
         importCount: 0,
         status: 'idle',
         error: undefined,

@@ -16,6 +16,7 @@ import type {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import uuid from 'uuid';
+import { safeLoad } from 'js-yaml';
 
 import type { AuthenticatedUser } from '../../../security/server';
 import {
@@ -988,7 +989,7 @@ export function overridePackageInputs(
     inputs,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo);
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, safeLoad);
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
