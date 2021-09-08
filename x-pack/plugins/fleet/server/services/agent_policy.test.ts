@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { AgentPolicy, NewAgentPolicy, Output } from '../types';
+import type { AgentPolicy, NewAgentPolicy } from '../types';
 
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -46,45 +46,6 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
 
   return mock;
 }
-
-jest.mock('./output', () => {
-  return {
-    outputService: {
-      getDefaultOutputId: () => 'test-id',
-      get: (soClient: any, id: string): Output => {
-        switch (id) {
-          case 'data-output-id':
-            return {
-              id: 'data-output-id',
-              is_default: false,
-              name: 'Data output',
-              // @ts-ignore
-              type: 'elasticsearch',
-              hosts: ['http://es-data.co:9201'],
-            };
-          case 'monitoring-output-id':
-            return {
-              id: 'monitoring-output-id',
-              is_default: false,
-              name: 'Monitoring output',
-              // @ts-ignore
-              type: 'elasticsearch',
-              hosts: ['http://es-monitoring.co:9201'],
-            };
-          default:
-            return {
-              id: 'test-id',
-              is_default: true,
-              name: 'default',
-              // @ts-ignore
-              type: 'elasticsearch',
-              hosts: ['http://127.0.0.1:9201'],
-            };
-        }
-      },
-    },
-  };
-});
 
 jest.mock('./agent_policy_update');
 jest.mock('./agents');
@@ -204,146 +165,6 @@ describe('agent policy', () => {
       await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, undefined);
 
       expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('getFullAgentPolicy', () => {
-    it('should return a policy without monitoring if monitoring is not enabled', async () => {
-      const soClient = getSavedObjectMock({
-        revision: 1,
-      });
-      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
-
-      expect(agentPolicy).toMatchObject({
-        id: 'agent-policy',
-        outputs: {
-          default: {
-            type: 'elasticsearch',
-            hosts: ['http://127.0.0.1:9201'],
-            ca_sha256: undefined,
-            api_key: undefined,
-          },
-        },
-        inputs: [],
-        revision: 1,
-        fleet: {
-          hosts: ['http://fleetserver:8220'],
-        },
-        agent: {
-          monitoring: {
-            enabled: false,
-            logs: false,
-            metrics: false,
-          },
-        },
-      });
-    });
-
-    it('should return a policy with monitoring if monitoring is enabled for logs', async () => {
-      const soClient = getSavedObjectMock({
-        namespace: 'default',
-        revision: 1,
-        monitoring_enabled: ['logs'],
-      });
-      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
-
-      expect(agentPolicy).toMatchObject({
-        id: 'agent-policy',
-        outputs: {
-          default: {
-            type: 'elasticsearch',
-            hosts: ['http://127.0.0.1:9201'],
-            ca_sha256: undefined,
-            api_key: undefined,
-          },
-        },
-        inputs: [],
-        revision: 1,
-        fleet: {
-          hosts: ['http://fleetserver:8220'],
-        },
-        agent: {
-          monitoring: {
-            namespace: 'default',
-            use_output: 'default',
-            enabled: true,
-            logs: true,
-            metrics: false,
-          },
-        },
-      });
-    });
-
-    it('should return a policy with monitoring if monitoring is enabled for metrics', async () => {
-      const soClient = getSavedObjectMock({
-        namespace: 'default',
-        revision: 1,
-        monitoring_enabled: ['metrics'],
-      });
-      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
-
-      expect(agentPolicy).toMatchObject({
-        id: 'agent-policy',
-        outputs: {
-          default: {
-            type: 'elasticsearch',
-            hosts: ['http://127.0.0.1:9201'],
-            ca_sha256: undefined,
-            api_key: undefined,
-          },
-        },
-        inputs: [],
-        revision: 1,
-        fleet: {
-          hosts: ['http://fleetserver:8220'],
-        },
-        agent: {
-          monitoring: {
-            namespace: 'default',
-            use_output: 'default',
-            enabled: true,
-            logs: false,
-            metrics: true,
-          },
-        },
-      });
-    });
-
-    it('should support a different monitoring output', async () => {
-      const soClient = getSavedObjectMock({
-        namespace: 'default',
-        revision: 1,
-        monitoring_enabled: ['metrics'],
-        monitoring_output_id: 'monitoring-output-id',
-      });
-      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
-
-      expect(agentPolicy).toMatchSnapshot();
-    });
-
-    it('should support a different data output', async () => {
-      const soClient = getSavedObjectMock({
-        namespace: 'default',
-        revision: 1,
-        monitoring_enabled: ['metrics'],
-        data_output_id: 'data-output-id',
-      });
-      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
-
-      expect(agentPolicy).toMatchSnapshot();
-    });
-
-    it('should support both different outputs for data and monitoring ', async () => {
-      const soClient = getSavedObjectMock({
-        namespace: 'default',
-        revision: 1,
-        monitoring_enabled: ['metrics'],
-        data_output_id: 'data-output-id',
-        monitoring_output_id: 'monitoring-output-id',
-      });
-      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
-
-      expect(agentPolicy).toMatchSnapshot();
     });
   });
 

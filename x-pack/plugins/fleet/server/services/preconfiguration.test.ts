@@ -19,9 +19,14 @@ import * as agentPolicy from './agent_policy';
 import {
   ensurePreconfiguredPackagesAndPolicies,
   comparePreconfiguredPolicyToCurrent,
+  ensurePreconfiguredOutputs,
 } from './preconfiguration';
+import { outputService } from './output';
 
 jest.mock('./agent_policy_update');
+jest.mock('./output');
+
+const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 
 const mockInstalledPackages = new Map();
 const mockConfiguredPolicies = new Map();
@@ -486,5 +491,78 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
       basePackagePolicy
     );
     expect(hasChanged).toBe(false);
+  });
+});
+
+describe('output preconfiguration', () => {
+  beforeEach(() => {
+    mockedOutputService.create.mockReset();
+    mockedOutputService.update.mockReset();
+    mockedOutputService.get.mockImplementation(
+      async (soClient, id): Promise<Output> => {
+        switch (id) {
+          case 'existing-output-1':
+            return {
+              id: 'existing-output-1',
+              is_default: false,
+              name: 'Output 1',
+              // @ts-ignore
+              type: 'elasticsearch',
+              hosts: ['http://es.co:9201'],
+              is_preconfigured: true,
+            };
+          default:
+            throw soClient.errors.createGenericNotFoundError(id);
+        }
+      }
+    );
+  });
+
+  it('should create preconfigured output that does not exists', async () => {
+    const soClient = savedObjectsClientMock.create();
+    await ensurePreconfiguredOutputs(soClient, [
+      {
+        id: 'non-existing-output-1',
+        name: 'Output 1',
+        type: 'elasticsearch',
+        is_default: false,
+        hosts: ['http://test.fr'],
+      },
+    ]);
+
+    expect(mockedOutputService.create).toBeCalled();
+    expect(mockedOutputService.update).not.toBeCalled();
+  });
+
+  it('should update output if preconfigured output exists and changed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    await ensurePreconfiguredOutputs(soClient, [
+      {
+        id: 'existing-output-1',
+        is_default: false,
+        name: 'Output 1',
+        type: 'elasticsearch',
+        hosts: ['http://newhostichanged.co:9201'], // field that changed
+      },
+    ]);
+
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).toBeCalled();
+  });
+
+  it('should do nothing if preconfigured output exists and did not changed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    await ensurePreconfiguredOutputs(soClient, [
+      {
+        id: 'existing-output-1',
+        is_default: false,
+        name: 'Output 1',
+        type: 'elasticsearch',
+        hosts: ['http://es.co:9201'],
+      },
+    ]);
+
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).not.toBeCalled();
   });
 });

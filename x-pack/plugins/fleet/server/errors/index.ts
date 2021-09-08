@@ -10,7 +10,7 @@ import { isESClientError } from './utils';
 
 export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
 
-export { isESClientError, isSavedObjectNotFoundError } from './utils';
+export { isESClientError } from './utils';
 
 export class IngestManagerError extends Error {
   constructor(message?: string, public readonly meta?: unknown) {

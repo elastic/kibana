@@ -25,7 +25,6 @@ import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_LATEST_KEYWORD,
 } from '../constants';
-import { isSavedObjectNotFoundError } from '../errors';
 
 import { escapeSearchQueryPhrase } from './saved_object';
 import { pkgToPkgKey } from './epm/registry';
@@ -52,7 +51,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
     existingOutput.is_default !== preconfiguredOutput.is_default ||
     existingOutput.name !== preconfiguredOutput.name ||
     existingOutput.type !== preconfiguredOutput.type ||
-    existingOutput.hosts !== preconfiguredOutput.hosts ||
+    !isEqual(existingOutput.hosts, preconfiguredOutput.hosts) ||
     existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
     existingOutput.config_yaml !== preconfiguredOutput.config_yaml
   );
@@ -64,8 +63,8 @@ export async function ensurePreconfiguredOutputs(
 ) {
   await Promise.all(
     outputs.map(async (output) => {
-      const existingOutput = await outputService.getOutputById(soClient, output.id).catch((err) => {
-        if (isSavedObjectNotFoundError(err)) {
+      const existingOutput = await outputService.get(soClient, output.id).catch((err) => {
+        if (soClient.errors.isNotFoundError(err)) {
           return undefined;
         }
 

@@ -26,15 +26,6 @@ class OutputService {
     });
   }
 
-  public async getOutputById(soClient: SavedObjectsClientContract, id: string) {
-    const so = await soClient.get<OutputSOAttributes>(OUTPUT_SAVED_OBJECT_TYPE, id);
-
-    return {
-      id: so.id,
-      ...so.attributes,
-    };
-  }
-
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
     const outputs = await this.getDefaultOutput(soClient);
 
