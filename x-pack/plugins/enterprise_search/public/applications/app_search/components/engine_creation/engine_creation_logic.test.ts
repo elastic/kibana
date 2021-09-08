@@ -117,13 +117,13 @@ describe('EngineCreationLogic', () => {
         jest.clearAllMocks();
       });
 
-      it('POSTS to /api/app_search/engines', () => {
+      it('POSTS to /internal/app_search/engines', () => {
         const body = JSON.stringify({
           name: EngineCreationLogic.values.name,
           language: EngineCreationLogic.values.language,
         });
         EngineCreationLogic.actions.submitEngine();
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines', { body });
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines', { body });
       });
 
       it('calls onEngineCreationSuccess on valid submission', async () => {

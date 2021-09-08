@@ -84,7 +84,7 @@ export const MetaEnginesTableLogic = kea<
     },
     fetchSourceEngines: ({ engineName }) => {
       recursivelyFetchEngines({
-        endpoint: `/api/app_search/engines/${engineName}/source_engines`,
+        endpoint: `/internal/app_search/engines/${engineName}/source_engines`,
         onComplete: (sourceEngines) => {
           actions.addSourceEngines({ [engineName]: sourceEngines });
           actions.displayRow(engineName);

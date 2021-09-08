@@ -11,16 +11,13 @@ import {
   EuiIcon,
   EuiText,
   EuiToolTip,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { orderBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { ValuesType } from 'utility-types';
-import {
-  BreakPoints,
-  useBreakPoints,
-} from '../../../../hooks/use_break_points';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
@@ -33,17 +30,18 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { Breakpoints, useBreakpoints } from '../../../../hooks/use_breakpoints';
+import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
+import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
+import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
-import { HealthBadge } from './HealthBadge';
-import { ServiceListMetric } from './ServiceListMetric';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
-import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
+import { HealthBadge } from './HealthBadge';
 
 type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
@@ -66,14 +64,14 @@ export function getServiceColumns({
   query,
   showTransactionTypeColumn,
   comparisonData,
-  breakPoints,
+  breakpoints,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
-  breakPoints: BreakPoints;
+  breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<ServiceListItem>> {
-  const { isSmall, isLarge, isXl } = breakPoints;
+  const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
   const showWhenSmallOrGreaterThanXL = isSmall || !isXl;
   return [
@@ -97,7 +95,6 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
         defaultMessage: 'Name',
       }),
-      width: '40%',
       sortable: true,
       render: (_, { serviceName, agentName, transactionType }) => (
         <TruncateWithTooltip
@@ -152,7 +149,7 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       render: (_, { serviceName, latency }) => (
-        <ServiceListMetric
+        <ListMetric
           series={comparisonData?.currentPeriod[serviceName]?.latency}
           comparisonSeries={
             comparisonData?.previousPeriod[serviceName]?.latency
@@ -162,8 +159,7 @@ export function getServiceColumns({
           valueLabel={asMillisecondDuration(latency || 0)}
         />
       ),
-      align: 'left',
-      width: showWhenSmallOrGreaterThanLarge ? `${unit * 11}px` : 'auto',
+      align: RIGHT_ALIGNMENT,
     },
     {
       field: 'throughput',
@@ -173,7 +169,7 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       render: (_, { serviceName, throughput }) => (
-        <ServiceListMetric
+        <ListMetric
           series={comparisonData?.currentPeriod[serviceName]?.throughput}
           comparisonSeries={
             comparisonData?.previousPeriod[serviceName]?.throughput
@@ -183,8 +179,7 @@ export function getServiceColumns({
           valueLabel={asTransactionRate(throughput)}
         />
       ),
-      align: 'left',
-      width: showWhenSmallOrGreaterThanLarge ? `${unit * 11}px` : 'auto',
+      align: RIGHT_ALIGNMENT,
     },
     {
       field: 'transactionErrorRate',
@@ -196,7 +191,7 @@ export function getServiceColumns({
       render: (_, { serviceName, transactionErrorRate }) => {
         const valueLabel = asPercent(transactionErrorRate, 1);
         return (
-          <ServiceListMetric
+          <ListMetric
             series={
               comparisonData?.currentPeriod[serviceName]?.transactionErrorRate
             }
@@ -209,8 +204,7 @@ export function getServiceColumns({
           />
         );
       },
-      align: 'left',
-      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : 'auto',
+      align: RIGHT_ALIGNMENT,
     },
   ];
 }
@@ -228,7 +222,7 @@ export function ServiceList({
   comparisonData,
   isLoading,
 }: Props) {
-  const breakPoints = useBreakPoints();
+  const breakpoints = useBreakpoints();
   const displayHealthStatus = items.some((item) => 'healthStatus' in item);
 
   const showTransactionTypeColumn = items.some(
@@ -250,9 +244,9 @@ export function ServiceList({
         query,
         showTransactionTypeColumn,
         comparisonData,
-        breakPoints,
+        breakpoints,
       }),
-    [query, showTransactionTypeColumn, comparisonData, breakPoints]
+    [query, showTransactionTypeColumn, comparisonData, breakpoints]
   );
 
   const columns = displayHealthStatus
