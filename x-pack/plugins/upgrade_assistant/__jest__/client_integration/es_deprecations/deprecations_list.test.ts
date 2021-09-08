@@ -162,7 +162,7 @@ describe('ES deprecations table', () => {
 
       expect(exists('noDeprecationsRow')).toBe(true);
       expect(find('noDeprecationsRow').text()).toContain(
-        'No Elasticsearch deprecation warnings found'
+        'No Elasticsearch deprecation issues found'
       );
     });
   });

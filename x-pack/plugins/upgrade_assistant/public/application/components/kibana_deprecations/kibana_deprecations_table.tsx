@@ -86,6 +86,12 @@ const i18nTexts = {
       defaultMessage: 'critical',
     }
   ),
+  warningBadgeLabel: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.table.warningBadgeLabel',
+    {
+      defaultMessage: 'warning',
+    }
+  ),
   searchPlaceholderLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.searchPlaceholderLabel',
     {
@@ -115,11 +121,16 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (level: KibanaDeprecationDetails['level']) => {
-        if (level === 'critical') {
-          return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
-        }
+        switch (level) {
+          case 'critical':
+            return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
 
-        return <>{''}</>;
+          case 'warning':
+            return <EuiBadge color="default">{i18nTexts.warningBadgeLabel}</EuiBadge>;
+
+          default:
+            return <>{''}</>;
+        }
       },
     },
     {
