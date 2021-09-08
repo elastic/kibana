@@ -104,12 +104,7 @@ export class FunctionForm extends BaseForm {
     }
 
     // render all included argument controls
-    return (
-      argValues &&
-      argValues.map((value, index) => {
-        return renderArgWithProps(value, index);
-      })
-    );
+    return argValues && argValues.map(renderArgWithProps);
   }
 
   // TODO: Argument adding isn't very good, we should improve this UI
