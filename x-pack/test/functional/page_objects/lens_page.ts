@@ -1088,6 +1088,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lens-dimensionTabs-formula');
     },
 
+    async switchToStaticValue() {
+      await testSubjects.click('lens-dimensionTabs-static_value');
+    },
+
     async toggleFullscreen() {
       await testSubjects.click('lnsFormula-fullscreen');
     },
