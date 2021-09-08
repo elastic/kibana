@@ -152,6 +152,7 @@ const InstalledPackages: React.FC = memo(() => {
       isLoading={isLoadingPackages}
       controls={controls}
       category={selectedCategory}
+      initialSearch={searchParam}
       title={title}
       list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
     />
@@ -228,6 +229,7 @@ const AvailablePackages: React.FC = memo(() => {
       title={title}
       controls={controls}
       category={selectedCategory}
+      initialSearch={searchParam}
       list={packages}
       setSelectedCategory={(categoryId) => {
         setSelectedCategory(categoryId);
