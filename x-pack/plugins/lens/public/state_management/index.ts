@@ -6,7 +6,7 @@
  */
 
 import { configureStore, getDefaultMiddleware, DeepPartial } from '@reduxjs/toolkit';
-// import logger from 'redux-logger';
+import { createLogger } from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import { lensSlice } from './lens_slice';
 import { timeRangeMiddleware } from './time_range_middleware';
