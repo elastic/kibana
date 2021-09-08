@@ -237,8 +237,8 @@ export default async function ({ readConfigFile }) {
           kibana: [
             {
               feature: {
-                canvas: ['minimal_all'],
-                visualize: ['minimal_all'],
+                canvas: ['all'],
+                visualize: ['all'],
               },
               spaces: ['*'],
             },
