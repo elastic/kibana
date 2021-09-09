@@ -40,8 +40,6 @@ export interface ProcessedImportResponse {
   unmatchedReferences: UnmatchedReference[];
   status: 'success' | 'idle';
   importCount: number;
-  conflictedSavedObjectsLinkedToSavedSearches: undefined;
-  conflictedSearchDocs: undefined;
   importWarnings: SavedObjectsImportWarning[];
 }
 
@@ -87,8 +85,6 @@ export function processImportResponse(
         ? 'success'
         : 'idle',
     importCount: response.successCount,
-    conflictedSavedObjectsLinkedToSavedSearches: undefined,
-    conflictedSearchDocs: undefined,
     importWarnings: response.warnings,
   };
 }

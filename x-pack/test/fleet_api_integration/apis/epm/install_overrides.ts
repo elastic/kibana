@@ -115,10 +115,18 @@ export default function (providerContext: FtrProviderContext) {
         template: {
           settings: {
             index: {
+              codec: 'best_compression',
               lifecycle: {
                 name: 'overridden by user',
               },
+              mapping: {
+                total_fields: {
+                  limit: '10000',
+                },
+              },
+              number_of_routing_shards: 30,
               number_of_shards: '3',
+              refresh_interval: '5s',
             },
           },
           mappings: {
