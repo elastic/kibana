@@ -120,7 +120,7 @@ export const taskDefinitionSchema = schema.object(
      * the task will be re-attempted.
      */
     timeout: schema.string({
-      defaultValue: '2m',
+      defaultValue: '1m',
     }),
     /**
      * Up to how many times the task should retry when it fails to run. This will

@@ -144,6 +144,7 @@ export class TaskManagerRunner implements TaskRunner {
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
+  private updatedRetryAt: Date;
   private readonly executionContext: ExecutionContextStart;
 
   /**
@@ -231,7 +232,7 @@ export class TaskManagerRunner implements TaskRunner {
    * Gets whether or not this task has run longer than its expiration setting allows.
    */
   public get isExpired() {
-    return this.expiration < new Date();
+    return this.expiration < new Date() && this.updatedRetryAt && this.updatedRetryAt < new Date();
   }
 
   /**
@@ -267,9 +268,29 @@ export class TaskManagerRunner implements TaskRunner {
     });
 
     const heartbeat = new Observable((subscriber) => {
-      const subscription: Subscription = timer(0, 10000)
+      const subscription: Subscription = timer(0, 30000)
         .pipe(
-          tap(() => console.log('heartbeat received')),
+          tap(async () => {
+            this.logger.info('heartbeat received');
+            this.logger.info(`current retryAt ${this.instance.task.retryAt}`);
+
+            this.updatedRetryAt =
+              (this.instance.task.schedule
+                ? maxIntervalFromDate(
+                    new Date(),
+                    this.instance.task.schedule.interval,
+                    this.definition.timeout
+                  )
+                : null) ?? null;
+
+            if (this.instance.task.retryAt !== this.updatedRetryAt) {
+              this.logger.info(`updated retryAt ${this.updatedRetryAt}`);
+              await this.bufferedTaskStore.update({
+                ...this.instance.task,
+                retryAt: this.updatedRetryAt,
+              });
+            }
+          }),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           catchError((err: Error, source$: Observable<any>) => {
             // onError(err);

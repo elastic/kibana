@@ -60,10 +60,9 @@ export const alertType: AlertType<
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
     state,
   }) {
-    console.log(`starting execution`);
     const count = ((state.count as number) ?? 0) + 1;
 
-    await new Promise<void>((done) => setTimeout(() => done(), 60000));
+    await new Promise<void>((done) => setTimeout(() => done(), 120000));
     range(instances)
       .map(() => uuid.v4())
       .forEach((id: string) => {
@@ -73,7 +72,6 @@ export const alertType: AlertType<
           .scheduleActions(getTShirtSizeByIdAndThreshold(id, thresholds));
       });
 
-    console.log(`ending execution`);
     return {
       count,
     };
