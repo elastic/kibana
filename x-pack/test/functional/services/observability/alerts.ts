@@ -6,6 +6,7 @@
  */
 
 import querystring from 'querystring';
+import { chunk } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
@@ -17,11 +18,14 @@ const DATE_WITH_DATA = {
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 
+const ACTION_COLUMN_INDEX = 1;
+
 export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const flyoutService = getService('flyout');
   const pageObjects = getPageObjects(['common']);
   const retry = getService('retry');
+  const toasts = getService('toasts');
 
   const navigateToTimeWithData = async () => {
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
@@ -31,9 +35,25 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     );
   };
 
+  const getTableColumnHeaders = async () => {
+    const table = await testSubjects.find('events-viewer-panel');
+    const tableHeaderRow = await testSubjects.findDescendant('dataGridHeader', table);
+    const columnHeaders = await tableHeaderRow.findAllByXpath('./div');
+    return columnHeaders;
+  };
+
   const getTableCells = async () => {
     // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
     return await testSubjects.findAll('dataGridRowCell');
+  };
+
+  const getTableCellsInRows = async () => {
+    const columnHeaders = await getTableColumnHeaders();
+    if (columnHeaders.length <= 0) {
+      return [];
+    }
+    const cells = await getTableCells();
+    return chunk(cells, columnHeaders.length);
   };
 
   const getTableOrFail = async () => {
@@ -109,21 +129,58 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListDescription', flyout);
   };
 
+  const openRowActionsOverflowMenu = async (rowIndex: number) => {
+    const rows = await getTableCellsInRows();
+    const actionsOverflowButton = await testSubjects.findDescendant(
+      'alerts-table-row-action-more',
+      rows[rowIndex][ACTION_COLUMN_INDEX]
+    );
+    await actionsOverflowButton.click();
+  };
+
+  const setSingleAlertWorkflowStatus = async (
+    rowIndex: number,
+    workflowStatus: 'open' | 'acknowledged' | 'closed'
+  ) => {
+    await openRowActionsOverflowMenu(rowIndex);
+
+    if (workflowStatus === 'closed') {
+      await testSubjects.click('close-alert-status');
+    } else {
+      await testSubjects.click(`${workflowStatus}-alert-status`);
+    }
+
+    // wait for a confirmation toast (the css index is 1-based)
+    await toasts.getToastElement(1);
+    await toasts.dismissAllToasts();
+  };
+
+  const setWorkflowStatusFilter = async (workflowStatus: 'open' | 'acknowledged' | 'closed') => {
+    const buttonGroupButton = await testSubjects.find(
+      `workflow-status-filter-${workflowStatus}-button`
+    );
+    await buttonGroupButton.click();
+  };
+
   return {
     clearQueryBar,
-    typeInQueryBar,
-    submitQuery,
-    getTableCells,
-    getTableOrFail,
-    getNoDataStateOrFail,
-    openAlertsFlyout,
-    getAlertsFlyout,
-    getAlertsFlyoutTitle,
     closeAlertsFlyout,
-    navigateToTimeWithData,
-    getAlertsFlyoutOrFail,
-    getAlertsFlyoutViewInAppButtonOrFail,
-    getAlertsFlyoutDescriptionListTitles,
+    getAlertsFlyout,
     getAlertsFlyoutDescriptionListDescriptions,
+    getAlertsFlyoutDescriptionListTitles,
+    getAlertsFlyoutOrFail,
+    getAlertsFlyoutTitle,
+    getAlertsFlyoutViewInAppButtonOrFail,
+    getNoDataStateOrFail,
+    getTableCells,
+    getTableCellsInRows,
+    getTableColumnHeaders,
+    getTableOrFail,
+    navigateToTimeWithData,
+    openAlertsFlyout,
+    setSingleAlertWorkflowStatus,
+    setWorkflowStatusFilter,
+    submitQuery,
+    typeInQueryBar,
   };
 }
