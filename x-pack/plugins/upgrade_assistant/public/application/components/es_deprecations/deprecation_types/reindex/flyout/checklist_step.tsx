@@ -107,7 +107,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             />
           </p>
         </EuiCallOut>
-        {hasRequiredPrivileges === false && (
+        {!hasRequiredPrivileges && (
           <Fragment>
             <EuiSpacer />
             <EuiCallOut
@@ -150,7 +150,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               iconType={status === ReindexStatus.paused ? 'play' : undefined}
               onClick={startReindex}
               isLoading={loading}
-              disabled={status === ReindexStatus.completed || hasRequiredPrivileges === false}
+              disabled={loading || status === ReindexStatus.completed || !hasRequiredPrivileges}
             >
               {buttonLabel(status)}
             </EuiButton>

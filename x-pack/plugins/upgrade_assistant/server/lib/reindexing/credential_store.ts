@@ -8,7 +8,7 @@
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest, Logger } from 'src/core/server';
 
 import { SecurityPluginStart } from '../../../../security/server';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
@@ -23,22 +23,23 @@ export type Credential = Record<string, any>;
  */
 export interface CredentialStore {
   get(reindexOp: ReindexSavedObject): Credential | undefined;
-  set(
-    reindexOp: ReindexSavedObject,
-    request: KibanaRequest,
-    security: SecurityPluginStart
-  ): Promise<void>;
-  update(
-    reindexOp: ReindexSavedObject,
-    security: SecurityPluginStart,
-    credential: Credential
-  ): Promise<void>;
+  set(params: {
+    reindexOp: ReindexSavedObject;
+    request: KibanaRequest;
+    security?: SecurityPluginStart;
+  }): Promise<void>;
+  update(params: {
+    reindexOp: ReindexSavedObject;
+    security?: SecurityPluginStart;
+    credential: Credential;
+  }): Promise<void>;
   clear(): void;
 }
 
-export const credentialStoreFactory = (): CredentialStore => {
+export const credentialStoreFactory = (logger: Logger): CredentialStore => {
   const credMap = new Map<string, Credential>();
   const apiKeysMap = new Map<string, string>();
+  const log = logger.get('credential_store');
 
   // Generates a stable hash for the reindex operation's current state.
   const getHash = (reindexOp: ReindexSavedObject) =>
@@ -46,13 +47,17 @@ export const credentialStoreFactory = (): CredentialStore => {
       .update(stringify({ id: reindexOp.id, ...reindexOp.attributes }))
       .digest('base64');
 
-  const createApiKey = async (
-    request: KibanaRequest,
-    security: SecurityPluginStart,
-    reindexOpId: string
-  ): Promise<string | undefined> => {
-    const apiKeyResult = await security.authc.apiKeys.grantAsInternalUser(request, {
-      name: 'ua_reindex_api_key',
+  const getApiKey = async ({
+    request,
+    security,
+    reindexOpId,
+  }: {
+    request: KibanaRequest;
+    security?: SecurityPluginStart;
+    reindexOpId: string;
+  }): Promise<string | undefined> => {
+    const apiKeyResult = await security?.authc.apiKeys.grantAsInternalUser(request, {
+      name: `ua_reindex_${reindexOpId}`,
       role_descriptors: {},
     });
 
@@ -60,17 +65,24 @@ export const credentialStoreFactory = (): CredentialStore => {
       const { api_key: apiKey, id } = apiKeyResult;
       // Store each API key per reindex operation so that we can later invalidate it when the reindex operation is complete
       apiKeysMap.set(reindexOpId, id);
-      // Return the base64 encoding of `id:api_key`
+      // Returns the base64 encoding of `id:api_key`
       // This can be used when sending a request with an "Authorization: ApiKey xxx" header
       return Buffer.from(`${id}:${apiKey}`).toString('base64');
     }
   };
 
-  const invalidateApiKey = async (apiKeyId: string, security: SecurityPluginStart) => {
+  const invalidateApiKey = async ({
+    apiKeyId,
+    security,
+  }: {
+    apiKeyId: string;
+    security?: SecurityPluginStart;
+  }) => {
     try {
-      await security.authc.apiKeys.invalidateAsInternalUser({ ids: [apiKeyId] });
+      await security?.authc.apiKeys.invalidateAsInternalUser({ ids: [apiKeyId] });
     } catch (error) {
       // Swallow error if there's a problem invalidating API key
+      log.debug(`Error invalidating API key for id ${apiKeyId}: ${error.message}`);
     }
   };
 
@@ -79,13 +91,19 @@ export const credentialStoreFactory = (): CredentialStore => {
       return credMap.get(getHash(reindexOp));
     },
 
-    async set(
-      reindexOp: ReindexSavedObject,
-      request: KibanaRequest,
-      security: SecurityPluginStart
-    ) {
-      const areApiKeysEnabled = (await security?.authc?.apiKeys?.areAPIKeysEnabled()) ?? false;
-      const apiKey = areApiKeysEnabled && (await createApiKey(request, security, reindexOp.id));
+    async set({
+      reindexOp,
+      request,
+      security,
+    }: {
+      reindexOp: ReindexSavedObject;
+      request: KibanaRequest;
+      security?: SecurityPluginStart;
+    }) {
+      const areApiKeysEnabled = (await security?.authc.apiKeys.areAPIKeysEnabled()) ?? false;
+
+      const apiKey =
+        areApiKeysEnabled && (await getApiKey({ request, security, reindexOpId: reindexOp.id }));
 
       if (apiKey) {
         credMap.set(getHash(reindexOp), {
@@ -99,16 +117,20 @@ export const credentialStoreFactory = (): CredentialStore => {
       credMap.set(getHash(reindexOp), request.headers);
     },
 
-    async update(
-      reindexOp: ReindexSavedObject,
-      security: SecurityPluginStart,
-      credential: Credential
-    ) {
+    async update({
+      reindexOp,
+      security,
+      credential,
+    }: {
+      reindexOp: ReindexSavedObject;
+      security?: SecurityPluginStart;
+      credential: Credential;
+    }) {
       // If the reindex operation is completed, and an API key is being used, invalidate it
       if (reindexOp.attributes.status === ReindexStatus.completed) {
         const apiKeyId = apiKeysMap.get(reindexOp.id);
         if (apiKeyId) {
-          await invalidateApiKey(apiKeyId, security);
+          await invalidateApiKey({ apiKeyId, security });
           return;
         }
       }

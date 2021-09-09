@@ -16,7 +16,7 @@ export interface RouteDependencies {
   credentialStore: CredentialStore;
   log: Logger;
   getSavedObjectsService: () => SavedObjectsServiceStart;
-  getSecurityPlugin: () => SecurityPluginStart;
+  getSecurityPlugin: () => SecurityPluginStart | undefined;
   licensing: LicensingPluginSetup;
   lib: {
     handleEsError: typeof handleEsError;

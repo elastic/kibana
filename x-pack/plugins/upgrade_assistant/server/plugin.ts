@@ -63,7 +63,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   constructor({ logger, env }: PluginInitializerContext) {
     this.logger = logger.get();
-    this.credentialStore = credentialStoreFactory();
+    this.credentialStore = credentialStoreFactory(this.logger);
     this.kibanaVersion = env.packageInfo.version;
   }
 
@@ -125,12 +125,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
         }
         return this.savedObjectsServiceStart;
       },
-      getSecurityPlugin: () => {
-        if (!this.securityPluginStart) {
-          throw new Error('Security start plugin not available');
-        }
-        return this.securityPluginStart;
-      },
+      getSecurityPlugin: () => this.securityPluginStart,
       lib: {
         handleEsError,
       },

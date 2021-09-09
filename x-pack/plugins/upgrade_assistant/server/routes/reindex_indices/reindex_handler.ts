@@ -34,7 +34,7 @@ interface ReindexHandlerArgs {
   reindexOptions?: {
     enqueue?: boolean;
   };
-  security: SecurityPluginStart;
+  security?: SecurityPluginStart;
 }
 
 export const reindexHandler = async ({
@@ -70,7 +70,7 @@ export const reindexHandler = async ({
       : await reindexService.createReindexOperation(indexName, reindexOptions);
 
   // Add users credentials for the worker to use
-  await credentialStore.set(reindexOp, request, security);
+  await credentialStore.set({ reindexOp, request, security });
 
   return reindexOp.attributes;
 };
