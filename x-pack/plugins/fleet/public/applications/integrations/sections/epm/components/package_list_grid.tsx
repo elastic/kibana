@@ -7,8 +7,6 @@
 
 import type { ReactNode } from 'react';
 import React, { Fragment, useCallback, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import type { Query } from '@elastic/eui';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
