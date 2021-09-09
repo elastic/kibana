@@ -46,7 +46,7 @@ export const ColorPicker = ({
 }) => {
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
-  const disabled = !!layer.splitAccessor;
+  const disabled = Boolean(layer.splitAccessor);
 
   const overwriteColor = getSeriesColor(layer, accessor);
   const currentColor = useMemo(() => {
