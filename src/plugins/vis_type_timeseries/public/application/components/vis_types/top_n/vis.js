@@ -19,7 +19,6 @@ import React from 'react';
 import { sortBy, first, get } from 'lodash';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
-import { FIELD_FORMAT_IDS } from '../../../../../../field_formats/common';
 
 function sortByDirection(data, direction, fn) {
   if (direction === 'desc') {
@@ -81,22 +80,12 @@ function TopNVisualization(props) {
     reversed: isBackgroundInverted(panelBackgroundColor),
   };
 
-  params.onClick = (item) => {
-    if (model.drilldown_url) {
+  if (model.drilldown_url) {
+    params.onClick = (item) => {
       const url = replaceVars(model.drilldown_url, {}, { key: item.label });
       getCoreStart().application.navigateToUrl(url);
-    } else {
-      const series = model.series.find(({ id }) => item.seriesId === id);
-      const fieldFormat = fieldFormatMap?.[getMetricsField(series.metrics)];
-      if (
-        series?.formatter === DATA_FORMATTERS.DEFAULT &&
-        fieldFormat?.id === FIELD_FORMAT_IDS.URL
-      ) {
-        const url = replaceVars(fieldFormat.params.urlTemplate, {}, { value: item.lastValue });
-        getCoreStart().application.navigateToUrl(url);
-      }
-    }
-  };
+    };
+  }
 
   return (
     <div className="tvbVis" style={style}>
