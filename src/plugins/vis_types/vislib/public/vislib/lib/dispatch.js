@@ -9,7 +9,6 @@
 import d3 from 'd3';
 import { get, pull, rest, size, reduce } from 'lodash';
 import $ from 'jquery';
-import { DIMMING_OPACITY_SETTING } from '../../../common';
 
 /**
  * Handles event responses
@@ -280,7 +279,7 @@ export class Dispatch {
     const addEvent = this.addEvent;
     const $el = this.handler.el;
     if (!this.handler.highlight) {
-      this.handler.highlight = self.getHighlighter(self.uiSettings);
+      this.handler.highlight = self.getHighlighter();
     }
 
     function hover(d, i) {
@@ -375,14 +374,13 @@ export class Dispatch {
   /**
    * return function to Highlight the element that is under the cursor
    * by reducing the opacity of all the elements on the graph.
-   * @param uiSettings
    * @method getHighlighter
    */
-  getHighlighter(uiSettings) {
+  getHighlighter() {
     return function highlight(element) {
       const label = this.getAttribute('data-label');
       if (!label) return;
-      const dimming = uiSettings.get(DIMMING_OPACITY_SETTING);
+      const dimming = 0.5;
       $(element)
         .parent()
         .find('[data-label]')

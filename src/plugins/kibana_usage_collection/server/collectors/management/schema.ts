@@ -68,10 +68,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:dimmingOpacity': {
-    type: 'float',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'visualization:tileMap:maxPrecision': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
