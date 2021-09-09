@@ -28,16 +28,7 @@ import { getPositions } from '../../../collections';
 
 const legendPositions = getPositions();
 
-export function PointSeriesOptions(
-  props: ValidationVisOptionsProps<
-    VisParams,
-    {
-      // TODO: Remove when vis_type_vislib is removed
-      // https://github.com/elastic/kibana/issues/56143
-      showElasticChartsOptions: boolean;
-    }
-  >
-) {
+export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) {
   const { stateParams, setValue, vis, aggs } = props;
   const hasBarChart = useMemo(
     () =>
@@ -62,14 +53,12 @@ export function PointSeriesOptions(
         <EuiSpacer size="m" />
 
         <BasicOptions {...props} legendPositions={legendPositions} />
-        {props.extraProps?.showElasticChartsOptions && (
-          <LongLegendOptions
-            data-test-subj="xyLongLegendsOptions"
-            truncateLegend={stateParams.truncateLegend ?? true}
-            maxLegendLines={stateParams.maxLegendLines ?? 1}
-            setValue={setValue}
-          />
-        )}
+        <LongLegendOptions
+          data-test-subj="xyLongLegendsOptions"
+          truncateLegend={stateParams.truncateLegend ?? true}
+          maxLegendLines={stateParams.maxLegendLines ?? 1}
+          setValue={setValue}
+        />
 
         {vis.data.aggs!.aggs.some(
           (agg) => agg.schema === 'segment' && agg.type.name === BUCKET_TYPES.DATE_HISTOGRAM
@@ -109,7 +98,7 @@ export function PointSeriesOptions(
           />
         )}
 
-        {props.extraProps?.showElasticChartsOptions && <ElasticChartsOptions {...props} />}
+        <ElasticChartsOptions {...props} />
       </EuiPanel>
 
       <EuiSpacer size="s" />
