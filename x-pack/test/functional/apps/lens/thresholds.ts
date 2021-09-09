@@ -12,10 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const find = getService('find');
   const retry = getService('retry');
-  //   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
-  //   const elasticChart = getService('elasticChart');
-  //   const filterBar = getService('filterBar');
 
   describe('lens thresholds tests', () => {
     it('should show a disabled threshold layer button if no data dimension is defined', async () => {

@@ -241,6 +241,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.createLayer('threshold');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yThresholdLeftPanel > lns-empty-dimension',
         operation: 'formula',
         formula: `count()`,
         keepOpen: true,
@@ -249,7 +257,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToStaticValue();
       await PageObjects.lens.closeDimensionEditor();
 
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).to.eql(
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yThresholdLeftPanel', 0)).to.eql(
         'count()'
       );
     });
