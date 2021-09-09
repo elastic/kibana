@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { VegaSpec } from '../data_model/types';
 import { getDocLinks } from '../services';
 
-import { BUCKET_TYPES } from '../../../data/public';
+import { BUCKET_TYPES } from '../../../../data/public';
 
 export const DeprecatedHistogramIntervalInfo = () => (
   <EuiCallOut
