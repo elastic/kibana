@@ -69,7 +69,7 @@ export const useHoverActionItems = ({
   ownFocus,
   showTopN,
   stKeyboardEvent,
-  timelineId = 'timeline-1',
+  timelineId,
   toggleColumn,
   toggleTopN,
   values,
