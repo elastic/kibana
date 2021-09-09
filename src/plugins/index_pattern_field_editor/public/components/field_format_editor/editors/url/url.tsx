@@ -145,7 +145,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
   };
 
   render() {
-    const { formatParams } = this.props;
+    const { formatParams, format } = this.props;
     const { error, samples, sampleConverterType } = this.state;
 
     return (
@@ -158,7 +158,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           <EuiSelect
             data-test-subj="urlEditorType"
             value={formatParams.type}
-            options={UrlFormat.urlTypes.map((type: UrlType) => {
+            options={(format.type as typeof UrlFormat).urlTypes.map((type: UrlType) => {
               return {
                 value: type.kind,
                 text: type.text,
