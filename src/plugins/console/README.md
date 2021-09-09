@@ -40,56 +40,63 @@ Url to Elasticsearch REST API documentation for the endpoint (If the url contain
 Allowed http methods (`GET`, `POST` etc)
 
 #### `patterns`
-Array of API endpoints (accepts variables like `{indices}` or `{fields}`, for example `{indices}/_rollup/{rollup_index}`, see below for more information)
+Array of API endpoints that contain variables like `{indices}` or `{fields}`. For example, `{indices}/_rollup/{rollup_index}`. See the [Variables](#variables) section below for more info.
 
 #### `url_params`
-Query url parameters and their values (see below for more information). An example: 
-```
-"url_params": {
-  "format": "",
-  "local": "__flag__",
-  "h": [],
-  "expand_wildcards": [
-    "open",
-    "closed",
-    "hidden",
-    "none",
-    "all"
-  ]
+Query url parameters and their values. See the [Query url parameters](#query-url-parameters) section below for more info. An example: 
+```json
+{
+  "url_params": {
+    "format": "",
+    "local": "__flag__",
+    "h": [],
+    "expand_wildcards": [
+      "open",
+      "closed",
+      "hidden",
+      "none",
+      "all"
+    ]
+  }
 }
 ```
 
 #### `priority`
-Value for selecting one autocomplete definition, if several configurations are loaded from the files.
+Value for selecting one autocomplete definition, if several configurations are loaded from the files. The highest number takes precedence.
 
 #### `data_autocomplete_rules`
 Request body parameters and their values. Only used in `overrides` files because REST API specs don't contain any information about body request parameters.
-Refer to Elasticsearch REST API documentation when configuring this object. (see below for more information). An example:
-```
-"data_autocomplete_rules": {
-  "text": [],
-  "field": "{field}",
-  "analyzer": "",
-  "explain": { "__one_of": [false, true] },
+Refer to Elasticsearch REST API documentation when configuring this object. See the [Request body parameters](#request-body-parameters) section below for more info. An example:
+```json
+{
+  "data_autocomplete_rules": {
+    "text": [],
+    "field": "{field}",
+    "analyzer": "",
+    "explain": { "__one_of": [false, true] }
+  }
 }
 ```
 
 ### Query url parameters
 Query url parameters are configured in form of an object, for example: 
+```json
+{
+  "url_params": {
+    "local": "__flag__",
+    "scroll": "",
+    "expand_wildcards": [
+      "open",
+      "closed",
+      "hidden",
+      "none",
+      "all"
+    ]
+  }
+} 
 ```
-"url_params": {
-  "local": "__flag__",
-  "scroll": "",
-  "expand_wildcards": [
-    "open",
-    "closed",
-    "hidden",
-    "none",
-    "all"
-  ]
-}  
-```
-This object specifies 3 query parameters `local` (boolean value), `scroll` (no default value) and `expand_wildcards` (with a list of accepted values).  
+This object specifies 3 query parameters: `local` (boolean value), `scroll` (no default value) and `expand_wildcards` (with a list of accepted values).  
+
 When the user types in the url path into Console and at least 2 characters after `?`, all matching url parameters are displayed as autocomplete suggestions. In this example, after typing 
 ```
 GET /_some_endpoint?ca
@@ -101,18 +108,20 @@ GET /_some_endpoint?expand_wildcards=hi
 ```
 "hidden" is displayed for autocompletion. 
 
-Variables such as `{indices}` or `{fields}` are accepted both as an url parameter and its value in the configuration object. See below for more information.
+Variables such as `{indices}` or `{fields}` are accepted both as an url parameter and its value in the configuration object. See the [Variables](#variables) section below for more information.
 
 ### Request body parameters
 Request body parameters are configured in form of an object, for example: 
-```
-"data_autocomplete_rules": {
-  "index_patterns": [],
-  "mappings": { "__scope_link": "put_mapping" },
-  "version": 0,
-  "aliases": {
-    "__template": {
-      "NAME": {}
+```json
+{
+  "data_autocomplete_rules": {
+    "index_patterns": [],
+    "mappings": { "__scope_link": "put_mapping" },
+    "version": 0,
+    "aliases": {
+      "__template": {
+        "NAME": {}
+      }
     }
   }
 }
@@ -167,16 +176,18 @@ All values in the array are displayed as suggestions for parameter values inside
 #### Default object structure (`__template: {...}`)
 Use this configuration to insert an object with default values into the request body when the corresponding key is typed in. 
 For example, in this configuration 
-```
-terms: {
-  __template: {
-    field: '',
-    size: 10,
-  },
-  field: '{field}',
-  size: 10,
-  shard_size: 10,
-  min_doc_count: 10,
+```json
+{
+  "terms": {
+    "__template": {
+      "field": "",
+      "size": 10
+    },
+    "field": "{field}",
+    "size": 10,
+    "shard_size": 10,
+    "min_doc_count": 10
+  }
 }
 ```
 the `terms` parameter has several properties, but only `field` and `size` are autocompleted in the request body when "terms" is selected from the suggestions list. 
@@ -193,19 +204,24 @@ The rest of the properties are displayed as autocomplete suggestions, when the `
 
 #### Scope link (`__scope_link`)
 Use this type to copy a configuration object specified in a different endpoint definition. For example, the `put_settings` endpoint definition contains a configuration object that can be reused for `settings` parameter in a different endpoint: 
-```
-"data_autocomplete_rules": {
-  "settings": {
-    "__scope_link": "put_settings"
+```json
+{
+  "data_autocomplete_rules": {
+    "settings": {
+      "__scope_link": "put_settings"
+    }
   }
+}
 ```
 #### Global scope (`GLOBAL`)
 Use `GLOBAL` keyword with `__scope_link` to refer to a reusable set of definitions created in the [`globals`](https://github.com/elastic/kibana/blob/master/src/plugins/console/server/lib/spec_definitions/js/globals.ts) file.
 For example: 
-```
-"data_autocomplete_rules": {
-  "query": {
-    "__scope_link": "GLOBAL.query"
+```json
+{
+  "data_autocomplete_rules": {
+    "query": {
+      "__scope_link": "GLOBAL.query"
+    }
   }
 }
 ```
