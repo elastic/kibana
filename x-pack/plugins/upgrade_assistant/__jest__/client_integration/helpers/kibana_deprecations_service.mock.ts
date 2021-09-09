@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { DeprecationsServiceStart, DomainDeprecationDetails } from 'kibana/public';
 
 const kibanaDeprecations: DomainDeprecationDetails[] = [
@@ -30,6 +31,23 @@ const kibanaDeprecations: DomainDeprecationDetails[] = [
     title: 'Test deprecation title 1',
     message: 'Test deprecation message 2',
     deprecationType: 'feature',
+  },
+];
+
+const mockedKibanaCriticalOnlyDeprecations: DomainDeprecationDetails[] = [
+  {
+    correctiveActions: {
+      manualSteps: ['Step 1', 'Step 2', 'Step 3'],
+      api: {
+        method: 'POST',
+        path: '/test',
+      },
+    },
+    domainId: 'test_domain_1',
+    level: 'critical',
+    title: 'Test deprecation title 1',
+    message: 'Test deprecation message 1',
+    deprecationType: 'config',
   },
 ];
 
@@ -90,5 +108,6 @@ export const kibanaDeprecationsServiceHelpers = {
     mockedConfigKibanaDeprecations: kibanaDeprecations.filter(
       (deprecation) => deprecation.deprecationType === 'config'
     ),
+    mockedKibanaCriticalOnlyDeprecations,
   },
 };

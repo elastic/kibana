@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-
 import { EuiIconTip } from '@elastic/eui';
+
 import { ResponseError } from '../../../../lib/api';
 import { getEsDeprecationError } from '../../../../lib/get_es_deprecation_error';
+
+import './_es_stats_error.scss';
 
 interface Props {
   error: ResponseError;
@@ -34,6 +36,7 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
         />
       );
       break;
+
     case 'partially_upgraded_error':
       iconContent = (
         <EuiIconTip
@@ -47,6 +50,7 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
         />
       );
       break;
+
     case 'upgraded_error':
       iconContent = (
         <EuiIconTip
@@ -60,6 +64,7 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
         />
       );
       break;
+
     case 'request_error':
     default:
       iconContent = (
