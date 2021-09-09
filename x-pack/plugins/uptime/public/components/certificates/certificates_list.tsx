@@ -13,7 +13,7 @@ import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
 import { Cert, CertMonitor, CertResult } from '../../../common/runtime_types';
 import { FingerprintCol } from './fingerprint_col';
-import { NO_CERTS_AVAILABLE } from './translations';
+import { LOADING_CERTIFICATES, NO_CERTS_AVAILABLE } from './translations';
 
 interface Page {
   index: number;
@@ -108,7 +108,13 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
           direction: sort.direction,
         },
       }}
-      noItemsMessage={<span data-test-subj="uptimeCertsEmptyMessage">{NO_CERTS_AVAILABLE}</span>}
+      noItemsMessage={
+        loading ? (
+          LOADING_CERTIFICATES
+        ) : (
+          <span data-test-subj="uptimeCertsEmptyMessage">{NO_CERTS_AVAILABLE}</span>
+        )
+      }
     />
   );
 };

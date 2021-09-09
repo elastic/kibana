@@ -343,7 +343,7 @@ describe('RoleMappingsLogic', () => {
         expect(RoleMappingsLogic.values.dataLoading).toEqual(true);
 
         expect(http.post).toHaveBeenCalledWith(
-          '/api/workplace_search/org/role_mappings/enable_role_based_access'
+          '/internal/workplace_search/org/role_mappings/enable_role_based_access'
         );
         await nextTick();
         expect(setRoleMappingsSpy).toHaveBeenCalledWith(mappingsServerProps);
@@ -364,7 +364,7 @@ describe('RoleMappingsLogic', () => {
         http.get.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.initializeRoleMappings();
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/role_mappings');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/role_mappings');
         await nextTick();
         expect(setRoleMappingsDataSpy).toHaveBeenCalledWith(mappingsServerProps);
       });
@@ -440,7 +440,7 @@ describe('RoleMappingsLogic', () => {
         http.post.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.handleSaveMapping();
 
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/role_mappings', {
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/org/role_mappings', {
           body: JSON.stringify({
             roleType: 'admin',
             allGroups: false,
@@ -467,7 +467,7 @@ describe('RoleMappingsLogic', () => {
         RoleMappingsLogic.actions.handleSaveMapping();
 
         expect(http.put).toHaveBeenCalledWith(
-          `/api/workplace_search/org/role_mappings/${wsRoleMapping.id}`,
+          `/internal/workplace_search/org/role_mappings/${wsRoleMapping.id}`,
           {
             body: JSON.stringify({
               roleType: 'admin',
@@ -524,7 +524,7 @@ describe('RoleMappingsLogic', () => {
         RoleMappingsLogic.actions.handleSaveUser();
 
         expect(http.post).toHaveBeenCalledWith(
-          '/api/workplace_search/org/single_user_role_mapping',
+          '/internal/workplace_search/org/single_user_role_mapping',
           {
             body: JSON.stringify({
               roleMapping: {
@@ -558,7 +558,7 @@ describe('RoleMappingsLogic', () => {
         RoleMappingsLogic.actions.handleSaveUser();
 
         expect(http.post).toHaveBeenCalledWith(
-          '/api/workplace_search/org/single_user_role_mapping',
+          '/internal/workplace_search/org/single_user_role_mapping',
           {
             body: JSON.stringify({
               roleMapping: {
@@ -614,7 +614,7 @@ describe('RoleMappingsLogic', () => {
         RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
 
         expect(http.delete).toHaveBeenCalledWith(
-          `/api/workplace_search/org/role_mappings/${roleMappingId}`
+          `/internal/workplace_search/org/role_mappings/${roleMappingId}`
         );
         await nextTick();
 
