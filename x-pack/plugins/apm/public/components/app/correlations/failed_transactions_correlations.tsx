@@ -411,7 +411,7 @@ export function FailedTransactionsCorrelations({
                 {i18n.translate(
                   'xpack.apm.correlations.failedTransactions.panelTitle',
                   {
-                    defaultMessage: 'Failed transactions',
+                    defaultMessage: 'Failed transactions latency distribution',
                   }
                 )}
               </h5>
