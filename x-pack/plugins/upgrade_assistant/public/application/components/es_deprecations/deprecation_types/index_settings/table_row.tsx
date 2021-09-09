@@ -75,6 +75,7 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
         },
         flyoutProps: {
           onClose: closeFlyout,
+          className: 'eui-textBreakWord',
           'data-test-subj': 'indexSettingsDetails',
           'aria-labelledby': 'indexSettingsDetailsFlyoutTitle',
         },

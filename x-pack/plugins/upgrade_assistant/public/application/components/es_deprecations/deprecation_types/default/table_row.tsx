@@ -44,6 +44,7 @@ export const DefaultTableRow: React.FunctionComponent<Props> = ({ rowFieldNames,
         },
         flyoutProps: {
           onClose: closeFlyout,
+          className: 'eui-textBreakWord',
           'data-test-subj': 'defaultDeprecationDetails',
           'aria-labelledby': 'defaultDeprecationDetailsFlyoutTitle',
         },

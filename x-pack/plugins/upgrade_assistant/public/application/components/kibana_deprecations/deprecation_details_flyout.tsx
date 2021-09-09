@@ -135,7 +135,9 @@ export const DeprecationDetailsFlyout = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2 id="kibanaDeprecationDetailsFlyoutTitle">{title}</h2>
+          <h2 id="kibanaDeprecationDetailsFlyoutTitle" className="eui-textBreakWord">
+            {title}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -154,7 +156,7 @@ export const DeprecationDetailsFlyout = ({
         )}
 
         <EuiText>
-          <p>{message}</p>
+          <p className="eui-textBreakWord">{message}</p>
 
           {documentationUrl && (
             <p>
