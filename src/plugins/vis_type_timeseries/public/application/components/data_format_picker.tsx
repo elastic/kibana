@@ -20,7 +20,6 @@ import {
   EuiSuperSelect,
   EuiText,
   EuiCode,
-  EuiIcon,
 } from '@elastic/eui';
 import { DATA_FORMATTERS } from '../../../common/enums';
 import { getFormatterType } from './lib/get_formatter_type';
