@@ -357,6 +357,7 @@ export const useTimelineEvents = ({
           from: startDate,
           to: endDate,
         },
+        runtimeMappings,
         ...deStructureEqlOptions(eqlOptions),
       };
 
