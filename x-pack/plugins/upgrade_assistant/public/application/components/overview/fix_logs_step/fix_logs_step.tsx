@@ -16,6 +16,7 @@ import { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';
 import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { loadLogsCheckpoint, saveLogsCheckpoint } from '../../../lib/logs_checkpoint';
+import type { OverviewStepProps } from '../../types';
 
 const i18nTexts = {
   identifyStepTitle: i18n.translate('xpack.upgradeAssistant.overview.identifyStepTitle', {
@@ -48,7 +49,11 @@ const i18nTexts = {
   ),
 };
 
-const FixLogsStep: FunctionComponent = () => {
+interface Props {
+  setIsComplete: OverviewStepProps['setIsComplete'];
+}
+
+const FixLogsStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   const state = useDeprecationLogging();
   const [checkpoint, setCheckpoint] = useState(loadLogsCheckpoint());
 
@@ -94,17 +99,24 @@ const FixLogsStep: FunctionComponent = () => {
             <h4>{i18nTexts.deprecationsCountCheckpointTitle}</h4>
           </EuiText>
           <EuiSpacer size="m" />
-          <DeprecationsCountCheckpoint checkpoint={checkpoint} setCheckpoint={setCheckpoint} />
+          <DeprecationsCountCheckpoint
+            checkpoint={checkpoint}
+            setCheckpoint={setCheckpoint}
+            setHasNoDeprecationLogs={setIsComplete}
+          />
         </>
       )}
     </>
   );
 };
 
-export const getFixLogsStep = (): EuiStepProps => {
+export const getFixLogsStep = ({ isComplete, setIsComplete }: OverviewStepProps): EuiStepProps => {
+  const status = isComplete ? 'complete' : 'incomplete';
+
   return {
+    status,
     title: i18nTexts.identifyStepTitle,
-    status: 'incomplete',
-    children: <FixLogsStep />,
+    'data-test-subj': `fixLogsStep-${status}`,
+    children: <FixLogsStep setIsComplete={setIsComplete} />,
   };
 };

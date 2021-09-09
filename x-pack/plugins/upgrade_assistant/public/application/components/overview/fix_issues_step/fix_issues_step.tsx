@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { ESDeprecationStats } from './es_stats';
 import { KibanaDeprecationStats } from './kibana_stats';
+import type { OverviewStepProps } from '../../types';
 
 import './_fix_issues_step.scss';
 
@@ -22,10 +23,49 @@ const i18nTexts = {
   }),
 };
 
-export const getFixIssuesStep = ({ nextMajor }: { nextMajor: number }): EuiStepProps => {
+interface Props {
+  setIsComplete: OverviewStepProps['setIsComplete'];
+}
+
+interface StepProps extends OverviewStepProps {
+  nextMajor: number;
+}
+
+const FixIssuesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
+  // We consider ES and Kibana issues to be fixed when there are 0 critical issues.
+  const [isEsFixed, setIsEsFixed] = useState(false);
+  const [isKibanaFixed, setIsKibanaFixed] = useState(false);
+
+  useEffect(() => {
+    setIsComplete(isEsFixed && isKibanaFixed);
+    // Depending upon setIsComplete would create an infinite loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEsFixed, isKibanaFixed]);
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <ESDeprecationStats setIsFixed={setIsEsFixed} />
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <KibanaDeprecationStats setIsFixed={setIsKibanaFixed} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+export const getFixIssuesStep = ({
+  nextMajor,
+  isComplete,
+  setIsComplete,
+}: StepProps): EuiStepProps => {
+  const status = isComplete ? 'complete' : 'incomplete';
+
   return {
     title: i18nTexts.reviewStepTitle,
-    status: 'incomplete',
+    status,
+    'data-test-subj': `fixIssuesStep-${status}`,
     children: (
       <>
         <EuiText>
@@ -40,15 +80,7 @@ export const getFixIssuesStep = ({ nextMajor }: { nextMajor: number }): EuiStepP
 
         <EuiSpacer size="m" />
 
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <ESDeprecationStats />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <KibanaDeprecationStats />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FixIssuesStep setIsComplete={setIsComplete} />
       </>
     ),
   };

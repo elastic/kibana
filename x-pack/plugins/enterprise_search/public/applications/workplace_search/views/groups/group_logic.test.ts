@@ -185,7 +185,7 @@ describe('GroupLogic', () => {
         http.get.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.initializeGroup(sourceIds[0]);
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/groups/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/groups/123');
         await nextTick();
         expect(onInitializeGroupSpy).toHaveBeenCalledWith(group);
       });
@@ -219,7 +219,7 @@ describe('GroupLogic', () => {
         http.delete.mockReturnValue(Promise.resolve(true));
 
         GroupLogic.actions.deleteGroup();
-        expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/groups/123');
+        expect(http.delete).toHaveBeenCalledWith('/internal/workplace_search/groups/123');
 
         await nextTick();
         expect(navigateToUrl).toHaveBeenCalledWith(GROUPS_PATH);
@@ -246,7 +246,7 @@ describe('GroupLogic', () => {
         http.put.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.updateGroupName();
-        expect(http.put).toHaveBeenCalledWith('/api/workplace_search/groups/123', {
+        expect(http.put).toHaveBeenCalledWith('/internal/workplace_search/groups/123', {
           body: JSON.stringify({ group: { name: 'new name' } }),
         });
 
@@ -277,7 +277,7 @@ describe('GroupLogic', () => {
         http.post.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.saveGroupSources();
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups/123/share', {
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/groups/123/share', {
           body: JSON.stringify({ content_source_ids: sourceIds }),
         });
 
@@ -310,7 +310,7 @@ describe('GroupLogic', () => {
         http.put.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.saveGroupSourcePrioritization();
-        expect(http.put).toHaveBeenCalledWith('/api/workplace_search/groups/123/boosts', {
+        expect(http.put).toHaveBeenCalledWith('/internal/workplace_search/groups/123/boosts', {
           body: JSON.stringify({
             content_source_boosts: [
               [sourceIds[0], 1],
