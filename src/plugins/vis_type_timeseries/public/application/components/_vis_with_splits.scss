@@ -23,3 +23,12 @@
     min-height: $tvbSplitBlockVisMinSize / 1.25;
   }
 }
+
+.tvbSplitVis__split__one {
+  display: flex;
+  flex: 1 0 25%;
+}
+
+.tvbSplitVis__one {
+  flex: 1;
+}

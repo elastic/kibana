@@ -40,8 +40,7 @@ export function visWithSplits(WrappedComponent) {
       [model, palettesService, syncColors, visData]
     );
 
-    if (!model || !visData || !visData[model.id] || visData[model.id].series.length === 1)
-      return <WrappedComponent {...props} />;
+    if (!model || !visData || !visData[model.id]) return <WrappedComponent {...props} />;
     if (visData[model.id].series.every((s) => s.id.split(':').length === 1)) {
       return <WrappedComponent {...props} />;
     }
@@ -105,7 +104,10 @@ export function visWithSplits(WrappedComponent) {
         },
       };
       return (
-        <div key={key} className="tvbSplitVis__split">
+        <div
+          key={key}
+          className={visData[model.id].series.length === 1 ? 'tvbSplitVis__split__one' : 'tvbSplitVis__split'}
+        >
           <WrappedComponent
             model={model}
             visData={newVisData}
@@ -119,7 +121,13 @@ export function visWithSplits(WrappedComponent) {
       );
     });
 
-    return <div className="tvbSplitVis">{rows}</div>;
+    return (
+      <div
+        className={`tvbSplitVis ${visData[model.id].series.length === 1 ? 'tvbSplitVis__one' : ''}`}
+      >
+        {rows}
+      </div>
+    );
   }
 
   SplitVisComponent.displayName = `SplitVisComponent(${getDisplayName(WrappedComponent)})`;
