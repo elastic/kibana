@@ -54,6 +54,7 @@ function MetricVisualization(props) {
           const shouldSkipFormat =
             fieldFormatMap?.[metricsField]?.id === FIELD_FORMAT_IDS.COLOR && colors.color;
           newProps.formatter = createFieldFormatter(
+            // pass undefined to apply default value formatting
             shouldSkipFormat ? undefined : metricsField,
             fieldFormatMap,
             'html'

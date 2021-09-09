@@ -63,10 +63,10 @@ export function Agg(props: AggProps) {
     [name, onChange, siblings, series]
   );
 
-  const isLastAgg = useMemo(
-    () => siblings.findIndex(({ id }) => id === model.id) === siblings.length - 1,
-    [model.id, siblings]
-  );
+  const isLastAgg = useMemo(() => siblings[siblings.length - 1]?.id === model.id, [
+    model.id,
+    siblings,
+  ]);
 
   useEffect(() => {
     // formatter is based on the last agg, i.e. active or resulting one as pipeline
