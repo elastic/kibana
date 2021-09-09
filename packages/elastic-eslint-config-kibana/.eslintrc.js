@@ -82,5 +82,7 @@ module.exports = {
         }
       ],
     ],
+
+    '@kbn/eslint/no_async_promise_body': 'error',
   },
 };

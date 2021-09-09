@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import { Middleware } from 'redux';
+import { State } from '../../../types';
+
+// @ts-expect-error untyped local
 import { setElementStats } from '../actions/transient';
 import { getAllElements, getElementCounts, getElementStats } from '../selectors/workpad';
 
-export const elementStats = ({ dispatch, getState }) => (next) => (action) => {
+export const elementStats: Middleware<{}, State> = ({ dispatch, getState }) => (next) => (
+  action
+) => {
   // execute the action
   next(action);
 
@@ -24,7 +30,7 @@ export const elementStats = ({ dispatch, getState }) => (next) => (action) => {
   const pending = total - ready - error;
 
   if (
-    total > 0 &&
+    (total > 0 || stats.total > 0) &&
     (ready !== stats.ready ||
       pending !== stats.pending ||
       error !== stats.error ||

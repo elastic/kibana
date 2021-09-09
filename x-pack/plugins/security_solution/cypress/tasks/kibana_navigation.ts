@@ -12,5 +12,5 @@ export const navigateFromKibanaCollapsibleTo = (page: string) => {
 };
 
 export const openKibanaNavigation = () => {
-  cy.get(KIBANA_NAVIGATION_TOGGLE).click();
+  cy.get(KIBANA_NAVIGATION_TOGGLE).click({ force: true });
 };

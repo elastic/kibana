@@ -418,15 +418,23 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
   }
 
-  async supportsFeatureEditing(): Promise<boolean> {
+  async getSourceIndexList(): Promise<string[]> {
     await this.getIndexPattern();
     if (!(this.indexPattern && this.indexPattern.title)) {
-      return false;
+      return [];
     }
-    const { matchingIndexes } = await getMatchingIndexes(this.indexPattern.title);
-    if (!matchingIndexes) {
-      return false;
+    let success;
+    let matchingIndexes;
+    try {
+      ({ success, matchingIndexes } = await getMatchingIndexes(this.indexPattern.title));
+    } catch (e) {
+      // Fail silently
     }
+    return success ? matchingIndexes : [];
+  }
+
+  async supportsFeatureEditing(): Promise<boolean> {
+    const matchingIndexes = await this.getSourceIndexList();
     // For now we only support 1:1 index-pattern:index matches
     return matchingIndexes.length === 1;
   }
@@ -703,14 +711,33 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return MVT_SOURCE_LAYER_NAME;
   }
 
+  async _getEditableIndex(): Promise<string> {
+    const indexList = await this.getSourceIndexList();
+    if (indexList.length === 0) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.indexZeroLengthEditError', {
+          defaultMessage: `Your index pattern doesn't point to any indices.`,
+        })
+      );
+    }
+    if (indexList.length > 1) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.indexOverOneLengthEditError', {
+          defaultMessage: `Your index pattern points to multiple indices. Only one index is allowed per index pattern.`,
+        })
+      );
+    }
+    return indexList[0];
+  }
+
   async addFeature(geometry: Geometry | Position[]) {
     const indexPattern = await this.getIndexPattern();
     await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName());
   }
 
   async deleteFeature(featureId: string) {
-    const indexPattern = await this.getIndexPattern();
-    await deleteFeatureFromIndex(indexPattern.title, featureId);
+    const index = await this._getEditableIndex();
+    await deleteFeatureFromIndex(index, featureId);
   }
 
   async getUrlTemplateWithMeta(

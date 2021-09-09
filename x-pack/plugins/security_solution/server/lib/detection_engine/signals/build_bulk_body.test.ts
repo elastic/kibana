@@ -41,7 +41,8 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      []
     );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -109,7 +110,8 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      []
     );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -191,7 +193,8 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      []
     );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -259,7 +262,8 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      []
     );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -324,7 +328,8 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      []
     );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -388,7 +393,8 @@ describe('buildBulkBody', () => {
     const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      []
     );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
       someKey: 'someValue',
@@ -448,7 +454,8 @@ describe('buildBulkBody', () => {
     const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      []
     );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
       someKey: 'someValue',
@@ -677,7 +684,8 @@ describe('buildSignalFromEvent', () => {
       ancestor,
       ruleSO,
       true,
-      'missingFields'
+      'missingFields',
+      []
     );
 
     // Timestamp will potentially always be different so remove it for the test

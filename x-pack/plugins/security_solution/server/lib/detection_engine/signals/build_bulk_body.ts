@@ -35,9 +35,10 @@ import type { ConfigType } from '../../../config';
 export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit,
-  mergeStrategy: ConfigType['alertMergeStrategy']
+  mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields']
 ): SignalHit => {
-  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
+  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
   const signal: Signal = {
     ...buildSignal([mergedDoc], rule),
@@ -68,11 +69,12 @@ export const buildSignalGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,
   ruleSO: SavedObject<AlertAttributes>,
   outputIndex: string,
-  mergeStrategy: ConfigType['alertMergeStrategy']
+  mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields']
 ): WrappedSignalHit[] => {
   const wrappedBuildingBlocks = wrapBuildingBlocks(
     sequence.events.map((event) => {
-      const signal = buildSignalFromEvent(event, ruleSO, false, mergeStrategy);
+      const signal = buildSignalFromEvent(event, ruleSO, false, mergeStrategy, ignoreFields);
       signal.signal.rule.building_block_type = 'default';
       return signal;
     }),
@@ -134,9 +136,10 @@ export const buildSignalFromEvent = (
   event: BaseSignalHit,
   ruleSO: SavedObject<AlertAttributes>,
   applyOverrides: boolean,
-  mergeStrategy: ConfigType['alertMergeStrategy']
+  mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields']
 ): SignalHit => {
-  const mergedEvent = getMergeStrategy(mergeStrategy)({ doc: event });
+  const mergedEvent = getMergeStrategy(mergeStrategy)({ doc: event, ignoreFields });
   const rule = applyOverrides
     ? buildRuleWithOverrides(ruleSO, mergedEvent._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);

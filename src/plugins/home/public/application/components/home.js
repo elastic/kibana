@@ -73,7 +73,7 @@ export class Home extends Component {
         if (this.state.isLoading) {
           this.setState({ isWelcomeEnabled: false });
         }
-      }, 500);
+      }, 10000);
 
       const { isNewInstance } = await this.props.http.get('/internal/home/new_instance_status');
 

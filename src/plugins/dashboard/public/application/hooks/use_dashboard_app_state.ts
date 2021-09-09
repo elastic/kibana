@@ -33,7 +33,7 @@ import {
   syncDashboardFilterState,
   loadSavedDashboardState,
   buildDashboardContainer,
-  loadDashboardUrlState,
+  syncDashboardUrlState,
   diffDashboardState,
   areTimeRangesEqual,
 } from '../lib';
@@ -124,6 +124,7 @@ export const useDashboardAppState = ({
       savedDashboards,
       kbnUrlStateStorage,
       initializerContext,
+      savedObjectsTagging,
       isEmbeddedExternally,
       dashboardCapabilities,
       dispatchDashboardStateChange,
@@ -148,11 +149,16 @@ export const useDashboardAppState = ({
        * Combine initial state from the saved object, session storage, and URL, then dispatch it to Redux.
        */
       const dashboardSessionStorageState = dashboardSessionStorage.getState(savedDashboardId) || {};
-      const dashboardURLState = loadDashboardUrlState(dashboardBuildContext);
+
+      const { initialDashboardStateFromUrl, stopWatchingAppStateInUrl } = syncDashboardUrlState({
+        ...dashboardBuildContext,
+        savedDashboard,
+      });
+
       const initialDashboardState = {
         ...savedDashboardState,
         ...dashboardSessionStorageState,
-        ...dashboardURLState,
+        ...initialDashboardStateFromUrl,
 
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
@@ -276,6 +282,7 @@ export const useDashboardAppState = ({
 
       onDestroy = () => {
         stopSyncingContainerInput();
+        stopWatchingAppStateInUrl();
         stopSyncingDashboardFilterState();
         lastSavedSubscription.unsubscribe();
         indexPatternsSubscription.unsubscribe();

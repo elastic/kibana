@@ -234,7 +234,7 @@ export class AlertingPlugin {
     );
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
-      level: ServiceStatusLevels.unavailable,
+      level: ServiceStatusLevels.degraded,
       summary: 'Alerting is initializing',
     });
     core.status.set(serviceStatus$);

@@ -14,6 +14,7 @@ import {
 import { setFilter } from '../state/actions/elements';
 import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
 import { RendererHandlers, CanvasElement } from '../../types';
+import { clearValue } from '../state/actions/resolved_args';
 
 // This class creates stub handlers to ensure every element and renderer fulfills the contract.
 // TODO: consider warning if these methods are invoked but not implemented by the renderer...?
@@ -123,6 +124,8 @@ export const createDispatchedHandlerFactory = (
       },
 
       onEmbeddableDestroyed() {
+        const argumentPath = [element.id, 'expressionRenderable'];
+        dispatch(clearValue({ path: argumentPath }));
         dispatch(fetchEmbeddableRenderable(element.id));
       },
 

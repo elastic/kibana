@@ -10,6 +10,7 @@ import { Subject, Observable } from 'rxjs';
 import stats from 'stats-lite';
 import sinon from 'sinon';
 import { take, tap, bufferCount, skip, map } from 'rxjs/operators';
+import { mockLogger } from '../test_utils';
 
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import {
@@ -34,9 +35,11 @@ import { configSchema } from '../config';
 
 describe('Task Run Statistics', () => {
   let fakeTimer: sinon.SinonFakeTimers;
+  const logger = mockLogger();
 
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
+    jest.resetAllMocks();
   });
 
   afterAll(() => fakeTimer.restore());
@@ -75,7 +78,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig()).value,
           })),
           take(runAtDrift.length),
           bufferCount(runAtDrift.length)
@@ -143,7 +146,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig()).value,
           })),
           take(runDurations.length * 2),
           bufferCount(runDurations.length * 2)
@@ -239,7 +242,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig()).value,
           })),
           take(10),
           bufferCount(10)
@@ -319,6 +322,7 @@ describe('Task Run Statistics', () => {
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
             value: summarizeTaskRunStat(
+              logger,
               value,
               getTaskManagerConfig({
                 monitored_task_execution_thresholds: {
@@ -410,6 +414,7 @@ describe('Task Run Statistics', () => {
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
             value: summarizeTaskRunStat(
+              logger,
               value,
               getTaskManagerConfig({
                 monitored_task_execution_thresholds: {
@@ -552,7 +557,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig()).value,
           })),
           tap(() => {
             expectedTimestamp.push(new Date().toISOString());

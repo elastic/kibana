@@ -100,8 +100,12 @@ export class TaskScheduling {
    */
   public async runNow(taskId: string): Promise<RunNowResult> {
     return new Promise(async (resolve, reject) => {
-      this.awaitTaskRunResult(taskId).then(resolve).catch(reject);
-      this.taskPollingLifecycle.attemptToRun(taskId);
+      try {
+        this.awaitTaskRunResult(taskId).then(resolve).catch(reject);
+        this.taskPollingLifecycle.attemptToRun(taskId);
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
