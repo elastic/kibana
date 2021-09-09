@@ -49,10 +49,15 @@ Kibana server is not ready yet
 
 If this occurs, to investigate, check
 
-1. Elasticsearch connectivity `curl -XGET elasticsearch_ip_or_hostname:9200/`
-2. Kibana logs
-    - Linux, DEB or RPM package: `/var/log/kibana/kibana.log`
-    - Linux, tar.gz package: `$KIBANA_HOME/log/kibana.log`
-    - Windows: `$KIBANA_HOME\log\kibana.log`
-3. `.kibana*`index health statuses
+* The {es} connectivity: 
++
+[source,sh]
+----
+`curl -XGET elasticsearch_ip_or_hostname:9200/`
+----
+* The {kib} logs:
+** Linux, DEB or RPM package: `/var/log/kibana/kibana.log`
+** Linux, tar.gz package: `$KIBANA_HOME/log/kibana.log`
+** Windows: `$KIBANA_HOME\log\kibana.log`
+* The health status of `.kibana*` indices
 
