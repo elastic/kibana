@@ -18,7 +18,7 @@ describe('config validation', () => {
           "request_capacity": 10,
         },
         "index": ".kibana_task_manager",
-        "internal": Object {
+        "unsafe": Object {
           "exclude_task_types": Array [],
         },
         "max_attempts": 3,
@@ -77,7 +77,7 @@ describe('config validation', () => {
           "request_capacity": 10,
         },
         "index": ".kibana_task_manager",
-        "internal": Object {
+        "unsafe": Object {
           "exclude_task_types": Array [],
         },
         "max_attempts": 3,
@@ -123,7 +123,7 @@ describe('config validation', () => {
           "request_capacity": 10,
         },
         "index": ".kibana_task_manager",
-        "internal": Object {
+        "unsafe": Object {
           "exclude_task_types": Array [],
         },
         "max_attempts": 3,

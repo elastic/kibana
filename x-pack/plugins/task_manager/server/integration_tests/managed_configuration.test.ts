@@ -55,7 +55,7 @@ describe('managed configuration', () => {
         enabled: true,
         request_capacity: 10,
       },
-      internal: {
+      unsafe: {
         exclude_task_types: [],
       },
     });

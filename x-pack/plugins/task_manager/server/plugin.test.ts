@@ -42,7 +42,7 @@ describe('TaskManagerPlugin', () => {
           enabled: false,
           request_capacity: 10,
         },
-        internal: {
+        unsafe: {
           exclude_task_types: [],
         },
       });
@@ -85,7 +85,7 @@ describe('TaskManagerPlugin', () => {
           enabled: true,
           request_capacity: 10,
         },
-        internal: {
+        unsafe: {
           exclude_task_types: [],
         },
       });

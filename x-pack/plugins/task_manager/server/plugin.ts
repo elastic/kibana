@@ -118,13 +118,13 @@ export class TaskManagerPlugin
         monitoredHealth$,
         this.config.ephemeral_tasks.enabled,
         this.config.ephemeral_tasks.request_capacity,
-        this.config.internal.exclude_task_types
+        this.config.unsafe.exclude_task_types
       );
     }
 
-    if (this.config.internal.exclude_task_types.length) {
+    if (this.config.unsafe.exclude_task_types.length) {
       this.logger.debug(
-        `Excluding task types from execution: ${this.config.internal.exclude_task_types.join(', ')}`
+        `Excluding task types from execution: ${this.config.unsafe.exclude_task_types.join(', ')}`
       );
     }
 
