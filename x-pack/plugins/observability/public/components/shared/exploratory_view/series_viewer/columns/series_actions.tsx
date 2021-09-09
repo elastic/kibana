@@ -16,7 +16,7 @@ import { useDiscoverLink } from '../../hooks/use_discover_link';
 interface Props {
   seriesId: number;
   series: SeriesUrl;
-  seriesConfig: SeriesConfig;
+  seriesConfig?: SeriesConfig;
 }
 export function SeriesActions({ seriesId, series, seriesConfig }: Props) {
   const { setSeries, allSeries } = useSeriesStorage();

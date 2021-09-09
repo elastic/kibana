@@ -96,25 +96,6 @@ export const SeriesEditor = React.memo(function () {
     });
   }, [allSeries, getSeries, indexPatterns, loading, reportType]);
 
-  useEffect(() => {
-    setItemIdToExpandedRowMap((prevState) => {
-      const itemIdToExpandedRowMapValues = { ...prevState };
-
-      const newEditorItems = getSeriesToEdit({
-        reportType,
-        allSeries,
-        indexPatterns,
-      });
-
-      newEditorItems.forEach((item) => {
-        if (itemIdToExpandedRowMapValues[item.id]) {
-          itemIdToExpandedRowMapValues[item.id] = true;
-        }
-      });
-      return itemIdToExpandedRowMapValues;
-    });
-  }, [allSeries, editorItems, indexPatterns, reportType]);
-
   const toggleDetails = (item: BuilderItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMapValues[item.id]) {
@@ -157,13 +138,12 @@ export const SeriesEditor = React.memo(function () {
         </EuiFlexGroup>
 
         <EuiHorizontalRule margin="s" />
-        {editorItems.map((item, index) => (
+        {editorItems.map((item) => (
           <>
             <Series
-              seriesId={index}
               item={item}
               toggleExpanded={() => toggleDetails(item)}
-              isExpanded={itemIdToExpandedRowMap[index]}
+              isExpanded={itemIdToExpandedRowMap[item.id]}
             />
             <EuiSpacer size="s" />
           </>

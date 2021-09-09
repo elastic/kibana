@@ -32,52 +32,56 @@ const StyledAccordion = styled(EuiAccordion)`
 
 interface Props {
   item: BuilderItem;
-  seriesId: number;
   isExpanded: boolean;
   toggleExpanded: () => void;
 }
 
-export function Series({ item, seriesId, isExpanded, toggleExpanded }: Props) {
-  const { series, seriesConfig } = item;
+export function Series({ item, isExpanded, toggleExpanded }: Props) {
+  const { id } = item;
+  const seriesProps = {
+    ...item,
+    seriesId: id,
+  };
 
   return (
     <EuiPanel hasBorder={true}>
       <StyledAccordion
-        id="stuff"
+        id={`exploratoryViewSeriesAccordion${id}`}
         forceState={isExpanded ? 'open' : 'closed'}
         onToggle={toggleExpanded}
+        arrowDisplay={
+          !seriesProps.series.dataType || !seriesProps.series.selectedMetricField
+            ? 'none'
+            : undefined
+        }
         extraAction={
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <SeriesInfo seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
+              <SeriesInfo {...seriesProps} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <SeriesName seriesId={seriesId} series={series} />
+              <SeriesName {...seriesProps} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <DataTypesSelect seriesId={seriesId} series={series} />
+              <DataTypesSelect {...seriesProps} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <ReportMetricOptions
-                series={series}
-                seriesId={seriesId}
-                metricOptions={seriesConfig?.metricOptions}
-              />
+              <ReportMetricOptions {...seriesProps} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <DatePickerCol seriesId={seriesId} series={series} />
+              <DatePickerCol {...seriesProps} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <Breakdowns seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
+              <Breakdowns {...seriesProps} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SeriesActions seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
+              <SeriesActions {...seriesProps} />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
       >
         <EuiSpacer size="s" />
-        <ExpandedSeriesRow seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
+        <ExpandedSeriesRow {...seriesProps} />
       </StyledAccordion>
     </EuiPanel>
   );

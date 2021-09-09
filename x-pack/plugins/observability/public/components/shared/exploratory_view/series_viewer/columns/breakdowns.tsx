@@ -16,7 +16,7 @@ import { SeriesConfig, SeriesUrl } from '../../types';
 interface Props {
   seriesId: number;
   series: SeriesUrl;
-  seriesConfig: SeriesConfig;
+  seriesConfig?: SeriesConfig;
 }
 
 export function Breakdowns({ seriesConfig, seriesId, series }: Props) {

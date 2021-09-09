@@ -14,7 +14,7 @@ import { getFiltersFromDefs } from './use_lens_attributes';
 import { RECORDS_FIELD, RECORDS_PERCENTAGE_FIELD } from '../configurations/constants';
 
 interface UseDiscoverLink {
-  seriesConfig: SeriesConfig;
+  seriesConfig?: SeriesConfig;
   series: SeriesUrl;
 }
 

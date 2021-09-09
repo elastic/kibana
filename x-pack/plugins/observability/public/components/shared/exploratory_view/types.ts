@@ -121,5 +121,5 @@ export interface FieldFormat {
 export interface BuilderItem {
   id: number;
   series: SeriesUrl;
-  seriesConfig: SeriesConfig;
+  seriesConfig?: SeriesConfig;
 }

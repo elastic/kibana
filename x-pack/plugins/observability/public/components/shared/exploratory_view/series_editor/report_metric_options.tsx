@@ -18,13 +18,14 @@ interface Props {
   seriesId: number;
   series: SeriesUrl;
   defaultValue?: string;
-  metricOptions: SeriesConfig['metricOptions'];
+  seriesConfig?: SeriesConfig;
 }
 
 const SELECT_REPORT_METRIC = 'SELECT_REPORT_METRIC';
 
-export function ReportMetricOptions({ seriesId, series, metricOptions }: Props) {
+export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   const { setSeries } = useSeriesStorage();
+  const metricOptions = seriesConfig?.metricOptions;
 
   const { indexPatterns } = useAppIndexPatternContext();
 
