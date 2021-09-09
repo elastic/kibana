@@ -36,13 +36,14 @@ export const findRules = ({
   filter,
   sortField,
   sortOrder,
+  isRuleRegistryEnabled,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
   return rulesClient.find({
     options: {
       fields,
       page,
       perPage,
-      filter: getFilter(filter),
+      filter: getFilter(filter, isRuleRegistryEnabled),
       sortOrder,
       sortField,
     },
