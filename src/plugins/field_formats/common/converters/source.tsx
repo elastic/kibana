@@ -52,9 +52,9 @@ export class SourceFormat extends FieldFormat {
       return escape(converter(value));
     }
 
-    const highlights = (hit && hit.highlight) || {};
+    const highlights: Record<string, string[]> = (hit && hit.highlight) || {};
     // TODO: remove index pattern dependency
-    const formatted = indexPattern!.formatHit(hit);
+    const formatted = hit ? indexPattern!.formatHit(hit) : {};
     const highlightPairs: Array<[string, string]> = [];
     const sourcePairs: Array<[string, string]> = [];
     const isShortDots = this.getConfig!(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);

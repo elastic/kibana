@@ -17,9 +17,9 @@ export interface HtmlContextTypeOptions {
   field?: { name: string };
   // TODO: get rid of indexPattern dep completely
   indexPattern?: {
-    formatHit: (hit: Record<string, any> | undefined) => Record<string, any> | undefined;
+    formatHit: (hit: { highlight: Record<string, string[]> }) => Record<string, string>;
   };
-  hit?: Record<string, any>;
+  hit?: { highlight: Record<string, string[]> };
 }
 
 /** @internal **/
