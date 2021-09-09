@@ -86,9 +86,19 @@ export const SeriesEditor = React.memo(function () {
     {}
   );
 
+  const [{ prevCount, curCount }, setSeriesCount] = useState<{
+    prevCount?: number;
+    curCount: number;
+  }>({
+    curCount: allSeries.length,
+  });
+
   useEffect(() => {
-    setItemIdToExpandedRowMap({});
-  }, [allSeries.length]);
+    setSeriesCount((oldParams) => ({ prevCount: oldParams.curCount, curCount: allSeries.length }));
+    if (typeof prevCount !== 'undefined' && !isNaN(prevCount) && prevCount < curCount) {
+      setItemIdToExpandedRowMap({});
+    }
+  }, [allSeries.length, curCount, prevCount]);
 
   useEffect(() => {
     const newExpandRows: ExpandedRowMap = {};
