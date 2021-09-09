@@ -6,14 +6,14 @@
  */
 
 import { EuiHighlight, EuiText } from '@elastic/eui';
-import React, { useCallback, useState, useMemo, useRef } from 'react';
+import React, { useCallback, useState, useMemo, useRef, useContext } from 'react';
 import styled from 'styled-components';
 
 import { OnUpdateColumns } from '../timeline/events';
 import { WithHoverActions } from '../../../common/components/with_hover_actions';
-import { useGetTimelineId } from '../../../common/components/drag_and_drop/use_get_timeline_id_from_dom';
 import { ColumnHeaderOptions } from '../../../../common';
 import { HoverActions } from '../../../common/components/hover_actions';
+import { TimelineContext } from '../../../../../timelines/public';
 
 /**
  * The name of a (draggable) field
@@ -95,8 +95,7 @@ export const FieldName = React.memo<{
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [showTopN, setShowTopN] = useState<boolean>(false);
-    const [goGetTimelineId, setGoGetTimelineId] = useState(false);
-    const timelineIdFind = useGetTimelineId(containerRef, goGetTimelineId);
+    const { timelineId: timelineIdFind } = useContext(TimelineContext);
 
     const toggleTopN = useCallback(() => {
       setShowTopN((prevShowTopN) => {
@@ -122,7 +121,6 @@ export const FieldName = React.memo<{
           ownFocus={hoverActionsOwnFocus}
           showTopN={showTopN}
           toggleTopN={toggleTopN}
-          goGetTimelineId={setGoGetTimelineId}
           timelineId={timelineIdFind}
         />
       ),
