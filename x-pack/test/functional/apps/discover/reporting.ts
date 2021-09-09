@@ -100,8 +100,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(lines.slice(0, 100)).toMatch();
         expectSnapshot(lines.slice(-100)).toMatch();
 
-        expectSnapshot(csvFile.length).toMatchInline(`157573`);
-        expectSnapshot(lines.length).toMatchInline(`4676`);
+        expectSnapshot(csvFile.length).toMatchInline(`5093456`);
+        expectSnapshot(lines.length).toMatchInline(`32726`);
       });
 
       it('generates a report from a new search with data: discover:searchFieldsFromSource', async () => {
@@ -127,8 +127,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(lines.slice(0, 100)).toMatch();
         expectSnapshot(lines.slice(-100)).toMatch();
 
-        expectSnapshot(csvFile.length).toMatchInline(`157573`);
-        expectSnapshot(lines.length).toMatchInline(`4676`);
+        expectSnapshot(csvFile.length).toMatchInline(`5093456`);
+        expectSnapshot(lines.length).toMatchInline(`32726`);
 
         await setFieldsFromSource(false);
       });
