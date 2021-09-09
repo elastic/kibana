@@ -131,7 +131,7 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2>
+          <h2 id="reindexDetailsFlyoutTitle">
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.flyoutHeader"
               defaultMessage="Reindex {index}"

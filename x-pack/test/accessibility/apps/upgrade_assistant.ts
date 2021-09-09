@@ -19,6 +19,31 @@ const translogSettingsIndexDeprecation: IndicesCreateRequest = {
   },
 };
 
+const multiFieldsIndexDeprecation: IndicesCreateRequest = {
+  index: 'nested_multi_fields',
+  body: {
+    mappings: {
+      properties: {
+        text: {
+          type: 'text',
+          fields: {
+            english: {
+              type: 'text',
+              analyzer: 'english',
+              fields: {
+                english: {
+                  type: 'text',
+                  analyzer: 'english',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
   const a11y = getService('a11y');
@@ -31,10 +56,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
       try {
-        // Create an index that will trigger a deprecation warning to test the ES deprecations page
+        // Create two indices that will trigger deprecation warnings to test the ES deprecations page
+        await es.indices.create(multiFieldsIndexDeprecation);
         await es.indices.create(translogSettingsIndexDeprecation);
       } catch (e) {
-        log.debug('[Setup error] Error creating index');
+        log.debug('[Setup error] Error creating indices');
         throw e;
       }
     });
@@ -42,10 +68,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       try {
         await es.indices.delete({
-          index: [translogSettingsIndexDeprecation.index],
+          index: [multiFieldsIndexDeprecation.index, translogSettingsIndexDeprecation.index],
         });
       } catch (e) {
-        log.debug('[Cleanup error] Error deleting index');
+        log.debug('[Cleanup error] Error deleting indices');
         throw e;
       }
     });
@@ -57,22 +83,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Elasticsearch deprecations page', async () => {
-      await PageObjects.common.navigateToUrl(
-        'management',
-        'stack/upgrade_assistant/es_deprecations',
-        {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-          shouldUseHashForSubUrl: false,
-        }
-      );
+    describe('Elasticsearch deprecations page', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToUrl(
+          'management',
+          'stack/upgrade_assistant/es_deprecations',
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+            shouldUseHashForSubUrl: false,
+          }
+        );
 
-      await retry.waitFor('Elasticsearch deprecations table to be visible', async () => {
-        return testSubjects.exists('esDeprecationsTable');
+        await retry.waitFor('Elasticsearch deprecations table to be visible', async () => {
+          return testSubjects.exists('esDeprecationsTable');
+        });
       });
 
-      await a11y.testAppSnapshot();
+      it('Deprecations table', async () => {
+        await a11y.testAppSnapshot();
+      });
+
+      it('Index settings deprecation flyout', async () => {
+        await PageObjects.upgradeAssistant.clickEsDeprecation(
+          'indexSettings' // An index setting deprecation was added in the before() hook so should be guaranteed
+        );
+        await retry.waitFor('ES index settings deprecation flyout to be visible', async () => {
+          return testSubjects.exists('indexSettingsDetails');
+        });
+        await a11y.testAppSnapshot();
+      });
+
+      it('Default deprecation flyout', async () => {
+        await PageObjects.upgradeAssistant.clickEsDeprecation(
+          'default' // A default deprecation was added in the before() hook so should be guaranteed
+        );
+        await retry.waitFor('ES default deprecation flyout to be visible', async () => {
+          return testSubjects.exists('defaultDeprecationDetails');
+        });
+        await a11y.testAppSnapshot();
+      });
     });
 
     describe('Kibana deprecations page', () => {
