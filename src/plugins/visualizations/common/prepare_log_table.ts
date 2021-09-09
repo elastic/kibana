@@ -8,16 +8,31 @@
 
 import { ExpressionValueVisDimension } from './expression_functions/vis_dimension';
 import { ExpressionValueXYDimension } from './expression_functions/xy_dimension';
-import { Datatable } from '../../expressions/common/expression_types/specs';
+import { Datatable, DatatableColumn } from '../../expressions/common/expression_types/specs';
 
 export type Dimension = [
   Array<ExpressionValueVisDimension | ExpressionValueXYDimension> | undefined,
   string
 ];
 
-const getDimensionName = (columnIndex: number, dimensions: Dimension[]) => {
+const isColumnEqualToAccessor = (
+  column: DatatableColumn,
+  columnIndex: number,
+  accessor: ExpressionValueVisDimension['accessor'] | ExpressionValueXYDimension['accessor']
+) => {
+  if (typeof accessor === 'number') {
+    return accessor === columnIndex;
+  }
+  return accessor.id === column.id;
+};
+
+const getDimensionName = (
+  column: DatatableColumn,
+  columnIndex: number,
+  dimensions: Dimension[]
+) => {
   for (const dimension of dimensions) {
-    if (dimension[0]?.find((d) => d.accessor === columnIndex)) {
+    if (dimension[0]?.find((d) => isColumnEqualToAccessor(column, columnIndex, d.accessor))) {
       return dimension[1];
     }
   }
@@ -31,7 +46,7 @@ export const prepareLogTable = (datatable: Datatable, dimensions: Dimension[]) =
         ...column,
         meta: {
           ...column.meta,
-          dimensionName: getDimensionName(columnIndex, dimensions),
+          dimensionName: getDimensionName(column, columnIndex, dimensions),
         },
       };
     }),

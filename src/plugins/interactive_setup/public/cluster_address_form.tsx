@@ -51,7 +51,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
   const [form, eventHandlers] = useForm({
     defaultValues,
     validate: async (values) => {
-      const errors: ValidationErrors<typeof values> = {};
+      const errors: ValidationErrors<ClusterAddressFormValues> = {};
 
       if (!values.host) {
         errors.host = i18n.translate('interactiveSetup.clusterAddressForm.hostRequiredError', {

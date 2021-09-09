@@ -8,6 +8,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TableHeader } from './components/table_header/table_header';
 import { FORMATS_UI_SETTINGS } from '../../../../../../../field_formats/common';
@@ -17,7 +18,7 @@ import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../../../common';
-import { getServices, IndexPattern, IndexPatternField } from '../../../../../kibana_services';
+import { getServices } from '../../../../../kibana_services';
 import { SortOrder } from './components/table_header/helpers';
 import { DocTableRow, TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';

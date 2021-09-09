@@ -22,7 +22,7 @@ import {
   UxLocalUIFilterName,
   uxLocalUIFilterNames,
 } from '../../../../../common/ux_ui_filter';
-import { useBreakPoints } from '../../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { FieldValueSuggestions } from '../../../../../../observability/public';
 import { URLFilter } from '../URLFilter';
 import { SelectedFilters } from './SelectedFilters';
@@ -84,7 +84,7 @@ function LocalUIFilters() {
     return dataFilters;
   }, [environment, serviceName]);
 
-  const { isSmall } = useBreakPoints();
+  const { isSmall } = useBreakpoints();
 
   const title = (
     <EuiTitle size="s">
