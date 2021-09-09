@@ -33,8 +33,7 @@ export function CorrelationsEmptyStatePrompt() {
                   id="xpack.apm.correlations.noCorrelationsTextLine1"
                   defaultMessage="Correlations will only be identified if they have significant impact."
                 />
-              </p>
-              <p>
+                <br />
                 <FormattedMessage
                   id="xpack.apm.correlations.noCorrelationsTextLine2"
                   defaultMessage="Try selecting another time range or remove any added filter."

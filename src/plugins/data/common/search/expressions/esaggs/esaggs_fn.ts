@@ -9,12 +9,13 @@
 import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 
-import { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import type { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { buildExpressionFunction } from '../../../../../../plugins/expressions/common';
 
 import { IndexPatternExpressionType } from '../../../index_patterns/expressions';
 import { IndexPatternsContract } from '../../../index_patterns/index_patterns';
 
-import { AggsStart, AggExpressionType } from '../../aggs';
+import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 
 import { KibanaContext } from '../kibana_context_type';
@@ -67,7 +68,7 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
     aggs: {
       types: ['agg_type'],
       multi: true,
-      default: [],
+      default: `{${buildExpressionFunction(aggCountFnName, {}).toString()}}`,
       help: i18n.translate('data.search.functions.esaggs.aggConfigs.help', {
         defaultMessage: 'List of aggs configured with agg_type functions',
       }),

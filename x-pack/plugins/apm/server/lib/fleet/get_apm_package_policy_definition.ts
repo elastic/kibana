@@ -16,6 +16,7 @@ interface GetApmPackagePolicyDefinitionOptions {
 export function getApmPackagePolicyDefinition(
   options: GetApmPackagePolicyDefinitionOptions
 ) {
+  const { apmServerSchema, cloudPluginSetup } = options;
   return {
     name: 'Elastic APM',
     namespace: 'default',
@@ -27,7 +28,10 @@ export function getApmPackagePolicyDefinition(
         type: 'apm',
         enabled: true,
         streams: [],
-        vars: getApmPackageInputVars(options),
+        vars: getApmPackageInputVars({
+          cloudPluginSetup,
+          apmServerSchema: preprocessLegacyFields({ apmServerSchema }),
+        }),
       },
     ],
     package: {
@@ -36,6 +40,34 @@ export function getApmPackagePolicyDefinition(
       title: 'Elastic APM',
     },
   };
+}
+
+function preprocessLegacyFields({
+  apmServerSchema,
+}: {
+  apmServerSchema: Record<string, any>;
+}) {
+  const copyOfApmServerSchema = { ...apmServerSchema };
+  [
+    {
+      key: 'apm-server.auth.anonymous.rate_limit.event_limit',
+      legacyKey: 'apm-server.rum.event_rate.limit',
+    },
+    {
+      key: 'apm-server.auth.anonymous.rate_limit.ip_limit',
+      legacyKey: 'apm-server.rum.event_rate.lru_size',
+    },
+    {
+      key: 'apm-server.auth.anonymous.allow_service',
+      legacyKey: 'apm-server.rum.allow_service_names',
+    },
+  ].forEach(({ key, legacyKey }) => {
+    if (!copyOfApmServerSchema[key]) {
+      copyOfApmServerSchema[key] = copyOfApmServerSchema[legacyKey];
+      delete copyOfApmServerSchema[legacyKey];
+    }
+  });
+  return copyOfApmServerSchema;
 }
 
 function getApmPackageInputVars(options: GetApmPackagePolicyDefinitionOptions) {
@@ -89,6 +121,18 @@ export const apmConfigMapping: Record<
   'apm-server.rum.allow_headers': {
     name: 'rum_allow_headers',
     type: 'text',
+  },
+  'apm-server.rum.event_rate.limit': {
+    name: 'rum_event_rate_limit',
+    type: 'integer',
+  },
+  'apm-server.rum.allow_service_names': {
+    name: 'rum_allow_service_names',
+    type: 'text',
+  },
+  'apm-server.rum.event_rate.lru_size': {
+    name: 'rum_event_rate_lru_size',
+    type: 'integer',
   },
   'apm-server.rum.response_headers': {
     name: 'rum_response_headers',

@@ -116,6 +116,7 @@ module.exports = {
           {
             loader: 'sass-loader',
             options: {
+              implementation: require('node-sass'),
               sourceMap: !isProd,
             },
           },
@@ -146,12 +147,13 @@ module.exports = {
           {
             loader: 'sass-loader',
             options: {
-              prependData(loaderContext) {
+              additionalData(content, loaderContext) {
                 return `@import ${stringifyRequest(
                   loaderContext,
                   path.resolve(KIBANA_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
-                )};\n`;
+                )};\n${content}`;
               },
+              implementation: require('node-sass'),
               webpackImporter: false,
               sassOptions: {
                 outputStyle: 'nested',

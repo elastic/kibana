@@ -9,6 +9,7 @@ import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { safeLoad } from 'js-yaml';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -71,8 +72,9 @@ export const EditPackagePolicyPage = memo(() => {
 
 export const EditPackagePolicyForm = memo<{
   packagePolicyId: string;
+  isUpgrade?: boolean;
   from?: EditPackagePolicyFrom;
-}>(({ packagePolicyId, from = 'edit' }) => {
+}>(({ packagePolicyId, isUpgrade = false, from = 'edit' }) => {
   const { application, notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -98,9 +100,6 @@ export const EditPackagePolicyForm = memo<{
     GetOnePackagePolicyResponse['item']
   >();
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
-
-  const isUpgrade =
-    from === 'upgrade-from-fleet-policy-list' || from === 'upgrade-from-integrations-policy-list';
 
   const policyId = agentPolicy?.id ?? '';
 
@@ -203,7 +202,9 @@ export const EditPackagePolicyForm = memo<{
 
             if (packageData?.response) {
               setPackageInfo(packageData.response);
-              setValidationResults(validatePackagePolicy(newPackagePolicy, packageData.response));
+              setValidationResults(
+                validatePackagePolicy(newPackagePolicy, packageData.response, safeLoad)
+              );
               setFormState('VALID');
             }
           }
@@ -241,7 +242,8 @@ export const EditPackagePolicyForm = memo<{
       if (packageInfo) {
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
-          packageInfo
+          packageInfo,
+          safeLoad
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
@@ -527,15 +529,14 @@ export const EditPackagePolicyForm = memo<{
         />
       ) : (
         <>
-          {from === 'package' || from === 'package-edit' ? (
-            <IntegrationsBreadcrumb
-              pkgkey={pkgKeyFromPackageInfo(packageInfo)}
-              pkgTitle={packageInfo.title}
-              policyName={packagePolicy.name}
-            />
-          ) : (
-            <PoliciesBreadcrumb policyName={agentPolicy.name} policyId={policyId} />
-          )}
+          <Breadcrumb
+            agentPolicyName={agentPolicy.name}
+            from={from}
+            packagePolicyName={packagePolicy.name}
+            pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+            pkgTitle={packageInfo.title}
+            policyId={policyId}
+          />
           {formState === 'CONFIRM' && (
             <ConfirmDeployAgentPolicyModal
               agentCount={agentCount}
@@ -544,20 +545,16 @@ export const EditPackagePolicyForm = memo<{
               onCancel={() => setFormState('VALID')}
             />
           )}
-
           {isUpgrade && dryRunData && (
             <>
               <UpgradeStatusCallout dryRunData={dryRunData} />
               <EuiSpacer size="xxl" />
             </>
           )}
-
           {configurePackage}
-
           {/* Extra space to accomodate the EuiBottomBar height */}
           <EuiSpacer size="xxl" />
           <EuiSpacer size="xxl" />
-
           <EuiBottomBar>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -604,11 +601,53 @@ export const EditPackagePolicyForm = memo<{
   );
 });
 
-const PoliciesBreadcrumb: React.FunctionComponent<{ policyName: string; policyId: string }> = ({
-  policyName,
-  policyId,
-}) => {
+const Breadcrumb = memo<{
+  agentPolicyName: string;
+  from: EditPackagePolicyFrom;
+  packagePolicyName: string;
+  pkgkey: string;
+  pkgTitle: string;
+  policyId: string;
+}>(({ agentPolicyName, from, packagePolicyName, pkgkey, pkgTitle, policyId }) => {
+  let breadcrumb = <PoliciesBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
+
+  if (
+    from === 'package' ||
+    from === 'package-edit' ||
+    from === 'upgrade-from-integrations-policy-list'
+  ) {
+    breadcrumb = (
+      <IntegrationsBreadcrumb pkgkey={pkgkey} pkgTitle={pkgTitle} policyName={packagePolicyName} />
+    );
+  } else if (from === 'upgrade-from-fleet-policy-list') {
+    breadcrumb = <UpgradeBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
+  }
+
+  return breadcrumb;
+});
+
+const IntegrationsBreadcrumb = memo<{
+  pkgTitle: string;
+  policyName: string;
+  pkgkey: string;
+}>(({ pkgTitle, policyName, pkgkey }) => {
+  useIntegrationsBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
+  return null;
+});
+
+const PoliciesBreadcrumb: React.FunctionComponent<{
+  policyName: string;
+  policyId: string;
+}> = ({ policyName, policyId }) => {
   useBreadcrumbs('edit_integration', { policyName, policyId });
+  return null;
+};
+
+const UpgradeBreadcrumb: React.FunctionComponent<{
+  policyName: string;
+  policyId: string;
+}> = ({ policyName, policyId }) => {
+  useBreadcrumbs('upgrade_package_policy', { policyName, policyId });
   return null;
 };
 
@@ -660,7 +699,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
         </EuiPortal>
       )}
 
-      {isReadyForUpgrade ? (
+      {isReadyForUpgrade && currentPackagePolicy ? (
         <EuiCallOut
           title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.successTitle', {
             defaultMessage: 'Ready to upgrade',
@@ -706,12 +745,3 @@ const UpgradeStatusCallout: React.FunctionComponent<{
     </>
   );
 };
-
-const IntegrationsBreadcrumb = memo<{
-  pkgTitle: string;
-  policyName: string;
-  pkgkey: string;
-}>(({ pkgTitle, policyName, pkgkey }) => {
-  useIntegrationsBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
-  return null;
-});

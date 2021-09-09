@@ -397,7 +397,7 @@
             "server_uuid": {
               "ignore_above": 1024,
               "type": "keyword"
-            }
+            }     
           }
         },
         "message": {
@@ -531,6 +531,9 @@
             "server_uuid": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "version": {
+              "type": "version"
             }
           }
         },

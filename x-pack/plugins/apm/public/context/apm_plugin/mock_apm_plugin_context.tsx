@@ -61,6 +61,9 @@ const mockCore = {
   docLinks: {
     DOC_LINK_VERSION: '0',
     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    links: {
+      apm: {},
+    },
   },
   http: {
     basePath: {

@@ -10,7 +10,7 @@ import {
   Normalizer,
   commonNormalizers,
   getNormalizer,
-  getJsonToArrayOrObjectNormalizer,
+  getJsonToJavascriptNormalizer,
 } from '../common/normalizers';
 import { tlsNormalizers } from '../tls/normalizers';
 import { defaultHTTPSimpleFields, defaultHTTPAdvancedFields } from '../contexts';
@@ -26,8 +26,8 @@ export const getHTTPNormalizer = (key: ConfigKeys) => {
   return getNormalizer(key, defaultHTTPValues);
 };
 
-export const getHTTPJsonToArrayOrObjectNormalizer = (key: ConfigKeys) => {
-  return getJsonToArrayOrObjectNormalizer(key, defaultHTTPValues);
+export const getHTTPJsonToJavascriptNormalizer = (key: ConfigKeys) => {
+  return getJsonToJavascriptNormalizer(key, defaultHTTPValues);
 };
 
 export const httpNormalizers: HTTPNormalizerMap = {
@@ -36,18 +36,18 @@ export const httpNormalizers: HTTPNormalizerMap = {
   [ConfigKeys.USERNAME]: getHTTPNormalizer(ConfigKeys.USERNAME),
   [ConfigKeys.PASSWORD]: getHTTPNormalizer(ConfigKeys.PASSWORD),
   [ConfigKeys.PROXY_URL]: getHTTPNormalizer(ConfigKeys.PROXY_URL),
-  [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: getHTTPJsonToArrayOrObjectNormalizer(
+  [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: getHTTPJsonToJavascriptNormalizer(
     ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE
   ),
-  [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: getHTTPJsonToArrayOrObjectNormalizer(
+  [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: getHTTPJsonToJavascriptNormalizer(
     ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE
   ),
   [ConfigKeys.RESPONSE_BODY_INDEX]: getHTTPNormalizer(ConfigKeys.RESPONSE_BODY_INDEX),
-  [ConfigKeys.RESPONSE_HEADERS_CHECK]: getHTTPJsonToArrayOrObjectNormalizer(
+  [ConfigKeys.RESPONSE_HEADERS_CHECK]: getHTTPJsonToJavascriptNormalizer(
     ConfigKeys.RESPONSE_HEADERS_CHECK
   ),
   [ConfigKeys.RESPONSE_HEADERS_INDEX]: getHTTPNormalizer(ConfigKeys.RESPONSE_HEADERS_INDEX),
-  [ConfigKeys.RESPONSE_STATUS_CHECK]: getHTTPJsonToArrayOrObjectNormalizer(
+  [ConfigKeys.RESPONSE_STATUS_CHECK]: getHTTPJsonToJavascriptNormalizer(
     ConfigKeys.RESPONSE_STATUS_CHECK
   ),
   [ConfigKeys.REQUEST_BODY_CHECK]: (fields) => {
@@ -76,7 +76,7 @@ export const httpNormalizers: HTTPNormalizerMap = {
       return defaultHTTPAdvancedFields[ConfigKeys.REQUEST_BODY_CHECK];
     }
   },
-  [ConfigKeys.REQUEST_HEADERS_CHECK]: getHTTPJsonToArrayOrObjectNormalizer(
+  [ConfigKeys.REQUEST_HEADERS_CHECK]: getHTTPJsonToJavascriptNormalizer(
     ConfigKeys.REQUEST_HEADERS_CHECK
   ),
   [ConfigKeys.REQUEST_METHOD_CHECK]: getHTTPNormalizer(ConfigKeys.REQUEST_METHOD_CHECK),

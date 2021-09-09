@@ -237,7 +237,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   upgradePackagePolicyHref={`${getHref('upgrade_package_policy', {
                     policyId: agentPolicy.id,
                     packagePolicyId: packagePolicy.id,
-                  })}`}
+                  })}?from=fleet-policy-list`}
                 />
               );
             },

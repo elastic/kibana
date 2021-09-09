@@ -8,6 +8,7 @@
 import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import {
   SERVICE_NAME,
+  TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
@@ -25,6 +26,7 @@ interface Options {
   serviceName: string;
   setup: Setup;
   transactionType: string;
+  transactionName?: string;
   start: number;
   end: number;
   intervalString: string;
@@ -38,6 +40,7 @@ export async function getThroughput({
   serviceName,
   setup,
   transactionType,
+  transactionName,
   start,
   end,
   intervalString,
@@ -55,6 +58,14 @@ export async function getThroughput({
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
+
+  if (transactionName) {
+    filter.push({
+      term: {
+        [TRANSACTION_NAME]: transactionName,
+      },
+    });
+  }
 
   const params = {
     apm: {

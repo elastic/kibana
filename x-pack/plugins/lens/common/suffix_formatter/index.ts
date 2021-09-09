@@ -28,9 +28,11 @@ export const unitSuffixesLong: Record<TimeScaleUnit, string> = {
   d: i18n.translate('xpack.lens.fieldFormats.longSuffix.d', { defaultMessage: 'per day' }),
 };
 
-export function getSuffixFormatter(formatFactory: FormatFactory): FieldFormatInstanceType {
+export const suffixFormatterId = 'suffix';
+
+export function getSuffixFormatter(getFormatFactory: () => FormatFactory): FieldFormatInstanceType {
   return class SuffixFormatter extends FieldFormat {
-    static id = 'suffix';
+    static id = suffixFormatterId;
     static hidden = true; // Don't want this format to appear in index pattern editor
     static title = i18n.translate('xpack.lens.fieldFormats.suffix.title', {
       defaultMessage: 'Suffix',
@@ -51,9 +53,10 @@ export function getSuffixFormatter(formatFactory: FormatFactory): FieldFormatIns
       const nestedFormatter = this.param('id');
       const nestedParams = this.param('params');
 
-      const formattedValue = formatFactory({ id: nestedFormatter, params: nestedParams }).convert(
-        val
-      );
+      const formattedValue = getFormatFactory()({
+        id: nestedFormatter,
+        params: nestedParams,
+      }).convert(val);
 
       // do not add suffixes to empty strings
       if (formattedValue === '') {

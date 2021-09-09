@@ -36,7 +36,7 @@ import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
-import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
+import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { getEmptyValue } from '../empty_value';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
@@ -157,7 +157,7 @@ function getEventFieldsToDisplay({
 }): EventSummaryField[] {
   switch (eventCode) {
     // memory protection fields
-    case EventCode.MALICIOUS_THREAD:
+    case EventCode.SHELLCODE_THREAD:
       return memoryShellCodeAlertFields;
     case EventCode.MEMORY_SIGNATURE:
       return memorySignatureAlertFields;
@@ -244,7 +244,7 @@ export const getSummaryRows = ({
           fieldFromBrowserField: browserField,
         };
 
-        if (item.id === 'agent.id' && !endpointAlertCheck({ data })) {
+        if (item.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
           return acc;
         }
 

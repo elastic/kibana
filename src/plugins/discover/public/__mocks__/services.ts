@@ -29,6 +29,7 @@ export const discoverServiceMock = ({
     location: {
       search: '',
     },
+    listen: jest.fn(),
   }),
   data: dataPlugin,
   docLinks: docLinksServiceMock.createStartContract(),
@@ -67,6 +68,9 @@ export const discoverServiceMock = ({
     isDefault: (key: string) => {
       return true;
     },
+  },
+  http: {
+    basePath: '/',
   },
   indexPatternFieldEditor: {
     openEditor: jest.fn(),

@@ -33,10 +33,17 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('Rule exception operators for data type ip', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/ip_as_array');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/ip_as_array');
+    });
+
     beforeEach(async () => {
       await createSignalsIndex(supertest);
       await createListsIndex(supertest);
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/ip_as_array');
     });
 
     afterEach(async () => {
@@ -44,7 +51,6 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllAlerts(supertest);
       await deleteAllExceptions(es);
       await deleteListsIndex(supertest);
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/ip_as_array');
     });
 
     describe('"is" operator', () => {

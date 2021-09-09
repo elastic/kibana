@@ -12,8 +12,5 @@ build --bes_backend=grpcs://cloud.buildbuddy.io
 build --remote_cache=grpcs://cloud.buildbuddy.io
 build --remote_timeout=3600
 
-## Avoid to keep connections to build event backend connections alive across builds
-build --keep_backend_build_event_connections_alive=false
-
 ## Metadata settings
 build --build_metadata=ROLE=CI

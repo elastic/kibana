@@ -30,7 +30,10 @@ import { i18n } from '@kbn/i18n';
 import { useChartTheme } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { HistogramItem } from '../../../../../common/search_strategies/correlations/types';
+import type {
+  FieldValuePair,
+  HistogramItem,
+} from '../../../../../common/search_strategies/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -38,8 +41,9 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { ChartContainer } from '../chart_container';
 
 interface TransactionDistributionChartProps {
-  field?: string;
-  value?: string;
+  fieldName?: FieldValuePair['fieldName'];
+  fieldValue?: FieldValuePair['fieldValue'];
+  hasData: boolean;
   histogram?: HistogramItem[];
   markerCurrentTransaction?: number;
   markerValue: number;
@@ -47,6 +51,7 @@ interface TransactionDistributionChartProps {
   overallHistogram?: HistogramItem[];
   onChartSelection?: BrushEndListener;
   selection?: [number, number];
+  status: FETCH_STATUS;
 }
 
 const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
@@ -95,8 +100,9 @@ const xAxisTickFormat: TickFormatter<number> = (d) =>
   getDurationFormatter(d, 0.9999)(d).formatted;
 
 export function TransactionDistributionChart({
-  field: fieldName,
-  value: fieldValue,
+  fieldName,
+  fieldValue,
+  hasData,
   histogram: originalHistogram,
   markerCurrentTransaction,
   markerValue,
@@ -104,6 +110,7 @@ export function TransactionDistributionChart({
   overallHistogram,
   onChartSelection,
   selection,
+  status,
 }: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
@@ -159,18 +166,7 @@ export function TransactionDistributionChart({
       data-test-subj="apmCorrelationsChart"
       style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
     >
-      <ChartContainer
-        height={250}
-        hasData={
-          Array.isArray(patchedOverallHistogram) &&
-          patchedOverallHistogram.length > 0
-        }
-        status={
-          Array.isArray(patchedOverallHistogram)
-            ? FETCH_STATUS.SUCCESS
-            : FETCH_STATUS.LOADING
-        }
-      >
+      <ChartContainer height={250} hasData={hasData} status={status}>
         <Chart>
           <Settings
             rotation={0}
@@ -282,7 +278,8 @@ export function TransactionDistributionChart({
             fieldName !== undefined &&
             fieldValue !== undefined && (
               <AreaSeries
-                id={`apmTransactionDistributionChartAreaSeries${fieldName}${fieldValue}`}
+                // id is used as the label for the legend
+                id={`${fieldName}:${fieldValue}`}
                 xScaleType={ScaleType.Log}
                 yScaleType={ScaleType.Log}
                 data={histogram}

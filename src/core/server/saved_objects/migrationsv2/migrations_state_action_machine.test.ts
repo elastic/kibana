@@ -17,6 +17,7 @@ import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { LoggerAdapter } from '../../logging/logger_adapter';
 import { AllControlStates, State } from './types';
 import { createInitialState } from './initial_state';
+import { ByteSizeValue } from '@kbn/config-schema';
 
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
@@ -40,6 +41,7 @@ describe('migrationsStateActionMachine', () => {
     indexPrefix: '.my-so-index',
     migrationsConfig: {
       batchSize: 1000,
+      maxBatchSizeBytes: new ByteSizeValue(1e8),
       pollInterval: 0,
       scrollDuration: '0s',
       skip: false,
@@ -235,6 +237,7 @@ describe('migrationsStateActionMachine', () => {
         ...initialState,
         reason: 'the fatal reason',
         outdatedDocuments: [{ _id: '1234', password: 'sensitive password' }],
+        transformedDocBatches: [[{ _id: '1234', password: 'sensitive transformed password' }]],
       } as State,
       logger: mockLogger.get(),
       model: transitionModel(['LEGACY_DELETE', 'FATAL']),
@@ -257,6 +260,7 @@ describe('migrationsStateActionMachine', () => {
           kibana: {
             migrationState: {
               batchSize: 1000,
+              maxBatchSizeBytes: 1e8,
               controlState: 'LEGACY_DELETE',
               currentAlias: '.my-so-index',
               excludeFromUpgradeFilterHooks: {},
@@ -270,7 +274,7 @@ describe('migrationsStateActionMachine', () => {
                   message: 'Log from LEGACY_DELETE control state',
                 },
               ],
-              outdatedDocuments: ['1234'],
+              outdatedDocuments: [{ _id: '1234' }],
               outdatedDocumentsQuery: expect.any(Object),
               preMigrationScript: {
                 _tag: 'None',
@@ -284,6 +288,7 @@ describe('migrationsStateActionMachine', () => {
               },
               tempIndex: '.my-so-index_7.11.0_reindex_temp',
               tempIndexMappings: expect.any(Object),
+              transformedDocBatches: [[{ _id: '1234' }]],
               unusedTypesQuery: expect.any(Object),
               versionAlias: '.my-so-index_7.11.0',
               versionIndex: '.my-so-index_7.11.0_001',
@@ -304,6 +309,7 @@ describe('migrationsStateActionMachine', () => {
           kibana: {
             migrationState: {
               batchSize: 1000,
+              maxBatchSizeBytes: 1e8,
               controlState: 'FATAL',
               currentAlias: '.my-so-index',
               excludeFromUpgradeFilterHooks: {},
@@ -321,7 +327,7 @@ describe('migrationsStateActionMachine', () => {
                   message: 'Log from FATAL control state',
                 },
               ],
-              outdatedDocuments: ['1234'],
+              outdatedDocuments: [{ _id: '1234' }],
               outdatedDocumentsQuery: expect.any(Object),
               preMigrationScript: {
                 _tag: 'None',
@@ -335,6 +341,7 @@ describe('migrationsStateActionMachine', () => {
               },
               tempIndex: '.my-so-index_7.11.0_reindex_temp',
               tempIndexMappings: expect.any(Object),
+              transformedDocBatches: [[{ _id: '1234' }]],
               unusedTypesQuery: expect.any(Object),
               versionAlias: '.my-so-index_7.11.0',
               versionIndex: '.my-so-index_7.11.0_001',
@@ -447,6 +454,7 @@ describe('migrationsStateActionMachine', () => {
           kibana: {
             migrationState: {
               batchSize: 1000,
+              maxBatchSizeBytes: 1e8,
               controlState: 'LEGACY_REINDEX',
               currentAlias: '.my-so-index',
               excludeFromUpgradeFilterHooks: {},
@@ -474,6 +482,7 @@ describe('migrationsStateActionMachine', () => {
               },
               tempIndex: '.my-so-index_7.11.0_reindex_temp',
               tempIndexMappings: expect.any(Object),
+              transformedDocBatches: [],
               unusedTypesQuery: expect.any(Object),
               versionAlias: '.my-so-index_7.11.0',
               versionIndex: '.my-so-index_7.11.0_001',
@@ -488,6 +497,7 @@ describe('migrationsStateActionMachine', () => {
           kibana: {
             migrationState: {
               batchSize: 1000,
+              maxBatchSizeBytes: 1e8,
               controlState: 'LEGACY_DELETE',
               currentAlias: '.my-so-index',
               excludeFromUpgradeFilterHooks: {},
@@ -519,6 +529,7 @@ describe('migrationsStateActionMachine', () => {
               },
               tempIndex: '.my-so-index_7.11.0_reindex_temp',
               tempIndexMappings: expect.any(Object),
+              transformedDocBatches: [],
               unusedTypesQuery: expect.any(Object),
               versionAlias: '.my-so-index_7.11.0',
               versionIndex: '.my-so-index_7.11.0_001',

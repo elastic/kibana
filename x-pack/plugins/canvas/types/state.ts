@@ -16,6 +16,7 @@ import {
   Style,
   Range,
 } from 'src/plugins/expressions';
+import { Datasource, Model, Transform, View } from '../public/expression_types';
 import { AssetType } from './assets';
 import { CanvasWorkpad } from './canvas';
 
@@ -51,7 +52,11 @@ type ExpressionType =
   | KibanaContext
   | PointSeries
   | Style
-  | Range;
+  | Range
+  | View
+  | Model
+  | Datasource
+  | Transform;
 
 export interface ExpressionRenderable {
   state: 'ready' | 'pending';
@@ -60,9 +65,9 @@ export interface ExpressionRenderable {
 }
 
 export interface ExpressionContext {
-  state: 'ready' | 'pending';
+  state: 'ready' | 'pending' | 'error';
   value: ExpressionType;
-  error: null;
+  error: null | string;
 }
 
 export interface ResolvedArgType {

@@ -15,7 +15,7 @@ export function registerOAuthAuthorizeRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/oauth/authorize',
+      path: '/internal/workplace_search/oauth/authorize',
       validate: {
         query: schema.object({
           access_type: schema.maybe(schema.string()),
@@ -42,7 +42,7 @@ export function registerOAuthAuthorizeAcceptRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workplace_search/oauth/authorize',
+      path: '/internal/workplace_search/oauth/authorize',
       validate: {
         body: schema.object({
           client_id: schema.string(),
@@ -65,7 +65,7 @@ export function registerOAuthAuthorizeDenyRoute({
 }: RouteDependencies) {
   router.delete(
     {
-      path: '/api/workplace_search/oauth/authorize',
+      path: '/internal/workplace_search/oauth/authorize',
       validate: {
         body: schema.object({
           client_id: schema.string(),

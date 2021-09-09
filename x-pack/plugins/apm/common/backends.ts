@@ -14,9 +14,9 @@ import {
 import { environmentQuery } from './utils/environment_query';
 
 export const kueryBarPlaceholder = i18n.translate(
-  'xpack.apm.backends.kueryBarPlaceholder',
+  'xpack.apm.dependencies.kueryBarPlaceholder',
   {
-    defaultMessage: `Search backend metrics (e.g. span.destination.service.resource:elasticsearch)`,
+    defaultMessage: `Search dependency metrics (e.g. span.destination.service.resource:elasticsearch)`,
   }
 );
 

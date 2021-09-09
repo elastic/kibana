@@ -664,7 +664,14 @@ describe('IndexPattern Data Panel', () => {
               ...props.indexPatterns['1'],
               fields: [
                 ...props.indexPatterns['1'].fields,
-                { name: '_id', displayName: '_id', meta: true, type: 'string' },
+                {
+                  name: '_id',
+                  displayName: '_id',
+                  meta: true,
+                  type: 'string',
+                  searchable: true,
+                  aggregatable: true,
+                },
               ],
             },
           }}

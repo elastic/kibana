@@ -6,11 +6,6 @@ Object {
     "test-index-*",
   ],
   "template": Object {
-    "aliases": Object {
-      ".alerts-security.alerts-space-id": Object {
-        "is_write_index": false,
-      },
-    },
     "mappings": Object {
       "_meta": Object {
         "aliases_version": 1,
@@ -1810,10 +1805,6 @@ Object {
           "path": "signal.rule.building_block_type",
           "type": "alias",
         },
-        "kibana.alert.rule.consumer": Object {
-          "type": "constant_keyword",
-          "value": "siem",
-        },
         "kibana.alert.rule.created_at": Object {
           "path": "signal.rule.created_at",
           "type": "alias",
@@ -1870,10 +1861,6 @@ Object {
           "path": "signal.rule.note",
           "type": "alias",
         },
-        "kibana.alert.rule.producer": Object {
-          "type": "constant_keyword",
-          "value": "siem",
-        },
         "kibana.alert.rule.query": Object {
           "path": "signal.rule.query",
           "type": "alias",
@@ -1901,10 +1888,6 @@ Object {
         "kibana.alert.rule.rule_name_override": Object {
           "path": "signal.rule.rule_name_override",
           "type": "alias",
-        },
-        "kibana.alert.rule.rule_type_id": Object {
-          "type": "constant_keyword",
-          "value": "siem.signals",
         },
         "kibana.alert.rule.saved_id": Object {
           "path": "signal.rule.saved_id",
@@ -2069,10 +2052,6 @@ Object {
         "kibana.alert.workflow_status": Object {
           "path": "signal.status",
           "type": "alias",
-        },
-        "kibana.space_ids": Object {
-          "type": "constant_keyword",
-          "value": "space-id",
         },
         "labels": Object {
           "type": "object",

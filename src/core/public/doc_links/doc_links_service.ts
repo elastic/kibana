@@ -24,12 +24,21 @@ export class DocLinksService {
     const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
     const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
     const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
+    const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
         settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
+        apm: {
+          kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
+          supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
+          customLinks: `${KIBANA_DOCS}custom-links.html`,
+          droppedTransactionSpans: `${APM_DOCS}get-started/master/transaction-spans.html#dropped-spans`,
+          upgrading: `${APM_DOCS}server/master/upgrading.html`,
+          metaData: `${APM_DOCS}get-started/master/metadata.html`,
+        },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
         },
@@ -204,6 +213,7 @@ export class DocLinksService {
         siem: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
           gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
+          privileges: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/sec-requirements.html`,
           ml: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/machine-learning.html`,
           ruleChangeLog: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/prebuilt-rules-changelog.html`,
           detectionsReq: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/detections-permissions-section.html`,
@@ -272,10 +282,15 @@ export class DocLinksService {
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
+          monitorStatus: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-status-alert.html`,
+          monitorUptime: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime.html`,
+          tlsCertificate: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/tls-certificate-alert.html`,
+          uptimeDurationAnomaly: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/duration-anomaly-alert.html`,
         },
         alerting: {
           guide: `${KIBANA_DOCS}create-and-manage-rules.html`,
           actionTypes: `${KIBANA_DOCS}action-types.html`,
+          apmRules: `${KIBANA_DOCS}apm-alerts.html`,
           emailAction: `${KIBANA_DOCS}email-action-type.html`,
           emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
           generalSettings: `${KIBANA_DOCS}alert-action-settings-kb.html#general-alert-action-settings`,
@@ -449,6 +464,14 @@ export interface DocLinksStart {
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
     readonly settings: string;
+    readonly apm: {
+      readonly kibanaSettings: string;
+      readonly supportedServiceMaps: string;
+      readonly customLinks: string;
+      readonly droppedTransactionSpans: string;
+      readonly upgrading: string;
+      readonly metaData: string;
+    };
     readonly canvas: {
       readonly guide: string;
     };
@@ -568,6 +591,7 @@ export interface DocLinksStart {
     readonly rollupJobs: string;
     readonly elasticsearch: Record<string, string>;
     readonly siem: {
+      readonly privileges: string;
       readonly guide: string;
       readonly gettingStarted: string;
       readonly ml: string;
@@ -619,7 +643,13 @@ export interface DocLinksStart {
       timeUnits: string;
       updateTransform: string;
     }>;
-    readonly observability: Record<string, string>;
+    readonly observability: Readonly<{
+      guide: string;
+      monitorStatus: string;
+      monitorUptime: string;
+      tlsCertificate: string;
+      uptimeDurationAnomaly: string;
+    }>;
     readonly alerting: Record<string, string>;
     readonly maps: Record<string, string>;
     readonly monitoring: Record<string, string>;

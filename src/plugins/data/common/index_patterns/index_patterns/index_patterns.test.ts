@@ -7,7 +7,7 @@
  */
 
 import { defaults } from 'lodash';
-import { IndexPatternsService, IndexPattern } from '.';
+import { DataViewsService, DataView } from '.';
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
@@ -47,7 +47,7 @@ const savedObject = {
 };
 
 describe('IndexPatterns', () => {
-  let indexPatterns: IndexPatternsService;
+  let indexPatterns: DataViewsService;
   let savedObjectsClient: SavedObjectsClientCommon;
   let SOClientGetDelay = 0;
 
@@ -85,7 +85,7 @@ describe('IndexPatterns', () => {
         };
       });
 
-    indexPatterns = new IndexPatternsService({
+    indexPatterns = new DataViewsService({
       uiSettings: ({
         get: () => Promise.resolve(false),
         getAll: () => {},
@@ -207,7 +207,7 @@ describe('IndexPatterns', () => {
     indexPatterns.refreshFields = jest.fn();
 
     const indexPattern = await indexPatterns.create({ title }, true);
-    expect(indexPattern).toBeInstanceOf(IndexPattern);
+    expect(indexPattern).toBeInstanceOf(DataView);
     expect(indexPattern.title).toBe(title);
     expect(indexPatterns.refreshFields).not.toBeCalled();
 
@@ -235,7 +235,7 @@ describe('IndexPatterns', () => {
     indexPatterns.createSavedObject = jest.fn(() =>
       Promise.resolve(({
         id: 'id',
-      } as unknown) as IndexPattern)
+      } as unknown) as DataView)
     );
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
