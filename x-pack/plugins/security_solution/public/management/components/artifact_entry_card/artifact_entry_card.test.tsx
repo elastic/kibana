@@ -10,6 +10,7 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../../common
 import { ArtifactEntryCard, ArtifactEntryCardProps } from './artifact_entry_card';
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 import { TrustedApp } from '../../../../common/endpoint/types';
+import { act, fireEvent, getByTestId } from '@testing-library/react';
 
 // FIXME:PT DEV ONLY - REMOVE IT
 // {
@@ -43,7 +44,9 @@ describe('when using the ArtifactEntryCard component', () => {
   let trustedApp: TrustedApp;
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
-  let render: (props?: ArtifactEntryCardProps) => ReturnType<AppContextTestRender['render']>;
+  let render: (
+    props?: Partial<ArtifactEntryCardProps>
+  ) => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
     trustedApp = new TrustedAppGenerator('seed').generate({
@@ -52,7 +55,7 @@ describe('when using the ArtifactEntryCard component', () => {
       created_at: new Date('2021-07-01').toISOString(),
     });
     appTestContext = createAppRootMockRenderer();
-    render = (props: Partial<ArtifactEntryCardProps> = {}) => {
+    render = (props = {}) => {
       renderResult = appTestContext.render(
         <ArtifactEntryCard
           {...{
@@ -127,9 +130,35 @@ describe('when using the ArtifactEntryCard component', () => {
   });
 
   describe('and actions were defined', () => {
-    it.todo('should show the actions icon when actions were defined');
+    let actions: ArtifactEntryCardProps['actions'];
+    const renderWithActions = () => render({ actions });
 
-    it.todo('should show popup with defined actions');
+    beforeEach(() => {
+      actions = [
+        {
+          'data-test-subj': 'test-action',
+          children: 'action one',
+        },
+      ];
+    });
+
+    it('should show the actions icon when actions were defined', () => {
+      renderWithActions();
+
+      expect(renderResult.getByTestId('testCard-header-actions-button')).not.toBeNull();
+    });
+
+    it('should show popup with defined actions', async () => {
+      renderWithActions();
+      await act(async () => {
+        await fireEvent.click(renderResult.getByTestId('testCard-header-actions-button'));
+      });
+
+      const bodyHtmlElement = renderResult.baseElement as HTMLElement;
+
+      expect(getByTestId(bodyHtmlElement, 'testCard-header-actions-popoverPanel')).not.toBeNull();
+      expect(getByTestId(bodyHtmlElement, 'test-action')).not.toBeNull();
+    });
   });
 
   describe('and artifact is defined per policy', () => {
