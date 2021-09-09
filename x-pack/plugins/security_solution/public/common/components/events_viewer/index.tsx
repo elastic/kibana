@@ -117,7 +117,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     indexPattern,
     runtimeMappings,
     selectedPatterns,
-    selectedKipId,
+    selectedDataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererScope(scopeId);
   const { globalFullScreen } = useGlobalFullScreen();
@@ -130,7 +130,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     if (createTimeline != null) {
       createTimeline({
         columns,
-        dataViewId: selectedKipId,
+        dataViewId: selectedDataViewId,
         defaultColumns,
         excludedRowRendererIds,
         id,

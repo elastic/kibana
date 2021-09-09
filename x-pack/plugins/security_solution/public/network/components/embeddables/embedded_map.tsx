@@ -96,12 +96,10 @@ export const EmbeddedMapComponent = ({
 
   const [, dispatchToaster] = useStateToaster();
   const defaultSourcererScopeSelector = useMemo(getDefaultSourcererSelector, []);
-  const { kibanaIndexPatterns, sourcererScope } = useDeepEqualSelector(
-    defaultSourcererScopeSelector
-  );
+  const { kibanaDataViews, sourcererScope } = useDeepEqualSelector(defaultSourcererScopeSelector);
 
   const [mapIndexPatterns, setMapIndexPatterns] = useState(
-    kibanaIndexPatterns.filter((kip) => sourcererScope.selectedPatterns.includes(kip.title))
+    kibanaDataViews.filter((dataView) => sourcererScope.selectedPatterns.includes(dataView.title))
   );
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
@@ -114,8 +112,8 @@ export const EmbeddedMapComponent = ({
 
   useEffect(() => {
     setMapIndexPatterns((prevMapIndexPatterns) => {
-      const newIndexPatterns = kibanaIndexPatterns.filter((kip) =>
-        sourcererScope.selectedPatterns.includes(kip.title)
+      const newIndexPatterns = kibanaDataViews.filter((dataView) =>
+        sourcererScope.selectedPatterns.includes(dataView.title)
       );
       if (!deepEqual(newIndexPatterns, prevMapIndexPatterns)) {
         if (newIndexPatterns.length === 0) {
@@ -125,7 +123,7 @@ export const EmbeddedMapComponent = ({
       }
       return prevMapIndexPatterns;
     });
-  }, [kibanaIndexPatterns, sourcererScope.selectedPatterns]);
+  }, [kibanaDataViews, sourcererScope.selectedPatterns]);
 
   // Initial Load useEffect
   useEffect(() => {

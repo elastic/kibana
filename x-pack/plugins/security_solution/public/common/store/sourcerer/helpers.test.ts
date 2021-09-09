@@ -14,8 +14,8 @@
 //   selectedPatterns: ['journalbeat-*'],
 //   state: {
 //     ...initialSourcererState,
-//     kibanaIndexPatterns: [
-//       initialSourcererState.defaultIndexPattern,
+//     kibanaDataViews: [
+//       initialSourcererState.defaultDataView,
 //       { id: '123', title: 'journalbeat-*', patternList: ['journalbeat-*'] },
 //     ],
 //     signalIndexName: 'signals-*',

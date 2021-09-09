@@ -33,7 +33,7 @@ const defaultProps = {
 };
 describe('Sourcerer component', () => {
   const state: State = mockGlobalState;
-  const { id, patternList, title } = state.sourcerer.defaultIndexPattern;
+  const { id, patternList, title } = state.sourcerer.defaultDataView;
   const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => ({
     availableOptionCount: wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).length,
     optionsSelected: patterns.every((pattern) =>
@@ -74,8 +74,8 @@ describe('Sourcerer component', () => {
       ...mockGlobalState,
       sourcerer: {
         ...mockGlobalState.sourcerer,
-        kibanaIndexPatterns: [
-          state.sourcerer.defaultIndexPattern,
+        kibanaDataViews: [
+          state.sourcerer.defaultDataView,
           { id: '1234', title: 'auditbeat-*', patternList: ['auditbeat-*'] },
           { id: '12347', title: 'packetbeat-*', patternList: ['packetbeat-*'] },
         ],
@@ -85,7 +85,7 @@ describe('Sourcerer component', () => {
             ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
             loading: false,
             patternList,
-            selectedKipId: id,
+            selectedDataViewId: id,
             selectedPatterns: patternList.slice(0, 2),
           },
         },
@@ -111,8 +111,8 @@ describe('Sourcerer component', () => {
         ...state,
         sourcerer: {
           ...state.sourcerer,
-          kibanaIndexPatterns: [
-            state.sourcerer.defaultIndexPattern,
+          kibanaDataViews: [
+            state.sourcerer.defaultDataView,
             { id: '1234', title: 'filebeat-*', patternList: ['filebeat-*'] },
           ],
           sourcererScopes: {
@@ -120,7 +120,7 @@ describe('Sourcerer component', () => {
             [SourcererScopeName.default]: {
               ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
               loading: false,
-              selectedKipId: id,
+              selectedDataViewId: id,
               selectedPatterns: patternList.slice(0, 2),
             },
           },
@@ -153,7 +153,7 @@ describe('Sourcerer component', () => {
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedKip({
         id: SourcererScopeName.default,
-        selectedKipId: id,
+        selectedDataViewId: id,
         selectedPatterns: patternList.slice(0, 3),
       })
     );
@@ -195,8 +195,8 @@ describe('Sourcerer component', () => {
         ...state,
         sourcerer: {
           ...state.sourcerer,
-          kibanaIndexPatterns: [
-            state.sourcerer.defaultIndexPattern,
+          kibanaDataViews: [
+            state.sourcerer.defaultDataView,
             { id: '1234', title: 'auditbeat-*', patternList: ['auditbeat-*'] },
           ],
         },

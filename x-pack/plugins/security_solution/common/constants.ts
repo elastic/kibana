@@ -24,7 +24,7 @@ export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
 export const DEFAULT_DARK_MODE = 'theme:darkMode';
 export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex';
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
-export const DEFAULT_INDEX_PATTERN_ID = 'security-solution';
+export const DEFAULT_DATA_VIEW_ID = 'security-solution';
 export const DEFAULT_TIME_FIELD = '@timestamp';
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
@@ -131,7 +131,7 @@ export const DEFAULT_INDEX_PATTERN = [
 ];
 
 export const defaultDataViewRef: SavedObjectReference = {
-  id: DEFAULT_INDEX_PATTERN_ID,
+  id: DEFAULT_DATA_VIEW_ID,
   name: 'dataViewId',
   type: DATA_VIEW_SAVED_OBJECT_TYPE,
 };

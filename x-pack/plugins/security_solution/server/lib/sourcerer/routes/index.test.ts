@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { createSourcererIndexPatternRoute } from './';
+import { createSourcererDataViewRoute } from './';
 import {
   requestMock,
   serverMock,
   requestContextMock,
 } from '../../detection_engine/routes/__mocks__';
 
-import { DEFAULT_INDEX_PATTERN_ID, SOURCERER_API_URL } from '../../../../common/constants';
+import { DEFAULT_DATA_VIEW_ID, SOURCERER_API_URL } from '../../../../common/constants';
 import { StartServicesAccessor } from 'kibana/server';
 import { StartPlugins } from '../../../plugin';
 
@@ -75,7 +75,7 @@ const getStartServicesNotSiem = jest.fn().mockReturnValue([
       indexPatterns: {
         indexPatternsServiceFactory: () => ({
           getIdsWithTitle: () =>
-            new Promise((rs) => rs(mockDataViews.filter((v) => v.id !== DEFAULT_INDEX_PATTERN_ID))),
+            new Promise((rs) => rs(mockDataViews.filter((v) => v.id !== DEFAULT_DATA_VIEW_ID))),
           get: () => new Promise((rs) => rs(mockPattern)),
           createAndSave: () => new Promise((rs) => rs(mockPattern)),
           updateSavedObject: () => new Promise((rs) => rs(mockPattern)),
@@ -86,13 +86,13 @@ const getStartServicesNotSiem = jest.fn().mockReturnValue([
 ] as unknown) as StartServicesAccessor<StartPlugins>;
 
 const mockDataViewsTransformed = {
-  defaultIndexPattern: {
+  defaultDataView: {
     id: 'security-solution',
     patternList: ['apm-*-transaction*', 'traces-apm*'],
     title:
       'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,ml_host_risk_score_*,.siem-signals-default',
   },
-  kibanaIndexPatterns: [
+  kibanaDataViews: [
     {
       id: 'metrics-*',
       patternList: ['metrics-*'],
@@ -129,34 +129,34 @@ describe('sourcerer route', () => {
   });
 
   test('returns sourcerer formatted Data Views when SIEM Data View does NOT exist', async () => {
-    createSourcererIndexPatternRoute(server.router, getStartServicesNotSiem);
+    createSourcererDataViewRoute(server.router, getStartServicesNotSiem);
     const response = await server.inject(getSourcererRequest(mockPatternList), context);
     expect(response.status).toEqual(200);
     expect(response.body).toEqual(mockDataViewsTransformed);
   });
 
   test('returns sourcerer formatted Data Views when SIEM Data View exists', async () => {
-    createSourcererIndexPatternRoute(server.router, getStartServices);
+    createSourcererDataViewRoute(server.router, getStartServices);
     const response = await server.inject(getSourcererRequest(mockPatternList), context);
     expect(response.status).toEqual(200);
     expect(response.body).toEqual(mockDataViewsTransformed);
   });
 
   test('returns sourcerer formatted Data Views when SIEM Data View exists and patternList input is changed', async () => {
-    createSourcererIndexPatternRoute(server.router, getStartServices);
+    createSourcererDataViewRoute(server.router, getStartServices);
     mockPatternList.shift();
     const response = await server.inject(getSourcererRequest(mockPatternList), context);
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
-      defaultIndexPattern: {
+      defaultDataView: {
         id: 'security-solution',
         patternList: ['traces-apm*', 'auditbeat-*'],
         title:
           'traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,ml_host_risk_score_*,.siem-signals-default',
       },
-      kibanaIndexPatterns: [
-        mockDataViewsTransformed.kibanaIndexPatterns[0],
-        mockDataViewsTransformed.kibanaIndexPatterns[1],
+      kibanaDataViews: [
+        mockDataViewsTransformed.kibanaDataViews[0],
+        mockDataViewsTransformed.kibanaDataViews[1],
         {
           id: 'security-solution',
           patternList: ['traces-apm*', 'auditbeat-*'],

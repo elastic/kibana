@@ -60,7 +60,7 @@ import {
 } from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-import { KibanaIndexPattern } from './common/store/sourcerer/model';
+import { KibanaDataView } from './common/store/sourcerer/model';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -347,19 +347,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         signal = { name: null };
       }
       const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      let defaultIndexPattern: KibanaIndexPattern;
-      let kibanaIndexPatterns: KibanaIndexPattern[];
+      let defaultDataView: KibanaDataView;
+      let kibanaDataViews: KibanaDataView[];
       try {
         // check for/generate default Security Solution Kibana index pattern
         const a = await coreStart.http.fetch(SOURCERER_API_URL, {
           method: 'POST',
           body: JSON.stringify({ patternList: [...configPatternList, signal.name] }),
         });
-        defaultIndexPattern = a.defaultIndexPattern;
-        kibanaIndexPatterns = a.kibanaIndexPatterns;
+        defaultDataView = a.defaultDataView;
+        kibanaDataViews = a.kibanaDataViews;
       } catch (error) {
-        defaultIndexPattern = { id: null, ...error };
-        kibanaIndexPatterns = [];
+        defaultDataView = { id: null, ...error };
+        kibanaDataViews = [];
       }
       const { createStore, createInitialState } = await this.lazyApplicationDependencies();
 
@@ -402,8 +402,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...subPlugins.management.store.initialState,
           },
           {
-            defaultIndexPattern,
-            kibanaIndexPatterns,
+            defaultDataView,
+            kibanaDataViews,
             signalIndexName: signal.name,
             enableExperimental: this.experimentalFeatures,
           }

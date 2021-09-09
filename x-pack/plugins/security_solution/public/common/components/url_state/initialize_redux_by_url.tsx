@@ -24,7 +24,7 @@ import { normalizeTimeRange } from './normalize_time_range';
 import { DispatchSetInitialStateFromUrl, SetInitialStateFromUrl } from './types';
 import { queryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
-import { DEFAULT_INDEX_PATTERN_ID } from '../../../../common/constants';
+import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 
 export const dispatchSetInitialStateFromUrl = (
   dispatch: Dispatch
@@ -51,7 +51,7 @@ export const dispatchSetInitialStateFromUrl = (
           dispatch(
             sourcererActions.setSelectedKip({
               id: scope,
-              selectedKipId: sourcererState[scope]?.id ?? DEFAULT_INDEX_PATTERN_ID,
+              selectedDataViewId: sourcererState[scope]?.id ?? DEFAULT_DATA_VIEW_ID,
               selectedPatterns: sourcererState[scope]?.selectedPatterns,
             })
           );

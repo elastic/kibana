@@ -33,7 +33,7 @@ interface Props {
 export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
   const dispatch = useDispatch();
   const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
-  const { kipId, selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
+  const { dataViewId, selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
     getSelectedKip(state, SourcererScopeName.timeline)
   );
 
@@ -47,14 +47,14 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
       dispatch(
         sourcererActions.setSelectedKip({
           id: SourcererScopeName.timeline,
-          selectedKipId: kipId,
+          selectedDataViewId: dataViewId,
           selectedPatterns,
         })
       );
       dispatch(
         timelineActions.createTimeline({
           columns: defaultHeaders,
-          dataViewId: kipId,
+          dataViewId,
           id,
           indexNames: selectedPatterns,
           show,
@@ -83,7 +83,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
     [
       dispatch,
       globalTimeRange,
-      kipId,
+      dataViewId,
       selectedPatterns,
       setTimelineFullScreen,
       timelineFullScreen,

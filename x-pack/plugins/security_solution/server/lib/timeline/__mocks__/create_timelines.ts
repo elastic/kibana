@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_INDEX_PATTERN_ID } from '../../../../common/constants';
+import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 
 export const mockTemplate = {
   columns: [
@@ -195,7 +195,7 @@ export const mockTimeline = {
     { columnHeaderType: 'not-filtered', id: 'user.name' },
   ],
   dataProviders: [],
-  dataViewId: DEFAULT_INDEX_PATTERN_ID,
+  dataViewId: DEFAULT_DATA_VIEW_ID,
   description: '',
   eventType: 'all',
   excludedRowRendererIds: [],

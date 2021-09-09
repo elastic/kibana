@@ -27,16 +27,16 @@ export const useInitSourcerer = (
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
-  const getDefaultIndexPatternSelector = useMemo(
-    () => sourcererSelectors.defaultIndexPatternSelector(),
+  const getDefaultDataViewSelector = useMemo(
+    () => sourcererSelectors.defaultDataViewSelector(),
     []
   );
-  const defaultIndexPattern = useDeepEqualSelector(getDefaultIndexPatternSelector);
+  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
 
   const { addError } = useAppToasts();
 
   useEffect(() => {
-    const { id, ...rest } = defaultIndexPattern;
+    const { id, ...rest } = defaultDataView;
     if (id === null) {
       // if id is null, rest is error
       addError(rest, {
@@ -49,7 +49,7 @@ export const useInitSourcerer = (
         }),
       });
     }
-  }, [addError, defaultIndexPattern]);
+  }, [addError, defaultDataView]);
 
   const getSignalIndexNameSelector = useMemo(
     () => sourcererSelectors.signalIndexNameSelector(),
@@ -84,9 +84,9 @@ export const useInitSourcerer = (
       dispatch(
         sourcererActions.setSelectedKip({
           id: SourcererScopeName.timeline,
-          selectedKipId: defaultIndexPattern.id,
+          selectedDataViewId: defaultDataView.id,
           selectedPatterns: getScopePatternListSelection(
-            defaultIndexPattern,
+            defaultDataView,
             SourcererScopeName.timeline,
             signalIndexName
           ),
@@ -101,9 +101,9 @@ export const useInitSourcerer = (
       dispatch(
         sourcererActions.setSelectedKip({
           id: SourcererScopeName.timeline,
-          selectedKipId: defaultIndexPattern.id,
+          selectedDataViewId: defaultDataView.id,
           selectedPatterns: getScopePatternListSelection(
-            defaultIndexPattern,
+            defaultDataView,
             SourcererScopeName.timeline,
             signalIndexNameSelector
           ),
@@ -112,7 +112,7 @@ export const useInitSourcerer = (
     }
   }, [
     activeTimeline,
-    defaultIndexPattern,
+    defaultDataView,
     dispatch,
     loadingSignalIndex,
     signalIndexName,
@@ -131,9 +131,9 @@ export const useInitSourcerer = (
       dispatch(
         sourcererActions.setSelectedKip({
           id: SourcererScopeName.detections,
-          selectedKipId: defaultIndexPattern.id,
+          selectedDataViewId: defaultDataView.id,
           selectedPatterns: getScopePatternListSelection(
-            defaultIndexPattern,
+            defaultDataView,
             SourcererScopeName.detections,
             signalIndexName
           ),
@@ -147,16 +147,16 @@ export const useInitSourcerer = (
       initialDetectionSourcerer.current = false;
       sourcererActions.setSelectedKip({
         id: SourcererScopeName.detections,
-        selectedKipId: defaultIndexPattern.id,
+        selectedDataViewId: defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
-          defaultIndexPattern,
+          defaultDataView,
           SourcererScopeName.detections,
           signalIndexNameSelector
         ),
       });
     }
   }, [
-    defaultIndexPattern,
+    defaultDataView,
     dispatch,
     isSignalIndexExists,
     scopeId,

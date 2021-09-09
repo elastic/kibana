@@ -167,7 +167,7 @@ export const makeMapStateToProps = () => {
         (acc, scope) => ({
           ...acc,
           [scope]: {
-            id: sourcerer[scope]?.selectedKipId,
+            id: sourcerer[scope]?.selectedDataViewId,
             selectedPatterns: sourcerer[scope]?.selectedPatterns,
           },
         }),

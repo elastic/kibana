@@ -8,34 +8,33 @@
 import { State } from '../../../../common/store';
 import { sourcererSelectors } from '../../../../common/store/selectors';
 import {
-  KibanaIndexPattern,
-  KibanaIndexPatterns,
+  KibanaDataView,
   ManageScope,
   SourcererScopeName,
 } from '../../../../common/store/sourcerer/model';
 
 export interface SourcererScopeSelector {
-  defaultIndexPattern: KibanaIndexPattern;
-  kibanaIndexPatterns: KibanaIndexPatterns;
+  defaultDataView: KibanaDataView;
+  kibanaDataViews: KibanaDataView[];
   signalIndexName: string | null;
   sourcererScope: ManageScope;
 }
 
 export const getSourcererScopeSelector = () => {
-  const getKibanaIndexPatternsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
-  const getDefaultIndexPatternSelector = sourcererSelectors.defaultIndexPatternSelector();
+  const getKibanaDataViewsSelector = sourcererSelectors.kibanaDataViewsSelector();
+  const getDefaultDataViewSelector = sourcererSelectors.defaultDataViewSelector();
   const getScopeIdSelector = sourcererSelectors.scopeIdSelector();
   const getSignalIndexNameSelector = sourcererSelectors.signalIndexNameSelector();
 
   return (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
-    const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
-    const defaultIndexPattern = getDefaultIndexPatternSelector(state);
+    const kibanaDataViews = getKibanaDataViewsSelector(state);
+    const defaultDataView = getDefaultDataViewSelector(state);
     const scope = getScopeIdSelector(state, scopeId);
     const signalIndexName = getSignalIndexNameSelector(state);
 
     return {
-      defaultIndexPattern,
-      kibanaIndexPatterns,
+      defaultDataView,
+      kibanaDataViews,
       signalIndexName,
       sourcererScope: scope,
     };

@@ -8,26 +8,26 @@
 import { State } from '../../../common/store';
 import { sourcererSelectors } from '../../../common/store/sourcerer';
 import {
-  KibanaIndexPatterns,
+  KibanaDataView,
   ManageScope,
   SourcererScopeName,
 } from '../../../common/store/sourcerer/model';
 
 export interface DefaultSourcererSelector {
-  kibanaIndexPatterns: KibanaIndexPatterns;
+  kibanaDataViews: KibanaDataView[];
   sourcererScope: ManageScope;
 }
 
 export const getDefaultSourcererSelector = () => {
-  const getKibanaIndexPatternsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
+  const getKibanaDataViewsSelector = sourcererSelectors.kibanaDataViewsSelector();
   const getScopesSelector = sourcererSelectors.scopesSelector();
 
   const mapStateToProps = (state: State): DefaultSourcererSelector => {
-    const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
+    const kibanaDataViews = getKibanaDataViewsSelector(state);
     const scope = getScopesSelector(state)[SourcererScopeName.default];
 
     return {
-      kibanaIndexPatterns,
+      kibanaDataViews,
       sourcererScope: scope,
     };
   };

@@ -11,7 +11,7 @@ import { getDefaultSourcererSelector } from './selector';
 
 jest.mock('../../../common/store/sourcerer', () => ({
   sourcererSelectors: {
-    kibanaIndexPatternsSelector: jest.fn().mockReturnValue(jest.fn()),
+    kibanaDataViewsSelector: jest.fn().mockReturnValue(jest.fn()),
     scopesSelector: jest.fn().mockReturnValue(jest.fn().mockReturnValue({ default: '' })),
   },
 }));
@@ -20,7 +20,7 @@ describe('getDefaultSourcererSelector', () => {
   test('Returns correct format', () => {
     const mockMapStateToProps = getDefaultSourcererSelector();
     const result = mockMapStateToProps({} as State);
-    expect(result).toHaveProperty('kibanaIndexPatterns');
+    expect(result).toHaveProperty('kibanaDataViews');
     expect(result).toHaveProperty('sourcererScope');
   });
 });

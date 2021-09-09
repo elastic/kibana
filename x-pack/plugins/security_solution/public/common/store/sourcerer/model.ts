@@ -32,7 +32,7 @@ export interface ManageScope {
   indicesExist: boolean | undefined | null;
   loading: boolean;
   runtimeMappings: MappingRuntimeFields;
-  selectedKipId: string;
+  selectedDataViewId: string;
   selectedPatterns: string[];
 }
 
@@ -44,7 +44,7 @@ export type SourcererScopeById = {
   [id in SourcererScopeName]: ManageScope;
 };
 
-export interface KibanaIndexPattern {
+export interface KibanaDataView {
   /** Uniquely identifies a Kibana Index Pattern */
   id: string;
   /**  list of active patterns that return data  */
@@ -56,12 +56,12 @@ export interface KibanaIndexPattern {
   title: string;
 }
 
-export type KibanaIndexPatterns = KibanaIndexPattern[];
+export type KibanaDataViews = KibanaDataView[];
 
 // ManageSourcerer
 export interface SourcererModel {
-  defaultIndexPattern: KibanaIndexPattern;
-  kibanaIndexPatterns: KibanaIndexPatterns;
+  defaultDataView: KibanaDataView;
+  kibanaDataViews: KibanaDataView[];
   signalIndexName: string | null;
   sourcererScopes: SourcererScopeById;
 }
@@ -74,17 +74,17 @@ export const initSourcererScope = {
   indicesExist: true,
   loading: false,
   runtimeMappings: {},
-  selectedKipId: '',
+  selectedDataViewId: '',
   selectedPatterns: [],
 };
 
 export const initialSourcererState: SourcererModel = {
-  defaultIndexPattern: {
+  defaultDataView: {
     id: '',
     title: '',
     patternList: [],
   },
-  kibanaIndexPatterns: [],
+  kibanaDataViews: [],
   signalIndexName: null,
   sourcererScopes: {
     [SourcererScopeName.default]: {

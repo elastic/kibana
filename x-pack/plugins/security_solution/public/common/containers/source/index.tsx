@@ -214,7 +214,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const searchSubscription$ = useRef(new Subscription());
   const dispatch = useDispatch();
   const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
-  const { kipId, patternList, selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
+  const { dataViewId, patternList, selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
     getSelectedKip(state, sourcererScopeName)
   );
   const { addError, addWarning } = useAppToasts();
@@ -227,13 +227,17 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   const indexFieldsSearch = useCallback(
-    (selectedKipId: string) => {
+    (selectedDataViewId: string) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { kipId: selectedKipId, indices: patternList, onlyCheckIfIndicesExist: false },
+            {
+              dataViewId: selectedDataViewId,
+              indices: patternList,
+              onlyCheckIfIndicesExist: false,
+            },
             {
               abortSignal: abortCtrl.current.signal,
               strategy: 'indexFields',
@@ -261,7 +265,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                       loading: false,
                       runtimeMappings: response.runtimeMappings,
                       selectedPatterns: newSelectedPatterns,
-                      selectedKipId,
+                      selectedDataViewId,
                     },
                   })
                 );
@@ -298,14 +302,14 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
   const refKipId = useRef('');
   useEffect(() => {
-    if (kipId != null && kipId !== refKipId.current) {
-      indexFieldsSearch(kipId);
+    if (dataViewId != null && dataViewId !== refKipId.current) {
+      indexFieldsSearch(dataViewId);
     }
-    refKipId.current = kipId;
+    refKipId.current = dataViewId;
     return () => {
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kipId]);
+  }, [dataViewId]);
 };

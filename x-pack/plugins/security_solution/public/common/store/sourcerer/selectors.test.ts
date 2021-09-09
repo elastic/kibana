@@ -16,7 +16,7 @@ describe('Sourcerer selectors', () => {
       const mapStateToProps = getSourcererScopeSelector();
       expect(
         mapStateToProps(mockGlobalState, SourcererScopeName.default).selectedPatterns
-      ).toEqual([...mockSourcererState.defaultIndexPattern.patternList, '-*elastic-cloud-logs-*']);
+      ).toEqual([...mockSourcererState.defaultDataView.patternList, '-*elastic-cloud-logs-*']);
     });
 
     it('Should NOT exclude elastic cloud alias when selected patterns does NOT include "logs-*" as an alias', () => {

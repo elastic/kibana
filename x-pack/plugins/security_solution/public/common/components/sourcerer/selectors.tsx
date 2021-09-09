@@ -14,20 +14,20 @@ export interface SourcererScopeSelector extends Omit<SourcererModel, 'sourcererS
 }
 
 export const getSourcererScopeSelector = () => {
-  const getKibanaIndexPatternsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
-  const getDefaultIndexPatternSelector = sourcererSelectors.defaultIndexPatternSelector();
+  const getKibanaDataViewsSelector = sourcererSelectors.kibanaDataViewsSelector();
+  const getDefaultDataViewSelector = sourcererSelectors.defaultDataViewSelector();
   const getSignalIndexNameSelector = sourcererSelectors.signalIndexNameSelector();
   const getScopesSelector = sourcererSelectors.scopesSelector();
 
   return (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
-    const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
-    const defaultIndexPattern = getDefaultIndexPatternSelector(state);
+    const kibanaDataViews = getKibanaDataViewsSelector(state);
+    const defaultDataView = getDefaultDataViewSelector(state);
     const signalIndexName = getSignalIndexNameSelector(state);
     const scope = getScopesSelector(state)[scopeId];
 
     return {
-      defaultIndexPattern,
-      kibanaIndexPatterns,
+      defaultDataView,
+      kibanaDataViews,
       signalIndexName,
       sourcererScope: scope,
     };

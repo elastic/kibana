@@ -157,8 +157,8 @@ describe('Sourcerer Hooks', () => {
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_KIP',
         payload: {
           id: 'timeline',
-          selectedKipId: mockSourcererState.defaultIndexPattern.id,
-          selectedPatterns: mockSourcererState.defaultIndexPattern.patternList,
+          selectedDataViewId: mockSourcererState.defaultDataView.id,
+          selectedPatterns: mockSourcererState.defaultDataView.patternList,
         },
       });
     });
@@ -182,7 +182,7 @@ describe('Sourcerer Hooks', () => {
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_KIP',
         payload: {
           id: 'detections',
-          selectedKipId: mockSourcererState.defaultIndexPattern.id,
+          selectedDataViewId: mockSourcererState.defaultDataView.id,
           selectedPatterns: [DEFAULT_SIGNALS_INDEX],
         },
       });

@@ -510,7 +510,7 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
       sourcererActions.setSelectedKip({
         id: SourcererScopeName.timeline,
         selectedPatterns: newIndexNames,
-        selectedKipId: newKipId,
+        selectedDataViewId: newKipId,
       })
     );
   },

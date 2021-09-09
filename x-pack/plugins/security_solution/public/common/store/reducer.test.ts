@@ -7,7 +7,7 @@
 
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { createInitialState } from './reducer';
-import { DEFAULT_INDEX_PATTERN, DEFAULT_INDEX_PATTERN_ID } from '../../../common/constants';
+import { DEFAULT_INDEX_PATTERN, DEFAULT_DATA_VIEW_ID } from '../../../common/constants';
 
 jest.mock('../lib/kibana', () => ({
   KibanaServices: {
@@ -18,15 +18,15 @@ jest.mock('../lib/kibana', () => ({
 describe('createInitialState', () => {
   describe('sourcerer -> default -> indicesExist', () => {
     const defaultState = {
-      defaultIndexPattern: {
-        id: DEFAULT_INDEX_PATTERN_ID,
+      defaultDataView: {
+        id: DEFAULT_DATA_VIEW_ID,
         title: DEFAULT_INDEX_PATTERN.join(','),
         patternList: DEFAULT_INDEX_PATTERN,
       },
       enableExperimental: parseExperimentalConfigValue([]),
-      kibanaIndexPatterns: [
+      kibanaDataViews: [
         {
-          id: DEFAULT_INDEX_PATTERN_ID,
+          id: DEFAULT_DATA_VIEW_ID,
           title: DEFAULT_INDEX_PATTERN.join(','),
           patternList: DEFAULT_INDEX_PATTERN,
         },
@@ -44,7 +44,7 @@ describe('createInitialState', () => {
         {},
         {
           ...defaultState,
-          defaultIndexPattern: { id: '', title: '', patternList: [] },
+          defaultDataView: { id: '', title: '', patternList: [] },
         }
       );
 

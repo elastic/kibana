@@ -111,7 +111,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
-    const { kipId, selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
+    const { dataViewId, selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
       getSelectedKip(state, SourcererScopeName.timeline)
     );
 
@@ -207,7 +207,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
               columns: defaultHeaders,
-              dataViewId: kipId,
+              dataViewId,
               indexNames: selectedPatterns,
               show: false,
             })
@@ -217,7 +217,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         await deleteTimelinesByIds(timelineIds);
         refetch();
       },
-      [timelineSavedObjectId, refetch, dispatch, kipId, selectedPatterns]
+      [timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(

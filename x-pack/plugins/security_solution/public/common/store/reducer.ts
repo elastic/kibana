@@ -21,7 +21,7 @@ import { SecuritySubPlugins } from '../../app/types';
 import { ManagementPluginReducer } from '../../management';
 import { State } from './types';
 import { AppAction } from './actions';
-import { KibanaIndexPattern, KibanaIndexPatterns, SourcererScopeName } from './sourcerer/model';
+import { KibanaDataView, SourcererScopeName } from './sourcerer/model';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 
@@ -36,29 +36,29 @@ export type SubPluginsInitReducer = HostsPluginReducer &
 export const createInitialState = (
   pluginsInitState: SecuritySubPlugins['store']['initialState'],
   {
-    defaultIndexPattern,
-    kibanaIndexPatterns,
+    defaultDataView,
+    kibanaDataViews,
     signalIndexName,
     enableExperimental,
   }: {
-    defaultIndexPattern: KibanaIndexPattern;
-    kibanaIndexPatterns: KibanaIndexPatterns;
+    defaultDataView: KibanaDataView;
+    kibanaDataViews: KibanaDataView[];
     signalIndexName: string | null;
     enableExperimental: ExperimentalFeatures;
   }
 ): PreloadedState<State> => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
-      defaultIndexPattern,
+      defaultDataView,
       SourcererScopeName.default,
       signalIndexName
     ),
     [SourcererScopeName.detections]: getScopePatternListSelection(
-      defaultIndexPattern,
+      defaultDataView,
       SourcererScopeName.detections,
       signalIndexName
     ),
-    [SourcererScopeName.timeline]: defaultIndexPattern.patternList,
+    [SourcererScopeName.timeline]: defaultDataView.patternList,
   };
   const preloadedState: PreloadedState<State> = {
     app: { ...initialAppState, enableExperimental },
@@ -71,25 +71,25 @@ export const createInitialState = (
         ...sourcererModel.initialSourcererState.sourcererScopes,
         [SourcererScopeName.default]: {
           ...sourcererModel.initialSourcererState.sourcererScopes.default,
-          selectedKipId: defaultIndexPattern.id,
+          selectedDataViewId: defaultDataView.id,
           selectedPatterns: initialPatterns[SourcererScopeName.default],
           indicesExist: initialPatterns[SourcererScopeName.default].length > 0,
         },
         [SourcererScopeName.detections]: {
           ...sourcererModel.initialSourcererState.sourcererScopes.detections,
-          selectedKipId: defaultIndexPattern.id,
+          selectedDataViewId: defaultDataView.id,
           selectedPatterns: initialPatterns[SourcererScopeName.detections],
           indicesExist: initialPatterns[SourcererScopeName.detections].length > 0,
         },
         [SourcererScopeName.timeline]: {
           ...sourcererModel.initialSourcererState.sourcererScopes.timeline,
-          selectedKipId: defaultIndexPattern.id,
+          selectedDataViewId: defaultDataView.id,
           selectedPatterns: initialPatterns[SourcererScopeName.timeline],
           indicesExist: initialPatterns[SourcererScopeName.timeline].length > 0,
         },
       },
-      defaultIndexPattern,
-      kibanaIndexPatterns,
+      defaultDataView,
+      kibanaDataViews,
       signalIndexName,
     },
   };

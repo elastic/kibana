@@ -6,9 +6,9 @@
  */
 
 import { isEmpty } from 'lodash';
-import { KibanaIndexPattern, SourcererModel, SourcererScopeName } from './model';
+import { KibanaDataView, SourcererModel, SourcererScopeName } from './model';
 import { TimelineEventsType } from '../../../../common';
-import { DEFAULT_INDEX_PATTERN_ID } from '../../../../common/constants';
+import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 
 export interface Args {
   eventType?: TimelineEventsType;
@@ -18,14 +18,14 @@ export interface Args {
 }
 
 export const getScopePatternListSelection = (
-  theKip: KibanaIndexPattern | undefined,
+  theDataView: KibanaDataView | undefined,
   sourcererScope: SourcererScopeName,
   signalIndexName: SourcererModel['signalIndexName']
 ): string[] => {
-  let patternList: string[] = theKip != null ? theKip.patternList : [];
+  let patternList: string[] = theDataView != null ? theDataView.patternList : [];
 
   // when our SIEM KIP is set, here are the defaults
-  if (theKip && theKip.id === DEFAULT_INDEX_PATTERN_ID) {
+  if (theDataView && theDataView.id === DEFAULT_DATA_VIEW_ID) {
     if (sourcererScope === SourcererScopeName.default) {
       patternList = patternList.filter((index) => index !== signalIndexName).sort();
     } else if (sourcererScope === SourcererScopeName.detections) {
@@ -36,7 +36,7 @@ export const getScopePatternListSelection = (
 };
 
 // TODO: Steph/sourcerer eventType will be alerts only, when ui updates delete raw
-export const defaultIndexPatternByEventType = ({
+export const defaultDataViewByEventType = ({
   state,
   eventType,
 }: {
@@ -45,7 +45,7 @@ export const defaultIndexPatternByEventType = ({
 }) => {
   const {
     signalIndexName,
-    defaultIndexPattern: { id, patternList },
+    defaultDataView: { id, patternList },
   } = state;
 
   if (!isEmpty(signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
@@ -53,5 +53,5 @@ export const defaultIndexPatternByEventType = ({
   } else if (eventType === 'raw') {
     return patternList.filter((index) => index !== signalIndexName).sort();
   }
-  return { selectedPatterns: patternList.sort(), selectedKipId: id };
+  return { selectedPatterns: patternList.sort(), selectedDataViewId: id };
 };

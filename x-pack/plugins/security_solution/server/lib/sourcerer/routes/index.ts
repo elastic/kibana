@@ -9,7 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { StartServicesAccessor } from 'kibana/server';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import {
-  DEFAULT_INDEX_PATTERN_ID,
+  DEFAULT_DATA_VIEW_ID,
   DEFAULT_TIME_FIELD,
   SOURCERER_API_URL,
 } from '../../../../common/constants';
@@ -19,7 +19,7 @@ import { sourcererSchema } from './schema';
 import { StartPlugins } from '../../../plugin';
 import { findExistingIndices } from './helpers';
 
-export const createSourcererIndexPatternRoute = (
+export const createSourcererDataViewRoute = (
   router: SecuritySolutionPluginRouter,
   getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
@@ -42,36 +42,36 @@ export const createSourcererIndexPatternRoute = (
             data: { indexPatterns },
           },
         ] = await getStartServices();
-        const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
+        const dataViewService = await indexPatterns.indexPatternsServiceFactory(
           context.core.savedObjects.client,
           context.core.elasticsearch.client.asInternalUser
         );
 
-        const allKips = await indexPatternsService.getIdsWithTitle();
-        const patternId = DEFAULT_INDEX_PATTERN_ID;
+        const allDataViews = await dataViewService.getIdsWithTitle();
+        const patternId = DEFAULT_DATA_VIEW_ID;
         const { patternList } = request.body;
-        const ssKip = allKips.find((v) => v.id === patternId);
-        let defaultIndexPattern;
+        const siemDataView = allDataViews.find((v) => v.id === patternId);
+        let defaultDataView;
         const patternListAsTitle = patternList.join();
 
-        if (ssKip == null) {
-          defaultIndexPattern = await indexPatternsService.createAndSave({
+        if (siemDataView == null) {
+          defaultDataView = await dataViewService.createAndSave({
             id: patternId,
             title: patternListAsTitle,
             timeFieldName: DEFAULT_TIME_FIELD,
           });
           // type thing here, should never happen
-          allKips.push({ ...defaultIndexPattern, id: defaultIndexPattern.id ?? patternId });
+          allDataViews.push({ ...defaultDataView, id: defaultDataView.id ?? patternId });
         } else {
-          defaultIndexPattern = { ...ssKip, id: ssKip.id ?? '' };
-          if (patternListAsTitle !== defaultIndexPattern.title) {
-            const wholeKip = await indexPatternsService.get(defaultIndexPattern.id);
-            wholeKip.title = patternListAsTitle;
-            await indexPatternsService.updateSavedObject(wholeKip);
+          defaultDataView = { ...siemDataView, id: siemDataView.id ?? '' };
+          if (patternListAsTitle !== defaultDataView.title) {
+            const wholeDataView = await dataViewService.get(defaultDataView.id);
+            wholeDataView.title = patternListAsTitle;
+            await dataViewService.updateSavedObject(wholeDataView);
           }
         }
 
-        const patternLists: string[][] = allKips.map(({ title }) => title.split(','));
+        const patternLists: string[][] = allDataViews.map(({ title }) => title.split(','));
         const activePatternBools: boolean[][] = await Promise.all(
           patternLists.map((pl) =>
             findExistingIndices(pl, context.core.elasticsearch.client.asCurrentUser)
@@ -80,13 +80,13 @@ export const createSourcererIndexPatternRoute = (
         const activePatternLists = patternLists.map((pl, i) =>
           pl.filter((pattern, j) => activePatternBools[i][j])
         );
-        const kibanaIndexPatterns = allKips.map((kip, i) => ({
+        const kibanaDataViews = allDataViews.map((kip, i) => ({
           ...kip,
           patternList: activePatternLists[i],
         }));
         const body = {
-          defaultIndexPattern: kibanaIndexPatterns.find((p) => p.id === patternId) ?? {},
-          kibanaIndexPatterns,
+          defaultDataView: kibanaDataViews.find((p) => p.id === patternId) ?? {},
+          kibanaDataViews,
         };
         return response.ok({ body });
       } catch (err) {

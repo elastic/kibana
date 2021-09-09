@@ -8,22 +8,16 @@
 import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
 import { State } from '../types';
-import {
-  KibanaIndexPattern,
-  KibanaIndexPatterns,
-  ManageScope,
-  SourcererScopeById,
-  SourcererScopeName,
-} from './model';
+import { KibanaDataView, ManageScope, SourcererScopeById, SourcererScopeName } from './model';
 
-export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): KibanaIndexPatterns =>
-  sourcerer.kibanaIndexPatterns;
+export const sourcererKibanaDataViewsSelector = ({ sourcerer }: State): KibanaDataView[] =>
+  sourcerer.kibanaDataViews;
 
 export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string | null =>
   sourcerer.signalIndexName;
 
-export const sourcererDefaultIndexPatternSelector = ({ sourcerer }: State): KibanaIndexPattern =>
-  sourcerer.defaultIndexPattern;
+export const sourcererDefaultDataViewSelector = ({ sourcerer }: State): KibanaDataView =>
+  sourcerer.defaultDataView;
 
 export const sourcererScopeIdSelector = (
   { sourcerer }: State,
@@ -37,39 +31,40 @@ export const sourcererScopesSelector = ({ sourcerer }: State): SourcererScopeByI
 
 export const scopesSelector = () => createSelector(sourcererScopesSelector, (scopes) => scopes);
 
-export const kibanaIndexPatternsSelector = () =>
-  createSelector(sourcererKibanaIndexPatternsSelector, (patterns) => patterns);
+export const kibanaDataViewsSelector = () =>
+  createSelector(sourcererKibanaDataViewsSelector, (patterns) => patterns);
 
 export const signalIndexNameSelector = () =>
   createSelector(sourcererSignalIndexNameSelector, (signalIndexName) => signalIndexName);
 
-export const defaultIndexPatternSelector = () =>
-  createSelector(sourcererDefaultIndexPatternSelector, (patterns) => patterns);
+export const defaultDataViewSelector = () =>
+  createSelector(sourcererDefaultDataViewSelector, (patterns) => patterns);
 
 export interface SelectedKip {
-  kipId: string;
+  dataViewId: string;
   patternList: string[];
   selectedPatterns: string[];
 }
 export const getSelectedKipSelector = () => {
   const getScopeSelector = scopeIdSelector();
-  const getDefaultIndexPatternSelector = defaultIndexPatternSelector();
-  const getKibanaIndexPatternsSelector = kibanaIndexPatternsSelector();
+  const getDefaultDataViewSelector = defaultDataViewSelector();
+  const getKibanaDataViewsSelector = kibanaDataViewsSelector();
 
   return (state: State, scopeId: SourcererScopeName): SelectedKip => {
     const scope = getScopeSelector(state, scopeId);
-    const defaultIndexPattern = getDefaultIndexPatternSelector(state);
-    const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
-    const kipId = scope.selectedKipId === null ? defaultIndexPattern.id : scope.selectedKipId;
-    const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
+    const defaultDataView = getDefaultDataViewSelector(state);
+    const kibanaDataViews = getKibanaDataViewsSelector(state);
+    const dataViewId =
+      scope.selectedDataViewId === null ? defaultDataView.id : scope.selectedDataViewId;
+    const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
 
-    const patternList = theKip != null ? theKip.title.split(',') : [];
+    const patternList = theDataView != null ? theDataView.title.split(',') : [];
     const selectedPatterns =
-      scope.selectedPatterns.length === 0 && theKip != null
-        ? theKip.patternList
+      scope.selectedPatterns.length === 0 && theDataView != null
+        ? theDataView.patternList
         : scope.selectedPatterns;
     return {
-      kipId,
+      dataViewId,
       // all patterns in KIP
       patternList,
       // selected patterns in KIP
@@ -89,7 +84,7 @@ export const getSourcererScopeSelector = () => {
       : selectedPatterns;
   });
 
-  const getIndexPattern = memoizeOne(
+  const getDataView = memoizeOne(
     (indexPattern, title) => ({
       ...indexPattern,
       title,
@@ -100,7 +95,7 @@ export const getSourcererScopeSelector = () => {
   return (state: State, scopeId: SourcererScopeName): ManageScope => {
     const scope = getScopeIdSelector(state, scopeId);
     const selectedPatterns = getSelectedPatterns(scope.selectedPatterns);
-    const indexPattern = getIndexPattern(scope.indexPattern, selectedPatterns.join());
+    const indexPattern = getDataView(scope.indexPattern, selectedPatterns.join());
 
     return {
       ...scope,

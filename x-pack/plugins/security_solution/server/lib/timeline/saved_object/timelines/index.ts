@@ -9,7 +9,7 @@ import { getOr } from 'lodash/fp';
 
 import { SavedObjectsFindOptions } from '../../../../../../../../src/core/server';
 import {
-  DEFAULT_INDEX_PATTERN_ID,
+  DEFAULT_DATA_VIEW_ID,
   defaultDataViewRef,
   UNAUTHENTICATED_USER,
 } from '../../../../../common/constants';
@@ -398,7 +398,7 @@ export const persistTimeline = async (
           pickSavedTimeline(timelineId, timeline, userInfo),
           {
             references: [
-              { ...defaultDataViewRef, id: timeline.dataViewId || DEFAULT_INDEX_PATTERN_ID },
+              { ...defaultDataViewRef, id: timeline.dataViewId || DEFAULT_DATA_VIEW_ID },
             ],
           }
         )
@@ -416,9 +416,7 @@ export const persistTimeline = async (
       pickSavedTimeline(timelineId, timeline, userInfo),
       {
         version: version || undefined,
-        references: [
-          { ...defaultDataViewRef, id: timeline.dataViewId || DEFAULT_INDEX_PATTERN_ID },
-        ],
+        references: [{ ...defaultDataViewRef, id: timeline.dataViewId || DEFAULT_DATA_VIEW_ID }],
       }
     );
 
@@ -472,7 +470,7 @@ const updatePartialSavedTimeline = async (
       },
       request.user
     ),
-    { references: [{ ...defaultDataViewRef, id: timeline.dataViewId || DEFAULT_INDEX_PATTERN_ID }] }
+    { references: [{ ...defaultDataViewRef, id: timeline.dataViewId || DEFAULT_DATA_VIEW_ID }] }
   );
 };
 

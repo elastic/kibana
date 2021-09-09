@@ -76,7 +76,7 @@ export const requestIndexFieldSearch = async (
       data: { indexPatterns },
     },
   ] = await getStartServices();
-  const indexPatternService = await indexPatterns.indexPatternsServiceFactory(
+  const dataViewService = await indexPatterns.indexPatternsServiceFactory(
     savedObjectsClient,
     esClient.asCurrentUser
   );
@@ -85,17 +85,17 @@ export const requestIndexFieldSearch = async (
   const indicesExist: boolean[] = await findExistingIndices(dedupeIndices, esClient.asCurrentUser);
 
   let fieldDescriptor: FieldDescriptor[][];
-  // if kipId is provided, get fields from the Kibana Data View
+  // if dataViewId is provided, get fields from the Kibana Data View
 
   let indexFields: IndexField[] = [];
   let runtimeMappings = {};
   if (!request.onlyCheckIfIndicesExist) {
-    if (request.kipId) {
+    if (request.dataViewId) {
       // TODO: Steph/sourcerer needs unit test
-      const kip = await indexPatternService.get(request.kipId);
+      const dataView = await dataViewService.get(request.dataViewId);
       // type cast because index pattern type is FieldSpec and timeline type is FieldDescriptor, same diff
-      fieldDescriptor = [Object.values(kip.fields.toSpec()) as FieldDescriptor[]];
-      runtimeMappings = kip.runtimeFieldMap;
+      fieldDescriptor = [Object.values(dataView.fields.toSpec()) as FieldDescriptor[]];
+      runtimeMappings = dataView.runtimeFieldMap;
     } else {
       fieldDescriptor = await Promise.all(
         dedupeIndices

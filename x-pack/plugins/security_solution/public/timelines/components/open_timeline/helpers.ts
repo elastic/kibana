@@ -391,7 +391,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     dispatch(
       sourcererActions.setSelectedKip({
         id: SourcererScopeName.timeline,
-        selectedKipId: timeline.dataViewId,
+        selectedDataViewId: timeline.dataViewId,
         selectedPatterns: timeline.indexNames,
         eventType: timeline.eventType,
       })

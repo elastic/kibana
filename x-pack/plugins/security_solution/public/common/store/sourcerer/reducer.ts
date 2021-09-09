@@ -10,7 +10,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { setSourcererScopeLoading, setSelectedKip, setSignalIndexName, setSource } from './actions';
 import { initialSourcererState, SourcererModel } from './model';
-import { defaultIndexPatternByEventType } from './helpers';
+import { defaultDataViewByEventType } from './helpers';
 
 export type SourcererState = SourcererModel;
 
@@ -39,7 +39,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
           ...state.sourcererScopes[id],
           ...rest,
           ...(isEmpty(payload.selectedPatterns)
-            ? defaultIndexPatternByEventType({ state, eventType })
+            ? defaultDataViewByEventType({ state, eventType })
             : {}),
         },
       },

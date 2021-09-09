@@ -11,7 +11,7 @@ import { TimelineStatus, TimelineType, SavedTimeline } from '../../../../../comm
 import { NoteSavedObject } from '../../../../../common/types/timeline/note';
 
 import { pickSavedTimeline } from './pick_saved_timeline';
-import { DEFAULT_INDEX_PATTERN_ID } from '../../../../../common/constants';
+import { DEFAULT_DATA_VIEW_ID } from '../../../../../common/constants';
 
 describe('pickSavedTimeline', () => {
   const mockDateNow = new Date('2020-04-03T23:00:00.000Z').valueOf();
@@ -39,7 +39,7 @@ describe('pickSavedTimeline', () => {
       { columnHeaderType: 'not-filtered', id: 'destination.ip' },
       { columnHeaderType: 'not-filtered', id: 'user.name' },
     ],
-    dataViewId: DEFAULT_INDEX_PATTERN_ID,
+    dataViewId: DEFAULT_DATA_VIEW_ID,
     indexNames: [
       'auditbeat-*',
       'endgame-*',

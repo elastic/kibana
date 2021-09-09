@@ -17,7 +17,7 @@ import {
   TimelineType,
   TimelineStatus,
 } from '../../../../../common/types/timeline';
-import { DEFAULT_INDEX_PATTERN_ID, defaultDataViewRef } from '../../../../../common/constants';
+import { DEFAULT_DATA_VIEW_ID, defaultDataViewRef } from '../../../../../common/constants';
 
 export const TimelineSavedObjectWithDraftRuntimeType = intersection([
   type({
@@ -83,7 +83,7 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
         ...attributes,
         dataViewId:
           (savedTimeline.references || []).find((t) => t.type === defaultDataViewRef.type)?.id ||
-          DEFAULT_INDEX_PATTERN_ID,
+          DEFAULT_DATA_VIEW_ID,
       };
     }),
     fold((errors) => {
