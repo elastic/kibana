@@ -38,6 +38,8 @@ export function ApmMainTemplate({
   const { http, docLinks } = useKibana().services;
   const basePath = http?.basePath.get();
   const { services } = useKibana<ApmPluginStartDeps>();
+  const { http, docLinks } = services;
+  const basePath = http?.basePath.get();
 
   const ObservabilityPageTemplate =
     services.observability.navigation.PageTemplate;

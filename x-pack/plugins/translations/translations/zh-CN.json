@@ -7136,7 +7136,6 @@
     "xpack.apm.transactionDetails.distribution.panelTitle": "延迟分布",
     "xpack.apm.transactionDetails.emptySelectionText": "单击并拖动以选择范围",
     "xpack.apm.transactionDetails.errorCount": "{errorCount, number} 个 {errorCount, plural, other {错误}}",
-    "xpack.apm.transactionDetails.errorsOverviewLinkTooltip": "{errorCount, plural, one {查看 1 个相关错误} other {查看 # 个相关错误}}",
     "xpack.apm.transactionDetails.noTraceParentButtonTooltip": "找不到上级追溯",
     "xpack.apm.transactionDetails.percentOfTraceLabelExplanation": "{parentType, select, transaction {事务} trace {追溯} }的百分比超过 100%，因为此{childType, select, span {跨度} transaction {事务} }比根事务花费更长的时间。",
     "xpack.apm.transactionDetails.requestMethodLabel": "请求方法",
