@@ -52,16 +52,16 @@ export const installMlModel = async (
     previousInstalledMlModelEsAssets.map((asset) => asset.id)
   );
 
-  // const installNameSuffix = `${installablePackage.version}`;
   const mlModelPath = paths.find((path) => isMlModel(path));
 
   const installedMlModels: EsAssetReference[] = [];
   if (mlModelPath !== undefined) {
     const content = getAsset(mlModelPath).toString('utf-8');
-    const mlModelObject = JSON.parse(content);
+    const pathParts = mlModelPath.split('/');
+    const modelId = pathParts[pathParts.length - 1].replace('.json', '');
 
     const mlModelRef = {
-      id: mlModelObject.model_id,
+      id: modelId,
       type: ElasticsearchAssetType.mlModel,
     };
 
@@ -69,7 +69,7 @@ export const installMlModel = async (
     await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, [mlModelRef]);
 
     const mlModel: MlModelInstallation = {
-      installationName: mlModelObject.model_id,
+      installationName: modelId,
       content,
     };
 
@@ -111,6 +111,7 @@ async function handleMlModelInstall({
   try {
     await esClient.ml.putTrainedModel({
       model_id: mlModel.installationName,
+      defer_definition_decompression: true,
       timeout: '45s',
       body: mlModel.content,
     });
