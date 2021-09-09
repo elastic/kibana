@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { Setup } from '../../helpers/setup_request';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { Setup } from '../../lib/helpers/setup_request';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem
 export async function hasHistoricalAgentData(setup: Setup) {

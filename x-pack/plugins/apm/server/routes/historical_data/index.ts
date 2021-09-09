@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { setupRequest } from '../lib/helpers/setup_request';
-import { hasHistoricalAgentData } from '../lib/services/get_services/has_historical_agent_data';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { setupRequest } from '../../lib/helpers/setup_request';
+import { createApmServerRoute } from '../create_apm_server_route';
+import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
+import { hasHistoricalAgentData } from './has_historical_agent_data';
 
 const hasDataRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/has_data',
