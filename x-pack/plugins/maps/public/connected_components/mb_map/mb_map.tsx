@@ -49,10 +49,10 @@ import {
 } from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { MapExtentState } from '../../actions';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
 import { TiledVectorLayer } from '../../classes/layers/tiled_vector_layer/tiled_vector_layer';
+import type { MapExtentState } from '../../reducers/map/types';
 
 export interface Props {
   isMapReady: boolean;
@@ -150,7 +150,7 @@ export class MbMap extends Component<Props, State> {
     }
   }, 256);
 
-  _getMapState() {
+  _getMapExtentState(): MapExtentState {
     const zoom = this.state.mbMap!.getZoom();
     const mbCenter = this.state.mbMap!.getCenter();
     const mbBounds = this.state.mbMap!.getBounds();
@@ -257,7 +257,7 @@ export class MbMap extends Component<Props, State> {
       this._loadMakiSprites(mbMap);
       this._initResizerChecker();
       this._registerMapEventListeners(mbMap);
-      this.props.onMapReady(this._getMapState());
+      this.props.onMapReady(this._getMapExtentState());
     });
   }
 
@@ -269,7 +269,7 @@ export class MbMap extends Component<Props, State> {
     mbMap.on(
       'moveend',
       _.debounce(() => {
-        this.props.extentChanged(this._getMapState());
+        this.props.extentChanged(this._getMapExtentState());
       }, 100)
     );
 
@@ -413,7 +413,7 @@ export class MbMap extends Component<Props, State> {
     // hack to update extent after zoom update finishes moving map.
     if (zoomRangeChanged) {
       setTimeout(() => {
-        this.props.extentChanged(this._getMapState());
+        this.props.extentChanged(this._getMapExtentState());
       }, 300);
     }
   }

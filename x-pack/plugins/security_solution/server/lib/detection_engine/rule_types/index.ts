@@ -7,3 +7,4 @@
 
 export { createQueryAlertType } from './query/create_query_alert_type';
 export { createIndicatorMatchAlertType } from './indicator_match/create_indicator_match_alert_type';
+export { createMlAlertType } from './ml/create_ml_alert_type';

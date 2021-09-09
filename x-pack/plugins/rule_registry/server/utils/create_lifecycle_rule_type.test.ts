@@ -198,7 +198,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.action": "open",
               "event.kind": "signal",
               "kibana.alert.duration.us": 0,
-              "kibana.alert.id": "opbeans-java",
+              "kibana.alert.instance.id": "opbeans-java",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
               "kibana.alert.rule.name": "name",
@@ -222,7 +222,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.action": "open",
               "event.kind": "signal",
               "kibana.alert.duration.us": 0,
-              "kibana.alert.id": "opbeans-node",
+              "kibana.alert.instance.id": "opbeans-node",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
               "kibana.alert.rule.name": "name",
@@ -263,6 +263,36 @@ describe('createLifecycleRuleTypeFactory', () => {
           },
         ]);
 
+        // TODO mock the resolved value before calling alertWithLifecycle again
+        const lastOpbeansNodeDoc = helpers.ruleDataClientMock
+          .getWriter()
+          .bulk.mock.calls[0][0].body?.concat()
+          .reverse()
+          .find(
+            (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
+          ) as Record<string, any>;
+
+        const stored = mapValues(lastOpbeansNodeDoc, (val) => {
+          return castArray(val);
+        });
+
+        helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
+          hits: {
+            hits: [{ fields: stored } as any],
+            total: {
+              value: 1,
+              relation: 'eq',
+            },
+          },
+          took: 0,
+          timed_out: false,
+          _shards: {
+            failed: 0,
+            successful: 1,
+            total: 1,
+          },
+        });
+
         await helpers.alertWithLifecycle([
           {
             id: 'opbeans-java',
@@ -274,6 +304,7 @@ describe('createLifecycleRuleTypeFactory', () => {
             id: 'opbeans-node',
             fields: {
               'service.name': 'opbeans-node',
+              'kibana.alert.workflow_status': 'closed',
             },
           },
         ]);
@@ -281,7 +312,6 @@ describe('createLifecycleRuleTypeFactory', () => {
 
       it('writes the correct alerts', () => {
         expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(2);
-
         const body = helpers.ruleDataClientMock.getWriter().bulk.mock.calls[1][0].body!;
 
         const documents = body.filter((op: any) => !('index' in op)) as any[];

@@ -203,7 +203,7 @@ describe('crawlDomainValidationToResult', () => {
 
     expect(crawlDomainValidationToResult(data)).toEqual({
       blockingFailure: false,
-      state: 'invalid',
+      state: 'warning',
       message: 'A warning, not failure',
     } as CrawlerDomainValidationStep);
   });

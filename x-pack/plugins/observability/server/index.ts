@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110905
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
@@ -26,8 +29,8 @@ export const config = {
       index: schema.string({ defaultValue: 'observability-annotations' }),
     }),
     unsafe: schema.object({
-      alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
-      cases: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+      alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+      cases: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
     }),
   }),
 };

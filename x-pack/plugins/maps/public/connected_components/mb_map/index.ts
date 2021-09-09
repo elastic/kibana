@@ -14,7 +14,6 @@ import {
   clearMouseCoordinates,
   mapDestroyed,
   mapExtentChanged,
-  MapExtentState,
   mapReady,
   setAreTilesLoaded,
   setMapInitError,
@@ -35,6 +34,7 @@ import { getInspectorAdapters } from '../../reducers/non_serializable_instances'
 import { MapStoreState } from '../../reducers/store';
 import { DRAW_MODE } from '../../../common';
 import { TileMetaFeature } from '../../../common/descriptor_types';
+import type { MapExtentState } from '../../reducers/map/types';
 
 function mapStateToProps(state: MapStoreState) {
   return {

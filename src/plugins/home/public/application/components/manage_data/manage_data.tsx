@@ -32,9 +32,13 @@ interface Props {
 }
 
 export const ManageData: FC<Props> = ({ addBasePath, application, features }) => {
-  if (features.length) {
-    const { trackUiMetric } = getServices();
+  const { share, trackUiMetric } = getServices();
+  const consoleHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
+  const managementHref = share.url.locators
+    .get('MANAGEMENT_APP_LOCATOR')
+    ?.useUrl({ sectionId: '' });
 
+  if (features.length) {
     const {
       management: isManagementEnabled,
       dev_tools: isDevToolsEnabled,
@@ -67,7 +71,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
                           className="kbnOverviewPageHeader__actionButton"
                           flush="both"
                           iconType="wrench"
-                          href={addBasePath('/app/dev_tools#/console')}
+                          href={consoleHref}
                         >
                           <FormattedMessage
                             id="home.manageData.devToolsButtonLabel"
@@ -86,7 +90,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
                           className="kbnOverviewPageHeader__actionButton"
                           flush="both"
                           iconType="gear"
-                          href={addBasePath('/app/management')}
+                          href={managementHref}
                         >
                           <FormattedMessage
                             id="home.manageData.stackManagementButtonLabel"

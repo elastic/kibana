@@ -64,12 +64,12 @@ export const RadioButtons = React.memo(
         <ConfigFormHeading>
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policyDetailsConfig.protectionLevel"
-            defaultMessage="Protection Level"
+            defaultMessage="Protection level"
           />
         </ConfigFormHeading>
         <EuiSpacer size="xs" />
         <RadioFlexGroup>
-          <EuiFlexItem className="no-right-margin-radio" grow={2}>
+          <EuiFlexItem className="no-right-margin-radio" grow={1}>
             <ProtectionRadio
               protection={protection}
               protectionMode={radios[0].id}

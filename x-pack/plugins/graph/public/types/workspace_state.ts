@@ -6,10 +6,13 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
+import d3 from 'd3';
+import { TargetOptions } from '../components/control_panel';
 import { FontawesomeIcon } from '../helpers/style_choices';
 import { WorkspaceField, AdvancedSettings } from './app_state';
 
 export interface WorkspaceNode {
+  id: string;
   x: number;
   y: number;
   label: string;
@@ -21,8 +24,13 @@ export interface WorkspaceNode {
   scaledSize: number;
   parent: WorkspaceNode | null;
   color: string;
+  numChildren: number;
   isSelected?: boolean;
+  kx: number;
+  ky: number;
 }
+
+export type BlockListedNode = Omit<WorkspaceNode, 'numChildren' | 'kx' | 'ky' | 'id'>;
 
 export interface WorkspaceEdge {
   weight: number;
@@ -31,6 +39,8 @@ export interface WorkspaceEdge {
   source: WorkspaceNode;
   target: WorkspaceNode;
   isSelected?: boolean;
+  topTarget: WorkspaceNode;
+  topSrc: WorkspaceNode;
 }
 
 export interface ServerResultNode {
@@ -58,13 +68,59 @@ export interface GraphData {
   nodes: ServerResultNode[];
   edges: ServerResultEdge[];
 }
+export interface TermIntersect {
+  id1: string;
+  id2: string;
+  term1: string;
+  term2: string;
+  v1: number;
+  v2: number;
+  overlap: number;
+}
 
 export interface Workspace {
   options: WorkspaceOptions;
   nodesMap: Record<string, WorkspaceNode>;
   nodes: WorkspaceNode[];
+  selectedNodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
-  blocklistedNodes: WorkspaceNode[];
+  blocklistedNodes: BlockListedNode[];
+  undoLog: string;
+  redoLog: string;
+  force: ReturnType<typeof d3.layout.force>;
+  lastRequest: string;
+  lastResponse: string;
+
+  undo: () => void;
+  redo: () => void;
+  expandSelecteds: (targetOptions: TargetOptions) => {};
+  deleteSelection: () => void;
+  blocklistSelection: () => void;
+  selectAll: () => void;
+  selectNone: () => void;
+  selectInvert: () => void;
+  selectNeighbours: () => void;
+  deselectNode: (node: WorkspaceNode) => void;
+  colorSelected: (color: string) => void;
+  groupSelections: (node: WorkspaceNode | undefined) => void;
+  ungroup: (node: WorkspaceNode | undefined) => void;
+  callElasticsearch: (request: any) => void;
+  search: (qeury: any, fieldsChoice: WorkspaceField[] | undefined, numHops: number) => void;
+  simpleSearch: (
+    searchTerm: string,
+    fieldsChoice: WorkspaceField[] | undefined,
+    numHops: number
+  ) => void;
+  getAllIntersections: (
+    callback: (termIntersects: TermIntersect[]) => void,
+    nodes: WorkspaceNode[]
+  ) => void;
+  toggleNodeSelection: (node: WorkspaceNode) => boolean;
+  mergeIds: (term1: string, term2: string) => void;
+  changeHandler: () => void;
+  unblockNode: (node: BlockListedNode) => void;
+  unblockAll: () => void;
+  clearGraph: () => void;
 
   getQuery(startNodes?: WorkspaceNode[], loose?: boolean): JsonObject;
   getSelectedOrAllNodes(): WorkspaceNode[];
@@ -96,6 +152,8 @@ export type ExploreRequest = any;
 export type SearchRequest = any;
 export type ExploreResults = any;
 export type SearchResults = any;
+export type GraphExploreCallback = (data: ExploreResults) => void;
+export type GraphSearchCallback = (data: SearchResults) => void;
 
 export type WorkspaceOptions = Partial<{
   indexName: string;
@@ -105,12 +163,14 @@ export type WorkspaceOptions = Partial<{
   graphExploreProxy: (
     indexPattern: string,
     request: ExploreRequest,
-    callback: (data: ExploreResults) => void
+    callback: GraphExploreCallback
   ) => void;
   searchProxy: (
     indexPattern: string,
     request: SearchRequest,
-    callback: (data: SearchResults) => void
+    callback: GraphSearchCallback
   ) => void;
   exploreControls: AdvancedSettings;
 }>;
+
+export type ControlType = 'style' | 'drillDowns' | 'editLabel' | 'mergeTerms' | 'none';

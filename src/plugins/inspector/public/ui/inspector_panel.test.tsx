@@ -12,15 +12,23 @@ import { InspectorPanel } from './inspector_panel';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import type { ApplicationStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
+import { SharePluginStart } from '../../../share/public';
+import { applicationServiceMock } from '../../../../core/public/mocks';
 
 describe('InspectorPanel', () => {
   let adapters: Adapters;
   let views: InspectorViewDescription[];
-  const dependencies = {
-    application: {},
+  const dependencies = ({
+    application: applicationServiceMock.createStartContract(),
     http: {},
+    share: {},
     uiSettings: {},
-  } as { application: ApplicationStart; http: HttpSetup; uiSettings: IUiSettingsClient };
+  } as unknown) as {
+    application: ApplicationStart;
+    http: HttpSetup;
+    share: SharePluginStart;
+    uiSettings: IUiSettingsClient;
+  };
 
   beforeEach(() => {
     adapters = {

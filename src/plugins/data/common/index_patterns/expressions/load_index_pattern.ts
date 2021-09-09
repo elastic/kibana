@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { IndexPatternsContract } from '../index_patterns';
-import { IndexPatternSpec } from '..';
+import { DataViewsContract } from '../index_patterns';
+import { DataViewSpec } from '..';
 import { SavedObjectReference } from '../../../../../core/types';
 
 const name = 'indexPatternLoad';
@@ -17,7 +17,7 @@ const type = 'index_pattern';
 
 export interface IndexPatternExpressionType {
   type: typeof type;
-  value: IndexPatternSpec;
+  value: DataViewSpec;
 }
 
 type Input = null;
@@ -29,7 +29,7 @@ interface Arguments {
 
 /** @internal */
 export interface IndexPatternLoadStartDependencies {
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
 }
 
 export type IndexPatternLoadExpressionFunctionDefinition = ExpressionFunctionDefinition<

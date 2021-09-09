@@ -20,6 +20,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { AppLogic } from '../../../app_logic';
 import { ENGINE_CRAWLER_DOMAIN_PATH } from '../../../routes';
 import { generateEnginePath } from '../../engine';
+import { CrawlerLogic } from '../crawler_logic';
 import { CrawlerOverviewLogic } from '../crawler_overview_logic';
 import { CrawlerDomain } from '../types';
 
@@ -28,7 +29,7 @@ import { getDeleteDomainConfirmationMessage } from '../utils';
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
 export const DomainsTable: React.FC = () => {
-  const { domains } = useValues(CrawlerOverviewLogic);
+  const { domains } = useValues(CrawlerLogic);
 
   const { deleteDomain } = useActions(CrawlerOverviewLogic);
 

@@ -21,14 +21,14 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage, FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n/react';
 
-import moment from 'moment-timezone';
 import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   PieVisualizationState,
 } from '../../../lens/public';
-import { FilterStateStore } from '../../../../../src/plugins/data/common';
+import { FilterStateStore, IndexPattern } from '../../../../../src/plugins/data/common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
@@ -60,6 +60,7 @@ interface ViewResultsInDiscoverActionProps {
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
+  mode?: string;
 }
 
 function getLensAttributes(
@@ -200,6 +201,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   buttonType,
   endDate,
   startDate,
+  mode,
 }) => {
   const lensService = useKibana().services.lens;
 
@@ -215,7 +217,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
           timeRange: {
             from: startDate ?? 'now-1d',
             to: endDate ?? 'now',
-            mode: startDate || endDate ? 'absolute' : 'relative',
+            mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
           },
           attributes: getLensAttributes(actionId, agentIds),
         },
@@ -224,7 +226,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
         }
       );
     },
-    [actionId, agentIds, endDate, lensService, startDate]
+    [actionId, agentIds, endDate, lensService, mode, startDate]
   );
 
   if (buttonType === ViewResultsActionButtonType.button) {
@@ -389,16 +391,21 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   toggleErrors,
   expanded,
 }) => {
+  const data = useKibana().services.data;
+  const [logsIndexPattern, setLogsIndexPattern] = useState<IndexPattern | undefined>(undefined);
+
   const { data: lastResultsData, isFetched } = useScheduledQueryGroupQueryLastResults({
     actionId,
     agentIds,
     interval,
+    logsIndexPattern,
   });
 
   const { data: errorsData, isFetched: errorsFetched } = useScheduledQueryGroupQueryErrors({
     actionId,
     agentIds,
     interval,
+    logsIndexPattern,
   });
 
   const handleErrorsToggle = useCallback(() => toggleErrors({ queryId, interval }), [
@@ -407,20 +414,41 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
     toggleErrors,
   ]);
 
+  useEffect(() => {
+    const fetchLogsIndexPattern = async () => {
+      const indexPattern = await data.indexPatterns.find('logs-*');
+
+      setLogsIndexPattern(indexPattern[0]);
+    };
+    fetchLogsIndexPattern();
+  }, [data.indexPatterns]);
+
   if (!isFetched || !errorsFetched) {
     return <EuiLoadingSpinner />;
   }
 
-  if (!lastResultsData) {
+  if (!lastResultsData && !errorsData?.total) {
     return <>{'-'}</>;
   }
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={4}>
-        {lastResultsData.first_event_ingested_time?.value ? (
-          <EuiToolTip content={lastResultsData.first_event_ingested_time?.value}>
-            <>{moment(lastResultsData.first_event_ingested_time?.value).fromNow()}</>
+        {lastResultsData?.['@timestamp'] ? (
+          <EuiToolTip
+            content={
+              <>
+                <FormattedDate
+                  value={lastResultsData['@timestamp']}
+                  year="numeric"
+                  month="short"
+                  day="2-digit"
+                />{' '}
+                <FormattedTime value={lastResultsData['@timestamp']} timeZoneName="short" />
+              </>
+            }
+          >
+            <FormattedRelative value={lastResultsData['@timestamp']} />
           </EuiToolTip>
         ) : (
           '-'
@@ -430,10 +458,17 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiNotificationBadge color="subdued">
-              {lastResultsData?.doc_count ?? 0}
+              {lastResultsData?.docCount ?? 0}
             </EuiNotificationBadge>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{'Documents'}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.osquery.queriesStatusTable.documentLabelText"
+              defaultMessage="{count, plural, one {Document} other {Documents}}"
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{ count: lastResultsData?.docCount as number }}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
@@ -441,10 +476,17 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiNotificationBadge color="subdued">
-              {lastResultsData?.unique_agents?.value ?? 0}
+              {lastResultsData?.uniqueAgentsCount ?? 0}
             </EuiNotificationBadge>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{'Agents'}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.osquery.queriesStatusTable.agentsLabelText"
+              defaultMessage="{count, plural, one {Agent} other {Agents}}"
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{ count: agentIds?.length }}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
@@ -456,7 +498,15 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
             </EuiNotificationBadge>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>{'Errors'}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {' '}
+            <FormattedMessage
+              id="xpack.osquery.queriesStatusTable.errorsLabelText"
+              defaultMessage="{count, plural, one {Error} other {Errors}}"
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{ count: errorsData?.total as number }}
+            />
+          </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
@@ -537,6 +587,9 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
         actionId={getPackActionId(item.vars?.id.value, scheduledQueryGroupName)}
         agentIds={agentIds}
         buttonType={ViewResultsActionButtonType.icon}
+        startDate={`now-${item.vars?.interval.value * 2}s`}
+        endDate="now"
+        mode="relative"
       />
     ),
     [agentIds, scheduledQueryGroupName]
@@ -545,12 +598,15 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
   const renderLensResultsAction = useCallback(
     (item) => (
       <ViewResultsInLensAction
-        actionId={item.vars?.id.value}
+        actionId={getPackActionId(item.vars?.id.value, scheduledQueryGroupName)}
         agentIds={agentIds}
         buttonType={ViewResultsActionButtonType.icon}
+        startDate={`now-${item.vars?.interval.value * 2}s`}
+        endDate="now"
+        mode="relative"
       />
     ),
-    [agentIds]
+    [agentIds, scheduledQueryGroupName]
   );
 
   const getItemId = useCallback(

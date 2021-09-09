@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { Filter, IFieldType, IndexPattern, ISearchSource } from 'src/plugins/data/public';
+import { Filter, IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
 import { AbstractVectorSource, BoundsFilters } from '../vector_source';
 import {
   getAutocompleteService,
@@ -364,7 +364,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     }
   }
 
-  async _getGeoField(): Promise<IFieldType> {
+  async _getGeoField(): Promise<IndexPatternField> {
     const indexPattern = await this.getIndexPattern();
     const geoField = indexPattern.fields.getByName(this.getGeoFieldName());
     if (!geoField) {

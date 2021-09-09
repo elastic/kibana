@@ -8,5 +8,6 @@
     "githubTeam": "kibana-app-services"
   },
   "extraPublicDirs": ["common", "common/adapters/request"],
-  "requiredBundles": ["kibanaReact"]
+  "requiredBundles": ["kibanaReact"],
+  "requiredPlugins": ["share"]
 }

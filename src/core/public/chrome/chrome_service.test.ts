@@ -390,6 +390,19 @@ describe('start', () => {
     });
   });
 
+  describe('header banner', () => {
+    it('updates/emits the state of the header banner', async () => {
+      const { chrome, service } = await start();
+      const promise = chrome.hasHeaderBanner$().pipe(toArray()).toPromise();
+
+      chrome.setHeaderBanner({ content: () => () => undefined });
+      chrome.setHeaderBanner(undefined);
+      service.stop();
+
+      await expect(promise).resolves.toEqual([false, true, false]);
+    });
+  });
+
   describe('erase chrome fields', () => {
     it('while switching an app', async () => {
       const startDeps = defaultStartDeps([new FakeApp('alpha')]);

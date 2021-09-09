@@ -7,9 +7,8 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { I18nProvider } from '@kbn/i18n/react';
 import { DocViewerTable, DocViewerTableProps } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -77,11 +76,7 @@ indexPattern.fields.getByName = (name: string) => {
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 
 const mountComponent = (props: DocViewerTableProps) => {
-  return mount(
-    <I18nProvider>
-      <DocViewerTable {...props} />
-    </I18nProvider>
-  );
+  return mountWithIntl(<DocViewerTable {...props} />);
 };
 
 describe('DocViewTable at Discover', () => {

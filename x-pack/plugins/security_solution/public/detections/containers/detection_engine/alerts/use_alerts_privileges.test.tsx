@@ -87,10 +87,10 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
     error: undefined,
   },
   endpointPrivileges: { loading: true, canAccessEndpointManagement: false, canAccessFleet: false },
-  alertsPrivileges: { loading: true, crud: false, read: false },
+  kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
 };
 
-describe('usePrivilegeUser', () => {
+describe('useAlertsPrivileges', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
@@ -113,13 +113,15 @@ describe('usePrivilegeUser', () => {
         hasIndexMaintenance: null,
         hasIndexWrite: null,
         hasIndexUpdateDelete: null,
+        hasKibanaCRUD: false,
+        hasKibanaREAD: false,
         isAuthenticated: null,
         loading: false,
       });
     });
   });
 
-  test('if there is an error when fetching user privilege, we should get back false for every properties', async () => {
+  test('if there is an error when fetching user privilege, we should get back false for all index related properties', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.error = new Error('Something went wrong');
     });
@@ -137,6 +139,8 @@ describe('usePrivilegeUser', () => {
         hasIndexRead: false,
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
+        hasKibanaCRUD: true,
+        hasKibanaREAD: true,
         isAuthenticated: false,
         loading: false,
       });
@@ -162,9 +166,11 @@ describe('usePrivilegeUser', () => {
         hasEncryptionKey: true,
         hasIndexManage: false,
         hasIndexMaintenance: true,
-        hasIndexRead: false,
-        hasIndexWrite: false,
+        hasIndexRead: true,
+        hasIndexWrite: true,
         hasIndexUpdateDelete: true,
+        hasKibanaCRUD: true,
+        hasKibanaREAD: true,
         isAuthenticated: true,
         loading: false,
       });
@@ -187,9 +193,67 @@ describe('usePrivilegeUser', () => {
         hasEncryptionKey: true,
         hasIndexManage: true,
         hasIndexMaintenance: true,
-        hasIndexRead: false,
-        hasIndexWrite: false,
+        hasIndexRead: true,
+        hasIndexWrite: true,
         hasIndexUpdateDelete: true,
+        hasKibanaCRUD: true,
+        hasKibanaREAD: true,
+        isAuthenticated: true,
+        loading: false,
+      });
+    });
+  });
+
+  test('returns "hasKibanaCRUD" as false if user does not have SIEM Kibana "all" privileges', async () => {
+    const userPrivileges = produce(userPrivilegesInitial, (draft) => {
+      draft.detectionEnginePrivileges.result = privilege;
+      draft.kibanaSecuritySolutionsPrivileges = { crud: false, read: true };
+    });
+    useUserPrivilegesMock.mockReturnValue(userPrivileges);
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
+        useAlertsPrivileges()
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      expect(result.current).toEqual({
+        hasEncryptionKey: true,
+        hasIndexManage: true,
+        hasIndexMaintenance: true,
+        hasIndexRead: true,
+        hasIndexWrite: true,
+        hasIndexUpdateDelete: true,
+        hasKibanaCRUD: false,
+        hasKibanaREAD: true,
+        isAuthenticated: true,
+        loading: false,
+      });
+    });
+  });
+
+  test('returns "hasKibanaREAD" as false if user does not have at least SIEM Kibana "read" privileges', async () => {
+    const userPrivileges = produce(userPrivilegesInitial, (draft) => {
+      draft.detectionEnginePrivileges.result = privilege;
+      draft.kibanaSecuritySolutionsPrivileges = { crud: false, read: false };
+    });
+    useUserPrivilegesMock.mockReturnValue(userPrivileges);
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
+        useAlertsPrivileges()
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      expect(result.current).toEqual({
+        hasEncryptionKey: true,
+        hasIndexManage: true,
+        hasIndexMaintenance: true,
+        hasIndexRead: true,
+        hasIndexWrite: true,
+        hasIndexUpdateDelete: true,
+        hasKibanaCRUD: false,
+        hasKibanaREAD: false,
         isAuthenticated: true,
         loading: false,
       });

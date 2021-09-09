@@ -10,7 +10,7 @@ import { IndexPatternsService } from '../../../../../data/common';
 
 import { from } from 'rxjs';
 import { AbstractSearchStrategy } from './abstract_search_strategy';
-import type { IFieldType } from '../../../../../data/common';
+import type { FieldSpec } from '../../../../../data/common';
 import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -21,7 +21,7 @@ class FooSearchStrategy extends AbstractSearchStrategy {}
 
 describe('AbstractSearchStrategy', () => {
   let abstractSearchStrategy: AbstractSearchStrategy;
-  let mockedFields: IFieldType[];
+  let mockedFields: FieldSpec[];
   let requestContext: VisTypeTimeseriesRequestHandlerContext;
 
   beforeEach(() => {

@@ -44,12 +44,10 @@ describe('GraphOverlay', () => {
   });
 
   describe('when used in an events viewer (i.e. in the Detections view, or the Host > Events view)', () => {
-    const isEventViewer = true;
-
-    test('it has 100% width when isEventViewer is true and NOT in full screen mode', async () => {
+    test('it has 100% width when NOT in full screen mode', async () => {
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} isEventViewer={isEventViewer} />
+          <GraphOverlay timelineId={TimelineId.test} />
         </TestProviders>
       );
 
@@ -59,9 +57,9 @@ describe('GraphOverlay', () => {
       });
     });
 
-    test('it has a calculated width that makes room for the Timeline flyout button when isEventViewer is true in full screen mode', async () => {
+    test('it has a fixed position when in full screen mode', async () => {
       (useGlobalFullScreen as jest.Mock).mockReturnValue({
-        globalFullScreen: true, // <-- true when an events viewer is in full screen mode
+        globalFullScreen: true,
         setGlobalFullScreen: jest.fn(),
       });
       (useTimelineFullScreen as jest.Mock).mockReturnValue({
@@ -71,25 +69,24 @@ describe('GraphOverlay', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} isEventViewer={isEventViewer} />
+          <GraphOverlay timelineId={TimelineId.test} />
         </TestProviders>
       );
 
       await waitFor(() => {
         const overlayContainer = wrapper.find('[data-test-subj="overlayContainer"]').first();
-        expect(overlayContainer).toHaveStyleRule('width', 'calc(100% - 36px)');
+        expect(overlayContainer).toHaveStyleRule('position', 'fixed');
       });
     });
   });
 
   describe('when used in the active timeline', () => {
-    const isEventViewer = false;
     const timelineId = TimelineId.active;
 
-    test('it has 100% width when isEventViewer is false and NOT in full screen mode', async () => {
+    test('it has 100% width when NOT in full screen mode', async () => {
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
+          <GraphOverlay timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -99,7 +96,7 @@ describe('GraphOverlay', () => {
       });
     });
 
-    test('it has 100% width when isEventViewer is false and the active timeline is in full screen mode', async () => {
+    test('it has 100% width when the active timeline is in full screen mode', async () => {
       (useGlobalFullScreen as jest.Mock).mockReturnValue({
         globalFullScreen: false,
         setGlobalFullScreen: jest.fn(),
@@ -111,7 +108,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
+          <GraphOverlay timelineId={timelineId} />
         </TestProviders>
       );
 

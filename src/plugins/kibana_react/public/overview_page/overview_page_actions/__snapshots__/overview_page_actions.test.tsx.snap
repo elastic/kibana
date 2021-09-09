@@ -18,54 +18,10 @@ Array [
       className="kbnOverviewPageHeader__actionButton"
       data-test-subj="homeAddData"
       flush="both"
-      href="/app/home#/tutorial_directory"
+      href=""
       iconType="plusInCircle"
     >
       Add data
-    </EuiButtonEmpty>
-  </mockConstructor>,
-  <mockConstructor
-    application={
-      Object {
-        "capabilities": Object {
-          "navLinks": Object {
-            "dev_tools": true,
-            "management": true,
-          },
-        },
-      }
-    }
-  >
-    <EuiButtonEmpty
-      className="kbnOverviewPageHeader__actionButton"
-      data-test-subj="homeManage"
-      flush="both"
-      href="/app/management"
-      iconType="gear"
-    >
-      Manage
-    </EuiButtonEmpty>
-  </mockConstructor>,
-  <mockConstructor
-    application={
-      Object {
-        "capabilities": Object {
-          "navLinks": Object {
-            "dev_tools": true,
-            "management": true,
-          },
-        },
-      }
-    }
-  >
-    <EuiButtonEmpty
-      className="kbnOverviewPageHeader__actionButton"
-      data-test-subj="homeDevTools"
-      flush="both"
-      href="/app/dev_tools#/console"
-      iconType="wrench"
-    >
-      Dev tools
     </EuiButtonEmpty>
   </mockConstructor>,
 ]
@@ -91,7 +47,7 @@ Array [
       className="kbnOverviewPageHeader__actionButton"
       data-test-subj="homeAddData"
       flush="both"
-      href="/app/home#/tutorial_directory"
+      href=""
       iconType="plusInCircle"
     >
       Add data

@@ -107,12 +107,13 @@ describe('get_signals_template', () => {
         }
       }, []);
     const constantKeywordsFound = recursiveConstantKeywordFound('', template);
-    expect(constantKeywordsFound).toEqual([
-      'template.mappings.properties.kibana.space_ids',
-      'template.mappings.properties.kibana.alert.rule.consumer',
-      'template.mappings.properties.kibana.alert.rule.producer',
-      'template.mappings.properties.kibana.alert.rule.rule_type_id',
-    ]);
+    expect(constantKeywordsFound).toEqual([]);
+    // expect(constantKeywordsFound).toEqual([
+    //   'template.mappings.properties.kibana.space_ids',
+    //   'template.mappings.properties.kibana.alert.rule.consumer',
+    //   'template.mappings.properties.kibana.alert.rule.producer',
+    //   'template.mappings.properties.kibana.alert.rule.rule_type_id',
+    // ]);
   });
 
   test('it should match snapshot', () => {

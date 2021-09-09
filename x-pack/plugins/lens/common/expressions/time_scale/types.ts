@@ -5,4 +5,24 @@
  * 2.0.
  */
 
+import type {
+  Datatable,
+  ExpressionFunctionDefinition,
+} from '../../../../../../src/plugins/expressions';
+
 export type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
+
+export interface TimeScaleArgs {
+  dateColumnId: string;
+  inputColumnId: string;
+  outputColumnId: string;
+  targetUnit: TimeScaleUnit;
+  outputColumnName?: string;
+}
+
+export type TimeScaleExpressionFunction = ExpressionFunctionDefinition<
+  'lens_time_scale',
+  Datatable,
+  TimeScaleArgs,
+  Promise<Datatable>
+>;

@@ -18,6 +18,7 @@ interface Options {
     request: ESSearchRequest
   ) => ESSearchResponse<unknown, ESSearchRequest>;
   uiFilters?: Record<string, string>;
+  config?: Partial<APMConfig>;
 }
 
 interface MockSetup {
@@ -70,7 +71,12 @@ export async function inspectSearchParams(
     config: new Proxy(
       {},
       {
-        get: (_, key) => {
+        get: (_, key: keyof APMConfig) => {
+          const { config } = options;
+          if (config?.[key]) {
+            return config?.[key];
+          }
+
           switch (key) {
             default:
               return 'myIndex';
@@ -110,7 +116,7 @@ export async function inspectSearchParams(
   }
 
   return {
-    params: spy.mock.calls[0][1],
+    params: spy.mock.calls[0]?.[1],
     response,
     error,
     spy,

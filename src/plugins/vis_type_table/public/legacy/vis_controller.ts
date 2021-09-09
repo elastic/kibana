@@ -71,35 +71,42 @@ export function getTableVisualizationControllerClass(
       await this.initLocalAngular();
 
       return new Promise(async (resolve, reject) => {
-        if (!this.$rootScope) {
-          const $injector = this.getInjector();
-          this.$rootScope = $injector.get('$rootScope');
-          this.$compile = $injector.get('$compile');
-        }
-        const updateScope = () => {
-          if (!this.$scope) {
-            return;
+        try {
+          if (!this.$rootScope) {
+            const $injector = this.getInjector();
+            this.$rootScope = $injector.get('$rootScope');
+            this.$compile = $injector.get('$compile');
           }
 
-          this.$scope.visState = { params: visParams, title: visParams.title };
-          this.$scope.esResponse = esResponse;
+          const updateScope = () => {
+            if (!this.$scope) {
+              return;
+            }
 
-          this.$scope.visParams = visParams;
-          this.$scope.renderComplete = resolve;
-          this.$scope.renderFailed = reject;
-          this.$scope.resize = Date.now();
-          this.$scope.$apply();
-        };
+            this.$scope.visState = {
+              params: visParams,
+              title: visParams.title,
+            };
+            this.$scope.esResponse = esResponse;
+            this.$scope.visParams = visParams;
+            this.$scope.renderComplete = resolve;
+            this.$scope.renderFailed = reject;
+            this.$scope.resize = Date.now();
+            this.$scope.$apply();
+          };
 
-        if (!this.$scope && this.$compile) {
-          this.$scope = this.$rootScope.$new();
-          this.$scope.uiState = handlers.uiState;
-          this.$scope.filter = handlers.event;
-          updateScope();
-          this.el.find('div').append(this.$compile(tableVisTemplate)(this.$scope));
-          this.$scope.$apply();
-        } else {
-          updateScope();
+          if (!this.$scope && this.$compile) {
+            this.$scope = this.$rootScope.$new();
+            this.$scope.uiState = handlers.uiState;
+            this.$scope.filter = handlers.event;
+            updateScope();
+            this.el.find('div').append(this.$compile(tableVisTemplate)(this.$scope));
+            this.$scope.$apply();
+          } else {
+            updateScope();
+          }
+        } catch (error) {
+          reject(error);
         }
       });
     }
