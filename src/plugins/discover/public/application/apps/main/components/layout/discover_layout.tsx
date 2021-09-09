@@ -30,7 +30,7 @@ import {
 } from '../../../../../../../data/public';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
+import { AGGREGATED_VIEW_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
 import { popularizeField } from '../../../../helpers/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
@@ -75,7 +75,7 @@ export function DiscoverLayout({
   const [discoverViewMode, setDiscoverViewMode] = useState(DISCOVER_VIEW_MODES.DOCUMENT_LEVEL);
 
   useEffect(() => {
-    const userSetViewMode = uiSettings?.get('discover:aggregatedView');
+    const userSetViewMode = uiSettings?.get(AGGREGATED_VIEW_SETTING);
     if (userSetViewMode) {
       setDiscoverViewMode(DISCOVER_VIEW_MODES.FIELD_LEVEL);
     } else {

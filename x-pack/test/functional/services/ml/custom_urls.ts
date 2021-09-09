@@ -169,7 +169,6 @@ export function MachineLearningCustomUrlsProvider({
 
     async assertDiscoverCustomUrlAction(expectedHitCountFormatted: string) {
       await PageObjects.discover.waitForDiscoverAppOnScreen();
-      await PageObjects.discover.toggleSidebarCollapse();
       await retry.tryForTime(10 * 1000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         expect(hitCount).to.eql(

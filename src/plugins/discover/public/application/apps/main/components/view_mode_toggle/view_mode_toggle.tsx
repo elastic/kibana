@@ -32,7 +32,7 @@ export const DocumentViewModeToggle = ({
   return (
     <EuiButtonGroup
       legend={i18n.translate('discover.viewModes.legend', { defaultMessage: 'View modes' })}
-      style={{ paddingRight: 20 }}
+      style={{ paddingRight: 16 }}
       buttonSize={'compressed'}
       options={toggleButtons}
       idSelected={discoverViewMode}
