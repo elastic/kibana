@@ -86,7 +86,10 @@ export const fetchFailedTransactionsCorrelationPValues = async (
     bg_count: number;
     score: number;
   }>;
-  const result = overallResult.buckets.map((bucket) => {
+
+  // Using for of to sequentially augment the results with histogram data.
+  const result = [];
+  for (const bucket of overallResult.buckets) {
     // Scale the score into a value from 0 - 1
     // using a concave piecewise linear function in -log(p-value)
     const normalizedScore =
@@ -94,7 +97,17 @@ export const fetchFailedTransactionsCorrelationPValues = async (
       0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
       0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
 
-    return {
+    const histogram = await fetchTransactionDurationRanges(
+      esClient,
+      params,
+      histogramRangeSteps,
+      [
+        { fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure },
+        { fieldName, fieldValue: bucket.key },
+      ]
+    );
+
+    result.push({
       fieldName,
       fieldValue: bucket.key,
       doc_count: bucket.doc_count,
@@ -108,24 +121,8 @@ export const fetchFailedTransactionsCorrelationPValues = async (
       successPercentage:
         (bucket.bg_count - bucket.doc_count) /
         (overallResult.bg_count - overallResult.doc_count),
-      histogram: [] as Array<{ key: number; doc_count: number }>,
-    };
-  });
-
-  for (let i = 0; i < result.length; i++) {
-    const current = result[i];
-
-    const histogram = await fetchTransactionDurationRanges(
-      esClient,
-      params,
-      histogramRangeSteps,
-      [
-        { fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure },
-        { fieldName: current.fieldName, fieldValue: current.fieldValue },
-      ]
-    );
-
-    current.histogram = histogram;
+      histogram,
+    });
   }
 
   return result;
