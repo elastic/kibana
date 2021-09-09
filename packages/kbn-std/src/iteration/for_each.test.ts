@@ -52,6 +52,11 @@ describe('asyncForEachWithLimit', () => {
     result$.complete();
     await expect(promise).resolves.toBe(undefined);
   });
+
+  it('resolves when iterator is empty', async () => {
+    mockMapWithLimit$.mockReturnValue(Rx.EMPTY);
+    await expect(asyncForEachWithLimit([], 100, async () => 'foo')).resolves.toBe(undefined);
+  });
 });
 
 describe('asyncForEach', () => {

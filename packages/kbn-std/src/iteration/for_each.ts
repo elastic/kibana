@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { lastValueFrom } from '../rxjs_7';
+import { defaultIfEmpty } from 'rxjs/operators';
 
+import { lastValueFrom } from '../rxjs_7';
 import { mapWithLimit$ } from './observable';
 import { IterableInput, AsyncMapFn } from './types';
 
@@ -20,7 +21,7 @@ import { IterableInput, AsyncMapFn } from './types';
  * @param fn Function to call for each item
  */
 export async function asyncForEach<T>(iterable: IterableInput<T>, fn: AsyncMapFn<T, any>) {
-  await lastValueFrom(mapWithLimit$(iterable, Infinity, fn));
+  await lastValueFrom(mapWithLimit$(iterable, Infinity, fn).pipe(defaultIfEmpty()));
 }
 
 /**
@@ -39,5 +40,5 @@ export async function asyncForEachWithLimit<T>(
   limit: number,
   fn: AsyncMapFn<T, any>
 ) {
-  await lastValueFrom(mapWithLimit$(iterable, limit, fn));
+  await lastValueFrom(mapWithLimit$(iterable, limit, fn).pipe(defaultIfEmpty()));
 }
