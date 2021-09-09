@@ -13,6 +13,8 @@ import { CloudServiceResponse } from './cloud_response';
 // GCP documentation shows both 'metadata.google.internal' (mostly) and '169.254.169.254' (sometimes)
 // To bypass potential DNS changes, the IP was used because it's shared with other cloud services
 const SERVICE_ENDPOINT = 'http://169.254.169.254/computeMetadata/v1/instance';
+// GCP required headers
+const SERVICE_HEADERS = { 'Metadata-Flavor': 'Google' };
 
 /**
  * Checks and loads the service metadata for an Google Cloud Platform VM if it is available.
@@ -32,10 +34,7 @@ export class GCPCloudService extends CloudService {
       fields.map(async (field) => {
         return await fetch(`${SERVICE_ENDPOINT}/${field}`, {
           method: 'GET',
-          headers: {
-            // GCP requires this header
-            'Metadata-Flavor': 'Google',
-          },
+          headers: { ...SERVICE_HEADERS },
         });
       })
     );
