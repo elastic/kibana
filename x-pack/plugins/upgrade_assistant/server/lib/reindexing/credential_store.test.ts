@@ -22,7 +22,7 @@ const requestMock = KibanaRequest.from(
   })
 );
 const securityStartMock = securityMock.createStart();
-// @ts-expect-error partial mock of ReindexSavedObject
+
 const reindexOpMock = {
   id: 'asdf',
   attributes: { indexName: 'test', lastCompletedStep: 1, locked: null },
