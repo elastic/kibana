@@ -348,7 +348,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
-                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -376,7 +375,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
-                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -409,7 +407,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
-                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -442,7 +439,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
-                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -524,7 +520,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
-                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -552,7 +547,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
-                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -585,7 +579,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
-                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -618,7 +611,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
-                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >

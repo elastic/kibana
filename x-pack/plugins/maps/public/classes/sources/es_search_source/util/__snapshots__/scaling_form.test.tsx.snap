@@ -34,6 +34,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
       <EuiToolTip
         content="Simulated clustering disabled"
         delay="regular"
+        display="inlineBlock"
         position="left"
       >
         <EuiRadio
@@ -57,6 +58,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
           </React.Fragment>
         }
         delay="regular"
+        display="inlineBlock"
         position="left"
       >
         <EuiRadio
@@ -137,6 +139,7 @@ exports[`scaling form should render 1`] = `
           </React.Fragment>
         }
         delay="regular"
+        display="inlineBlock"
         position="left"
       >
         <EuiRadio
