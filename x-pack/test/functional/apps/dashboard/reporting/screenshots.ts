@@ -55,7 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           {
             spaces: ['*'],
             base: [],
-            feature: { dashboard: ['minimal_all'] }, // no sub-feature privileges needed
+            feature: { dashboard: ['minimal_all'] },
           },
         ],
       });
