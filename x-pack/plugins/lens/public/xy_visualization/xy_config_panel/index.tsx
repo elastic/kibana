@@ -24,7 +24,7 @@ import type {
   FramePublicAPI,
 } from '../../types';
 import { State, visualizationTypes, XYState } from '../types';
-import { FormatFactory } from '../../../common';
+import type { FormatFactory } from '../../../common';
 import {
   SeriesType,
   YAxisMode,
