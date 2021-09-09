@@ -444,7 +444,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue",
+                "id": "def-public.ScopedHistory.createHref.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "{ prependBasePath = true }",
@@ -454,7 +454,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue.prependBasePath",
+                    "id": "def-public.ScopedHistory.createHref.$2.prependBasePath",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "prependBasePath",
@@ -715,7 +715,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.params",
+                "id": "def-public.App.mount.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -1203,7 +1203,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.ApplicationStart.getUrlForApp.$2.options",
+                "id": "def-public.ApplicationStart.getUrlForApp.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1213,7 +1213,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.path",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.path",
                     "type": "string",
                     "tags": [],
                     "label": "path",
@@ -1226,7 +1226,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.absolute",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.absolute",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "absolute",
@@ -1239,7 +1239,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.deepLinkId",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.deepLinkId",
                     "type": "string",
                     "tags": [],
                     "label": "deepLinkId",
@@ -2004,7 +2004,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-public.factory",
+            "id": "def-public.AppLeaveHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "factory",
@@ -2017,7 +2017,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.nextAppId",
+            "id": "def-public.AppLeaveHandler.$2",
             "type": "string",
             "tags": [],
             "label": "nextAppId",
@@ -2075,7 +2075,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-public.params",
+            "id": "def-public.AppMount.$1",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -2188,7 +2188,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-public.app",
+            "id": "def-public.AppUpdater.$1",
             "type": "Object",
             "tags": [],
             "label": "app",
