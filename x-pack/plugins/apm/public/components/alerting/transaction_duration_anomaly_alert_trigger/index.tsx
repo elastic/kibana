@@ -48,9 +48,11 @@ interface Props {
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
-  const transactionTypes = useServiceTransactionTypesFetcher(
-    metadata?.serviceName
-  );
+  const transactionTypes = useServiceTransactionTypesFetcher({
+    serviceName: metadata?.serviceName,
+    start: metadata?.start,
+    end: metadata?.end,
+  });
 
   const params = defaults(
     {
