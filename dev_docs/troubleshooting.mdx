@@ -9,7 +9,15 @@ tags: ['kibana', 'onboarding', 'dev', 'troubleshooting']
 
 ### Typescript issues
 
-If you run into some really head-scratching Typescript errors, and are starting to question your sanity, try to run `git clean` to restore your repository to a totally fresh state. Sometimes the Typescript caches can get mixed up when switching branches and show errors that are totally wrong.
+When switching branches, sometimes the TypeScript cache can get mixed up and show some invalid errors. If you run into TypeScript issues (invalid errors, or if it's taking too long to build types), here a few things to try.
+
+1. Build TypeScript references with the clean command.
+
+```
+node scripts/build_ts_refs --clean
+```
+
+2. Restore your repository to a totally fresh state by running `git clean`
 
 ```
 # dry-run the clean to see what will be deleted
