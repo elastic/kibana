@@ -172,10 +172,6 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Utilities for building Kibana plugins.
 
 
-|{kib-repo}blob/{branch}/src/plugins/legacy_export/README.md[legacyExport]
-|The legacyExport plugin adds support for the legacy saved objects export format.
-
-
 |{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
 |This plugins contains the "Stack Management" page framework. It offers navigation and an API
 to link individual managment section into it. This plugin does not contain any individual

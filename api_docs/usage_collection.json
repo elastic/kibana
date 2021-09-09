@@ -409,7 +409,7 @@
             "children": [
               {
                 "parentPluginId": "usageCollection",
-                "id": "def-server.context",
+                "id": "def-server.ICollector.fetch.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "context",
@@ -751,7 +751,7 @@
         "children": [
           {
             "parentPluginId": "usageCollection",
-            "id": "def-server.context",
+            "id": "def-server.CollectorFetchMethod.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "context",
