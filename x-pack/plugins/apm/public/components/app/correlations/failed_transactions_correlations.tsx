@@ -179,6 +179,7 @@ export function FailedTransactionsCorrelations({
       : [];
     return [
       {
+        width: '116px',
         field: 'normalizedScore',
         name: (
           <>
