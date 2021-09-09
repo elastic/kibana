@@ -15,6 +15,7 @@ import {
   NewPackagePolicy,
   pagePathGetters,
 } from '../../../../../../../fleet/public';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../fleet/common';
 import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 import { ListPageRouteState } from '../../../../../../common/endpoint/types';
@@ -49,6 +50,10 @@ const WrappedPolicyDetailsForm = memo<{
   const updatedPolicy = usePolicyDetailsSelector(policyDetailsForUpdate);
   const { getAppUrl } = useAppUrl();
   const [, setLastUpdatedPolicy] = useState(updatedPolicy);
+  // TODO: Remove this and related code when removing FF
+  const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
+    'trustedAppsByPolicyEnabled'
+  );
 
   // When the form is initially displayed, trigger the Redux middleware which is based on
   // the location information stored via the `userChangedUrl` action.
@@ -149,31 +154,41 @@ const WrappedPolicyDetailsForm = memo<{
 
   return (
     <div data-test-subj="endpointIntegrationPolicyForm">
-      <div>
-        <EuiText>
-          <h5>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyDetails.artifacts.title"
-              defaultMessage="Artifacts"
+      {isTrustedAppsByPolicyEnabled ? (
+        <>
+          <div>
+            <EuiText>
+              <h5>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyDetails.artifacts.title"
+                  defaultMessage="Artifacts"
+                />
+              </h5>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <FleetTrustedAppsCard
+              policyId={policyId}
+              cardSize="m"
+              customLink={policyTrustedAppsLink}
             />
-          </h5>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <FleetTrustedAppsCard policyId={policyId} cardSize="m" customLink={policyTrustedAppsLink} />
-      </div>
-      <EuiSpacer size="l" />
-      <div>
-        <EuiText>
-          <h5>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyDetails.settings.title"
-              defaultMessage="Policy settings"
-            />
-          </h5>
-        </EuiText>
-        <EuiSpacer size="s" />
+          </div>
+          <EuiSpacer size="l" />
+          <div>
+            <EuiText>
+              <h5>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyDetails.settings.title"
+                  defaultMessage="Policy settings"
+                />
+              </h5>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <PolicyDetailsForm />
+          </div>
+        </>
+      ) : (
         <PolicyDetailsForm />
-      </div>
+      )}
     </div>
   );
 });
