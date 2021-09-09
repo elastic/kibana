@@ -43,17 +43,8 @@ export type ChangeValueAxis = (
 
 const VALUE_AXIS_PREFIX = 'ValueAxis-';
 
-function MetricsAxisOptions(
-  props: ValidationVisOptionsProps<
-    VisParams,
-    {
-      // TODO: Remove when vis_type_vislib is removed
-      // https://github.com/elastic/kibana/issues/56143
-      showElasticChartsOptions: boolean;
-    }
-  >
-) {
-  const { stateParams, setValue, aggs, vis, isTabSelected, extraProps } = props;
+function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
+  const { stateParams, setValue, aggs, vis, isTabSelected } = props;
 
   const setParamByIndex: SetParamByIndex = useCallback(
     (axesName, index, paramName, value) => {
@@ -335,7 +326,6 @@ function MetricsAxisOptions(
         setMultipleValidity={props.setMultipleValidity}
         seriesParams={stateParams.seriesParams}
         valueAxes={stateParams.valueAxes}
-        isNewLibrary={extraProps?.showElasticChartsOptions}
       />
       <EuiSpacer size="s" />
       <CategoryAxisPanel

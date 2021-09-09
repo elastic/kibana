@@ -400,10 +400,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:visualize:legacyChartsLibrary': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'visualization:visualize:legacyPieChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
