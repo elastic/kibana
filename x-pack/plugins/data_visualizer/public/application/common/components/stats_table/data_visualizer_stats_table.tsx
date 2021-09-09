@@ -310,7 +310,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           return null;
         },
         width: dimensions.distributions,
-        align: CENTER_ALIGNMENT as HorizontalAlignment,
+        align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistribution',
       },
     ];

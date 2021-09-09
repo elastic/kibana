@@ -16,8 +16,8 @@ import {
 import { FieldVisConfig } from '../../types';
 import { kibanaFieldFormat, formatSingleValue } from '../../../utils';
 
-const METRIC_DISTRIBUTION_CHART_WIDTH = 120;
-const METRIC_DISTRIBUTION_CHART_HEIGHT = 12;
+const METRIC_DISTRIBUTION_CHART_WIDTH = 100;
+const METRIC_DISTRIBUTION_CHART_HEIGHT = 10;
 
 export interface NumberContentPreviewProps {
   config: FieldVisConfig;
