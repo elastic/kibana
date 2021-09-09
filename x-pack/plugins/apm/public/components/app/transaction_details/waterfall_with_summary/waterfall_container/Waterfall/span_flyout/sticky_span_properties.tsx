@@ -33,7 +33,7 @@ interface Props {
 }
 
 export function StickySpanProperties({ span, transaction }: Props) {
-  const { query } = useApmParams('/services/:serviceName/transactions/view');
+  const { query } = useApmParams('/services/{serviceName}/transactions/view');
   const { environment, latencyAggregationType } = query;
 
   const trackEvent = useUiTracker();
