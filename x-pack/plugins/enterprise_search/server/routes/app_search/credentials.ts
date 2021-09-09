@@ -37,7 +37,7 @@ export function registerCredentialsRoutes({
   // Credentials API
   router.get(
     {
-      path: '/api/app_search/credentials',
+      path: '/internal/app_search/credentials',
       validate: {
         query: schema.object({
           'page[current]': schema.number(),
@@ -51,7 +51,7 @@ export function registerCredentialsRoutes({
   );
   router.post(
     {
-      path: '/api/app_search/credentials',
+      path: '/internal/app_search/credentials',
       validate: {
         body: tokenSchema,
       },
@@ -64,7 +64,7 @@ export function registerCredentialsRoutes({
   // TODO: It would be great to remove this someday
   router.get(
     {
-      path: '/api/app_search/credentials/details',
+      path: '/internal/app_search/credentials/details',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -75,7 +75,7 @@ export function registerCredentialsRoutes({
   // Single credential API
   router.put(
     {
-      path: '/api/app_search/credentials/{name}',
+      path: '/internal/app_search/credentials/{name}',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -89,7 +89,7 @@ export function registerCredentialsRoutes({
   );
   router.delete(
     {
-      path: '/api/app_search/credentials/{name}',
+      path: '/internal/app_search/credentials/{name}',
       validate: {
         params: schema.object({
           name: schema.string(),
