@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -19,11 +20,11 @@ import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { HeightRetainer } from '../HeightRetainer';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { filterSectionsByTerm, SectionsWithRows } from './helper';
 import { Section } from './Section';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   sections: SectionsWithRows;
@@ -34,6 +35,7 @@ export function MetadataTable({ sections }: Props) {
   const location = useLocation();
   const { urlParams } = useUrlParams();
   const { searchTerm = '' } = urlParams;
+  const { docLinks } = useApmPluginContext().core;
 
   const filteredSections = filterSectionsByTerm(sections, searchTerm);
 
@@ -55,11 +57,11 @@ export function MetadataTable({ sections }: Props) {
     <React.Fragment>
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
         <EuiFlexItem grow={false}>
-          <ElasticDocsLink section="/apm/get-started" path="/metadata.html">
+          <EuiLink href={docLinks.links.apm.metaData}>
             <EuiText size="s">
               <EuiIcon type="help" /> How to add labels and other data
             </EuiText>
-          </ElasticDocsLink>
+          </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFieldSearch

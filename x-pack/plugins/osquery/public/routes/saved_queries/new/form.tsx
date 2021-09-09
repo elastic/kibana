@@ -36,6 +36,7 @@ const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
     defaultValue,
     handleSubmit,
   });
+  const { submit, isSubmitting } = form;
 
   return (
     <Form form={form}>
@@ -54,12 +55,12 @@ const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  // isLoading={isLoading}
+                  isLoading={isSubmitting}
                   color="primary"
                   fill
                   size="m"
                   iconType="save"
-                  onClick={form.submit}
+                  onClick={submit}
                 >
                   <FormattedMessage
                     id="xpack.osquery.addSavedQuery.form.saveQueryButtonLabel"

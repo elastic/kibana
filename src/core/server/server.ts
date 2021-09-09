@@ -243,6 +243,7 @@ export class Server {
       environment: environmentSetup,
       http: httpSetup,
       metrics: metricsSetup,
+      coreUsageData: coreUsageDataSetup,
     });
 
     const renderingSetup = await this.rendering.setup({
@@ -278,6 +279,7 @@ export class Server {
       logging: loggingSetup,
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
+      coreUsageData: coreUsageDataSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);

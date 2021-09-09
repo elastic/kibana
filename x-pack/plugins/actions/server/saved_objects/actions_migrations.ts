@@ -62,6 +62,12 @@ export function getActionsMigrations(
     pipeMigrations(addisMissingSecretsField)
   );
 
+  const migrationEmailActionsSixteen = createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => doc.attributes.actionTypeId === '.email',
+    pipeMigrations(setServiceConfigIfNotSet)
+  );
+
   const migrationActions800 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawAction>): doc is SavedObjectUnsanitizedDoc<RawAction> =>
@@ -73,6 +79,7 @@ export function getActionsMigrations(
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
     '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
+    '7.16.0': executeMigrationWithErrorHandling(migrationEmailActionsSixteen, '7.16.0'),
     '8.0.0': executeMigrationWithErrorHandling(migrationActions800, '8.0.0'),
   };
 }
@@ -152,6 +159,24 @@ const addHasAuthConfigurationObject = (
       config: {
         ...doc.attributes.config,
         hasAuth,
+      },
+    },
+  };
+};
+
+const setServiceConfigIfNotSet = (
+  doc: SavedObjectUnsanitizedDoc<RawAction>
+): SavedObjectUnsanitizedDoc<RawAction> => {
+  if (doc.attributes.actionTypeId !== '.email' || null != doc.attributes.config.service) {
+    return doc;
+  }
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      config: {
+        ...doc.attributes.config,
+        service: 'other',
       },
     },
   };
