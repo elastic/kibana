@@ -7,6 +7,20 @@
 
 import { act } from 'react-dom/test-utils';
 
+// Once the logs team register the kibana locators in their app, we should be able
+// to remove this mock and follow a similar approach to how discover link is tested.
+// See: https://github.com/elastic/kibana/issues/104855
+const MOCKED_TIME = '2021-09-05T10:49:01.805Z';
+jest.mock('../../../../public/application/lib/logs_checkpoint', () => {
+  const originalModule = jest.requireActual('../../../../public/application/lib/logs_checkpoint');
+
+  return {
+    __esModule: true,
+    ...originalModule,
+    loadLogsCheckpoint: jest.fn().mockReturnValue('2021-09-05T10:49:01.805Z'),
+  };
+});
+
 import { DeprecationLoggingStatus } from '../../../../common/types';
 import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../common/constants';
 import { setupEnvironment } from '../../helpers';
@@ -180,7 +194,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
       expect(exists('viewObserveLogs')).toBe(true);
       expect(find('viewObserveLogs').props().href).toBe(
-        `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}`
+        `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}&logPosition=(end:now,start:'${MOCKED_TIME}')`
       );
     });
 
@@ -194,7 +208,12 @@ describe('Overview - Fix deprecation logs step', () => {
       component.update();
 
       expect(exists('viewDiscoverLogs')).toBe(true);
-      expect(find('viewDiscoverLogs').props().href).toBe('discoverUrl');
+
+      const decodedUrl = decodeURIComponent(find('viewDiscoverLogs').props().href);
+      expect(decodedUrl).toContain('discoverUrl');
+      ['"language":"kuery"', '"query":"@timestamp+>'].forEach((param) => {
+        expect(decodedUrl).toContain(param);
+      });
     });
   });
 
