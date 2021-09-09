@@ -13,7 +13,6 @@ import { MapApp } from './map_app';
 import { SavedMap, getInitialLayersFromUrlParam } from './saved_map';
 import { MapEmbeddableInput } from '../../embeddable/types';
 import { SpacesPluginStart } from '../../../../spaces/public';
-import { resolveSavedObject } from '../../map_attribute_service';
 
 interface Props {
   mapEmbeddableInput?: MapEmbeddableInput;

@@ -367,10 +367,10 @@ export class MapApp extends React.Component<Props, State> {
         this.props.savedMap.getTitle(),
         savedObjectId
       );
+      await this.getLegacyUrlConflictCallout(savedObjectId);
     }
 
     this._initMapAndLayerSettings(this.props.savedMap.getAttributes());
-    await this.getLegacyUrlConflictCallout(savedObjectId);
 
     this.setState({ initialized: true });
   }
@@ -442,31 +442,25 @@ export class MapApp extends React.Component<Props, State> {
     );
   }
 
-  async getLegacyUrlConflictCallout(savedObjectId: string | undefined) {
-    if (!savedObjectId) {
-      return;
-    }
-    await this.props.savedMap.whenReady();
+  async getLegacyUrlConflictCallout(savedObjectId: string) {
     const { resolvedSavedObject } = await resolveSavedObject(savedObjectId);
-    if (this.props.spacesApi && resolvedSavedObject) {
-      if (resolvedSavedObject.outcome === 'conflict') {
-        const currentObjectId = resolvedSavedObject.saved_object.id;
-        const otherObjectId = resolvedSavedObject.alias_target_id!;
-        const otherObjectPath = this.props.http.basePath.prepend(getFullPath(otherObjectId));
-        this.setState({
-          savedObjectWarning: (
-            <>
-              {this.props.spacesApi.ui.components.getLegacyUrlConflict({
-                objectNoun: 'Saved map',
-                currentObjectId,
-                otherObjectId,
-                otherObjectPath,
-              })}
-              <EuiSpacer />
-            </>
-          ),
-        });
-      }
+    if (this.props.spacesApi && resolvedSavedObject?.outcome === 'conflict') {
+      const currentObjectId = resolvedSavedObject.saved_object.id;
+      const otherObjectId = resolvedSavedObject.alias_target_id!;
+      const otherObjectPath = this.props.http.basePath.prepend(getFullPath(otherObjectId));
+      this.setState({
+        savedObjectWarning: (
+          <>
+            {this.props.spacesApi.ui.components.getLegacyUrlConflict({
+              objectNoun: 'Saved map',
+              currentObjectId,
+              otherObjectId,
+              otherObjectPath,
+            })}
+            <EuiSpacer />
+          </>
+        ),
+      });
     }
   }
 
