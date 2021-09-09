@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ALERT_FLYOUT, CELL_TEXT, JSON_LINES, TABLE_ROWS } from '../../screens/alerts_details';
+import { ALERT_FLYOUT, JSON_LINES } from '../../screens/alerts_details';
 
 import {
   expandFirstAlert,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
-import { openJsonView, openTable, scrollJsonViewToBottom } from '../../tasks/alerts_details';
+import { openJsonView, scrollJsonViewToBottom } from '../../tasks/alerts_details';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
