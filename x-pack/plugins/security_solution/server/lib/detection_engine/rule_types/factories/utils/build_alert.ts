@@ -105,6 +105,9 @@ export const buildAlert = (
     []
   );
 
+  const { actions, id, output_index: outputIndex, throttle, ...mappedRule } = rule;
+  mappedRule.uuid = id;
+
   return ({
     '@timestamp': new Date().toISOString(),
     [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
@@ -114,7 +117,7 @@ export const buildAlert = (
     [ALERT_WORKFLOW_STATUS]: 'open',
     [ALERT_DEPTH]: depth,
     [ALERT_REASON]: reason,
-    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, rule),
+    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, mappedRule as RulesSchema),
   } as unknown) as RACAlert;
 };
 

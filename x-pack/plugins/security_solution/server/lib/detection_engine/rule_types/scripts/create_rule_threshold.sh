@@ -33,12 +33,12 @@ curl -X POST ${KIBANA_URL}${SPACE_URL}/api/alerts/alert \
      "severityMapping": [],
      "threat": [],
       "threshold": {
-        "field": ["host.id", "host.ip"],
-        "value": 5,
+        "field": ["source.ip"],
+        "value": 2,
         "cardinality": [
           {
             "field": "source.ip",
-            "value": 11,
+            "value": 1
           }
         ]
       },

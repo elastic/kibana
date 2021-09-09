@@ -175,6 +175,7 @@ export const partialRulesSchema = t.partial({
   meta,
   index,
   note,
+  uuid: id, // Move to 'required' post-migration
 });
 
 /**
