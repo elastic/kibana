@@ -4389,7 +4389,6 @@
     "savedObjectsManagement.managementSectionLabel": "保存されたオブジェクト",
     "savedObjectsManagement.objects.savedObjectsDescription": "保存された検索、ビジュアライゼーション、ダッシュボードのインポート、エクスポート、管理を行います。",
     "savedObjectsManagement.objects.savedObjectsTitle": "保存されたオブジェクト",
-    "savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.content": "一部の選択したオブジェクトは削除できません。テーブル概要の一覧には表示されません",
     "savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.title": "一部のオブジェクトを削除できません",
     "savedObjectsManagement.objectsTable.deleteConfirmModal.sharedObjectsCallout.content": "共有オブジェクトは属しているすべてのスペースから削除されます。",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel": "キャンセル",
