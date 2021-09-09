@@ -33,7 +33,7 @@ describe('<FieldEditorFlyoutContent />', () => {
   test('should allow a field to be provided', async () => {
     const field = {
       name: 'foo',
-      type: 'ip',
+      type: 'ip' as const,
       script: {
         source: 'emit("hello world")',
       },
@@ -50,7 +50,7 @@ describe('<FieldEditorFlyoutContent />', () => {
   test('should accept an "onSave" prop', async () => {
     const field = {
       name: 'foo',
-      type: 'date',
+      type: 'date' as const,
       script: { source: 'test=123' },
     };
     const onSave: jest.Mock<Props['onSave']> = jest.fn();
@@ -69,7 +69,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
     expect(onSave).toHaveBeenCalled();
     const fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
-    expect(fieldReturned).toEqual(field);
+    expect(fieldReturned).toEqual({ ...field, format: null });
   });
 
   test('should accept an onCancel prop', async () => {
@@ -135,6 +135,7 @@ describe('<FieldEditorFlyoutContent />', () => {
         name: 'someName',
         type: 'keyword', // default to keyword
         script: { source: 'echo("hello")' },
+        format: null,
       });
 
       // Change the type and make sure it is forwarded
@@ -150,6 +151,7 @@ describe('<FieldEditorFlyoutContent />', () => {
         name: 'someName',
         type: 'other_type',
         script: { source: 'echo("hello")' },
+        format: null,
       });
     });
   });

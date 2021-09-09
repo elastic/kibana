@@ -109,6 +109,7 @@ const resolveRuntimeMappings = (indexPattern: IndexPattern): estypes.MappingRunt
   const runtimeMappingsFromIndexPattern = (Object.entries(runtimeFields) as ObjectEntries<
     typeof runtimeFields
   >).reduce<estypes.MappingRuntimeFields>(
+    // @ts-expect-error @elasticsearch/elasticsearch does not support yet "composite" type for runtime fields
     (accumulatedMappings, [runtimeFieldName, runtimeFieldSpec]) => ({
       ...accumulatedMappings,
       [runtimeFieldName]: {
@@ -117,7 +118,7 @@ const resolveRuntimeMappings = (indexPattern: IndexPattern): estypes.MappingRunt
           ? {
               script: {
                 lang: 'painless', // required in the es types
-                source: runtimeFieldSpec.script.source,
+                source: (runtimeFieldSpec.script as estypes.InlineScript).source,
               },
             }
           : {}),
@@ -126,5 +127,6 @@ const resolveRuntimeMappings = (indexPattern: IndexPattern): estypes.MappingRunt
     {}
   );
 
+  // @ts-expect-error @elasticsearch/elasticsearch does not support yet "composite" type for runtime fields
   return runtimeMappingsFromIndexPattern;
 };

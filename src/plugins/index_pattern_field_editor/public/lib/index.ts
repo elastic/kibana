@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { deserializeField } from './serialization';
-
 export { getLinks } from './documentation';
 
 export {

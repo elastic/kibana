@@ -31,7 +31,10 @@ export interface Context {
    * e.g we probably don't want a user to give a name of an existing
    * runtime field (for that the user should edit the existing runtime field).
    */
-  namesNotAllowed: string[];
+  namesNotAllowed: {
+    fields: string[];
+    runtimeComposites: string[];
+  };
   /**
    * An array of existing concrete fields. If the user gives a name to the runtime
    * field that matches one of the concrete fields, a callout will be displayed

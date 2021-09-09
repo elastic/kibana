@@ -8,12 +8,7 @@
 
 import { FunctionComponent } from 'react';
 
-import {
-  DataPublicPluginStart,
-  RuntimeField,
-  RuntimeType,
-  UsageCollectionStart,
-} from './shared_imports';
+import { DataPublicPluginStart, UsageCollectionStart, RuntimeField } from './shared_imports';
 import { OpenFieldEditorOptions } from './open_editor';
 import { OpenFieldDeleteModalOptions } from './open_delete_modal';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
@@ -43,25 +38,8 @@ export interface StartPlugins {
 
 export type InternalFieldType = 'concrete' | 'runtime';
 
-export interface Field {
+export interface Field extends RuntimeField {
   name: string;
-  type: RuntimeField['type'] | string;
-  script?: RuntimeField['script'];
-  customLabel?: string;
-  popularity?: number;
-  format?: FieldFormatConfig;
-}
-
-export interface FieldFormatConfig {
-  id: string;
-  params?: { [key: string]: any };
-}
-
-export interface EsRuntimeField {
-  type: RuntimeType | string;
-  script?: {
-    source: string;
-  };
 }
 
 export type CloseEditor = () => void;

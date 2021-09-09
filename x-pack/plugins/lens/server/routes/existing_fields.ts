@@ -115,6 +115,8 @@ async function fetchFieldExistence({
   const indexPattern = await indexPatternsService.get(indexPatternId);
 
   const fields = buildFieldList(indexPattern, metaFields);
+  const runtimeMappings = indexPattern.getRuntimeMappings();
+
   const docs = await fetchIndexPatternStats({
     fromDate,
     toDate,
@@ -123,6 +125,8 @@ async function fetchFieldExistence({
     index: indexPattern.title,
     timeFieldName: timeFieldName || indexPattern.timeFieldName,
     fields,
+    // @ts-expect-error The MappingRuntimeField from @elastic/elasticsearch does not expose the "composite" runtime type yet
+    runtimeMappings,
   });
 
   return {
@@ -157,6 +161,7 @@ async function fetchIndexPatternStats({
   fromDate,
   toDate,
   fields,
+  runtimeMappings,
 }: {
   client: ElasticsearchClient;
   index: string;
@@ -165,6 +170,7 @@ async function fetchIndexPatternStats({
   fromDate?: string;
   toDate?: string;
   fields: Field[];
+  runtimeMappings: estypes.MappingRuntimeFields;
 }) {
   const filter =
     timeFieldName && fromDate && toDate
@@ -188,7 +194,7 @@ async function fetchIndexPatternStats({
   };
 
   const scriptedFields = fields.filter((f) => f.isScript);
-  const runtimeFields = fields.filter((f) => f.runtimeField);
+
   const { body: result } = await client.search(
     {
       index,
@@ -199,11 +205,7 @@ async function fetchIndexPatternStats({
         sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
         fields: ['*'],
         _source: false,
-        runtime_mappings: runtimeFields.reduce((acc, field) => {
-          if (!field.runtimeField) return acc;
-          acc[field.name] = field.runtimeField;
-          return acc;
-        }, {} as Record<string, estypes.MappingRuntimeField>),
+        runtime_mappings: runtimeMappings,
         script_fields: scriptedFields.reduce((acc, field) => {
           acc[field.name] = {
             script: {

@@ -130,9 +130,12 @@ const formDeserializer = (field: Field): FieldFormInternal => {
     fieldType = [{ label: label ?? field.type, value: field.type as RuntimeType }];
   }
 
+  const format = field.format === null ? undefined : field.format;
+
   return {
     ...field,
     type: fieldType,
+    format,
     __meta__: {
       isCustomLabelVisible: field.customLabel !== undefined,
       isValueVisible: field.script !== undefined,
@@ -143,9 +146,12 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 };
 
 const formSerializer = (field: FieldFormInternal): Field => {
-  const { __meta__, type, ...rest } = field;
+  const { __meta__, type, format, ...rest } = field;
   return {
     type: type[0].value!,
+    // By passing "null" we are explicitly telling DataView to remove the
+    // format if there is one defined for the field.
+    format: format === undefined ? null : format,
     ...rest,
   };
 };

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import { estypes } from '@elastic/elasticsearch';
 
 import { DataPublicPluginStart } from '../shared_imports';
-import type { EsRuntimeField } from '../types';
 
 export interface RuntimeFieldPainlessError {
   message: string;
@@ -95,7 +95,7 @@ export const parseEsError = (
 export const getRuntimeFieldValidator = (
   index: string,
   searchService: DataPublicPluginStart['search']
-) => async (runtimeField: EsRuntimeField) => {
+) => async (runtimeField: estypes.MappingRuntimeField) => {
   return await searchService
     .search({
       params: {

@@ -280,7 +280,7 @@ describe('Field editor Preview panel', () => {
     test('should **not** display an empty prompt editing a document with a script', async () => {
       const field = {
         name: 'foo',
-        type: 'ip',
+        type: 'ip' as const,
         script: {
           source: 'emit("hello world")',
         },
@@ -303,7 +303,7 @@ describe('Field editor Preview panel', () => {
     test('should **not** display an empty prompt editing a document with format defined', async () => {
       const field = {
         name: 'foo',
-        type: 'ip',
+        type: 'ip' as const,
         format: {
           id: 'upper',
           params: {},

@@ -7,4 +7,6 @@
  */
 
 export { FormatSelectEditor, FormatSelectEditorProps } from './field_format_editor';
+export type { FormatEditorState } from './format_editor';
+export type { Sample } from './types';
 export * from './editors';
