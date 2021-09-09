@@ -14,7 +14,7 @@ const INITIAL_DATA = { transactionTypes: [] };
 export function useServiceTransactionTypesFetcher(serviceName?: string) {
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
