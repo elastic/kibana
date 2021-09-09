@@ -11,6 +11,11 @@ PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 
+# A few things, such as Chrome, respect this variable
+# For many agent types, the workspace is mounted on a local ssd, so will be faster than the default tmp dir location
+export TMPDIR="$WORKSPACE/tmp"
+mkdir -p "$TMPDIR"
+
 KIBANA_PKG_BRANCH="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH
 export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"

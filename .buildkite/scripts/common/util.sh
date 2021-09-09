@@ -61,14 +61,14 @@ retry() {
 
   until "$@"; do
     retry_exit_status=$?
-    echo "Exited with $retry_exit_status"
+    echo "Exited with $retry_exit_status" >&2
     if (( retries == "0" )); then
       return $retry_exit_status
     elif (( attempts == retries )); then
-      echo "Failed $attempts retries"
+      echo "Failed $attempts retries" >&2
       return $retry_exit_status
     else
-      echo "Retrying $((retries - attempts)) more times..."
+      echo "Retrying $((retries - attempts)) more times..." >&2
       attempts=$((attempts + 1))
       sleep "$delay"
     fi

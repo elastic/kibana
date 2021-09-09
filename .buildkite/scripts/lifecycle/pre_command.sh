@@ -6,7 +6,7 @@ cd '.buildkite'
 yarn install
 cd -
 
-BUILDKITE_TOKEN="$(vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
+BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
 export BUILDKITE_TOKEN
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
@@ -43,10 +43,10 @@ EOF
   if [[ "$CI_STATS_BUILD_ID" ]]; then
     echo "CI Stats Build ID: $CI_STATS_BUILD_ID"
 
-    CI_STATS_TOKEN="$(vault read -field=api_token secret/kibana-issues/dev/kibana_ci_stats)"
+    CI_STATS_TOKEN="$(retry 5 5 vault read -field=api_token secret/kibana-issues/dev/kibana_ci_stats)"
     export CI_STATS_TOKEN
 
-    CI_STATS_HOST="$(vault read -field=api_host secret/kibana-issues/dev/kibana_ci_stats)"
+    CI_STATS_HOST="$(retry 5 5 vault read -field=api_host secret/kibana-issues/dev/kibana_ci_stats)"
     export CI_STATS_HOST
 
     KIBANA_CI_STATS_CONFIG=$(jq -n \
@@ -59,18 +59,18 @@ EOF
   fi
 }
 
-GITHUB_TOKEN=$(vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
+GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
 export GITHUB_TOKEN
 
 # Setup Failed Test Reporter Elasticsearch credentials
 {
-  TEST_FAILURES_ES_CLOUD_ID=$(vault read -field=cloud_id secret/kibana-issues/dev/failed_tests_reporter_es)
+  TEST_FAILURES_ES_CLOUD_ID=$(retry 5 5 vault read -field=cloud_id secret/kibana-issues/dev/failed_tests_reporter_es)
   export TEST_FAILURES_ES_CLOUD_ID
 
-  TEST_FAILURES_ES_USERNAME=$(vault read -field=username secret/kibana-issues/dev/failed_tests_reporter_es)
+  TEST_FAILURES_ES_USERNAME=$(retry 5 5 vault read -field=username secret/kibana-issues/dev/failed_tests_reporter_es)
   export TEST_FAILURES_ES_USERNAME
 
-  TEST_FAILURES_ES_PASSWORD=$(vault read -field=password secret/kibana-issues/dev/failed_tests_reporter_es)
+  TEST_FAILURES_ES_PASSWORD=$(retry 5 5 vault read -field=password secret/kibana-issues/dev/failed_tests_reporter_es)
   export TEST_FAILURES_ES_PASSWORD
 }
 
