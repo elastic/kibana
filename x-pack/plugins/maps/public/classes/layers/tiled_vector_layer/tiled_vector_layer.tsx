@@ -148,14 +148,13 @@ export class TiledVectorLayer extends VectorLayer {
 
     startLoading(SOURCE_DATA_REQUEST_ID, requestToken, requestMeta);
     try {
-      const prevMeta: VectorSourceRequestMeta | undefined = prevDataRequest
-        ? (prevDataRequest.getMeta() as VectorSourceRequestMeta)
-        : undefined;
       const prevData = prevDataRequest
         ? (prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig)
         : undefined;
       const urlToken =
-        !prevData || (prevMeta && prevMeta.isForceRefresh) ? uuid() : prevData.urlToken;
+        !prevData || (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
+          ? uuid()
+          : prevData.urlToken;
 
       const newUrlTemplateAndMeta = await this._source.getUrlTemplateWithMeta(requestMeta);
 
