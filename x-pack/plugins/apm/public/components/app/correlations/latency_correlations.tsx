@@ -254,11 +254,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     });
   }
 
-  if (
-    Array.isArray(selectedHistogram?.histogram) &&
-    selectedHistogram?.fieldName !== undefined &&
-    selectedHistogram.fieldValue !== undefined
-  ) {
+  if (selectedTerm && Array.isArray(selectedTerm.histogram)) {
     transactionDistributionChartData.push({
       id: `${selectedHistogram.fieldName}:${selectedHistogram.fieldValue}`,
       histogram: selectedHistogram.histogram,

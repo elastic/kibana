@@ -394,7 +394,7 @@ export function FailedTransactionsCorrelations({
     });
   }
 
-  if (selectedTerm !== undefined && Array.isArray(selectedTerm.histogram)) {
+  if (selectedTerm && Array.isArray(selectedTerm.histogram)) {
     transactionDistributionChartData.push({
       id: `${selectedTerm.fieldName}:${selectedTerm.fieldValue}`,
       histogram: selectedTerm.histogram,
