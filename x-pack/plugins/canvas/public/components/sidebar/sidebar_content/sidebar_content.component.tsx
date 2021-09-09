@@ -6,17 +6,19 @@
  */
 
 import React, { Fragment } from 'react';
-import { connect } from 'react-redux';
-import { compose, branch, renderComponent } from 'recompose';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { SidebarHeader } from '../../sidebar_header';
+import { MultiElementSettings } from '../multi_element_settings';
+import { GroupSettings } from '../group_settings';
+import { GlobalConfig } from '../global_config';
+import { ElementSettings } from '../element_settings';
 
-import { getSelectedToplevelNodes, getSelectedElementId } from '../../state/selectors/workpad';
-import { SidebarHeader } from '../sidebar_header';
-import { MultiElementSettings } from './multi_element_settings';
-import { GroupSettings } from './group_settings';
-import { GlobalConfig } from './global_config';
-import { ElementSettings } from './element_settings';
+interface SidebarContentProps {
+  commit?: Function;
+  selectedElementId: string | null;
+  selectedToplevelNodes: string[];
+}
 
 const strings = {
   getGroupedElementSidebarTitle: () =>
@@ -43,12 +45,7 @@ const strings = {
     }),
 };
 
-const mapStateToProps = (state) => ({
-  selectedToplevelNodes: getSelectedToplevelNodes(state),
-  selectedElementId: getSelectedElementId(state),
-});
-
-const MultiElementSidebar = () => (
+const MultiElementSidebar: React.FC = () => (
   <Fragment>
     <SidebarHeader title={strings.getMultiElementSidebarTitle()} />
     <EuiSpacer />
@@ -56,38 +53,38 @@ const MultiElementSidebar = () => (
   </Fragment>
 );
 
-const GroupedElementSidebar = () => (
+const GroupedElementSidebar: React.FC = () => (
   <Fragment>
-    <SidebarHeader title={strings.getGroupedElementSidebarTitle()} groupIsSelected />
+    <SidebarHeader title={strings.getGroupedElementSidebarTitle()} />
     <EuiSpacer />
     <GroupSettings />
   </Fragment>
 );
 
-const SingleElementSidebar = ({ selectedElementId }) => (
+const SingleElementSidebar: React.FC<{ selectedElementId: string | null }> = ({
+  selectedElementId,
+}) => (
   <Fragment>
-    <SidebarHeader title={strings.getSingleElementSidebarTitle()} showLayerControls />
+    <SidebarHeader title={strings.getSingleElementSidebarTitle()} />
     <ElementSettings selectedElementId={selectedElementId} />
   </Fragment>
 );
 
-const branches = [
-  // multiple elements are selected
-  branch(
-    ({ selectedToplevelNodes }) => selectedToplevelNodes.length > 1,
-    renderComponent(MultiElementSidebar)
-  ),
-  // a single, grouped element is selected
-  branch(
-    ({ selectedToplevelNodes }) =>
-      selectedToplevelNodes.length === 1 && selectedToplevelNodes[0].includes('group'),
-    renderComponent(GroupedElementSidebar)
-  ),
-  // a single element is selected
-  branch(
-    ({ selectedToplevelNodes }) => selectedToplevelNodes.length === 1,
-    renderComponent(SingleElementSidebar)
-  ),
-];
+export const SidebarContent: React.FC<SidebarContentProps> = ({
+  selectedToplevelNodes,
+  selectedElementId,
+}) => {
+  if (selectedToplevelNodes.length > 1) {
+    return <MultiElementSidebar />;
+  }
 
-export const SidebarContent = compose(connect(mapStateToProps), ...branches)(GlobalConfig);
+  if (selectedToplevelNodes.length === 1 && selectedToplevelNodes[0].includes('group')) {
+    return <GroupedElementSidebar />;
+  }
+
+  if (selectedToplevelNodes.length === 1) {
+    return <SingleElementSidebar selectedElementId={selectedElementId} />;
+  }
+
+  return <GlobalConfig />;
+};
