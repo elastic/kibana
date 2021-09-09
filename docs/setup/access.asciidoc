@@ -41,13 +41,7 @@ For JSON-formatted server status details, use the `localhost:5601/api/status` AP
 [[not-ready]]
 === {kib} not ready
 
-During install or post upgrade, you may infrequently encounter the Kibana start up error
-
-```
-Kibana server is not ready yet 
-```
-
-If this occurs, to investigate, check
+If you receive an error that the {kib} `server is not ready`, check the following:
 
 * The {es} connectivity: 
 +
