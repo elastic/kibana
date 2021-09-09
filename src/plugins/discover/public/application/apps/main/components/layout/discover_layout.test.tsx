@@ -51,7 +51,7 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
     navigateTo: jest.fn(),
     onChangeIndexPattern: jest.fn(),
     onUpdateQuery: jest.fn(),
-    resetQuery: jest.fn(),
+    resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchData$: savedSearch$,
     savedSearchRefetch$: new Subject(),

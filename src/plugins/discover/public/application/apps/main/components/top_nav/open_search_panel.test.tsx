@@ -21,6 +21,6 @@ jest.mock('../../../../../kibana_services', () => {
 import { OpenSearchPanel } from './open_search_panel';
 
 test('render', () => {
-  const component = shallow(<OpenSearchPanel onClose={jest.fn()} makeUrl={jest.fn()} />);
+  const component = shallow(<OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />);
   expect(component).toMatchSnapshot();
 });

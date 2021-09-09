@@ -29,6 +29,7 @@ export const getTopNavLinks = ({
   state,
   onOpenInspector,
   searchSource,
+  onOpenSavedSearch,
 }: {
   indexPattern: IndexPattern;
   navigateTo: (url: string) => void;
@@ -37,6 +38,7 @@ export const getTopNavLinks = ({
   state: GetStateReturn;
   onOpenInspector: () => void;
   searchSource: ISearchSource;
+  onOpenSavedSearch: (id: string) => void;
 }) => {
   const options = {
     id: 'options',
@@ -89,7 +91,7 @@ export const getTopNavLinks = ({
     testId: 'discoverOpenButton',
     run: () =>
       showOpenSearchPanel({
-        makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
+        onOpenSavedSearch,
         I18nContext: services.core.i18n.Context,
       }),
   };

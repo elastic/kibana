@@ -28,7 +28,7 @@ export function DiscoverChart({
   chartData,
   hits,
   isLegacy,
-  resetQuery,
+  resetSavedSearch,
   savedSearch,
   state,
   stateContainer,
@@ -41,7 +41,7 @@ export function DiscoverChart({
   hits?: number;
   indexPattern: IndexPattern;
   isLegacy: boolean;
-  resetQuery: () => void;
+  resetSavedSearch: () => void;
   savedSearch: SavedSearch;
   state: AppState;
   stateContainer: GetStateReturn;
@@ -95,7 +95,7 @@ export function DiscoverChart({
             <HitsCounter
               hits={hits}
               showResetButton={!!(savedSearch && savedSearch.id)}
-              onResetQuery={resetQuery}
+              onResetQuery={resetSavedSearch}
             />
           </EuiFlexItem>
           {!state.hideChart && (
