@@ -47,6 +47,7 @@
   font-size: .9em; /* 1 */
   line-height: 1em;  /* 1 */
   text-align: center;
+  pointer-events: all;
 
   .tvbVisGauge--reversed & {
     color: $tvbValueColorReversed;
@@ -71,4 +72,5 @@
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
+  pointer-events: none;
 }
