@@ -94,6 +94,7 @@ steps:
   - plugins:
       - junit-annotate#v1.9.0:
           artifacts: target/junit/**/*.xml
+          job-uuid-file-pattern: '-bk__(.*).xml'
 
   - wait: ~
     continue_on_failure: true
