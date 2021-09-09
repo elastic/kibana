@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(lines.slice(0, 100)).toMatch();
         expectSnapshot(lines.slice(-100)).toMatch();
 
-        expectSnapshot(csvFile.length).toMatchInline(`5093470`);
+        expectSnapshot(csvFile.length).toMatchInline(`5107495`);
         expectSnapshot(lines.length).toMatchInline(`32726`);
       });
 
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(lines.slice(0, 100)).toMatch();
         expectSnapshot(lines.slice(-100)).toMatch();
 
-        expectSnapshot(csvFile.length).toMatchInline(`5093470`);
+        expectSnapshot(csvFile.length).toMatchInline(`5107495`);
         expectSnapshot(lines.length).toMatchInline(`32726`);
 
         await setFieldsFromSource(false);
