@@ -35,9 +35,9 @@ export class DocLinksService {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
           supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
           customLinks: `${KIBANA_DOCS}custom-links.html`,
-          droppedTransactionSpans: `${APM_DOCS}get-started/${DOC_LINK_VERSION}/transaction-spans.html#dropped-spans`,
-          upgrading: `${APM_DOCS}server/${DOC_LINK_VERSION}/upgrading.html`,
-          metaData: `${APM_DOCS}get-started/${DOC_LINK_VERSION}/metadata.html`,
+          droppedTransactionSpans: `${APM_DOCS}get-started/master/transaction-spans.html#dropped-spans`,
+          upgrading: `${APM_DOCS}server/master/upgrading.html`,
+          metaData: `${APM_DOCS}get-started/master/metadata.html`,
         },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
@@ -282,6 +282,9 @@ export class DocLinksService {
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
+          infrastructureThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/infrastructure-threshold-alert.html`,
+          logsThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/logs-threshold-alert.html`,
+          metricsThreshold: `{ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/metrics-threshold-alert.html`,
           monitorStatus: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-status-alert.html`,
           monitorUptime: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime.html`,
           tlsCertificate: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/tls-certificate-alert.html`,
@@ -645,6 +648,9 @@ export interface DocLinksStart {
     }>;
     readonly observability: Readonly<{
       guide: string;
+      infrastructureThreshold: string;
+      logsThreshold: string;
+      metricsThreshold: string;
       monitorStatus: string;
       monitorUptime: string;
       tlsCertificate: string;
