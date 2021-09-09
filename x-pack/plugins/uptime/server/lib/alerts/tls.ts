@@ -23,8 +23,8 @@ import { createUptimeESClient } from '../lib';
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 
 export const DEFAULT_SIZE = 20;
-const DEFAULT_FROM = 'now-5m';
-const DEFAULT_TO = 'now';
+export const DEFAULT_FROM = 'now-5m';
+export const DEFAULT_TO = 'now';
 
 interface TlsAlertState {
   commonName: string;

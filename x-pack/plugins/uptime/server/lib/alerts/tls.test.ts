@@ -6,11 +6,10 @@
  */
 import moment from 'moment';
 import { ALERT_SEVERITY_WARNING, ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import { tlsAlertFactory, getCertSummary, DEFAULT_SIZE } from './tls';
+import { tlsAlertFactory, getCertSummary, DEFAULT_SIZE, DEFAULT_TO, DEFAULT_FROM } from './tls';
 import { TLS } from '../../../common/constants/alerts';
 import { CertResult, DynamicSettings } from '../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
-import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 
 import { savedObjectsAdapter, UMSavedObjectsAdapter } from '../saved_objects';
