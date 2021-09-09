@@ -20,7 +20,7 @@ import {
   getListItems,
   getListPagination,
   isListLoading,
-  mapOfPoliciesById,
+  getMapOfPoliciesById,
 } from '../../../store/selectors';
 
 import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from '../../hooks';
@@ -62,7 +62,7 @@ export const TrustedAppsGrid = memo(() => {
   const isLoading = useTrustedAppsSelector(isListLoading);
   const error = useTrustedAppsSelector(getListErrorMessage);
   const location = useTrustedAppsSelector(getCurrentLocation);
-  const policyListById = useTrustedAppsSelector(mapOfPoliciesById);
+  const policyListById = useTrustedAppsSelector(getMapOfPoliciesById);
 
   const handlePaginationChange: PaginatedContentProps<
     TrustedApp,

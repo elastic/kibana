@@ -231,7 +231,7 @@ export const listOfPolicies: (
   return isLoadedResourceState(policies) ? policies.data.items : [];
 });
 
-export const mapOfPoliciesById: (
+export const getMapOfPoliciesById: (
   state: Immutable<TrustedAppsListPageState>
 ) => Immutable<Record<string, Immutable<PolicyData>>> = createSelector(
   listOfPolicies,
