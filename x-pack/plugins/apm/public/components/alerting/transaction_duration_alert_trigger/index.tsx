@@ -29,7 +29,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata, getIntervalAndTimeRange, TIME_UNITS } from '../helper';
+import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 
@@ -108,7 +108,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
-        windowUnit: params.windowUnit as TIME_UNITS,
+        windowUnit: params.windowUnit as TimeUnit,
       });
       if (interval && start && end) {
         return callApmApi({

@@ -14,12 +14,7 @@ export interface AlertMetadata {
   end?: string;
 }
 
-export enum TIME_UNITS {
-  SECOND = 's',
-  MINUTE = 'm',
-  HOUR = 'h',
-  DAY = 'd',
-}
+export type TimeUnit = 's' | 'm' | 'h' | 'd';
 
 const BUCKET_SIZE = 20;
 
