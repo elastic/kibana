@@ -317,69 +317,73 @@ export class SessionIndex {
 
     const sessionIndexTemplateName = `${this.options.kibanaIndexName}_security_session_index_template_${SESSION_INDEX_TEMPLATE_VERSION}`;
     return (this.indexInitialization = new Promise<void>(async (resolve, reject) => {
-      // Check if required index template exists.
-      let indexTemplateExists = false;
       try {
-        indexTemplateExists = (
-          await this.options.elasticsearchClient.indices.existsTemplate({
-            name: sessionIndexTemplateName,
-          })
-        ).body;
-      } catch (err) {
-        this.options.logger.error(
-          `Failed to check if session index template exists: ${err.message}`
-        );
-        return reject(err);
-      }
-
-      // Create index template if it doesn't exist.
-      if (indexTemplateExists) {
-        this.options.logger.debug('Session index template already exists.');
-      } else {
+        // Check if required index template exists.
+        let indexTemplateExists = false;
         try {
-          await this.options.elasticsearchClient.indices.putTemplate({
-            name: sessionIndexTemplateName,
-            body: getSessionIndexTemplate(this.indexName),
-          });
-          this.options.logger.debug('Successfully created session index template.');
+          indexTemplateExists = (
+            await this.options.elasticsearchClient.indices.existsTemplate({
+              name: sessionIndexTemplateName,
+            })
+          ).body;
         } catch (err) {
-          this.options.logger.error(`Failed to create session index template: ${err.message}`);
+          this.options.logger.error(
+            `Failed to check if session index template exists: ${err.message}`
+          );
           return reject(err);
         }
-      }
 
-      // Check if required index exists. We cannot be sure that automatic creation of indices is
-      // always enabled, so we create session index explicitly.
-      let indexExists = false;
-      try {
-        indexExists = (
-          await this.options.elasticsearchClient.indices.exists({ index: this.indexName })
-        ).body;
-      } catch (err) {
-        this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
-        return reject(err);
-      }
-
-      // Create index if it doesn't exist.
-      if (indexExists) {
-        this.options.logger.debug('Session index already exists.');
-      } else {
-        try {
-          await this.options.elasticsearchClient.indices.create({ index: this.indexName });
-          this.options.logger.debug('Successfully created session index.');
-        } catch (err) {
-          // There can be a race condition if index is created by another Kibana instance.
-          if (err?.body?.error?.type === 'resource_already_exists_exception') {
-            this.options.logger.debug('Session index already exists.');
-          } else {
-            this.options.logger.error(`Failed to create session index: ${err.message}`);
+        // Create index template if it doesn't exist.
+        if (indexTemplateExists) {
+          this.options.logger.debug('Session index template already exists.');
+        } else {
+          try {
+            await this.options.elasticsearchClient.indices.putTemplate({
+              name: sessionIndexTemplateName,
+              body: getSessionIndexTemplate(this.indexName),
+            });
+            this.options.logger.debug('Successfully created session index template.');
+          } catch (err) {
+            this.options.logger.error(`Failed to create session index template: ${err.message}`);
             return reject(err);
           }
         }
-      }
 
-      // Notify any consumers that are awaiting on this promise and immediately reset it.
-      resolve();
+        // Check if required index exists. We cannot be sure that automatic creation of indices is
+        // always enabled, so we create session index explicitly.
+        let indexExists = false;
+        try {
+          indexExists = (
+            await this.options.elasticsearchClient.indices.exists({ index: this.indexName })
+          ).body;
+        } catch (err) {
+          this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
+          return reject(err);
+        }
+
+        // Create index if it doesn't exist.
+        if (indexExists) {
+          this.options.logger.debug('Session index already exists.');
+        } else {
+          try {
+            await this.options.elasticsearchClient.indices.create({ index: this.indexName });
+            this.options.logger.debug('Successfully created session index.');
+          } catch (err) {
+            // There can be a race condition if index is created by another Kibana instance.
+            if (err?.body?.error?.type === 'resource_already_exists_exception') {
+              this.options.logger.debug('Session index already exists.');
+            } else {
+              this.options.logger.error(`Failed to create session index: ${err.message}`);
+              return reject(err);
+            }
+          }
+        }
+
+        // Notify any consumers that are awaiting on this promise and immediately reset it.
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
     }).finally(() => {
       this.indexInitialization = undefined;
     }));

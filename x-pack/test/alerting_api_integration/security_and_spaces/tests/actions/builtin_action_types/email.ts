@@ -319,5 +319,122 @@ export default function emailTest({ getService }: FtrProviderContext) {
           });
         });
     });
+
+    it('should return 200 when creating an email action without defining service', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action',
+          connector_type_id: '.email',
+          config: {
+            from: 'bob@example.com',
+            host: 'some.non.existent.com',
+            port: 25,
+            hasAuth: true,
+          },
+          secrets: {
+            user: 'bob',
+            password: 'supersecret',
+          },
+        })
+        .expect(200);
+
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+        is_preconfigured: false,
+        name: 'An email action',
+        connector_type_id: '.email',
+        is_missing_secrets: false,
+        config: {
+          service: 'other',
+          hasAuth: true,
+          host: 'some.non.existent.com',
+          port: 25,
+          secure: null,
+          from: 'bob@example.com',
+        },
+      });
+
+      expect(typeof createdAction.id).to.be('string');
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/actions/connector/${createdAction.id}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        id: fetchedAction.id,
+        is_preconfigured: false,
+        name: 'An email action',
+        connector_type_id: '.email',
+        is_missing_secrets: false,
+        config: {
+          from: 'bob@example.com',
+          service: 'other',
+          hasAuth: true,
+          host: 'some.non.existent.com',
+          port: 25,
+          secure: null,
+        },
+      });
+    });
+
+    it('should return 200 when creating an email action with nodemailer well-defined service', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action',
+          connector_type_id: '.email',
+          config: {
+            from: 'bob@example.com',
+            service: 'hotmail',
+            hasAuth: true,
+          },
+          secrets: {
+            user: 'bob',
+            password: 'supersecret',
+          },
+        })
+        .expect(200);
+
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+        is_preconfigured: false,
+        name: 'An email action',
+        connector_type_id: '.email',
+        is_missing_secrets: false,
+        config: {
+          service: 'hotmail',
+          hasAuth: true,
+          host: null,
+          port: null,
+          secure: null,
+          from: 'bob@example.com',
+        },
+      });
+
+      expect(typeof createdAction.id).to.be('string');
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/actions/connector/${createdAction.id}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        id: fetchedAction.id,
+        is_preconfigured: false,
+        name: 'An email action',
+        connector_type_id: '.email',
+        is_missing_secrets: false,
+        config: {
+          from: 'bob@example.com',
+          service: 'hotmail',
+          hasAuth: true,
+          host: null,
+          port: null,
+          secure: null,
+        },
+      });
+    });
   });
 }

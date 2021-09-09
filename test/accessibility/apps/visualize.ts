@@ -11,12 +11,16 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
   const a11y = getService('a11y');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Visualize', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.common.navigateToApp('visualize');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 
     it('visualize', async () => {

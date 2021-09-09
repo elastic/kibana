@@ -40,15 +40,17 @@ export const useDataGridHeightHack = (pageSize: number, rowCount: number) => {
         gridVirtualized &&
         gridVirtualized.children[0].clientHeight !== gridVirtualized.clientHeight // check if it has vertical scroll
       ) {
-        setHeight(
-          height +
+        setHeight((currHeight) => {
+          return (
+            currHeight +
             gridVirtualized.children[0].clientHeight -
             gridVirtualized.clientHeight +
             MAGIC_GAP
-        );
+          );
+        });
       }
     }, TIME_INTERVAL);
-  }, [pageSize, rowCount, height]);
+  }, [pageSize, rowCount]);
 
   return height;
 };

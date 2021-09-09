@@ -1700,6 +1700,14 @@ describe('successful migrations', () => {
       });
     });
   });
+
+  describe('8.0.0', () => {
+    test('no op migration for rules SO', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData({}, true);
+      expect(migration800(alert, migrationContext)).toEqual(alert);
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {

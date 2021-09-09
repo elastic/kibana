@@ -21,7 +21,7 @@ export interface IFieldSubType {
  * A base interface for an index pattern field
  * @public
  */
-export interface IndexPatternFieldBase {
+export interface DataViewFieldBase {
   name: string;
   /**
    * Kibana field type
@@ -41,14 +41,24 @@ export interface IndexPatternFieldBase {
 }
 
 /**
+ * @deprecated Use DataViewField instead. All index pattern interfaces were renamed.
+ */
+export type IndexPatternFieldBase = DataViewFieldBase;
+
+/**
  * A base interface for an index pattern
  * @public
  */
-export interface IndexPatternBase {
-  fields: IndexPatternFieldBase[];
+export interface DataViewBase {
+  fields: DataViewFieldBase[];
   id?: string;
   title?: string;
 }
+
+/**
+ * @deprecated Use DataViewBase instead.  All index pattern interfaces were renamed.
+ */
+export type IndexPatternBase = DataViewBase;
 
 export interface BoolQuery {
   must: estypes.QueryDslQueryContainer[];

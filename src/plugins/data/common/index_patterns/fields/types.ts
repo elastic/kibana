@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPatternFieldBase } from '@kbn/es-query';
-import { FieldSpec, IndexPattern } from '../..';
+import { DataViewFieldBase } from '@kbn/es-query';
+import { FieldSpec, DataView } from '../..';
 
 /**
  * @deprecated Use {@link IndexPatternField}
  * @removeBy 8.1
  */
-export interface IFieldType extends IndexPatternFieldBase {
+export interface IFieldType extends DataViewFieldBase {
   count?: number;
   // esTypes might be undefined on old index patterns that have not been refreshed since we added
   // this prop. It is also undefined on scripted fields.
@@ -26,5 +26,5 @@ export interface IFieldType extends IndexPatternFieldBase {
   displayName?: string;
   customLabel?: string;
   format?: any;
-  toSpec?: (options?: { getFormatterForField?: IndexPattern['getFormatterForField'] }) => FieldSpec;
+  toSpec?: (options?: { getFormatterForField?: DataView['getFormatterForField'] }) => FieldSpec;
 }

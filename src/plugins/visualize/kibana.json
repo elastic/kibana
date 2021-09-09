@@ -26,8 +26,8 @@
     "discover"
   ],
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
   },
   "description": "Contains the visualize application which includes the listing page and the app frame, which will load the visualization's editor."
 }

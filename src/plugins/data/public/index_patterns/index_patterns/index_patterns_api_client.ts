@@ -7,7 +7,7 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { IndexPatternMissingIndices } from '../../../common/index_patterns/lib';
+import { DataViewMissingIndices } from '../../../common/index_patterns/lib';
 import {
   GetFieldsOptions,
   IIndexPatternsApiClient,
@@ -30,7 +30,7 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
       })
       .catch((resp: any) => {
         if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
-          throw new IndexPatternMissingIndices(resp.body.message);
+          throw new DataViewMissingIndices(resp.body.message);
         }
 
         throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);

@@ -19,12 +19,9 @@ import {
 } from '@kbn/server-route-repository';
 import { mergeRt, jsonRt } from '@kbn/io-ts-utils';
 import { pickKeys } from '../../../common/utils/pick_keys';
-import {
-  APMRouteHandlerResources,
-  InspectResponse,
-  TelemetryUsageCounter,
-} from '../typings';
+import { APMRouteHandlerResources, TelemetryUsageCounter } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
+import { InspectResponse } from '../../../typings/common';
 
 const inspectRt = t.exact(
   t.partial({

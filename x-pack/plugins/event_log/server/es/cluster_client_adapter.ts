@@ -41,8 +41,19 @@ export interface QueryEventsBySavedObjectResult {
   data: IValidatedEvent[];
 }
 
+interface QueryOptionsEventsBySavedObjectFilter {
+  index: string;
+  namespace: string | undefined;
+  type: string;
+  ids: string[];
+  findOptions: FindOptionsType;
+  legacyIds?: string[];
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AliasAny = any;
+
+const LEGACY_ID_CUTOFF_VERSION = '8.0.0';
 
 export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string } = Doc> {
   private readonly logger: Logger;
@@ -202,13 +213,12 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   }
 
   public async queryEventsBySavedObjects(
-    index: string,
-    namespace: string | undefined,
-    type: string,
-    ids: string[],
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    { page, per_page: perPage, start, end, sort_field, sort_order, filter }: FindOptionsType
+    queryOptions: QueryOptionsEventsBySavedObjectFilter
   ): Promise<QueryEventsBySavedObjectResult> {
+    const { index, namespace, type, ids, findOptions, legacyIds } = queryOptions;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { page, per_page: perPage, start, end, sort_field, sort_order, filter } = findOptions;
+
     const defaultNamespaceQuery = {
       bool: {
         must_not: {
@@ -238,41 +248,125 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       });
       throw err;
     }
+    const savedObjectsQueryMust: estypes.QueryDslQueryContainer[] = [
+      {
+        term: {
+          'kibana.saved_objects.rel': {
+            value: SAVED_OBJECT_REL_PRIMARY,
+          },
+        },
+      },
+      {
+        term: {
+          'kibana.saved_objects.type': {
+            value: type,
+          },
+        },
+      },
+      // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
+      namespaceQuery,
+    ];
+
     const musts: estypes.QueryDslQueryContainer[] = [
       {
         nested: {
           path: 'kibana.saved_objects',
           query: {
             bool: {
-              must: [
-                {
-                  term: {
-                    'kibana.saved_objects.rel': {
-                      value: SAVED_OBJECT_REL_PRIMARY,
-                    },
-                  },
-                },
-                {
-                  term: {
-                    'kibana.saved_objects.type': {
-                      value: type,
-                    },
-                  },
-                },
-                {
-                  terms: {
-                    // default maximum of 65,536 terms, configurable by index.max_terms_count
-                    'kibana.saved_objects.id': ids,
-                  },
-                },
-                // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
-                namespaceQuery,
-              ],
+              must: reject(savedObjectsQueryMust, isUndefined),
             },
           },
         },
       },
     ];
+
+    const shouldQuery = [];
+
+    shouldQuery.push({
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      terms: {
+                        // default maximum of 65,536 terms, configurable by index.max_terms_count
+                        'kibana.saved_objects.id': ids,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            range: {
+              'kibana.version': {
+                gte: LEGACY_ID_CUTOFF_VERSION,
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    if (legacyIds && legacyIds.length > 0) {
+      shouldQuery.push({
+        bool: {
+          must: [
+            {
+              nested: {
+                path: 'kibana.saved_objects',
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        terms: {
+                          // default maximum of 65,536 terms, configurable by index.max_terms_count
+                          'kibana.saved_objects.id': legacyIds,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    range: {
+                      'kibana.version': {
+                        lt: LEGACY_ID_CUTOFF_VERSION,
+                      },
+                    },
+                  },
+                  {
+                    bool: {
+                      must_not: {
+                        exists: {
+                          field: 'kibana.version',
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
+    }
+
+    musts.push({
+      bool: {
+        should: shouldQuery,
+      },
+    });
+
     if (start) {
       musts.push({
         range: {

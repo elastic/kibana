@@ -45,7 +45,7 @@ export const getElementPositionAndAttributes = async (
               },
               attributes: Object.keys(attributes).reduce((result: AttributesMap, key) => {
                 const attribute = attributes[key];
-                (result as any)[key] = element.getAttribute(attribute);
+                result[key] = element.getAttribute(attribute);
                 return result;
               }, {} as AttributesMap),
             });

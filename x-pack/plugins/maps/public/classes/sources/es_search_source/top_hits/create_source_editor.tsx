@@ -8,16 +8,13 @@
 import React, { Component } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
+import type { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 import { SCALING_TYPES } from '../../../../../common/constants';
 import { GeoFieldSelect } from '../../../../components/geo_field_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
 import { getGeoFields, getTermsFields, getSortFields } from '../../../../index_pattern_util';
 import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
-import {
-  IndexPattern,
-  IFieldType,
-  SortDirection,
-} from '../../../../../../../../src/plugins/data/common';
+import { SortDirection } from '../../../../../../../../src/plugins/data/public';
 import { TopHitsForm } from './top_hits_form';
 import { OnSourceChangeArgs } from '../../source';
 
@@ -27,12 +24,12 @@ interface Props {
 
 interface State {
   indexPattern: IndexPattern | null;
-  geoFields: IFieldType[];
+  geoFields: IndexPatternField[];
   geoFieldName: string | null;
   sortField: string | null;
-  sortFields: IFieldType[];
+  sortFields: IndexPatternField[];
   sortOrder: SortDirection;
-  termFields: IFieldType[];
+  termFields: IndexPatternField[];
   topHitsSplitField: string | null;
   topHitsSize: number;
 }

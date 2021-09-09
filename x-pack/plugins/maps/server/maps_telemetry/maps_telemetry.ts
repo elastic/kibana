@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { SavedObject } from 'kibana/server';
-import { IFieldType } from 'src/plugins/data/public';
+import type { IndexPatternField } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
   LAYER_TYPE,
@@ -136,7 +136,8 @@ async function isFieldGeoShape(
     return false;
   }
   return indexPattern.fields.some(
-    (fieldDescriptor: IFieldType) => fieldDescriptor.name && fieldDescriptor.name === geoField!
+    (fieldDescriptor: IndexPatternField) =>
+      fieldDescriptor.name && fieldDescriptor.name === geoField!
   );
 }
 

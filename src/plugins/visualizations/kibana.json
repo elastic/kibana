@@ -15,8 +15,8 @@
   "requiredBundles": ["kibanaUtils", "discover"],
   "extraPublicDirs": ["common/constants", "common/prepare_log_table", "common/expression_functions"],
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
   },
   "description": "Contains the shared architecture among all the legacy visualizations, e.g. the visualization type registry or the visualization embeddable."
 }

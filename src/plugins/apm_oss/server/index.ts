@@ -10,7 +10,10 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { ConfigDeprecationProvider, PluginInitializerContext } from '../../../core/server';
 import { APMOSSPlugin } from './plugin';
 
-const deprecations: ConfigDeprecationProvider = ({ unused }) => [unused('fleetMode')];
+const deprecations: ConfigDeprecationProvider = ({ unused }) => [
+  unused('fleetMode'),
+  unused('indexPattern'),
+];
 
 export const config = {
   schema: schema.object({

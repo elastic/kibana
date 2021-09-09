@@ -45,19 +45,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(tableData).to.be(EXPECTED);
       });
 
-      it('should display drilldown urls', async () => {
-        const baseURL = 'http://elastic.co/foo/';
-
-        await visualBuilder.clickPanelOptions('table');
-        await visualBuilder.setDrilldownUrl(`${baseURL}{{key}}`);
-
-        await retry.try(async () => {
-          const links = await findService.allByCssSelector(`a[href="${baseURL}ios"]`);
-
-          expect(links.length).to.be(1);
-        });
-      });
-
       it('should display correct values on changing metrics aggregation', async () => {
         const EXPECTED = 'OS Cardinality\nwin 8 12\nwin xp 9\nwin 7 8\nios 5\nosx 3';
 
@@ -133,6 +120,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const tableData = await visualBuilder.getViewTable();
         expect(tableData).to.be(EXPECTED);
+      });
+
+      it('should display drilldown urls', async () => {
+        const baseURL = 'http://elastic.co/foo/';
+
+        await visualBuilder.clickPanelOptions('table');
+        await visualBuilder.setDrilldownUrl(`${baseURL}{{key}}`);
+
+        await retry.try(async () => {
+          const links = await findService.allByCssSelector(`a[href="${baseURL}ios"]`);
+
+          expect(links.length).to.be(1);
+        });
       });
     });
   });

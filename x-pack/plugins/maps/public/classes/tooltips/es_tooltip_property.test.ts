@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IFieldType, IndexPattern } from '../../../../../../src/plugins/data/public';
+import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { TooltipProperty } from './tooltip_property';
 import { AbstractField } from '../fields/field';
@@ -25,7 +25,7 @@ const indexPatternField = {
   searchable: true,
   aggregatable: true,
   readFromDocValues: false,
-} as IFieldType;
+} as IndexPatternField;
 
 const featurePropertyField = new MockField({
   fieldName: 'machine.os',
@@ -41,7 +41,7 @@ const nonFilterableIndexPatternField = {
   searchable: true,
   aggregatable: true,
   readFromDocValues: false,
-} as IFieldType;
+} as IndexPatternField;
 
 const nonFilterableFeaturePropertyField = new MockField({
   fieldName: 'location',
@@ -51,7 +51,7 @@ const nonFilterableFeaturePropertyField = new MockField({
 const indexPattern = {
   id: 'indexPatternId',
   fields: {
-    getByName: (name: string): IFieldType | null => {
+    getByName: (name: string): IndexPatternField | null => {
       if (name === 'machine.os') {
         return indexPatternField;
       }

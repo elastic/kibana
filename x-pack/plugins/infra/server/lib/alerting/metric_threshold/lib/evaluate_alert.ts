@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues, first, last, isNaN } from 'lodash';
+import { mapValues, first, last, isNaN, isNumber, isObject, has } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
 import {
@@ -23,7 +23,11 @@ import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
 import { MetricExpressionParams, Comparator, Aggregators } from '../types';
 import { getElasticsearchMetricQuery } from './metric_query';
 
-interface Aggregation {
+interface AggregationWithoutIntervals {
+  aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
+}
+
+interface AggregationWithIntervals {
   aggregatedIntervals: {
     buckets: Array<{
       aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
@@ -33,6 +37,14 @@ interface Aggregation {
       key_as_string: string;
     }>;
   };
+}
+
+type Aggregation = AggregationWithIntervals | AggregationWithoutIntervals;
+
+function isAggregationWithIntervals(
+  subject: Aggregation | undefined
+): subject is AggregationWithIntervals {
+  return isObject(subject) && has(subject, 'aggregatedIntervals');
 }
 
 interface CompositeAggregationsResponse {
@@ -52,7 +64,7 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
   esClient: ElasticsearchClient,
   params: Params,
   config: InfraSource['configuration'],
-  timeframe?: { start: number; end: number }
+  timeframe?: { start?: number; end: number }
 ) => {
   const { criteria, groupBy, filterQuery, shouldDropPartialBuckets } = params;
   return Promise.all(
@@ -105,7 +117,7 @@ const getMetric: (
   timefield: string,
   groupBy: string | undefined | string[],
   filterQuery: string | undefined,
-  timeframe?: { start: number; end: number },
+  timeframe?: { start?: number; end: number },
   shouldDropPartialBuckets?: boolean
 ) => Promise<Record<string, number[]>> = async function (
   esClient,
@@ -124,10 +136,7 @@ const getMetric: (
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMS = intervalAsSeconds * 1000;
 
-  const to = moment(timeframe ? timeframe.end : Date.now())
-    .add(1, timeUnit)
-    .startOf(timeUnit)
-    .valueOf();
+  const to = moment(timeframe ? timeframe.end : Date.now()).valueOf();
 
   // Rate aggregations need 5 buckets worth of data
   const minimumBuckets = aggType === Aggregators.RATE ? 5 : 1;
@@ -135,7 +144,7 @@ const getMetric: (
   const minimumFrom = to - intervalAsMS * minimumBuckets;
 
   const from = roundTimestamp(
-    timeframe && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
+    timeframe && timeframe.start && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
     timeUnit
   );
 
@@ -172,16 +181,26 @@ const getMetric: (
         searchBody,
         bucketSelector,
         afterKeyHandler
-      )) as Array<Aggregation & { key: Record<string, string> }>;
-      return compositeBuckets.reduce(
+      )) as Array<Aggregation & { key: Record<string, string>; doc_count: number }>;
+      const groupedResults = compositeBuckets.reduce(
         (result, bucket) => ({
           ...result,
           [Object.values(bucket.key)
             .map((value) => value)
-            .join(', ')]: getValuesFromAggregations(bucket, aggType, dropPartialBucketsOptions),
+            .join(', ')]: getValuesFromAggregations(
+            bucket,
+            aggType,
+            dropPartialBucketsOptions,
+            {
+              start: from,
+              end: to,
+            },
+            bucket.doc_count
+          ),
         }),
         {}
       );
+      return groupedResults;
     }
     const { body: result } = await esClient.search({
       body: searchBody,
@@ -192,7 +211,9 @@ const getMetric: (
       [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(
         (result.aggregations! as unknown) as Aggregation,
         aggType,
-        dropPartialBucketsOptions
+        dropPartialBucketsOptions,
+        { start: from, end: to },
+        isNumber(result.hits.total) ? result.hits.total : result.hits.total.value
       ),
     };
   } catch (e) {
@@ -221,7 +242,7 @@ interface DropPartialBucketOptions {
 const dropPartialBuckets = ({ from, to, bucketSizeInMillis }: DropPartialBucketOptions) => (
   row: {
     key: string;
-    value: number;
+    value: number | null;
   } | null
 ) => {
   if (row == null) return null;
@@ -230,20 +251,45 @@ const dropPartialBuckets = ({ from, to, bucketSizeInMillis }: DropPartialBucketO
 };
 
 const getValuesFromAggregations = (
-  aggregations: Aggregation,
+  aggregations: Aggregation | undefined,
   aggType: MetricExpressionParams['aggType'],
-  dropPartialBucketsOptions: DropPartialBucketOptions | null
+  dropPartialBucketsOptions: DropPartialBucketOptions | null,
+  timeFrame: { start: number; end: number },
+  docCount?: number
 ) => {
   try {
-    const { buckets } = aggregations.aggregatedIntervals;
+    let buckets;
+    if (aggType === Aggregators.COUNT) {
+      buckets = [
+        {
+          doc_count: docCount,
+          to_as_string: moment(timeFrame.end).toISOString(),
+          from_as_string: moment(timeFrame.start).toISOString(),
+          key_as_string: moment(timeFrame.start).toISOString(),
+        },
+      ];
+    } else if (isAggregationWithIntervals(aggregations)) {
+      buckets = aggregations.aggregatedIntervals.buckets;
+    } else {
+      buckets = [
+        {
+          ...aggregations,
+          doc_count: docCount,
+          to_as_string: moment(timeFrame.end).toISOString(),
+          from_as_string: moment(timeFrame.start).toISOString(),
+          key_as_string: moment(timeFrame.start).toISOString(),
+        },
+      ];
+    }
+
     if (!buckets.length) return null; // No Data state
 
-    let mappedBuckets;
+    let mappedBuckets: Array<{ key: string; value: number | null } | null>;
 
     if (aggType === Aggregators.COUNT) {
       mappedBuckets = buckets.map((bucket) => ({
         key: bucket.from_as_string,
-        value: bucket.doc_count,
+        value: bucket.doc_count || null,
       }));
     } else if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
       mappedBuckets = buckets.map((bucket) => {

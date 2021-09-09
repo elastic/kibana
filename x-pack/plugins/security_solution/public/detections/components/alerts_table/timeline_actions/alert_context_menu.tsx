@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@ela
 import { indexOf } from 'lodash';
 
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
-import { get, getOr } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
@@ -36,6 +36,7 @@ import { useInvestigateInResolverContextItem } from './investigate_in_resolver';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
+import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_alert_check';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -77,17 +78,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const alertStatus = get(0, ecsRowData?.signal?.status) as Status;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
-
-  const isEndpointAlert = useMemo((): boolean => {
-    if (ecsRowData == null) {
-      return false;
-    }
-
-    const eventModules = getOr([], 'signal.original_event.module', ecsRowData);
-    const kinds = getOr([], 'signal.original_event.kind', ecsRowData);
-
-    return eventModules.includes('endpoint') && kinds.includes('alert');
-  }, [ecsRowData]);
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -153,7 +143,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   }, [closePopover, onAddEventFilterClick]);
 
   const { exceptionActionItems } = useExceptionActions({
-    isEndpointAlert,
+    isEndpointAlert: isAlertFromEndpointAlert({ ecsData: ecsRowData }),
     onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
   });
   const investigateInResolverActionItems = useInvestigateInResolverContextItem({

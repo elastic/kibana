@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import * as Option from 'fp-ts/Option';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
@@ -21,6 +22,7 @@ describe('createInitialState', () => {
   const migrationsConfig = ({
     retryAttempts: 15,
     batchSize: 1000,
+    maxBatchSizeBytes: ByteSizeValue.parse('100mb'),
   } as unknown) as SavedObjectsMigrationConfigType;
   it('creates the initial state for the model based on the passed in parameters', () => {
     expect(
@@ -37,6 +39,7 @@ describe('createInitialState', () => {
       })
     ).toEqual({
       batchSize: 1000,
+      maxBatchSizeBytes: ByteSizeValue.parse('100mb').getValueInBytes(),
       controlState: 'INIT',
       currentAlias: '.kibana_task_manager',
       excludeFromUpgradeFilterHooks: {},

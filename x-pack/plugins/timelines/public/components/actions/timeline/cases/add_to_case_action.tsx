@@ -26,6 +26,7 @@ export interface AddToCaseActionProps {
   } | null;
   appId: string;
   onClose?: Function;
+  disableAlerts?: boolean;
 }
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
@@ -35,6 +36,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   casePermissions,
   appId,
   onClose,
+  disableAlerts,
 }) => {
   const eventId = event?.ecs._id ?? '';
   const eventIndex = event?.ecs._index ?? '';
@@ -104,6 +106,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           onSuccess={onCaseSuccess}
           useInsertTimeline={useInsertTimeline}
           appId={appId}
+          disableAlerts={disableAlerts}
         />
       )}
       {isAllCaseModalOpen && cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}

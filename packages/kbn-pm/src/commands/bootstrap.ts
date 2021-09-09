@@ -102,9 +102,20 @@ export const BootstrapCommand: ICommand = {
     // NOTE: We don't probably need this anymore, is actually not being used
     await linkProjectExecutables(projects, projectGraph);
 
+    // Update vscode settings
+    await spawnStreaming(
+      process.execPath,
+      ['scripts/update_vscode_config'],
+      {
+        cwd: kbn.getAbsolute(),
+        env: process.env,
+      },
+      { prefix: '[vscode]', debug: false }
+    );
+
     // Build typescript references
     await spawnStreaming(
-      'node',
+      process.execPath,
       ['scripts/build_ts_refs', '--ignore-type-failures', '--info'],
       {
         cwd: kbn.getAbsolute(),

@@ -21,7 +21,7 @@ import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 import { Document } from '../persistence/saved_object_store';
 import { LensAttributeService } from '../lens_attribute_service';
-import { DOC_TYPE } from '../../common';
+import { DOC_TYPE } from '../../common/constants';
 import { ErrorMessage } from '../editor_frame_service/types';
 import { extract, inject } from '../../common/embeddable_factory';
 

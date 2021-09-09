@@ -74,6 +74,10 @@ describe('Service Overview', () => {
     cy.contains('Service Map');
     // Waits until the agent request is finished to check the tab.
     cy.wait('@agentRequest');
-    cy.contains('Dependencies').should('not.exist');
+    cy.get('.euiTabs .euiTab__content').then((elements) => {
+      elements.map((index, element) => {
+        expect(element.innerText).to.not.equal('Dependencies');
+      });
+    });
   });
 });

@@ -74,7 +74,7 @@
         "children": [
           {
             "parentPluginId": "expressionShape",
-            "id": "def-public.props",
+            "id": "def-public.LazyProgressDrawer.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -136,7 +136,7 @@
         "children": [
           {
             "parentPluginId": "expressionShape",
-            "id": "def-public.props",
+            "id": "def-public.LazyShapeDrawer.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",

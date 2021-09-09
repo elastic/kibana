@@ -7,15 +7,14 @@
  */
 
 import { getStats } from './get_usage_collector';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+import { createCollectorFetchContextMock } from '../../../usage_collection/server/mocks';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '../../../../core/server';
 import { TIME_RANGE_DATA_MODES } from '../../common/enums';
 
-const mockedSavedObjects = [
-  {
-    _id: 'visualization:timeseries-123',
-    _source: {
-      type: 'visualization',
-      visualization: {
+const mockedSavedObject = {
+  saved_objects: [
+    {
+      attributes: {
         visState: JSON.stringify({
           type: 'metrics',
           title: 'TSVB visualization 1',
@@ -25,12 +24,8 @@ const mockedSavedObjects = [
         }),
       },
     },
-  },
-  {
-    _id: 'visualization:timeseries-321',
-    _source: {
-      type: 'visualization',
-      visualization: {
+    {
+      attributes: {
         visState: JSON.stringify({
           type: 'metrics',
           title: 'TSVB visualization 2',
@@ -40,12 +35,8 @@ const mockedSavedObjects = [
         }),
       },
     },
-  },
-  {
-    _id: 'visualization:timeseries-456',
-    _source: {
-      type: 'visualization',
-      visualization: {
+    {
+      attributes: {
         visState: JSON.stringify({
           type: 'metrics',
           title: 'TSVB visualization 3',
@@ -55,8 +46,8 @@ const mockedSavedObjects = [
         }),
       },
     },
-  },
-];
+  ],
+} as SavedObjectsFindResponse;
 
 const mockedSavedObjectsByValue = [
   {
@@ -91,42 +82,43 @@ const mockedSavedObjectsByValue = [
   },
 ];
 
-const getMockCollectorFetchContext = (hits?: unknown[], savedObjectsByValue: unknown[] = []) => {
+const getMockCollectorFetchContext = (
+  savedObjects: SavedObjectsFindResponse,
+  savedObjectsByValue: unknown[] = []
+) => {
   const fetchParamsMock = createCollectorFetchContextMock();
 
-  fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ body: { hits: { hits } } });
-  fetchParamsMock.soClient.find = jest.fn().mockResolvedValue({
-    saved_objects: savedObjectsByValue,
-  });
+  fetchParamsMock.soClient = ({
+    find: jest.fn().mockResolvedValue({
+      saved_objects: savedObjectsByValue,
+    }),
+    createPointInTimeFinder: jest.fn().mockResolvedValue({
+      close: jest.fn(),
+      find: function* asyncGenerator() {
+        yield savedObjects;
+      },
+    }),
+  } as unknown) as SavedObjectsClientContract;
   return fetchParamsMock;
 };
 
 describe('Timeseries visualization usage collector', () => {
-  const mockIndex = 'mock_index';
-
   test('Returns undefined when no results found (undefined)', async () => {
-    const mockCollectorFetchContext = getMockCollectorFetchContext([], []);
-    const result = await getStats(
-      mockCollectorFetchContext.esClient,
-      mockCollectorFetchContext.soClient,
-      mockIndex
+    const mockCollectorFetchContext = getMockCollectorFetchContext(
+      ({ saved_objects: [] } as unknown) as SavedObjectsFindResponse,
+      []
     );
+    const result = await getStats(mockCollectorFetchContext.soClient);
 
     expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no timeseries saved objects found', async () => {
-    const mockCollectorFetchContext = getMockCollectorFetchContext(
-      [
+    const mockCollectorFetchContext = getMockCollectorFetchContext({
+      saved_objects: [
         {
-          _id: 'visualization:myvis-123',
-          _source: {
-            type: 'visualization',
-            visualization: { visState: '{"type": "area"}' },
-          },
+          attributes: { visState: '{"type": "area"}' },
         },
-      ],
-      [
         {
           attributes: {
             panelsJSON: JSON.stringify({
@@ -139,27 +131,20 @@ describe('Timeseries visualization usage collector', () => {
             }),
           },
         },
-      ]
-    );
-    const result = await getStats(
-      mockCollectorFetchContext.esClient,
-      mockCollectorFetchContext.soClient,
-      mockIndex
-    );
+      ],
+    } as SavedObjectsFindResponse);
+
+    const result = await getStats(mockCollectorFetchContext.soClient);
 
     expect(result).toBeUndefined();
   });
 
   test('Summarizes visualizations response data', async () => {
     const mockCollectorFetchContext = getMockCollectorFetchContext(
-      mockedSavedObjects,
+      mockedSavedObject,
       mockedSavedObjectsByValue
     );
-    const result = await getStats(
-      mockCollectorFetchContext.esClient,
-      mockCollectorFetchContext.soClient,
-      mockIndex
-    );
+    const result = await getStats(mockCollectorFetchContext.soClient);
 
     expect(result).toMatchObject({
       timeseries_use_last_value_mode_total: 3,

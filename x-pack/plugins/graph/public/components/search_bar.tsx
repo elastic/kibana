@@ -17,6 +17,7 @@ import {
   datasourceSelector,
   requestDatasource,
   IndexpatternDatasource,
+  submitSearch,
 } from '../state_management';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
@@ -28,11 +29,11 @@ import {
   esKuery,
 } from '../../../../../src/plugins/data/public';
 
-export interface OuterSearchBarProps {
+export interface SearchBarProps {
   isLoading: boolean;
-  initialQuery?: string;
-  onQuerySubmit: (query: string) => void;
-
+  urlQuery: string | null;
+  currentIndexPattern?: IndexPattern;
+  onIndexPatternChange: (indexPattern?: IndexPattern) => void;
   confirmWipeWorkspace: (
     onConfirm: () => void,
     text?: string,
@@ -41,9 +42,10 @@ export interface OuterSearchBarProps {
   indexPatternProvider: IndexPatternProvider;
 }
 
-export interface SearchBarProps extends OuterSearchBarProps {
+export interface SearchBarStateProps {
   currentDatasource?: IndexpatternDatasource;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
+  submit: (searchTerm: string) => void;
 }
 
 function queryToString(query: Query, indexPattern: IndexPattern) {
@@ -65,31 +67,34 @@ function queryToString(query: Query, indexPattern: IndexPattern) {
   return JSON.stringify(query.query);
 }
 
-export function SearchBarComponent(props: SearchBarProps) {
+export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) {
   const {
-    currentDatasource,
-    onQuerySubmit,
     isLoading,
-    onIndexPatternSelected,
-    initialQuery,
+    urlQuery,
+    currentIndexPattern,
+    currentDatasource,
     indexPatternProvider,
+    submit,
+    onIndexPatternSelected,
     confirmWipeWorkspace,
+    onIndexPatternChange,
   } = props;
-  const [query, setQuery] = useState<Query>({ language: 'kuery', query: initialQuery || '' });
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern | undefined>(
-    undefined
-  );
+  const [query, setQuery] = useState<Query>({ language: 'kuery', query: urlQuery || '' });
+
+  useEffect(() => setQuery((prev) => ({ language: prev.language, query: urlQuery || '' })), [
+    urlQuery,
+  ]);
 
   useEffect(() => {
     async function fetchPattern() {
       if (currentDatasource) {
-        setCurrentIndexPattern(await indexPatternProvider.get(currentDatasource.id));
+        onIndexPatternChange(await indexPatternProvider.get(currentDatasource.id));
       } else {
-        setCurrentIndexPattern(undefined);
+        onIndexPatternChange(undefined);
       }
     }
     fetchPattern();
-  }, [currentDatasource, indexPatternProvider]);
+  }, [currentDatasource, indexPatternProvider, onIndexPatternChange]);
 
   const kibana = useKibana<IDataPluginServices>();
   const { services, overlays } = kibana;
@@ -101,7 +106,7 @@ export function SearchBarComponent(props: SearchBarProps) {
       onSubmit={(e) => {
         e.preventDefault();
         if (!isLoading && currentIndexPattern) {
-          onQuerySubmit(queryToString(query, currentIndexPattern));
+          submit(queryToString(query, currentIndexPattern));
         }
       }}
     >
@@ -195,6 +200,9 @@ export const SearchBar = connect(
           title: indexPattern.attributes.title,
         })
       );
+    },
+    submit: (searchTerm: string) => {
+      dispatch(submitSearch(searchTerm));
     },
   })
 )(SearchBarComponent);

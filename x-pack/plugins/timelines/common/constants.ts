@@ -21,3 +21,4 @@ export const FILTER_IN_PROGRESS: AlertStatus = 'in-progress';
 export const FILTER_ACKNOWLEDGED: AlertStatus = 'acknowledged';
 
 export const RAC_ALERTS_BULK_UPDATE_URL = '/internal/rac/alerts/bulk_update';
+export const DETECTION_ENGINE_SIGNALS_STATUS_URL = '/api/detection_engine/signals/status';
