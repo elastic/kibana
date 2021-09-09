@@ -23,8 +23,13 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
+import {
+  AlertMetadata,
+  getAbsoluteTimeRange,
+  isNewApmRuleFromStackManagement,
+} from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
+import { NewAlertEmptyPrompt } from '../new_alert_empty_prompt';
 
 interface AlertParams {
   windowSize: number;
@@ -94,6 +99,10 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       params.windowUnit,
     ]
   );
+
+  if (isNewApmRuleFromStackManagement(alertParams, metadata)) {
+    return <NewAlertEmptyPrompt />;
+  }
 
   const fields = [
     <ServiceField value={params.serviceName} />,

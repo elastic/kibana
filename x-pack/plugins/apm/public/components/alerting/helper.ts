@@ -24,3 +24,14 @@ export function getAbsoluteTimeRange(windowSize: number, windowUnit: string) {
     end: now,
   };
 }
+
+export function isNewApmRuleFromStackManagement(
+  alertParams: any,
+  metadata?: AlertMetadata
+) {
+  return (
+    alertParams !== undefined &&
+    Object.keys(alertParams).length === 0 &&
+    metadata === undefined
+  );
+}
