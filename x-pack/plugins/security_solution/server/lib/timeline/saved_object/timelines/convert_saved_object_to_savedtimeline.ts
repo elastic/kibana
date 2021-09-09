@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { intersection, type, partial, literal, union, string } from 'io-ts/lib/index';
+import { intersection, type, partial, literal, union, string, TypeOf } from 'io-ts/lib/index';
 import { failure } from 'io-ts/lib/PathReporter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
@@ -19,7 +19,7 @@ import {
 } from '../../../../../common/types/timeline';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
-export const TimelineSavedObjectWithDraftRuntimeType = intersection([
+const TimelineSavedObjectWithDraftRuntime = intersection([
   type({
     id: string,
     version: string,
@@ -32,6 +32,10 @@ export const TimelineSavedObjectWithDraftRuntimeType = intersection([
     savedObjectId: string,
   }),
 ]);
+
+export type TimelineSavedObjectWithDraftRuntimeType = TypeOf<
+  typeof TimelineSavedObjectWithDraftRuntime
+>;
 
 const getTimelineTypeAndStatus = (
   timelineType: TimelineType | 'draft' | null = TimelineType.default,
@@ -53,7 +57,7 @@ const getTimelineTypeAndStatus = (
 
 export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
   const timeline = pipe(
-    TimelineSavedObjectWithDraftRuntimeType.decode(savedObject),
+    TimelineSavedObjectWithDraftRuntime.decode(savedObject),
     map((savedTimeline) => {
       const attributes = {
         ...savedTimeline.attributes,

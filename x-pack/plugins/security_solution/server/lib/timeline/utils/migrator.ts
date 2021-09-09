@@ -7,23 +7,24 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import { SavedObject, SavedObjectReference } from 'kibana/server';
+import { SavedObject, SavedObjectReference, SavedObjectsUpdateResponse } from 'kibana/server';
 
 interface Field {
   path: string;
   type: string;
   name: string;
 }
+
 export class FieldMigrator {
   constructor(private readonly fieldsToMigrate: Field[]) {}
 
-  public extractFieldsToReferences({
+  public extractFieldsToReferences<T>({
     data,
     existingReferences = [],
   }: {
     data: unknown;
     existingReferences?: SavedObjectReference[];
-  }): { transformedFields: unknown; references: SavedObjectReference[] } {
+  }): { transformedFields: T; references: SavedObjectReference[] } {
     const copyOfData = _.cloneDeep(data);
 
     const references = createReferenceMap(existingReferences);
@@ -43,10 +44,10 @@ export class FieldMigrator {
       }
     }
 
-    return { transformedFields: copyOfData, references: Array.from(references.values()) };
+    return { transformedFields: copyOfData as T, references: Array.from(references.values()) };
   }
 
-  public populateFieldsFromReferences(data: SavedObject): object {
+  public populateFieldsFromReferences<T extends object>(data: SavedObject<T>): object {
     const dataToManipulate = _.cloneDeep(data);
 
     const references = createReferenceMap(data.references);
@@ -55,21 +56,21 @@ export class FieldMigrator {
       const reference = references.get(field.name);
 
       if (reference) {
-        set(dataToManipulate, field.path, reference.id);
+        set(dataToManipulate.attributes, field.path, reference.id);
       } else {
-        set(dataToManipulate, field.path, null);
+        set(dataToManipulate.attributes, field.path, null);
       }
     }
 
     return dataToManipulate;
   }
 
-  public populateFieldsFromReferencesForPatch({
+  public populateFieldsFromReferencesForPatch<T extends object>({
     dataBeforeRequest,
     dataReturnedFromRequest,
   }: {
     dataBeforeRequest: object;
-    dataReturnedFromRequest: SavedObject;
+    dataReturnedFromRequest: SavedObjectsUpdateResponse<T>;
   }): object {
     const dataToManipulate = _.cloneDeep(dataReturnedFromRequest);
 
@@ -81,10 +82,10 @@ export class FieldMigrator {
       const fieldValueBeforeRequest = _.get(dataBeforeRequest, field.path);
       if (fieldValueBeforeRequest !== undefined) {
         if (reference) {
-          set(dataToManipulate, field.path, reference.id);
+          set(dataToManipulate.attributes, field.path, reference.id);
         } else {
           // set path to fieldValueBeforeRequest
-          set(dataToManipulate, field.path, fieldValueBeforeRequest);
+          set(dataToManipulate.attributes, field.path, fieldValueBeforeRequest);
         }
       }
     }
