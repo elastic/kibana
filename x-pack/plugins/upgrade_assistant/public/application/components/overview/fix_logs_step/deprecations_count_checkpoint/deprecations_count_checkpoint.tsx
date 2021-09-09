@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import React, { FunctionComponent, useEffect } from 'react';
 import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';

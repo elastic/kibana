@@ -36,11 +36,13 @@ const idToUrlMap = {
 type IdKey = keyof typeof idToUrlMap;
 
 const stringifySearchParams = (params: Record<string, any>) => {
-  return Object.keys(params).reduce((list, key) => {
+  const stringifiedParams = Object.keys(params).reduce((list, key) => {
     const value = typeof params[key] === 'object' ? JSON.stringify(params[key]) : params[key];
 
     return { ...list, [key]: value };
   }, {});
+
+  return new URLSearchParams(stringifiedParams).toString();
 };
 
 const shareMock = sharePluginMock.createSetupContract();
@@ -48,7 +50,7 @@ const shareMock = sharePluginMock.createSetupContract();
 shareMock.url.locators.get = (id: IdKey) => ({
   useUrl: (): string | undefined => idToUrlMap[id],
   getUrl: (params: Record<string, any>): string | undefined =>
-    `${idToUrlMap[id]}?${new URLSearchParams(stringifySearchParams(params)).toString()}`,
+    `${idToUrlMap[id]}?${stringifySearchParams(params)}`,
 });
 
 export const getAppContextMock = () => ({
