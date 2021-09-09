@@ -59,17 +59,17 @@ export const importListItemsToStream = ({
     let list: ListSchema | null = null;
     readBuffer.on('fileName', async (fileNameEmitted: string) => {
       readBuffer.pause();
-      fileName = fileNameEmitted;
+      fileName = decodeURIComponent(fileNameEmitted);
       if (listId == null) {
         list = await createListIfItDoesNotExist({
-          description: `File uploaded from file system of ${fileNameEmitted}`,
+          description: `File uploaded from file system of ${fileName}`,
           deserializer,
           esClient,
-          id: fileNameEmitted,
+          id: fileName,
           immutable: false,
           listIndex,
           meta,
-          name: fileNameEmitted,
+          name: fileName,
           serializer,
           type,
           user,
