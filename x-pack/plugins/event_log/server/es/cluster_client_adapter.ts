@@ -58,6 +58,10 @@ type AliasAny = any;
 
 const LEGACY_ID_CUTOFF_VERSION = '8.0.0';
 
+function stripSnapshotFromVersion(version: string) {
+  return version.replace('-SNAPSHOT', '');
+}
+
 export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string } = Doc> {
   private readonly logger: Logger;
   private readonly kibanaVersion: string;
@@ -71,7 +75,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     this.elasticsearchClientPromise = opts.elasticsearchClientPromise;
     this.wait = opts.wait;
     this.docBuffer$ = new Subject<TDoc>();
-    this.kibanaVersion = opts.kibanaVersion;
+    this.kibanaVersion = stripSnapshotFromVersion(opts.kibanaVersion);
     // buffer event log docs for time / buffer length, ignore empty
     // buffers, then index the buffered docs; kick things off with a
     // promise on the observable, which we'll wait on in shutdown
