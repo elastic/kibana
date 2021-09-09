@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { exportDashboards } from './export/export_dashboards';
-export { importDashboards } from './import/import_dashboards';
+export { exportDashboards } from './export_dashboards';
+export { importDashboards } from './import_dashboards';
