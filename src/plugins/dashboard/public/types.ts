@@ -32,6 +32,7 @@ import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
 import { DataPublicPluginStart, IndexPatternsContract } from './services/data';
 import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
+import { ScreenshotModePluginStart } from './services/screenshot_mode';
 import { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
@@ -203,4 +204,5 @@ export interface DashboardAppServices {
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
+  screenshotMode: ScreenshotModePluginStart;
 }

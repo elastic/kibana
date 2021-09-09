@@ -37,7 +37,10 @@ import { NavigationPublicPluginStart as NavigationStart } from './services/navig
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from './services/data';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from './services/share';
 import type { SavedObjectTaggingOssPluginStart } from './services/saved_objects_tagging_oss';
-import type { ScreenshotModePluginSetup } from './services/screenshot_mode';
+import type {
+  ScreenshotModePluginSetup,
+  ScreenshotModePluginStart,
+} from './services/screenshot_mode';
 import {
   getSavedObjectFinder,
   SavedObjectLoader,
@@ -122,6 +125,7 @@ export interface DashboardStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   spaces?: SpacesPluginStart;
   visualizations: VisualizationsStart;
+  screenshotMode: ScreenshotModePluginStart;
 }
 
 export interface DashboardSetup {
@@ -176,9 +180,6 @@ export class DashboardPlugin
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const startServices = core.getStartServices();
-
-    console.error('!!!!!' + screenshotMode.isScreenshotMode());
-    console.error('!!!!!' + screenshotMode.getScreenshotLayout());
 
     if (share) {
       this.dashboardUrlGenerator = share.urlGenerators.registerUrlGenerator(

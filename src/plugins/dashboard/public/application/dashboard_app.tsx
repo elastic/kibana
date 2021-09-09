@@ -41,7 +41,11 @@ export function DashboardApp({
     onAppLeave,
     uiSettings,
     data,
+    screenshotMode,
   } = useKibana<DashboardAppServices>().services;
+
+  const isScreenshotMode = screenshotMode.isScreenshotMode();
+  const screenshotLayout = screenshotMode.getScreenshotLayout();
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -106,15 +110,23 @@ export function DashboardApp({
     };
   }, [data.search.session]);
 
+  useEffect(() => {
+    if (isScreenshotMode) {
+      chrome.setIsVisible(false);
+    }
+  }, [chrome, isScreenshotMode]);
+
   return (
     <>
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          <DashboardTopNav
-            redirectTo={redirectTo}
-            embedSettings={embedSettings}
-            dashboardAppState={dashboardAppState}
-          />
+          {!isScreenshotMode && (
+            <DashboardTopNav
+              redirectTo={redirectTo}
+              embedSettings={embedSettings}
+              dashboardAppState={dashboardAppState}
+            />
+          )}
           <div className="dashboardViewport">
             <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
           </div>

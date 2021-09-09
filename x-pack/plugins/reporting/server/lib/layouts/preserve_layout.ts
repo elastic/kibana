@@ -32,7 +32,9 @@ export class PreserveLayout extends Layout implements LayoutInstance {
   }
 
   public getCssOverridesPath() {
-    return path.join(__dirname, 'preserve_layout.css');
+    // TODO: Uncomment below, this is just for PoC purposes to show that dashboard does not rely on injected CSS to handle layout or hiding of elements
+    // return path.join(__dirname, 'preserve_layout.css');
+    return undefined;
   }
 
   public getBrowserViewport() {
