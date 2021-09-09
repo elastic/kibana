@@ -18,6 +18,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       log.debug('Starting before method');
       await browser.setWindowSize(1280, 800);
       await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
+
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
     });
 
     describe('dashboard elements ciGroup10', function () {
