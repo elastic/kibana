@@ -95,7 +95,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               <p>
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.content"
-                  defaultMessage="{objectsCount, plural, one {# object is} other {# objects are}} hidden and cannot be deleted. {objectsCount, plural, one {It was} other {They were}} excluded from the table summary."
+                  defaultMessage="{objectCount, plural, one {# object is} other {# objects are}} hidden and cannot be deleted. {objectCount, plural, one {It was} other {They were}} excluded from the table summary."
                   values={{ objectCount: undeletableObjects.length }}
                 />
               </p>
