@@ -23,7 +23,7 @@ import {
   Query,
   ContextVarsObject,
 } from './types';
-import { dateHistogramInterval } from '../../../data/common';
+import { dateHistogramInterval } from '../../../../data/common';
 
 const TIMEFILTER: string = '%timefilter%';
 const AUTOINTERVAL: string = '%autointerval%';
