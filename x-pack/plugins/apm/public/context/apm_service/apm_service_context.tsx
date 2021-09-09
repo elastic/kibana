@@ -41,7 +41,7 @@ export function ApmServiceContextProvider({
     path: { serviceName },
     query,
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
