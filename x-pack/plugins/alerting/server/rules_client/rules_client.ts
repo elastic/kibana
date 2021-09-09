@@ -7,7 +7,7 @@
 
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
+import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
 import {
@@ -38,6 +38,9 @@ import {
   AlertWithLegacyId,
   SanitizedAlertWithLegacyId,
   PartialAlertWithLegacyId,
+  RawAlertInstance,
+  AlertInstanceState,
+  AlertType,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -60,7 +63,7 @@ import {
   AlertingAuthorizationFilterType,
   AlertingAuthorizationFilterOpts,
 } from '../authorization';
-import { IEventLogClient } from '../../../event_log/server';
+import { IEventLogClient, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
 import { IEvent } from '../../../event_log/server';
@@ -73,6 +76,8 @@ import { ruleAuditEvent, RuleAuditAction } from './audit_events';
 import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField } from './lib';
 import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
+import { AlertInstance } from '../alert_instance';
+import { EVENT_LOG_ACTIONS } from '../plugin';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -101,6 +106,7 @@ export interface ConstructorOptions {
   getEventLogClient: () => Promise<IEventLogClient>;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   auditLogger?: AuditLogger;
+  eventLogger?: IEventLogger;
 }
 
 export interface MuteOptions extends IndexType {
@@ -215,6 +221,7 @@ export class RulesClient {
   private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private readonly kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly auditLogger?: AuditLogger;
+  private readonly eventLogger?: IEventLogger;
 
   constructor({
     ruleTypeRegistry,
@@ -232,6 +239,7 @@ export class RulesClient {
     getEventLogClient,
     kibanaVersion,
     auditLogger,
+    eventLogger,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
@@ -248,6 +256,7 @@ export class RulesClient {
     this.getEventLogClient = getEventLogClient;
     this.kibanaVersion = kibanaVersion;
     this.auditLogger = auditLogger;
+    this.eventLogger = eventLogger;
   }
 
   public async create<Params extends AlertTypeParams = never>({
@@ -503,7 +512,7 @@ export class RulesClient {
 
     // default duration of instance summary is 60 * alert interval
     const dateNow = new Date();
-    const durationMillis = parseDuration(alert.schedule.interval) * 60;
+    const durationMillis = parseDuration(alert.schedule.interval) * 360;
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
     const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
 
@@ -1177,6 +1186,37 @@ export class RulesClient {
       version = alert.version;
     }
 
+    const { state } = taskInstanceToAlertTaskInstance(
+      await this.taskManager.get(attributes.scheduledTaskId!),
+      (attributes as unknown) as SanitizedAlert
+    );
+
+    const recoveredAlertInstances = mapValues<Record<string, RawAlertInstance>, AlertInstance>(
+      state.alertInstances!,
+      (rawAlertInstance) => new AlertInstance(rawAlertInstance)
+    );
+    const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
+
+    for (const instanceId of recoveredAlertInstanceIds) {
+      const { group: actionGroup, subgroup: actionSubgroup } =
+        recoveredAlertInstances[instanceId].getLastScheduledActions() ?? {};
+      const inststate = recoveredAlertInstances[instanceId].getState();
+      const message = `instance '${instanceId}' has recovered`;
+
+      this.logInstanceEvent(
+        id,
+        attributes.name,
+        this.ruleTypeRegistry.get(attributes.alertTypeId),
+        instanceId,
+        EVENT_LOG_ACTIONS.recoveredInstance,
+        message,
+        inststate,
+        actionGroup,
+        actionSubgroup,
+        this.namespace
+      );
+    }
+
     try {
       await this.authorization.ensureAuthorized({
         ruleTypeId: attributes.alertTypeId,
@@ -1234,6 +1274,55 @@ export class RulesClient {
           : null,
       ]);
     }
+  }
+
+  private async logInstanceEvent(
+    ruleId: string,
+    ruleName: string,
+    ruleType: AlertType,
+    instanceId: string,
+    action: string,
+    message: string,
+    state: AlertInstanceState,
+    group?: string,
+    subgroup?: string,
+    namespace?: string
+  ) {
+    const event: IEvent = {
+      event: {
+        action,
+        kind: 'alert',
+        category: [ruleType.producer],
+        ...(state?.start ? { start: state.start as string } : {}),
+        ...(state?.end ? { end: state.end as string } : {}),
+        ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
+      },
+      kibana: {
+        alerting: {
+          instance_id: instanceId,
+          ...(group ? { action_group_id: group } : {}),
+          ...(subgroup ? { action_subgroup: subgroup } : {}),
+        },
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'alert',
+            id: ruleId,
+            type_id: ruleType.id,
+            namespace,
+          },
+        ],
+      },
+      message,
+      rule: {
+        id: ruleId,
+        license: ruleType.minimumLicenseRequired,
+        category: ruleType.id,
+        ruleset: ruleType.producer,
+        name: ruleName,
+      },
+    };
+    this.eventLogger!.logEvent(event);
   }
 
   public async muteAll({ id }: { id: string }): Promise<void> {
