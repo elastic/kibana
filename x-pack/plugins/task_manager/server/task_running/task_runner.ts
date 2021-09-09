@@ -142,6 +142,7 @@ export class TaskManagerRunner implements TaskRunner {
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
+  private cancelled: boolean;
   private readonly executionContext: ExecutionContextStart;
 
   /**
@@ -174,6 +175,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
+    this.cancelled = false;
   }
 
   /**
@@ -279,6 +281,7 @@ export class TaskManagerRunner implements TaskRunner {
         withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
       );
       const validatedResult = this.validateResult(result);
+
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())
       );
@@ -407,7 +410,7 @@ export class TaskManagerRunner implements TaskRunner {
       this.task = undefined;
       return task.cancel();
     }
-
+    this.cancelled = true;
     this.logger.debug(`The task ${this} is not cancellable.`);
   }
 
@@ -499,20 +502,26 @@ export class TaskManagerRunner implements TaskRunner {
       unwrap
     )(result);
 
-    this.instance = asRan(
-      await this.bufferedTaskStore.update(
-        defaults(
-          {
-            ...fieldUpdates,
-            // reset fields that track the lifecycle of the concluded `task run`
-            startedAt: null,
-            retryAt: null,
-            ownerId: null,
-          },
-          this.instance.task
+    if (!this.cancelled) {
+      this.instance = asRan(
+        await this.bufferedTaskStore.update(
+          defaults(
+            {
+              ...fieldUpdates,
+              // reset fields that track the lifecycle of the concluded `task run`
+              startedAt: null,
+              retryAt: null,
+              ownerId: null,
+            },
+            this.instance.task
+          )
         )
-      )
-    );
+      );
+    } else {
+      this.logger.warn(
+        `Recurring task completed but doc will not be updated because task was cancelled`
+      );
+    }
 
     return fieldUpdates.status === TaskStatus.Failed
       ? TaskRunResult.Failed
