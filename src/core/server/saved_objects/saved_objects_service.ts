@@ -306,6 +306,7 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
+      kibanaVersion: this.coreContext.env.packageInfo.version,
     });
 
     registerCoreObjectTypes(this.typeRegistry);

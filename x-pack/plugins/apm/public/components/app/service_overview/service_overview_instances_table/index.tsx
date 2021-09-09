@@ -70,7 +70,7 @@ export function ServiceOverviewInstancesTable({
 
   const {
     query: { kuery },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const {
     urlParams: { latencyAggregationType, comparisonEnabled },
