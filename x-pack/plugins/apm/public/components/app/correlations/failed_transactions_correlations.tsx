@@ -386,7 +386,10 @@ export function FailedTransactionsCorrelations({
 
   if (Array.isArray(response.errorHistogram)) {
     transactionDistributionChartData.push({
-      id: `All failed transactions`,
+      id: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.allFailedTransactionsLabel',
+        { defaultMessage: 'All failed transactions' }
+      ),
       histogram: response.errorHistogram,
     });
   }
