@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { map, sortBy, without, each, defaults, isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 function getFieldValues(hits, field, indexPattern) {
   const name = field.name;
   const flattenHit = indexPattern.flattenHit;
-  return _.map(hits, function (hit) {
+  return map(hits, function (hit) {
     return flattenHit(hit)[name];
   });
 }
 
 function getFieldValueCounts(params) {
-  params = _.defaults(params, {
+  params = defaults(params, {
     count: 5,
     grouped: false,
   });
@@ -44,7 +44,7 @@ function getFieldValueCounts(params) {
 
   try {
     const groups = _groupValues(allValues, params);
-    counts = _.map(_.sortBy(groups, 'count').reverse().slice(0, params.count), function (bucket) {
+    counts = map(sortBy(groups, 'count').reverse().slice(0, params.count), function (bucket) {
       return {
         value: bucket.value,
         count: bucket.count,
@@ -80,7 +80,7 @@ function getFieldValueCounts(params) {
 
 // returns a count of fields in the array that are undefined or null
 function _countMissing(array) {
-  return array.length - _.without(array, undefined, null).length;
+  return array.length - without(array, undefined, null).length;
 }
 
 function _groupValues(allValues, params) {
@@ -88,7 +88,7 @@ function _groupValues(allValues, params) {
   let k;
 
   allValues.forEach(function (value) {
-    if (_.isObject(value) && !Array.isArray(value)) {
+    if (isObject(value) && !Array.isArray(value)) {
       throw new Error(
         i18n.translate(
           'discover.fieldChooser.fieldCalculator.analysisIsNotAvailableForObjectFieldsErrorMessage',
@@ -105,7 +105,7 @@ function _groupValues(allValues, params) {
       k = value == null ? undefined : [value];
     }
 
-    _.each(k, function (key) {
+    each(k, function (key) {
       if (groups.hasOwnProperty(key)) {
         groups[key].count++;
       } else {
