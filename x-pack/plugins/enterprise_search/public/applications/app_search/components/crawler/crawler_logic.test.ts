@@ -167,7 +167,7 @@ describe('CrawlerLogic', () => {
         CrawlerLogic.actions.fetchCrawlerData();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/crawler');
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines/some-engine/crawler');
         expect(CrawlerLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith(
           MOCK_CLIENT_CRAWLER_DATA
         );
@@ -263,7 +263,7 @@ describe('CrawlerLogic', () => {
           await nextTick();
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/app_search/engines/some-engine/crawler/crawl_requests'
+            '/internal/app_search/engines/some-engine/crawler/crawl_requests'
           );
           expect(CrawlerLogic.actions.fetchCrawlerData).toHaveBeenCalled();
         });
@@ -291,7 +291,7 @@ describe('CrawlerLogic', () => {
           await nextTick();
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/app_search/engines/some-engine/crawler/crawl_requests/cancel'
+            '/internal/app_search/engines/some-engine/crawler/crawl_requests/cancel'
           );
           expect(CrawlerLogic.actions.fetchCrawlerData).toHaveBeenCalled();
         });

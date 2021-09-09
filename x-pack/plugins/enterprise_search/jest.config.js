@@ -10,11 +10,12 @@ module.exports = {
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/enterprise_search'],
   collectCoverage: true,
-  coverageReporters: ['text'],
+  coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/plugins/enterprise_search/**/*.{ts,tsx}',
     '!<rootDir>/x-pack/plugins/enterprise_search/public/*.ts',
     '!<rootDir>/x-pack/plugins/enterprise_search/server/*.ts',
     '!<rootDir>/x-pack/plugins/enterprise_search/public/applications/test_helpers/**/*.{ts,tsx}',
   ],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/enterprise_search',
 };

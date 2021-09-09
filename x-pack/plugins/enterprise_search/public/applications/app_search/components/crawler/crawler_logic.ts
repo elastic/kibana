@@ -44,7 +44,7 @@ interface CrawlerActions {
 }
 
 export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
-  path: ['enterprise_search', 'app_search', 'crawler', 'crawler_overview'],
+  path: ['enterprise_search', 'app_search', 'crawler_logic'],
   actions: {
     clearTimeoutId: true,
     createNewTimeoutForCrawlerData: (duration) => ({ duration }),
@@ -104,7 +104,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/api/app_search/engines/${engineName}/crawler`);
+        const response = await http.get(`/internal/app_search/engines/${engineName}/crawler`);
 
         const crawlerData = crawlerDataServerToClient(response);
         actions.onReceiveCrawlerData(crawlerData);
@@ -129,7 +129,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { engineName } = EngineLogic.values;
 
       try {
-        await http.post(`/api/app_search/engines/${engineName}/crawler/crawl_requests`);
+        await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests`);
         actions.fetchCrawlerData();
       } catch (e) {
         flashAPIErrors(e);
@@ -140,7 +140,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { engineName } = EngineLogic.values;
 
       try {
-        await http.post(`/api/app_search/engines/${engineName}/crawler/crawl_requests/cancel`);
+        await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests/cancel`);
         actions.fetchCrawlerData();
       } catch (e) {
         flashAPIErrors(e);

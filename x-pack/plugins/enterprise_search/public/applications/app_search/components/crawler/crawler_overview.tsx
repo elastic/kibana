@@ -86,6 +86,7 @@ export const CrawlerOverview: React.FC = () => {
               </EuiLink>
             </p>
           </EuiText>
+          <EuiSpacer size="l" />
           <AddDomainForm />
           <EuiSpacer />
           <EuiFlexGroup justifyContent="flexEnd">

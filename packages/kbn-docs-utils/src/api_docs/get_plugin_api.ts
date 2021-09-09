@@ -11,7 +11,7 @@ import { Node, Project } from 'ts-morph';
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { ApiScope, Lifecycle } from './types';
 import { ApiDeclaration, PluginApi } from './types';
-import { buildApiDeclaration } from './build_api_declarations/build_api_declaration';
+import { buildApiDeclarationTopNode } from './build_api_declarations/build_api_declaration';
 import { getDeclarationNodesForPluginScope } from './get_declaration_nodes_for_plugin';
 import { getSourceFileMatching } from './tsmorph_utils';
 
@@ -55,8 +55,7 @@ function getDeclarations(
   const contractTypes = getContractTypes(project, plugin, scope);
 
   const declarations = nodes.reduce<ApiDeclaration[]>((acc, node) => {
-    const apiDec = buildApiDeclaration({
-      node,
+    const apiDec = buildApiDeclarationTopNode(node, {
       plugins,
       log,
       currentPluginId: plugin.manifest.id,
