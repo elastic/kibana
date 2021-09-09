@@ -201,28 +201,4 @@ describe('graph-workspace', () => {
       expect(migratedDoc).toBe(doc);
     });
   });
-  describe('8.0.0', () => {
-    const migration = graphMigrations['8.0.0'];
-    test('no op migration', () => {
-      const doc = {
-        id: '1',
-        type: 'graph-workspace',
-        attributes: {
-          wsState: JSON.stringify(
-            JSON.stringify({ foo: true, indexPatternRefName: 'indexPattern_0' })
-          ),
-          bar: true,
-        },
-        references: [
-          {
-            id: 'pattern*',
-            name: 'indexPattern_0',
-            type: 'index-pattern',
-          },
-        ],
-      };
-      const migratedDoc = migration(doc);
-      expect(migratedDoc).toBe(doc);
-    });
-  });
 });
