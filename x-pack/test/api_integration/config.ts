@@ -35,9 +35,6 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.data_enhanced.search.sessions.trackingInterval=5s', // shorten trackingInterval for quicker testing
         '--xpack.data_enhanced.search.sessions.cleanupInterval=5s', // shorten cleanupInterval for quicker testing
         '--xpack.ruleRegistry.write.enabled=true',
-        '--xpack.reporting.roles.enabled=false', // use the non-deprecated access control model for Reporting
-        '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
-        '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
       ],
     },
     esTestCluster: {
