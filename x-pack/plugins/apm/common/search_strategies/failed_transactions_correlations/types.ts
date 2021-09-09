@@ -27,10 +27,12 @@ export interface FailedTransactionsCorrelation extends FieldValuePair {
 
 export type FailedTransactionsCorrelationsImpactThreshold = typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
 
-export interface FailedTransactionsCorrelationsParams
-  extends SearchStrategyClientParams {
+export interface FailedTransactionsCorrelationsParams {
   percentileThreshold: number;
 }
+
+export type FailedTransactionsCorrelationsRequestParams = FailedTransactionsCorrelationsParams &
+  SearchStrategyClientParams;
 
 export interface FailedTransactionsCorrelationsRawResponse
   extends RawResponseBase {

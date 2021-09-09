@@ -19,7 +19,7 @@ import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
 import type { SearchStrategyServerParams } from '../../../../common/search_strategies/types';
 import type {
-  FailedTransactionsCorrelationsParams,
+  FailedTransactionsCorrelationsRequestParams,
   FailedTransactionsCorrelationsRawResponse,
 } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
@@ -38,19 +38,19 @@ import { failedTransactionsCorrelationsSearchServiceStateProvider } from './fail
 import { ERROR_CORRELATION_THRESHOLD } from '../constants';
 
 export type FailedTransactionsCorrelationsSearchServiceProvider = SearchServiceProvider<
-  FailedTransactionsCorrelationsParams,
+  FailedTransactionsCorrelationsRequestParams,
   FailedTransactionsCorrelationsRawResponse
 >;
 
 export type FailedTransactionsCorrelationsSearchStrategy = ISearchStrategy<
-  IKibanaSearchRequest<FailedTransactionsCorrelationsParams>,
+  IKibanaSearchRequest<FailedTransactionsCorrelationsRequestParams>,
   IKibanaSearchResponse<FailedTransactionsCorrelationsRawResponse>
 >;
 
 export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransactionsCorrelationsSearchServiceProvider = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
-  searchServiceParams: FailedTransactionsCorrelationsParams,
+  searchServiceParams: FailedTransactionsCorrelationsRequestParams,
   includeFrozen: boolean
 ) => {
   const { addLogMessage, getLogMessages } = searchServiceLogProvider();
@@ -60,7 +60,7 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
   async function fetchErrorCorrelations() {
     try {
       const indices = await getApmIndices();
-      const params: FailedTransactionsCorrelationsParams &
+      const params: FailedTransactionsCorrelationsRequestParams &
         SearchStrategyServerParams = {
         ...searchServiceParams,
         index: indices['apm_oss.transactionIndices'],

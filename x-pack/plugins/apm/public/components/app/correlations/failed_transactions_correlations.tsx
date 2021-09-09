@@ -33,7 +33,10 @@ import {
 
 import { asPercent } from '../../../../common/utils/formatters';
 import { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
-import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
+import {
+  APM_SEARCH_STRATEGIES,
+  DEFAULT_PERCENTILE_THRESHOLD,
+} from '../../../../common/search_strategies/constants';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -57,8 +60,6 @@ import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
 
-const DEFAULT_PERCENTILE_THRESHOLD = 95;
-
 export function FailedTransactionsCorrelations({
   onFilter,
 }: {
@@ -72,7 +73,10 @@ export function FailedTransactionsCorrelations({
   const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
   const { progress, response, startFetch, cancelFetch } = useSearchStrategy(
-    APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS
+    APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS,
+    {
+      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+    }
   );
   const progressNormalized = progress.loaded / progress.total;
   const { overallHistogram, hasData, status } = getOverallHistogram(
