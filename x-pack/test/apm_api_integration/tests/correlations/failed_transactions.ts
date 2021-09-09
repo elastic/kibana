@@ -40,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
   };
 
-  registry.when('on trial license without data', { config: 'trial', archives: [] }, () => {
+  registry.when('failed transactions without data', { config: 'trial', archives: [] }, () => {
     it('queries the search strategy and returns results', async () => {
       const intialResponse = await supertest
         .post(`/internal/bsearch`)
@@ -129,8 +129,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/109703
-  registry.when.skip('on trial license with data', { config: 'trial', archives: ['8.0.0'] }, () => {
+  registry.when('failed transactions with data', { config: 'trial', archives: ['8.0.0'] }, () => {
     it('queries the search strategy and returns results', async () => {
       const intialResponse = await supertest
         .post(`/internal/bsearch`)
@@ -215,26 +214,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(finalRawResponse?.overallHistogram).to.be(undefined);
 
       expect(finalRawResponse?.failedTransactionsCorrelations.length).to.eql(
-        43,
-        `Expected 43 identified correlations, got ${finalRawResponse?.failedTransactionsCorrelations.length}.`
+        30,
+        `Expected 30 identified correlations, got ${finalRawResponse?.failedTransactionsCorrelations.length}.`
       );
 
       expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
         'Identified 68 fieldCandidates.',
         'Identified correlations for 68 fields out of 68 candidates.',
-        'Identified 43 significant correlations relating to failed transactions.',
+        'Identified 30 significant correlations relating to failed transactions.',
       ]);
 
       const sortedCorrelations = finalRawResponse?.failedTransactionsCorrelations.sort();
       const correlation = sortedCorrelations[0];
 
       expect(typeof correlation).to.be('object');
-      expect(correlation?.key).to.be('HTTP 5xx');
       expect(correlation?.doc_count).to.be(31);
-      expect(correlation?.score).to.be(100.17736139032642);
-      expect(correlation?.bg_count).to.be(60);
-      expect(correlation?.fieldName).to.be('transaction.result');
-      expect(correlation?.fieldValue).to.be('HTTP 5xx');
+      expect(correlation?.score).to.be(83.70467673605746);
+      expect(correlation?.bg_count).to.be(31);
+      expect(correlation?.fieldName).to.be('http.response.status_code');
+      expect(correlation?.fieldValue).to.be(500);
       expect(typeof correlation?.pValue).to.be('number');
       expect(typeof correlation?.normalizedScore).to.be('number');
       expect(typeof correlation?.failurePercentage).to.be('number');
