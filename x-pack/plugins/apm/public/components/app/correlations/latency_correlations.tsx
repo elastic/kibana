@@ -254,7 +254,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     });
   }
 
-  if (selectedTerm && Array.isArray(selectedTerm.histogram)) {
+  if (selectedHistogram && Array.isArray(selectedHistogram.histogram)) {
     transactionDistributionChartData.push({
       id: `${selectedHistogram.fieldName}:${selectedHistogram.fieldValue}`,
       histogram: selectedHistogram.histogram,
