@@ -70,28 +70,24 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
   },
 });
 
+// TODO Revisit this approach since it actually manipulates the numbers
+// showing in the chart and its tooltips.
 const CHART_PLACEHOLDER_VALUE = 0.0001;
 
 // Elastic charts will show any lone bin (i.e. a populated bin followed by empty bin)
 // as a circular marker instead of a bar
 // This provides a workaround by making the next bin not empty
-export const replaceHistogramDotsWithBars = (
-  originalHistogram: HistogramItem[]
-) => {
-  const histogram = [...originalHistogram];
-
-  for (let i = 0; i < histogram.length - 1; i++) {
+export const replaceHistogramDotsWithBars = (histogramItems: HistogramItem[]) =>
+  histogramItems.reduce((histogramItem, _, i) => {
     if (
-      histogram[i].doc_count > 0 &&
-      histogram[i].doc_count !== CHART_PLACEHOLDER_VALUE &&
-      histogram[i + 1].doc_count === 0
+      histogramItem[i - 1]?.doc_count > 0 &&
+      histogramItem[i - 1]?.doc_count !== CHART_PLACEHOLDER_VALUE &&
+      histogramItem[i].doc_count === 0
     ) {
-      histogram[i + 1].doc_count = CHART_PLACEHOLDER_VALUE;
+      histogramItem[i].doc_count = CHART_PLACEHOLDER_VALUE;
     }
-  }
-
-  return histogram;
-};
+    return histogramItem;
+  }, histogramItems);
 
 // Create and call a duration formatter for every value since the durations for the
 // x axis might have a wide range of values e.g. from low milliseconds to large seconds.
