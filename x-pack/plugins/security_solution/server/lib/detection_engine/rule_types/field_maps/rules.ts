@@ -56,11 +56,6 @@ export const rulesFieldMap = {
     array: false,
     required: true,
   },
-  'kibana.alert.rule.threat.tactic': {
-    type: 'object',
-    array: false,
-    required: true,
-  },
   'kibana.alert.rule.threat.tactic.id': {
     type: 'keyword',
     array: false,
@@ -76,11 +71,6 @@ export const rulesFieldMap = {
     array: false,
     required: true,
   },
-  'kibana.alert.rule.threat.technique': {
-    type: 'object',
-    array: false,
-    required: true,
-  },
   'kibana.alert.rule.threat.technique.id': {
     type: 'keyword',
     array: false,
@@ -93,11 +83,6 @@ export const rulesFieldMap = {
   },
   'kibana.alert.rule.threat.technique.reference': {
     type: 'keyword',
-    array: false,
-    required: true,
-  },
-  'kibana.alert.rule.threat.technique.subtechnique': {
-    type: 'object',
     array: false,
     required: true,
   },
@@ -161,11 +146,6 @@ export const rulesFieldMap = {
     array: true,
     required: false,
   },
-  'kibana.alert.rule.threshold': {
-    type: 'object',
-    array: true,
-    required: false,
-  },
   'kibana.alert.rule.threshold.field': {
     type: 'keyword',
     array: true,
@@ -173,7 +153,7 @@ export const rulesFieldMap = {
   },
   'kibana.alert.rule.threshold.value': {
     type: 'float', // TODO: should be 'long' (eventually, after we stabilize)
-    array: true,
+    array: false,
     required: false,
   },
   'kibana.alert.rule.threshold.cardinality': {
@@ -183,12 +163,12 @@ export const rulesFieldMap = {
   },
   'kibana.alert.rule.threshold.cardinality.field': {
     type: 'keyword',
-    array: true,
+    array: false,
     required: false,
   },
   'kibana.alert.rule.threshold.cardinality.value': {
     type: 'long',
-    array: true,
+    array: false,
     required: false,
   },
   'kibana.alert.rule.timeline_id': {

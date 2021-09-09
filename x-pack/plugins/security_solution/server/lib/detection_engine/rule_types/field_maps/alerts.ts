@@ -43,11 +43,6 @@ export const alertsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
-  'kibana.alert.group': {
-    type: 'object',
-    array: false,
-    required: false,
-  },
   'kibana.alert.group.id': {
     type: 'keyword',
     array: false,
@@ -55,11 +50,6 @@ export const alertsFieldMap: FieldMap = {
   },
   'kibana.alert.group.index': {
     type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'kibana.alert.original_event': {
-    type: 'object',
     array: false,
     required: false,
   },
@@ -198,11 +188,6 @@ export const alertsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  'kibana.alert.threshold_result': {
-    type: 'object',
-    array: false,
-    required: false,
-  },
   'kibana.alert.threshold_result.cardinality': {
     type: 'object',
     array: false,
@@ -230,7 +215,7 @@ export const alertsFieldMap: FieldMap = {
   },
   'kibana.alert.threshold_result.terms': {
     type: 'object',
-    array: false,
+    array: true,
     required: false,
   },
   'kibana.alert.threshold_result.terms.field': {
