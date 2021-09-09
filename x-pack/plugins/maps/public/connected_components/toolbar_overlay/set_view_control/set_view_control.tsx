@@ -65,7 +65,13 @@ interface State {
   zoom: number | string;
   coord: string;
   mgrs: string;
-  utm: { northing: string; easting: string; zoneNumber: string; zoneLetter: string | undefined; zone: string };
+  utm: {
+    northing: string;
+    easting: string;
+    zoneNumber: string;
+    zoneLetter: string | undefined;
+    zone: string;
+  };
   isCoordPopoverOpen: boolean;
   prevView: string | undefined;
 }
@@ -90,15 +96,11 @@ export class SetViewControl extends Component<Props, State> {
   };
 
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
-    const nextView = getViewString(
-      nextProps.center.lat,
-      nextProps.center.lon,
-      nextProps.zoom
-    );
-  
+    const nextView = getViewString(nextProps.center.lat, nextProps.center.lon, nextProps.zoom);
+
     const utm = convertLatLonToUTM(nextProps.center.lat, nextProps.center.lon);
     const mgrs = convertLatLonToMGRS(nextProps.center.lat, nextProps.center.lon);
-  
+
     if (nextView !== prevState.prevView) {
       return {
         lat: nextProps.center.lat,
@@ -109,7 +111,7 @@ export class SetViewControl extends Component<Props, State> {
         prevView: nextView,
       };
     }
-  
+
     return null;
   }
 
@@ -176,14 +178,14 @@ export class SetViewControl extends Component<Props, State> {
   };
 
   _onUTMChange = (name: 'easting' | 'northing' | 'zone', evt: ChangeEvent<HTMLInputElement>) => {
-    let value = evt.target.value;
+    const value = evt.target.value;
     const updateObj = { ...this.state.utm };
     updateObj[name] = isNull(value) ? '' : value;
-    if(name === 'zone' && value.length > 0){
-      let zoneLetter = value.substring(value.length - 1);
-      let zoneNumber = value.substring(0, value.length - 1);
-      updateObj['zoneLetter'] = isNaN(zoneLetter) ? zoneLetter : '';
-      updateObj['zoneNumber'] =  isNaN(zoneNumber) ? '' : zoneNumber;
+    if (name === 'zone' && value.length > 0) {
+      const zoneLetter = value.substring(value.length - 1);
+      const zoneNumber = value.substring(0, value.length - 1);
+      updateObj.zoneLetter = isNaN(zoneLetter) ? zoneLetter : '';
+      updateObj.zoneNumber = isNaN(zoneNumber) ? '' : zoneNumber;
     }
     this.setState(
       {
@@ -216,7 +218,10 @@ export class SetViewControl extends Component<Props, State> {
 
       this.setState({ mgrs, utm });
     } else {
-      this.setState({ mgrs: '', utm: { northing: '', easting: '', zoneNumber: '', zoneLetter: '', zone: '' } });
+      this.setState({
+        mgrs: '',
+        utm: { northing: '', easting: '', zoneNumber: '', zoneLetter: '', zone: '' },
+      });
     }
   };
 
@@ -233,7 +238,6 @@ export class SetViewControl extends Component<Props, State> {
         lat = north;
         lon = east;
       } catch (err) {
-        // eslint-disable-next-line no-console
         return;
       }
 
@@ -267,7 +271,6 @@ export class SetViewControl extends Component<Props, State> {
           this.state.utm.zoneNumber
         ));
       } catch (err) {
-        // eslint-disable-next-line no-console
         return;
       }
 
@@ -336,13 +339,24 @@ export class SetViewControl extends Component<Props, State> {
       point = convertMGRStoLL(value);
     } catch (err) {
       point = undefined;
-      // eslint-disable-next-line no-console
     }
 
-    const isInvalid = value === '' || point === undefined || (!point.north || isNaN(point.north)) || (!point.south || isNaN(point.south)) || (!point.east || isNaN(point.east)) || (!point.west || isNaN(point.west));
-    const error = isInvalid ? i18n.translate('xpack.maps.setViewControl.mgrsInvalid', {
-      defaultMessage: 'MGRS is invalid'
-    }) : null;
+    const isInvalid =
+      value === '' ||
+      point === undefined ||
+      !point.north ||
+      isNaN(point.north) ||
+      !point.south ||
+      isNaN(point.south) ||
+      !point.east ||
+      isNaN(point.east) ||
+      !point.west ||
+      isNaN(point.west);
+    const error = isInvalid
+      ? i18n.translate('xpack.maps.setViewControl.mgrsInvalid', {
+          defaultMessage: 'MGRS is invalid',
+        })
+      : null;
     return {
       isInvalid,
       component: (
@@ -382,9 +396,11 @@ export class SetViewControl extends Component<Props, State> {
     }
 
     const isInvalid = value === '' || point === undefined;
-    const error = isInvalid ? i18n.translate('xpack.maps.setViewControl.utmInvalidZone', {
-      defaultMessage: 'UTM Zone is invalid'
-    }) : null;
+    const error = isInvalid
+      ? i18n.translate('xpack.maps.setViewControl.utmInvalidZone', {
+          defaultMessage: 'UTM Zone is invalid',
+        })
+      : null;
     return {
       isInvalid,
       component: (
@@ -419,9 +435,11 @@ export class SetViewControl extends Component<Props, State> {
       point = undefined;
     }
     const isInvalid = value === '' || point === undefined;
-    const error = isInvalid ? i18n.translate('xpack.maps.setViewControl.utmInvalidEasting', {
-      defaultMessage: 'UTM Easting is invalid'
-    }) : null;
+    const error = isInvalid
+      ? i18n.translate('xpack.maps.setViewControl.utmInvalidEasting', {
+          defaultMessage: 'UTM Easting is invalid',
+        })
+      : null;
     return {
       isInvalid,
       component: (
@@ -456,9 +474,11 @@ export class SetViewControl extends Component<Props, State> {
       point = undefined;
     }
     const isInvalid = value === '' || point === undefined;
-    const error = isInvalid ? i18n.translate('xpack.maps.setViewControl.utmInvalidNorthing', {
-      defaultMessage: 'UTM Northing is invalid'
-    }) : null;
+    const error = isInvalid
+      ? i18n.translate('xpack.maps.setViewControl.utmInvalidNorthing', {
+          defaultMessage: 'UTM Northing is invalid',
+        })
+      : null;
     return {
       isInvalid,
       component: (
@@ -482,12 +502,21 @@ export class SetViewControl extends Component<Props, State> {
   };
 
   _renderSetViewForm() {
-    
-    
+    let isLatInvalid;
+    let latFormRow;
+    let isLonInvalid;
+    let lonFormRow;
+    let isMGRSInvalid;
+    let mgrsFormRow;
+    let isUtmZoneInvalid;
+    let utmZoneRow;
+    let isUtmEastingInvalid;
+    let utmEastingRow;
+    let isUtmNorthingInvalid;
+    let utmNorthingRow;
 
-
-    if(this.state.coord == COORDINATE_SYSTEM_DEGREES_DECIMAL){
-      var { isInvalid: isLatInvalid, component: latFormRow } = this._renderNumberFormRow({
+    if (this.state.coord === COORDINATE_SYSTEM_DEGREES_DECIMAL) {
+      const latRenderObject = this._renderNumberFormRow({
         value: this.state.lat,
         min: -90,
         max: 90,
@@ -497,8 +526,11 @@ export class SetViewControl extends Component<Props, State> {
         }),
         dataTestSubj: 'latitudeInput',
       });
-  
-      var { isInvalid: isLonInvalid, component: lonFormRow } = this._renderNumberFormRow({
+
+      isLatInvalid = latRenderObject.isInvalid;
+      latFormRow = latRenderObject.component;
+
+      const lonRenderObject = this._renderNumberFormRow({
         value: this.state.lon,
         min: -180,
         max: 180,
@@ -508,11 +540,11 @@ export class SetViewControl extends Component<Props, State> {
         }),
         dataTestSubj: 'longitudeInput',
       });
-    }
-    
 
-    else if(this.state.coord == COORDINATE_SYSTEM_MGRS){
-      var { isInvalid: isMGRSInvalid, component: mgrsFormRow } = this._renderMGRSFormRow({
+      isLonInvalid = lonRenderObject.isInvalid;
+      lonFormRow = lonRenderObject.component;
+    } else if (this.state.coord === COORDINATE_SYSTEM_MGRS) {
+      const mgrsRenderObject = this._renderMGRSFormRow({
         value: this.state.mgrs,
         onChange: this._onMGRSChange,
         label: i18n.translate('xpack.maps.setViewControl.mgrsLabel', {
@@ -520,10 +552,11 @@ export class SetViewControl extends Component<Props, State> {
         }),
         dataTestSubj: 'mgrsInput',
       });
-    }
 
-    else if(this.state.coord == COORDINATE_SYSTEM_UTM){
-      var { isInvalid: isUtmZoneInvalid, component: utmZoneRow } = this._renderUTMZoneRow({
+      isMGRSInvalid = mgrsRenderObject.isInvalid;
+      mgrsFormRow = mgrsRenderObject.component;
+    } else if (this.state.coord === COORDINATE_SYSTEM_UTM) {
+      const utmZoneRenderObject = this._renderUTMZoneRow({
         value: this.state.utm !== undefined ? this.state.utm.zone : '',
         onChange: this._onUTMZoneChange,
         label: i18n.translate('xpack.maps.setViewControl.utmZoneLabel', {
@@ -531,8 +564,11 @@ export class SetViewControl extends Component<Props, State> {
         }),
         dataTestSubj: 'utmZoneInput',
       });
-  
-      var { isInvalid: isUtmEastingInvalid, component: utmEastingRow } = this._renderUTMEastingRow({
+
+      isUtmZoneInvalid = utmZoneRenderObject.isInvalid;
+      utmZoneRow = utmZoneRenderObject.component;
+
+      const utmEastingRenderObject = this._renderUTMEastingRow({
         value: this.state.utm !== undefined ? this.state.utm.easting : '',
         onChange: this._onUTMEastingChange,
         label: i18n.translate('xpack.maps.setViewControl.utmEastingLabel', {
@@ -540,8 +576,11 @@ export class SetViewControl extends Component<Props, State> {
         }),
         dataTestSubj: 'utmEastingInput',
       });
-  
-      var { isInvalid: isUtmNorthingInvalid, component: utmNorthingRow } = this._renderUTMNorthingRow({
+
+      isUtmEastingInvalid = utmEastingRenderObject.isInvalid;
+      utmEastingRow = utmEastingRenderObject.component;
+
+      const utmNorthingRenderObject = this._renderUTMNorthingRow({
         value: this.state.utm !== undefined ? this.state.utm.northing : '',
         onChange: this._onUTMNorthingChange,
         label: i18n.translate('xpack.maps.setViewControl.utmNorthingLabel', {
@@ -549,6 +588,9 @@ export class SetViewControl extends Component<Props, State> {
         }),
         dataTestSubj: 'utmNorthingInput',
       });
+
+      isUtmNorthingInvalid = utmNorthingRenderObject.isInvalid;
+      utmNorthingRow = utmNorthingRenderObject.component;
     }
 
     const { isInvalid: isZoomInvalid, component: zoomFormRow } = this._renderNumberFormRow({
@@ -632,7 +674,15 @@ export class SetViewControl extends Component<Props, State> {
           <EuiButton
             size="s"
             fill
-            disabled={isLatInvalid || isLonInvalid || isZoomInvalid || isMGRSInvalid || isUtmZoneInvalid || isUtmEastingInvalid || isUtmNorthingInvalid}
+            disabled={
+              isLatInvalid ||
+              isLonInvalid ||
+              isZoomInvalid ||
+              isMGRSInvalid ||
+              isUtmZoneInvalid ||
+              isUtmEastingInvalid ||
+              isUtmNorthingInvalid
+            }
             onClick={this._onSubmit}
             data-test-subj="submitViewButton"
           >
@@ -689,14 +739,13 @@ function convertLatLonToUTM(lat: string | number, lon: string | number) {
     norwest = 'S';
   }
 
-  if(utmCoord !== "undefined"){
+  if (utmCoord !== 'undefined') {
     utmCoord.zoneLetter = isNaN(lat) ? '' : converter.UTMLetterDesignator(lat);
     utmCoord.zone = `${utmCoord.zoneNumber}${utmCoord.zoneLetter}`;
     utmCoord.easting = Math.round(utmCoord.easting);
     utmCoord.northing = Math.round(utmCoord.northing);
     utmCoord.str = `${utmCoord.zoneNumber}${utmCoord.zoneLetter} ${utmCoord.easting}${eastwest} ${utmCoord.northing}${norwest}`;
   }
-  
 
   return utmCoord;
 }
@@ -736,4 +785,3 @@ function convertMGRStoUSNG(mgrs: string) {
 function convertMGRStoLL(mgrs: string) {
   return mgrs ? converter.USNGtoLL(convertMGRStoUSNG(mgrs)) : '';
 }
-
