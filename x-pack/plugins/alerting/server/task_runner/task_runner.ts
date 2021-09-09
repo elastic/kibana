@@ -660,7 +660,43 @@ export class TaskRunner<
   }
 
   async cancel(): Promise<void> {
+    // Received cancel signal from Task Manager
     this.cancelled$.next(true);
+
+    // Write event log entry
+    const {
+      params: { alertId, spaceId },
+    } = this.taskInstance;
+    const namespace = this.context.spaceIdToNamespace(spaceId);
+
+    const eventLogger = this.context.eventLogger;
+    const event: IEvent = {
+      '@timestamp': new Date().toISOString(),
+      event: {
+        action: EVENT_LOG_ACTIONS.cancel,
+        kind: 'alert',
+        category: [this.alertType.producer],
+      },
+      message: `rule execution cancelled by task manager: "${alertId}"`,
+      kibana: {
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'alert',
+            id: alertId,
+            type_id: this.alertType.id,
+            namespace,
+          },
+        ],
+      },
+      rule: {
+        id: alertId,
+        license: this.alertType.minimumLicenseRequired,
+        category: this.alertType.id,
+        ruleset: this.alertType.producer,
+      },
+    };
+    eventLogger.logEvent(event);
   }
 }
 

@@ -79,6 +79,7 @@ export const EVENT_LOG_ACTIONS = {
   newInstance: 'new-instance',
   recoveredInstance: 'recovered-instance',
   activeInstance: 'active-instance',
+  cancel: 'cancelled',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
