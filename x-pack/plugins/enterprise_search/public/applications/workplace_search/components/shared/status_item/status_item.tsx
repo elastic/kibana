@@ -11,7 +11,6 @@ import {
   EuiCopy,
   EuiButton,
   EuiButtonIcon,
-  EuiToolTip,
   EuiSpacer,
   EuiCodeBlock,
   EuiPopover,
