@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/dom';
 import { CertificateList, CertSort } from './certificates_list';
 import { render } from '../../lib/helper/rtl_helpers';
 
@@ -73,8 +72,6 @@ describe('CertificateList', () => {
         }}
       />
     );
-
-    screen.debug();
 
     expect(getByText('BadSSL Expired')).toBeInTheDocument();
   });
