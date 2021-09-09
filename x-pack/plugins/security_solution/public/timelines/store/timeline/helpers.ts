@@ -155,6 +155,7 @@ export const addTimelineToStore = ({
   return {
     ...timelineById,
     [id]: {
+      ...(timelineById[id] ? timelineById[id] : {}),
       ...timeline,
       isLoading: timelineById[id].isLoading,
       initialized: timelineById[id].initialized,
