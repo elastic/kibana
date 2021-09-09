@@ -7,7 +7,15 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiForm, EuiFormRow, EuiFieldText, EuiSelect } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
+  EuiSelect,
+  EuiFormHelpText,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import type { AgentPolicy, EnrollmentAPIKey } from '../types';
 import { useInput, useStartServices, sendCreateEnrollmentAPIKey } from '../hooks';
@@ -86,15 +94,18 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
       <form onSubmit={form.onSubmit}>
         <EuiFormRow
           label={i18n.translate('xpack.fleet.newEnrollmentKey.nameLabel', {
-            defaultMessage: 'Name',
+            defaultMessage: 'Token name',
           })}
         >
-          <EuiFieldText
-            required={true}
-            name="name"
-            autoComplete="off"
-            {...form.apiKeyNameInput.props}
-          />
+          <EuiFlexItem>
+            <EuiFieldText
+              name="name"
+              autoComplete="off"
+              placeholder="Enter a token name"
+              {...form.apiKeyNameInput.props}
+            />
+            <EuiFormHelpText>Token id will be used when this is left empty.</EuiFormHelpText>
+          </EuiFlexItem>
         </EuiFormRow>
 
         <EuiFormRow
