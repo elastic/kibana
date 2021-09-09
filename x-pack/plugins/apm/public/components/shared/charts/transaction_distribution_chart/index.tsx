@@ -115,7 +115,7 @@ export function TransactionDistributionChart({
   const areaSeriesColors = [
     euiTheme.eui.euiColorVis1,
     euiTheme.eui.euiColorVis2,
-    euiTheme.eui.euiColorVis9,
+    euiTheme.eui.euiColorVis5,
   ];
 
   const annotationsDataValues: LineAnnotationDatum[] = [
