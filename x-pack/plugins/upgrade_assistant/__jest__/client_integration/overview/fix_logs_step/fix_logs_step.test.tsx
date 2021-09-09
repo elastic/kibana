@@ -9,8 +9,9 @@ import { act } from 'react-dom/test-utils';
 
 import { DeprecationLoggingStatus } from '../../../../common/types';
 import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../common/constants';
-import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
+import { setupEnvironment, advanceTime } from '../../helpers';
+import { DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS } from '../../../../common/constants';
 
 const getLoggingResponse = (toggle: boolean): DeprecationLoggingStatus => ({
   isDeprecationLogIndexingEnabled: toggle,
@@ -288,6 +289,40 @@ describe('Overview - Fix deprecation logs step', () => {
       await actions.clickResetButton();
 
       expect(exists('noWarningsCallout')).toBe(true);
+    });
+
+    describe('Poll for logs count', () => {
+      beforeEach(async () => {
+        jest.useFakeTimers();
+
+        // First request should make the step be complete
+        httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+          count: 0,
+        });
+
+        testBed = await setupOverviewPage();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      test('renders step as incomplete when having no deprecation logs but after some time we have some', async () => {
+        const { exists } = testBed;
+
+        expect(exists('fixLogsStep-complete')).toBe(true);
+
+        // second request should make it incomplete
+        httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+          count: 5,
+        });
+
+        // Resolve the polling timeout.
+        await advanceTime(DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS);
+        testBed.component.update();
+
+        expect(exists('fixLogsStep-incomplete')).toBe(true);
+      });
     });
   });
 });
