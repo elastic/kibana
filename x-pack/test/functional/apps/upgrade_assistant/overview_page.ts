@@ -37,10 +37,10 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
     });
 
     it('Should render all steps', async () => {
-      testSubjects.exists('backupStep');
-      testSubjects.exists('fixIssuesStep');
-      testSubjects.exists('fixLogsStep');
-      testSubjects.exists('backupStep');
+      testSubjects.exists('backupStep-incomplete');
+      testSubjects.exists('fixIssuesStep-incomplete');
+      testSubjects.exists('fixLogsStep-incomplete');
+      testSubjects.exists('upgradeStep');
     });
 
     describe('fixLogsStep', () => {
