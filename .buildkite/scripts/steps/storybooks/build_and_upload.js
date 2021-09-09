@@ -59,7 +59,8 @@ const upload = () => {
     process.chdir(path.join('.', 'built_assets', 'storybook'));
     fs.renameSync('ci_composite', 'composite');
 
-    const storybooks = exec(`ls -1d */`)
+    const storybooks = execSync(`ls -1d */`)
+      .toString()
       .trim()
       .split('\n')
       .map((path) => path.replace('/', ''))
