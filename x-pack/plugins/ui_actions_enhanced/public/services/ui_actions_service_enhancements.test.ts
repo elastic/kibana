@@ -20,26 +20,26 @@ const deps: UiActionsServiceEnhancementsParams = {
 
 describe('UiActionsService', () => {
   describe('action factories', () => {
-    const factoryDefinition1: ActionFactoryDefinition = {
+    const factoryDefinition1: ActionFactoryDefinition = ({
       id: 'test-factory-1',
-      CollectConfig: {} as any,
+      CollectConfig: {},
       createConfig: () => ({}),
       isConfigValid: () => true,
-      create: () => ({} as any),
+      create: () => ({}),
       supportedTriggers() {
         return ['VALUE_CLICK_TRIGGER'];
       },
-    };
-    const factoryDefinition2: ActionFactoryDefinition = {
+    } as unknown) as ActionFactoryDefinition;
+    const factoryDefinition2: ActionFactoryDefinition = ({
       id: 'test-factory-2',
-      CollectConfig: {} as any,
+      CollectConfig: {},
       createConfig: () => ({}),
       isConfigValid: () => true,
-      create: () => ({} as any),
+      create: () => ({}),
       supportedTriggers() {
         return ['VALUE_CLICK_TRIGGER'];
       },
-    };
+    } as unknown) as ActionFactoryDefinition;
 
     test('.getActionFactories() returns empty array if no action factories registered', () => {
       const service = new UiActionsServiceEnhancements(deps);

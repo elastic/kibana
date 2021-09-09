@@ -52,7 +52,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('config validation', () => {
-  test('config validation succeeds when config is valid', () => {
+  test('config validation succeeds when config is valid for nodemailer well known service', () => {
     const config: Record<string, unknown> = {
       service: 'gmail',
       from: 'bob@example.com',
@@ -64,14 +64,46 @@ describe('config validation', () => {
       port: null,
       secure: null,
     });
+  });
 
-    delete config.service;
-    config.host = 'elastic.co';
-    config.port = 8080;
-    config.hasAuth = true;
+  test(`config validation succeeds when config is valid and defaults to 'other' when service is undefined`, () => {
+    const config: Record<string, unknown> = {
+      from: 'bob@example.com',
+      host: 'elastic.co',
+      port: 8080,
+      hasAuth: true,
+    };
     expect(validateConfig(actionType, config)).toEqual({
       ...config,
-      service: null,
+      service: 'other',
+      secure: null,
+    });
+  });
+
+  test(`config validation succeeds when config is valid and service requires custom host/port value`, () => {
+    const config: Record<string, unknown> = {
+      service: 'exchange_server',
+      from: 'bob@example.com',
+      host: 'elastic.co',
+      port: 8080,
+      hasAuth: true,
+    };
+    expect(validateConfig(actionType, config)).toEqual({
+      ...config,
+      secure: null,
+    });
+  });
+
+  test(`config validation succeeds when config is valid and service is elastic_cloud`, () => {
+    const config: Record<string, unknown> = {
+      service: 'elastic_cloud',
+      from: 'bob@example.com',
+      hasAuth: true,
+    };
+    expect(validateConfig(actionType, config)).toEqual({
+      ...config,
+      host: null,
+      port: null,
       secure: null,
     });
   });
@@ -325,7 +357,7 @@ describe('execute()', () => {
       ...executorOptions,
       config: {
         ...config,
-        service: null,
+        service: 'other',
         hasAuth: false,
       },
       secrets: {
@@ -381,12 +413,73 @@ describe('execute()', () => {
     `);
   });
 
+  test('parameters are as expected when using elastic_cloud service', async () => {
+    const customExecutorOptions: EmailActionTypeExecutorOptions = {
+      ...executorOptions,
+      config: {
+        ...config,
+        service: 'elastic_cloud',
+        hasAuth: false,
+      },
+      secrets: {
+        ...secrets,
+        user: null,
+        password: null,
+      },
+    };
+
+    sendEmailMock.mockReset();
+    await actionType.executor(customExecutorOptions);
+    expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "configurationUtilities": Object {
+          "ensureActionTypeEnabled": [MockFunction],
+          "ensureHostnameAllowed": [MockFunction],
+          "ensureUriAllowed": [MockFunction],
+          "getCustomHostSettings": [MockFunction],
+          "getProxySettings": [MockFunction],
+          "getResponseSettings": [MockFunction],
+          "getSSLSettings": [MockFunction],
+          "isActionTypeEnabled": [MockFunction],
+          "isHostnameAllowed": [MockFunction],
+          "isUriAllowed": [MockFunction],
+        },
+        "content": Object {
+          "message": "a message to you
+
+      --
+
+      This message was sent by Kibana.",
+          "subject": "the subject",
+        },
+        "hasAuth": false,
+        "routing": Object {
+          "bcc": Array [
+            "jimmy@example.com",
+          ],
+          "cc": Array [
+            "james@example.com",
+          ],
+          "from": "bob@example.com",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+        "transport": Object {
+          "host": "dockerhost",
+          "port": 10025,
+          "secure": false,
+        },
+      }
+    `);
+  });
+
   test('returns expected result when an error is thrown', async () => {
     const customExecutorOptions: EmailActionTypeExecutorOptions = {
       ...executorOptions,
       config: {
         ...config,
-        service: null,
+        service: 'other',
         hasAuth: false,
       },
       secrets: {

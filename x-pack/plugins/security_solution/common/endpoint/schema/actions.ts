@@ -23,8 +23,8 @@ export const EndpointActionLogRequestSchema = {
   query: schema.object({
     page: schema.number({ defaultValue: 1, min: 1 }),
     page_size: schema.number({ defaultValue: 10, min: 1, max: 100 }),
-    start_date: schema.maybe(schema.string()),
-    end_date: schema.maybe(schema.string()),
+    start_date: schema.string(),
+    end_date: schema.string(),
   }),
   params: schema.object({
     agent_id: schema.string(),

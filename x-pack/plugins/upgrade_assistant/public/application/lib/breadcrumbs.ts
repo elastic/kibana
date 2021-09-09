@@ -21,7 +21,7 @@ const i18nTexts = {
     kibanaDeprecations: i18n.translate(
       'xpack.upgradeAssistant.breadcrumb.kibanaDeprecationsLabel',
       {
-        defaultMessage: 'Kibana deprecations',
+        defaultMessage: 'Kibana deprecation warnings',
       }
     ),
   },

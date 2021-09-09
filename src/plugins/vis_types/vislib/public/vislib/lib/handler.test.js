@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import _ from 'lodash';
 import $ from 'jquery';
 import {
   setHTMLElementClientSizes,
@@ -26,6 +26,7 @@ const names = ['series', 'columns', 'rows', 'stackedSeries'];
 let mockedHTMLElementClientSizes;
 let mockedSVGElementGetBBox;
 let mockedSVGElementGetComputedTextLength;
+let mockWidth;
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Handler Test Suite for ' + names[i] + ' Data', function () {
@@ -36,10 +37,24 @@ dateHistogramArray.forEach(function (data, i) {
       mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
       mockedSVGElementGetBBox = setSVGElementGetBBox(100);
       mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+      mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(900);
     });
 
     beforeEach(() => {
-      vis = getVis();
+      const vislibParams = {
+        type: 'heatmap',
+        addLegend: true,
+        addTooltip: true,
+        colorsNumber: 4,
+        colorSchema: 'Greens',
+        setColorRange: false,
+        percentageMode: true,
+        percentageFormatPattern: '0.0%',
+        invertColors: false,
+        colorsRange: [],
+      };
+      const config = _.defaultsDeep({}, vislibParams);
+      vis = getVis(config);
       vis.render(data, getMockUiState());
     });
 
@@ -51,6 +66,7 @@ dateHistogramArray.forEach(function (data, i) {
       mockedHTMLElementClientSizes.mockRestore();
       mockedSVGElementGetBBox.mockRestore();
       mockedSVGElementGetComputedTextLength.mockRestore();
+      mockWidth.mockRestore();
     });
 
     describe('render Method', function () {

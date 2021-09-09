@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { KibanaDeprecationsContent } from './kibana_deprecations';
+export { KibanaDeprecations } from './kibana_deprecations';

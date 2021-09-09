@@ -68,6 +68,58 @@ Review important information about the {kib} 7.x releases.
 For information about the 7.14.1 release, review the following information.
 
 [float]
+[[security-updates-v7.14.1]]
+=== Security updates
+Review the security updates that were found in previous versions of {kib}.
+[discrete]
+[[code-execution-issue]]
+.Code execution issue
+[%collapsible]
+====
+*Details* +
+In {kib} 7.10.2 to 7.14.0, users with Fleet admin privileges could insecurely upload malicious packages. Due to an older version of the js-yaml library, attackers were able to execute commands on the {kib} server. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22150[CVE-2021-22150]
+*Solution* +
+Upgrade to {kib} 7.14.1.
+====    
+[discrete]
+[[path-traversal-issue]]
+.Path traversal issue
+[%collapsible]
+====
+*Details* +
+In {kib} 7.13.4 and earlier, {kib} was not validating the user supplied paths that upload .pbf files, allowing malicious users to arbitrarily traverse the {kib} host to load internal files that end in the .pbf extension. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22151[CVE-2021-22151]
+Thanks to Luat Nguyen of CyberJutsu for reporting this issue.
+*Solution* +
+Upgrade to {kib} 7.14.1.
+====    
+[discrete]
+[[html-injection-issue]]
+.HTML injection issue
+[%collapsible]
+====
+*Details* +
+In {kib} 7.14.0, {kib} was not sanitizing document fields that contain HTML snippets, allowing attackers with the ability to write documents to an {es} index to inject HTML. When *Discover* highlighted a search term that contained the HTML, the term was rendered. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-37936[CVE-2021-37936]
+*Solution* +
+In <<advanced-options,*Advanced Settings*>>, set `doc_table:highlight` to `false`. If you do not want to change the *Advanced Settings*, upgrade to {kib} 7.14.1.
+====    
+[discrete]
+[[nodejs-security-vulnerabilities]]
+.Node.js security vulnerabilities
+[%collapsible]
+====
+*Details* +
+In {kib} 7.14.0 and earlier, Node.js 14.17.3 is affected by the following security vulnerabilities: 
+* https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22930[CVE-2021-22930]
+* https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-3672[CVE-2021-3672]
+* https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22931[CVE-2021-22931]
+* https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22930[CVE-2021-22930]
+* https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22939[CVE-2021-22939]
+We do not believe an attacker can exploit the security vulnerabilities against {kib}, but are upgrading Node.js out of an abudance of caution. To resolve the security vulnerabilities, {kib} 7.14.1 upgrades Node.js to 14.17.5.
+*Solution* +
+Upgrade to {kib} 7.14.1.
+==== 
+
+[float]
 [[breaking-changes-v7.14.1]]
 === Breaking changes
 Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.14.1, review the <<breaking-changes-7.14.0,7.14.0 breaking changes>>.

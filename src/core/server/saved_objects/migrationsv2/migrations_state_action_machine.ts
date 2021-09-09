@@ -13,7 +13,8 @@ import type { ElasticsearchClient } from '../../elasticsearch';
 import { getErrorMessage, getRequestDebugMeta } from '../../elasticsearch';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
-import { State } from './types';
+import { ReindexSourceToTempIndex, ReindexSourceToTempIndexBulk, State } from './types';
+import { SavedObjectsRawDoc } from '../serialization';
 
 interface StateLogMeta extends LogMeta {
   kibana: {
@@ -140,11 +141,22 @@ export async function migrationStateActionMachine({
         const newState = model(state, res);
         // Redact the state to reduce the memory consumption and so that we
         // don't log sensitive information inside documents by only keeping
-        // the _id's of outdatedDocuments
+        // the _id's of documents
         const redactedNewState = {
           ...newState,
-          // @ts-expect-error outdatedDocuments don't exist in all states
-          ...{ outdatedDocuments: (newState.outdatedDocuments ?? []).map((doc) => doc._id) },
+          ...{
+            outdatedDocuments: ((newState as ReindexSourceToTempIndex).outdatedDocuments ?? []).map(
+              (doc) =>
+                ({
+                  _id: doc._id,
+                } as SavedObjectsRawDoc)
+            ),
+          },
+          ...{
+            transformedDocBatches: (
+              (newState as ReindexSourceToTempIndexBulk).transformedDocBatches ?? []
+            ).map((batches) => batches.map((doc) => ({ _id: doc._id }))) as [SavedObjectsRawDoc[]],
+          },
         };
         executionLog.push({
           type: 'transition',

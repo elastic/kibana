@@ -18,7 +18,7 @@ import {
   createEsDeprecationsMockResponse,
 } from './mocked_responses';
 
-describe('Deprecations table', () => {
+describe('ES deprecations table', () => {
   let testBed: ElasticsearchTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
@@ -162,7 +162,7 @@ describe('Deprecations table', () => {
 
       expect(exists('noDeprecationsRow')).toBe(true);
       expect(find('noDeprecationsRow').text()).toContain(
-        'No Elasticsearch deprecation warnings found'
+        'No Elasticsearch deprecation issues found'
       );
     });
   });

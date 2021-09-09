@@ -34,7 +34,7 @@ pageLoadAssetSize:
   indexPatternManagement: 28222
   indexPatternEditor: 40000
   infra: 184320
-  fleet: 465774
+  fleet: 250000
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711

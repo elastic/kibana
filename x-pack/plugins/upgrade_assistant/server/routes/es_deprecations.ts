@@ -11,9 +11,13 @@ import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../lib/reindexing';
-import { handleEsError } from '../shared_imports';
 
-export function registerESDeprecationRoutes({ router, licensing, log }: RouteDependencies) {
+export function registerESDeprecationRoutes({
+  router,
+  lib: { handleEsError },
+  licensing,
+  log,
+}: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/es_deprecations`,
@@ -50,8 +54,8 @@ export function registerESDeprecationRoutes({ router, licensing, log }: RouteDep
           return response.ok({
             body: status,
           });
-        } catch (e) {
-          return handleEsError({ error: e, response });
+        } catch (error) {
+          return handleEsError({ error, response });
         }
       }
     )

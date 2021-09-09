@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { isEqual } from 'lodash';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
 import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
@@ -46,6 +46,7 @@ export class DocViewerTab extends React.Component<Props, State> {
     return (
       nextProps.renderProps.hit._id !== this.props.renderProps.hit._id ||
       nextProps.id !== this.props.id ||
+      !isEqual(nextProps.renderProps.columns, this.props.renderProps.columns) ||
       nextState.hasError
     );
   }
@@ -66,11 +67,9 @@ export class DocViewerTab extends React.Component<Props, State> {
     // doc view is provided by a react component
     if (Component) {
       return (
-        <I18nProvider>
-          <KibanaContextProvider services={{ uiSettings: getServices().uiSettings }}>
-            <Component {...renderProps} />
-          </KibanaContextProvider>
-        </I18nProvider>
+        <KibanaContextProvider services={{ uiSettings: getServices().uiSettings }}>
+          <Component {...renderProps} />
+        </KibanaContextProvider>
       );
     }
 

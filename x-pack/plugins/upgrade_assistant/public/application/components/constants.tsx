@@ -5,29 +5,7 @@
  * 2.0.
  */
 
-import { IconColor } from '@elastic/eui';
-import { invert } from 'lodash';
 import { i18n } from '@kbn/i18n';
-
-import { DeprecationInfo } from '../../../common/types';
-
-export const LEVEL_MAP: { [level: string]: number } = {
-  warning: 0,
-  critical: 1,
-};
-
-interface ReverseLevelMap {
-  [idx: number]: DeprecationInfo['level'];
-}
-
-export const REVERSE_LEVEL_MAP: ReverseLevelMap = invert(LEVEL_MAP) as ReverseLevelMap;
-
-export const COLOR_MAP: { [level: string]: IconColor } = {
-  warning: 'default',
-  critical: 'danger',
-};
-
-export const DEPRECATIONS_PER_PAGE = 25;
 
 export const DEPRECATION_TYPE_MAP = {
   cluster_settings: i18n.translate(
@@ -48,4 +26,9 @@ export const DEPRECATION_TYPE_MAP = {
   ml_settings: i18n.translate('xpack.upgradeAssistant.esDeprecations.mlDeprecationTypeLabel', {
     defaultMessage: 'Machine Learning',
   }),
+};
+
+export const PAGINATION_CONFIG = {
+  initialPageSize: 50,
+  pageSizeOptions: [50, 100, 200],
 };

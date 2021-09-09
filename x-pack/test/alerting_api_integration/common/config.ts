@@ -149,7 +149,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
-          `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
+          `--xpack.actions.allowedHosts=${JSON.stringify([
+            'localhost',
+            'some.non.existent.com',
+            'smtp.live.com',
+          ])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           '--xpack.alerting.healthCheck.interval="1s"',

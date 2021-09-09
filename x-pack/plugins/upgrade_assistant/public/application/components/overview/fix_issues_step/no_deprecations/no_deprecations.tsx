@@ -11,12 +11,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiSpacer } from '@elastic
 import { i18n } from '@kbn/i18n';
 
 const i18nTexts = {
-  noDeprecationsText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecationStats.noDeprecationsText',
-    {
-      defaultMessage: 'No warnings. Good to go!',
-    }
-  ),
+  noDeprecationsText: i18n.translate('xpack.upgradeAssistant.noDeprecationsText', {
+    defaultMessage: 'No warnings. Good to go!',
+  }),
 };
 
 export const NoDeprecations: FunctionComponent = () => {

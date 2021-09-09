@@ -26,6 +26,12 @@ const i18nTexts = {
       defaultMessage: 'Critical',
     }
   ),
+  warningBadgeLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.warningBadgeLabel',
+    {
+      defaultMessage: 'Warning',
+    }
+  ),
   manualCellLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.manualCellLabel',
     {
@@ -52,7 +58,7 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
       return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
     }
 
-    return <>{''}</>;
+    return <EuiBadge color="default">{i18nTexts.warningBadgeLabel}</EuiBadge>;
   }
 
   // "Issue" column

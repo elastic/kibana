@@ -6,6 +6,8 @@
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
+
+import { handleEsError } from '../shared_imports';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { registerUpgradeStatusRoute } from './status';
@@ -31,6 +33,7 @@ describe('Status API', () => {
     mockRouter = createMockRouter();
     routeDependencies = {
       router: mockRouter,
+      lib: { handleEsError },
     };
     registerUpgradeStatusRoute(routeDependencies);
   });

@@ -105,7 +105,7 @@ export default function upgradeAssistantFunctionalTests({
       await PageObjects.upgradeAssistant.clickKibanaDeprecationsPanel();
 
       await retry.waitFor('Kibana deprecations table to be visible', async () => {
-        return testSubjects.exists('kibanaDeprecationsContent');
+        return testSubjects.exists('kibanaDeprecations');
       });
     });
   });
