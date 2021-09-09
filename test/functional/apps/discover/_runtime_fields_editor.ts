@@ -32,11 +32,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.savedObjects.clean({ types: ['saved-search'] });
     });
 
     it('allows adding custom label to existing fields', async function () {

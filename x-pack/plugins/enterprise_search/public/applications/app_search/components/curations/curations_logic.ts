@@ -75,7 +75,7 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/api/app_search/engines/${engineName}/curations`, {
+        const response = await http.get(`/internal/app_search/engines/${engineName}/curations`, {
           query: {
             'page[current]': meta.page.current,
             'page[size]': meta.page.size,
@@ -93,7 +93,7 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
 
       if (window.confirm(DELETE_MESSAGE)) {
         try {
-          await http.delete(`/api/app_search/engines/${engineName}/curations/${id}`);
+          await http.delete(`/internal/app_search/engines/${engineName}/curations/${id}`);
           actions.loadCurations();
           flashSuccessToast(SUCCESS_MESSAGE);
         } catch (e) {
@@ -108,7 +108,7 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
       clearFlashMessages();
 
       try {
-        const response = await http.post(`/api/app_search/engines/${engineName}/curations`, {
+        const response = await http.post(`/internal/app_search/engines/${engineName}/curations`, {
           body: JSON.stringify({ queries }),
         });
         navigateToUrl(generateEnginePath(ENGINE_CURATION_PATH, { curationId: response.id }));
