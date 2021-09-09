@@ -33,7 +33,7 @@ export function BackendDetailOverview() {
   const {
     path: { backendName },
     query: { rangeFrom, rangeTo, environment, kuery },
-  } = useApmParams('/backends/:backendName/overview');
+  } = useApmParams('/backends/{backendName}/overview');
 
   const apmRouter = useApmRouter();
 
@@ -46,7 +46,7 @@ export function BackendDetailOverview() {
     },
     {
       title: backendName,
-      href: apmRouter.link('/backends/:backendName/overview', {
+      href: apmRouter.link('/backends/{backendName}/overview', {
         path: { backendName },
         query: {
           rangeFrom,
