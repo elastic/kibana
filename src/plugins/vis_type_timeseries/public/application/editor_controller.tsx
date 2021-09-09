@@ -26,7 +26,7 @@ export class EditorController implements IEditorController {
     private embeddableHandler: VisualizeEmbeddableContract
   ) {}
 
-  render({ timeRange, uiState }: EditorRenderProps) {
+  render({ timeRange, uiState, filters, query }: EditorRenderProps) {
     const I18nContext = getI18n().Context;
 
     render(
@@ -38,6 +38,8 @@ export class EditorController implements IEditorController {
           embeddableHandler={this.embeddableHandler}
           eventEmitter={this.eventEmitter}
           uiState={uiState}
+          filters={filters}
+          query={query}
         />
       </I18nContext>,
       this.el

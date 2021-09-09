@@ -130,7 +130,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       column: number,
       expectedColumnValues: string[]
     ) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse columns up to the one we want to assert
         const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
@@ -152,7 +152,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertEuiDataGridColumnValuesNotEmpty(tableSubj: string, column: number) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse columns up to the one we want to assert
         const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
@@ -171,7 +171,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertIndexPreview(columns: number, expectedNumberOfRows: number) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse the first column as this is sufficient to get assert the row count
         const rowsData = await this.parseEuiDataGrid('transformIndexPreview', 1);

@@ -13,7 +13,97 @@ import { RequiredKeys, ValuesType } from 'utility-types';
 // import { unconst } from '../unconst';
 import { NormalizePath } from './utils';
 
-export type PathsOf<TRoutes extends Route[]> = keyof MapRoutes<TRoutes> & string;
+type PathsOfRoute<TRoute extends Route> =
+  | TRoute['path']
+  | (TRoute extends { children: Route[] }
+      ? AppendPath<TRoute['path'], '/*'> | PathsOf<TRoute['children']>
+      : never);
+
+export type PathsOf<TRoutes extends Route[]> = TRoutes extends []
+  ? never
+  : TRoutes extends [Route]
+  ? PathsOfRoute<TRoutes[0]>
+  : TRoutes extends [Route, Route]
+  ? PathsOfRoute<TRoutes[0]> | PathsOfRoute<TRoutes[1]>
+  : TRoutes extends [Route, Route, Route]
+  ? PathsOfRoute<TRoutes[0]> | PathsOfRoute<TRoutes[1]> | PathsOfRoute<TRoutes[2]>
+  : TRoutes extends [Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+  : TRoutes extends [Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+      | PathsOfRoute<TRoutes[5]>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+      | PathsOfRoute<TRoutes[5]>
+      | PathsOfRoute<TRoutes[6]>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+      | PathsOfRoute<TRoutes[5]>
+      | PathsOfRoute<TRoutes[6]>
+      | PathsOfRoute<TRoutes[7]>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+      | PathsOfRoute<TRoutes[5]>
+      | PathsOfRoute<TRoutes[6]>
+      | PathsOfRoute<TRoutes[7]>
+      | PathsOfRoute<TRoutes[8]>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+      | PathsOfRoute<TRoutes[5]>
+      | PathsOfRoute<TRoutes[6]>
+      | PathsOfRoute<TRoutes[7]>
+      | PathsOfRoute<TRoutes[8]>
+      | PathsOfRoute<TRoutes[9]>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+      | PathsOfRoute<TRoutes[5]>
+      | PathsOfRoute<TRoutes[6]>
+      | PathsOfRoute<TRoutes[7]>
+      | PathsOfRoute<TRoutes[8]>
+      | PathsOfRoute<TRoutes[9]>
+      | PathsOfRoute<TRoutes[10]>
+  : string;
 
 export interface RouteMatch<TRoute extends Route = Route> {
   route: TRoute;
@@ -167,29 +257,17 @@ type MaybeUnion<T extends Record<string, any>, U extends Record<string, any>> = 
     [key in keyof U]: key extends keyof T ? T[key] | U[key] : U[key];
   };
 
-type MapRoute<
-  TRoute extends Route,
-  TPrefix extends string,
-  TParents extends Route[] = []
-> = TRoute extends Route
+type MapRoute<TRoute extends Route, TParents extends Route[] = []> = TRoute extends Route
   ? MaybeUnion<
       {
-        [key in AppendPath<TPrefix, TRoute['path']>]: TRoute & { parents: TParents };
+        [key in TRoute['path']]: TRoute & { parents: TParents };
       },
       TRoute extends { children: Route[] }
         ? MaybeUnion<
-            MapRoutes<
-              TRoute['children'],
-              AppendPath<TPrefix, TRoute['path']>,
-              [...TParents, TRoute]
-            >,
+            MapRoutes<TRoute['children'], [...TParents, TRoute]>,
             {
-              [key in AppendPath<TPrefix, AppendPath<TRoute['path'], '*'>>]: ValuesType<
-                MapRoutes<
-                  TRoute['children'],
-                  AppendPath<TPrefix, TRoute['path']>,
-                  [...TParents, TRoute]
-                >
+              [key in AppendPath<TRoute['path'], '*'>]: ValuesType<
+                MapRoutes<TRoute['children'], [...TParents, TRoute]>
               >;
             }
           >
@@ -197,74 +275,68 @@ type MapRoute<
     >
   : {};
 
-type MapRoutes<
-  TRoutes,
-  TPrefix extends string = '',
-  TParents extends Route[] = []
-> = TRoutes extends [Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents>
+type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
+  ? MapRoute<TRoutes[0], TParents>
   : TRoutes extends [Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> & MapRoute<TRoutes[1], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> & MapRoute<TRoutes[1], TParents>
   : TRoutes extends [Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> & MapRoute<TRoutes[1], TParents> & MapRoute<TRoutes[2], TParents>
   : TRoutes extends [Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents>
   : TRoutes extends [Route, Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents> &
-      MapRoute<TRoutes[4], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents>
   : TRoutes extends [Route, Route, Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents> &
-      MapRoute<TRoutes[4], TPrefix, TParents> &
-      MapRoute<TRoutes[5], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents> &
+      MapRoute<TRoutes[5], TParents>
   : TRoutes extends [Route, Route, Route, Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents> &
-      MapRoute<TRoutes[4], TPrefix, TParents> &
-      MapRoute<TRoutes[5], TPrefix, TParents> &
-      MapRoute<TRoutes[6], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents> &
+      MapRoute<TRoutes[5], TParents> &
+      MapRoute<TRoutes[6], TParents>
   : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents> &
-      MapRoute<TRoutes[4], TPrefix, TParents> &
-      MapRoute<TRoutes[5], TPrefix, TParents> &
-      MapRoute<TRoutes[6], TPrefix, TParents> &
-      MapRoute<TRoutes[7], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents> &
+      MapRoute<TRoutes[5], TParents> &
+      MapRoute<TRoutes[6], TParents> &
+      MapRoute<TRoutes[7], TParents>
   : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents> &
-      MapRoute<TRoutes[4], TPrefix, TParents> &
-      MapRoute<TRoutes[5], TPrefix, TParents> &
-      MapRoute<TRoutes[6], TPrefix, TParents> &
-      MapRoute<TRoutes[7], TPrefix, TParents> &
-      MapRoute<TRoutes[8], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents> &
+      MapRoute<TRoutes[5], TParents> &
+      MapRoute<TRoutes[6], TParents> &
+      MapRoute<TRoutes[7], TParents> &
+      MapRoute<TRoutes[8], TParents>
   : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents> &
-      MapRoute<TRoutes[4], TPrefix, TParents> &
-      MapRoute<TRoutes[5], TPrefix, TParents> &
-      MapRoute<TRoutes[6], TPrefix, TParents> &
-      MapRoute<TRoutes[7], TPrefix, TParents> &
-      MapRoute<TRoutes[8], TPrefix, TParents> &
-      MapRoute<TRoutes[9], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents> &
+      MapRoute<TRoutes[5], TParents> &
+      MapRoute<TRoutes[6], TParents> &
+      MapRoute<TRoutes[8], TParents> &
+      MapRoute<TRoutes[7], TParents> &
+      MapRoute<TRoutes[9], TParents>
   : {};
 
 // const element = null as any;
@@ -279,20 +351,11 @@ type MapRoutes<
 //         element,
 //         children: [
 //           {
-//             path: '/agent-configuration',
+//             path: '/settings/agent-configuration',
 //             element,
 //           },
 //           {
-//             path: '/agent-configuration/create',
-//             element,
-//             params: t.partial({
-//               query: t.partial({
-//                 pageStep: t.string,
-//               }),
-//             }),
-//           },
-//           {
-//             path: '/agent-configuration/edit',
+//             path: '/settings/agent-configuration/create',
 //             element,
 //             params: t.partial({
 //               query: t.partial({
@@ -301,23 +364,32 @@ type MapRoutes<
 //             }),
 //           },
 //           {
-//             path: '/apm-indices',
+//             path: '/settings/agent-configuration/edit',
+//             element,
+//             params: t.partial({
+//               query: t.partial({
+//                 pageStep: t.string,
+//               }),
+//             }),
+//           },
+//           {
+//             path: '/settings/apm-indices',
 //             element,
 //           },
 //           {
-//             path: '/customize-ui',
+//             path: '/settings/customize-ui',
 //             element,
 //           },
 //           {
-//             path: '/schema',
+//             path: '/settings/schema',
 //             element,
 //           },
 //           {
-//             path: '/anomaly-detection',
+//             path: '/settings/anomaly-detection',
 //             element,
 //           },
 //           {
-//             path: '/',
+//             path: '/settings',
 //             element,
 //           },
 //         ],
@@ -346,15 +418,15 @@ type MapRoutes<
 //         ]),
 //         children: [
 //           {
-//             path: '/overview',
+//             path: '/services/:serviceName/overview',
 //             element,
 //           },
 //           {
-//             path: '/transactions',
+//             path: '/services/:serviceName/transactions',
 //             element,
 //           },
 //           {
-//             path: '/errors',
+//             path: '/services/:serviceName/errors',
 //             element,
 //             children: [
 //               {
@@ -367,7 +439,7 @@ type MapRoutes<
 //                 }),
 //               },
 //               {
-//                 path: '/',
+//                 path: '/services/:serviceName',
 //                 element,
 //                 params: t.partial({
 //                   query: t.partial({
@@ -381,19 +453,19 @@ type MapRoutes<
 //             ],
 //           },
 //           {
-//             path: '/foo',
+//             path: '/services/:serviceName/foo',
 //             element,
 //           },
 //           {
-//             path: '/bar',
+//             path: '/services/:serviceName/bar',
 //             element,
 //           },
 //           {
-//             path: '/baz',
+//             path: '/services/:serviceName/baz',
 //             element,
 //           },
 //           {
-//             path: '/',
+//             path: '/services/:serviceName',
 //             element,
 //           },
 //         ],
@@ -436,6 +508,7 @@ type MapRoutes<
 
 // type Bar = ValuesType<Match<Routes, '/*'>>['route']['path'];
 // type Foo = OutputOf<Routes, '/*'>;
+// type Baz = OutputOf<Routes, '/services/:serviceName/baz'>;
 
 // const { path }: Foo = {} as any;
 

@@ -28,7 +28,7 @@ const ALERT_DURATION = `${ALERT_NAMESPACE}.duration.us` as const;
 const ALERT_END = `${ALERT_NAMESPACE}.end` as const;
 const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
-const ALERT_ID = `${ALERT_NAMESPACE}.id` as const;
+const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 const ALERT_RISK_SCORE = `${ALERT_NAMESPACE}.risk_score` as const;
 const ALERT_SEVERITY = `${ALERT_NAMESPACE}.severity` as const;
@@ -94,7 +94,7 @@ const fields = {
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
-  ALERT_ID,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
   ALERT_REASON,
@@ -143,7 +143,7 @@ export {
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
-  ALERT_ID,
+  ALERT_INSTANCE_ID,
   ALERT_NAMESPACE,
   ALERT_RULE_NAMESPACE,
   ALERT_RULE_CONSUMER,
