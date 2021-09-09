@@ -67,10 +67,12 @@ is determined by its {ecs-ref}/ecs-event.html#field-event-outcome[event.outcome]
 value. For example, APM agents set the `event.outcome` to `failure` when an HTTP
 transaction returns a `5xx` status code.
 
+// The chart highlights the failed transactions in the overall latency distribution for the transaction group. 
 If there are attributes that have a statistically significant correlation with
 failed transactions, they are listed in a table. The table is sorted by scores,
 which are mapped to high, medium, or low impact levels. Attributes with high
 impact levels are more likely to contribute to failed transactions.
+//  By default, the attribute with the highest score is added to the chart. To see a different attribute in the chart, hover over its row in the table.
 
 For example, in the screenshot below, the field
 `kubernetes.pod.name` and value `frontend-node-59dff47885-fl5lb` has a medium
