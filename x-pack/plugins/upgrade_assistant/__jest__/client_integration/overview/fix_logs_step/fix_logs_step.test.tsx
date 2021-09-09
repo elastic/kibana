@@ -307,15 +307,18 @@ describe('Overview - Fix deprecation logs step', () => {
         jest.useRealTimers();
       });
 
-      test('renders step as incomplete when having no deprecation logs but after some time we have some', async () => {
+      test('renders step as incomplete when a success state is followed by an error state', async () => {
         const { exists } = testBed;
 
         expect(exists('fixLogsStep-complete')).toBe(true);
 
-        // second request should make it incomplete
-        httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
-          count: 5,
-        });
+        // second request will error
+        const error = {
+          statusCode: 500,
+          error: 'Internal server error',
+          message: 'Internal server error',
+        };
+        httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse(undefined, error);
 
         // Resolve the polling timeout.
         await advanceTime(DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS);
