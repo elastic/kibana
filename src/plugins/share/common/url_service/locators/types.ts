@@ -75,7 +75,7 @@ export interface LocatorPublic<P extends SerializableRecord> extends Persistable
    * @param params URL locator parameters.
    * @param options URL serialization options.
    */
-  getRedirectUrl(params: P, options: FormatSearchParamsOptions): string;
+  getRedirectUrl(params: P, options?: FormatSearchParamsOptions): string;
 
   /**
    * Navigate using the `core.application.navigateToApp()` method to a Kibana
