@@ -55,21 +55,4 @@ describe('Alert details with unmapped fields', () => {
           .should('include', expectedUnmappedField.text);
       });
   });
-
-  it('Displays the unmapped field on the table', () => {
-    const expectedUnmmappedField = {
-      row: 90,
-      field: 'unmapped',
-      text: 'This is the unmapped field',
-    };
-
-    openTable();
-    cy.get(ALERT_FLYOUT)
-      .find(TABLE_ROWS)
-      .eq(expectedUnmmappedField.row)
-      .within(() => {
-        cy.get(CELL_TEXT).eq(2).should('have.text', expectedUnmmappedField.field);
-        cy.get(CELL_TEXT).eq(4).should('have.text', expectedUnmmappedField.text);
-      });
-  });
 });
