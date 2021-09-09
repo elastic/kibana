@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { IFieldSubType, IndexPatternBase } from '@kbn/es-query';
-import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/common';
+import { IFieldSubType } from '@kbn/es-query';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
+import {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IIndexPattern,
+} from '../../../../../../src/plugins/data/common';
 import { DocValueFields, Maybe } from '../common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
 
-interface FieldInfo {
+export interface FieldInfo {
   category: string;
   description?: string;
   example?: string | number;
@@ -55,6 +60,7 @@ export interface IndexFieldsStrategyRequest extends IEsSearchRequest {
 export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
   indexFields: IndexField[];
   indicesExist: string[];
+  runtimeMappings: MappingRuntimeFields;
 }
 
 export interface BrowserField {
@@ -80,7 +86,7 @@ export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
 export const EMPTY_BROWSER_FIELDS = {};
 export const EMPTY_DOCVALUE_FIELD: DocValueFields[] = [];
-export const EMPTY_INDEX_PATTERN: IndexPatternBase = {
+export const EMPTY_INDEX_PATTERN: IIndexPattern = {
   fields: [],
   title: '',
 };

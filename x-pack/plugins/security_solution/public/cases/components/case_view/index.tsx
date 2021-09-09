@@ -53,7 +53,9 @@ export interface CaseProps extends Props {
 }
 
 const TimelineDetailsPanel = () => {
-  const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.detections);
+  const { browserFields, docValueFields, runtimeMappings } = useSourcererScope(
+    SourcererScopeName.detections
+  );
 
   return (
     <DetailsPanel
@@ -61,6 +63,7 @@ const TimelineDetailsPanel = () => {
       docValueFields={docValueFields}
       entityType="events"
       isFlyoutView
+      runtimeMappings={runtimeMappings}
       timelineId={TimelineId.casePage}
     />
   );

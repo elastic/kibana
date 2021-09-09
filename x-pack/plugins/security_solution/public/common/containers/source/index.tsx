@@ -259,6 +259,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                       indexPattern: getIndexFields(patternString, response.indexFields),
                       indicesExist: patternList.length > 0,
                       loading: false,
+                      runtimeMappings: response.runtimeMappings,
                       selectedPatterns: newSelectedPatterns,
                       selectedKipId,
                     },

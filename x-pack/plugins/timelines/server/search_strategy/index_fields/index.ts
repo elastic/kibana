@@ -88,13 +88,14 @@ export const requestIndexFieldSearch = async (
   // if kipId is provided, get fields from the Kibana Data View
 
   let indexFields: IndexField[] = [];
-
+  let runtimeMappings = {};
   if (!request.onlyCheckIfIndicesExist) {
     if (request.kipId) {
       // TODO: Steph/sourcerer needs unit test
       const kip = await indexPatternService.get(request.kipId);
       // type cast because index pattern type is FieldSpec and timeline type is FieldDescriptor, same diff
       fieldDescriptor = [Object.values(kip.fields.toSpec()) as FieldDescriptor[]];
+      runtimeMappings = kip.runtimeFieldMap;
     } else {
       fieldDescriptor = await Promise.all(
         dedupeIndices
@@ -114,9 +115,9 @@ export const requestIndexFieldSearch = async (
     }
     indexFields = await formatIndexFields(beatFields, fieldDescriptor, dedupeIndices);
   }
-
   return {
     indexFields,
+    runtimeMappings,
     indicesExist: dedupeIndices.filter((index, i) => indicesExist[i]),
     rawResponse: {
       timed_out: false,

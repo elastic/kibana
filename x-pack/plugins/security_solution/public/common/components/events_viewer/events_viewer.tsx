@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { useDispatch } from 'react-redux';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
 import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
@@ -133,6 +134,7 @@ interface Props {
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  runtimeMappings: MappingRuntimeFields;
   start: string;
   sort: Sort[];
   showTotalCount?: boolean;
@@ -162,6 +164,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   query,
   renderCellValue,
   rowRenderers,
+  runtimeMappings,
   start,
   sort,
   showTotalCount = true,
@@ -242,6 +245,7 @@ const EventsViewerComponent: React.FC<Props> = ({
     id,
     indexNames,
     limit: itemsPerPage,
+    runtimeMappings,
     sort: sortField,
     startDate: start,
     endDate: end,

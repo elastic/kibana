@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
 import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
@@ -41,6 +42,7 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   defaultIndex: string[];
   docValueFields?: DocValueFields[];
   factoryQueryType?: TimelineFactoryQueryTypes;
+  runtimeMappings: MappingRuntimeFields;
 }
 
 export interface TimelineRequestSortField<Field = string> extends SortField<Field> {
@@ -72,7 +74,7 @@ export type TimelineStrategyRequestType<
   : T extends TimelineEventsQueries.details
   ? TimelineEventsDetailsRequestOptions
   : T extends TimelineEventsQueries.kpi
-  ? TimelineRequestBasicOptions
+  ? TimelineKpiStrategyResponse
   : T extends TimelineEventsQueries.lastEventTime
   ? TimelineEventsLastEventTimeRequestOptions
   : never;

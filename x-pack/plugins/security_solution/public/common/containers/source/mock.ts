@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { DocValueFields } from '../../../../common/search_strategy';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -726,3 +727,12 @@ export const mockDocValueFields: DocValueFields[] = [
     format: 'date_time',
   },
 ];
+
+export const mockRuntimeMappings: MappingRuntimeFields = {
+  '@a.runtime.field': {
+    script: {
+      source: 'emit("Radical dude: " + doc[\'host.name\'].value)',
+    },
+    type: 'keyword',
+  },
+};

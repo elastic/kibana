@@ -178,6 +178,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     browserFields,
     docValueFields,
     loading: loadingSourcerer,
+    runtimeMappings,
     selectedPatterns,
   } = useSourcererScope(SourcererScopeName.timeline);
 
@@ -218,6 +219,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     language: 'eql',
     limit: itemsPerPage,
     filterQuery: eqlQuery ?? '',
+    runtimeMappings,
     startDate: start,
     skip: !canQueryTimeline(),
     timerangeKind,
@@ -348,6 +350,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
               <DetailsPanel
                 browserFields={browserFields}
                 docValueFields={docValueFields}
+                runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.eql}
                 timelineId={timelineId}
                 handleOnPanelClosed={handleOnPanelClosed}

@@ -6,14 +6,22 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
 import { DocValueFields } from '../../../../../../common/search_strategy';
 
-export const buildTimelineDetailsQuery = (
-  indexName: string,
-  id: string,
-  docValueFields: DocValueFields[],
-  authFilter?: JsonObject
-) => {
+export const buildTimelineDetailsQuery = ({
+  authFilter,
+  docValueFields,
+  id,
+  indexName,
+  runtimeMappings,
+}: {
+  authFilter?: JsonObject;
+  docValueFields: DocValueFields[];
+  id: string;
+  indexName: string;
+  runtimeMappings: MappingRuntimeFields;
+}) => {
   const basicFilter = {
     terms: {
       _id: [id],
@@ -40,6 +48,7 @@ export const buildTimelineDetailsQuery = (
       docvalue_fields: docValueFields,
       query,
       fields: [{ field: '*', include_unmapped: true }],
+      runtime_mappings: runtimeMappings,
       _source: true,
     },
     size: 1,

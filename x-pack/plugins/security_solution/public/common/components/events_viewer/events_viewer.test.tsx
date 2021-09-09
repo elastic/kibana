@@ -17,7 +17,11 @@ import { StatefulEventsViewer } from '.';
 import { EventsViewer } from './events_viewer';
 import { defaultHeaders } from './default_headers';
 import { useSourcererScope } from '../../containers/sourcerer';
-import { mockBrowserFields, mockDocValueFields } from '../../containers/source/mock';
+import {
+  mockBrowserFields,
+  mockDocValueFields,
+  mockRuntimeMappings,
+} from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { inputsModel } from '../../store/inputs';
@@ -107,6 +111,7 @@ const to = '2019-08-27T22:10:56.794Z';
 const defaultMocks = {
   browserFields: mockBrowserFields,
   docValueFields: mockDocValueFields,
+  runtimeMappings: mockRuntimeMappings,
   indexPattern: mockIndexPattern,
   loading: false,
   selectedPatterns: mockIndexNames,
@@ -139,6 +144,7 @@ const eventsViewerDefaultProps = {
   },
   renderCellValue: DefaultCellRenderer,
   rowRenderers: defaultRowRenderers,
+  runtimeMappings: {},
   start: from,
   sort: [
     {

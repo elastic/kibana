@@ -143,7 +143,9 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     status: timelineStatus,
   } = useDeepEqualSelector((state) => getTimelineNotes(state, timelineId));
 
-  const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.timeline);
+  const { browserFields, docValueFields, runtimeMappings } = useSourcererScope(
+    SourcererScopeName.timeline
+  );
 
   const getNotesAsCommentsList = useMemo(
     () => appSelectors.selectNotesAsCommentsListSelector(),
@@ -185,11 +187,19 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
           browserFields={browserFields}
           docValueFields={docValueFields}
           handleOnPanelClosed={handleOnPanelClosed}
+          runtimeMappings={runtimeMappings}
           tabType={TimelineTabs.notes}
           timelineId={timelineId}
         />
       ) : null,
-    [browserFields, docValueFields, expandedDetail, handleOnPanelClosed, timelineId]
+    [
+      browserFields,
+      docValueFields,
+      expandedDetail,
+      handleOnPanelClosed,
+      runtimeMappings,
+      timelineId,
+    ]
   );
 
   const SidebarContent = useMemo(

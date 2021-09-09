@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { DocValueFields } from '../../../../common/search_strategy/common';
 import {
@@ -30,6 +31,7 @@ export interface ManageScope {
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
   loading: boolean;
+  runtimeMappings: MappingRuntimeFields;
   selectedKipId: string;
   selectedPatterns: string[];
 }
@@ -71,6 +73,7 @@ export const initSourcererScope = {
   indexPattern: EMPTY_INDEX_PATTERN,
   indicesExist: true,
   loading: false,
+  runtimeMappings: {},
   selectedKipId: '',
   selectedPatterns: [],
 };

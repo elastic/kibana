@@ -116,9 +116,12 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   showExpandedDetails,
   sort,
 }) => {
-  const { browserFields, docValueFields, loading: loadingSourcerer } = useSourcererScope(
-    SourcererScopeName.timeline
-  );
+  const {
+    browserFields,
+    docValueFields,
+    loading: loadingSourcerer,
+    runtimeMappings,
+  } = useSourcererScope(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
 
   const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
@@ -192,6 +195,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     fields: timelineQueryFields,
     limit: itemsPerPage,
     filterQuery,
+    runtimeMappings,
     skip: filterQuery === '',
     startDate: '',
     sort: timelineQuerySortField,
@@ -269,6 +273,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
+                runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.pinned}
                 timelineId={timelineId}
               />

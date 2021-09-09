@@ -189,6 +189,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     docValueFields,
     loading: loadingSourcerer,
     indexPattern,
+    runtimeMappings,
     selectedPatterns,
   } = useSourcererScope(SourcererScopeName.timeline);
 
@@ -271,6 +272,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     limit: itemsPerPage,
     filterQuery: combinedQueries?.filterQuery,
     startDate: start,
+    runtimeMappings,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,
     timerangeKind,
@@ -417,6 +419,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
+                runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.query}
                 timelineId={timelineId}
               />

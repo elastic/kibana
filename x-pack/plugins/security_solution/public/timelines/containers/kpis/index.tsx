@@ -15,7 +15,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import {
   DocValueFields,
   TimelineEventsQueries,
-  TimelineRequestBasicOptions,
+  TimelineKpiStrategyRequest,
   TimelineKpiStrategyResponse,
   TimerangeInput,
 } from '../../../../common/search_strategy';
@@ -44,7 +44,7 @@ export const useTimelineKpis = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [timelineKpiRequest, setTimelineKpiRequest] = useState<TimelineRequestBasicOptions | null>(
+  const [timelineKpiRequest, setTimelineKpiRequest] = useState<TimelineKpiStrategyRequest | null>(
     null
   );
   const [
@@ -54,7 +54,7 @@ export const useTimelineKpis = ({
   const { addError, addWarning } = useAppToasts();
 
   const timelineKpiSearch = useCallback(
-    (request: TimelineRequestBasicOptions | null) => {
+    (request: TimelineKpiStrategyRequest | null) => {
       if (request == null) {
         return;
       }
@@ -63,7 +63,7 @@ export const useTimelineKpis = ({
         setLoading(true);
 
         searchSubscription$.current = data.search
-          .search<TimelineRequestBasicOptions, TimelineKpiStrategyResponse>(request, {
+          .search<TimelineKpiStrategyRequest, TimelineKpiStrategyResponse>(request, {
             strategy: 'timelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })

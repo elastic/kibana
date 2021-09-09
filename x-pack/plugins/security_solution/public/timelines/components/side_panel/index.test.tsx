@@ -72,6 +72,7 @@ describe('Details Panel Component', () => {
     docValueFields: [],
     handleOnPanelClosed: jest.fn(),
     isFlyoutView: false,
+    runtimeMappings: {},
     tabType: TimelineTabs.query,
     timelineId: 'test',
   };

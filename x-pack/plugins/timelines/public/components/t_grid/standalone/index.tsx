@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
@@ -107,6 +108,7 @@ export interface TGridStandaloneProps {
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  runtimeMappings: MappingRuntimeFields;
   setRefetch: (ref: () => void) => void;
   start: string;
   sort: SortColumnTimeline[];
@@ -138,6 +140,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   query,
   renderCellValue,
   rowRenderers,
+  runtimeMappings,
   setRefetch,
   start,
   sort,
@@ -221,6 +224,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     id: STANDALONE_ID,
     indexNames,
     limit: itemsPerPageStore,
+    runtimeMappings,
     sort: sortField,
     startDate: start,
     endDate: end,

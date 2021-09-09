@@ -17,6 +17,7 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -62,6 +63,7 @@ interface EventDetailsPanelProps {
   };
   handleOnEventClosed: () => void;
   isFlyoutView?: boolean;
+  runtimeMappings: MappingRuntimeFields;
   tabType: TimelineTabs;
   timelineId: string;
 }
@@ -73,6 +75,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   expandedEvent,
   handleOnEventClosed,
   isFlyoutView,
+  runtimeMappings,
   tabType,
   timelineId,
 }) => {
@@ -81,6 +84,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     entityType,
     indexName: expandedEvent.indexName ?? '',
     eventId: expandedEvent.eventId ?? '',
+    runtimeMappings,
     skip: !expandedEvent.eventId,
   });
 

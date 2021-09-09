@@ -115,6 +115,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     browserFields,
     docValueFields,
     indexPattern,
+    runtimeMappings,
     selectedPatterns,
     selectedKipId,
     loading: isLoadingIndexPattern,
@@ -197,6 +198,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               graphEventId,
               filterStatus: currentFilter,
               leadingControlColumns,
+              runtimeMappings,
               trailingControlColumns,
               tGridEventRenderedViewEnabled,
               unit,
@@ -222,6 +224,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               onRuleChange={onRuleChange}
               renderCellValue={renderCellValue}
               rowRenderers={rowRenderers}
+              runtimeMappings={runtimeMappings}
               start={start}
               sort={sort}
               showTotalCount={isEmpty(graphEventId) ? true : false}
@@ -236,6 +239,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         entityType={entityType}
         docValueFields={docValueFields}
         isFlyoutView
+        runtimeMappings={runtimeMappings}
         timelineId={id}
       />
     </>
