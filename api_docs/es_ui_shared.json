@@ -352,7 +352,7 @@
         "children": [
           {
             "parentPluginId": "esUiShared",
-            "id": "def-public.__0",
+            "id": "def-public.JsonEditor.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -1434,7 +1434,7 @@
         "children": [
           {
             "parentPluginId": "esUiShared",
-            "id": "def-public.arg",
+            "id": "def-public.OnJsonEditorUpdateHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "arg",
@@ -1510,7 +1510,7 @@
             "children": [
               {
                 "parentPluginId": "esUiShared",
-                "id": "def-public.indexName",
+                "id": "def-public.indices.indexNameBeginsWithPeriod.$1",
                 "type": "string",
                 "tags": [],
                 "label": "indexName",
@@ -1539,7 +1539,7 @@
             "children": [
               {
                 "parentPluginId": "esUiShared",
-                "id": "def-public.indexName",
+                "id": "def-public.indices.findIllegalCharactersInIndexName.$1",
                 "type": "string",
                 "tags": [],
                 "label": "indexName",
@@ -1565,7 +1565,7 @@
             "children": [
               {
                 "parentPluginId": "esUiShared",
-                "id": "def-public.indexName",
+                "id": "def-public.indices.indexNameContainsSpaces.$1",
                 "type": "string",
                 "tags": [],
                 "label": "indexName",
