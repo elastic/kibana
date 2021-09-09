@@ -225,7 +225,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(typeof correlation).to.be('object');
       expect(correlation?.doc_count).to.be(31);
       expect(correlation?.score).to.be(83.70467673605746);
-      expect(correlation?.bg_count).to.be(31);
+      expect(correlation?.bg_count).to.be(60);
       expect(correlation?.fieldName).to.be('http.response.status_code');
       expect(correlation?.fieldValue).to.be(500);
       expect(typeof correlation?.pValue).to.be('number');
