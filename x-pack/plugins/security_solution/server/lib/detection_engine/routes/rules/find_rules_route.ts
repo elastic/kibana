@@ -6,7 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
 import {
   findRulesSchema,
@@ -21,7 +20,7 @@ import { transformFindAlerts } from './utils';
 
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: IRuleDataClient | null
+  isRuleRegistryEnabled: boolean
 ) => {
   router.get(
     {
@@ -52,6 +51,7 @@ export const findRulesRoute = (
 
         const execLogClient = context.securitySolution.getExecutionLogClient();
         const rules = await findRules({
+          isRuleRegistryEnabled,
           rulesClient,
           perPage: query.per_page,
           page: query.page,
