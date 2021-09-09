@@ -86,7 +86,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               title={
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.title"
-                  defaultMessage="Some objects cannot deleted"
+                  defaultMessage="Some objects cannot be deleted"
                 />
               }
               iconType="alert"
