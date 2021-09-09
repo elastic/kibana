@@ -8,13 +8,15 @@
 import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
 
-import { setupEnvironment } from '../helpers';
+import { setupEnvironment, kibanaDeprecationsServiceHelpers } from '../helpers';
 import { KibanaTestBed, setupKibanaPage } from './kibana_deprecations.helpers';
-import { kibanaDeprecationsMockResponse } from './mocked_responses';
 
 describe('Kibana deprecation details flyout', () => {
   let testBed: KibanaTestBed;
   const { server } = setupEnvironment();
+  const {
+    defaultMockedResponses: { mockedKibanaDeprecations },
+  } = kibanaDeprecationsServiceHelpers;
   const deprecationService = deprecationsServiceMock.createStartContract();
 
   afterAll(() => {
@@ -23,9 +25,7 @@ describe('Kibana deprecation details flyout', () => {
 
   beforeEach(async () => {
     await act(async () => {
-      deprecationService.getAllDeprecations = jest
-        .fn()
-        .mockReturnValue(kibanaDeprecationsMockResponse);
+      kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService });
 
       testBed = await setupKibanaPage({
         services: {
@@ -42,7 +42,7 @@ describe('Kibana deprecation details flyout', () => {
   describe('Deprecation with manual steps', () => {
     test('renders flyout with manual steps only', async () => {
       const { find, exists, actions } = testBed;
-      const manualDeprecation = kibanaDeprecationsMockResponse[1];
+      const manualDeprecation = mockedKibanaDeprecations[1];
 
       await actions.table.clickDeprecationAt(1);
 
@@ -61,7 +61,7 @@ describe('Kibana deprecation details flyout', () => {
   describe('Deprecation with automatic resolution', () => {
     test('resolves deprecation successfully', async () => {
       const { find, exists, actions } = testBed;
-      const quickResolveDeprecation = kibanaDeprecationsMockResponse[0];
+      const quickResolveDeprecation = mockedKibanaDeprecations[0];
 
       await actions.table.clickDeprecationAt(0);
 
@@ -93,14 +93,12 @@ describe('Kibana deprecation details flyout', () => {
 
     test('handles resolve failure', async () => {
       const { find, exists, actions } = testBed;
-      const quickResolveDeprecation = kibanaDeprecationsMockResponse[0];
+      const quickResolveDeprecation = mockedKibanaDeprecations[0];
 
-      deprecationService.resolveDeprecation.mockReturnValue(
-        Promise.resolve({
-          status: 'fail',
-          reason: 'resolve failed',
-        })
-      );
+      kibanaDeprecationsServiceHelpers.setResolveDeprecations({
+        deprecationService,
+        status: 'fail',
+      });
 
       await actions.table.clickDeprecationAt(0);
 

@@ -15,7 +15,7 @@ export const createCaseCommentSavedObjectType = ({
   migrationDeps: CreateCommentsMigrationsDeps;
 }): SavedObjectsType => ({
   name: CASE_COMMENT_SAVED_OBJECT,
-  hidden: false,
+  hidden: true,
   namespaceType: 'single',
   mappings: {
     properties: {

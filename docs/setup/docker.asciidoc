@@ -144,7 +144,8 @@ The following settings have different default values when using the Docker
 images:
 
 [horizontal]
-`server.host`:: `"0"`
+`server.host`:: `"0.0.0.0"`
+`server.shutdownTimeout`:: `"5s"`
 `elasticsearch.hosts`:: `http://elasticsearch:9200`
 `monitoring.ui.container.elasticsearch.enabled`:: `true`
 

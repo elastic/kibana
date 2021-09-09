@@ -160,7 +160,7 @@ describe('SearchUILogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/engine1/search_ui/field_config'
+          '/internal/app_search/engines/engine1/search_ui/field_config'
         );
         expect(SearchUILogic.actions.onFieldDataLoaded).toHaveBeenCalledWith({
           validFields: ['test'],

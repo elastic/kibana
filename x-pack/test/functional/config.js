@@ -59,7 +59,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/reporting_management'),
       resolve(__dirname, './apps/management'),
       resolve(__dirname, './apps/reporting'),
-      resolve(__dirname, './apps/observability'),
 
       //This upgrade assistant file needs to be run after the rest of the jobs because of
       //it being destructive.
@@ -106,7 +105,6 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'visualization:visualize:legacyChartsLibrary': true,
         'visualization:visualize:legacyPieChartsLibrary': true,
       },
     },
