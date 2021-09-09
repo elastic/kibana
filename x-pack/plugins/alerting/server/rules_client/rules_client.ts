@@ -660,6 +660,14 @@ export class RulesClient {
   }
 
   public async delete({ id }: { id: string }) {
+    return await retryIfConflicts(
+      this.logger,
+      `rulesClient.delete('${id}')`,
+      async () => await this.deleteWithOCC({ id })
+    );
+  }
+
+  private async deleteWithOCC({ id }: { id: string }) {
     let taskIdToRemove: string | undefined | null;
     let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
