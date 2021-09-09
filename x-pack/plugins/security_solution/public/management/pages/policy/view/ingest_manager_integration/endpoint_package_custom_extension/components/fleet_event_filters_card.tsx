@@ -78,7 +78,10 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
           path: fleetPackageCustomUrlPath,
         },
       ],
-      backButtonUrl: getAppUrl({ appId: INTEGRATIONS_PLUGIN_ID, path: fleetPackageCustomUrlPath }),
+      backButtonUrl: getAppUrl({
+        appId: INTEGRATIONS_PLUGIN_ID,
+        path: fleetPackageCustomUrlPath,
+      }),
     };
   }, [getAppUrl, pkgkey]);
 

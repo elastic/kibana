@@ -5,19 +5,26 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React, { memo, useEffect, useState, useMemo } from 'react';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import {
   PackagePolicyEditExtensionComponentProps,
   NewPackagePolicy,
+  pagePathGetters,
 } from '../../../../../../../fleet/public';
-import { getPolicyDetailPath } from '../../../../common/routing';
+import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../fleet/common';
+import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
+import { ListPageRouteState } from '../../../../../../common/endpoint/types';
+import { getPolicyDetailPath, getPolicyTrustedAppsPath } from '../../../../common/routing';
 import { PolicyDetailsForm } from '../policy_details_form';
 import { AppAction } from '../../../../../common/store/actions';
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import { policyDetailsForUpdate } from '../../store/policy_details/selectors';
-
+import { FleetTrustedAppsCard } from './endpoint_package_custom_extension/components/fleet_trusted_apps_card';
+import { LinkWithIcon } from './endpoint_package_custom_extension/components/link_with_icon';
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
@@ -40,6 +47,7 @@ const WrappedPolicyDetailsForm = memo<{
 }>(({ policyId, onChange }) => {
   const dispatch = useDispatch<(a: AppAction) => void>();
   const updatedPolicy = usePolicyDetailsSelector(policyDetailsForUpdate);
+  const { getAppUrl } = useAppUrl();
   const [, setLastUpdatedPolicy] = useState(updatedPolicy);
 
   // When the form is initially displayed, trigger the Redux middleware which is based on
@@ -93,9 +101,76 @@ const WrappedPolicyDetailsForm = memo<{
     });
   }, [onChange, updatedPolicy]);
 
+  const policyTrustedAppsPath = useMemo(() => getPolicyTrustedAppsPath(policyId), [policyId]);
+  const policyTrustedAppRouteState = useMemo<ListPageRouteState>(() => {
+    const fleetPackageIntegrationCustomUrlPath = `#${
+      pagePathGetters.integration_policy_edit({ packagePolicyId: policyId })[1]
+    }`;
+
+    return {
+      backButtonLabel: i18n.translate(
+        'xpack.securitySolution.endpoint.fleetCustomExtension.artifacts.backButtonLabel',
+        { defaultMessage: `Back to ${updatedPolicy?.name} policy` }
+      ),
+      onBackButtonNavigateTo: [
+        INTEGRATIONS_PLUGIN_ID,
+        {
+          path: fleetPackageIntegrationCustomUrlPath,
+        },
+      ],
+      backButtonUrl: getAppUrl({
+        appId: INTEGRATIONS_PLUGIN_ID,
+        path: fleetPackageIntegrationCustomUrlPath,
+      }),
+    };
+  }, [getAppUrl, updatedPolicy, policyId]);
+
+  const policyTrustedAppsLink = useMemo(
+    () => (
+      <LinkWithIcon
+        href={getAppUrl({
+          path: policyTrustedAppsPath,
+        })}
+        appPath={policyTrustedAppsPath}
+        appState={policyTrustedAppRouteState}
+        data-test-subj="linkToTrustedApps"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
+          defaultMessage="Manage trusted applications"
+        />
+      </LinkWithIcon>
+    ),
+    [getAppUrl, policyTrustedAppsPath, policyTrustedAppRouteState]
+  );
+
   return (
     <div data-test-subj="endpointIntegrationPolicyForm">
-      <PolicyDetailsForm />
+      <div>
+        <EuiText>
+          <h5>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyDetails.artifacts.title"
+              defaultMessage="Artifacts"
+            />
+          </h5>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <FleetTrustedAppsCard policyId={policyId} cardSize="m" customLink={policyTrustedAppsLink} />
+      </div>
+      <EuiSpacer size="l" />
+      <div>
+        <EuiText>
+          <h5>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyDetails.settings.title"
+              defaultMessage="Policy settings"
+            />
+          </h5>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <PolicyDetailsForm />
+      </div>
     </div>
   );
 });
