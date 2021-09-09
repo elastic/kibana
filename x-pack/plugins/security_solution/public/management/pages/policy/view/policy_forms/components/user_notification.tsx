@@ -176,7 +176,7 @@ export const UserNotification = React.memo(
                       />
                       <EuiSpacer size="m" />
                       <FormattedMessage
-                        id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.b"
+                        id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.c"
                         defaultMessage="
                     The user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the { bracketText }."
                         values={{
