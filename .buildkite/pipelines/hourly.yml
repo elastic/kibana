@@ -13,11 +13,12 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Default CI Group'
-    parallelism: 13 # TODO 13
+    parallelism: 13
     agents:
       queue: ci-group-6
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+    timeout_in_minutes: 120
     key: default-cigroup
     retry:
       automatic:
@@ -30,6 +31,7 @@ steps:
       queue: ci-group-6
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+    timeout_in_minutes: 120
     key: default-cigroup-docker
     retry:
       automatic:
@@ -43,6 +45,7 @@ steps:
       queue: ci-group-4d
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+    timeout_in_minutes: 120
     key: oss-cigroup
     retry:
       automatic:
@@ -55,6 +58,7 @@ steps:
       queue: ci-group-4d
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+    timeout_in_minutes: 120
     retry:
       automatic:
         - exit_status: '*'
@@ -66,6 +70,7 @@ steps:
       queue: ci-group-6
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+    timeout_in_minutes: 120
     retry:
       automatic:
         - exit_status: '*'
@@ -77,6 +82,7 @@ steps:
       queue: ci-group-4d
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+    timeout_in_minutes: 120
     retry:
       automatic:
         - exit_status: '*'
@@ -88,6 +94,7 @@ steps:
       queue: ci-group-6
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+    timeout_in_minutes: 120
     retry:
       automatic:
         - exit_status: '*'
@@ -99,6 +106,7 @@ steps:
       queue: ci-group-4d
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+    timeout_in_minutes: 120
     retry:
       automatic:
         - exit_status: '*'
@@ -110,6 +118,7 @@ steps:
       queue: ci-group-6
     artifact_paths: target/junit/**/*.xml
     depends_on: build
+    timeout_in_minutes: 120
     retry:
       automatic:
         - exit_status: '*'
@@ -120,6 +129,7 @@ steps:
     agents:
       queue: jest
     artifact_paths: target/junit/**/*.xml
+    timeout_in_minutes: 120
     key: jest-integration
 
   - command: .buildkite/scripts/steps/test/api_integration.sh
@@ -127,6 +137,7 @@ steps:
     agents:
       queue: jest
     artifact_paths: target/junit/**/*.xml
+    timeout_in_minutes: 120
     key: api-integration
 
   - command: .buildkite/scripts/steps/test/jest.sh
@@ -134,6 +145,7 @@ steps:
     agents:
       queue: c2-16
     artifact_paths: target/junit/**/*.xml
+    timeout_in_minutes: 120
     key: jest
 
   - command: .buildkite/scripts/steps/lint.sh
