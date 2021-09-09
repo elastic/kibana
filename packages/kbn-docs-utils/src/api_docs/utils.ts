@@ -7,15 +7,7 @@
  */
 import path from 'path';
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
-import {
-  AnchorLink,
-  ApiDeclaration,
-  ScopeApi,
-  TypeKind,
-  Lifecycle,
-  PluginApi,
-  ApiScope,
-} from './types';
+import { ApiDeclaration, ScopeApi, TypeKind, Lifecycle, PluginApi, ApiScope } from './types';
 
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -107,11 +99,10 @@ export function getPluginApiDocId(
   return `kib${capitalize(snakeToCamel(cleanName)) + capitalize(service)}PluginApi`;
 }
 
-export function getApiSectionId(link: AnchorLink) {
+export function getApiSectionId({ id, scope }: { id: string; scope: ApiScope }) {
   // Clean up the name. Things like destructured function parameters can have really long names with brackets and commas.
-  const cleanName = link.apiName.replace(/[^A-Za-z_.$0-9]+/g, '');
-  const id = `def-${link.scope}.${cleanName}`;
-  return id;
+  const cleanName = id.replace(/[^A-Za-z_.$0-9]+/g, '');
+  return `def-${scope}.${cleanName}`;
 }
 
 export function countScopeApi(api: ScopeApi): number {

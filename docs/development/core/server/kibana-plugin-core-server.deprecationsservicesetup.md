@@ -31,10 +31,10 @@ async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecations
     // Example of a manual correctiveAction
     deprecations.push({
       title: i18n.translate('xpack.timelion.deprecations.worksheetsTitle', {
-        defaultMessage: 'Found Timelion worksheets.'
+        defaultMessage: 'Timelion worksheets are deprecated'
       }),
       message: i18n.translate('xpack.timelion.deprecations.worksheetsMessage', {
-        defaultMessage: 'You have {count} Timelion worksheets. The Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard.',
+        defaultMessage: 'You have {count} Timelion worksheets. Migrate your Timelion worksheets to a dashboard to continue using them.',
         values: { count },
       }),
       documentationUrl:

@@ -13,9 +13,9 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { getWaterfall } from './waterfall_with_summary/waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
 
 const INITIAL_DATA = {
-  root: undefined,
-  trace: { items: [], exceedsMax: false, errorDocs: [] },
-  errorsPerTransaction: {},
+  errorDocs: [],
+  traceDocs: [],
+  exceedsMax: false,
 };
 
 export function useWaterfallFetcher() {
@@ -24,7 +24,7 @@ export function useWaterfallFetcher() {
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/transactions/view');
+  } = useApmParams('/services/{serviceName}/transactions/view');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -51,5 +51,5 @@ export function useWaterfallFetcher() {
     transactionId,
   ]);
 
-  return { waterfall, status, error, exceedsMax: data.trace.exceedsMax };
+  return { waterfall, status, error };
 }

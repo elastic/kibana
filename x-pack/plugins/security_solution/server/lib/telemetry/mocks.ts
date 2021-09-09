@@ -7,9 +7,8 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { TelemetryEventsSender } from './sender';
-import { TelemetryDiagTask } from './diagnostic_task';
-import { TelemetryEndpointTask } from './endpoint_task';
-import { TelemetryExceptionListsTask } from './security_lists_task';
+import { TelemetryReceiver } from './receiver';
+import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 
 /**
@@ -22,20 +21,26 @@ export const createMockTelemetryEventsSender = (
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
-    fetchDiagnosticAlerts: jest.fn(),
-    fetchEndpointMetrics: jest.fn(),
-    fetchEndpointPolicyResponses: jest.fn(),
-    fetchTrustedApplications: jest.fn(),
+    fetchTelemetryUrl: jest.fn(),
     queueTelemetryEvents: jest.fn(),
     processEvents: jest.fn(),
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemtry ?? jest.fn()),
     sendIfDue: jest.fn(),
-    fetchClusterInfo: jest.fn(),
-    fetchTelemetryUrl: jest.fn(),
-    fetchLicenseInfo: jest.fn(),
-    copyLicenseFields: jest.fn(),
     sendEvents: jest.fn(),
   } as unknown) as jest.Mocked<TelemetryEventsSender>;
+};
+
+export const createMockTelemetryReceiver = (): jest.Mocked<TelemetryReceiver> => {
+  return ({
+    start: jest.fn(),
+    fetchClusterInfo: jest.fn(),
+    fetchLicenseInfo: jest.fn(),
+    copyLicenseFields: jest.fn(),
+    fetchDiagnosticAlerts: jest.fn(),
+    fetchEndpointMetrics: jest.fn(),
+    fetchEndpointPolicyResponses: jest.fn(),
+    fetchTrustedApplications: jest.fn(),
+  } as unknown) as jest.Mocked<TelemetryReceiver>;
 };
 
 /**
@@ -57,20 +62,20 @@ export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> => {
 /**
  * Creates a mocked Telemetry Diagnostic Task
  */
-export class MockTelemetryDiagnosticTask extends TelemetryDiagTask {
+export class MockTelemetryDiagnosticTask extends DiagnosticTask {
   public runTask = jest.fn();
 }
 
 /**
  * Creates a mocked Telemetry Endpoint Task
  */
-export class MockTelemetryEndpointTask extends TelemetryEndpointTask {
+export class MockTelemetryEndpointTask extends EndpointTask {
   public runTask = jest.fn();
 }
 
 /**
  * Creates a mocked Telemetry exception lists Task
  */
-export class MockExceptionListsTask extends TelemetryExceptionListsTask {
+export class MockExceptionListsTask extends ExceptionListsTask {
   public runTask = jest.fn();
 }

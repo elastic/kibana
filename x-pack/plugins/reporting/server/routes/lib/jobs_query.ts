@@ -11,9 +11,10 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { i18n } from '@kbn/i18n';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
+import { PromiseType } from 'utility-types';
 import { ReportingCore } from '../../';
-import { statuses } from '../../lib/statuses';
 import { ReportApiJSON, ReportSource } from '../../../common/types';
+import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
 
@@ -58,9 +59,9 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     return `${config.get('index')}-*`;
   }
 
-  async function execQuery<T extends (client: ElasticsearchClient) => any>(
-    callback: T
-  ): Promise<UnwrapPromise<ReturnType<T>> | undefined> {
+  async function execQuery<
+    T extends (client: ElasticsearchClient) => Promise<PromiseType<ReturnType<T>> | undefined>
+  >(callback: T): Promise<UnwrapPromise<ReturnType<T>> | undefined> {
     try {
       const { asInternalUser: client } = await reportingCore.getEsClient();
 

@@ -16,38 +16,12 @@ import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../test_helpers';
 
-import {
-  CrawlerDomain,
-  CrawlerPolicies,
-  CrawlerRules,
-  CrawlerStatus,
-  CrawlRequest,
-} from '../types';
+import { CrawlerStatus, CrawlRequest } from '../types';
 
 import { CrawlRequestsTable } from './crawl_requests_table';
 
-const values: { domains: CrawlerDomain[]; crawlRequests: CrawlRequest[] } = {
-  // CrawlerOverviewLogic
-  domains: [
-    {
-      id: '507f1f77bcf86cd799439011',
-      createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
-      url: 'elastic.co',
-      documentCount: 13,
-      sitemaps: [],
-      entryPoints: [],
-      crawlRules: [],
-      defaultCrawlRule: {
-        id: '-',
-        policy: CrawlerPolicies.allow,
-        rule: CrawlerRules.regex,
-        pattern: '.*',
-      },
-      deduplicationEnabled: false,
-      deduplicationFields: ['title'],
-      availableDeduplicationFields: ['title', 'description'],
-    },
-  ],
+const values: { crawlRequests: CrawlRequest[] } = {
+  // CrawlerLogic
   crawlRequests: [
     {
       id: '618d0e66abe97bc688328900',

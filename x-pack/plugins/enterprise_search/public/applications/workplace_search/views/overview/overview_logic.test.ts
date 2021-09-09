@@ -63,7 +63,7 @@ describe('OverviewLogic', () => {
 
       await OverviewLogic.actions.initializeOverview();
 
-      expect(http.get).toHaveBeenCalledWith('/api/workplace_search/overview');
+      expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/overview');
       expect(setServerDataSpy).toHaveBeenCalled();
     });
   });

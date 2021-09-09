@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import Url from 'url';
 import cypress from 'cypress';
 import { FtrProviderContext } from './ftr_provider_context';
@@ -59,6 +61,7 @@ async function cypressStart(
     },
   });
 
+  console.log('Loading esArchiver...');
   await esArchiverLoad('apm_8.0.0');
 
   const res = await cypressExecution({
@@ -71,6 +74,7 @@ async function cypressStart(
     },
   });
 
+  console.log('Removing esArchiver...');
   await esArchiverUnload('apm_8.0.0');
 
   return res;

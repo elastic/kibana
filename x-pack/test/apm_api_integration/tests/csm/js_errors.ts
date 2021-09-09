@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function rumJsErrorsApiTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   registry.when('CSM JS errors with data', { config: 'trial', archives: [] }, () => {
     it('returns no js errors', async () => {
