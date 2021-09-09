@@ -273,6 +273,7 @@ describe('enable()', () => {
       params: {
         alertId: '1',
         spaceId: 'default',
+        alertConsumer: 'myApp',
       },
       schedule: {
         interval: '10s',

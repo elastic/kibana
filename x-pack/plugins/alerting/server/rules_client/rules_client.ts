@@ -357,6 +357,7 @@ export class RulesClient {
         scheduledTask = await this.scheduleAlert(
           createdAlert.id,
           rawAlert.alertTypeId,
+          data.consumer,
           data.schedule
         );
       } catch (e) {
@@ -1129,6 +1130,7 @@ export class RulesClient {
       const scheduledTask = await this.scheduleAlert(
         id,
         attributes.alertTypeId,
+        attributes.consumer,
         attributes.schedule as IntervalSchedule
       );
       await this.unsecuredSavedObjectsClient.update('alert', id, {
@@ -1500,13 +1502,19 @@ export class RulesClient {
     return this.spaceId;
   }
 
-  private async scheduleAlert(id: string, alertTypeId: string, schedule: IntervalSchedule) {
+  private async scheduleAlert(
+    id: string,
+    alertTypeId: string,
+    consumer: string,
+    schedule: IntervalSchedule
+  ) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alertTypeId}`,
       schedule,
       params: {
         alertId: id,
         spaceId: this.spaceId,
+        alertConsumer: consumer,
       },
       state: {
         previousStartedAt: null,

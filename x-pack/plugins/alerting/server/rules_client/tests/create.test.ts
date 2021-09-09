@@ -444,6 +444,7 @@ describe('create()', () => {
                                                                         Array [
                                                                           Object {
                                                                             "params": Object {
+                                                                              "alertConsumer": "bar",
                                                                               "alertId": "1",
                                                                               "spaceId": "default",
                                                                             },
