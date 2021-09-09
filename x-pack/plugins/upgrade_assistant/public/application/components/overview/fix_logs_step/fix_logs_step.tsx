@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiSpacer, EuiPanel, EuiCallOut } from '@elastic/eui';
@@ -15,6 +15,7 @@ import { ExternalLinks } from './external_links';
 import { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';
 import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
+import { loadLogsCheckpoint, saveLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import type { OverviewStepProps } from '../../types';
 
 const i18nTexts = {
@@ -54,6 +55,11 @@ interface Props {
 
 const FixLogsStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   const state = useDeprecationLogging();
+  const [checkpoint, setCheckpoint] = useState(loadLogsCheckpoint());
+
+  useEffect(() => {
+    saveLogsCheckpoint(checkpoint);
+  }, [checkpoint]);
 
   return (
     <>
@@ -86,14 +92,18 @@ const FixLogsStep: FunctionComponent<Props> = ({ setIsComplete }) => {
             <h4>{i18nTexts.analyzeTitle}</h4>
           </EuiText>
           <EuiSpacer size="m" />
-          <ExternalLinks />
+          <ExternalLinks checkpoint={checkpoint} />
 
           <EuiSpacer size="xl" />
           <EuiText data-test-subj="deprecationsCountTitle">
             <h4>{i18nTexts.deprecationsCountCheckpointTitle}</h4>
           </EuiText>
           <EuiSpacer size="m" />
-          <DeprecationsCountCheckpoint setHasNoDeprecationLogs={setIsComplete} />
+          <DeprecationsCountCheckpoint
+            checkpoint={checkpoint}
+            setCheckpoint={setCheckpoint}
+            setHasNoDeprecationLogs={setIsComplete}
+          />
         </>
       )}
     </>

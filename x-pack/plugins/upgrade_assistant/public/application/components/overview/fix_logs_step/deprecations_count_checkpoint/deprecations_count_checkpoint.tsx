@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButton, EuiLoadingContent } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
-import { Storage } from '../../../../../shared_imports';
-
-const LS_SETTING_ID = 'kibana.upgradeAssistant.lastCheckpoint';
-const localStorage = new Storage(window.localStorage);
 
 const i18nTexts = {
   calloutTitle: (warningsCount: number, previousCheck: string) => (
@@ -51,32 +47,22 @@ const i18nTexts = {
   ),
 };
 
-const getPreviousCheckpointDate = () => {
-  const storedValue = moment(localStorage.get(LS_SETTING_ID));
-
-  if (storedValue.isValid()) {
-    return storedValue.toISOString();
-  }
-
-  const now = moment().toISOString();
-  localStorage.set(LS_SETTING_ID, now);
-
-  return now;
-};
-
 interface Props {
+  checkpoint: string;
+  setCheckpoint: (value: string) => void;
   setHasNoDeprecationLogs: (hasNoLogs: boolean) => void;
 }
 
 export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
+  checkpoint,
+  setCheckpoint,
   setHasNoDeprecationLogs,
 }) => {
   const {
     services: { api },
   } = useAppContext();
-  const [previousCheck, setPreviousCheck] = useState(getPreviousCheckpointDate());
   const { data, error, isLoading, resendRequest, isInitialRequest } = api.getDeprecationLogsCount(
-    previousCheck
+    checkpoint
   );
 
   const logsCount = data?.count || 0;
@@ -87,9 +73,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
 
   const onResetClick = () => {
     const now = moment().toISOString();
-
-    setPreviousCheck(now);
-    localStorage.set(LS_SETTING_ID, now);
+    setCheckpoint(now);
   };
 
   useEffect(() => {
@@ -126,7 +110,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
 
   return (
     <EuiCallOut
-      title={i18nTexts.calloutTitle(logsCount, previousCheck)}
+      title={i18nTexts.calloutTitle(logsCount, checkpoint)}
       color={calloutTint}
       iconType={calloutIcon}
       data-test-subj={calloutTestId}

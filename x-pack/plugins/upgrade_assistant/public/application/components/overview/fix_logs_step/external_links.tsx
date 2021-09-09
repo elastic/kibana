@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { encode } from 'rison-node';
 import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -17,10 +18,12 @@ import {
   DEPRECATION_LOGS_SOURCE_ID,
 } from '../../../../../common/constants';
 
-const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) => {
-  const { indexPatterns: indexPatternService } = dataService;
+interface Props {
+  checkpoint: string;
+}
 
-  const results = await indexPatternService.find(DEPRECATION_LOGS_INDEX_PATTERN);
+const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) => {
+  const results = await dataService.dataViews.find(DEPRECATION_LOGS_INDEX_PATTERN);
   // Since the find might return also results with wildcard matchers we need to find the
   // index pattern that has an exact match with our title.
   const deprecationIndexPattern = results.find(
@@ -30,7 +33,7 @@ const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) 
   if (deprecationIndexPattern) {
     return deprecationIndexPattern.id;
   } else {
-    const newIndexPattern = await indexPatternService.createAndSave({
+    const newIndexPattern = await dataService.dataViews.createAndSave({
       title: DEPRECATION_LOGS_INDEX_PATTERN,
       allowNoIndex: true,
     });
@@ -38,7 +41,7 @@ const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) 
   }
 };
 
-const DiscoverAppLink: FunctionComponent = () => {
+const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
   const {
     services: { data: dataService },
     plugins: { share },
@@ -55,12 +58,19 @@ const DiscoverAppLink: FunctionComponent = () => {
         return;
       }
 
-      const url = await locator.getUrl({ indexPatternId });
+      const url = await locator.getUrl({
+        indexPatternId,
+        query: {
+          language: 'kuery',
+          query: `@timestamp > "${checkpoint}"`,
+        },
+      });
+
       setDiscoveryUrl(url);
     };
 
     getDiscoveryUrl();
-  }, [dataService, share.url.locators]);
+  }, [dataService, checkpoint, share.url.locators]);
 
   return (
     <EuiLink href={discoveryUrl} data-test-subj="viewDiscoverLogs">
@@ -72,14 +82,16 @@ const DiscoverAppLink: FunctionComponent = () => {
   );
 };
 
-const ObservabilityAppLink: FunctionComponent = () => {
+const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
   const {
     services: {
       core: { http },
     },
   } = useAppContext();
   const logStreamUrl = http?.basePath?.prepend(
-    `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}`
+    `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}&logPosition=(end:now,start:${encode(
+      checkpoint
+    )})`
   );
 
   return (
@@ -92,7 +104,7 @@ const ObservabilityAppLink: FunctionComponent = () => {
   );
 };
 
-export const ExternalLinks: FunctionComponent = () => {
+export const ExternalLinks: FunctionComponent<Props> = ({ checkpoint }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -106,7 +118,7 @@ export const ExternalLinks: FunctionComponent = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <ObservabilityAppLink />
+          <ObservabilityAppLink checkpoint={checkpoint} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -120,7 +132,7 @@ export const ExternalLinks: FunctionComponent = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <DiscoverAppLink />
+          <DiscoverAppLink checkpoint={checkpoint} />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
