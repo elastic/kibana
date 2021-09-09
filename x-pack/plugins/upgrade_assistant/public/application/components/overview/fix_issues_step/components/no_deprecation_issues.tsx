@@ -10,9 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const i18nTexts = {
-  noPartialDeprecationIssuesText: i18n.translate('xpack.upgradeAssistant.noDeprecationsMessage', {
-    defaultMessage: 'None',
-  }),
+  noPartialDeprecationIssuesText: i18n.translate(
+    'xpack.upgradeAssistant.noPartialDeprecationsMessage',
+    {
+      defaultMessage: 'None',
+    }
+  ),
   noDeprecationIssuesText: i18n.translate('xpack.upgradeAssistant.noDeprecationsMessage', {
     defaultMessage: 'No issues',
   }),
