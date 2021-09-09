@@ -355,6 +355,7 @@ export interface ChromeStart {
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsNavDrawerLocked$(): Observable<boolean>;
     getIsVisible$(): Observable<boolean>;
+    hasHeaderBanner$(): Observable<boolean>;
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;
@@ -476,6 +477,7 @@ export interface DocLinksStart {
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
+            readonly customLinks: string;
             readonly droppedTransactionSpans: string;
             readonly upgrading: string;
             readonly metaData: string;
@@ -651,7 +653,13 @@ export interface DocLinksStart {
             timeUnits: string;
             updateTransform: string;
         }>;
-        readonly observability: Record<string, string>;
+        readonly observability: Readonly<{
+            guide: string;
+            monitorStatus: string;
+            monitorUptime: string;
+            tlsCertificate: string;
+            uptimeDurationAnomaly: string;
+        }>;
         readonly alerting: Record<string, string>;
         readonly maps: Record<string, string>;
         readonly monitoring: Record<string, string>;

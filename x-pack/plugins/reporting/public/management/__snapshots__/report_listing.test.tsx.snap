@@ -693,9 +693,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -894,9 +916,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <InjectIntl(ReportInfoButtonUi)
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -1095,9 +1139,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <ReportInfoButtonUi
                                   apiClient={
                                     Object {
-                                      "list": [Function],
+                                      "list": [MockFunction] {
+                                        "calls": Array [
+                                          Array [
+                                            0,
+                                          ],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                      "total": [Function],
+                                      "total": [MockFunction] {
+                                        "calls": Array [
+                                          Array [],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                     }
                                   }
                                   capabilities={
@@ -1707,9 +1773,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -1908,9 +1996,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <InjectIntl(ReportInfoButtonUi)
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -2109,9 +2219,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <ReportInfoButtonUi
                                   apiClient={
                                     Object {
-                                      "list": [Function],
+                                      "list": [MockFunction] {
+                                        "calls": Array [
+                                          Array [
+                                            0,
+                                          ],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                      "total": [Function],
+                                      "total": [MockFunction] {
+                                        "calls": Array [
+                                          Array [],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                     }
                                   }
                                   capabilities={
@@ -2703,9 +2835,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -2951,9 +3105,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <InjectIntl(ReportInfoButtonUi)
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -3152,9 +3328,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <ReportInfoButtonUi
                                   apiClient={
                                     Object {
-                                      "list": [Function],
+                                      "list": [MockFunction] {
+                                        "calls": Array [
+                                          Array [
+                                            0,
+                                          ],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                      "total": [Function],
+                                      "total": [MockFunction] {
+                                        "calls": Array [
+                                          Array [],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                     }
                                   }
                                   capabilities={
@@ -3768,9 +3966,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -4018,9 +4238,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <InjectIntl(ReportInfoButtonUi)
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -4221,9 +4463,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <ReportInfoButtonUi
                                   apiClient={
                                     Object {
-                                      "list": [Function],
+                                      "list": [MockFunction] {
+                                        "calls": Array [
+                                          Array [
+                                            0,
+                                          ],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                      "total": [Function],
+                                      "total": [MockFunction] {
+                                        "calls": Array [
+                                          Array [],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                     }
                                   }
                                   capabilities={
@@ -4817,9 +5081,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -5065,9 +5351,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <InjectIntl(ReportInfoButtonUi)
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -5266,9 +5574,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <ReportInfoButtonUi
                                   apiClient={
                                     Object {
-                                      "list": [Function],
+                                      "list": [MockFunction] {
+                                        "calls": Array [
+                                          Array [
+                                            0,
+                                          ],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                      "total": [Function],
+                                      "total": [MockFunction] {
+                                        "calls": Array [
+                                          Array [],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                     }
                                   }
                                   capabilities={
@@ -5860,9 +6190,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -6108,9 +6460,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <InjectIntl(ReportInfoButtonUi)
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -6309,9 +6683,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <ReportInfoButtonUi
                                   apiClient={
                                     Object {
-                                      "list": [Function],
+                                      "list": [MockFunction] {
+                                        "calls": Array [
+                                          Array [
+                                            0,
+                                          ],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                      "total": [Function],
+                                      "total": [MockFunction] {
+                                        "calls": Array [
+                                          Array [],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                     }
                                   }
                                   capabilities={
@@ -6903,9 +7299,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -7151,9 +7569,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <InjectIntl(ReportInfoButtonUi)
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -7352,9 +7792,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <ReportInfoButtonUi
                                   apiClient={
                                     Object {
-                                      "list": [Function],
+                                      "list": [MockFunction] {
+                                        "calls": Array [
+                                          Array [
+                                            0,
+                                          ],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                      "total": [Function],
+                                      "total": [MockFunction] {
+                                        "calls": Array [
+                                          Array [],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                     }
                                   }
                                   capabilities={
@@ -7983,9 +8445,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -8231,9 +8715,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <InjectIntl(ReportInfoButtonUi)
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -8432,9 +8938,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <ReportInfoButtonUi
                                   apiClient={
                                     Object {
-                                      "list": [Function],
+                                      "list": [MockFunction] {
+                                        "calls": Array [
+                                          Array [
+                                            0,
+                                          ],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                      "total": [Function],
+                                      "total": [MockFunction] {
+                                        "calls": Array [
+                                          Array [],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                     }
                                   }
                                   capabilities={
@@ -9063,9 +9591,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -9311,9 +9861,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               <InjectIntl(ReportInfoButtonUi)
                                 apiClient={
                                   Object {
-                                    "list": [Function],
+                                    "list": [MockFunction] {
+                                      "calls": Array [
+                                        Array [
+                                          0,
+                                        ],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                     "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                    "total": [Function],
+                                    "total": [MockFunction] {
+                                      "calls": Array [
+                                        Array [],
+                                      ],
+                                      "results": Array [
+                                        Object {
+                                          "type": "return",
+                                          "value": Promise {},
+                                        },
+                                      ],
+                                    },
                                   }
                                 }
                                 capabilities={
@@ -9512,9 +10084,31 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <ReportInfoButtonUi
                                   apiClient={
                                     Object {
-                                      "list": [Function],
+                                      "list": [MockFunction] {
+                                        "calls": Array [
+                                          Array [
+                                            0,
+                                          ],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                       "migrateReportingIndicesIlmPolicy": [MockFunction],
-                                      "total": [Function],
+                                      "total": [MockFunction] {
+                                        "calls": Array [
+                                          Array [],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": Promise {},
+                                          },
+                                        ],
+                                      },
                                     }
                                   }
                                   capabilities={
