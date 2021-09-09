@@ -47,7 +47,7 @@ export function AnalyzeDataButton() {
 
   const {
     query: { rangeFrom, rangeTo, environment },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const basepath = services.http?.basePath.get();
   const canShowDashboard = services.application?.capabilities.dashboard.show;

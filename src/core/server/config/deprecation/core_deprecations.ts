@@ -8,6 +8,19 @@
 
 import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
+const kibanaPathConf: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+  if (process.env?.KIBANA_PATH_CONF) {
+    addDeprecation({
+      message: `Environment variable "KIBANA_PATH_CONF" is deprecated. It has been replaced with "KBN_PATH_CONF" pointing to a config folder`,
+      correctiveActions: {
+        manualSteps: [
+          'Use "KBN_PATH_CONF" instead of "KIBANA_PATH_CONF" to point to a config folder.',
+        ],
+      },
+    });
+  }
+};
+
 const configPathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (process.env?.CONFIG_PATH) {
     addDeprecation({
@@ -121,28 +134,6 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecati
         },
       ],
     };
-  }
-};
-
-const mapManifestServiceUrlDeprecation: ConfigDeprecation = (
-  settings,
-  fromPath,
-  addDeprecation
-) => {
-  if (settings.map?.manifestServiceUrl) {
-    addDeprecation({
-      message:
-        'You should no longer use the map.manifestServiceUrl setting in kibana.yml to configure the location ' +
-        'of the Elastic Maps Service settings. These settings have moved to the "map.emsTileApiUrl" and ' +
-        '"map.emsFileApiUrl" settings instead. These settings are for development use only and should not be ' +
-        'modified for use in production environments.',
-      correctiveActions: {
-        manualSteps: [
-          `Use "map.emsTileApiUrl" and "map.emsFileApiUrl" config instead of "map.manifestServiceUrl".`,
-          `These settings are for development use only and should not be modified for use in production environments.`,
-        ],
-      },
-    });
   }
 };
 
@@ -388,7 +379,6 @@ const logFilterDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecat
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
-  unusedFromRoot('maps.manifestServiceUrl'),
   unusedFromRoot('optimize.lazy'),
   unusedFromRoot('optimize.lazyPort'),
   unusedFromRoot('optimize.lazyHost'),
@@ -415,10 +405,10 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   rename('server.xsrf.whitelist', 'server.xsrf.allowlist'),
   rewriteCorsSettings,
   configPathDeprecation,
+  kibanaPathConf,
   dataPathDeprecation,
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
-  mapManifestServiceUrlDeprecation,
   opsLoggingEventDeprecation,
   requestLoggingEventDeprecation,
   timezoneLoggingDeprecation,

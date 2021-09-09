@@ -28,7 +28,7 @@ import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
-import { apmCorrelationsSearchStrategyProvider } from './lib/search_strategies/correlations';
+import { registerSearchStrategies } from './lib/search_strategies';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
@@ -51,10 +51,6 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
-import {
-  apmFailedTransactionsCorrelationsSearchStrategyProvider,
-  FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY,
-} from './lib/search_strategies/failed_transactions_correlations';
 
 export class APMPlugin
   implements
@@ -217,22 +213,10 @@ export class APMPlugin
           .asScopedToClient(savedObjectsClient)
           .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
 
-        // Register APM latency correlations search strategy
-        plugins.data.search.registerSearchStrategy(
-          'apmCorrelationsSearchStrategy',
-          apmCorrelationsSearchStrategyProvider(
-            boundGetApmIndices,
-            includeFrozen
-          )
-        );
-
-        // Register APM failed transactions correlations search strategy
-        plugins.data.search.registerSearchStrategy(
-          FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY,
-          apmFailedTransactionsCorrelationsSearchStrategyProvider(
-            boundGetApmIndices,
-            includeFrozen
-          )
+        registerSearchStrategies(
+          plugins.data.search.registerSearchStrategy,
+          boundGetApmIndices,
+          includeFrozen
         );
       })();
     });

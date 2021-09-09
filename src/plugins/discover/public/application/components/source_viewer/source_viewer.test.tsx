@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { mountWithIntl } from '@kbn/test/jest';
 import { SourceViewer } from './source_viewer';
 import * as hooks from '../../services/use_es_doc_search';
@@ -18,7 +19,7 @@ jest.mock('../../../kibana_services', () => ({
   getServices: jest.fn(),
 }));
 
-import { getServices, IndexPattern } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
 
 const mockIndexPattern = {
   getComputedFields: () => [],

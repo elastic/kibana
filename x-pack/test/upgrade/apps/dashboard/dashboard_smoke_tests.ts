@@ -40,7 +40,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
           await kibanaServer.uiSettings.update(
             {
-              'visualization:visualize:legacyChartsLibrary': true,
               'visualization:visualize:legacyPieChartsLibrary': true,
             },
             { space }
