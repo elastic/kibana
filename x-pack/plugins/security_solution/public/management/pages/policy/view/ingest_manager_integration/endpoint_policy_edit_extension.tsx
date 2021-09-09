@@ -110,7 +110,10 @@ const WrappedPolicyDetailsForm = memo<{
     return {
       backButtonLabel: i18n.translate(
         'xpack.securitySolution.endpoint.fleetCustomExtension.artifacts.backButtonLabel',
-        { defaultMessage: `Back to ${updatedPolicy?.name} policy` }
+        {
+          defaultMessage: `Back to {name} policy`,
+          values: { name: updatedPolicy?.name },
+        }
       ),
       onBackButtonNavigateTo: [
         INTEGRATIONS_PLUGIN_ID,
