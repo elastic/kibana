@@ -23,7 +23,7 @@ export function getIntervalAndTimeRange({
   windowUnit,
 }: {
   windowSize: number;
-  windowUnit: TIME_UNITS;
+  windowUnit: TimeUnit;
 }) {
   const end = Date.now();
   const start =
