@@ -153,8 +153,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeSource: async ({ sourceId }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}`
-        : `/api/workplace_search/account/sources/${sourceId}`;
+        ? `/internal/workplace_search/org/sources/${sourceId}`
+        : `/internal/workplace_search/account/sources/${sourceId}`;
 
       try {
         const response = await HttpLogic.values.http.get(route);
@@ -182,7 +182,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       }
     },
     initializeFederatedSummary: async ({ sourceId }) => {
-      const route = `/api/workplace_search/account/sources/${sourceId}/federated_summary`;
+      const route = `/internal/workplace_search/account/sources/${sourceId}/federated_summary`;
       try {
         const response = await HttpLogic.values.http.get(route);
         actions.onUpdateSummary(response.summary);
@@ -195,8 +195,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/documents`
-        : `/api/workplace_search/account/sources/${sourceId}/documents`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/documents`
+        : `/internal/workplace_search/account/sources/${sourceId}/documents`;
 
       const {
         contentFilterValue: query,
@@ -215,8 +215,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     updateContentSource: async ({ sourceId, source }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/settings`
-        : `/api/workplace_search/account/sources/${sourceId}/settings`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/settings`
+        : `/internal/workplace_search/account/sources/${sourceId}/settings`;
 
       try {
         const response = await HttpLogic.values.http.patch(route, {
@@ -233,8 +233,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}`
-        : `/api/workplace_search/account/sources/${sourceId}`;
+        ? `/internal/workplace_search/org/sources/${sourceId}`
+        : `/internal/workplace_search/account/sources/${sourceId}`;
 
       try {
         const response = await HttpLogic.values.http.delete(route);

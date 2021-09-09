@@ -104,7 +104,7 @@ export const home = {
       }),
       children: [
         {
-          path: '/:backendName/overview',
+          path: '/backends/{backendName}/overview',
           element: <BackendDetailOverview />,
           params: t.type({
             path: t.type({
@@ -113,7 +113,7 @@ export const home = {
           }),
         },
         page({
-          path: '/',
+          path: '/backends',
           title: DependenciesInventoryTitle,
           element: <BackendInventory />,
         }),

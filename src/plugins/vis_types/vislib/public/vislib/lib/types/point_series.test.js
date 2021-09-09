@@ -8,10 +8,6 @@
 
 import stackedSeries from '../../../fixtures/mock_data/date_histogram/_stacked_series';
 import { vislibPointSeriesTypes } from './point_series';
-import percentileTestdata from './testdata_linechart_percentile.json';
-import percentileTestdataResult from './testdata_linechart_percentile_result.json';
-import percentileTestdataFloatValue from './testdata_linechart_percentile_float_value.json';
-import percentileTestdataFloatValueResult from './testdata_linechart_percentile_float_value_result.json';
 
 const maxBucketData = {
   get: (prop) => {
@@ -84,7 +80,7 @@ describe('vislibPointSeriesTypes', () => {
 
   describe('axis formatters', () => {
     it('should create a value axis config with the default y axis formatter', () => {
-      const parsedConfig = vislibPointSeriesTypes.line({}, maxBucketData);
+      const parsedConfig = vislibPointSeriesTypes.heatmap({}, maxBucketData);
       expect(parsedConfig.valueAxes.length).toEqual(1);
       expect(parsedConfig.valueAxes[0].labels.axisFormatter).toBe(
         maxBucketData.data.yAxisFormatter
@@ -95,7 +91,7 @@ describe('vislibPointSeriesTypes', () => {
       const axisFormatter1 = jest.fn();
       const axisFormatter2 = jest.fn();
       const axisFormatter3 = jest.fn();
-      const parsedConfig = vislibPointSeriesTypes.line(
+      const parsedConfig = vislibPointSeriesTypes.heatmap(
         {
           valueAxes: [
             {
@@ -163,70 +159,6 @@ describe('vislibPointSeriesTypes', () => {
       expect(parsedConfig.valueAxes[0].show).toBeFalsy();
       expect(parsedConfig.categoryAxes.length).toBe(2);
       expect(parsedConfig.error).toBeUndefined();
-    });
-  });
-});
-
-describe('Point Series Config Type Class Test Suite', function () {
-  let parsedConfig;
-  const histogramConfig = {
-    type: 'histogram',
-    addLegend: true,
-    tooltip: {
-      show: true,
-    },
-    categoryAxes: [
-      {
-        id: 'CategoryAxis-1',
-        type: 'category',
-        title: {},
-      },
-    ],
-    valueAxes: [
-      {
-        id: 'ValueAxis-1',
-        type: 'value',
-        labels: {},
-        title: {},
-      },
-    ],
-  };
-
-  describe('histogram chart', function () {
-    beforeEach(function () {
-      parsedConfig = vislibPointSeriesTypes.column(histogramConfig, maxBucketData);
-    });
-    it('should not throw an error when more than 25 series are provided', function () {
-      expect(parsedConfig.error).toBeUndefined();
-    });
-
-    it('should set axis title and formatter from data', () => {
-      expect(parsedConfig.categoryAxes[0].title.text).toEqual(maxBucketData.data.xAxisLabel);
-      expect(parsedConfig.valueAxes[0].labels.axisFormatter).toBeDefined();
-    });
-  });
-
-  describe('line chart', function () {
-    function prepareData({ cfg, data }) {
-      const percentileDataObj = {
-        get: (prop) => {
-          return maxBucketData[prop] || maxBucketData.data[prop] || null;
-        },
-        getLabels: () => [],
-        data: data,
-      };
-      const parsedConfig = vislibPointSeriesTypes.line(cfg, percentileDataObj);
-      return parsedConfig;
-    }
-
-    it('should render a percentile line chart', function () {
-      const parsedConfig = prepareData(percentileTestdata);
-      expect(parsedConfig).toMatchObject(percentileTestdataResult);
-    });
-
-    it('should render a percentile line chart when value is float', function () {
-      const parsedConfig = prepareData(percentileTestdataFloatValue);
-      expect(parsedConfig).toMatchObject(percentileTestdataFloatValueResult);
     });
   });
 });
