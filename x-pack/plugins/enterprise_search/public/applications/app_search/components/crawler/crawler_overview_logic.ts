@@ -25,7 +25,7 @@ export const CrawlerOverviewLogic = kea<MakeLogicType<{}, CrawlerOverviewActions
   actions: {
     deleteDomain: (domain) => ({ domain }),
   },
-  listeners: ({ actions, values }) => ({
+  listeners: () => ({
     deleteDomain: async ({ domain }) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;

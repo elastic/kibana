@@ -8,7 +8,6 @@
 import React, { Fragment } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// @ts-expect-error unconverted component
 import { SidebarHeader } from '../../sidebar_header';
 import { MultiElementSettings } from '../multi_element_settings';
 import { GroupSettings } from '../group_settings';
@@ -56,7 +55,7 @@ const MultiElementSidebar: React.FC = () => (
 
 const GroupedElementSidebar: React.FC = () => (
   <Fragment>
-    <SidebarHeader title={strings.getGroupedElementSidebarTitle()} groupIsSelected />
+    <SidebarHeader title={strings.getGroupedElementSidebarTitle()} />
     <EuiSpacer />
     <GroupSettings />
   </Fragment>
@@ -66,7 +65,7 @@ const SingleElementSidebar: React.FC<{ selectedElementId: string | null }> = ({
   selectedElementId,
 }) => (
   <Fragment>
-    <SidebarHeader title={strings.getSingleElementSidebarTitle()} showLayerControls />
+    <SidebarHeader title={strings.getSingleElementSidebarTitle()} />
     <ElementSettings selectedElementId={selectedElementId} />
   </Fragment>
 );
