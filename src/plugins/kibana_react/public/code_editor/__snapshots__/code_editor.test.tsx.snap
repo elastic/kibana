@@ -164,7 +164,6 @@ exports[`<CodeEditor /> is rendered 1`] = `
     >
       <span
         className="euiToolTipAnchor euiToolTipAnchor--displayBlock"
-        onKeyUp={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
