@@ -57,4 +57,17 @@ export class UpgradeAssistantPageObject extends FtrService {
       this.log.debug('Unable to find selected deprecation row');
     }
   }
+
+  async clickEsDeprecation(deprecationType: 'indexSettings' | 'default' | 'reindex' | 'ml') {
+    const table = await this.testSubjects.find('esDeprecationsTable');
+    const deprecationIssueLink = await (
+      await table.findByTestSubject(`${deprecationType}TableCell-message`)
+    ).findByCssSelector('button');
+
+    if (deprecationIssueLink) {
+      await deprecationIssueLink.click();
+    } else {
+      this.log.debug('Unable to find selected deprecation');
+    }
+  }
 }
