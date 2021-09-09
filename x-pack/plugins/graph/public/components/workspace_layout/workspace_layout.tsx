@@ -9,6 +9,7 @@ import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { SearchBar } from '../search_bar';
 import {
   GraphState,
@@ -61,7 +62,6 @@ type WorkspaceLayoutProps = Pick<
   indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;
-  urlQuery: string | null;
   sharingSavedObjectProps?: SharingSavedObjectProps;
 };
 
@@ -85,7 +85,6 @@ export const WorkspaceLayoutComponent = ({
   graphSavePolicy,
   navigation,
   canEditDrillDownUrls,
-  urlQuery,
   setHeaderActionMenu,
   sharingSavedObjectProps,
   spaces,
@@ -96,6 +95,10 @@ export const WorkspaceLayoutComponent = ({
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
   const [control, setControl] = useState<ControlType>('none');
   const selectedNode = useRef<WorkspaceNode | undefined>(undefined);
+
+  const search = useLocation().search;
+  const urlQuery = new URLSearchParams(search).get('query');
+
   const isInitialized = Boolean(workspaceInitialized || savedWorkspace.id);
 
   const selectSelected = useCallback((node: WorkspaceNode) => {
@@ -167,7 +170,8 @@ export const WorkspaceLayoutComponent = ({
       // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
       // callout with a warning for the user, and provide a way for them to navigate to the other object.
       const otherObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'conflict'
-      const otherObjectPath = getEditUrl(coreStart.http.basePath.prepend, { id: otherObjectId });
+      const otherObjectPath =
+        getEditUrl(coreStart.http.basePath.prepend, { id: otherObjectId }) + search;
       return spaces.ui.components.getLegacyUrlConflict({
         objectNoun: i18n.translate('xpack.graph.legacyUrlConflict.objectNoun', {
           defaultMessage: 'Graph',
@@ -178,7 +182,7 @@ export const WorkspaceLayoutComponent = ({
       });
     }
     return null;
-  }, [savedWorkspace.id, sharingSavedObjectProps, spaces, coreStart.http]);
+  }, [savedWorkspace.id, sharingSavedObjectProps, spaces, coreStart.http, search]);
 
   return (
     <Fragment>

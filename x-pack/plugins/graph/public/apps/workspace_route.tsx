@@ -8,7 +8,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Provider } from 'react-redux';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from '../../../../../src/plugins/saved_objects/public';
 import { Workspace } from '../types';
@@ -57,7 +57,6 @@ export const WorkspaceRoute = ({
    */
   const [renderCounter, setRenderCounter] = useState(0);
   const history = useHistory();
-  const urlQuery = new URLSearchParams(useLocation().search).get('query');
 
   const indexPatternProvider = useMemo(
     () => createCachedIndexPatternProvider(getIndexPatternProvider.get),
@@ -129,10 +128,6 @@ export const WorkspaceRoute = ({
 
   const { savedWorkspace, indexPatterns, sharingSavedObjectProps } = loaded;
 
-  if (!savedWorkspace || !indexPatterns) {
-    return null;
-  }
-
   return (
     <I18nProvider>
       <KibanaContextProvider services={services}>
@@ -153,7 +148,6 @@ export const WorkspaceRoute = ({
             indexPatterns={indexPatterns}
             savedWorkspace={savedWorkspace}
             indexPatternProvider={indexPatternProvider}
-            urlQuery={urlQuery}
           />
         </Provider>
       </KibanaContextProvider>

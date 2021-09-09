@@ -15,6 +15,15 @@ import { GraphSavePolicy, GraphWorkspaceSavedObject, IndexPatternProvider } from
 import { OverlayStart, Capabilities } from 'kibana/public';
 import { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 
+jest.mock('react-router-dom', () => {
+  const useLocation = () => ({
+    search: '?query={}',
+  });
+  return {
+    useLocation,
+  };
+});
+
 describe('workspace_layout', () => {
   const defaultProps = {
     renderCounter: 1,
@@ -30,7 +39,6 @@ describe('workspace_layout', () => {
     graphSavePolicy: 'configAndDataWithConsent' as GraphSavePolicy,
     navigation: {} as NavigationStart,
     canEditDrillDownUrls: true,
-    urlQuery: 'search',
     setHeaderActionMenu: jest.fn(),
     sharingSavedObjectProps: {
       outcome: 'exactMatch',
@@ -49,7 +57,7 @@ describe('workspace_layout', () => {
       currentObjectId: 'test',
       objectNoun: 'Graph',
       otherObjectId: 'conflictId',
-      otherObjectPath: '#/workspace/conflictId',
+      otherObjectPath: '#/workspace/conflictId?query={}',
     });
   });
 });

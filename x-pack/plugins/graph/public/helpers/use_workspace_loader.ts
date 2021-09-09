@@ -32,8 +32,8 @@ export interface SharingSavedObjectProps {
 }
 
 interface WorkspaceLoadedState {
-  savedWorkspace?: GraphWorkspaceSavedObject;
-  indexPatterns?: IndexPatternSavedObject[];
+  savedWorkspace: GraphWorkspaceSavedObject;
+  indexPatterns: IndexPatternSavedObject[];
   sharingSavedObjectProps?: SharingSavedObjectProps;
 }
 
@@ -44,7 +44,7 @@ export const useWorkspaceLoader = ({
   store,
   savedObjectsClient,
 }: UseWorkspaceLoaderProps) => {
-  const [state, setState] = useState<WorkspaceLoadedState>({});
+  const [state, setState] = useState<WorkspaceLoadedState>();
   const { replace: historyReplace } = useHistory();
   const { search } = useLocation();
   const { id } = useParams<WorkspaceUrlParams>();
@@ -112,7 +112,7 @@ export const useWorkspaceLoader = ({
       if (spaces && fetchedSharingSavedObjectProps?.outcome === 'aliasMatch') {
         // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
         const newObjectId = fetchedSharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
-        const newPath = getEditUrl(coreStart.http.basePath.prepend, { id: newObjectId });
+        const newPath = getEditUrl(coreStart.http.basePath.prepend, { id: newObjectId }) + search;
         spaces.ui.redirectLegacyUrl(
           newPath,
           i18n.translate('xpack.graph.legacyUrlConflict.objectNoun', {

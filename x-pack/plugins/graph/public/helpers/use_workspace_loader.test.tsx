@@ -16,7 +16,7 @@ import { act } from 'react-dom/test-utils';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({
-    search: '2',
+    search: '?query={}',
   });
 
   const replaceFn = jest.fn();
@@ -88,7 +88,7 @@ describe('use_workspace_loader', () => {
       await setup((props as unknown) as UseWorkspaceLoaderProps);
     });
     expect(props.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-      '#/workspace/aliasTargetId',
+      '#/workspace/aliasTargetId?query={}',
       'Graph'
     );
   });
