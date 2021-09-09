@@ -4,6 +4,8 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+echo "--- Cloning Elasticsearch and preparing workspace"
+
 cd ..
 destination="$(pwd)/es-build"
 rm -rf "$destination"
@@ -20,8 +22,11 @@ fi
 git fetch origin --depth 1 "$ELASTICSEARCH_BRANCH"
 git reset --hard FETCH_HEAD
 
-export ELASTICSEARCH_GIT_COMMIT="$(git rev-parse HEAD)"
-export ELASTICSEARCH_GIT_COMMIT_SHORT="$(git rev-parse --short HEAD)"
+ELASTICSEARCH_GIT_COMMIT="$(git rev-parse HEAD)"
+export ELASTICSEARCH_GIT_COMMIT
+
+ELASTICSEARCH_GIT_COMMIT_SHORT="$(git rev-parse --short HEAD)"
+export ELASTICSEARCH_GIT_COMMIT_SHORT
 
 # These turn off automation in the Elasticsearch repo
 export BUILD_NUMBER=""
@@ -40,6 +45,8 @@ export JAVA_HOME="$HOME/.java/$ES_BUILD_JAVA"
 # The Elasticsearch Dockerfile needs to be built with root privileges, but Docker on our servers is running using a non-root user
 # So, let's use docker-in-docker to temporarily create a privileged docker daemon to run `docker build` on
 # We have to do this, because there's no `docker build --privileged` or similar
+
+echo "--- Setting up Docker-in-Docker for Elasticsearch"
 
 docker rm -f dind || true # If there's an old daemon running that somehow didn't get cleaned up, lets remove it first
 CERTS_DIR="$HOME/dind-certs"
@@ -66,10 +73,9 @@ docker images "docker.elastic.co/elasticsearch/elasticsearch"
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 echo 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
 
+echo "--- Create checksums for snapshot files"
 cd "$destination"
-
 find ./* -exec bash -c "shasum -a 512 {} > {}.sha512" \;
-ls -alh "$destination"
 
 cd "$BUILDKITE_BUILD_CHECKOUT_PATH"
 node "$(dirname "${0}")/create_manifest.js" "$destination"

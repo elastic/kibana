@@ -1,8 +1,6 @@
 const fs = require('fs');
 const { execSync } = require('child_process');
-
-const BASE_BUCKET_DAILY = 'ci-artifacts.kibana.dev/es-snapshots-daily-buildkite';
-const BASE_BUCKET_PERMANENT = 'ci-artifacts.kibana.dev/es-snapshots-permanent-buildkite';
+const { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } = require('./bucket_config.js');
 
 (async () => {
   try {
