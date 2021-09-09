@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EsQuerySortValue, SortDirection } from '../../../../../kibana_services';
+import type { EsQuerySortValue, SortDirection } from 'src/plugins/data/common';
 
 /**
  * Returns `EsQuerySort` which is used to sort records in the ES query
