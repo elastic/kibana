@@ -109,7 +109,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
         },
       }}
       noItemsMessage={
-        loading ? (
+        certificates.loading ? (
           LOADING_CERTIFICATES
         ) : (
           <span data-test-subj="uptimeCertsEmptyMessage">{NO_CERTS_AVAILABLE}</span>
