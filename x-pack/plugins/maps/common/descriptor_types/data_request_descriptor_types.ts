@@ -65,7 +65,7 @@ export type VectorSourceRequestMeta = DataFilters & {
   applyForceRefresh: boolean;
   fieldNames: string[];
   geogridPrecision?: number;
-  timesiceMaskField?: string;
+  timesliceMaskField?: string;
   sourceQuery?: Query;
   sourceMeta: VectorSourceSyncMeta;
   isForceRefresh: boolean;

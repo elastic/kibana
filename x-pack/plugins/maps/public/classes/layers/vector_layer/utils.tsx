@@ -117,9 +117,9 @@ export async function syncVectorSource({
     }
     const responseMeta: DataRequestMeta = meta ? { ...meta } : {};
     if (requestMeta.applyGlobalTime && (await source.isTimeAware())) {
-      const timesiceMaskField = await source.getTimesliceMaskFieldName();
-      if (timesiceMaskField) {
-        responseMeta.timesiceMaskField = timesiceMaskField;
+      const timesliceMaskField = await source.getTimesliceMaskFieldName();
+      if (timesliceMaskField) {
+        responseMeta.timesliceMaskField = timesliceMaskField;
       }
     }
     stopLoading(dataRequestId, requestToken, layerFeatureCollection, responseMeta);

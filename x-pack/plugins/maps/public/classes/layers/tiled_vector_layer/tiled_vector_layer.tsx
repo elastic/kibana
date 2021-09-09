@@ -38,7 +38,6 @@ import {
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
-import { isRefreshOnlyQuery } from '../../util/is_refresh_only_query';
 import { CustomIconAndTooltipContent } from '../layer';
 
 export class TiledVectorLayer extends VectorLayer {
@@ -149,14 +148,14 @@ export class TiledVectorLayer extends VectorLayer {
 
     startLoading(SOURCE_DATA_REQUEST_ID, requestToken, requestMeta);
     try {
-      const prevMeta = prevDataRequest ? prevDataRequest.getMeta() : undefined;
+      const prevMeta: VectorSourceRequestMeta | undefined = prevDataRequest
+        ? (prevDataRequest.getMeta() as VectorSourceRequestMeta)
+        : undefined;
       const prevData = prevDataRequest
         ? (prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig)
         : undefined;
       const urlToken =
-        !prevData || isRefreshOnlyQuery(prevMeta ? prevMeta.query : undefined, requestMeta.query)
-          ? uuid()
-          : prevData.urlToken;
+        !prevData || (prevMeta && prevMeta.isForceRefresh) ? uuid() : prevData.urlToken;
 
       const newUrlTemplateAndMeta = await this._source.getUrlTemplateWithMeta(requestMeta);
 

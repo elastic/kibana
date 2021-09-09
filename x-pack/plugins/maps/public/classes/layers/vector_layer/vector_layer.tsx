@@ -994,9 +994,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const prevMeta = this.getSourceDataRequest()?.getMeta();
-    return prevMeta !== undefined && prevMeta.timesiceMaskField !== undefined
+    return prevMeta !== undefined && prevMeta.timesliceMaskField !== undefined
       ? {
-          timesiceMaskField: prevMeta.timesiceMaskField,
+          timesliceMaskField: prevMeta.timesliceMaskField,
           timeslice,
         }
       : undefined;
