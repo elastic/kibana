@@ -14,7 +14,8 @@ import { PartialFilter } from '../types';
 export const installPrepackagedRules = (
   rulesClient: RulesClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
-  outputIndex: string
+  outputIndex: string,
+  isRuleRegistryEnabled: boolean
 ): Array<Promise<SanitizedAlert<AlertTypeParams>>> =>
   rules.reduce<Array<Promise<SanitizedAlert<AlertTypeParams>>>>((acc, rule) => {
     const {
@@ -60,6 +61,7 @@ export const installPrepackagedRules = (
       threshold,
       timestamp_override: timestampOverride,
       references,
+      namespace,
       note,
       version,
       exceptions_list: exceptionsList,
@@ -70,6 +72,7 @@ export const installPrepackagedRules = (
     return [
       ...acc,
       createRules({
+        isRuleRegistryEnabled,
         rulesClient,
         anomalyThreshold,
         author,
@@ -116,6 +119,7 @@ export const installPrepackagedRules = (
         throttle: null, // At this time there is no pre-packaged actions
         timestampOverride,
         references,
+        namespace,
         note,
         version,
         exceptionsList,
