@@ -16,7 +16,7 @@ interface GetThresholdSignalHistoryParams {
 
 const getTerms = (alert: SimpleHit) => {
   if (isWrappedRACAlert(alert)) {
-    return (alert._source['kibana.alert.threshold.field'] as string[]).map((field) => ({
+    return (alert._source['kibana.alert.rule.threshold.field'] as string[]).map((field) => ({
       field,
       value: alert._source[field] as string,
     }));

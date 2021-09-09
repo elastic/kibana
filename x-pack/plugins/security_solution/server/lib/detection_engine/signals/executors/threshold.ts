@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { SavedObject } from 'src/core/types';
-
 import { SearchHit } from '@elastic/elasticsearch/api/types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
+import { Logger } from 'src/core/server';
+import { SavedObject } from 'src/core/types';
 
 import {
   AlertInstanceContext,
@@ -184,8 +184,19 @@ export const thresholdExecutor = async ({
     }),
   ]);
 
+  const createdAlerts = createdItems.map((alert) => {
+    const { _id, _index, ...source } = alert as { _id: string; _index: string };
+    return {
+      _id,
+      _index,
+      _source: {
+        ...source,
+      },
+    } as SearchHit<unknown>;
+  });
+
   const newSignalHistory = await buildThresholdSignalHistory({
-    alerts: result.createdSignals as Array<SearchHit<unknown>>,
+    alerts: createdAlerts,
   });
 
   return {

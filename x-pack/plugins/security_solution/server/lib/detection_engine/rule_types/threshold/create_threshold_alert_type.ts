@@ -72,6 +72,8 @@ export const createThresholdAlertType = (createOptions: CreateRuleOptions) => {
         state,
       } = execOptions;
 
+      // console.log(JSON.stringify(state));
+
       const result = await thresholdExecutor({
         buildRuleMessage,
         bulkCreate,
@@ -86,7 +88,8 @@ export const createThresholdAlertType = (createOptions: CreateRuleOptions) => {
         version,
         wrapHits,
       });
-      return { ...result, state };
+
+      return result;
     },
   });
 };
