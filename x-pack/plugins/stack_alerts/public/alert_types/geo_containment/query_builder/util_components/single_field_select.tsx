@@ -34,7 +34,7 @@ function fieldsToOptions(fields?: IFieldType[]): Array<EuiComboBoxOptionOption<I
 
 interface Props {
   placeholder: string;
-  value: string | null; // index pattern field name
+  value: string | null; // data view field name
   onChange: (fieldName?: string) => void;
   fields: IFieldType[];
 }
