@@ -30,6 +30,7 @@ const StyledTransactionLink = euiStyled(TransactionDetailLink)`
 interface Props {
   items: TraceGroup[];
   isLoading: boolean;
+  errorFetching: boolean;
 }
 
 const traceListColumns: Array<ITableColumn<TraceGroup>> = [
@@ -124,10 +125,11 @@ const noItemsMessage = (
   />
 );
 
-export function TraceList({ items = [], isLoading }: Props) {
+export function TraceList({ items = [], isLoading, errorFetching }: Props) {
   return (
     <ManagedTable
       isLoading={isLoading}
+      error={errorFetching}
       columns={traceListColumns}
       items={items}
       initialSortField="impact"

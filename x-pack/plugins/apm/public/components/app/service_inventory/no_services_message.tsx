@@ -9,19 +9,29 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { ErrorStatePrompt } from '../../shared/ErrorStatePrompt';
+import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
+import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 
 interface Props {
   status: FETCH_STATUS | undefined;
 }
 
-export function NoServicesMessage({ status }: Props) {
-  if (status === FETCH_STATUS.LOADING) {
-    return null;
-  }
+export function NoServicesMessage({ historicalDataFound, status }: Props) {
+  const upgradeAssistantHref = useUpgradeAssistantHref();
 
-  if (status === FETCH_STATUS.FAILURE) {
-    return <ErrorStatePrompt />;
+  if (historicalDataFound) {
+    return (
+      <EuiEmptyPrompt
+        title={
+          <div>
+            {i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
+              defaultMessage: 'No services found',
+            })}
+          </div>
+        }
+        titleSize="s"
+      />
+    );
   }
 
   return (

@@ -16,9 +16,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { CsmSharedContext } from '../CsmSharedContext';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
@@ -133,6 +134,13 @@ export function JSErrors() {
       <EuiBasicTable
         data-test-subj={'uxJsErrorTable'}
         loading={status !== 'success'}
+        error={
+          status === FETCH_STATUS.FAILURE
+            ? i18n.translate('xpack.apm.rum.jsErrorsTable.errorMessage', {
+                defaultMessage: 'Failed to fetch',
+              })
+            : ''
+        }
         responsive={false}
         compressed={true}
         columns={cols}

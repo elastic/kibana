@@ -214,6 +214,7 @@ interface Props {
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   noItemsMessage?: React.ReactNode;
   isLoading: boolean;
+  errorFetching?: boolean;
 }
 
 export function ServiceList({
@@ -221,6 +222,7 @@ export function ServiceList({
   noItemsMessage,
   comparisonData,
   isLoading,
+  errorFetching,
 }: Props) {
   const breakpoints = useBreakpoints();
   const displayHealthStatus = items.some((item) => 'healthStatus' in item);
@@ -296,6 +298,7 @@ export function ServiceList({
       <EuiFlexItem>
         <ManagedTable
           isLoading={isLoading}
+          error={errorFetching}
           columns={columns}
           items={items}
           noItemsMessage={noItemsMessage}

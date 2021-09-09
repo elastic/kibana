@@ -65,6 +65,7 @@ export function TraceOverview() {
       <TraceList
         items={data.items}
         isLoading={status === FETCH_STATUS.LOADING}
+        errorFetching={status === FETCH_STATUS.FAILURE}
       />
     </>
   );
