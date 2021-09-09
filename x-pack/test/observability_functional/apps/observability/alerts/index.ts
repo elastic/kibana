@@ -23,11 +23,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const pageObjects = getPageObjects(['common']);
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
-    const Observability = getService('observability');
+    const observability = getService('observability');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await Observability.alerts.navigateToTimeWithData();
+      await observability.alerts.navigateToTimeWithData();
     });
 
     after(async () => {
@@ -36,49 +36,49 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Alerts table', () => {
       it('Renders the table', async () => {
-        await Observability.alerts.getTableOrFail();
+        await observability.alerts.getTableOrFail();
       });
 
       it('Renders the correct number of cells', async () => {
         // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
-        const cells = await Observability.alerts.getTableCells();
+        const cells = await observability.alerts.getTableCells();
         expect(cells.length).to.be(72);
       });
 
       describe('Filtering', () => {
         afterEach(async () => {
-          await Observability.alerts.clearQueryBar();
+          await observability.alerts.clearQueryBar();
         });
 
         after(async () => {
           // NOTE: We do this as the query bar takes the place of the datepicker when it is in focus, so we'll reset
           // back to default.
-          await Observability.alerts.submitQuery('');
+          await observability.alerts.submitQuery('');
         });
 
         it('Autocompletion works', async () => {
-          await Observability.alerts.typeInQueryBar('kibana.alert.s');
+          await observability.alerts.typeInQueryBar('kibana.alert.s');
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
         });
 
         it('Applies filters correctly', async () => {
-          await Observability.alerts.submitQuery('kibana.alert.status: recovered');
+          await observability.alerts.submitQuery('kibana.alert.status: recovered');
           await retry.try(async () => {
-            const cells = await Observability.alerts.getTableCells();
+            const cells = await observability.alerts.getTableCells();
             expect(cells.length).to.be(24);
           });
         });
 
         it('Displays a no data state when filters produce zero results', async () => {
-          await Observability.alerts.submitQuery('kibana.alert.consumer: uptime');
-          await testSubjects.existOrFail('events-container-loading-false');
+          await observability.alerts.submitQuery('kibana.alert.consumer: uptime');
+          await observability.alerts.getNoDataStateOrFail();
         });
       });
 
       describe('Date selection', () => {
         after(async () => {
-          await Observability.alerts.navigateToTimeWithData();
+          await observability.alerts.navigateToTimeWithData();
         });
 
         it('Correctly applies date picker selections', async () => {
@@ -87,41 +87,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             // We shouldn't expect any data for the last 15 minutes
             await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
           });
-          await Observability.alerts.getNoDataStateOrFail();
+          await observability.alerts.getNoDataStateOrFail();
           await pageObjects.common.waitUntilUrlIncludes('rangeFrom=now-15m&rangeTo=now');
         });
       });
 
       describe('Flyout', () => {
         it('Can be opened', async () => {
-          await Observability.alerts.toggleFlyout();
-          await Observability.alerts.getAlertsFlyoutOrFail();
+          await observability.alerts.openAlertsFlyout();
+          await observability.alerts.getAlertsFlyoutOrFail();
         });
 
         it('Can be closed', async () => {
-          await Observability.alerts.closeAlertsFlyout();
+          await observability.alerts.closeAlertsFlyout();
           await testSubjects.missingOrFail('alertsFlyout');
         });
 
         describe('When open', async () => {
           before(async () => {
-            await Observability.alerts.toggleFlyout();
+            await observability.alerts.openAlertsFlyout();
           });
 
           after(async () => {
-            await Observability.alerts.closeAlertsFlyout();
+            await observability.alerts.closeAlertsFlyout();
           });
 
           it('Displays the correct title', async () => {
             const titleText = await (
-              await Observability.alerts.getAlertsFlyoutTitle()
+              await observability.alerts.getAlertsFlyoutTitle()
             ).getVisibleText();
             expect(titleText).to.contain('Log threshold');
           });
 
           it('Displays the correct content', async () => {
-            const flyoutTitles = await Observability.alerts.getAlertsFlyoutDescriptionListTitles();
-            const flyoutDescriptions = await Observability.alerts.getAlertsFlyoutDescriptionListDescriptions();
+            const flyoutTitles = await observability.alerts.getAlertsFlyoutDescriptionListTitles();
+            const flyoutDescriptions = await observability.alerts.getAlertsFlyoutDescriptionListDescriptions();
 
             const expectedTitles = [
               'Status',
@@ -150,7 +150,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('Displays a View in App button', async () => {
-            await Observability.alerts.getAlertsFlyoutViewInAppButtonOrFail();
+            await observability.alerts.getAlertsFlyoutViewInAppButtonOrFail();
           });
         });
       });

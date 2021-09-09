@@ -15,9 +15,13 @@ const DATE_WITH_DATA = {
   rangeTo: '2021-09-03T13:36:22.109Z',
 };
 
+const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
+
 export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const flyoutService = getService('flyout');
   const pageObjects = getPageObjects(['common']);
+  const retry = getService('retry');
 
   const navigateToTimeWithData = async () => {
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
@@ -37,7 +41,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
   };
 
   const getNoDataStateOrFail = async () => {
-    return await testSubjects.existOrFail('events-container-loading-false');
+    return await testSubjects.existOrFail('tGridEmptyState');
   };
 
   // Query Bar
@@ -63,21 +67,24 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
   };
 
   // Flyout
-  const getToggleFlyoutButton = async () => {
-    return await testSubjects.find('toggleFlyoutButton');
+  const getOpenFlyoutButton = async () => {
+    return await testSubjects.find('openFlyoutButton');
   };
 
-  const toggleFlyout = async () => {
-    await (await getToggleFlyoutButton()).click();
-    return await pageObjects.common.sleep(2500); // Wait for the animation
+  const openAlertsFlyout = async () => {
+    await (await getOpenFlyoutButton()).click();
+    await retry.waitFor(
+      'flyout open',
+      async () => await testSubjects.exists(ALERTS_FLYOUT_SELECTOR, { timeout: 2500 })
+    );
   };
 
   const getAlertsFlyout = async () => {
-    return await testSubjects.find('alertsFlyout');
+    return await testSubjects.find(ALERTS_FLYOUT_SELECTOR);
   };
 
   const getAlertsFlyoutOrFail = async () => {
-    return await testSubjects.existOrFail('alertsFlyout');
+    return await testSubjects.existOrFail(ALERTS_FLYOUT_SELECTOR);
   };
 
   const getAlertsFlyoutTitle = async () => {
@@ -85,8 +92,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
   };
 
   const closeAlertsFlyout = async () => {
-    const flyout = await getAlertsFlyout();
-    return await (await testSubjects.findDescendant('euiFlyoutCloseButton', flyout)).click();
+    return await flyoutService.close(ALERTS_FLYOUT_SELECTOR);
   };
 
   const getAlertsFlyoutViewInAppButtonOrFail = async () => {
@@ -110,7 +116,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     getTableCells,
     getTableOrFail,
     getNoDataStateOrFail,
-    toggleFlyout,
+    openAlertsFlyout,
     getAlertsFlyout,
     getAlertsFlyoutTitle,
     closeAlertsFlyout,
