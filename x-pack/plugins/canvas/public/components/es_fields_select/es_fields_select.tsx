@@ -5,37 +5,30 @@
  * 2.0.
  */
 
-import React, { FocusEventHandler } from 'react';
-import { EuiComboBox } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
+import { isEqual } from 'lodash';
+import { getFields } from '../../lib/es_service';
+import {
+  ESFieldsSelect as Component,
+  ESFieldsSelectProps as Props,
+} from './es_fields_select.component';
 
-export interface ESFieldsSelectProps {
-  value: string;
-  onChange: (fields: string[]) => void;
-  onBlur: FocusEventHandler<HTMLDivElement> | undefined;
-  onFocus: FocusEventHandler<HTMLDivElement> | undefined;
-  fields: string[];
-  selected: string[];
-}
+type ESFieldsSelectProps = Omit<Props, 'fields'> & { index: string };
 
-export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = ({
-  selected = [],
-  fields = [],
-  onChange,
-  onFocus,
-  onBlur,
-}) => {
-  const options = fields.map((value) => ({ label: value }));
-  const selectedOptions = selected.map((value) => ({ label: value }));
+export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = (props) => {
+  const { index, selected, onChange } = props;
+  const [fields, setFields] = useState<string[]>([]);
+  useEffect(() => {
+    getFields(index).then((newFields) => {
+      if (!isEqual(newFields, fields)) {
+        setFields(newFields || []);
+        const filteredSelected = selected.filter((option) => (newFields || []).includes(option));
+        if (!isEqual(filteredSelected, selected)) {
+          onChange(selected);
+        }
+      }
+    });
+  }, [fields, index, onChange, selected]);
 
-  return (
-    <EuiComboBox
-      selectedOptions={selectedOptions}
-      options={options}
-      onChange={(values) => onChange(values.map(({ label }) => label))}
-      className="canvasFieldsSelect"
-      onFocus={onFocus}
-      onBlur={onBlur}
-      compressed
-    />
-  );
+  return <Component {...props} fields={fields} />;
 };
