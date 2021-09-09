@@ -12,10 +12,10 @@ import { functionWrapper } from 'src/plugins/expressions/common/expression_funct
 
 describe('lens_counter_rate', () => {
   const fn = functionWrapper(counterRate);
-  const runFn = (input: Datatable, args: CounterRateArgs) => fn(input, args) as Datatable;
+  const runFn = (input: Datatable, args: CounterRateArgs) => fn(input, args) as Promise<Datatable>;
 
-  it('calculates counter rate', () => {
-    const result = runFn(
+  it('calculates counter rate', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -31,8 +31,8 @@ describe('lens_counter_rate', () => {
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 0, 2, 3, 2]);
   });
 
-  it('calculates counter rate with decreasing values in input', () => {
-    const result = runFn(
+  it('calculates counter rate with decreasing values in input', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -48,8 +48,8 @@ describe('lens_counter_rate', () => {
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 6, 5, 4]);
   });
 
-  it('skips null or undefined values until there is real data', () => {
-    const result = runFn(
+  it('skips null or undefined values until there is real data', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -85,8 +85,8 @@ describe('lens_counter_rate', () => {
     ]);
   });
 
-  it('treats 0 as real data', () => {
-    const result = runFn(
+  it('treats 0 as real data', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -123,8 +123,8 @@ describe('lens_counter_rate', () => {
     ]);
   });
 
-  it('calculates counter rate for multiple series', () => {
-    const result = runFn(
+  it('calculates counter rate for multiple series', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -157,8 +157,8 @@ describe('lens_counter_rate', () => {
     ]);
   });
 
-  it('treats missing split column as separate series', () => {
-    const result = runFn(
+  it('treats missing split column as separate series', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -190,8 +190,8 @@ describe('lens_counter_rate', () => {
     ]);
   });
 
-  it('treats null like undefined and empty string for split columns', () => {
-    const result = runFn(
+  it('treats null like undefined and empty string for split columns', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -225,8 +225,8 @@ describe('lens_counter_rate', () => {
     ]);
   });
 
-  it('calculates counter rate for multiple series by multiple split columns', () => {
-    const result = runFn(
+  it('calculates counter rate for multiple series by multiple split columns', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -259,8 +259,8 @@ describe('lens_counter_rate', () => {
     ]);
   });
 
-  it('splits separate series by the string representation of the cell values', () => {
-    const result = runFn(
+  it('splits separate series by the string representation of the cell values', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -280,8 +280,8 @@ describe('lens_counter_rate', () => {
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 2 - 1, undefined, 11 - 10]);
   });
 
-  it('casts values to number before calculating counter rate', () => {
-    const result = runFn(
+  it('casts values to number before calculating counter rate', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -292,8 +292,8 @@ describe('lens_counter_rate', () => {
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 7 - 5, 3, 2]);
   });
 
-  it('casts values to number before calculating counter rate for NaN like values', () => {
-    const result = runFn(
+  it('casts values to number before calculating counter rate for NaN like values', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -304,8 +304,8 @@ describe('lens_counter_rate', () => {
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 7 - 5, NaN, 2, 5 - 2]);
   });
 
-  it('copies over meta information from the source column', () => {
-    const result = runFn(
+  it('copies over meta information from the source column', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -346,8 +346,8 @@ describe('lens_counter_rate', () => {
     });
   });
 
-  it('sets output name on output column if specified', () => {
-    const result = runFn(
+  it('sets output name on output column if specified', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -370,7 +370,7 @@ describe('lens_counter_rate', () => {
     });
   });
 
-  it('returns source table if input column does not exist', () => {
+  it('returns source table if input column does not exist', async () => {
     const input: Datatable = {
       type: 'datatable',
       columns: [
@@ -384,12 +384,16 @@ describe('lens_counter_rate', () => {
       ],
       rows: [{ val: 5 }],
     };
-    expect(runFn(input, { inputColumnId: 'nonexisting', outputColumnId: 'output' })).toBe(input);
+    expect(await runFn(input, { inputColumnId: 'nonexisting', outputColumnId: 'output' })).toBe(
+      input
+    );
   });
 
-  it('throws an error if output column exists already', () => {
-    expect(() =>
-      runFn(
+  it('throws an error if output column exists already', async () => {
+    let error: Error | undefined;
+
+    try {
+      await runFn(
         {
           type: 'datatable',
           columns: [
@@ -404,7 +408,13 @@ describe('lens_counter_rate', () => {
           rows: [{ val: 5 }],
         },
         { inputColumnId: 'val', outputColumnId: 'val' }
-      )
-    ).toThrow();
+      );
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toMatchInlineSnapshot(
+      `[Error: Specified outputColumnId val already exists. Please pick another column id.]`
+    );
   });
 });

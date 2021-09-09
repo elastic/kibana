@@ -12,6 +12,7 @@ import { SortDirection } from 'src/plugins/data/common/search';
 import { RENDER_AS, SCALING_TYPES } from '../constants';
 import { MapExtent } from './map_descriptor';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
+import { ESTermSourceDescriptor } from './source_descriptor_types';
 
 export type Timeslice = {
   from: number;
@@ -49,9 +50,7 @@ type ESGeoLineSourceSyncMeta = {
   sortField: string;
 };
 
-type ESTermSourceSyncMeta = {
-  size: number;
-};
+export type ESTermSourceSyncMeta = Pick<ESTermSourceDescriptor, 'indexPatternId' | 'size' | 'term'>;
 
 export type VectorSourceSyncMeta =
   | ESSearchSourceSyncMeta

@@ -34,9 +34,10 @@ export class DocLinksService {
         apm: {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
           supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
-          droppedTransactionSpans: `${APM_DOCS}get-started/${DOC_LINK_VERSION}/transaction-spans.html#dropped-spans`,
-          upgrading: `${APM_DOCS}server/${DOC_LINK_VERSION}/upgrading.html`,
-          metaData: `${APM_DOCS}get-started/${DOC_LINK_VERSION}/metadata.html`,
+          customLinks: `${KIBANA_DOCS}custom-links.html`,
+          droppedTransactionSpans: `${APM_DOCS}get-started/master/transaction-spans.html#dropped-spans`,
+          upgrading: `${APM_DOCS}server/master/upgrading.html`,
+          metaData: `${APM_DOCS}get-started/master/metadata.html`,
         },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
@@ -281,6 +282,10 @@ export class DocLinksService {
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
+          monitorStatus: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-status-alert.html`,
+          monitorUptime: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime.html`,
+          tlsCertificate: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/tls-certificate-alert.html`,
+          uptimeDurationAnomaly: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/duration-anomaly-alert.html`,
         },
         alerting: {
           guide: `${KIBANA_DOCS}create-and-manage-rules.html`,
@@ -462,6 +467,7 @@ export interface DocLinksStart {
     readonly apm: {
       readonly kibanaSettings: string;
       readonly supportedServiceMaps: string;
+      readonly customLinks: string;
       readonly droppedTransactionSpans: string;
       readonly upgrading: string;
       readonly metaData: string;
@@ -637,7 +643,13 @@ export interface DocLinksStart {
       timeUnits: string;
       updateTransform: string;
     }>;
-    readonly observability: Record<string, string>;
+    readonly observability: Readonly<{
+      guide: string;
+      monitorStatus: string;
+      monitorUptime: string;
+      tlsCertificate: string;
+      uptimeDurationAnomaly: string;
+    }>;
     readonly alerting: Record<string, string>;
     readonly maps: Record<string, string>;
     readonly monitoring: Record<string, string>;
