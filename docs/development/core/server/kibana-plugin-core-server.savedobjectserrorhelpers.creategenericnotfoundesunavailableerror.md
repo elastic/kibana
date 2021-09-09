@@ -7,15 +7,15 @@
 <b>Signature:</b>
 
 ```typescript
-static createGenericNotFoundEsUnavailableError(type: string, id: string): DecoratedError;
+static createGenericNotFoundEsUnavailableError(type?: string | null, id?: string | null): DecoratedError;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
+|  type | <code>string &#124; null</code> |  |
+|  id | <code>string &#124; null</code> |  |
 
 <b>Returns:</b>
 

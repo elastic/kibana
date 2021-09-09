@@ -178,7 +178,7 @@ export const buildExceptionFilter = ({
     return undefined;
   } else if (exceptionsWithoutLargeValueLists.length <= chunkSize) {
     const clause = createOrClauses(exceptionsWithoutLargeValueLists);
-    exceptionFilter.query.bool.should = clause;
+    exceptionFilter.query!.bool.should = clause;
     return exceptionFilter;
   } else {
     const chunks = chunkExceptions(exceptionsWithoutLargeValueLists, chunkSize);

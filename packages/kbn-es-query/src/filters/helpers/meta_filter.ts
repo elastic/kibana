@@ -129,7 +129,7 @@ export const isFilters = (x: unknown): x is Filter[] =>
   Array.isArray(x) && !x.find((y) => !isFilter(y));
 
 /**
- * Clean out any invalid attributes from the filters
+ * Clean out decorators from the filters
  * @param {object} filter The filter to clean
  * @returns {object}
  *

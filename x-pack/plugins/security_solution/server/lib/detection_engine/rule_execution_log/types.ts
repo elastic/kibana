@@ -6,7 +6,7 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObject, SavedObjectsFindResult } from '../../../../../../../src/core/server';
+import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
 import { RuleDataPluginService } from '../../../../../rule_registry/server';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { IRuleStatusSOAttributes } from '../rules/types';
@@ -39,12 +39,24 @@ export interface FindBulkExecutionLogArgs {
   logsCount?: number;
 }
 
+/**
+ * @deprecated LegacyMetrics are only kept here for backward compatibility
+ * and should be replaced by ExecutionMetric in the future
+ */
+export interface LegacyMetrics {
+  searchAfterTimeDurations?: string[];
+  bulkCreateTimeDurations?: string[];
+  lastLookBackDate?: string;
+  gap?: string;
+}
+
 export interface LogStatusChangeArgs {
   ruleId: string;
   spaceId: string;
   newStatus: RuleExecutionStatus;
   namespace?: string;
   message?: string;
+  metrics?: LegacyMetrics;
 }
 
 export interface UpdateExecutionLogArgs {
@@ -75,10 +87,8 @@ export interface IRuleExecutionLogClient {
     args: FindExecutionLogArgs
   ) => Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>>;
   findBulk: (args: FindBulkExecutionLogArgs) => Promise<FindBulkExecutionLogResponse>;
-  create: (args: CreateExecutionLogArgs) => Promise<SavedObject<IRuleStatusSOAttributes>>;
   update: (args: UpdateExecutionLogArgs) => Promise<void>;
   delete: (id: string) => Promise<void>;
-  // TODO These methods are intended to supersede ones provided by RuleStatusService
   logStatusChange: (args: LogStatusChangeArgs) => Promise<void>;
   logExecutionMetric: <T extends ExecutionMetric>(args: ExecutionMetricArgs<T>) => Promise<void>;
 }

@@ -1,13 +1,14 @@
 {
   "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "outDir": "target",
-    "stripInternal": false,
     "declaration": true,
     "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "target_types",
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-legacy-logging/src",
+    "stripInternal": false,
     "types": ["jest", "node"]
   },
   "include": ["src/**/*"]

@@ -17,8 +17,6 @@ import { mapRange } from './mappers/map_range';
 import { mapExists } from './mappers/map_exists';
 import { mapMissing } from './mappers/map_missing';
 import { mapQueryString } from './mappers/map_query_string';
-import { mapGeoBoundingBox } from './mappers/map_geo_bounding_box';
-import { mapGeoPolygon } from './mappers/map_geo_polygon';
 import { mapDefault } from './mappers/map_default';
 import { generateMappingChain } from './generate_mapping_chain';
 
@@ -48,8 +46,6 @@ export function mapFilter(filter: Filter) {
     mapExists,
     mapMissing,
     mapQueryString,
-    mapGeoBoundingBox,
-    mapGeoPolygon,
     mapDefault,
   ];
 

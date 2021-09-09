@@ -58,17 +58,26 @@ The service will show the following deprecation details when the users set the a
 config `ui_metric.debug`.
 
 ```ts
+import { i18n } from '@kbn/i18n';
+
 {
   deprecationsInfo:[{
+    domainId: 'usageCollection',
+    title: i18n.translate('usageCollection.uiCounters.deprecations.uiMetricDebugTitle', {
+      defaultMessage: 'Setting "ui_metric.debug" is deprecated',
+    });
     level: 'critical',
-    message: `"ui_metric.debug" is deprecated and has been replaced by "usageCollection.uiCounters.debug"`,
+    title: i18n.translate('usageCollection.uiCounters.deprecations.uiMetricDebugMessage', {
+      defaultMessage: '"ui_metric.debug" is deprecated and has been replaced by "usageCollection.uiCounters.debug"',
+    });
     documentationUrl: 'elastic.co/some-url',
     correctiveActions:{
       manualSteps: [
-        `Replace "ui_metric.debug" with "usageCollection.uiCounters.debug" in the Kibana config file, CLI flag, or environment variable (in Docker only).`,
+        title: i18n.translate('usageCollection.uiCounters.deprecations.uiMetricDebug.manualStepOneMessage', {
+          defaultMessage: 'Replace "ui_metric.debug" with "usageCollection.uiCounters.debug" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
+        }),
       ]
     },
-    domainId: 'usageCollection',
   }],
 }
 ```
@@ -79,6 +88,8 @@ Custom config deprecation handling allows specifying the deprecation details via
 ##### Example
 
 ```ts
+import { i18n } from '@kbn/i18n';
+
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     defaultAppId: true,
@@ -97,12 +108,23 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
         return completeConfig;
       }
       addDeprecation({
-        message: `kibana.defaultAppId is deprecated and will be removed in 8.0. Please use the "defaultRoute" advanced setting instead`,
+        title: i18n.translate('kibana_legacy.deprecations.defaultAppIdTitle', {
+          defaultMessage: 'Setting "kibana.defaultAppId" is deprecated',
+        }),
+        message: i18n.translate('kibana_legacy.deprecations.defaultAppIdMessage', {
+          defaultMessage: 'Use the "defaultRoute" advanced setting instead of "kibana.defaultAppId".',
+        }),
         correctiveActions: {
           manualSteps: [
-            'Go to Stack Management > Advanced Settings',
-            'Update the "defaultRoute" setting under the General section',
-            'Remove "kibana.defaultAppId" from the kibana.yml config file',
+            i18n.translate('kibana_legacy.deprecations.defaultAppId.manualStepOneMessage', {
+              defaultMessage: 'Go to Stack Management > Advanced Settings.',
+            }),
+            i18n.translate('kibana_legacy.deprecations.defaultAppId.manualStepTwoMessage', {
+              defaultMessage: 'Update the "defaultRoute" setting in the General section.',
+            }),
+            i18n.translate('kibana_legacy.deprecations.defaultAppId.manualStepThreeMessage', {
+              defaultMessage: 'Remove "kibana.defaultAppId" from the kibana.yml config file.',
+            }),
           ],
         },
       });
@@ -138,39 +160,49 @@ To check the full TS types of the service please check the [generated core docs]
 ### Example
 ```ts
 import { DeprecationsDetails, GetDeprecationsContext } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
 
 async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
   const deprecations: DeprecationsDetails[] = [];
   const testDashboardUser = await getTestDashboardUser(savedObjectsClient);
 
   if (testDashboardUser) {
-  deprecations.push({
-    message: 'User "test_dashboard_user" is using a deprecated role: "kibana_user"',
-    documentationUrl: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html',
-    level: 'critical',
-    correctiveActions: {
-      api: {
-          path: '/internal/security/users/test_dashboard_user',
-          method: 'POST',
-          body: {
-            username: 'test_dashboard_user',
-            roles: [
-              'machine_learning_user',
-              'enrich_user',
-              'kibana_admin'
-            ],
-            full_name: 'Alison Goryachev',
-            email: 'alisongoryachev@gmail.com',
-            metadata: {},
-            enabled: true
-          }
+    deprecations.push({
+      title: i18n.translate('security.deprecations.kibanaUserRoleTitle', {
+        defaultMessage: 'Deprecated roles are assigned to some users',
+      }),
+      message: i18n.translate('security.deprecations.kibanaUserRoleMessage', {
+        defaultMessage: 'User "test_dashboard_user" is using a deprecated role: "kibana_user".',
+      }),
+      documentationUrl: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html',
+      level: 'critical',
+      correctiveActions: {
+        api: {
+            path: '/internal/security/users/test_dashboard_user',
+            method: 'POST',
+            body: {
+              username: 'test_dashboard_user',
+              roles: [
+                'machine_learning_user',
+                'enrich_user',
+                'kibana_admin'
+              ],
+              full_name: 'Alison Goryachev',
+              email: 'alisongoryachev@gmail.com',
+              metadata: {},
+              enabled: true
+            }
+        },
+        manualSteps: [
+          i18n.translate('security.deprecations.kibanaUserRole.manualStepOneMessage', {
+            defaultMessage: 'Switch all users with the "kibana_user" role to the kibana_admin role in Management > Security > Users.',
+          }),
+          i18n.translate('security.deprecations.kibanaUserRole.manualStepTwoMessage', {
+            defaultMessage: 'Update all mappings in Management > Security > Role Mappings to assign the "kibana_admin" role instead of the "kibana_user" role.'
+          }),
+        ],
       },
-      manualSteps: [
-        'Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.',
-        'Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role.'
-      ]
-    },
-  });
+    });
   }
 
   return deprecations;
@@ -204,7 +236,128 @@ Currently we do not have test objects to run functional tests against the Upgrad
 Yes. Using this service should help users find and resolve any issues specific to their deployment before upgrading.
 We recommend adding a `documentationUrl` for every deprecation you expose to further assist our users if they need extra help.
 
+## Writing deprecation details
+
+State what is being deprecated and what action the user needs to take:
+
+> Abc is deprecated. Use Xyz to do the thing.
+
+Provide as much context as possible for what triggered the deprecation warning.
+If action is not required (for example the default behavior is changing), describe the impact of doing nothing.
+
+Examples:
+- > Setting `xpack.reporting.roles.enabled` is deprecated. Use feature controls to grant reporting privileges. 
+- > The Joda Time century-of era-formatter (C) is deprecated. Use a `java.time` formatter instead.
+- > The default for the `cluster.routing.allocation.disk.watermark` setting is changing from false to true.
+  > If you do not explicitly configure this setting when you upgrade, indices in this one node cluster will
+  > become read-only if disk usage reaches 95%. 
+
 ## Note on i18n
-We have decided to support i18n to the exposed deprecations for a better user experience when using the UA.
-We will inject `i18n` into the deprecation function to enable teams to use it before fully documenting its usage.
-For context follow [this issue](https://github.com/elastic/kibana/issues/99072).
+All deprecation titles, messsages, and manual steps should be wrapped in `i18n.translate`. This 
+provides a better user experience using different locales. Follow the writing guidelines below for
+best practices to writing the i18n messages and ids.
+
+### Writing guidelines
+The deprecation service enables you to specify a `title`, `message`, `documentationUrl`,
+and the `manual steps` for resolving a deprecation issue.
+
+#### Title:
+No end punctuation is required.
+i18n id: `{plugin_domain}.deprecations.{deprecationTitle}Title`
+
+Example:
+```ts
+title: i18n.translate('xpack.reporting.deprecations.reportingRoleTitle', {
+  defaultMessage: `Found deprecated reporting roles`,
+})
+```
+
+#### Message
+Keep it brief, but multiple sentences are allowed if needed.
+i18n id: `{plugin_domain}.deprecations.{deprecationTitle}Message`
+
+Example:
+```ts
+message: i18n.translate('xpack.reporting.deprecations.reportingRoleMessage', {
+  defaultMessage: `The deprecated "${deprecatedRole}" role has been found for ${numReportingUsers} user(s): "${usernames}"`,
+  values: { deprecatedRole, numReportingUsers, usernames },
+}),
+```
+
+#### Documentation URL
+Don’t link to the Migration guide/breaking changes. 
+Only specify a doc URL if the user truly needs to “learn more” to understand what actions they need to take.
+
+Example:
+```ts
+documentationUrl: 'https://www.elastic.co/guide/en/kibana/current/secure-reporting.html',
+```
+#### Manual steps
+State the action first for each step.
+i18n id: `{plugin_domain}.deprecations.{deprecationTitle}.manualStep{Step#}Message`
+
+Example:
+```ts
+manualSteps: [
+  i18n.translate('xpack.reporting.deprecations.reportingRole.manualStepTwoMessage', {
+    defaultMessage: `Create one or more custom roles that provide Kibana application privileges to reporting features in **Management > Security > Roles**.`,
+  }),
+  i18n.translate('xpack.reporting.deprecations.reportingRole.manualStepThreeMessage', {
+    defaultMessage: `Assign the custom role(s) as desired, and remove the "${deprecatedRole}" role from the user(s).`,
+    values: { deprecatedRole },
+  }),
+]
+```
+
+#### General Guidelines
+
+##### What is deprecated
+Use the present tense: 
+- Types are deprecated in geo_shape queries.
+- Sorting is deprecated in reindex requests.
+
+Avoid:
+- The type should no longer be specified in geo_shape queries.
+- Sorting has been deprecated in reindex requests.
+
+##### What action the user needs to take
+Use the imperative voice:
+- Do not specify a type in the indexed_shape section. 
+- Use query filtering to reindex a subset of documents.
+
+Avoid:
+- Please use query filtering instead.
+- You should use query filtering instead.
+- Instead consider using query filtering to find the desired subset of data.
+
+##### Context
+Where possible, provide the specific context that resulted in the warning:
+- The Abc timezone used by rollup job Def is deprecated. Use Xyz instead.
+
+##### Impact
+Many deprecations are clearcut--you are using this old thing and need to switch to using this new thing.
+Others are more nuanced and don’t necessarily require any changes. In this case, the warning needs to address
+the impact of not taking action:
+- The default for the `cluster.routing.allocation.disk.watermark` setting is changing from false to true.
+  If you do not explicitly configure this setting when you upgrade, indices in this one node cluster will
+  become read-only if disk usage reaches 95%. 
+
+##### Version
+You do not need to include any form of "and will be removed in a future release".
+The assumption is that deprecated things are going to be removed, and the standard schedule for removal
+is the next major version. 
+
+If things are targeted for removal in a specific minor release, the message should include that information:
+- Abc is deprecated. Use Xyz to do the thing. Support for Abc will be removed in n.n.
+
+If an item is deprecated, but won’t be removed in the next major version, the message should indicate that:
+- Abc is deprecated. Use Xyz to do the thing. Support for Abc will be removed following the release of n.0. 
+
+Avoid:
+- Xyz is deprecated and will be removed in 8.0.
+- Xyz is deprecated and will be unsupported in future.
+- Xyz is deprecated and will not be supported in the next major version of Elasticsearch.
+
+##### Formatting
+- Sentence style capitalization and punctuation. 
+- Avoid quotes for emphasis.

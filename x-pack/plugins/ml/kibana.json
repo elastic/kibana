@@ -17,7 +17,8 @@
     "uiActions",
     "kibanaLegacy",
     "discover",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "fieldFormats"
   ],
   "optionalPlugins": [
     "alerting",

@@ -6,12 +6,17 @@
  */
 
 /* eslint-disable dot-notation */
-import { TelemetryEventsSender, copyAllowlistedFields, getV3UrlFromV2 } from './sender';
+import { TelemetryEventsSender, copyAllowlistedFields } from './sender';
 import { loggingSystemMock } from 'src/core/server/mocks';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import { URL } from 'url';
 
 describe('TelemetryEventsSender', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
+  const telemetryUsageCounter = usageCountersServiceSetup.createUsageCounter(
+    'testTelemetryUsageCounter'
+  );
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -163,18 +168,19 @@ describe('TelemetryEventsSender', () => {
 
     it('empties the queue when sending', async () => {
       const sender = new TelemetryEventsSender(logger);
-      sender['sendEvents'] = jest.fn();
       sender['telemetryStart'] = {
         getIsOptedIn: jest.fn(async () => true),
       };
       sender['telemetrySetup'] = {
         getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
       };
-      sender['fetchClusterInfo'] = jest.fn(async () => {
-        return {
-          cluster_name: 'test',
-          cluster_uuid: 'test-uuid',
-        };
+      sender['telemetryUsageCounter'] = telemetryUsageCounter;
+      sender['sendEvents'] = jest.fn(async () => {
+        sender['telemetryUsageCounter']?.incrementCounter({
+          counterName: 'test_counter',
+          counterType: 'invoked',
+          incrementBy: 1,
+        });
       });
 
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
@@ -188,6 +194,7 @@ describe('TelemetryEventsSender', () => {
       await sender['sendIfDue']();
       expect(sender['queue'].length).toBe(0);
       expect(sender['sendEvents']).toBeCalledTimes(2);
+      expect(sender['telemetryUsageCounter'].incrementCounter).toBeCalledTimes(2);
     });
 
     it("shouldn't send when telemetry is disabled", async () => {
@@ -326,21 +333,30 @@ describe('allowlistEventFields', () => {
 });
 
 describe('getV3UrlFromV2', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+  });
+
   it('should return prod url', () => {
-    expect(getV3UrlFromV2('https://telemetry.elastic.co/xpack/v2/send', 'alerts-endpoint')).toBe(
-      'https://telemetry.elastic.co/v3/send/alerts-endpoint'
-    );
+    const sender = new TelemetryEventsSender(logger);
+    expect(
+      sender.getV3UrlFromV2('https://telemetry.elastic.co/xpack/v2/send', 'alerts-endpoint')
+    ).toBe('https://telemetry.elastic.co/v3/send/alerts-endpoint');
   });
 
   it('should return staging url', () => {
+    const sender = new TelemetryEventsSender(logger);
     expect(
-      getV3UrlFromV2('https://telemetry-staging.elastic.co/xpack/v2/send', 'alerts-endpoint')
+      sender.getV3UrlFromV2('https://telemetry-staging.elastic.co/xpack/v2/send', 'alerts-endpoint')
     ).toBe('https://telemetry-staging.elastic.co/v3-dev/send/alerts-endpoint');
   });
 
   it('should support ports and auth', () => {
+    const sender = new TelemetryEventsSender(logger);
     expect(
-      getV3UrlFromV2('http://user:pass@myproxy.local:1337/xpack/v2/send', 'alerts-endpoint')
+      sender.getV3UrlFromV2('http://user:pass@myproxy.local:1337/xpack/v2/send', 'alerts-endpoint')
     ).toBe('http://user:pass@myproxy.local:1337/v3/send/alerts-endpoint');
   });
 });

@@ -678,7 +678,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         action: 'start',
         kind: 'alert',
         category: 'malware',
-        code: isShellcode ? 'malicious_thread' : 'memory_signature',
+        code: isShellcode ? 'shellcode_thread' : 'memory_signature',
         id: this.seededUUIDv4(),
         dataset: 'endpoint',
         module: 'endpoint',
@@ -829,6 +829,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       },
       rule: {
         id: this.randomUUID(),
+        description: 'Behavior rule description',
       },
       event: {
         action: 'rule_detection',
@@ -871,6 +872,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         name: processName,
         entity_id: entityID,
         executable: `C:/fake_behavior/${processName}`,
+        code_signature: {
+          status: 'trusted',
+          subject_name: 'Microsoft Windows',
+        },
         parent: parentEntityID
           ? {
               entity_id: parentEntityID,

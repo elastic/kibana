@@ -470,6 +470,15 @@ class BrowserService extends FtrService {
   }
 
   /**
+   * Clears all values in local storage for the focused window/frame.
+   *
+   * @return {Promise<void>}
+   */
+  public async clearLocalStorage(): Promise<void> {
+    await this.driver.executeScript('return window.localStorage.clear();');
+  }
+
+  /**
    * Clears session storage for the focused window/frame.
    *
    * @return {Promise<void>}

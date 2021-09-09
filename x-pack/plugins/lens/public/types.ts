@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { CoreSetup } from 'kibana/public';
-import { PaletteOutput } from 'src/plugins/charts/public';
-import { SavedObjectReference } from 'kibana/public';
-import { MutableRefObject } from 'react';
-import { RowClickContext } from '../../../../src/plugins/ui_actions/public';
-import {
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
+import type { CoreSetup, SavedObjectReference } from 'kibana/public';
+import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { MutableRefObject } from 'react';
+import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
@@ -19,20 +17,28 @@ import {
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType } from '../common';
-import { Query, Filter } from '../../../../src/plugins/data/public';
-import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
-import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
-import {
-  LENS_EDIT_SORT_ACTION,
-  LENS_EDIT_RESIZE_ACTION,
-  LENS_TOGGLE_ACTION,
-} from './datatable_visualization/components/constants';
+import type { Query, Filter } from '../../../../src/plugins/data/public';
+import type {
+  RangeSelectContext,
+  ValueClickContext,
+} from '../../../../src/plugins/embeddable/public';
 import type {
   LensSortActionData,
   LensResizeActionData,
   LensToggleActionData,
 } from './datatable_visualization/components/types';
-import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import type {
+  UiActionsStart,
+  RowClickContext,
+  VisualizeFieldContext,
+} from '../../../../src/plugins/ui_actions/public';
+
+import {
+  LENS_EDIT_SORT_ACTION,
+  LENS_EDIT_RESIZE_ACTION,
+  LENS_TOGGLE_ACTION,
+} from './datatable_visualization/components/constants';
+import type { LensInspector } from './lens_inspector_service';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -43,6 +49,7 @@ export interface PublicAPIProps<T> {
 
 export interface EditorFrameProps {
   showNoDataPopover: () => void;
+  lensInspector: LensInspector;
 }
 
 export type VisualizationMap = Record<string, Visualization>;
@@ -249,7 +256,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) =>
     | Array<{
         shortMessage: string;
-        longMessage: string;
+        longMessage: React.ReactNode;
         fixAction?: { label: string; newState: () => Promise<T> };
       }>
     | undefined;
@@ -722,7 +729,7 @@ export interface Visualization<T = unknown> {
   ) =>
     | Array<{
         shortMessage: string;
-        longMessage: string;
+        longMessage: React.ReactNode;
       }>
     | undefined;
 
@@ -805,4 +812,10 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
   ) => void;
+}
+
+export interface SharingSavedObjectProps {
+  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
+  aliasTargetId?: string;
+  errorJSON?: string;
 }

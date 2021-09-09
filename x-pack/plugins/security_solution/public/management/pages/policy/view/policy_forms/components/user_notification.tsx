@@ -100,7 +100,7 @@ export const UserNotification = React.memo(
         <ConfigFormHeading>
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policyDetailsConfig.userNotification"
-            defaultMessage="User Notification"
+            defaultMessage="User notification"
           />
         </ConfigFormHeading>
         <SupportedVersionNotice optionName={protection} />
@@ -112,15 +112,15 @@ export const UserNotification = React.memo(
           checked={userNotificationSelected}
           disabled={selected === ProtectionModes.off}
           label={i18n.translate('xpack.securitySolution.endpoint.policyDetail.notifyUser', {
-            defaultMessage: 'Notify User',
+            defaultMessage: 'Notify user',
           })}
         />
         {userNotificationSelected && (
           <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s">
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiText size="xs">
+                <EuiText size="s">
                   <h4>
                     <FormattedMessage
                       id="xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification"

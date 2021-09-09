@@ -27,7 +27,6 @@ import {
   IRuleStatusSOAttributes,
 } from '../../rules/types';
 import { requestMock } from './request';
-import { RuleNotificationAlertType } from '../../notifications/types';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
@@ -574,54 +573,6 @@ export const getSuccessfulSignalUpdateResponse = () => ({
   requests_per_second: -1,
   throttled_until_millis: 0,
   failures: [],
-});
-
-export const getNotificationResult = (): RuleNotificationAlertType => ({
-  id: '200dbf2f-b269-4bf9-aa85-11ba32ba73ba',
-  name: 'Notification for Rule Test',
-  tags: ['__internal_rule_alert_id:85b64e8a-2e40-4096-86af-5ac172c10825'],
-  alertTypeId: 'siem.notifications',
-  consumer: 'siem',
-  params: {
-    ruleAlertId: '85b64e8a-2e40-4096-86af-5ac172c10825',
-  },
-  schedule: {
-    interval: '5m',
-  },
-  enabled: true,
-  actions: [
-    {
-      actionTypeId: '.slack',
-      params: {
-        message:
-          'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
-      },
-      group: 'default',
-      id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-    },
-  ],
-  throttle: null,
-  notifyWhen: null,
-  apiKey: null,
-  apiKeyOwner: 'elastic',
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
-  createdAt: new Date('2020-03-21T11:15:13.530Z'),
-  muteAll: false,
-  mutedInstanceIds: [],
-  scheduledTaskId: '62b3a130-6b70-11ea-9ce9-6b9818c4cbd7',
-  updatedAt: new Date('2020-03-21T12:37:08.730Z'),
-  executionStatus: {
-    status: 'unknown',
-    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-  },
-});
-
-export const getFindNotificationsResultWithSingleHit = (): FindHit<RuleNotificationAlertType> => ({
-  page: 1,
-  perPage: 1,
-  total: 1,
-  data: [getNotificationResult()],
 });
 
 export const getFinalizeSignalsMigrationRequest = () =>

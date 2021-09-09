@@ -43,6 +43,7 @@ describe('buildBulkBody', () => {
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
@@ -114,6 +115,7 @@ describe('buildBulkBody', () => {
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
@@ -199,6 +201,7 @@ describe('buildBulkBody', () => {
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
@@ -270,6 +273,7 @@ describe('buildBulkBody', () => {
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
@@ -338,6 +342,7 @@ describe('buildBulkBody', () => {
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
@@ -405,6 +410,7 @@ describe('buildBulkBody', () => {
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
@@ -468,6 +474,7 @@ describe('buildBulkBody', () => {
       ruleSO,
       doc,
       'missingFields',
+      [],
       buildReasonMessage
     );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
@@ -712,6 +719,7 @@ describe('buildSignalFromEvent', () => {
       ruleSO,
       true,
       'missingFields',
+      [],
       buildReasonMessage
     );
 

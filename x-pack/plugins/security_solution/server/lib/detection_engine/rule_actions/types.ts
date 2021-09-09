@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
-import { SavedObject, SavedObjectAttributes, SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectAttributes } from 'kibana/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
-export { RuleAlertAction };
-
+/**
+ * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
+ * do not use it anymore within the code base. Once we feel comfortable that users are upgrade far enough and this is no longer
+ * needed then it will be safe to remove this saved object and all its migrations.
+ * @deprecated
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleActionsAttributes extends Record<string, any> {
   ruleAlertId: string;
@@ -19,53 +22,12 @@ export interface IRuleActionsAttributes extends Record<string, any> {
   alertThrottle: string | null;
 }
 
-export interface RuleActions {
-  id: string;
-  actions: RuleAlertAction[];
-  ruleThrottle: string;
-  alertThrottle: string | null;
-}
-
+/**
+ * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
+ * do not use it anymore within the code base. Once we feel comfortable that users are upgrade far enough and this is no longer
+ * needed then it will be safe to remove this saved object and all its migrations.
+ * @deprecated
+ */
 export interface IRuleActionsAttributesSavedObjectAttributes
   extends IRuleActionsAttributes,
     SavedObjectAttributes {}
-
-export interface RuleActionsResponse {
-  [key: string]: {
-    actions: IRuleActionsAttributes | null | undefined;
-  };
-}
-
-export interface IRuleActionsSavedObject {
-  type: string;
-  id: string;
-  attributes: Array<SavedObject<IRuleActionsAttributes & SavedObjectAttributes>>;
-  references: unknown[];
-  updated_at: string;
-  version: string;
-}
-
-export interface IRuleActionsFindType {
-  page: number;
-  per_page: number;
-  total: number;
-  saved_objects: IRuleActionsSavedObject[];
-}
-
-export const isRuleActionsSavedObjectType = (
-  obj: unknown
-): obj is SavedObject<IRuleActionsAttributesSavedObjectAttributes> => {
-  return get('attributes', obj) != null;
-};
-
-export const isRuleActionsFindType = (
-  obj: unknown
-): obj is SavedObjectsFindResponse<IRuleActionsAttributesSavedObjectAttributes> => {
-  return get('saved_objects', obj) != null;
-};
-
-export const isRuleActionsFindTypes = (
-  obj: unknown[] | undefined
-): obj is Array<SavedObjectsFindResponse<IRuleActionsAttributesSavedObjectAttributes>> => {
-  return obj ? obj.every((ruleStatus) => isRuleActionsFindType(ruleStatus)) : false;
-};

@@ -62,7 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -160,7 +160,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {

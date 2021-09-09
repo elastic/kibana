@@ -5,22 +5,13 @@
  * 2.0.
  */
 
+import { INDEX_PREFIX, INDEX_PREFIX_FOR_BACKING_INDICES } from '../config';
 import { IndexOptions } from './index_options';
 import { joinWithDash } from './utils';
 
 interface ConstructorOptions {
-  /**
-   * Prepends a relative resource name (defined in the code) with
-   * a full resource prefix, which starts with '.alerts' and can
-   * optionally include a user-defined part in it.
-   * @example 'security.alerts' => '.alerts-security.alerts'
-   */
-  getResourceName(relativeName: string): string;
-
-  /**
-   * Options provided by the plugin/solution defining the index.
-   */
   indexOptions: IndexOptions;
+  kibanaVersion: string;
 }
 
 /**
@@ -31,12 +22,17 @@ interface ConstructorOptions {
  */
 export class IndexInfo {
   constructor(options: ConstructorOptions) {
-    const { getResourceName, indexOptions } = options;
+    const { indexOptions, kibanaVersion } = options;
     const { registrationContext, dataset } = indexOptions;
 
     this.indexOptions = indexOptions;
-    this.baseName = getResourceName(`${registrationContext}.${dataset}`);
+    this.kibanaVersion = kibanaVersion;
+    this.baseName = joinWithDash(INDEX_PREFIX, `${registrationContext}.${dataset}`);
     this.basePattern = joinWithDash(this.baseName, '*');
+    this.baseNameForBackingIndices = joinWithDash(
+      INDEX_PREFIX_FOR_BACKING_INDICES,
+      `${registrationContext}.${dataset}`
+    );
   }
 
   /**
@@ -45,7 +41,13 @@ export class IndexInfo {
   public readonly indexOptions: IndexOptions;
 
   /**
-   * Base index name, prefixed with the full resource prefix.
+   * Current version of Kibana. We version our index resources and documents based on it.
+   * @example '7.16.0'
+   */
+  public readonly kibanaVersion: string;
+
+  /**
+   * Base index name, prefixed with the resource prefix.
    * @example '.alerts-security.alerts'
    */
   public readonly baseName: string;
@@ -57,20 +59,18 @@ export class IndexInfo {
   public readonly basePattern: string;
 
   /**
+   * Base name for internal backing indices, prefixed with a special prefix.
+   * @example '.internal.alerts-security.alerts'
+   */
+  private readonly baseNameForBackingIndices: string;
+
+  /**
    * Primary index alias. Includes a namespace.
    * Used as a write target when writing documents to the index.
    * @example '.alerts-security.alerts-default'
    */
   public getPrimaryAlias(namespace: string): string {
     return joinWithDash(this.baseName, namespace);
-  }
-
-  /**
-   * Index pattern based on the primary alias.
-   * @example '.alerts-security.alerts-default-*'
-   */
-  public getPrimaryAliasPattern(namespace: string): string {
-    return joinWithDash(this.baseName, namespace, '*');
   }
 
   /**
@@ -81,6 +81,26 @@ export class IndexInfo {
   public getSecondaryAlias(namespace: string): string | null {
     const { secondaryAlias } = this.indexOptions;
     return secondaryAlias ? joinWithDash(secondaryAlias, namespace) : null;
+  }
+
+  /**
+   * Name of the initial concrete index, with the namespace and the ILM suffix.
+   * @example '.internal.alerts-security.alerts-default-000001'
+   */
+  public getConcreteIndexInitialName(namespace: string): string {
+    return joinWithDash(this.baseNameForBackingIndices, namespace, '000001');
+  }
+
+  /**
+   * Index pattern for internal backing indices. Used in the index bootstrapping logic.
+   * Can include or exclude the namespace.
+   *
+   * WARNING: Must not be used for reading documents! If you use it, you should know what you're doing.
+   *
+   * @example '.internal.alerts-security.alerts-default-*', '.internal.alerts-security.alerts-*'
+   */
+  public getPatternForBackingIndices(namespace?: string): string {
+    return joinWithDash(this.baseNameForBackingIndices, namespace, '*');
   }
 
   /**
@@ -98,14 +118,6 @@ export class IndexInfo {
    */
   public getPatternForReading(namespace?: string): string {
     return `${joinWithDash(this.baseName, namespace)}*`;
-  }
-
-  /**
-   * Name of the initial concrete index, with the namespace and the ILM suffix.
-   * @example '.alerts-security.alerts-default-000001'
-   */
-  public getConcreteIndexInitialName(namespace: string): string {
-    return joinWithDash(this.baseName, namespace, '000001');
   }
 
   /**

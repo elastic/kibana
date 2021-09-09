@@ -455,8 +455,24 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    validateJobId(jobId: string) {
+      if (jobId.match(/[\*,]/) !== null) {
+        throw new Error(`No wildcards or list of ids supported in this context (got ${jobId})`);
+      }
+    },
+
     async getAnomalyDetectionJob(jobId: string) {
       return await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(200);
+    },
+
+    async adJobExist(jobId: string) {
+      this.validateJobId(jobId);
+      try {
+        await this.getAnomalyDetectionJob(jobId);
+        return true;
+      } catch (err) {
+        return false;
+      }
     },
 
     async waitForAnomalyDetectionJobToExist(jobId: string, timeout: number = 5 * 1000) {
@@ -509,6 +525,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteAnomalyDetectionJobES(jobId: string) {
       log.debug(`Deleting anomaly detection job with id '${jobId}' ...`);
+
+      if ((await this.adJobExist(jobId)) === false) {
+        log.debug('> no such AD job found, nothing to delete.');
+        return;
+      }
 
       const datafeedId = `datafeed-${jobId}`;
       if ((await this.datafeedExist(datafeedId)) === true) {
@@ -672,6 +693,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return response;
     },
 
+    async dfaJobExist(analyticsId: string) {
+      this.validateJobId(analyticsId);
+      try {
+        await this.getDataFrameAnalyticsJob(analyticsId);
+        return true;
+      } catch (err) {
+        return false;
+      }
+    },
+
     async waitForDataFrameAnalyticsJobToExist(analyticsId: string) {
       await retry.waitForWithTimeout(`'${analyticsId}' to exist`, 5 * 1000, async () => {
         if (await this.getDataFrameAnalyticsJob(analyticsId)) {
@@ -724,6 +755,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteDataFrameAnalyticsJobES(analyticsId: string) {
       log.debug(`Deleting data frame analytics job with id '${analyticsId}' ...`);
+
+      if ((await this.dfaJobExist(analyticsId)) === false) {
+        log.debug('> no such DFA job found, nothing to delete.');
+        return;
+      }
 
       await esSupertest
         .delete(`/_ml/data_frame/analytics/${analyticsId}`)

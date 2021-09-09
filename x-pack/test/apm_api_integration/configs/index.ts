@@ -6,7 +6,7 @@
  */
 
 import { mapValues } from 'lodash';
-import { createTestConfig } from '../common/config';
+import { createTestConfig, CreateTestConfig } from '../common/config';
 
 const apmFtrConfigs = {
   basic: {
@@ -27,7 +27,6 @@ const apmFtrConfigs = {
     license: 'trial' as const,
     kibanaConfig: {
       'migrations.enableV2': 'false',
-      'xpack.ruleRegistry.index': '.kibana-alerts',
       'xpack.ruleRegistry.write.enabled': 'true',
     },
   },
@@ -35,9 +34,12 @@ const apmFtrConfigs = {
 
 export type APMFtrConfigName = keyof typeof apmFtrConfigs;
 
-export const configs = mapValues(apmFtrConfigs, (value, key) => {
-  return createTestConfig({
-    name: key as APMFtrConfigName,
-    ...value,
-  });
-});
+export const configs: Record<APMFtrConfigName, CreateTestConfig> = mapValues(
+  apmFtrConfigs,
+  (value, key) => {
+    return createTestConfig({
+      name: key as APMFtrConfigName,
+      ...value,
+    });
+  }
+);

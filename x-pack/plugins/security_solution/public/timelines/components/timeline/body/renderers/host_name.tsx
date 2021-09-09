@@ -8,7 +8,7 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { LinkAnchor } from '../../../../../common/components/links';
+import { HostDetailsLink } from '../../../../../common/components/links';
 import {
   TimelineId,
   TimelineTabs,
@@ -17,11 +17,9 @@ import {
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
-import { StatefulEventContext } from '../events/stateful_event_context';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
-import { SecurityPageName } from '../../../../../../common/constants';
-import { useFormatUrl, getHostDetailsUrl } from '../../../../../common/components/link_to';
+import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   contextId: string;
@@ -41,10 +39,8 @@ const HostNameComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
-
-  const { formatUrl } = useFormatUrl(SecurityPageName.hosts);
-  const isInTimelineContext = hostName && eventContext?.tabType && eventContext?.timelineID;
-
+  const isInTimelineContext =
+    hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
   const openHostDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
@@ -73,19 +69,19 @@ const HostNameComponent: React.FC<Props> = ({
     [dispatch, eventContext, isInTimelineContext, hostName]
   );
 
+  // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
+  // When this component is used outside of timeline/alerts table (i.e. in the flyout) we would still like it to link to the Host Details page
   const content = useMemo(
     () => (
-      <LinkAnchor
-        href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
-        data-test-subj="host-details-button"
-        // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
-        // When this component is used outside of timeline (i.e. in the flyout) we would still like it to link to the Host Details page
+      <HostDetailsLink
+        hostName={hostName}
+        isButton={false}
         onClick={isInTimelineContext ? openHostDetailsSidePanel : undefined}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
-      </LinkAnchor>
+      </HostDetailsLink>
     ),
-    [formatUrl, hostName, isInTimelineContext, openHostDetailsSidePanel]
+    [hostName, isInTimelineContext, openHostDetailsSidePanel]
   );
 
   return isString(value) && hostName.length > 0 ? (

@@ -607,7 +607,17 @@
               "UrlGeneratorsSetup",
               "; url: ",
               "UrlService",
-              "; }"
+              "; navigate(options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.RedirectOptions",
+                "text": "RedirectOptions"
+              },
+              "<",
+              "SerializableRecord",
+              ">): void; }"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false
@@ -702,7 +712,17 @@
               "UrlGeneratorsStart",
               "; url: ",
               "UrlService",
-              "; }"
+              "; navigate(options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.RedirectOptions",
+                "text": "RedirectOptions"
+              },
+              "<",
+              "SerializableRecord",
+              ">): void; }"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false
@@ -904,7 +924,7 @@
         "children": [
           {
             "parentPluginId": "dashboardEnhanced",
-            "id": "def-common.createExtract.$1.drilldownId",
+            "id": "def-common.createExtract.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  drilldownId,\n}",
@@ -914,7 +934,7 @@
             "children": [
               {
                 "parentPluginId": "dashboardEnhanced",
-                "id": "def-common.createExtract.$1.drilldownId.drilldownId",
+                "id": "def-common.createExtract.$1.drilldownId",
                 "type": "string",
                 "tags": [],
                 "label": "drilldownId",
@@ -960,7 +980,7 @@
         "children": [
           {
             "parentPluginId": "dashboardEnhanced",
-            "id": "def-common.createInject.$1.drilldownId",
+            "id": "def-common.createInject.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  drilldownId,\n}",
@@ -970,7 +990,7 @@
             "children": [
               {
                 "parentPluginId": "dashboardEnhanced",
-                "id": "def-common.createInject.$1.drilldownId.drilldownId",
+                "id": "def-common.createInject.$1.drilldownId",
                 "type": "string",
                 "tags": [],
                 "label": "drilldownId",

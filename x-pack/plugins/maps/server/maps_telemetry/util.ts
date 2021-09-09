@@ -29,7 +29,6 @@ export enum TELEMETRY_LAYER_TYPE {
   ES_AGG_HEATMAP = 'es_agg_heatmap',
   EMS_REGION = 'ems_region',
   EMS_BASEMAP = 'ems_basemap',
-  KBN_REGION = 'kbn_region',
   KBN_TMS_RASTER = 'kbn_tms_raster',
   UX_TMS_RASTER = 'ux_tms_raster', // configured in the UX layer wizard of Maps
   UX_TMS_MVT = 'ux_tms_mvt', // configured in the UX layer wizard of Maps
@@ -109,10 +108,6 @@ export function getTelemetryLayerType(
 
   if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.KIBANA_TILEMAP) {
     return TELEMETRY_LAYER_TYPE.KBN_TMS_RASTER;
-  }
-
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.REGIONMAP_FILE) {
-    return TELEMETRY_LAYER_TYPE.KBN_REGION;
   }
 
   if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.EMS_XYZ) {

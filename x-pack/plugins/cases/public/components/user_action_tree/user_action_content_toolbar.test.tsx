@@ -21,17 +21,10 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        getUrlForApp: jest.fn(),
-      },
-    },
-  }),
-}));
+jest.mock('../../common/lib/kibana');
 
 const props: UserActionContentToolbarProps = {
+  commentMarkdown: '',
   getCaseDetailHrefWithCommentId: jest.fn().mockReturnValue('case-detail-url-with-comment-id-1'),
   id: '1',
   editLabel: 'edit',

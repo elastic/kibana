@@ -1,5 +1,6 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-plugin-generator"
 PKG_REQUIRE_NAME = "@kbn/plugin-generator"
@@ -35,7 +36,7 @@ NPM_MODULE_EXTRA_FILES = [
   ":template",
 ]
 
-SRC_DEPS = [
+RUNTIME_DEPS = [
   "//packages/kbn-utils",
   "//packages/kbn-dev-utils",
   "@npm//del",
@@ -49,6 +50,11 @@ SRC_DEPS = [
 ]
 
 TYPES_DEPS = [
+  "//packages/kbn-utils",
+  "//packages/kbn-dev-utils",
+  "@npm//del",
+  "@npm//execa",
+  "@npm//globby",
   "@npm//@types/ejs",
   "@npm//@types/inquirer",
   "@npm//@types/jest",
@@ -58,7 +64,11 @@ TYPES_DEPS = [
   "@npm//@types/vinyl-fs",
 ]
 
-DEPS = SRC_DEPS + TYPES_DEPS
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
 
 ts_config(
   name = "tsconfig",
@@ -70,13 +80,14 @@ ts_config(
 )
 
 ts_project(
-  name = "tsc",
+  name = "tsc_types",
   args = ['--pretty'],
   srcs = SRCS,
-  deps = DEPS,
+  deps = TYPES_DEPS,
   declaration = True,
   declaration_map = True,
-  out_dir = "target",
+  emit_declaration_only = True,
+  out_dir = "target_types",
   source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
@@ -85,7 +96,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":tsc"],
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

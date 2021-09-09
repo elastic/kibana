@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useInspectorContext } from '../context/inspector/use_inspector_context';
+import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import {
   AutoAbortedAPMClient,
   callApmApi,
@@ -76,7 +77,8 @@ export function useFetcher<TReturn>(
     status: FETCH_STATUS.NOT_INITIATED,
   });
   const [counter, setCounter] = useState(0);
-  const { rangeId } = useUrlParams();
+  const { timeRangeId } = useTimeRangeId();
+  const { addInspectorRequest } = useInspectorContext();
 
   useEffect(() => {
     let controller: AbortController = new AbortController();
@@ -159,11 +161,19 @@ export function useFetcher<TReturn>(
   }, [
     counter,
     preservePreviousData,
-    rangeId,
+    timeRangeId,
     showToastOnError,
     ...fnDeps,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
+
+  useEffect(() => {
+    if (result.error) {
+      addInspectorRequest({ ...result, data: result.error.body?.attributes });
+    } else {
+      addInspectorRequest(result);
+    }
+  }, [addInspectorRequest, result]);
 
   return useMemo(() => {
     return {

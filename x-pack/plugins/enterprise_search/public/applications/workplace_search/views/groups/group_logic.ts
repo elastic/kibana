@@ -13,8 +13,7 @@ import { i18n } from '@kbn/i18n';
 import {
   clearFlashMessages,
   flashAPIErrors,
-  setSuccessMessage,
-  setQueuedSuccessMessage,
+  flashSuccessToast,
   setQueuedErrorMessage,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
@@ -175,7 +174,9 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
   listeners: ({ actions, values }) => ({
     initializeGroup: async ({ groupId }) => {
       try {
-        const response = await HttpLogic.values.http.get(`/api/workplace_search/groups/${groupId}`);
+        const response = await HttpLogic.values.http.get(
+          `/internal/workplace_search/groups/${groupId}`
+        );
         actions.onInitializeGroup(response);
       } catch (e) {
         const NOT_FOUND_MESSAGE = i18n.translate(
@@ -197,7 +198,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
         group: { id, name },
       } = values;
       try {
-        await HttpLogic.values.http.delete(`/api/workplace_search/groups/${id}`);
+        await HttpLogic.values.http.delete(`/internal/workplace_search/groups/${id}`);
         const GROUP_DELETED_MESSAGE = i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.groups.groupDeleted',
           {
@@ -206,7 +207,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
           }
         );
 
-        setQueuedSuccessMessage(GROUP_DELETED_MESSAGE);
+        flashSuccessToast(GROUP_DELETED_MESSAGE);
         KibanaLogic.values.navigateToUrl(GROUPS_PATH);
       } catch (e) {
         flashAPIErrors(e);
@@ -219,9 +220,12 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
       } = values;
 
       try {
-        const response = await HttpLogic.values.http.put(`/api/workplace_search/groups/${id}`, {
-          body: JSON.stringify({ group: { name: groupNameInputValue } }),
-        });
+        const response = await HttpLogic.values.http.put(
+          `/internal/workplace_search/groups/${id}`,
+          {
+            body: JSON.stringify({ group: { name: groupNameInputValue } }),
+          }
+        );
         actions.onGroupNameChanged(response);
 
         const GROUP_RENAMED_MESSAGE = i18n.translate(
@@ -231,7 +235,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
             values: { groupName: response.name },
           }
         );
-        setSuccessMessage(GROUP_RENAMED_MESSAGE);
+        flashSuccessToast(GROUP_RENAMED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -244,7 +248,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
 
       try {
         const response = await HttpLogic.values.http.post(
-          `/api/workplace_search/groups/${id}/share`,
+          `/internal/workplace_search/groups/${id}/share`,
           {
             body: JSON.stringify({ content_source_ids: selectedGroupSources }),
           }
@@ -256,7 +260,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
             defaultMessage: 'Successfully updated shared content sources.',
           }
         );
-        setSuccessMessage(GROUP_SOURCES_UPDATED_MESSAGE);
+        flashSuccessToast(GROUP_SOURCES_UPDATED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -276,7 +280,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
 
       try {
         const response = await HttpLogic.values.http.put(
-          `/api/workplace_search/groups/${id}/boosts`,
+          `/internal/workplace_search/groups/${id}/boosts`,
           {
             body: JSON.stringify({ content_source_boosts: boosts }),
           }
@@ -289,7 +293,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
           }
         );
 
-        setSuccessMessage(GROUP_PRIORITIZATION_UPDATED_MESSAGE);
+        flashSuccessToast(GROUP_PRIORITIZATION_UPDATED_MESSAGE);
         actions.onGroupPrioritiesChanged(response);
       } catch (e) {
         flashAPIErrors(e);

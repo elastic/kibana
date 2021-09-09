@@ -48,7 +48,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
     'data-test-subj': dataTestSubj,
     tabs = [],
   }) => {
-    const isAdd = useMemo(() => ['package'].includes(from), [from]);
+    const isAdd = useMemo(() => ['policy', 'package'].includes(from), [from]);
     const isEdit = useMemo(() => ['edit', 'package-edit'].includes(from), [from]);
     const isUpgrade = useMemo(
       () =>

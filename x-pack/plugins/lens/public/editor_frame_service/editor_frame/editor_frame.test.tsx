@@ -39,6 +39,7 @@ import {
   DatasourceMock,
   createExpressionRendererMock,
 } from '../../mocks';
+import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
@@ -46,6 +47,7 @@ import { chartPluginMock } from '../../../../../../src/plugins/charts/public/moc
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import { mockDataPlugin, mountWithProvider } from '../../mocks';
 import { setState } from '../../state_management';
+import { getLensInspectorService } from '../../lens_inspector_service';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -79,6 +81,7 @@ function getDefaultProps() {
       charts: chartPluginMock.createStartContract(),
     },
     palettes: chartPluginMock.createPaletteRegistry(),
+    lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
     showNoDataPopover: jest.fn(),
   };
   return defaultProps;
@@ -227,7 +230,7 @@ describe('editor_frame', () => {
         await mountWithProvider(<EditorFrame {...props} />, {
           data: props.plugins.data,
           preloadedState: {
-            visualization: { activeId: 'testVis', state: null },
+            visualization: { activeId: 'testVis', state: {} },
             datasourceStates: {
               testDatasource: {
                 isLoading: false,
@@ -282,7 +285,7 @@ describe('editor_frame', () => {
         await mountWithProvider(<EditorFrame {...props} />, {
           data: props.plugins.data,
           preloadedState: {
-            visualization: { activeId: 'testVis', state: null },
+            visualization: { activeId: 'testVis', state: {} },
             datasourceStates: {
               testDatasource: {
                 isLoading: false,

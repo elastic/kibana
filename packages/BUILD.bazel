@@ -7,6 +7,7 @@ filegroup(
       "//packages/elastic-eslint-config-kibana:build",
       "//packages/elastic-safer-lodash-set:build",
       "//packages/kbn-ace:build",
+      "//packages/kbn-alerts:build",
       "//packages/kbn-analytics:build",
       "//packages/kbn-apm-config-loader:build",
       "//packages/kbn-apm-utils:build",

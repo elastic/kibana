@@ -63,7 +63,23 @@ export const useScheduledQueryGroupQueryForm = ({
     options: {
       stripEmptyFields: false,
     },
-    defaultValue,
+    defaultValue: defaultValue || {
+      id: {
+        type: 'text',
+        value: '',
+      },
+      query: {
+        type: 'text',
+        value: '',
+      },
+      interval: {
+        type: 'integer',
+        value: '3600',
+      },
+      ecs_mapping: {
+        value: {},
+      },
+    },
     // @ts-expect-error update types
     serializer: (payload) =>
       produce(payload, (draft) => {

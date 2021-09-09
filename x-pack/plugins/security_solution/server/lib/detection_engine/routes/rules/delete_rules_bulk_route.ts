@@ -50,7 +50,6 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
     const siemResponse = buildSiemResponse(response);
 
     const rulesClient = context.alerting?.getRulesClient();
-    const savedObjectsClient = context.core.savedObjects.client;
 
     if (!rulesClient) {
       return siemResponse.error({ statusCode: 404 });
@@ -84,12 +83,11 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
           });
           await deleteRules({
             rulesClient,
-            savedObjectsClient,
             ruleStatusClient,
             ruleStatuses,
             id: rule.id,
           });
-          return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
+          return transformValidateBulkError(idOrRuleIdOrUnknown, rule, ruleStatuses);
         } catch (err) {
           return transformBulkError(idOrRuleIdOrUnknown, err);
         }

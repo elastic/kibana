@@ -18,12 +18,10 @@ import { SavedObjectDecorator } from './decorators';
 
 import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
-import { getStubIndexPattern, StubIndexPattern } from '../../../../plugins/data/public/test_utils';
+import { createStubIndexPattern } from '../../../../plugins/data/common/stubs';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
-import { IndexPattern } from '../../../data/common/index_patterns';
+import { IndexPattern } from '../../../data/common/index_patterns/index_patterns';
 import { savedObjectsDecoratorRegistryMock } from './decorators/registry.mock';
-
-const getConfig = (cfg: any) => cfg;
 
 describe('Saved Object', () => {
   const startMock = coreMock.createStart();
@@ -375,14 +373,9 @@ describe('Saved Object', () => {
               type: 'dashboard',
             } as SimpleSavedObject<SavedObjectAttributes>);
 
-            const indexPattern = getStubIndexPattern(
-              'my-index',
-              getConfig,
-              null,
-              [],
-              coreMock.createSetup()
-            );
-            indexPattern.title = indexPattern.id!;
+            const indexPattern = createStubIndexPattern({
+              spec: { id: 'my-index', title: 'my-index' },
+            });
             savedObject.searchSource!.setField('index', indexPattern);
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
@@ -416,13 +409,12 @@ describe('Saved Object', () => {
               type: 'dashboard',
             } as SimpleSavedObject<SavedObjectAttributes>);
 
-            const indexPattern = getStubIndexPattern(
-              'non-existant-index',
-              getConfig,
-              null,
-              [],
-              coreMock.createSetup()
-            );
+            const indexPattern = createStubIndexPattern({
+              spec: {
+                id: 'non-existant-index',
+              },
+            });
+
             savedObject.searchSource!.setFields({ index: indexPattern });
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
@@ -746,14 +738,12 @@ describe('Saved Object', () => {
 
         const savedObject = new SavedObjectClass(config);
         savedObject.hydrateIndexPattern = jest.fn().mockImplementation(() => {
-          const indexPattern = getStubIndexPattern(
-            indexPatternId,
-            getConfig,
-            null,
-            [],
-            coreMock.createSetup()
-          );
-          indexPattern.title = indexPattern.id!;
+          const indexPattern = createStubIndexPattern({
+            spec: {
+              id: indexPatternId,
+              title: indexPatternId,
+            },
+          });
           savedObject.searchSource!.setField('index', indexPattern);
           return Bluebird.resolve(indexPattern);
         });
@@ -762,7 +752,7 @@ describe('Saved Object', () => {
         return savedObject.init!().then(() => {
           expect(afterESRespCallback).toHaveBeenCalled();
           const index = savedObject.searchSource!.getField('index');
-          expect(index instanceof StubIndexPattern).toBe(true);
+          expect(index instanceof IndexPattern).toBe(true);
           expect(index!.id).toEqual(indexPatternId);
         });
       });

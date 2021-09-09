@@ -11,13 +11,13 @@ import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { getSplits } from '../../helpers/get_splits';
 import { getLastMetric } from '../../helpers/get_last_metric';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
-import { METRIC_TYPES } from '../../../../../common/enums';
+import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 
 export function percentileRank(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
     const metric = getLastMetric(series);
 
-    if (metric.type !== METRIC_TYPES.PERCENTILE_RANK) {
+    if (metric.type !== TSVB_METRIC_TYPES.PERCENTILE_RANK) {
       return next(results);
     }
 

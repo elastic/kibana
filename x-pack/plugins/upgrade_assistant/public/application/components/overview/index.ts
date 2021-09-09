@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DeprecationsOverview } from './overview';
+export { Overview } from './overview';

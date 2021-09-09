@@ -7,7 +7,7 @@
  */
 
 import { has } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta } from './types';
+import type { Filter, FilterMeta } from './types';
 
 export type MissingFilterMeta = FilterMeta;
 
@@ -24,8 +24,7 @@ export type MissingFilter = Filter & {
  *
  * @public
  */
-export const isMissingFilter = (filter: FieldFilter): filter is MissingFilter =>
-  has(filter, 'missing');
+export const isMissingFilter = (filter: Filter): filter is MissingFilter => has(filter, 'missing');
 
 /**
  * @internal

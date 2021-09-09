@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFieldNumber,
   EuiFieldPassword,
+  EuiSelect,
   EuiSwitch,
   EuiFormRow,
   EuiTitle,
@@ -24,13 +25,22 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import { getEmailServices } from './email';
+import { useEmailConfig } from './use_email_config';
 
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
-  const { docLinks } = useKibana().services;
-  const { from, host, port, secure, hasAuth } = action.config;
+  const { docLinks, http, isCloud } = useKibana().services;
+  const { from, host, port, secure, hasAuth, service } = action.config;
   const { user, password } = action.secrets;
+
+  const { emailServiceConfigurable, setEmailService } = useEmailConfig(
+    http,
+    service,
+    editActionConfig
+  );
+
   useEffect(() => {
     if (!action.id) {
       editActionConfig('hasAuth', true);
@@ -42,6 +52,8 @@ export const EmailActionConnectorFields: React.FunctionComponent<
     from !== undefined && errors.from !== undefined && errors.from.length > 0;
   const isHostInvalid: boolean =
     host !== undefined && errors.host !== undefined && errors.host.length > 0;
+  const isServiceInvalid: boolean =
+    service !== undefined && errors.service !== undefined && errors.service.length > 0;
   const isPortInvalid: boolean =
     port !== undefined && errors.port !== undefined && errors.port.length > 0;
 
@@ -95,6 +107,31 @@ export const EmailActionConnectorFields: React.FunctionComponent<
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiFormRow
+            label={i18n.translate(
+              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serviceTextFieldLabel',
+              {
+                defaultMessage: 'Service',
+              }
+            )}
+            error={errors.serverType}
+            isInvalid={isServiceInvalid}
+          >
+            <EuiSelect
+              name="service"
+              hasNoInitialSelection={true}
+              value={service}
+              disabled={readOnly}
+              isInvalid={isServiceInvalid}
+              data-test-subj="emailServiceSelectInput"
+              options={getEmailServices(isCloud)}
+              onChange={(e) => {
+                setEmailService(e.target.value);
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
             id="emailHost"
             fullWidth
             error={errors.host}
@@ -108,6 +145,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
           >
             <EuiFieldText
               fullWidth
+              disabled={!emailServiceConfigurable}
               readOnly={readOnly}
               isInvalid={isHostInvalid}
               name="host"
@@ -144,6 +182,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                   prepend=":"
                   isInvalid={isPortInvalid}
                   fullWidth
+                  disabled={!emailServiceConfigurable}
                   readOnly={readOnly}
                   name="port"
                   value={port || ''}
@@ -169,7 +208,8 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                         defaultMessage: 'Secure',
                       }
                     )}
-                    disabled={readOnly}
+                    data-test-subj="emailSecureSwitch"
+                    disabled={readOnly || !emailServiceConfigurable}
                     checked={secure || false}
                     onChange={(e) => {
                       editActionConfig('secure', e.target.checked);

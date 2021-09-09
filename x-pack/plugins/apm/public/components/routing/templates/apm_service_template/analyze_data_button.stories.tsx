@@ -7,10 +7,12 @@
 
 import type { Story, StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
-import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { AnalyzeDataButton } from './analyze_data_button';
 
 interface Args {
@@ -35,17 +37,28 @@ export default {
       } as unknown) as Partial<CoreStart>);
 
       return (
-        <MockUrlParamsContextProvider
-          params={{ environment, rangeFrom: 'now-15m', rangeTo: 'now' }}
+        <MemoryRouter
+          initialEntries={[
+            `/services/${serviceName}/overview?rangeFrom=now-15m&rangeTo=now&environment=${
+              environment ?? ENVIRONMENT_ALL.value
+            }&kuery=`,
+          ]}
         >
-          <APMServiceContext.Provider
-            value={{ agentName, alerts: [], transactionTypes: [], serviceName }}
-          >
-            <KibanaContext.Provider>
-              <StoryComponent />
-            </KibanaContext.Provider>
-          </APMServiceContext.Provider>
-        </MockUrlParamsContextProvider>
+          <MockApmPluginContextWrapper>
+            <APMServiceContext.Provider
+              value={{
+                agentName,
+                alerts: [],
+                transactionTypes: [],
+                serviceName,
+              }}
+            >
+              <KibanaContext.Provider>
+                <StoryComponent />
+              </KibanaContext.Provider>
+            </APMServiceContext.Provider>
+          </MockApmPluginContextWrapper>
+        </MemoryRouter>
       );
     },
   ],

@@ -36,17 +36,18 @@ export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit,
   mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields'],
   applyOverrides: boolean,
   buildReasonMessage: BuildReasonMessage
 ): RACAlert => {
-  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
+  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const rule = applyOverrides
     ? buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);
   const filteredSource = filterSource(mergedDoc);
   const timestamp = new Date().toISOString();
 
-  const reason = buildReasonMessage({ mergedDoc, rule, timestamp });
+  const reason = buildReasonMessage({ mergedDoc, rule });
   if (isSourceDoc(mergedDoc)) {
     return {
       ...filteredSource,

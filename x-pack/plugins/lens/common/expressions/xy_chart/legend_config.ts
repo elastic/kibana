@@ -37,6 +37,14 @@ export interface LegendConfig {
    * Number of columns when legend is set inside chart
    */
   floatingColumns?: number;
+  /**
+   * Maximum number of lines per legend item
+   */
+  maxLines?: number;
+  /**
+   * Flag whether the legend items are truncated or not
+   */
+  shouldTruncate?: boolean;
 }
 
 export type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
@@ -98,6 +106,19 @@ export const legendConfig: ExpressionFunctionDefinition<
       types: ['number'],
       help: i18n.translate('xpack.lens.xyChart.floatingColumns.help', {
         defaultMessage: 'Specifies the number of columns when legend is displayed inside chart.',
+      }),
+    },
+    maxLines: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.maxLines.help', {
+        defaultMessage: 'Specifies the number of lines per legend item.',
+      }),
+    },
+    shouldTruncate: {
+      types: ['boolean'],
+      default: true,
+      help: i18n.translate('xpack.lens.xyChart.shouldTruncate.help', {
+        defaultMessage: 'Specifies whether the legend items will be truncated or not',
       }),
     },
   },

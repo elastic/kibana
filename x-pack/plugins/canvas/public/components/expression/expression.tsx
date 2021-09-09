@@ -171,7 +171,7 @@ export const Expression: FC<Props> = ({
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="fullScreen" onClick={toggleCompactView} size="xs">
+                <EuiButtonEmpty iconType="fullScreen" onClick={toggleCompactView} size="s">
                   {isCompact ? strings.getMaximizeButtonLabel() : strings.getMinimizeButtonLabel()}
                 </EuiButtonEmpty>
               </EuiFlexItem>

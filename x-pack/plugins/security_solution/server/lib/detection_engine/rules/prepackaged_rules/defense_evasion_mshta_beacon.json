@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies Mshta.exe making outbound network connections. This may indicate adversarial activity as Mshta is often leveraged by adversaries to execute malicious scripts and evade detection.",
+  "description": "Identifies Mshta.exe making outbound network connections. This may indicate adversarial activity, as Mshta is often leveraged by adversaries to execute malicious scripts and evade detection.",
   "from": "now-20m",
   "index": [
     "logs-endpoint.events.*",
@@ -48,5 +48,5 @@
     }
   ],
   "type": "eql",
-  "version": 4
+  "version": 5
 }

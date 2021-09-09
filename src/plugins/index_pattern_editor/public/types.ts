@@ -27,6 +27,7 @@ export interface IndexPatternEditorContext {
   notifications: NotificationsStart;
   application: ApplicationStart;
   indexPatternService: DataPublicPluginStart['indexPatterns'];
+  searchClient: DataPublicPluginStart['search']['search'];
 }
 
 /** @public */

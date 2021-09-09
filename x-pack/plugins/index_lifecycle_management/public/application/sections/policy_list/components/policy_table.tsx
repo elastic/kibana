@@ -15,10 +15,9 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useHistory } from 'react-router-dom';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
-import { getIndexListUri } from '../../../../../../index_management/public';
 import { PolicyFromES } from '../../../../../common/types';
 import { useKibana } from '../../../../shared_imports';
-import { getPolicyEditPath } from '../../../services/navigation';
+import { getIndicesListPath, getPolicyEditPath } from '../../../services/navigation';
 import { trackUiMetric } from '../../../services/ui_metric';
 
 import { UIM_EDIT_CLICK } from '../../../constants';
@@ -53,7 +52,7 @@ interface Props {
 export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   const history = useHistory();
   const {
-    services: { navigateToApp },
+    services: { getUrlForApp },
   } = useKibana();
 
   const { setListAction } = usePolicyListContext();
@@ -115,19 +114,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
       render: (value: string[], policy: PolicyFromES) => {
         return value && value.length > 0 ? (
           <EuiToolTip content={actionTooltips.viewIndices} position="left">
-            <EuiButtonEmpty
-              flush="both"
-              onClick={() =>
-                navigateToApp('management', {
-                  path: `/data/index_management${getIndexListUri(
-                    `ilm.policy:"${policy.name}"`,
-                    true
-                  )}`,
-                })
-              }
-            >
-              {value.length}
-            </EuiButtonEmpty>
+            <EuiLink href={getIndicesListPath(policy.name, getUrlForApp)}>{value.length}</EuiLink>
           </EuiToolTip>
         ) : (
           '0'

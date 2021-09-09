@@ -523,6 +523,10 @@ export class ActionsClient {
   ) {
     return this.actionTypeRegistry.isActionTypeEnabled(actionTypeId, options);
   }
+
+  public isPreconfigured(connectorId: string): boolean {
+    return !!this.preconfiguredActions.find((preconfigured) => preconfigured.id === connectorId);
+  }
 }
 
 function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResult {

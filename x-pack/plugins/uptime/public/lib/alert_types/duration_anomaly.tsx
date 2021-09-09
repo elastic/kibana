@@ -8,7 +8,7 @@
 import React from 'react';
 import moment from 'moment';
 
-import { ALERT_END, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_REASON } from '@kbn/rule-data-utils';
 
 import { AlertTypeInitializer } from '.';
 import { getMonitorRouteFromMonitorId } from './common';
@@ -26,7 +26,7 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
-    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/duration-anomaly-alert.html`;
+    return `${docLinks.links.observability.uptimeDurationAnomaly}`;
   },
   alertParamsExpression: (params: unknown) => (
     <DurationAnomalyAlert core={core} plugins={plugins} params={params} />
@@ -36,10 +36,10 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   defaultActionMessage,
   requiresAppContext: true,
   format: ({ fields }) => ({
-    reason: fields.reason,
+    reason: fields[ALERT_REASON] || '',
     link: getMonitorRouteFromMonitorId({
       monitorId: fields['monitor.id']!,
-      dateRangeEnd: fields[ALERT_STATUS] === 'open' ? 'now' : fields[ALERT_END]!,
+      dateRangeEnd: fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE ? 'now' : fields[ALERT_END]!,
       dateRangeStart: moment(new Date(fields['anomaly.start']!)).subtract('5', 'm').toISOString(),
     }),
   }),

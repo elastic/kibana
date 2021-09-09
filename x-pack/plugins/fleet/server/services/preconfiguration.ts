@@ -28,7 +28,7 @@ import {
 import { escapeSearchQueryPhrase } from './saved_object';
 
 import { pkgToPkgKey } from './epm/registry';
-import { getInstallation } from './epm/packages';
+import { getInstallation, getPackageInfo } from './epm/packages';
 import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
@@ -277,6 +277,12 @@ async function addPreconfiguredPolicyPackages(
 ) {
   // Add packages synchronously to avoid overwriting
   for (const { installedPackage, name, description, inputs } of installedPackagePolicies) {
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: installedPackage.name,
+      pkgVersion: installedPackage.version,
+    });
+
     await addPackageToAgentPolicy(
       soClient,
       esClient,
@@ -285,7 +291,7 @@ async function addPreconfiguredPolicyPackages(
       defaultOutput,
       name,
       description,
-      (policy) => overridePackageInputs(policy, inputs)
+      (policy) => overridePackageInputs(policy, packageInfo, inputs)
     );
   }
 }

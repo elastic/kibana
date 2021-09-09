@@ -13,7 +13,7 @@ import { mockGlobalState } from '../../mock/global_state';
 import { TGridModelSettings } from '.';
 
 const id = 'foo';
-const timelineById = {
+const defaultTimelineById = {
   ...mockGlobalState.timelineById,
 };
 
@@ -28,16 +28,32 @@ describe('setInitializeTgridSettings', () => {
       sort, // <-- override
     };
 
-    expect(setInitializeTgridSettings({ id, timelineById, tGridSettingsProps })[id].sort).toEqual(
-      sort
-    );
+    expect(
+      setInitializeTgridSettings({ id, timelineById: defaultTimelineById, tGridSettingsProps })[id]
+        .sort
+    ).toEqual(sort);
   });
 
   test('it returns the default sort when tGridSettingsProps does NOT contain an override', () => {
     const tGridSettingsProps = { footerText: 'test' }; // <-- no `sort` override
 
-    expect(setInitializeTgridSettings({ id, timelineById, tGridSettingsProps })[id].sort).toEqual(
-      tGridDefaults.sort
-    );
+    expect(
+      setInitializeTgridSettings({ id, timelineById: defaultTimelineById, tGridSettingsProps })[id]
+        .sort
+    ).toEqual(tGridDefaults.sort);
+  });
+
+  test('it doesn`t overwrite the timeline if it is initialized', () => {
+    const tGridSettingsProps = { title: 'testTitle' };
+
+    const timelineById = {
+      [id]: {
+        ...defaultTimelineById.test,
+        initialized: true,
+      },
+    };
+
+    const result = setInitializeTgridSettings({ id, timelineById, tGridSettingsProps });
+    expect(result).toBe(timelineById);
   });
 });

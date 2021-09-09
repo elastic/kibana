@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
     const log = getService('log');
 
     before(async () => {
-      await browser.setWindowSize(1200, 800);
+      await browser.setWindowSize(1400, 1400);
       await PageObjects.common.navigateToApp('apm');
       await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
     });
@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
       await testSubjects.existOrFail('apmMainContainer', {
         timeout: 10000,
       });
-      await find.clickByLinkText('apm-a-rum-test-e2e-general-usecase');
+      await find.clickByDisplayedLinkText('apm-a-rum-test-e2e-general-usecase');
       log.debug('### apm smoke test passed');
       await find.clickByLinkText('general-usecase-initial-p-load');
       log.debug('### general use case smoke test passed');

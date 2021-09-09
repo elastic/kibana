@@ -9,6 +9,15 @@
 import { Task } from '../../lib';
 import { runFpm } from './run_fpm';
 import { runDockerGenerator } from './docker_generator';
+import { createOSPackageKibanaYML } from './create_os_package_kibana_yml';
+
+export const CreatePackageConfig: Task = {
+  description: 'Creating OS package kibana.yml',
+
+  async run(config, log, build) {
+    await createOSPackageKibanaYML(config, build);
+  },
+};
 
 export const CreateDebPackage: Task = {
   description: 'Creating deb package',

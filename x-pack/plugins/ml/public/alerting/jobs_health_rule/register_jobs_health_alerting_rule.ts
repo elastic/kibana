@@ -21,7 +21,8 @@ export function registerJobsHealthAlertingRule(
   triggersActionsUi.ruleTypeRegistry.register({
     id: ML_ALERT_TYPES.AD_JOBS_HEALTH,
     description: i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.description', {
-      defaultMessage: 'Alert when anomaly detection jobs experience operational issues.',
+      defaultMessage:
+        'Alert when anomaly detection jobs experience operational issues. Enable suitable alerts for critically important jobs.',
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
@@ -86,18 +87,23 @@ export function registerJobsHealthAlertingRule(
     defaultActionMessage: i18n.translate(
       'xpack.ml.alertTypes.jobsHealthAlertingRule.defaultActionMessage',
       {
-        defaultMessage: `Anomaly detection jobs health check result:
+        defaultMessage: `[\\{\\{rule.name\\}\\}] Anomaly detection jobs health check result:
 \\{\\{context.message\\}\\}
 \\{\\{#context.results\\}\\}
   Job ID: \\{\\{job_id\\}\\}
-  \\{\\{#datafeed_id\\}\\}Datafeed ID: \\{\\{datafeed_id\\}\\}  \\{\\{/datafeed_id\\}\\}
-  \\{\\{#datafeed_state\\}\\}Datafeed state: \\{\\{datafeed_state\\}\\}  \\{\\{/datafeed_state\\}\\}
-  \\{\\{#memory_status\\}\\}Memory status: \\{\\{memory_status\\}\\}  \\{\\{/memory_status\\}\\}
-  \\{\\{#log_time\\}\\}Memory logging time: \\{\\{log_time\\}\\}  \\{\\{/log_time\\}\\}
-  \\{\\{#failed_category_count\\}\\}Failed category count: \\{\\{failed_category_count\\}\\}  \\{\\{/failed_category_count\\}\\}
-  \\{\\{#annotation\\}\\}Annotation: \\{\\{annotation\\}\\}  \\{\\{/annotation\\}\\}
-  \\{\\{#missed_docs_count\\}\\}Number of missed documents: \\{\\{missed_docs_count\\}\\}  \\{\\{/missed_docs_count\\}\\}
-  \\{\\{#end_timestamp\\}\\}Latest finalized bucket with missing docs: \\{\\{end_timestamp\\}\\}  \\{\\{/end_timestamp\\}\\}
+  \\{\\{#datafeed_id\\}\\}Datafeed ID: \\{\\{datafeed_id\\}\\}
+  \\{\\{/datafeed_id\\}\\}\\{\\{#datafeed_state\\}\\}Datafeed state: \\{\\{datafeed_state\\}\\}
+  \\{\\{/datafeed_state\\}\\}\\{\\{#memory_status\\}\\}Memory status: \\{\\{memory_status\\}\\}
+  \\{\\{/memory_status\\}\\}\\{\\{#model_bytes\\}\\}Model size: \\{\\{model_bytes\\}\\}
+  \\{\\{/model_bytes\\}\\}\\{\\{#model_bytes_memory_limit\\}\\}Model memory limit: \\{\\{model_bytes_memory_limit\\}\\}
+  \\{\\{/model_bytes_memory_limit\\}\\}\\{\\{#peak_model_bytes\\}\\}Peak model bytes: \\{\\{peak_model_bytes\\}\\}
+  \\{\\{/peak_model_bytes\\}\\}\\{\\{#model_bytes_exceeded\\}\\}Model exceeded: \\{\\{model_bytes_exceeded\\}\\}
+  \\{\\{/model_bytes_exceeded\\}\\}\\{\\{#log_time\\}\\}Memory logging time: \\{\\{log_time\\}\\}
+  \\{\\{/log_time\\}\\}\\{\\{#failed_category_count\\}\\}Failed category count: \\{\\{failed_category_count\\}\\}
+  \\{\\{/failed_category_count\\}\\}\\{\\{#annotation\\}\\}Annotation: \\{\\{annotation\\}\\}
+  \\{\\{/annotation\\}\\}\\{\\{#missed_docs_count\\}\\}Number of missed documents: \\{\\{missed_docs_count\\}\\}
+  \\{\\{/missed_docs_count\\}\\}\\{\\{#end_timestamp\\}\\}Latest finalized bucket with missing docs: \\{\\{end_timestamp\\}\\}
+  \\{\\{/end_timestamp\\}\\}\\{\\{#errors\\}\\}Error message: \\{\\{message\\}\\} \\{\\{/errors\\}\\}
 \\{\\{/context.results\\}\\}
 `,
       }

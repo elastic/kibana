@@ -11,10 +11,12 @@ import { getAlertByIdRoute } from './get_alert_by_id';
 import { updateAlertByIdRoute } from './update_alert_by_id';
 import { getAlertsIndexRoute } from './get_alert_index';
 import { bulkUpdateAlertsRoute } from './bulk_update_alerts';
+import { findAlertsByQueryRoute } from './find';
 
 export function defineRoutes(router: IRouter<RacRequestHandlerContext>) {
   getAlertByIdRoute(router);
   updateAlertByIdRoute(router);
   getAlertsIndexRoute(router);
   bulkUpdateAlertsRoute(router);
+  findAlertsByQueryRoute(router);
 }

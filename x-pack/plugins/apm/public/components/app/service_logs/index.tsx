@@ -10,7 +10,6 @@ import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { LogStream } from '../../../../../infra/public';
@@ -19,20 +18,18 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import {
   CONTAINER_ID,
   HOSTNAME,
-  POD_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function ServiceLogs() {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: { environment, kuery },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/logs');
 
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -57,8 +54,7 @@ export function ServiceLogs() {
   const noInfrastructureData = useMemo(() => {
     return (
       isEmpty(data?.serviceInfrastructure?.containerIds) &&
-      isEmpty(data?.serviceInfrastructure?.hostNames) &&
-      isEmpty(data?.serviceInfrastructure?.podNames)
+      isEmpty(data?.serviceInfrastructure?.hostNames)
     );
   }, [data]);
 
@@ -95,16 +91,15 @@ export function ServiceLogs() {
   );
 }
 
-const getInfrastructureKQLFilter = (
+export const getInfrastructureKQLFilter = (
   data?: APIReturnType<'GET /api/apm/services/{serviceName}/infrastructure'>
 ) => {
   const containerIds = data?.serviceInfrastructure?.containerIds ?? [];
   const hostNames = data?.serviceInfrastructure?.hostNames ?? [];
-  const podNames = data?.serviceInfrastructure?.podNames ?? [];
 
-  return [
-    ...containerIds.map((id) => `${CONTAINER_ID}: "${id}"`),
-    ...hostNames.map((id) => `${HOSTNAME}: "${id}"`),
-    ...podNames.map((id) => `${POD_NAME}: "${id}"`),
-  ].join(' or ');
+  const kqlFilter = containerIds.length
+    ? containerIds.map((id) => `${CONTAINER_ID}: "${id}"`)
+    : hostNames.map((id) => `${HOSTNAME}: "${id}"`);
+
+  return kqlFilter.join(' or ');
 };

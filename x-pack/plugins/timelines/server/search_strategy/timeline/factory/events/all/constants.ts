@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 // import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
 
 // TODO: share with security_solution/common/cti/constants.ts
@@ -40,6 +41,7 @@ export const CTI_ROW_RENDERER_FIELDS = [
 ];
 
 export const TIMELINE_EVENTS_FIELDS = [
+  ALERT_RULE_CONSUMER,
   '@timestamp',
   'signal.status',
   'signal.group.id',

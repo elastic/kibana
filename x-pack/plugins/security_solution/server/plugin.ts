@@ -21,7 +21,10 @@ import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import {
+  UsageCollectionSetup,
+  UsageCounter,
+} from '../../../../src/plugins/usage_collection/server';
 import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
@@ -46,11 +49,10 @@ import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { createQueryAlertType } from './lib/detection_engine/rule_types';
+import { createMlAlertType } from './lib/detection_engine/rule_types/ml/create_ml_alert_type';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
-import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
-import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
@@ -64,6 +66,7 @@ import {
   QUERY_ALERT_TYPE_ID,
   DEFAULT_SPACE_ID,
   INDICATOR_ALERT_TYPE_ID,
+  ML_ALERT_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -78,6 +81,7 @@ import type { SecuritySolutionRequestHandlerContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
+import { TelemetryReceiver } from './lib/telemetry/receiver';
 import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
@@ -128,6 +132,7 @@ export interface PluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
+
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config: ConfigType;
@@ -135,6 +140,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private appClientFactory: AppClientFactory;
   private setupPlugins?: SetupPlugins;
   private readonly endpointAppContextService = new EndpointAppContextService();
+  private readonly telemetryReceiver: TelemetryReceiver;
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
@@ -143,6 +149,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private manifestTask: ManifestTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
+  private telemetryUsageCounter?: UsageCounter;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -152,6 +159,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Cache up to three artifacts with a max retention of 5 mins each
     this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
+    this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
     this.logger.debug('plugin initialized');
   }
@@ -180,6 +188,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
     });
+
+    this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
@@ -227,16 +237,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         componentTemplates: [
           {
             name: 'mappings',
-            version: 0,
             mappings: mappingFromFieldMap(
               { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
               false
             ),
           },
         ],
-        indexTemplate: {
-          version: 0,
-        },
         secondaryAlias: config.signalsIndex,
       });
 
@@ -246,6 +252,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         lists: plugins.lists,
         logger: this.logger,
         mergeStrategy: this.config.alertMergeStrategy,
+        ignoreFields: this.config.alertIgnoreFields,
+        ml: plugins.ml,
         ruleDataClient,
         ruleDataService,
         version: this.context.env.packageInfo.version,
@@ -253,6 +261,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createMlAlertType(createRuleOptions));
     }
 
     // TODO We need to get the endpoint routes inside of initRoutes
@@ -272,7 +281,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerTrustedAppsRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
-    const racRuleTypes = [QUERY_ALERT_TYPE_ID, INDICATOR_ALERT_TYPE_ID];
+    const racRuleTypes = [QUERY_ALERT_TYPE_ID, INDICATOR_ALERT_TYPE_ID, ML_ALERT_TYPE_ID];
     const ruleTypes = [
       SIGNALS_ID,
       NOTIFICATIONS_ID,
@@ -290,19 +299,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ml: plugins.ml,
         lists: plugins.lists,
         mergeStrategy: this.config.alertMergeStrategy,
+        ignoreFields: this.config.alertIgnoreFields,
         experimentalFeatures,
         ruleDataService: plugins.ruleRegistry.ruleDataService,
-      });
-      const ruleNotificationType = rulesNotificationAlertType({
-        logger: this.logger,
       });
 
       if (isAlertExecutor(signalRuleType)) {
         this.setupPlugins.alerting.registerType(signalRuleType);
-      }
-
-      if (isNotificationAlertExecutor(ruleNotificationType)) {
-        this.setupPlugins.alerting.registerType(ruleNotificationType);
       }
     }
 
@@ -329,7 +332,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     });
 
-    this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);
+    this.telemetryEventsSender.setup(
+      this.telemetryReceiver,
+      plugins.telemetry,
+      plugins.taskManager,
+      this.telemetryUsageCounter
+    );
 
     return {};
   }
@@ -412,13 +420,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       exceptionListsClient: exceptionListClient,
     });
 
+    this.telemetryReceiver.start(core, this.endpointAppContextService, exceptionListClient);
+
     this.telemetryEventsSender.start(
-      core,
       plugins.telemetry,
       plugins.taskManager,
-      this.endpointAppContextService,
-      exceptionListClient
+      this.telemetryReceiver
     );
+
     return {};
   }
 

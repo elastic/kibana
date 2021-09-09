@@ -40,8 +40,10 @@ export const getExportByObjectIds = async (
   exportDetails: string;
 }> => {
   const rulesAndErrors = await getRulesFromObjects(rulesClient, objects);
-  const rulesNdjson = transformDataToNdjson(rulesAndErrors.rules);
-  const exportDetails = getExportDetailsNdjson(rulesAndErrors.rules, rulesAndErrors.missingRules);
+  // We do not support importing/exporting actions. When we do, delete this line of code
+  const rulesWithoutActions = rulesAndErrors.rules.map((rule) => ({ ...rule, actions: [] }));
+  const rulesNdjson = transformDataToNdjson(rulesWithoutActions);
+  const exportDetails = getExportDetailsNdjson(rulesWithoutActions, rulesAndErrors.missingRules);
   return { rulesNdjson, exportDetails };
 };
 

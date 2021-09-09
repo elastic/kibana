@@ -474,6 +474,10 @@ export function getMlClient(
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.updateJob(...p);
     },
+    async resetJob(...p: Parameters<MlClient['resetJob']>) {
+      await jobIdsCheck('anomaly-detector', p);
+      return mlClient.resetJob(...p);
+    },
     async updateModelSnapshot(...p: Parameters<MlClient['updateModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.updateModelSnapshot(...p);

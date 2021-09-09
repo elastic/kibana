@@ -376,6 +376,7 @@ export type AlertEvent = Partial<{
   }>;
   rule: Partial<{
     id: ECSField<string>;
+    description: ECSField<string>;
   }>;
   file: Partial<{
     owner: ECSField<string>;

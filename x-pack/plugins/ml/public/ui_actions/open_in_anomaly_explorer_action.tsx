@@ -83,7 +83,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
                 should: [
                   {
                     match_phrase: {
-                      [fieldName]: fieldValue,
+                      [fieldName]: String(fieldValue),
                     },
                   },
                 ],
@@ -104,6 +104,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
           pageState: {
             jobIds,
             timeRange,
+            // @ts-ignore QueryDslQueryContainer is not compatible with SerializableRecord
             ...(mlExplorerFilter ? ({ mlExplorerFilter } as SerializableRecord) : {}),
             query: {},
           },

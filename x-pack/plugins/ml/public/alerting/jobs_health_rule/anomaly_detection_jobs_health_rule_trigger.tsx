@@ -19,6 +19,8 @@ import { useMlKibana } from '../../application/contexts/kibana';
 import { TestsSelectionControl } from './tests_selection_control';
 import { isPopulatedObject } from '../../../common';
 import { ALL_JOBS_SELECTION } from '../../../common/constants/alerts';
+import { BetaBadge } from '../beta_badge';
+import { isDefined } from '../../../common/types/guards';
 
 export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 
@@ -78,6 +80,19 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
               }),
               options: jobs.map((v) => ({ label: v.job_id })),
             },
+            {
+              label: i18n.translate('xpack.ml.jobSelector.groupOptionsLabel', {
+                defaultMessage: 'Groups',
+              }),
+              options: [
+                ...new Set(
+                  jobs
+                    .map((v) => v.groups)
+                    .flat()
+                    .filter((v) => isDefined(v) && !alertParams.includeJobs.groupIds?.includes(v))
+                ),
+              ].map((v) => ({ label: v! })),
+            },
           ]);
         });
     },
@@ -92,6 +107,15 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       error={formErrors}
       isInvalid={isFormInvalid}
     >
+      <BetaBadge
+        message={i18n.translate(
+          'xpack.ml.alertTypes.jobsHealthAlertingRule.betaBadgeTooltipContent',
+          {
+            defaultMessage: `Anomaly detection job health alerts are a beta feature. We'd love to hear your feedback.`,
+          }
+        )}
+      />
+
       <JobSelectorControl
         jobsAndGroupIds={includeJobsAndGroupIds}
         adJobsApiService={adJobsApiService}

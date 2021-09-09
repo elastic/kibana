@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { JSDOM } from 'jsdom';
-import request, { Cookie } from 'request';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { format as formatURL } from 'url';
 import { createTokens, getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         stateAndNonce = getStateAndNonce(handshakeResponse.body.location);
       });
 
@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const sessionCookie = request.cookie(cookies[0])!;
+        const sessionCookie = parseCookie(cookies[0])!;
         expect(sessionCookie.key).to.be('sid');
         expect(sessionCookie.value).to.not.be.empty();
         expect(sessionCookie.path).to.be('/');

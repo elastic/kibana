@@ -15,8 +15,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/106650
-  describe('Home page', function () {
+  // FLAKY: See https://github.com/elastic/kibana/issues/106650
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
@@ -87,12 +87,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/106660
-    describe.skip('Saved Views', () => {
+    describe('Saved Views', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       it('should have save and load controls', async () => {
         await pageObjects.common.navigateToApp('infraOps');
+        await pageObjects.infraHome.waitForLoading();
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraSavedViews.getSavedViewsButton();
         await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');

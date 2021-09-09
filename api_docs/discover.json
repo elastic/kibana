@@ -77,13 +77,7 @@
             "text": "DiscoverAppLocatorParams"
           },
           " extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          }
+          "SerializableRecord"
         ],
         "path": "src/plugins/discover/public/locator.ts",
         "deprecated": false,
@@ -159,13 +153,7 @@
                 "text": "RefreshInterval"
               },
               " & ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ") | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -274,13 +262,7 @@
             ],
             "signature": [
               "(string[][] & ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ") | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -1027,7 +1009,7 @@
         "signature": [
           "\"search\""
         ],
-        "path": "src/plugins/discover/public/application/embeddable/constants.ts",
+        "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1053,7 +1035,7 @@
           "signature": [
             "{ addDocView(docViewRaw: ComponentDocViewInput | ",
             "RenderDocViewInput",
-            " | DirectiveDocViewInput | ",
+            " | ",
             "DocViewInputFn",
             "): void; }"
           ],
@@ -1138,12 +1120,8 @@
           "deprecated": true,
           "references": [
             {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
-            },
-            {
               "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_table.tsx"
+              "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
             },
             {
               "plugin": "osquery",
@@ -1327,6 +1305,20 @@
         "description": [],
         "signature": [
           "\"discover:sampleSize\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.SEARCH_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"search\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,

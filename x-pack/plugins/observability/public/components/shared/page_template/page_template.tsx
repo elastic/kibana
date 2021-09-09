@@ -75,12 +75,8 @@ export function ObservabilityPageTemplate({
           const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           return {
             id: `${sectionIndex}.${entryIndex}`,
-            name: entry.sideBadgeLabel ? (
-              <NavNameWithBadge
-                label={entry.label}
-                badgeLabel={entry.sideBadgeLabel}
-                localstorageId={badgeLocalStorageId}
-              />
+            name: entry.isNewFeature ? (
+              <NavNameWithBadge label={entry.label} localStorageId={badgeLocalStorageId} />
             ) : (
               entry.label
             ),
@@ -91,8 +87,8 @@ export function ObservabilityPageTemplate({
                 entry.onClick(event);
               }
 
-              // When side badge is defined hides it when the item is clicked
-              if (entry.sideBadgeLabel) {
+              // Hides NEW badge when the item is clicked
+              if (entry.isNewFeature) {
                 hideBadge(badgeLocalStorageId);
               }
 

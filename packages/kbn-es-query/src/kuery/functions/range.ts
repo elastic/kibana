@@ -7,13 +7,14 @@
  */
 
 import _ from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript, RangeFilterParams } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IndexPatternBase, KueryNode } from '../..';
+import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
 
 export function buildNodeParams(fieldName: string, params: RangeFilterParams) {
   const paramsToMap = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
@@ -34,9 +35,9 @@ export function buildNodeParams(fieldName: string, params: RangeFilterParams) {
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IndexPatternBase,
-  config: Record<string, any> = {},
+  config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-) {
+): estypes.QueryDslQueryContainer {
   const [fieldNameArg, ...args] = node.arguments;
   const fullFieldNameArg = getFullFieldNameNode(
     fieldNameArg,

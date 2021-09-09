@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { validateDurationSchema, ILicenseState, AlertTypeDisabledError } from '../lib';
+import { validateDurationSchema, AlertTypeDisabledError } from '../lib';
 import { CreateOptions } from '../rules_client';
 import {
   RewriteRequestCase,
   RewriteResponseCase,
   handleDisabledApiKeysError,
   verifyAccessAndContext,
+  countUsageOfPredefinedIds,
 } from './lib';
 import {
   SanitizedAlert,
   validateNotifyWhenType,
   AlertTypeParams,
-  AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   AlertNotifyWhenType,
 } from '../types';
+import { RouteOptions } from '.';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -93,10 +93,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   })),
 });
 
-export const createRuleRoute = (
-  router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
-) => {
+export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id?}`,
@@ -115,6 +112,13 @@ export const createRuleRoute = (
           const rulesClient = context.alerting.getRulesClient();
           const rule = req.body;
           const params = req.params;
+
+          countUsageOfPredefinedIds({
+            predefinedId: params?.id,
+            spaceId: rulesClient.getSpaceId(),
+            usageCounter,
+          });
+
           try {
             const createdRule: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(
               {

@@ -30,7 +30,6 @@ import {
   createMockLevelLogger,
   createMockReportingCore,
 } from '../../test_helpers';
-import { ElementsPositionAndAttribute } from './';
 import * as contexts from './constants';
 import { getScreenshots$ } from './';
 
@@ -101,7 +100,21 @@ describe('Screenshot Observable Pipeline', () => {
           "error": undefined,
           "screenshots": Array [
             Object {
-              "base64EncodedData": "allyourBase64",
+              "data": Object {
+                "data": Array [
+                  115,
+                  99,
+                  114,
+                  101,
+                  101,
+                  110,
+                  115,
+                  104,
+                  111,
+                  116,
+                ],
+                "type": "Buffer",
+              },
               "description": "Default ",
               "title": "Default Mock Title",
             },
@@ -114,10 +127,7 @@ describe('Screenshot Observable Pipeline', () => {
 
   it('pipelines multiple urls into', async () => {
     // mock implementations
-    const mockScreenshot = jest.fn().mockImplementation((item: ElementsPositionAndAttribute) => {
-      return Promise.resolve(`allyourBase64 screenshots`);
-    });
-
+    const mockScreenshot = jest.fn(async () => Buffer.from('some screenshots'));
     const mockOpen = jest.fn();
 
     // mocks
@@ -164,7 +174,27 @@ describe('Screenshot Observable Pipeline', () => {
           "error": undefined,
           "screenshots": Array [
             Object {
-              "base64EncodedData": "allyourBase64 screenshots",
+              "data": Object {
+                "data": Array [
+                  115,
+                  111,
+                  109,
+                  101,
+                  32,
+                  115,
+                  99,
+                  114,
+                  101,
+                  101,
+                  110,
+                  115,
+                  104,
+                  111,
+                  116,
+                  115,
+                ],
+                "type": "Buffer",
+              },
               "description": "Default ",
               "title": "Default Mock Title",
             },
@@ -195,7 +225,27 @@ describe('Screenshot Observable Pipeline', () => {
           "error": undefined,
           "screenshots": Array [
             Object {
-              "base64EncodedData": "allyourBase64 screenshots",
+              "data": Object {
+                "data": Array [
+                  115,
+                  111,
+                  109,
+                  101,
+                  32,
+                  115,
+                  99,
+                  114,
+                  101,
+                  101,
+                  110,
+                  115,
+                  104,
+                  111,
+                  116,
+                  115,
+                ],
+                "type": "Buffer",
+              },
               "description": "Default ",
               "title": "Default Mock Title",
             },
@@ -264,7 +314,21 @@ describe('Screenshot Observable Pipeline', () => {
                   "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
                   "screenshots": Array [
                     Object {
-                      "base64EncodedData": "allyourBase64",
+                      "data": Object {
+                        "data": Array [
+                          115,
+                          99,
+                          114,
+                          101,
+                          101,
+                          110,
+                          115,
+                          104,
+                          111,
+                          116,
+                        ],
+                        "type": "Buffer",
+                      },
                       "description": undefined,
                       "title": undefined,
                     },
@@ -292,7 +356,21 @@ describe('Screenshot Observable Pipeline', () => {
                   "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
                   "screenshots": Array [
                     Object {
-                      "base64EncodedData": "allyourBase64",
+                      "data": Object {
+                        "data": Array [
+                          115,
+                          99,
+                          114,
+                          101,
+                          101,
+                          110,
+                          115,
+                          104,
+                          111,
+                          116,
+                        ],
+                        "type": "Buffer",
+                      },
                       "description": undefined,
                       "title": undefined,
                     },
@@ -384,7 +462,21 @@ describe('Screenshot Observable Pipeline', () => {
             "error": undefined,
             "screenshots": Array [
               Object {
-                "base64EncodedData": "allyourBase64",
+                "data": Object {
+                  "data": Array [
+                    115,
+                    99,
+                    114,
+                    101,
+                    101,
+                    110,
+                    115,
+                    104,
+                    111,
+                    116,
+                  ],
+                  "type": "Buffer",
+                },
                 "description": undefined,
                 "title": undefined,
               },

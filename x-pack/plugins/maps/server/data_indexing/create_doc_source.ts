@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
 import {
-  INDEX_META_DATA_CREATED_BY,
+  MAPS_NEW_VECTOR_LAYER_META_CREATED_BY,
   CreateDocSourceResp,
   IndexSourceMappings,
   BodySettings,
@@ -15,9 +15,9 @@ import {
 import { IndexPatternsCommonService } from '../../../../../src/plugins/data/server';
 
 const DEFAULT_SETTINGS = { number_of_shards: 1 };
-const DEFAULT_MAPPINGS = {
+const DEFAULT_META = {
   _meta: {
-    created_by: INDEX_META_DATA_CREATED_BY,
+    created_by: MAPS_NEW_VECTOR_LAYER_META_CREATED_BY,
   },
 };
 
@@ -50,7 +50,7 @@ async function createIndex(
 ) {
   const body: { mappings: IndexSourceMappings; settings: BodySettings } = {
     mappings: {
-      ...DEFAULT_MAPPINGS,
+      ...DEFAULT_META,
       ...mappings,
     },
     settings: DEFAULT_SETTINGS,

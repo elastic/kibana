@@ -7,7 +7,6 @@
 
 import url from 'url';
 import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
@@ -17,15 +16,10 @@ const serviceOverviewHref = url.format({
 });
 
 describe('Transactions Overview', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
-  });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
-  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
+
   it('persists transaction type selected when navigating to Overview tab', () => {
     cy.visit(serviceOverviewHref);
     cy.get('[data-test-subj="headerFilterTransactionType"]').should(

@@ -23,7 +23,7 @@ import * as i18n from './translations';
 
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../common/lib/kibana';
-import { AddComment, AddCommentRefObject } from '../add_comment';
+import { AddComment } from '../add_comment';
 import {
   ActionConnector,
   ActionsCommentRequestRt,
@@ -55,6 +55,7 @@ import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
+import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -155,12 +156,18 @@ export const UserActionTree = React.memo(
       subCaseId?: string;
     }>();
     const handlerTimeoutId = useRef(0);
-    const addCommentRef = useRef<AddCommentRefObject>(null);
     const [initLoading, setInitLoading] = useState(true);
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
-    const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
+    const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
+    const commentRefs = useRef<Record<string, any>>({});
+    const {
+      clearDraftComment,
+      draftComment,
+      hasIncomingLensState,
+      openLensModal,
+    } = useLensDraftComment();
 
     const [loadingAlertData, manualAlertsData] = useFetchAlertData(
       getManualAlertIdsWithNoRuleId(caseData.comments)
@@ -168,13 +175,14 @@ export const UserActionTree = React.memo(
 
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
-        if (!manageMarkdownEditIds.includes(id)) {
-          setManangeMardownEditIds([...manageMarkdownEditIds, id]);
-        } else {
-          setManangeMardownEditIds(manageMarkdownEditIds.filter((myId) => id !== myId));
-        }
+        clearDraftComment();
+        setManageMarkdownEditIds((prevManageMarkdownEditIds) =>
+          !prevManageMarkdownEditIds.includes(id)
+            ? prevManageMarkdownEditIds.concat(id)
+            : prevManageMarkdownEditIds.filter((myId) => id !== myId)
+        );
       },
-      [manageMarkdownEditIds]
+      [clearDraftComment]
     );
 
     const handleSaveComment = useCallback(
@@ -220,8 +228,8 @@ export const UserActionTree = React.memo(
       (quote: string) => {
         const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '  \n> ');
 
-        if (addCommentRef && addCommentRef.current) {
-          addCommentRef.current.addQuote(`> ${addCarrots} \n`);
+        if (commentRefs.current[NEW_ID]) {
+          commentRefs.current[NEW_ID].addQuote(`> ${addCarrots} \n`);
         }
 
         handleOutlineComment('add-comment');
@@ -240,6 +248,7 @@ export const UserActionTree = React.memo(
     const MarkdownDescription = useMemo(
       () => (
         <UserActionMarkdown
+          ref={(element) => (commentRefs.current[DESCRIPTION_ID] = element)}
           id={DESCRIPTION_ID}
           content={caseData.description}
           isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
@@ -255,9 +264,10 @@ export const UserActionTree = React.memo(
     const MarkdownNewComment = useMemo(
       () => (
         <AddComment
+          id={NEW_ID}
           caseId={caseId}
           userCanCrud={userCanCrud}
-          ref={addCommentRef}
+          ref={(element) => (commentRefs.current[NEW_ID] = element)}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
@@ -300,6 +310,7 @@ export const UserActionTree = React.memo(
         }),
         actions: (
           <UserActionContentToolbar
+            commentMarkdown={caseData.description}
             getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
             id={DESCRIPTION_ID}
             editLabel={i18n.EDIT_DESCRIPTION}
@@ -357,6 +368,7 @@ export const UserActionTree = React.memo(
                     }),
                     children: (
                       <UserActionMarkdown
+                        ref={(element) => (commentRefs.current[comment.id] = element)}
                         id={comment.id}
                         content={comment.comment}
                         isEditable={manageMarkdownEditIds.includes(comment.id)}
@@ -377,6 +389,7 @@ export const UserActionTree = React.memo(
                       <UserActionContentToolbar
                         getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
                         id={comment.id}
+                        commentMarkdown={comment.comment}
                         editLabel={i18n.EDIT_COMMENT}
                         quoteLabel={i18n.QUOTE}
                         isLoading={isLoadingIds.includes(comment.id)}
@@ -628,6 +641,41 @@ export const UserActionTree = React.memo(
       : [];
 
     const comments = [...userActions, ...bottomActions];
+
+    useEffect(() => {
+      if (draftComment?.commentId) {
+        setManageMarkdownEditIds((prevManageMarkdownEditIds) => {
+          if (
+            ![NEW_ID].includes(draftComment?.commentId) &&
+            !prevManageMarkdownEditIds.includes(draftComment?.commentId)
+          ) {
+            return [draftComment?.commentId];
+          }
+          return prevManageMarkdownEditIds;
+        });
+
+        if (
+          commentRefs.current &&
+          commentRefs.current[draftComment.commentId] &&
+          commentRefs.current[draftComment.commentId].editor?.textarea &&
+          commentRefs.current[draftComment.commentId].editor?.toolbar
+        ) {
+          commentRefs.current[draftComment.commentId].setComment(draftComment.comment);
+          if (hasIncomingLensState) {
+            openLensModal({ editorRef: commentRefs.current[draftComment.commentId].editor });
+          } else {
+            clearDraftComment();
+          }
+        }
+      }
+    }, [
+      draftComment,
+      openLensModal,
+      commentRefs,
+      hasIncomingLensState,
+      clearDraftComment,
+      manageMarkdownEditIds,
+    ]);
 
     return (
       <>

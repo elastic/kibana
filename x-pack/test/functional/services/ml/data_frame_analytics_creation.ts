@@ -277,9 +277,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     async assertRuntimeMappingsEditorContent(expectedContent: string[]) {
       await this.assertRuntimeMappingEditorExists();
 
-      const runtimeMappingsEditorString = await aceEditor.getValue(
-        'mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor'
-      );
+      const wrapper = await testSubjects.find('mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor');
+      const editor = await wrapper.findByCssSelector('.monaco-editor .view-lines');
+      const runtimeMappingsEditorString = await editor.getVisibleText();
       // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
       // This means we might not get back valid JSON so we only test against the first few lines
       // and see if the string matches.

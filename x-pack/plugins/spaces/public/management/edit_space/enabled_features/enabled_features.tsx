@@ -11,10 +11,10 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import type { KibanaFeatureConfig } from '../../../../../features/public';
+import type { Space } from '../../../../common';
 import { SectionPanel } from '../section_panel';
 import { FeatureTable } from './feature_table';
 

@@ -409,7 +409,7 @@
             "children": [
               {
                 "parentPluginId": "usageCollection",
-                "id": "def-server.context",
+                "id": "def-server.ICollector.fetch.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "context",
@@ -671,7 +671,7 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
+          "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"text\" | \"short\" | \"float\" | \"integer\" | \"byte\""
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
@@ -751,7 +751,7 @@
         "children": [
           {
             "parentPluginId": "usageCollection",
-            "id": "def-server.context",
+            "id": "def-server.CollectorFetchMethod.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "context",

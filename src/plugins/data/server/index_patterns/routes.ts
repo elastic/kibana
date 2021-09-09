@@ -26,6 +26,7 @@ import { registerGetRuntimeFieldRoute } from './routes/runtime_fields/get_runtim
 import { registerDeleteRuntimeFieldRoute } from './routes/runtime_fields/delete_runtime_field';
 import { registerPutRuntimeFieldRoute } from './routes/runtime_fields/put_runtime_field';
 import { registerUpdateRuntimeFieldRoute } from './routes/runtime_fields/update_runtime_field';
+import { registerHasUserIndexPatternRoute } from './routes/has_user_index_pattern';
 
 export function registerRoutes(
   http: HttpServiceSetup,
@@ -49,6 +50,7 @@ export function registerRoutes(
   registerDeleteIndexPatternRoute(router, getStartServices);
   registerUpdateIndexPatternRoute(router, getStartServices);
   registerManageDefaultIndexPatternRoutes(router, getStartServices);
+  registerHasUserIndexPatternRoute(router, getStartServices);
 
   // Fields API
   registerUpdateFieldsRoute(router, getStartServices);

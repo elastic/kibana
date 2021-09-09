@@ -6,33 +6,50 @@
  */
 
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Location } from 'history';
+import { Redirect, useLocation, RouteComponentProps } from 'react-router-dom';
 
 /**
- * Given a path, redirect to that location, preserving the search and maintaining
+ * Function that returns a react component to redirect to a given pathname removing hash-based URLs
+ * @param pathname
+ */
+export function redirectTo(pathname: string) {
+  return ({ location }: RouteComponentProps<{}>) => {
+    return <RenderRedirectTo location={location} pathname={pathname} />;
+  };
+}
+
+/**
+ * React component to redirect to a given pathname removing hash-based URLs
+ * @param param0
+ */
+export function RedirectTo({ pathname }: { pathname: string }) {
+  const location = useLocation();
+  return <RenderRedirectTo location={location} pathname={pathname} />;
+}
+
+interface Props {
+  location: Location;
+  pathname: string;
+}
+
+/**
+ * Given a pathname, redirect to that location, preserving the search and maintaining
  * backward-compatibilty with legacy (pre-7.9) hash-based URLs.
  */
-export function redirectTo(to: string) {
-  return ({ location }: RouteComponentProps<{}>) => {
-    let resolvedUrl: URL | undefined;
+function RenderRedirectTo(props: Props) {
+  const { location } = props;
+  let search = location.search;
+  let pathname = props.pathname;
 
-    // Redirect root URLs with a hash to support backward compatibility with URLs
-    // from before we switched to the non-hash platform history.
-    if (location.pathname === '' && location.hash.length > 0) {
-      // We just want the search and pathname so the host doesn't matter
-      resolvedUrl = new URL(location.hash.slice(1), 'http://localhost');
-      to = resolvedUrl.pathname;
-    }
+  // Redirect root URLs with a hash to support backward compatibility with URLs
+  // from before we switched to the non-hash platform history.
+  if (location.pathname === '' && location.hash.length > 0) {
+    // We just want the search and pathname so the host doesn't matter
+    const resolvedUrl = new URL(location.hash.slice(1), 'http://localhost');
+    search = resolvedUrl.search;
+    pathname = resolvedUrl.pathname;
+  }
 
-    return (
-      <Redirect
-        to={{
-          ...location,
-          hash: '',
-          pathname: to,
-          search: resolvedUrl ? resolvedUrl.search : location.search,
-        }}
-      />
-    );
-  };
+  return <Redirect to={{ ...location, hash: '', pathname, search }} />;
 }

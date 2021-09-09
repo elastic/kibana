@@ -6,10 +6,9 @@
  */
 
 import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
-import { RuleRegistryAdapter } from './adapters/rule_registry_adapter';
-import { SavedObjectsAdapter } from './adapters/saved_objects_adapter';
+import { RuleRegistryAdapter } from './rule_registry_adapter/rule_registry_adapter';
+import { SavedObjectsAdapter } from './saved_objects_adapter/saved_objects_adapter';
 import {
-  CreateExecutionLogArgs,
   ExecutionMetric,
   ExecutionMetricArgs,
   FindBulkExecutionLogArgs,
@@ -44,10 +43,6 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
 
   public findBulk(args: FindBulkExecutionLogArgs) {
     return this.client.findBulk(args);
-  }
-
-  public async create(args: CreateExecutionLogArgs) {
-    return this.client.create(args);
   }
 
   public async update(args: UpdateExecutionLogArgs) {

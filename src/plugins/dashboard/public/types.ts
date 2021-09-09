@@ -34,6 +34,7 @@ import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
 import { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
+import { DashboardAppLocatorParams } from './locator';
 
 export { SavedDashboardPanel };
 
@@ -123,6 +124,8 @@ export type DashboardBuildContext = Pick<
   search: DashboardAppServices['data']['search'];
   notifications: DashboardAppServices['core']['notifications'];
 
+  locatorState?: DashboardAppLocatorParams;
+
   history: History;
   kibanaVersion: string;
   isEmbeddedExternally: boolean;
@@ -135,11 +138,12 @@ export type DashboardBuildContext = Pick<
   executionContext?: KibanaExecutionContext;
 };
 
-export interface DashboardOptions {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DashboardOptions = {
   hidePanelTitles: boolean;
   useMargins: boolean;
   syncColors: boolean;
-}
+};
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =
@@ -168,7 +172,7 @@ export interface DashboardAppCapabilities {
   createNew: boolean;
   saveQuery: boolean;
   createShortUrl: boolean;
-  hideWriteControls: boolean;
+  showWriteControls: boolean;
   storeSearchSession: boolean;
   mapsCapabilities: { save: boolean };
   visualizeCapabilities: { save: boolean };

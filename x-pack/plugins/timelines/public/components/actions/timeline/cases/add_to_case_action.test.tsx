@@ -11,6 +11,7 @@ import { TestProviders, mockGetAllCasesSelectorModal } from '../../../../mock';
 import { AddToCaseAction } from './add_to_case_action';
 import { SECURITY_SOLUTION_OWNER } from '../../../../../../cases/common';
 import { AddToCaseActionButton } from './add_to_case_action_button';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -100,7 +101,7 @@ describe('AddToCaseAction', () => {
           {...props}
           event={{
             _id: 'test-id',
-            data: [],
+            data: [{ field: ALERT_RULE_UUID, value: ['rule-id'] }],
             ecs: {
               _id: 'test-id',
               _index: 'test-index',
@@ -112,7 +113,7 @@ describe('AddToCaseAction', () => {
           {...props}
           event={{
             _id: 'test-id',
-            data: [],
+            data: [{ field: ALERT_RULE_UUID, value: ['rule-id'] }],
             ecs: {
               _id: 'test-id',
               _index: 'test-index',

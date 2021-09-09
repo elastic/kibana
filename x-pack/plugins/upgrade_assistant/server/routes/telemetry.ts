@@ -18,19 +18,17 @@ export function registerTelemetryRoutes({ router, getSavedObjectsService }: Rout
       validate: {
         body: schema.object({
           overview: schema.boolean({ defaultValue: false }),
-          cluster: schema.boolean({ defaultValue: false }),
-          indices: schema.boolean({ defaultValue: false }),
+          elasticsearch: schema.boolean({ defaultValue: false }),
           kibana: schema.boolean({ defaultValue: false }),
         }),
       },
     },
     async (ctx, request, response) => {
-      const { cluster, indices, overview, kibana } = request.body;
+      const { elasticsearch, overview, kibana } = request.body;
       return response.ok({
         body: await upsertUIOpenOption({
           savedObjects: getSavedObjectsService(),
-          cluster,
-          indices,
+          elasticsearch,
           overview,
           kibana,
         }),

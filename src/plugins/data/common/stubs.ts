@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { stubIndexPattern, stubIndexPatternWithFields } from './index_patterns/index_pattern.stub';
-export { stubFields } from './index_patterns/field.stub';
+export * from './index_patterns/field.stub';
+export * from './index_patterns/index_pattern.stub';
 export * from './es_query/stubs';

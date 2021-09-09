@@ -53,6 +53,12 @@ const apmRoutes = route([
         }),
       }),
     ]),
+    defaults: {
+      query: {
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+      },
+    },
   },
   {
     path: '/',

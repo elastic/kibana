@@ -11,7 +11,6 @@ import {
   ALL_CASES_CLOSED_CASES_STATS,
   ALL_CASES_COMMENTS_COUNT,
   ALL_CASES_IN_PROGRESS_CASES_STATS,
-  ALL_CASES_ITEM_ACTIONS_BTN,
   ALL_CASES_NAME,
   ALL_CASES_OPEN_CASES_COUNT,
   ALL_CASES_OPEN_CASES_STATS,
@@ -26,7 +25,6 @@ import {
 import {
   CASE_DETAILS_DESCRIPTION,
   CASE_DETAILS_PAGE_TITLE,
-  // CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN,
   CASE_DETAILS_STATUS,
   CASE_DETAILS_TAGS,
   CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME,
@@ -67,8 +65,8 @@ describe('Cases', () => {
         .as('mycase')
     );
   });
-  // TODO: enable once attach timeline to cases is re-enabled
-  it.skip('Creates a new case with timeline and opens the timeline', function () {
+
+  it('Creates a new case with timeline and opens the timeline', function () {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(this.mycase);
@@ -92,7 +90,6 @@ describe('Cases', () => {
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', '0');
     cy.get(ALL_CASES_OPENED_ON).should('include.text', 'ago');
     cy.get(ALL_CASES_SERVICE_NOW_INCIDENT).should('have.text', 'Not pushed');
-    cy.get(ALL_CASES_ITEM_ACTIONS_BTN).should('exist');
 
     goToCaseDetails();
 
@@ -108,7 +105,6 @@ describe('Cases', () => {
     cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('have.text', this.mycase.reporter);
     cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('have.text', this.mycase.reporter);
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
-    // cy.get(CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN).should('have.attr', 'disabled');
 
     openCaseTimeline();
 

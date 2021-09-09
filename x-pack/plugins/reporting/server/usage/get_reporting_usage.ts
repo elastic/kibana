@@ -5,21 +5,21 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
-import { ElasticsearchClient } from 'kibana/server';
-import { ReportingConfig } from '../';
-import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { GetLicense } from './';
-import { decorateRangeStats } from './decorate_range_stats';
+import type { ReportingConfig } from '../';
+import type { ExportTypesRegistry } from '../lib/export_types_registry';
+import type { GetLicense } from './';
+import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
-import {
+import type {
   AggregationResultBuckets,
+  AvailableTotal,
   FeatureAvailabilityMap,
   JobTypes,
   KeyCountBucket,
   RangeStats,
   ReportingUsageType,
-  // ReportingUsageSearchResponse,
   StatusByAppBucket,
 } from './types';
 
@@ -28,6 +28,7 @@ const JOB_TYPES_FIELD = 'jobtype';
 const LAYOUT_TYPES_KEY = 'layoutTypes';
 const LAYOUT_TYPES_FIELD = 'meta.layout.keyword';
 const OBJECT_TYPES_KEY = 'objectTypes';
+const OBJECT_TYPE_DEPRECATED_KEY = 'meta.isDeprecated';
 const OBJECT_TYPES_FIELD = 'meta.objectType.keyword';
 const STATUS_TYPES_KEY = 'statusTypes';
 const STATUS_BY_APP_KEY = 'statusByApp';
@@ -64,12 +65,15 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
 
 function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
   const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY];
-  const jobTypes = jobBuckets.reduce(
-    (accum: JobTypes, { key, doc_count: count }: { key: string; doc_count: number }) => {
-      return { ...accum, [key]: { total: count } };
-    },
-    {} as JobTypes
-  );
+  const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
+    const { key, doc_count: count, isDeprecated } = bucket;
+    const deprecatedCount = isDeprecated?.doc_count;
+    const total: Omit<AvailableTotal, 'available'> = {
+      total: count,
+      deprecated: deprecatedCount,
+    };
+    return { ...accum, [key]: total };
+  }, {} as JobTypes);
 
   // merge pdf stats into pdf jobtype key
   const pdfJobs = jobTypes[PRINTABLE_PDF_JOBTYPE];
@@ -104,11 +108,16 @@ type RangeStatSets = Partial<RangeStats> & {
 type ESResponse = Partial<estypes.SearchResponse>;
 
 async function handleResponse(response: ESResponse): Promise<Partial<RangeStatSets>> {
-  const buckets = get(response, 'aggregations.ranges.buckets');
+  const buckets = get(response, 'aggregations.ranges.buckets') as Record<
+    'all' | 'last7Days',
+    AggregationResultBuckets
+  >;
+
   if (!buckets) {
     return {};
   }
-  const { last7Days, all } = buckets as any;
+
+  const { all, last7Days } = buckets;
 
   const last7DaysUsage = last7Days ? getAggStats(last7Days) : {};
   const allUsage = all ? getAggStats(all) : {};
@@ -141,7 +150,10 @@ export async function getReportingUsage(
             },
           },
           aggs: {
-            [JOB_TYPES_KEY]: { terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
+            [JOB_TYPES_KEY]: {
+              terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE },
+              aggs: { isDeprecated: { filter: { term: { [OBJECT_TYPE_DEPRECATED_KEY]: true } } } },
+            },
             [STATUS_TYPES_KEY]: { terms: { field: STATUS_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
             [STATUS_BY_APP_KEY]: {
               terms: { field: 'status', size: DEFAULT_TERMS_SIZE },
@@ -189,8 +201,8 @@ export async function getReportingUsage(
           available: true,
           browser_type: browserType,
           enabled: true,
-          last7Days: decorateRangeStats(last7Days, availability),
-          ...decorateRangeStats(all, availability),
+          last7Days: getExportStats(last7Days, availability, exportTypesHandler),
+          ...getExportStats(all, availability, exportTypesHandler),
         };
       }
     );

@@ -144,10 +144,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'courier:batchSearches': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'courier:setRequestPreference': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -401,10 +397,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'bfetch:disableCompression': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'visualization:visualize:legacyChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

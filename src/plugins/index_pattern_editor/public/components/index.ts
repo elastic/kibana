@@ -18,7 +18,6 @@ export { TimestampField, TypeField, TitleField } from './form_fields';
 export { EmptyPrompts } from './empty_prompts';
 export { PreviewPanel } from './preview_panel';
 export { LoadingIndices } from './loading_indices';
-export { geti18nTexts } from './i18n_texts';
 export { Footer } from './footer';
 export { AdvancedParamsContent } from './advanced_params_content';
 export { RollupBetaWarning } from './rollup_beta_warning';

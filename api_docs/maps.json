@@ -70,6 +70,16 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.deferEmbeddableLoad",
+            "type": "boolean",
+            "tags": [],
+            "label": "deferEmbeddableLoad",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.Unnamed",
             "type": "Function",
             "tags": [],
@@ -330,6 +340,66 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.setOnInitialRenderComplete",
+            "type": "Function",
+            "tags": [],
+            "label": "setOnInitialRenderComplete",
+            "description": [],
+            "signature": [
+              "(onInitialRenderComplete?: (() => void) | undefined) => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.setOnInitialRenderComplete.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "onInitialRenderComplete",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.setIsSharable",
+            "type": "Function",
+            "tags": [],
+            "label": "setIsSharable",
+            "description": [],
+            "signature": [
+              "(isSharable: boolean) => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.setIsSharable.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isSharable",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.getInspectorAdapters",
             "type": "Function",
             "tags": [],
@@ -412,7 +482,7 @@
             "children": [
               {
                 "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable._dispatchSetQuery.$1.forceRefresh",
+                "id": "def-public.MapEmbeddable._dispatchSetQuery.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ forceRefresh }",
@@ -422,7 +492,7 @@
                 "children": [
                   {
                     "parentPluginId": "maps",
-                    "id": "def-public.MapEmbeddable._dispatchSetQuery.$1.forceRefresh.forceRefresh",
+                    "id": "def-public.MapEmbeddable._dispatchSetQuery.$1.forceRefresh",
                     "type": "boolean",
                     "tags": [],
                     "label": "forceRefresh",
@@ -966,7 +1036,7 @@
             "children": [
               {
                 "parentPluginId": "maps",
-                "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerIdfeatureIdmbProperties",
+                "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    layerId,\n    featureId,\n    mbProperties,\n  }",
@@ -976,7 +1046,7 @@
                 "children": [
                   {
                     "parentPluginId": "maps",
-                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerIdfeatureIdmbProperties.layerId",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerId",
                     "type": "string",
                     "tags": [],
                     "label": "layerId",
@@ -986,7 +1056,7 @@
                   },
                   {
                     "parentPluginId": "maps",
-                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerIdfeatureIdmbProperties.featureId",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.featureId",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "featureId",
@@ -999,7 +1069,7 @@
                   },
                   {
                     "parentPluginId": "maps",
-                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerIdfeatureIdmbProperties.mbProperties",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.mbProperties",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "mbProperties",
@@ -1030,7 +1100,7 @@
             "children": [
               {
                 "parentPluginId": "maps",
-                "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.layerIdfeatureId",
+                "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    layerId,\n    featureId,\n  }",
@@ -1040,7 +1110,7 @@
                 "children": [
                   {
                     "parentPluginId": "maps",
-                    "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.layerIdfeatureId.layerId",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.layerId",
                     "type": "string",
                     "tags": [],
                     "label": "layerId",
@@ -1050,7 +1120,7 @@
                   },
                   {
                     "parentPluginId": "maps",
-                    "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.layerIdfeatureId.featureId",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.featureId",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "featureId",
@@ -2061,6 +2131,17 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-common.CHECK_IS_DRAWING_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "CHECK_IS_DRAWING_INDEX",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.COUNT_PROP_LABEL",
         "type": "string",
         "tags": [],
@@ -2486,7 +2567,7 @@
         "children": [
           {
             "parentPluginId": "maps",
-            "id": "def-common.value",
+            "id": "def-common.FieldFormatter.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "value",
@@ -2582,20 +2663,6 @@
         "tags": [],
         "label": "INDEX_FEATURE_PATH",
         "description": [],
-        "path": "x-pack/plugins/maps/common/constants.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "maps",
-        "id": "def-common.INDEX_META_DATA_CREATED_BY",
-        "type": "string",
-        "tags": [],
-        "label": "INDEX_META_DATA_CREATED_BY",
-        "description": [],
-        "signature": [
-          "\"maps-drawing-data-ingest\""
-        ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -2797,6 +2864,20 @@
         "tags": [],
         "label": "MAPS_APP_PATH",
         "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.MAPS_NEW_VECTOR_LAYER_META_CREATED_BY",
+        "type": "string",
+        "tags": [],
+        "label": "MAPS_NEW_VECTOR_LAYER_META_CREATED_BY",
+        "description": [],
+        "signature": [
+          "\"maps-new-vector-layer\""
+        ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false

@@ -79,9 +79,8 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async ensureViewIsLoadable(name: string) {
-      const subjects = await testSubjects.getVisibleTextAll('savedViews-loadList');
-      const includesName = subjects.some((s) => s.includes(name));
-      expect(includesName).to.be(true);
+      const subject = await testSubjects.find('savedViews-loadList');
+      await subject.findByCssSelector(`li[title="${name}"]`);
     },
 
     async closeSavedViewsLoadModal() {

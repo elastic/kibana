@@ -123,7 +123,7 @@ export function getScreenshots$(
                 const elements = data.elementsPositionAndAttributes
                   ? data.elementsPositionAndAttributes
                   : getDefaultElementPosition(layout.getViewport(1));
-                const screenshots = await getScreenshots(driver, layout, elements, logger);
+                const screenshots = await getScreenshots(driver, elements, logger);
                 const { timeRange, error: setupError } = data;
                 return {
                   timeRange,

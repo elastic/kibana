@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const MockLegacyClusterClient = jest.fn();
-jest.mock('./legacy/cluster_client', () => ({ LegacyClusterClient: MockLegacyClusterClient }));
-
 export const MockClusterClient = jest.fn();
 jest.mock('./client/cluster_client', () => ({ ClusterClient: MockClusterClient }));

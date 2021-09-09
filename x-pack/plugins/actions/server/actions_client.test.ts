@@ -1823,3 +1823,65 @@ describe('isActionTypeEnabled()', () => {
     });
   });
 });
+
+describe('isPreconfigured()', () => {
+  test('should return true if connector id is in list of preconfigured connectors', () => {
+    actionsClient = new ActionsClient({
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      defaultKibanaIndex,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      request,
+      authorization: (authorization as unknown) as ActionsAuthorization,
+      preconfiguredActions: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: 'my-action-type',
+          secrets: {
+            test: 'test1',
+          },
+          isPreconfigured: true,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+    });
+
+    expect(actionsClient.isPreconfigured('testPreconfigured')).toEqual(true);
+  });
+
+  test('should return false if connector id is not in list of preconfigured connectors', () => {
+    actionsClient = new ActionsClient({
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      defaultKibanaIndex,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      request,
+      authorization: (authorization as unknown) as ActionsAuthorization,
+      preconfiguredActions: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: 'my-action-type',
+          secrets: {
+            test: 'test1',
+          },
+          isPreconfigured: true,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+    });
+
+    expect(actionsClient.isPreconfigured(uuid.v4())).toEqual(false);
+  });
+});

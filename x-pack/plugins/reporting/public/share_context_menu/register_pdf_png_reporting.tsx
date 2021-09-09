@@ -127,6 +127,7 @@ export const reportingScreenshotShareProvider = ({
     };
 
     const isV2Job = isJobV2Params(jobProviderOptions);
+    const requiresSavedState = !isV2Job;
 
     const pngReportType = isV2Job ? 'pngV2' : 'png';
 
@@ -149,7 +150,7 @@ export const reportingScreenshotShareProvider = ({
             uiSettings={uiSettings}
             reportType={pngReportType}
             objectId={objectId}
-            requiresSavedState={true}
+            requiresSavedState={requiresSavedState}
             getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
             isDirty={isDirty}
             onClose={onClose}
@@ -183,7 +184,7 @@ export const reportingScreenshotShareProvider = ({
             uiSettings={uiSettings}
             reportType={pdfReportType}
             objectId={objectId}
-            requiresSavedState={true}
+            requiresSavedState={requiresSavedState}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
             getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
             isDirty={isDirty}

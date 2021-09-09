@@ -13,4 +13,14 @@ export type ConfigType = TypeOf<typeof ConfigSchema>;
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  connectionCheck: schema.object({
+    interval: schema.duration({
+      defaultValue: '5s',
+      validate(value) {
+        if (value.asSeconds() < 1) {
+          return 'the value must be greater or equal to 1 second.';
+        }
+      },
+    }),
+  }),
 });

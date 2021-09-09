@@ -23,9 +23,10 @@ import { IndexPatternEditorLazy } from './components/index_pattern_editor_lazy';
 interface Dependencies {
   core: CoreStart;
   indexPatternService: DataPublicPluginStart['indexPatterns'];
+  searchClient: DataPublicPluginStart['search']['search'];
 }
 
-export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => (
+export const getEditorOpener = ({ core, indexPatternService, searchClient }: Dependencies) => (
   options: IndexPatternEditorProps
 ): CloseEditor => {
   const { uiSettings, overlays, docLinks, notifications, http, application } = core;
@@ -38,6 +39,7 @@ export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => 
     notifications,
     application,
     indexPatternService,
+    searchClient,
   });
 
   let overlayRef: OverlayRef | null = null;

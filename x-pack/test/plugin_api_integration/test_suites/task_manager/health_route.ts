@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import { keyBy, mapValues } from 'lodash';
-import supertestAsPromised from 'supertest-as-promised';
+import supertest from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
@@ -84,10 +84,10 @@ interface MonitoringStats {
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
   const retry = getService('retry');
-  const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
+  const request = supertest(url.format(config.get('servers.kibana')));
 
   function getHealthRequest() {
-    return supertest.get('/api/task_manager/_health').set('kbn-xsrf', 'foo');
+    return request.get('/api/task_manager/_health').set('kbn-xsrf', 'foo');
   }
 
   function getHealth(): Promise<MonitoringStats> {
@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   function scheduleTask(task: Partial<ConcreteTaskInstance>): Promise<ConcreteTaskInstance> {
-    return supertest
+    return request
       .post('/api/sample_tasks/schedule')
       .set('kbn-xsrf', 'xxx')
       .send({ task })

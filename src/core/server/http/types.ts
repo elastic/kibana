@@ -142,6 +142,11 @@ export interface HttpServicePreboot {
    * See {@link IBasePath}.
    */
   basePath: IBasePath;
+
+  /**
+   * Provides common {@link HttpServerInfo | information} about the running preboot http server.
+   */
+  getServerInfo: () => HttpServerInfo;
 }
 
 /** @internal */
@@ -155,6 +160,7 @@ export interface InternalHttpServicePreboot
     | 'registerStaticDir'
     | 'registerRouteHandlerContext'
     | 'server'
+    | 'getServerInfo'
   > {
   registerRoutes(path: string, callback: (router: IRouter) => void): void;
 }

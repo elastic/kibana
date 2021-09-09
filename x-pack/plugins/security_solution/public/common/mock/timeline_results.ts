@@ -1930,46 +1930,48 @@ export const mockTimelineResults: OpenTimelineResult[] = [
   },
 ];
 
+const mockTimelineModelColumns: TimelineModel['columns'] = [
+  {
+    columnHeaderType: 'not-filtered',
+    id: '@timestamp',
+    initialWidth: 190,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'message',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'event.category',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'host.name',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'source.ip',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'destination.ip',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'user.name',
+    initialWidth: 180,
+  },
+];
 export const mockTimelineModel: TimelineModel = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.notes,
-  columns: [
-    {
-      columnHeaderType: 'not-filtered',
-      id: '@timestamp',
-      initialWidth: 190,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'message',
-      initialWidth: 180,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'event.category',
-      initialWidth: 180,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'host.name',
-      initialWidth: 180,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'source.ip',
-      initialWidth: 180,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'destination.ip',
-      initialWidth: 180,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'user.name',
-      initialWidth: 180,
-    },
-  ],
+  columns: mockTimelineModelColumns,
+  defaultColumns: mockTimelineModelColumns,
   dataProviders: [],
   dateRange: {
     end: '2020-03-18T13:52:38.929Z',
@@ -1977,6 +1979,7 @@ export const mockTimelineModel: TimelineModel = {
   },
   deletedEventIds: [],
   description: 'This is a sample rule description',
+  documentType: '',
   eqlOptions: {
     eventCategoryField: 'event.category',
     tiebreakerField: 'event.sequence',
@@ -1999,7 +2002,7 @@ export const mockTimelineModel: TimelineModel = {
         params: '"{"query":"placeholder"}"',
         type: 'phrase',
       },
-      query: '"{"match_phrase":{"host.name":"placeholder"}}"',
+      query: { match_phrase: { 'host.name': 'placeholder' } },
     },
   ],
   highlightedDropAndProviderId: '',
@@ -2015,6 +2018,7 @@ export const mockTimelineModel: TimelineModel = {
   kqlQuery: {
     filterQuery: null,
   },
+  queryFields: [],
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
   loadingEventIds: [],
@@ -2022,6 +2026,7 @@ export const mockTimelineModel: TimelineModel = {
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
   savedObjectId: 'ef579e40-jibber-jabber',
+  selectAll: false,
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
@@ -2076,21 +2081,23 @@ export const mockTimelineResult = {
   stale: false,
 };
 
+const defaultTimelineColumns: CreateTimelineProps['timeline']['columns'] = [
+  { columnHeaderType: 'not-filtered', id: '@timestamp', type: 'number', initialWidth: 190 },
+  { columnHeaderType: 'not-filtered', id: 'message', initialWidth: 180 },
+  { columnHeaderType: 'not-filtered', id: 'event.category', initialWidth: 180 },
+  { columnHeaderType: 'not-filtered', id: 'event.action', initialWidth: 180 },
+  { columnHeaderType: 'not-filtered', id: 'host.name', initialWidth: 180 },
+  { columnHeaderType: 'not-filtered', id: 'source.ip', initialWidth: 180 },
+  { columnHeaderType: 'not-filtered', id: 'destination.ip', initialWidth: 180 },
+  { columnHeaderType: 'not-filtered', id: 'user.name', initialWidth: 180 },
+];
 export const defaultTimelineProps: CreateTimelineProps = {
   from: '2018-11-05T18:58:25.937Z',
   timeline: {
     activeTab: TimelineTabs.query,
     prevActiveTab: TimelineTabs.query,
-    columns: [
-      { columnHeaderType: 'not-filtered', id: '@timestamp', type: 'number', initialWidth: 190 },
-      { columnHeaderType: 'not-filtered', id: 'message', initialWidth: 180 },
-      { columnHeaderType: 'not-filtered', id: 'event.category', initialWidth: 180 },
-      { columnHeaderType: 'not-filtered', id: 'event.action', initialWidth: 180 },
-      { columnHeaderType: 'not-filtered', id: 'host.name', initialWidth: 180 },
-      { columnHeaderType: 'not-filtered', id: 'source.ip', initialWidth: 180 },
-      { columnHeaderType: 'not-filtered', id: 'destination.ip', initialWidth: 180 },
-      { columnHeaderType: 'not-filtered', id: 'user.name', initialWidth: 180 },
-    ],
+    columns: defaultTimelineColumns,
+    defaultColumns: defaultTimelineColumns,
     dataProviders: [
       {
         and: [],
@@ -2106,6 +2113,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     dateRange: { end: '2018-11-05T19:03:25.937Z', start: '2018-11-05T18:58:25.937Z' },
     deletedEventIds: [],
     description: '',
+    documentType: '',
     eqlOptions: {
       eventCategoryField: 'event.category',
       query: '',
@@ -2137,7 +2145,9 @@ export const defaultTimelineProps: CreateTimelineProps = {
     noteIds: [],
     pinnedEventIds: {},
     pinnedEventsSaveObject: {},
+    queryFields: [],
     savedObjectId: null,
+    selectAll: false,
     selectedEventIds: {},
     show: false,
     showCheckboxes: false,

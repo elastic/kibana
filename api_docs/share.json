@@ -362,8 +362,16 @@
         "description": [],
         "signature": [
           "(opts: ",
-          "RedirectOptions",
-          ") => URLSearchParams"
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.RedirectOptions",
+            "text": "RedirectOptions"
+          },
+          "<",
+          "SerializableRecord",
+          ">) => URLSearchParams"
         ],
         "path": "src/plugins/share/public/url_service/redirect/util/format_search_params.ts",
         "deprecated": false,
@@ -376,7 +384,16 @@
             "label": "opts",
             "description": [],
             "signature": [
-              "RedirectOptions"
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.RedirectOptions",
+                "text": "RedirectOptions"
+              },
+              "<",
+              "SerializableRecord",
+              ">"
             ],
             "path": "src/plugins/share/public/url_service/redirect/util/format_search_params.ts",
             "deprecated": false,
@@ -397,7 +414,16 @@
         ],
         "signature": [
           "(urlSearch: string) => ",
-          "RedirectOptions"
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.RedirectOptions",
+            "text": "RedirectOptions"
+          },
+          "<",
+          "SerializableRecord",
+          ">"
         ],
         "path": "src/plugins/share/public/url_service/redirect/util/parse_search_params.ts",
         "deprecated": false,
@@ -433,13 +459,7 @@
         "description": [],
         "signature": [
           "<P extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           ">(locator: ",
           {
             "pluginId": "share",
@@ -904,6 +924,68 @@
       },
       {
         "parentPluginId": "share",
+        "id": "def-public.RedirectOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "RedirectOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.RedirectOptions",
+            "text": "RedirectOptions"
+          },
+          "<P>"
+        ],
+        "path": "src/plugins/share/public/url_service/redirect/redirect_manager.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.RedirectOptions.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Locator ID."
+            ],
+            "path": "src/plugins/share/public/url_service/redirect/redirect_manager.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.RedirectOptions.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "Kibana version when locator params where generated."
+            ],
+            "path": "src/plugins/share/public/url_service/redirect/redirect_manager.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.RedirectOptions.params",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [
+              "Locator params."
+            ],
+            "signature": [
+              "P"
+            ],
+            "path": "src/plugins/share/public/url_service/redirect/redirect_manager.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
         "id": "def-public.ShareContext",
         "type": "Interface",
         "tags": [],
@@ -1037,7 +1119,7 @@
           },
           " extends Pick<",
           "EuiContextMenuPanelItemDescriptorEntry",
-          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"disabled\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
+          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"disabled\" | \"data-test-subj\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
         ],
         "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
@@ -1742,7 +1824,17 @@
         "UrlGeneratorsSetup",
         "; url: ",
         "UrlService",
-        "; }"
+        "; navigate(options: ",
+        {
+          "pluginId": "share",
+          "scope": "public",
+          "docId": "kibSharePluginApi",
+          "section": "def-public.RedirectOptions",
+          "text": "RedirectOptions"
+        },
+        "<",
+        "SerializableRecord",
+        ">): void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
       "deprecated": false,
@@ -1769,7 +1861,17 @@
         "UrlGeneratorsStart",
         "; url: ",
         "UrlService",
-        "; }"
+        "; navigate(options: ",
+        {
+          "pluginId": "share",
+          "scope": "public",
+          "docId": "kibSharePluginApi",
+          "section": "def-public.RedirectOptions",
+          "text": "RedirectOptions"
+        },
+        "<",
+        "SerializableRecord",
+        ">): void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
       "deprecated": false,
@@ -1880,13 +1982,7 @@
         "description": [],
         "signature": [
           "<P extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           ">(locator: ",
           {
             "pluginId": "share",

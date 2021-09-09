@@ -7,7 +7,6 @@
 
 import { omit } from 'lodash';
 import moment from 'moment';
-// @ts-ignore no module definition
 import Puid from 'puid';
 import { JOB_STATUSES } from '../../../common/constants';
 import {
@@ -16,7 +15,7 @@ import {
   ReportDocumentHead,
   ReportSource,
 } from '../../../common/types';
-import { ReportTaskParams } from '../tasks';
+import type { ReportTaskParams } from '../tasks';
 
 export { ReportDocument };
 export { ReportApiJSON, ReportSource };
@@ -25,8 +24,7 @@ const puid = new Puid();
 export const MIGRATION_VERSION = '7.14.0';
 
 /*
- * The public fields are a flattened version what Elasticsearch returns when you
- * `GET` a document.
+ * Class for an ephemeral report document: possibly is not saved in Elasticsearch
  */
 export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public _index?: string;
@@ -69,7 +67,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
 
     this.migration_version = MIGRATION_VERSION;
 
-    // see enqueue_job for all the fields that are expected to exist when adding a report
+    // see RequestHandler.enqueueJob for all the fields that are expected to exist when adding a report
     if (opts.jobtype == null) {
       throw new Error(`jobtype is expected!`);
     }

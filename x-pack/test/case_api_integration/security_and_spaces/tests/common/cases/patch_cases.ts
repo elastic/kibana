@@ -535,8 +535,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should update the status of multiple alerts attached to multiple cases', async () => {
-          const signalID = '5f2b9ec41f8febb1c06b5d1045aeabb9874733b7617e88a370510f2fb3a41a5d';
-          const signalID2 = '4d0f4b1533e46b66b43bdd0330d23f39f2cf42a7253153270e38d30cce9ff0c6';
+          const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
+          const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
 
           // does NOT updates alert status when adding comments and syncAlerts=false
           const individualCase1 = await createCase(supertest, {
@@ -653,7 +653,7 @@ export default ({ getService }: FtrProviderContext): void => {
             CaseStatuses.closed
           );
           expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
-            CaseStatuses['in-progress']
+            'acknowledged'
           );
         });
       });
@@ -846,7 +846,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('in-progress');
+          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('acknowledged');
         });
 
         it('does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
@@ -970,7 +970,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('in-progress');
+          expect(updatedAlert.hits.hits[0]._source?.signal.status).eql('acknowledged');
         });
 
         it('it does NOT updates alert status when syncAlerts is turned off', async () => {

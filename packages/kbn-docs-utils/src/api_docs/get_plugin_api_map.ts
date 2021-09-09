@@ -9,7 +9,12 @@
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import { Project } from 'ts-morph';
 import { getPluginApi } from './get_plugin_api';
-import { MissingApiItemMap, PluginApi, ReferencedDeprecationsByPlugin } from './types';
+import {
+  ApiDeclaration,
+  MissingApiItemMap,
+  PluginApi,
+  ReferencedDeprecationsByPlugin,
+} from './types';
 import { removeBrokenLinks } from './utils';
 
 export function getPluginApiMap(
@@ -21,6 +26,7 @@ export function getPluginApiMap(
   pluginApiMap: { [key: string]: PluginApi };
   missingApiItems: MissingApiItemMap;
   referencedDeprecations: ReferencedDeprecationsByPlugin;
+  unReferencedDeprecations: ApiDeclaration[];
 } {
   log.debug('Building plugin API map, getting missing comments, and collecting deprecations...');
   const pluginApiMap: { [key: string]: PluginApi } = {};
@@ -40,32 +46,52 @@ export function getPluginApiMap(
   const missingApiItems: { [key: string]: { [key: string]: string[] } } = {};
   const referencedDeprecations: ReferencedDeprecationsByPlugin = {};
 
+  const unReferencedDeprecations: ApiDeclaration[] = [];
+
   plugins.forEach((plugin) => {
     const id = plugin.manifest.id;
     const pluginApi = pluginApiMap[id];
     removeBrokenLinks(pluginApi, missingApiItems, pluginApiMap, log);
-    collectDeprecations(pluginApi, referencedDeprecations);
+    collectDeprecations(pluginApi, referencedDeprecations, unReferencedDeprecations);
   });
-  return { pluginApiMap, missingApiItems, referencedDeprecations };
+  return { pluginApiMap, missingApiItems, referencedDeprecations, unReferencedDeprecations };
 }
 
 function collectDeprecations(
   pluginApi: PluginApi,
-  referencedDeprecations: ReferencedDeprecationsByPlugin
+  referencedDeprecations: ReferencedDeprecationsByPlugin,
+  unReferencedDeprecations: ApiDeclaration[]
 ) {
   (['client', 'common', 'server'] as Array<'client' | 'server' | 'common'>).forEach((scope) => {
     pluginApi[scope].forEach((api) => {
-      if ((api.tags || []).find((tag) => tag === 'deprecated')) {
-        (api.references || []).forEach((ref) => {
-          if (referencedDeprecations[ref.plugin] === undefined) {
-            referencedDeprecations[ref.plugin] = [];
-          }
-          referencedDeprecations[ref.plugin].push({
-            ref,
-            deprecatedApi: api,
-          });
-        });
-      }
+      collectDeprecationsForApi(api, referencedDeprecations, unReferencedDeprecations);
     });
   });
+}
+
+function collectDeprecationsForApi(
+  api: ApiDeclaration,
+  referencedDeprecations: ReferencedDeprecationsByPlugin,
+  unReferencedDeprecations: ApiDeclaration[]
+) {
+  if ((api.tags || []).find((tag) => tag === 'deprecated')) {
+    if (api.references && api.references.length > 0) {
+      api.references.forEach((ref) => {
+        if (referencedDeprecations[ref.plugin] === undefined) {
+          referencedDeprecations[ref.plugin] = [];
+        }
+        referencedDeprecations[ref.plugin].push({
+          ref,
+          deprecatedApi: api,
+        });
+      });
+    } else {
+      unReferencedDeprecations.push(api);
+    }
+  }
+  if (api.children) {
+    api.children.forEach((child) =>
+      collectDeprecationsForApi(child, referencedDeprecations, unReferencedDeprecations)
+    );
+  }
 }

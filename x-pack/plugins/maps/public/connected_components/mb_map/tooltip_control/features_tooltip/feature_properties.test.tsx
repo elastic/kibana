@@ -31,6 +31,10 @@ class MockTooltipProperty {
     return this._value;
   }
 
+  getPropertyKey() {
+    return this._key;
+  }
+
   getPropertyName() {
     return this._key;
   }

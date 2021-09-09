@@ -7,12 +7,17 @@
 
 import moment from 'moment';
 import { createMockPackagePolicy } from './mocks';
+import { TrustedApp } from '../../../common/endpoint/types';
+import { LIST_ENDPOINT_EXCEPTION, LIST_ENDPOINT_EVENT_FILTER } from './constants';
 import {
   getPreviousDiagTaskTimestamp,
   getPreviousEpMetaTaskTimestamp,
   batchTelemetryRecords,
   isPackagePolicyList,
+  templateTrustedApps,
+  templateEndpointExceptions,
 } from './helpers';
+import { EndpointExceptionListItem } from './types';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -123,5 +128,69 @@ describe('test package policy type guard', () => {
     const result = isPackagePolicyList(arr);
 
     expect(result).toEqual(true);
+  });
+});
+
+describe('list telemetry schema', () => {
+  test('trusted apps document is correctly formed', () => {
+    const data = [{ id: 'test_1' }] as TrustedApp[];
+    const templatedItems = templateTrustedApps(data);
+
+    expect(templatedItems[0]?.trusted_application.length).toEqual(1);
+    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
+    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
+  });
+
+  test('trusted apps document is correctly formed with multiple entries', () => {
+    const data = [{ id: 'test_2' }, { id: 'test_2' }] as TrustedApp[];
+    const templatedItems = templateTrustedApps(data);
+
+    expect(templatedItems[0]?.trusted_application.length).toEqual(1);
+    expect(templatedItems[1]?.trusted_application.length).toEqual(1);
+    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
+    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
+  });
+
+  test('endpoint exception document is correctly formed', () => {
+    const data = [{ id: 'test_3' }] as EndpointExceptionListItem[];
+    const templatedItems = templateEndpointExceptions(data, LIST_ENDPOINT_EXCEPTION);
+
+    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
+    expect(templatedItems[0]?.endpoint_exception.length).toEqual(1);
+    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
+  });
+
+  test('endpoint exception document is correctly formed with multiple entries', () => {
+    const data = [
+      { id: 'test_4' },
+      { id: 'test_4' },
+      { id: 'test_4' },
+    ] as EndpointExceptionListItem[];
+    const templatedItems = templateEndpointExceptions(data, LIST_ENDPOINT_EXCEPTION);
+
+    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
+    expect(templatedItems[0]?.endpoint_exception.length).toEqual(1);
+    expect(templatedItems[1]?.endpoint_exception.length).toEqual(1);
+    expect(templatedItems[2]?.endpoint_exception.length).toEqual(1);
+    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
+  });
+
+  test('endpoint event filters document is correctly formed', () => {
+    const data = [{ id: 'test_5' }] as EndpointExceptionListItem[];
+    const templatedItems = templateEndpointExceptions(data, LIST_ENDPOINT_EVENT_FILTER);
+
+    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
+    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
+    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(1);
+  });
+
+  test('endpoint event filters document is correctly formed with multiple entries', () => {
+    const data = [{ id: 'test_6' }, { id: 'test_6' }] as EndpointExceptionListItem[];
+    const templatedItems = templateEndpointExceptions(data, LIST_ENDPOINT_EVENT_FILTER);
+
+    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
+    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
+    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(1);
+    expect(templatedItems[1]?.endpoint_event_filter.length).toEqual(1);
   });
 });

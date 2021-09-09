@@ -6,12 +6,26 @@
  * Side Public License, v 1.
  */
 
+import { Location } from 'history';
 import { useLocation } from 'react-router-dom';
 import { useRouter } from './use_router';
 
-export function useParams(path: string, optional: boolean = false) {
+export function useParams(...args: any[]) {
   const router = useRouter();
   const location = useLocation();
 
-  return router.getParams(path as never, location, optional);
+  let optional: boolean = false;
+
+  const last: boolean | string | undefined = args[args.length - 1];
+
+  if (typeof last === 'boolean') {
+    optional = last;
+    args.pop();
+  }
+
+  const paths = args as string[];
+
+  const getParamsArgs = [...paths, location, optional] as [never, Location<any>, boolean];
+
+  return router.getParams(...getParamsArgs);
 }

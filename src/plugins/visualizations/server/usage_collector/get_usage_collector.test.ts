@@ -7,126 +7,106 @@
  */
 
 import moment from 'moment';
-import { ElasticsearchClient } from 'src/core/server';
 import { getStats } from './get_usage_collector';
+import type { SavedObjectsClientContract } from '../../../../core/server';
 
 const defaultMockSavedObjects = [
   {
-    _id: 'visualization:coolviz-123',
-    _source: {
-      type: 'visualization',
-      visualization: { visState: '{"type": "shell_beads"}' },
-      updated_at: moment().subtract(7, 'days').startOf('day').toString(),
-    },
+    id: 'visualization:coolviz-123',
+    attributes: { visState: '{"type": "shell_beads"}' },
+    updated_at: moment().subtract(7, 'days').startOf('day').toString(),
   },
 ];
 
 const enlargedMockSavedObjects = [
   // default space
   {
-    _id: 'visualization:coolviz-123',
-    _source: {
-      type: 'visualization',
-      visualization: { visState: '{"type": "cave_painting"}' },
-      updated_at: moment().subtract(7, 'days').startOf('day').toString(),
-    },
+    id: 'visualization:coolviz-123',
+    namespaces: ['default'],
+    attributes: { visState: '{"type": "cave_painting"}' },
+    updated_at: moment().subtract(7, 'days').startOf('day').toString(),
   },
   {
-    _id: 'visualization:coolviz-456',
-    _source: {
-      type: 'visualization',
-      visualization: { visState: '{"type": "printing_press"}' },
-      updated_at: moment().subtract(20, 'days').startOf('day').toString(),
-    },
+    id: 'visualization:coolviz-456',
+    namespaces: ['default'],
+    attributes: { visState: '{"type": "printing_press"}' },
+    updated_at: moment().subtract(20, 'days').startOf('day').toString(),
   },
   {
-    _id: 'meat:visualization:coolviz-789',
-    _source: {
-      type: 'visualization',
-      visualization: { visState: '{"type": "floppy_disk"}' },
-      updated_at: moment().subtract(2, 'months').startOf('day').toString(),
-    },
+    id: 'meat:visualization:coolviz-789',
+    namespaces: ['default'],
+    attributes: { visState: '{"type": "floppy_disk"}' },
+    updated_at: moment().subtract(2, 'months').startOf('day').toString(),
   },
   // meat space
   {
-    _id: 'meat:visualization:coolviz-789',
-    _source: {
-      type: 'visualization',
-      visualization: { visState: '{"type": "cave_painting"}' },
-      updated_at: moment().subtract(89, 'days').startOf('day').toString(),
-    },
+    id: 'meat:visualization:coolviz-789',
+    namespaces: ['meat'],
+    attributes: { visState: '{"type": "cave_painting"}' },
+    updated_at: moment().subtract(89, 'days').startOf('day').toString(),
   },
   {
-    _id: 'meat:visualization:coolviz-789',
-    _source: {
-      type: 'visualization',
-      visualization: { visState: '{"type": "cuneiform"}' },
-      updated_at: moment().subtract(5, 'months').startOf('day').toString(),
-    },
+    id: 'meat:visualization:coolviz-789',
+    namespaces: ['meat'],
+    attributes: { visState: '{"type": "cuneiform"}' },
+    updated_at: moment().subtract(5, 'months').startOf('day').toString(),
   },
   {
-    _id: 'meat:visualization:coolviz-789',
-    _source: {
-      type: 'visualization',
-      visualization: { visState: '{"type": "cuneiform"}' },
-      updated_at: moment().subtract(2, 'days').startOf('day').toString(),
-    },
+    id: 'meat:visualization:coolviz-789',
+    namespaces: ['meat'],
+    attributes: { visState: '{"type": "cuneiform"}' },
+    updated_at: moment().subtract(2, 'days').startOf('day').toString(),
   },
   {
-    _id: 'meat:visualization:coolviz-789',
-    _source: {
-      type: 'visualization',
-      visualization: { visState: '{"type": "floppy_disk"}' },
-      updated_at: moment().subtract(7, 'days').startOf('day').toString(),
-    },
+    id: 'meat:visualization:coolviz-789',
+    attributes: { visState: '{"type": "floppy_disk"}' },
+    updated_at: moment().subtract(7, 'days').startOf('day').toString(),
   },
   // cyber space
   {
-    _id: 'cyber:visualization:coolviz-789',
-    _source: {
-      type: 'visualization',
-      visualization: { visState: '{"type": "floppy_disk"}' },
-      updated_at: moment().subtract(7, 'months').startOf('day').toString(),
-    },
+    id: 'cyber:visualization:coolviz-789',
+    namespaces: ['cyber'],
+    attributes: { visState: '{"type": "floppy_disk"}' },
+    updated_at: moment().subtract(7, 'months').startOf('day').toString(),
   },
   {
-    _id: 'cyber:visualization:coolviz-789',
-    _source: {
-      type: 'visualization',
-      visualization: { visState: '{"type": "floppy_disk"}' },
-      updated_at: moment().subtract(3, 'days').startOf('day').toString(),
-    },
+    id: 'cyber:visualization:coolviz-789',
+    namespaces: ['cyber'],
+    attributes: { visState: '{"type": "floppy_disk"}' },
+    updated_at: moment().subtract(3, 'days').startOf('day').toString(),
   },
   {
-    _id: 'cyber:visualization:coolviz-123',
-    _source: {
-      type: 'visualization',
-      visualization: { visState: '{"type": "cave_painting"}' },
-      updated_at: moment().subtract(15, 'days').startOf('day').toString(),
-    },
+    id: 'cyber:visualization:coolviz-123',
+    namespaces: ['cyber'],
+    attributes: { visState: '{"type": "cave_painting"}' },
+    updated_at: moment().subtract(15, 'days').startOf('day').toString(),
   },
 ];
 
 describe('Visualizations usage collector', () => {
-  const mockIndex = '';
-
-  const getMockCallCluster = (hits: unknown[]) =>
-    ({
-      search: () => Promise.resolve({ body: { hits: { hits } } }) as unknown,
-    } as ElasticsearchClient);
+  const getMockCallCluster = (savedObjects: unknown[]) =>
+    (({
+      createPointInTimeFinder: jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: savedObjects };
+        },
+      }),
+    } as unknown) as SavedObjectsClientContract);
 
   test('Returns undefined when no results found (undefined)', async () => {
-    const result = await getStats(getMockCallCluster(undefined as any), mockIndex);
+    const result = await getStats(getMockCallCluster(undefined as any));
+
     expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no results found (0 results)', async () => {
-    const result = await getStats(getMockCallCluster([]), mockIndex);
+    const result = await getStats(getMockCallCluster([]));
     expect(result).toBeUndefined();
   });
 
   test('Summarizes visualizations response data', async () => {
-    const result = await getStats(getMockCallCluster(defaultMockSavedObjects), mockIndex);
+    const result = await getStats(getMockCallCluster(defaultMockSavedObjects));
 
     expect(result).toMatchObject({
       shell_beads: {
@@ -181,7 +161,7 @@ describe('Visualizations usage collector', () => {
       },
     };
 
-    const result = await getStats(getMockCallCluster(enlargedMockSavedObjects), mockIndex);
+    const result = await getStats(getMockCallCluster(enlargedMockSavedObjects));
 
     expect(result).toMatchObject(expectedStats);
   });

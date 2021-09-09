@@ -163,6 +163,12 @@ describe('parseClientOptions', () => {
               ]
           `);
     });
+
+    it('`caFingerprint` option', () => {
+      const options = parseClientOptions(createConfig({ caFingerprint: 'ab:cd:ef' }), false);
+
+      expect(options.caFingerprint).toBe('ab:cd:ef');
+    });
   });
 
   describe('authorization', () => {

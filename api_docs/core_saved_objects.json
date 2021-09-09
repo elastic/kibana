@@ -995,10 +995,10 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-public.ResolvedSimpleSavedObject.savedObject",
+            "id": "def-public.ResolvedSimpleSavedObject.saved_object",
             "type": "Object",
             "tags": [],
-            "label": "savedObject",
+            "label": "saved_object",
             "description": [
               "\nThe saved object that was found."
             ],
@@ -1032,10 +1032,10 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.ResolvedSimpleSavedObject.aliasTargetId",
+            "id": "def-public.ResolvedSimpleSavedObject.alias_target_id",
             "type": "string",
             "tags": [],
-            "label": "aliasTargetId",
+            "label": "alias_target_id",
             "description": [
               "\nThe ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`."
             ],
@@ -4274,6 +4274,51 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError",
+            "type": "Function",
+            "tags": [],
+            "label": "createGenericNotFoundEsUnavailableError",
+            "description": [],
+            "signature": [
+              "(type?: string | null, id?: string | null) => ",
+              "DecoratedError"
+            ],
+            "path": "src/core/server/saved_objects/service/lib/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "src/core/server/saved_objects/service/lib/errors.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "src/core/server/saved_objects/service/lib/errors.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4684,7 +4729,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger",
+                "id": "def-server.SavedObjectsExporter.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }",
@@ -4694,7 +4739,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClient",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClient",
                     "type": "Object",
                     "tags": [],
                     "label": "savedObjectsClient",
@@ -5007,7 +5052,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger.typeRegistry",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.typeRegistry",
                     "type": "Object",
                     "tags": [],
                     "label": "typeRegistry",
@@ -5052,7 +5097,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger.exportSizeLimit",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.exportSizeLimit",
                     "type": "number",
                     "tags": [],
                     "label": "exportSizeLimit",
@@ -5062,7 +5107,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.savedObjectsClienttypeRegistryexportSizeLimitlogger.logger",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.$1.logger",
                     "type": "Object",
                     "tags": [],
                     "label": "logger",
@@ -5848,7 +5893,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClienttypeRegistryimportSizeLimit",
+                "id": "def-server.SavedObjectsImporter.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }",
@@ -5858,7 +5903,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClient",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClient",
                     "type": "Object",
                     "tags": [],
                     "label": "savedObjectsClient",
@@ -6171,7 +6216,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClienttypeRegistryimportSizeLimit.typeRegistry",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.typeRegistry",
                     "type": "Object",
                     "tags": [],
                     "label": "typeRegistry",
@@ -6216,7 +6261,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.savedObjectsClienttypeRegistryimportSizeLimit.importSizeLimit",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.$1.importSizeLimit",
                     "type": "number",
                     "tags": [],
                     "label": "importSizeLimit",
@@ -8657,6 +8702,74 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsUtils.getConvertedObjectId",
+            "type": "Function",
+            "tags": [],
+            "label": "getConvertedObjectId",
+            "description": [
+              "\nUses a single-namespace object's \"legacy ID\" to determine what its new ID will be after it is converted to a multi-namespace type.\n"
+            ],
+            "signature": [
+              "(namespace: string | undefined, type: string, id: string) => string"
+            ],
+            "path": "src/core/server/saved_objects/service/lib/utils.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsUtils.getConvertedObjectId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "The namespace of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/core/server/saved_objects/service/lib/utils.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsUtils.getConvertedObjectId.$2",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "The type of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/server/saved_objects/service/lib/utils.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsUtils.getConvertedObjectId.$3",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "The ID of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/server/saved_objects/service/lib/utils.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The ID of the saved object after it is converted."
+            ]
           }
         ],
         "initialIsOpen": false
@@ -9646,6 +9759,21 @@
             "label": "fields",
             "description": [
               "SavedObject fields to include in the response"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsBulkGetObject.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [
+              "\nOptional namespace(s) for the object to be retrieved in. If this is defined, it will supersede the namespace ID that is in the\ntop-level options.\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
             ],
             "signature": [
               "string[] | undefined"
@@ -12451,12 +12579,12 @@
             "deprecated": true,
             "references": [
               {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/lib/resolve_import_errors.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/components/copy_to_space_flyout_internal.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/lib/resolve_import_errors.ts"
               }
             ]
           },
@@ -12812,20 +12940,20 @@
             "deprecated": true,
             "references": [
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/server/migrations/saved_object_migrations.ts"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/server/migrations/saved_object_migrations.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
               }
             ],
             "children": [
@@ -12934,23 +13062,6 @@
         "tags": [],
         "label": "SavedObjectsOpenPointInTimeOptions",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsOpenPointInTimeOptions",
-            "text": "SavedObjectsOpenPointInTimeOptions"
-          },
-          " extends ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsBaseOptions",
-            "text": "SavedObjectsBaseOptions"
-          }
-        ],
         "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
         "deprecated": false,
         "children": [
@@ -12980,6 +13091,21 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsOpenPointInTimeOptions.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [
+              "\nAn optional list of namespaces to be used when opening the PIT.\n\nWhen the spaces plugin is enabled:\n - this will default to the user's current space (as determined by the URL)\n - if specified, the user's current space will be ignored\n - `['*']` will search across all available spaces"
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
@@ -13495,10 +13621,10 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.SavedObjectsResolveResponse.aliasTargetId",
+            "id": "def-server.SavedObjectsResolveResponse.alias_target_id",
             "type": "string",
             "tags": [],
-            "label": "aliasTargetId",
+            "label": "alias_target_id",
             "description": [
               "\nThe ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`."
             ],
@@ -15447,7 +15573,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.doc",
+            "id": "def-server.SavedObjectMigrationFn.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "doc",
@@ -15460,7 +15586,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.context",
+            "id": "def-server.SavedObjectMigrationFn.$2",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -15846,7 +15972,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.__0",
+            "id": "def-server.SavedObjectsClientFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -15901,7 +16027,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.repositoryFactory",
+            "id": "def-server.SavedObjectsClientFactoryProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "repositoryFactory",
@@ -15955,7 +16081,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.options",
+            "id": "def-server.SavedObjectsClientWrapperFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -16059,7 +16185,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.context",
+            "id": "def-server.SavedObjectsExportTransform.$1",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -16078,7 +16204,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.objects",
+            "id": "def-server.SavedObjectsExportTransform.$2",
             "type": "Array",
             "tags": [],
             "label": "objects",
@@ -16215,7 +16341,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.objects",
+            "id": "def-server.SavedObjectsImportHook.$1",
             "type": "Array",
             "tags": [],
             "label": "objects",
@@ -16308,7 +16434,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.toolkit",
+            "id": "def-server.SavedObjectTypeExcludeFromUpgradeFilterHook.$1",
             "type": "Object",
             "tags": [],
             "label": "toolkit",

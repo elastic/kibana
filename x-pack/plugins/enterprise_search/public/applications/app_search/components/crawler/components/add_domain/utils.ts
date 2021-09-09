@@ -36,7 +36,7 @@ export const getDomainWithProtocol = async (domain: string) => {
 
   if (!domain.startsWith('https://') && !domain.startsWith('http://')) {
     try {
-      const route = '/api/app_search/crawler/validate_url';
+      const route = '/internal/app_search/crawler/validate_url';
       const checks = ['tcp', 'url_request'];
 
       const httpsCheckData: CrawlerDomainValidationResultFromServer = await http.post(route, {
@@ -62,10 +62,12 @@ export const getDomainWithProtocol = async (domain: string) => {
 
 export const domainValidationStateToPanelColor = (
   state: CrawlerDomainValidationStepState
-): 'success' | 'danger' | 'subdued' => {
+): 'success' | 'warning' | 'danger' | 'subdued' => {
   switch (state) {
     case 'valid':
       return 'success';
+    case 'warning':
+      return 'warning';
     case 'invalid':
       return 'danger';
     default:
@@ -99,7 +101,8 @@ const allFailureResultChanges: CrawlerDomainValidationResultChange = {
     message: i18n.translate(
       'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.contentVerificationFalureMessage',
       {
-        defaultMessage: 'Unable to verify content because the "Network Connectivity" check failed.',
+        defaultMessage:
+          'Unable to verify content because the "Indexing Restrictions" check failed.',
       }
     ),
   },

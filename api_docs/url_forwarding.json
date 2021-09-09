@@ -28,7 +28,7 @@
                 "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<{}, { navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
+              "<{}, { navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
               {
                 "pluginId": "urlForwarding",
                 "scope": "public",
@@ -56,7 +56,7 @@
                     "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
-                  "<{}, { navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
+                  "<{}, { navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
                   {
                     "pluginId": "urlForwarding",
                     "scope": "public",
@@ -81,7 +81,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ application, http: { basePath }, uiSettings }: ",
+              "({ application, http: { basePath } }: ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -89,9 +89,7 @@
                 "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
-              ", { kibanaLegacy }: { kibanaLegacy: { dashboardConfig: ",
-              "DashboardConfig",
-              "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }; }) => { navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
+              ") => { navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
               {
                 "pluginId": "urlForwarding",
                 "scope": "public",
@@ -109,7 +107,7 @@
                 "id": "def-public.UrlForwardingPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ application, http: { basePath }, uiSettings }",
+                "label": "{ application, http: { basePath } }",
                 "description": [],
                 "signature": [
                   {
@@ -123,50 +121,8 @@
                 "path": "src/plugins/url_forwarding/public/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "urlForwarding",
-                "id": "def-public.UrlForwardingPlugin.start.$2.kibanaLegacy",
-                "type": "Object",
-                "tags": [],
-                "label": "{ kibanaLegacy }",
-                "description": [],
-                "path": "src/plugins/url_forwarding/public/plugin.ts",
-                "deprecated": false,
-                "children": [
-                  {
-                    "parentPluginId": "urlForwarding",
-                    "id": "def-public.UrlForwardingPlugin.start.$2.kibanaLegacy.kibanaLegacy",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "kibanaLegacy",
-                    "description": [],
-                    "signature": [
-                      "{ dashboardConfig: ",
-                      "DashboardConfig",
-                      "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
-                    ],
-                    "path": "src/plugins/url_forwarding/public/plugin.ts",
-                    "deprecated": false
-                  }
-                ]
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "urlForwarding",
-            "id": "def-public.UrlForwardingPlugin.stop",
-            "type": "Function",
-            "tags": [],
-            "label": "stop",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/url_forwarding/public/plugin.ts",
-            "deprecated": false,
-            "children": [],
             "returnComment": []
           }
         ],
@@ -263,7 +219,7 @@
         "label": "UrlForwardingStart",
         "description": [],
         "signature": [
-          "{ navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
+          "{ navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
           {
             "pluginId": "urlForwarding",
             "scope": "public",

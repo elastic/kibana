@@ -145,6 +145,7 @@ Below is a document in the expected structure, with descriptions of the fields:
         type: " saved object type",
       },
     ],
+    version: "7.15.0"
   },
 }
 ```
@@ -270,6 +271,7 @@ Request Body:
 |Property|Description|Type|
 |---|---|---|
 |ids|The array ids of the saved object.|string array|
+|legacyIds|The array legacy ids of the saved object. This filter applies to the rules creted in Kibana versions before 8.0.0.|string array|
 
 Response body:
 
@@ -283,7 +285,8 @@ interface EventLogClient {
   findEventsBySavedObjectIds(
     type: string,
     ids: string[],
-    options?: Partial<FindOptionsType>
+    options?: Partial<FindOptionsType>,
+    legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
 }
 
@@ -403,7 +406,8 @@ export interface IEventLogClient {
   findEventsBySavedObjectIds(
     type: string,
     ids: string[],
-    options?: Partial<FindOptionsType>
+    options?: Partial<FindOptionsType>,
+    legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
 }
 ```

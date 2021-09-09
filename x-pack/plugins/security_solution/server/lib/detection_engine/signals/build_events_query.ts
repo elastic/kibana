@@ -61,7 +61,6 @@ export const buildEventsSearchQuery = ({
                     '@timestamp': {
                       lte: to,
                       gte: from,
-                      // @ts-expect-error
                       format: 'strict_date_optional_time',
                     },
                   },

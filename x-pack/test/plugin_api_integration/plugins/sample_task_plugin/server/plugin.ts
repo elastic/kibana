@@ -69,7 +69,8 @@ export class SampleTaskManagerFixturePlugin
             }
           }
 
-          await core.elasticsearch.legacy.client.callAsInternalUser('index', {
+          const [{ elasticsearch }] = await core.getStartServices();
+          await elasticsearch.client.asInternalUser.index({
             index: '.kibana_task_manager_test_result',
             body: {
               type: 'task',
@@ -270,7 +271,7 @@ export class SampleTaskManagerFixturePlugin
         return context;
       },
     });
-    initRoutes(core.http.createRouter(), core, this.taskManagerStart, taskTestingEvents);
+    initRoutes(core.http.createRouter(), this.taskManagerStart, taskTestingEvents);
   }
 
   public start(core: CoreStart, { taskManager }: SampleTaskManagerFixtureStartDeps) {

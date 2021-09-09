@@ -34,6 +34,7 @@ import { useKibana } from '../../../../src/plugins/kibana_react/public';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
 import { SyntheticsCallout } from './components/overview/synthetics_callout';
+import { APP_WRAPPER_CLASS } from '../../../../src/core/public';
 import {
   StepDetailPageChildren,
   StepDetailPageHeader,
@@ -174,7 +175,7 @@ export const PageRouter: FC = () => {
       {Routes.map(
         ({ title, path, component: RouteComponent, dataTestSubj, telemetryId, pageHeader }) => (
           <Route path={path} key={telemetryId} exact={true}>
-            <div data-test-subj={dataTestSubj}>
+            <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
               <StyledPageTemplateComponent pageHeader={pageHeader}>

@@ -2,7 +2,7 @@
   "id": "apmOss",
   "owner": {
     "name": "APM UI",
-    "gitHubTeam": "apm-ui"
+    "githubTeam": "apm-ui"
   },
   "version": "8.0.0",
   "server": true,

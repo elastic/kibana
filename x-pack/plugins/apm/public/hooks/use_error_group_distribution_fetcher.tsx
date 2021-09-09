@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useApmParams } from './use_apm_params';
 import { useFetcher } from './use_fetcher';
+import { useTimeRange } from './use_time_range';
 
 export function useErrorGroupDistributionFetcher({
   serviceName,
@@ -20,8 +21,11 @@ export function useErrorGroupDistributionFetcher({
   environment: string;
 }) {
   const {
-    urlParams: { start, end },
-  } = useUrlParams();
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/:serviceName');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { data } = useFetcher(
     (callApmApi) => {
       if (start && end) {

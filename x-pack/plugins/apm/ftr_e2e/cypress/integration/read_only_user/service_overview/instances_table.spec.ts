@@ -7,7 +7,6 @@
 
 import url from 'url';
 import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
@@ -43,25 +42,21 @@ describe('Instances table', () => {
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
-  describe('when data is not loaded', () => {
-    it('shows empty message', () => {
-      cy.visit(serviceOverviewHref);
-      cy.contains('opbeans-java');
-      cy.get('[data-test-subj="serviceInstancesTableContainer"]').contains(
-        'No items found'
-      );
-    });
-  });
+
+  // describe('when data is not loaded', () => {
+  //   it('shows empty message', () => {
+  //     cy.visit(serviceOverviewHref);
+  //     cy.contains('opbeans-java');
+  //     cy.get('[data-test-subj="serviceInstancesTableContainer"]').contains(
+  //       'No items found'
+  //     );
+  //   });
+  // });
 
   describe('when data is loaded', () => {
-    before(() => {
-      esArchiverLoad('apm_8.0.0');
-    });
-    after(() => {
-      esArchiverUnload('apm_8.0.0');
-    });
     const serviceNodeName =
       '31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad';
+
     it('has data in the table', () => {
       cy.visit(serviceOverviewHref);
       cy.contains('opbeans-java');

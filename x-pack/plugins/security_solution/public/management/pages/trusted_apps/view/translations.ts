@@ -19,7 +19,7 @@ export { OS_TITLES } from '../../../common/translations';
 export const ABOUT_TRUSTED_APPS = i18n.translate('xpack.securitySolution.trustedapps.aboutInfo', {
   defaultMessage:
     'Add a trusted application to improve performance or alleviate conflicts with other applications running on ' +
-    'your hosts. Trusted applications are applied to hosts running the Endpoint Security integration on their agents.',
+    'your hosts.',
 });
 
 export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
@@ -71,16 +71,16 @@ export const PROPERTY_TITLES: Readonly<
     defaultMessage: 'OS',
   }),
   created_at: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdAt', {
-    defaultMessage: 'Date Created',
+    defaultMessage: 'Date created',
   }),
   created_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdBy', {
-    defaultMessage: 'Created By',
+    defaultMessage: 'Created by',
   }),
   updated_at: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedAt', {
-    defaultMessage: 'Date Modified',
+    defaultMessage: 'Date modified',
   }),
   updated_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedBy', {
-    defaultMessage: 'Modified By',
+    defaultMessage: 'Modified by',
   }),
   description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
     defaultMessage: 'Description',

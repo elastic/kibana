@@ -166,7 +166,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
         return { areFieldsValid: true, isFormValid: true };
       }
 
-      const areFieldsValid = validationResult.every(Boolean);
+      const areFieldsValid = validationResult.every((res) => res.isValid);
 
       const validationResultByPath = fieldsToValidate.reduce((acc, field, i) => {
         acc[field.path] = validationResult[i].isValid;

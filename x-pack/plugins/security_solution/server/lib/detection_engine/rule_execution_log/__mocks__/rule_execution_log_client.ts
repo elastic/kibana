@@ -7,16 +7,17 @@
 
 import { IRuleExecutionLogClient } from '../types';
 
+export const ruleExecutionLogClientMock = {
+  create: (): jest.Mocked<IRuleExecutionLogClient> => ({
+    find: jest.fn(),
+    findBulk: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    logStatusChange: jest.fn(),
+    logExecutionMetric: jest.fn(),
+  }),
+};
+
 export const RuleExecutionLogClient = jest
   .fn<jest.Mocked<IRuleExecutionLogClient>, []>()
-  .mockImplementation(() => {
-    return {
-      find: jest.fn(),
-      findBulk: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      logStatusChange: jest.fn(),
-      logExecutionMetric: jest.fn(),
-    };
-  });
+  .mockImplementation(ruleExecutionLogClientMock.create);

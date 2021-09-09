@@ -58,7 +58,7 @@ to any newly saved rule:
             {
               "name" : "param:exceptionsList_0",
               "id" : "endpoint_list",
-              "type" : "exception-list"
+              "type" : "exception-list-agnostic"
             },
             {
               "name" : "param:exceptionsList_1",

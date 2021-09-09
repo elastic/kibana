@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { get, includes, max, min, sum, noop } from 'lodash';
+import { get, max, min, sum, noop } from 'lodash';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
-import { METRIC_TYPES, EXTENDED_STATS_TYPES } from '../../../../common/enums';
+import { METRIC_TYPES } from '../../../../../data/common';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { getAggByPredicate } from '../../../../common/agg_utils';
 
 const aggFns = {
   max,
@@ -21,7 +23,7 @@ const aggFns = {
 
 export const getAggValue = (row, metric) => {
   // Extended Stats
-  if (includes(EXTENDED_STATS_TYPES, metric.type)) {
+  if (getAggByPredicate(metric.type, { hasExtendedStats: true })) {
     const isStdDeviation = /^std_deviation/.test(metric.type);
     const modeIsBounds = ~['upper', 'lower'].indexOf(metric.mode);
     if (isStdDeviation && modeIsBounds) {
@@ -31,15 +33,15 @@ export const getAggValue = (row, metric) => {
   }
 
   switch (metric.type) {
-    case METRIC_TYPES.PERCENTILE:
+    case TSVB_METRIC_TYPES.PERCENTILE:
       const percentileKey = toPercentileNumber(`${metric.percent}`);
 
       return row[metric.id].values[percentileKey];
-    case METRIC_TYPES.PERCENTILE_RANK:
+    case TSVB_METRIC_TYPES.PERCENTILE_RANK:
       const percentileRankKey = toPercentileNumber(`${metric.value}`);
 
       return row[metric.id] && row[metric.id].values && row[metric.id].values[percentileRankKey];
-    case METRIC_TYPES.TOP_HIT:
+    case TSVB_METRIC_TYPES.TOP_HIT:
       if (row[metric.id].doc_count === 0) {
         return null;
       }

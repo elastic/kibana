@@ -19,7 +19,8 @@ export const ListActionHandler: React.FunctionComponent<Props> = ({ updatePolici
   if (listAction?.actionType === 'viewIndexTemplates') {
     return (
       <IndexTemplatesFlyout
-        policy={listAction.selectedPolicy}
+        policyName={listAction.selectedPolicy.name}
+        indexTemplates={listAction.selectedPolicy.indexTemplates ?? []}
         close={() => {
           setListAction(null);
         }}

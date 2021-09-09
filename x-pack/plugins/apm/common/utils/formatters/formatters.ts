@@ -55,9 +55,9 @@ export function asPercent(
   return numeral(decimal).format('0.0%');
 }
 
-export function asDecimalOrInteger(value: number) {
-  // exact 0 or above 10 should not have decimal
-  if (value === 0 || value >= 10) {
+export function asDecimalOrInteger(value: number, threshold = 10) {
+  // exact 0 or above threshold should not have decimal
+  if (value === 0 || value >= threshold) {
     return asInteger(value);
   }
   return asDecimal(value);

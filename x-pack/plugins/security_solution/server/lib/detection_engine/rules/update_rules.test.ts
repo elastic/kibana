@@ -18,6 +18,9 @@ describe('updateRules', () => {
     ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue(
       getAlertMock(getQueryRuleParams())
     );
+    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
+      getAlertMock(getQueryRuleParams())
+    );
 
     await updateRules(rulesOptionsMock);
 
@@ -36,6 +39,9 @@ describe('updateRules', () => {
       ...getAlertMock(getQueryRuleParams()),
       enabled: false,
     });
+    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
+      getAlertMock(getQueryRuleParams())
+    );
 
     await updateRules(rulesOptionsMock);
 
@@ -49,6 +55,10 @@ describe('updateRules', () => {
   it('calls the rulesClient with params', async () => {
     const rulesOptionsMock = getUpdateMlRulesOptionsMock();
     rulesOptionsMock.ruleUpdate.enabled = true;
+
+    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
+      getAlertMock(getMlRuleParams())
+    );
 
     ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue(
       getAlertMock(getMlRuleParams())

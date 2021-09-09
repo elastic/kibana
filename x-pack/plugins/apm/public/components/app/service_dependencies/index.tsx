@@ -31,7 +31,7 @@ export function ServiceDependencies() {
           <ServiceDependenciesBreakdownChart height={200} />
         </EuiPanel>
       </ChartPointerEventContextProvider>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <ServiceOverviewDependenciesTable />
     </>
   );

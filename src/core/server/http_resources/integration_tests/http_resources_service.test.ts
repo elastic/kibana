@@ -19,6 +19,7 @@ describe('http resources service', () => {
           rules: [defaultCspRules],
         },
         plugins: { initialize: false },
+        elasticsearch: { skipStartupConnectionCheck: true },
       });
       await root.preboot();
     }, 30000);

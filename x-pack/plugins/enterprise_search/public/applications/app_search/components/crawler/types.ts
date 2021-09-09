@@ -98,6 +98,9 @@ export interface CrawlerDomain {
   defaultCrawlRule?: CrawlRule;
   entryPoints: EntryPoint[];
   sitemaps: Sitemap[];
+  deduplicationEnabled: boolean;
+  deduplicationFields: string[];
+  availableDeduplicationFields: string[];
 }
 
 export interface CrawlerDomainFromServer {
@@ -110,6 +113,9 @@ export interface CrawlerDomainFromServer {
   default_crawl_rule?: CrawlRule;
   entry_points: EntryPoint[];
   sitemaps: Sitemap[];
+  deduplication_enabled: boolean;
+  deduplication_fields: string[];
+  available_deduplication_fields: string[];
 }
 
 export interface CrawlerData {
@@ -129,7 +135,7 @@ export interface CrawlerDomainValidationResultFromServer {
   }>;
 }
 
-export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'invalid';
+export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'warning' | 'invalid';
 
 export interface CrawlerDomainValidationStep {
   state: CrawlerDomainValidationStepState;

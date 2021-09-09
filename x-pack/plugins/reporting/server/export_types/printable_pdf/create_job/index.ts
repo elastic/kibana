@@ -5,27 +5,28 @@
  * 2.0.
  */
 
-import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
-import { JobParamsPDF, TaskPayloadPDF } from '../types';
+import { JobParamsPDF, JobParamsPDFLegacy, TaskPayloadPDF } from '../types';
+import { compatibilityShim } from './compatibility_shim';
 
+/*
+ * Incoming job params can be `JobParamsPDF` or `JobParamsPDFLegacy` depending
+ * on the version that the POST URL was copied from.
+ */
 export const createJobFnFactory: CreateJobFnFactory<
-  CreateJobFn<JobParamsPDF, TaskPayloadPDF>
-> = function createJobFactoryFn(reporting, logger) {
-  const config = reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
+  CreateJobFn<JobParamsPDF | JobParamsPDFLegacy, TaskPayloadPDF>
+> = function createJobFactoryFn(_reporting, logger) {
+  return compatibilityShim(async function createJobFn(
+    { relativeUrls, ...jobParams }: JobParamsPDF // relativeUrls does not belong in the payload of PDFV1
+  ) {
+    validateUrls(relativeUrls);
 
-  return async function createJob(jobParams, _context, req) {
-    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
-
-    validateUrls(jobParams.relativeUrls);
-
+    // return the payload
     return {
-      headers: serializedEncryptedHeaders,
-      spaceId: reporting.getSpaceId(req, logger),
-      forceNow: new Date().toISOString(),
       ...jobParams,
+      forceNow: new Date().toISOString(),
+      objects: relativeUrls.map((u) => ({ relativeUrl: u })),
     };
-  };
+  }, logger);
 };

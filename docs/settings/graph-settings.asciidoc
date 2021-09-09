@@ -7,13 +7,5 @@
 
 You do not need to configure any settings to use the {graph-features}.
 
-[float]
-[[general-graph-settings]]
-==== General graph settings
-
-[cols="2*<"]
-|===
-| `xpack.graph.enabled` {ess-icon}
-  | Set to `false` to disable the {graph-features}.
-
-|===
+`xpack.graph.enabled` {ess-icon}::
+Set to `false` to disable the {graph-features}.

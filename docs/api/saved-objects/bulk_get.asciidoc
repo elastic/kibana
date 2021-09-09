@@ -31,6 +31,16 @@ experimental[] Retrieve multiple {kib} saved objects by ID.
 `fields`::
   (Optional, array) The fields to return in the `attributes` key of the object response.
 
+`namespaces`::
+  (Optional, string array) Identifiers for the <<xpack-spaces,spaces>> in which to search for this object. If this is provided, the object
+  is searched for only in the explicitly defined spaces. If this is not provided, the object is searched for in the current space (default
+  behavior).
+* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces, including
+the "All spaces" identifier (`'*'`).
+* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only be
+used to specify a single space, and the "All spaces" identifier (`'*'`) is not allowed.
+* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
+
 [[saved-objects-api-bulk-get-response-body]]
 ==== Response body
 

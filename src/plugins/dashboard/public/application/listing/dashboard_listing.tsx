@@ -87,7 +87,7 @@ export const DashboardListing = ({
     };
   }, [title, savedObjectsClient, redirectTo, data.query, kbnUrlStateStorage]);
 
-  const hideWriteControls = dashboardCapabilities.hideWriteControls;
+  const { showWriteControls } = dashboardCapabilities;
   const listingLimit = savedObjects.settings.getListingLimit();
   const defaultFilter = title ? `"${title}"` : '';
 
@@ -118,8 +118,8 @@ export const DashboardListing = ({
   }, [dashboardSessionStorage, redirectTo, core.overlays]);
 
   const emptyPrompt = useMemo(
-    () => getNoItemsMessage(hideWriteControls, core.application, createItem),
-    [createItem, core.application, hideWriteControls]
+    () => getNoItemsMessage(showWriteControls, core.application, createItem),
+    [createItem, core.application, showWriteControls]
   );
 
   const fetchItems = useCallback(
@@ -171,10 +171,10 @@ export const DashboardListing = ({
   } = dashboardListingTable;
   return (
     <TableListView
-      createItem={hideWriteControls ? undefined : createItem}
-      deleteItems={hideWriteControls ? undefined : deleteItems}
+      createItem={!showWriteControls ? undefined : createItem}
+      deleteItems={!showWriteControls ? undefined : deleteItems}
       initialPageSize={savedObjects.settings.getPerPage()}
-      editItem={hideWriteControls ? undefined : editItem}
+      editItem={!showWriteControls ? undefined : editItem}
       initialFilter={initialFilter ?? defaultFilter}
       toastNotifications={core.notifications.toasts}
       headingId="dashboardListingHeading"
@@ -239,11 +239,11 @@ const getTableColumns = (
 };
 
 const getNoItemsMessage = (
-  hideWriteControls: boolean,
+  showWriteControls: boolean,
   application: ApplicationStart,
   createItem: () => void
 ) => {
-  if (hideWriteControls) {
+  if (!showWriteControls) {
     return (
       <EuiEmptyPrompt
         iconType="glasses"

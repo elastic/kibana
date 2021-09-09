@@ -16,15 +16,19 @@ export const RowCheckBox = ({
   checked,
   ariaRowindex,
   columnValues,
+  disabled,
   loadingEventIds,
 }: ActionProps) => {
   const handleSelectEvent = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      onRowSelected({
-        eventIds: [eventId],
-        isSelected: event.currentTarget.checked,
-      }),
-    [eventId, onRowSelected]
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (!disabled) {
+        onRowSelected({
+          eventIds: [eventId],
+          isSelected: event.currentTarget.checked,
+        });
+      }
+    },
+    [eventId, onRowSelected, disabled]
   );
 
   return loadingEventIds.includes(eventId) ? (
@@ -33,7 +37,8 @@ export const RowCheckBox = ({
     <EuiCheckbox
       data-test-subj="select-event"
       id={eventId}
-      checked={checked}
+      checked={checked && !disabled}
+      disabled={disabled}
       onChange={handleSelectEvent}
       aria-label={i18n.CHECKBOX_FOR_ROW({ ariaRowindex, columnValues, checked })}
     />

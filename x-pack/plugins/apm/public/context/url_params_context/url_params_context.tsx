@@ -23,14 +23,14 @@ import { UxUIFilters } from '../../../typings/ui_filters';
 import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
 import { getDateRange } from './helpers';
 import { resolveUrlParams } from './resolve_url_params';
-import { IUrlParams } from './types';
+import { UrlParams } from './types';
 
 export interface TimeRange {
   rangeFrom: string;
   rangeTo: string;
 }
 
-function useUxUiFilters(params: IUrlParams): UxUIFilters {
+function useUxUiFilters(params: UrlParams): UxUIFilters {
   const localUiFilters = mapValues(
     pickKeys(params, ...uxLocalUIFilterNames),
     (val) => (val ? val.split(',') : [])
@@ -48,7 +48,7 @@ const UrlParamsContext = createContext({
   rangeId: 0,
   refreshTimeRange: defaultRefresh,
   uxUiFilters: {} as UxUIFilters,
-  urlParams: {} as IUrlParams,
+  urlParams: {} as UrlParams,
 });
 
 const UrlParamsProvider: React.ComponentClass<{}> = withRouter(

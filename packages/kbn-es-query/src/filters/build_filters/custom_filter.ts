@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
 
 /** @public */
-export type CustomFilter = Filter & {
-  query: any;
-};
+export type CustomFilter = Filter;
 
 /**
  *
@@ -27,7 +26,7 @@ export type CustomFilter = Filter & {
  */
 export function buildCustomFilter(
   indexPatternString: string,
-  queryDsl: any,
+  queryDsl: estypes.QueryDslQueryContainer,
   disabled: boolean,
   negate: boolean,
   alias: string | null,

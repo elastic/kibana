@@ -18,6 +18,8 @@ URL::       ServiceNow instance URL.
 Username::  Username for HTTP Basic authentication.
 Password::  Password for HTTP Basic authentication.
 
+The ServiceNow user requires at minimum read, create, and update access to the Incident table and read access to the https://docs.servicenow.com/bundle/paris-platform-administration/page/administer/localization/reference/r_ChoicesTable.html[sys_choice]. If you don't provide access to sys_choice, then the choices will not render.
+
 [float]
 [[servicenow-connector-networking-configuration]]
 ==== Connector networking configuration

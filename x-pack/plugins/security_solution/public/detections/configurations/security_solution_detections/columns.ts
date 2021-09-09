@@ -26,7 +26,7 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
-    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 5,
+    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 10,
   },
   {
     columnHeaderType: defaultColumnHeaderType,

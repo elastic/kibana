@@ -1,6 +1,7 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-ui-shared-deps"
 PKG_REQUIRE_NAME = "@kbn/ui-shared-deps"
@@ -28,7 +29,7 @@ NPM_MODULE_EXTRA_FILES = [
   "README.md"
 ]
 
-SRC_DEPS = [
+RUNTIME_DEPS = [
   "//packages/elastic-datemath",
   "//packages/elastic-safer-lodash-set",
   "//packages/kbn-analytics",
@@ -71,10 +72,53 @@ SRC_DEPS = [
 ]
 
 TYPES_DEPS = [
+  "//packages/elastic-datemath",
+  "//packages/elastic-safer-lodash-set",
+  "//packages/kbn-analytics",
+  "//packages/kbn-babel-preset",
+  "//packages/kbn-i18n",
+  "//packages/kbn-monaco",
+  "//packages/kbn-std",
+  "//packages/kbn-utils",
+  "@npm//@elastic/charts",
+  "@npm//@elastic/eui",
+  "@npm//@elastic/numeral",
+  "@npm//@emotion/react",
+  "@npm//abortcontroller-polyfill",
+  "@npm//angular",
+  "@npm//babel-loader",
+  "@npm//core-js",
+  "@npm//css-loader",
+  "@npm//fflate",
+  "@npm//jquery",
+  "@npm//loader-utils",
+  "@npm//mini-css-extract-plugin",
+  "@npm//moment",
+  "@npm//moment-timezone",
+  "@npm//raw-loader",
+  "@npm//react",
+  "@npm//react-dom",
+  "@npm//react-intl",
+  "@npm//react-is",
+  "@npm//react-router",
+  "@npm//react-router-dom",
+  "@npm//regenerator-runtime",
+  "@npm//resize-observer-polyfill",
+  "@npm//rison-node",
+  "@npm//rxjs",
+  "@npm//styled-components",
+  "@npm//symbol-observable",
+  "@npm//url-loader",
+  "@npm//val-loader",
+  "@npm//whatwg-fetch",
   "@npm//@types/node",
 ]
 
-DEPS = SRC_DEPS + TYPES_DEPS
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
 
 ts_config(
   name = "tsconfig",
@@ -86,22 +130,23 @@ ts_config(
 )
 
 ts_project(
-  name = "tsc",
+  name = "tsc_types",
   args = ['--pretty'],
   srcs = SRCS,
-  deps = DEPS,
+  deps = TYPES_DEPS,
   allow_js = True,
   declaration = True,
   declaration_map = True,
-  out_dir = "target",
-  source_map = True,
+  emit_declaration_only = True,
+  out_dir = "target_types",
   root_dir = "src",
+  source_map = True,
   tsconfig = ":tsconfig",
 )
 
 webpack(
   name = "shared_built_assets",
-  data = DEPS + [
+  data = RUNTIME_DEPS + [
     "//:package.json",
     ":srcs",
     ":tsconfig",
@@ -120,7 +165,7 @@ webpack(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":tsc", ":shared_built_assets"],
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types", ":shared_built_assets"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

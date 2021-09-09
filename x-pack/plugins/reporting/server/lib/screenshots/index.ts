@@ -21,7 +21,7 @@ export interface ScreenshotObservableOpts {
 }
 
 export interface AttributesMap {
-  [key: string]: any;
+  [key: string]: string | null;
 }
 
 export interface ElementPosition {
@@ -44,9 +44,9 @@ export interface ElementsPositionAndAttribute {
 }
 
 export interface Screenshot {
-  base64EncodedData: string;
-  title: string;
-  description: string;
+  data: Buffer;
+  title: string | null;
+  description: string | null;
 }
 
 export interface ScreenshotResults {

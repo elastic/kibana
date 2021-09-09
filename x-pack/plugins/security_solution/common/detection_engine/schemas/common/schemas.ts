@@ -170,7 +170,12 @@ export type RuleNameOverride = t.TypeOf<typeof rule_name_override>;
 export const ruleNameOverrideOrUndefined = t.union([rule_name_override, t.undefined]);
 export type RuleNameOverrideOrUndefined = t.TypeOf<typeof ruleNameOverrideOrUndefined>;
 
-export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
+export const status = t.keyof({
+  open: null,
+  closed: null,
+  acknowledged: null,
+  'in-progress': null, // TODO: Remove after `acknowledged` migrations
+});
 export type Status = t.TypeOf<typeof status>;
 
 export enum RuleExecutionStatus {

@@ -96,7 +96,7 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
       <EuiPopover
         isOpen={isActionsPopoverOpen}
         anchorPosition="upCenter"
-        panelPaddingSize="s"
+        panelPaddingSize="none"
         button={
           <EuiButtonEmpty
             aria-label="selectedShowBulkActions"

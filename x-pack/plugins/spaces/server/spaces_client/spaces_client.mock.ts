@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Space } from 'src/plugins/spaces_oss/common';
-
+import type { Space } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import type { SpacesClient } from './spaces_client';
 

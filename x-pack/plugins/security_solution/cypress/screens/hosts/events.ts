@@ -38,4 +38,4 @@ export const LOAD_MORE =
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 export const EVENTS_VIEWER_PAGINATION =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="timeline-pagination"]';
+  '[data-test-subj="events-viewer-panel"] .euiDataGrid__pagination';

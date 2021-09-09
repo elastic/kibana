@@ -13,6 +13,7 @@ import {
   getBulkOperationError,
   getSavedObjectFromSource,
   rawDocExistsInNamespace,
+  rawDocExistsInNamespaces,
 } from './internal_utils';
 import { ALL_NAMESPACES_STRING } from './utils';
 
@@ -238,6 +239,90 @@ describe('#rawDocExistsInNamespace', () => {
       expect(rawDocExistsInNamespace(registry, doc2, undefined)).toBe(true);
       expect(rawDocExistsInNamespace(registry, doc2, 'some-space')).toBe(true);
       expect(rawDocExistsInNamespace(registry, doc2, 'other-space')).toBe(true);
+    });
+  });
+});
+
+describe('#rawDocExistsInNamespaces', () => {
+  const SINGLE_NAMESPACE_TYPE = 'single-type';
+  const MULTI_NAMESPACE_TYPE = 'multi-type';
+  const NAMESPACE_AGNOSTIC_TYPE = 'agnostic-type';
+
+  const registry = typeRegistryMock.create();
+  registry.isSingleNamespace.mockImplementation((type) => type === SINGLE_NAMESPACE_TYPE);
+  registry.isMultiNamespace.mockImplementation((type) => type === MULTI_NAMESPACE_TYPE);
+  registry.isNamespaceAgnostic.mockImplementation((type) => type === NAMESPACE_AGNOSTIC_TYPE);
+
+  function createRawDoc(
+    type: string,
+    namespaceAttrs: { namespace?: string; namespaces?: string[] }
+  ) {
+    return {
+      // other fields exist on the raw document, but they are not relevant to these test cases
+      _source: {
+        type,
+        ...namespaceAttrs,
+      },
+    } as SavedObjectsRawDoc;
+  }
+
+  describe('single-namespace type', () => {
+    it('returns true regardless of namespace or namespaces fields', () => {
+      // Technically, a single-namespace type does not exist in a space unless it has a namespace prefix in its raw ID and a matching
+      // 'namespace' field. However, historically we have not enforced the latter, we have just relied on searching for and deserializing
+      // documents with the correct namespace prefix. We may revisit this in the future.
+      const doc1 = createRawDoc(SINGLE_NAMESPACE_TYPE, { namespace: 'some-space' }); // the namespace field is ignored
+      const doc2 = createRawDoc(SINGLE_NAMESPACE_TYPE, { namespaces: ['some-space'] }); // the namespaces field is ignored
+      expect(rawDocExistsInNamespaces(registry, doc1, [])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, doc1, ['some-space'])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, doc1, ['other-space'])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, doc2, [])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, doc2, ['some-space'])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, doc2, ['other-space'])).toBe(true);
+    });
+  });
+
+  describe('multi-namespace type', () => {
+    const docInDefaultSpace = createRawDoc(MULTI_NAMESPACE_TYPE, { namespaces: ['default'] });
+    const docInSomeSpace = createRawDoc(MULTI_NAMESPACE_TYPE, { namespaces: ['some-space'] });
+    const docInAllSpaces = createRawDoc(MULTI_NAMESPACE_TYPE, {
+      namespaces: [ALL_NAMESPACES_STRING],
+    });
+    const docInNoSpace = createRawDoc(MULTI_NAMESPACE_TYPE, { namespaces: [] });
+
+    it('returns true when the document namespaces matches', () => {
+      expect(rawDocExistsInNamespaces(registry, docInDefaultSpace, ['default'])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, docInAllSpaces, ['default'])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, docInSomeSpace, ['some-space'])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, docInAllSpaces, ['some-space'])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, docInDefaultSpace, ['*'])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, docInSomeSpace, ['*'])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, docInAllSpaces, ['*'])).toBe(true);
+    });
+
+    it('returns false when the document namespace does not match', () => {
+      expect(rawDocExistsInNamespaces(registry, docInSomeSpace, ['default'])).toBe(false);
+      expect(rawDocExistsInNamespaces(registry, docInNoSpace, ['default'])).toBe(false);
+      expect(rawDocExistsInNamespaces(registry, docInDefaultSpace, ['some-space'])).toBe(false);
+      expect(rawDocExistsInNamespaces(registry, docInNoSpace, ['some-space'])).toBe(false);
+      expect(rawDocExistsInNamespaces(registry, docInNoSpace, ['*'])).toBe(false);
+      expect(rawDocExistsInNamespaces(registry, docInDefaultSpace, [])).toBe(false);
+      expect(rawDocExistsInNamespaces(registry, docInSomeSpace, [])).toBe(false);
+      expect(rawDocExistsInNamespaces(registry, docInAllSpaces, [])).toBe(false);
+      expect(rawDocExistsInNamespaces(registry, docInNoSpace, [])).toBe(false);
+    });
+  });
+
+  describe('namespace-agnostic type', () => {
+    it('returns true regardless of namespace or namespaces fields', () => {
+      const doc1 = createRawDoc(NAMESPACE_AGNOSTIC_TYPE, { namespace: 'some-space' }); // the namespace field is ignored
+      const doc2 = createRawDoc(NAMESPACE_AGNOSTIC_TYPE, { namespaces: ['some-space'] }); // the namespaces field is ignored
+      expect(rawDocExistsInNamespaces(registry, doc1, [])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, doc1, ['some-space'])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, doc1, ['other-space'])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, doc2, [])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, doc2, ['some-space'])).toBe(true);
+      expect(rawDocExistsInNamespaces(registry, doc2, ['other-space'])).toBe(true);
     });
   });
 });

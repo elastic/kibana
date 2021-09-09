@@ -22,14 +22,7 @@ jest.mock('../utils/get_list_client', () => ({
   }),
 }));
 
-jest.mock('../../signals/rule_status_service', () => ({
-  ruleStatusServiceFactory: () => ({
-    goingToRun: jest.fn(),
-    success: jest.fn(),
-    partialFailure: jest.fn(),
-    error: jest.fn(),
-  }),
-}));
+jest.mock('../../rule_execution_log/rule_execution_log_client');
 
 describe('Custom query alerts', () => {
   it('does not send an alert when no events found', async () => {
@@ -39,6 +32,7 @@ describe('Custom query alerts', () => {
       lists: dependencies.lists,
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
+      ignoreFields: [],
       ruleDataClient: dependencies.ruleDataClient,
       ruleDataService: dependencies.ruleDataService,
       version: '1.0.0',
@@ -86,6 +80,7 @@ describe('Custom query alerts', () => {
       lists: dependencies.lists,
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
+      ignoreFields: [],
       ruleDataClient: dependencies.ruleDataClient,
       ruleDataService: dependencies.ruleDataService,
       version: '1.0.0',

@@ -30,7 +30,6 @@ import {
   createImportErrorObject,
   OutputError,
 } from '../utils';
-import { RuleActions } from '../../rule_actions/types';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert } from '../../../../../../alerting/common';
@@ -104,10 +103,9 @@ export const transformTags = (tags: string[]): string[] => {
 // those on the export
 export const transformAlertToRule = (
   alert: SanitizedAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<RulesSchema> => {
-  return internalRuleToAPIResponse(alert, ruleActions, ruleStatus?.attributes);
+  return internalRuleToAPIResponse(alert, ruleStatus?.attributes);
 };
 
 export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<RulesSchema>> => {
@@ -116,7 +114,6 @@ export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<R
 
 export const transformFindAlerts = (
   findResults: FindResult<RuleParams>,
-  ruleActions: { [key: string]: RuleActions | undefined },
   ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined }
 ): {
   page: number;
@@ -131,20 +128,18 @@ export const transformFindAlerts = (
     data: findResults.data.map((alert) => {
       const statuses = ruleStatuses[alert.id];
       const status = statuses ? statuses[0] : undefined;
-      return internalRuleToAPIResponse(alert, ruleActions[alert.id], status);
+      return internalRuleToAPIResponse(alert, status);
     }),
   };
 };
 
 export const transform = (
   alert: PartialAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<RulesSchema> | null => {
   if (isAlertType(alert)) {
     return transformAlertToRule(
       alert,
-      ruleActions,
       isRuleStatusSavedObjectType(ruleStatus) ? ruleStatus : undefined
     );
   }
@@ -155,14 +150,13 @@ export const transform = (
 export const transformOrBulkError = (
   ruleId: string,
   alert: PartialAlert<RuleParams>,
-  ruleActions: RuleActions,
   ruleStatus?: unknown
 ): Partial<RulesSchema> | BulkError => {
   if (isAlertType(alert)) {
     if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
-      return transformAlertToRule(alert, ruleActions, ruleStatus?.saved_objects[0] ?? ruleStatus);
+      return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
     } else {
-      return transformAlertToRule(alert, ruleActions);
+      return transformAlertToRule(alert);
     }
   } else {
     return createBulkErrorObject({

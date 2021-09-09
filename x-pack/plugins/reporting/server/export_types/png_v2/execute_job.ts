@@ -8,7 +8,7 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { PNG_JOB_TYPE_V2, getRedirectAppPathHome } from '../../../common/constants';
+import { PNG_JOB_TYPE_V2 } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import {
@@ -18,7 +18,7 @@ import {
   generatePngObservableFactory,
   setForceNow,
 } from '../common';
-import { getFullUrls } from '../common/v2/get_full_urls';
+import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 import { TaskPayloadPNGV2 } from './types';
 
 export const runTaskFnFactory: RunTaskFnFactory<
@@ -39,8 +39,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
       map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
       mergeMap((conditionalHeaders) => {
-        const relativeUrl = getRedirectAppPathHome();
-        const [url] = getFullUrls(config, [relativeUrl]);
+        const url = getFullRedirectAppUrl(config, job.spaceId);
         const [locatorParams] = job.locatorParams.map(setForceNow(job.forceNow));
 
         apmGetAssets?.end();
@@ -54,11 +53,9 @@ export const runTaskFnFactory: RunTaskFnFactory<
           job.layout
         );
       }),
-      tap(({ base64 }) => stream.write(base64)),
-      map(({ base64, warnings }) => ({
+      tap(({ buffer }) => stream.write(buffer)),
+      map(({ warnings }) => ({
         content_type: 'image/png',
-        content: base64,
-        size: (base64 && base64.length) || 0,
         warnings,
       })),
       catchError((err) => {

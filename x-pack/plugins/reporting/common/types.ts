@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { Ensure, SerializableRecord } from '@kbn/utility-types';
 
 export interface PageSizeParams {
   pageMarginTop: number;
@@ -16,28 +16,26 @@ export interface PageSizeParams {
   subheadingHeight: number;
 }
 
-export interface LayoutSelectorDictionary {
-  screenshot: string;
-  renderComplete: string;
-  itemsCountAttribute: string;
-  timefilterDurationAttribute: string;
-}
-
 export interface PdfImageSize {
   width: number;
   height?: number;
 }
 
-export interface Size {
-  width: number;
-  height: number;
-}
+export type Size = Ensure<
+  {
+    width: number;
+    height: number;
+  },
+  SerializableRecord
+>;
 
-export interface LayoutParams {
-  id: string;
-  dimensions?: Size;
-  selectors?: LayoutSelectorDictionary;
-}
+export type LayoutParams = Ensure<
+  {
+    id: string;
+    dimensions?: Size;
+  },
+  SerializableRecord
+>;
 
 export interface ReportDocumentHead {
   _id: string;
@@ -46,24 +44,28 @@ export interface ReportDocumentHead {
   _primary_term: number;
 }
 
-export interface ReportOutput {
-  content_type: string | null;
+export interface ReportOutput extends TaskRunResult {
   content: string | null;
   size: number;
+}
+
+export interface TaskRunResult {
+  content_type: string | null;
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
   warnings?: string[];
 }
 
-export type TaskRunResult = Omit<ReportOutput, 'content'>;
-
-export interface BaseParams {
-  layout?: LayoutParams;
-  objectType: string;
-  title: string;
-  browserTimezone: string; // to format dates in the user's time zone
-  version: string; // to handle any state migrations
-}
+export type BaseParams = Ensure<
+  {
+    layout?: LayoutParams;
+    objectType: string;
+    title: string;
+    browserTimezone: string; // to format dates in the user's time zone
+    version: string; // to handle any state migrations
+  },
+  SerializableRecord
+>;
 
 // base params decorated with encrypted headers that come into runJob functions
 export interface BasePayload extends BaseParams {
@@ -74,13 +76,18 @@ export interface BasePayload extends BaseParams {
 
 export interface ReportSource {
   /*
-   * Required fields: populated in enqueue_job when the request comes in to
+   * Required fields: populated in RequestHandler.enqueueJob when the request comes in to
    * generate the report
    */
   jobtype: string; // refers to `ExportTypeDefinition.jobType`
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: BasePayload;
-  meta: { objectType: string; layout?: string }; // for telemetry
+  meta: {
+    // for telemetry
+    objectType: string;
+    layout?: string;
+    isDeprecated?: boolean;
+  };
   migration_version: string; // for reminding the user to update their POST URL
   attempts: number; // initially populated as 0
   created_at: string; // timestamp in UTC

@@ -18,36 +18,11 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   // the value `true` in this context signals configuration is exposed to browser
   exposeToBrowser: {
     enabled: true,
-    showMapVisualizationTypes: true,
     showMapsInspectorAdapter: true,
     preserveDrawingBuffer: true,
   },
   schema: configSchema,
   deprecations: () => [
-    (
-      completeConfig: Record<string, any>,
-      rootPath: string,
-      addDeprecation: AddConfigDeprecation
-    ) => {
-      if (_.get(completeConfig, 'xpack.maps.showMapVisualizationTypes') === undefined) {
-        return completeConfig;
-      }
-      addDeprecation({
-        message: i18n.translate('xpack.maps.deprecation.showMapVisualizationTypes.message', {
-          defaultMessage:
-            'xpack.maps.showMapVisualizationTypes is deprecated and is no longer used',
-        }),
-        correctiveActions: {
-          manualSteps: [
-            i18n.translate('xpack.maps.deprecation.showMapVisualizationTypes.step1', {
-              defaultMessage:
-                'Remove "xpack.maps.showMapVisualizationTypes" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
-            }),
-          ],
-        },
-      });
-      return completeConfig;
-    },
     (
       completeConfig: Record<string, any>,
       rootPath: string,
@@ -70,37 +45,6 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
             }),
             i18n.translate('xpack.maps.deprecation.proxyEMS.step2', {
               defaultMessage: 'Host Elastic Maps Service locally.',
-            }),
-          ],
-        },
-      });
-      return completeConfig;
-    },
-    (
-      completeConfig: Record<string, any>,
-      rootPath: string,
-      addDeprecation: AddConfigDeprecation
-    ) => {
-      if (_.get(completeConfig, 'map.regionmap') === undefined) {
-        return completeConfig;
-      }
-      addDeprecation({
-        message: i18n.translate('xpack.maps.deprecation.regionmap.message', {
-          defaultMessage: 'map.regionmap is deprecated and is no longer used',
-        }),
-        correctiveActions: {
-          manualSteps: [
-            i18n.translate('xpack.maps.deprecation.regionmap.step1', {
-              defaultMessage:
-                'Remove "map.regionmap" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
-            }),
-            i18n.translate('xpack.maps.deprecation.regionmap.step2', {
-              defaultMessage:
-                'Use "Upload GeoJSON" to upload each layer defined by "map.regionmap.layers".',
-            }),
-            i18n.translate('xpack.maps.deprecation.regionmap.step3', {
-              defaultMessage:
-                'Update all maps with "Configured GeoJSON" layers. Use Choropleth layer wizard to build a replacement layer. Delete "Configured GeoJSON" layer from your map.',
             }),
           ],
         },

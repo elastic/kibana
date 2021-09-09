@@ -1064,6 +1064,83 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Container.setChildLoaded",
+            "type": "Function",
+            "tags": [],
+            "label": "setChildLoaded",
+            "description": [],
+            "signature": [
+              "(embeddable: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ">) => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Container.setChildLoaded.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "embeddable",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.IEmbeddable",
+                    "text": "IEmbeddable"
+                  },
+                  "<",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "common",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-common.EmbeddableInput",
+                    "text": "EmbeddableInput"
+                  },
+                  ", ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.EmbeddableOutput",
+                    "text": "EmbeddableOutput"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Container.updateInputForChild",
             "type": "Function",
             "tags": [],
@@ -2105,6 +2182,16 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.deferEmbeddableLoad",
+            "type": "boolean",
+            "tags": [],
+            "label": "deferEmbeddableLoad",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Embeddable.type",
             "type": "string",
             "tags": [],
@@ -2178,6 +2265,16 @@
                 "text": "RenderCompleteDispatcher"
               }
             ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.destroyed",
+            "type": "boolean",
+            "tags": [],
+            "label": "destroyed",
+            "description": [],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false
           },
@@ -2578,6 +2675,23 @@
             "label": "destroy",
             "description": [
               "\nCalled when this embeddable is no longer used, this should be the place for\nimplementors to add any additional clean up tasks, like unmounting and unsubscribing."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.setInitializationFinished",
+            "type": "Function",
+            "tags": [],
+            "label": "setInitializationFinished",
+            "description": [
+              "\ncommunicate to the parent embeddable that this embeddable's initialization is finished.\nThis only applies to embeddables which defer their loading state with deferEmbeddableLoad."
             ],
             "signature": [
               "() => void"
@@ -3567,7 +3681,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.options",
+                "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -3577,7 +3691,7 @@
                 "children": [
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.options.path",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.path",
                     "type": "string",
                     "tags": [],
                     "label": "path",
@@ -3590,7 +3704,7 @@
                   },
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.options.openInNewTab",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.openInNewTab",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "openInNewTab",
@@ -3603,7 +3717,7 @@
                   },
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.options.state",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.state",
                     "type": "Object",
                     "tags": [],
                     "label": "state",
@@ -3664,7 +3778,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2.options",
+                "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -3674,7 +3788,7 @@
                 "children": [
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2.options.path",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2.path",
                     "type": "string",
                     "tags": [],
                     "label": "path",
@@ -3687,7 +3801,7 @@
                   },
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2.options.state",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2.state",
                     "type": "Object",
                     "tags": [],
                     "label": "state",
@@ -4927,7 +5041,7 @@
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.openAddPanelFlyout.$1.options",
+            "id": "def-public.openAddPanelFlyout.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -4937,7 +5051,7 @@
             "children": [
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.embeddable",
+                "id": "def-public.openAddPanelFlyout.$1.embeddable",
                 "type": "Object",
                 "tags": [],
                 "label": "embeddable",
@@ -4973,7 +5087,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.getFactory",
+                "id": "def-public.openAddPanelFlyout.$1.getFactory",
                 "type": "Function",
                 "tags": [],
                 "label": "getFactory",
@@ -5045,7 +5159,7 @@
                 "children": [
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.embeddableFactoryId",
+                    "id": "def-public.openAddPanelFlyout.$1.getFactory.$1",
                     "type": "string",
                     "tags": [],
                     "label": "embeddableFactoryId",
@@ -5057,7 +5171,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.getAllFactories",
+                "id": "def-public.openAddPanelFlyout.$1.getAllFactories",
                 "type": "Function",
                 "tags": [],
                 "label": "getAllFactories",
@@ -5122,7 +5236,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.overlays",
+                "id": "def-public.openAddPanelFlyout.$1.overlays",
                 "type": "Object",
                 "tags": [],
                 "label": "overlays",
@@ -5141,7 +5255,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.notifications",
+                "id": "def-public.openAddPanelFlyout.$1.notifications",
                 "type": "Object",
                 "tags": [],
                 "label": "notifications",
@@ -5160,7 +5274,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.SavedObjectFinder",
+                "id": "def-public.openAddPanelFlyout.$1.SavedObjectFinder",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "SavedObjectFinder",
@@ -5173,7 +5287,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.showCreateNewMenu",
+                "id": "def-public.openAddPanelFlyout.$1.showCreateNewMenu",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "showCreateNewMenu",
@@ -5186,7 +5300,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.reportUiCounter",
+                "id": "def-public.openAddPanelFlyout.$1.reportUiCounter",
                 "type": "Function",
                 "tags": [],
                 "label": "reportUiCounter",
@@ -5597,7 +5711,7 @@
             "children": [
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.props",
+                "id": "def-public.EmbeddableChildPanelProps.PanelComponent.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -5610,7 +5724,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.context",
+                "id": "def-public.EmbeddableChildPanelProps.PanelComponent.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "context",
@@ -5681,6 +5795,19 @@
             "tags": [],
             "label": "originatingApp",
             "description": [],
+            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableEditorState.originatingPath",
+            "type": "string",
+            "tags": [],
+            "label": "originatingPath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
             "deprecated": false
           },
@@ -6936,6 +7063,88 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.IContainer.setChildLoaded",
+            "type": "Function",
+            "tags": [],
+            "label": "setChildLoaded",
+            "description": [
+              "\nEmbeddables which have deferEmbeddableLoad set to true need to manually call setChildLoaded\non their parent container to communicate when they have finished loading."
+            ],
+            "signature": [
+              "<E extends ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              "> = ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ">>(embeddable: E) => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.IContainer.setChildLoaded.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "embeddable",
+                "description": [
+                  "- the embeddable to set"
+                ],
+                "signature": [
+                  "E"
+                ],
+                "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.IContainer.removeEmbeddable",
             "type": "Function",
             "tags": [],
@@ -7161,6 +7370,18 @@
             "label": "id",
             "description": [
               "\nA unique identifier for this embeddable. Mainly only used by containers to map their\nPanel States to a child embeddable instance."
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.IEmbeddable.deferEmbeddableLoad",
+            "type": "boolean",
+            "tags": [],
+            "label": "deferEmbeddableLoad",
+            "description": [
+              "\nIf set to true, defer embeddable load tells the container that this embeddable\ntype isn't completely loaded when the constructor returns. This embeddable\nwill have to manually call setChildLoaded on its parent when all of its initial\noutput is finalized. For instance, after loading a saved object."
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false
@@ -8068,7 +8289,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, T>, \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"telemetry\" | \"extract\" | \"inject\" | \"migrations\" | \"grouping\" | \"getIconType\" | \"getDescription\">>"
+          "<I, O, E, T>, \"telemetry\" | \"inject\" | \"extract\" | \"migrations\" | \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"grouping\" | \"getIconType\" | \"getDescription\">>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory_definition.ts",
         "deprecated": false,
@@ -8091,14 +8312,10 @@
             "text": "ViewMode"
           },
           " | undefined; title?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
-          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; }"
+          "SerializableRecord",
+          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; executionContext?: ",
+          "KibanaExecutionContext",
+          " | undefined; }"
         ],
         "path": "src/plugins/embeddable/common/types.ts",
         "deprecated": false,
@@ -8144,7 +8361,7 @@
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.props",
+            "id": "def-public.EmbeddablePanelHOC.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -8157,7 +8374,7 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.context",
+            "id": "def-public.EmbeddablePanelHOC.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -8507,13 +8724,7 @@
               "text": "EnhancementRegistryDefinition"
             },
             "<",
-            {
-              "pluginId": "kibanaUtils",
-              "scope": "common",
-              "docId": "kibKibanaUtilsPluginApi",
-              "section": "def-common.Serializable",
-              "text": "Serializable"
-            },
+            "SerializableRecord",
             ">) => void"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
@@ -8535,13 +8746,7 @@
                   "text": "EnhancementRegistryDefinition"
                 },
                 "<",
-                {
-                  "pluginId": "kibanaUtils",
-                  "scope": "common",
-                  "docId": "kibKibanaUtilsPluginApi",
-                  "section": "def-common.Serializable",
-                  "text": "Serializable"
-                },
+                "SerializableRecord",
                 ">"
               ],
               "path": "src/plugins/embeddable/public/plugin.tsx",
@@ -8816,7 +9021,7 @@
           "children": [
             {
               "parentPluginId": "embeddable",
-              "id": "def-public.props",
+              "id": "def-public.EmbeddableStart.EmbeddablePanel.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "props",
@@ -8829,7 +9034,7 @@
             },
             {
               "parentPluginId": "embeddable",
-              "id": "def-public.context",
+              "id": "def-public.EmbeddableStart.EmbeddablePanel.$2",
               "type": "Any",
               "tags": [],
               "label": "context",
@@ -9190,13 +9395,7 @@
               "text": "EnhancementRegistryDefinition"
             },
             "<",
-            {
-              "pluginId": "kibanaUtils",
-              "scope": "common",
-              "docId": "kibKibanaUtilsPluginApi",
-              "section": "def-common.Serializable",
-              "text": "Serializable"
-            },
+            "SerializableRecord",
             ">) => void"
           ],
           "path": "src/plugins/embeddable/server/plugin.ts",
@@ -9218,13 +9417,7 @@
                   "text": "EnhancementRegistryDefinition"
                 },
                 "<",
-                {
-                  "pluginId": "kibanaUtils",
-                  "scope": "common",
-                  "docId": "kibKibanaUtilsPluginApi",
-                  "section": "def-common.Serializable",
-                  "text": "Serializable"
-                },
+                "SerializableRecord",
                 ">"
               ],
               "path": "src/plugins/embeddable/server/plugin.ts",
@@ -9961,14 +10154,10 @@
             "text": "ViewMode"
           },
           " | undefined; title?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
-          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; }"
+          "SerializableRecord",
+          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; executionContext?: ",
+          "KibanaExecutionContext",
+          " | undefined; }"
         ],
         "path": "src/plugins/embeddable/common/types.ts",
         "deprecated": false,
@@ -10033,21 +10222,9 @@
         "description": [],
         "signature": [
           "(state: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           ", version: string) => ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          }
+          "SerializableRecord"
         ],
         "path": "src/plugins/embeddable/common/lib/migrate.ts",
         "deprecated": false,
@@ -10055,28 +10232,20 @@
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-common.state",
+            "id": "def-common.MigrateFunction.$1",
             "type": "Object",
             "tags": [],
             "label": "state",
             "description": [],
             "signature": [
-              "{ [key: string]: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
-              "; }"
+              "SerializableRecord"
             ],
             "path": "src/plugins/embeddable/common/lib/migrate.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-common.version",
+            "id": "def-common.MigrateFunction.$2",
             "type": "string",
             "tags": [],
             "label": "version",

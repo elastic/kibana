@@ -18,6 +18,7 @@ import type {
   IndicesOptions,
 } from '../../../../common/types/anomaly_detection_jobs';
 import type { JobMessage } from '../../../../common/types/audit_message';
+import type { JobAction } from '../../../../common/constants/job_actions';
 import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
 import type { ExistingJobsAndGroups } from '../job_service';
 import type {
@@ -27,7 +28,11 @@ import type {
 } from '../../../../common/types/categories';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
 import type { Category } from '../../../../common/types/categories';
-import type { JobsExistResponse, BulkCreateResults } from '../../../../common/types/job_service';
+import type {
+  JobsExistResponse,
+  BulkCreateResults,
+  ResetJobsResponse,
+} from '../../../../common/types/job_service';
 import { ML_BASE_PATH } from '../../../../common/constants/app';
 
 export const jobsApiProvider = (httpService: HttpService) => ({
@@ -127,6 +132,15 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
+  resetJobs(jobIds: string[]) {
+    const body = JSON.stringify({ jobIds });
+    return httpService.http<ResetJobsResponse>({
+      path: `${ML_BASE_PATH}/jobs/reset_jobs`,
+      method: 'POST',
+      body,
+    });
+  },
+
   forceStopAndCloseJob(jobId: string) {
     const body = JSON.stringify({ jobId });
     return httpService.http<{ success: boolean }>({
@@ -169,9 +183,9 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  deletingJobTasks() {
-    return httpService.http<any>({
-      path: `${ML_BASE_PATH}/jobs/deleting_jobs_tasks`,
+  blockingJobTasks() {
+    return httpService.http<Record<string, JobAction>>({
+      path: `${ML_BASE_PATH}/jobs/blocking_jobs_tasks`,
       method: 'GET',
     });
   },

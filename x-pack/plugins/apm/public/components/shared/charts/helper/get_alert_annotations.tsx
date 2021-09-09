@@ -14,7 +14,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
   ALERT_START as ALERT_START_TYPED,
   ALERT_UUID as ALERT_UUID_TYPED,
   ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED,
@@ -22,7 +22,7 @@ import type {
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
   ALERT_START as ALERT_START_NON_TYPED,
   ALERT_UUID as ALERT_UUID_NON_TYPED,
   ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED,
@@ -38,7 +38,7 @@ import { asDuration, asPercent } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
 const ALERT_START: typeof ALERT_START_TYPED = ALERT_START_NON_TYPED;
 const ALERT_UUID: typeof ALERT_UUID_TYPED = ALERT_UUID_NON_TYPED;
 const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED = ALERT_RULE_TYPE_ID_NON_TYPED;
@@ -119,7 +119,7 @@ export function getAlertAnnotations({
       new Date(parsed[ALERT_START]!).getTime()
     );
     const end = start + parsed[ALERT_DURATION]! / 1000;
-    const severityLevel = parsed[ALERT_SEVERITY_LEVEL];
+    const severityLevel = parsed[ALERT_SEVERITY];
     const color = getAlertColor({ severityLevel, theme });
     const header = getAlertHeader({ severityLevel });
     const formatter = getFormatter(parsed[ALERT_RULE_TYPE_ID]!);

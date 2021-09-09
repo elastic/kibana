@@ -43,7 +43,6 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
-        '--xpack.maps.showMapVisualizationTypes=true',
 
         // to be re-enabled once kibana/issues/102552 is completed
         '--xpack.security.enabled=false',
@@ -57,7 +56,6 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'visualization:visualize:legacyChartsLibrary': true,
         'visualization:visualize:legacyPieChartsLibrary': true,
       },
     },
@@ -178,6 +176,20 @@ export default async function ({ readConfigFile }) {
           },
           kibana: [],
         },
+        test_field_formatters: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['field_formats_management_functional_tests*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
         //for sample data - can remove but not add sample data.( not ml)- for ml use built in role.
         kibana_sample_admin: {
           elasticsearch: {
@@ -273,7 +285,7 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['message_with_newline'],
+                names: ['newline-test'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

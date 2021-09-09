@@ -24,6 +24,7 @@ const createActionsClientMock = () => {
     ephemeralEnqueuedExecution: jest.fn(),
     listTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),
+    isPreconfigured: jest.fn(),
   };
   return mocked;
 };

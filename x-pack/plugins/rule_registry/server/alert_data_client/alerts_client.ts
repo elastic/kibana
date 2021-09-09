@@ -13,14 +13,13 @@ import type {
   getEsQueryConfig as getEsQueryConfigTyped,
   getSafeSortIds as getSafeSortIdsTyped,
   isValidFeatureId as isValidFeatureIdTyped,
-  mapConsumerToIndexName as mapConsumerToIndexNameTyped,
   STATUS_VALUES,
+  ValidFeatureId,
 } from '@kbn/rule-data-utils';
 import {
   getEsQueryConfig as getEsQueryConfigNonTyped,
   getSafeSortIds as getSafeSortIdsNonTyped,
   isValidFeatureId as isValidFeatureIdNonTyped,
-  mapConsumerToIndexName as mapConsumerToIndexNameNonTyped,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
@@ -42,11 +41,11 @@ import {
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
+import { Dataset, RuleDataPluginService } from '../rule_data_plugin_service';
 
 const getEsQueryConfig: typeof getEsQueryConfigTyped = getEsQueryConfigNonTyped;
 const getSafeSortIds: typeof getSafeSortIdsTyped = getSafeSortIdsNonTyped;
 const isValidFeatureId: typeof isValidFeatureIdTyped = isValidFeatureIdNonTyped;
-const mapConsumerToIndexName: typeof mapConsumerToIndexNameTyped = mapConsumerToIndexNameNonTyped;
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
@@ -56,7 +55,7 @@ type AlertType = { _index: string; _id: string } & NonNullableProps<
   typeof ALERT_RULE_TYPE_ID | typeof ALERT_RULE_CONSUMER | typeof SPACE_IDS
 >;
 
-const isValidAlert = (source?: estypes.SearchHit<any>): source is AlertType => {
+const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source is AlertType => {
   return (
     (source?._source?.[ALERT_RULE_TYPE_ID] != null &&
       source?._source?.[ALERT_RULE_CONSUMER] != null &&
@@ -71,6 +70,7 @@ export interface ConstructorOptions {
   authorization: PublicMethodsOf<AlertingAuthorization>;
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
+  ruleDataService: RuleDataPluginService;
 }
 
 export interface UpdateOptions<Params extends AlertTypeParams> {
@@ -93,11 +93,15 @@ interface GetAlertParams {
 }
 
 interface SingleSearchAfterAndAudit {
-  id: string | null | undefined;
-  query: object | string | null | undefined;
+  id?: string | null | undefined;
+  query?: string | object | undefined;
+  aggs?: object | undefined;
   index?: string;
+  _source?: string[] | undefined;
+  track_total_hits?: boolean | undefined;
+  size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
-  lastSortIds: Array<string | number> | undefined;
+  lastSortIds?: Array<string | number> | undefined;
 }
 
 /**
@@ -111,15 +115,17 @@ export class AlertsClient {
   private readonly authorization: PublicMethodsOf<AlertingAuthorization>;
   private readonly esClient: ElasticsearchClient;
   private readonly spaceId: string | undefined;
+  private readonly ruleDataService: RuleDataPluginService;
 
-  constructor({ auditLogger, authorization, logger, esClient }: ConstructorOptions) {
-    this.logger = logger;
-    this.authorization = authorization;
-    this.esClient = esClient;
-    this.auditLogger = auditLogger;
+  constructor(options: ConstructorOptions) {
+    this.logger = options.logger;
+    this.authorization = options.authorization;
+    this.esClient = options.esClient;
+    this.auditLogger = options.auditLogger;
     // If spaceId is undefined, it means that spaces is disabled
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
+    this.ruleDataService = options.ruleDataService;
   }
 
   private getOutcome(
@@ -216,6 +222,10 @@ export class AlertsClient {
   private async singleSearchAfterAndAudit({
     id,
     query,
+    aggs,
+    _source,
+    track_total_hits: trackTotalHits,
+    size,
     index,
     operation,
     lastSortIds = [],
@@ -233,6 +243,10 @@ export class AlertsClient {
       let queryBody = {
         fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
         query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
+        aggs,
+        _source,
+        track_total_hits: trackTotalHits,
+        size,
         sort: [
           {
             '@timestamp': {
@@ -265,17 +279,19 @@ export class AlertsClient {
         throw Boom.badData(errorMessage);
       }
 
-      await this.ensureAllAuthorized(result.body.hits.hits, operation);
+      if (result?.body?.hits?.hits != null && result?.body.hits.hits.length > 0) {
+        await this.ensureAllAuthorized(result.body.hits.hits, operation);
 
-      result?.body.hits.hits.map((item) =>
-        this.auditLogger?.log(
-          alertAuditEvent({
-            action: operationAlertAuditActionMap[operation],
-            id: item._id,
-            ...this.getOutcome(operation),
-          })
-        )
-      );
+        result?.body.hits.hits.map((item) =>
+          this.auditLogger?.log(
+            alertAuditEvent({
+              action: operationAlertAuditActionMap[operation],
+              id: item._id,
+              ...this.getOutcome(operation),
+            })
+          )
+        );
+      }
 
       return result.body;
     } catch (error) {
@@ -474,10 +490,8 @@ export class AlertsClient {
       // first search for the alert by id, then use the alert info to check if user has access to it
       const alert = await this.singleSearchAfterAndAudit({
         id,
-        query: undefined,
         index,
         operation: ReadOperations.Get,
-        lastSortIds: undefined,
       });
 
       if (alert == null || alert.hits.hits.length === 0) {
@@ -503,10 +517,8 @@ export class AlertsClient {
     try {
       const alert = await this.singleSearchAfterAndAudit({
         id,
-        query: null,
         index,
         operation: WriteOperations.Update,
-        lastSortIds: undefined,
       });
 
       if (alert == null || alert.hits.hits.length === 0) {
@@ -565,7 +577,7 @@ export class AlertsClient {
         });
 
         if (!fetchAndAuditResponse?.auditedAlerts) {
-          throw Boom.unauthorized('Failed to audit alerts');
+          throw Boom.forbidden('Failed to audit alerts');
         }
 
         // executes updateByQuery with query + authorization filter
@@ -598,8 +610,50 @@ export class AlertsClient {
     }
   }
 
+  public async find<Params extends AlertTypeParams = never>({
+    query,
+    aggs,
+    _source,
+    track_total_hits: trackTotalHits,
+    size,
+    index,
+  }: {
+    query?: object | undefined;
+    aggs?: object | undefined;
+    index: string | undefined;
+    track_total_hits?: boolean | undefined;
+    _source?: string[] | undefined;
+    size?: number | undefined;
+  }) {
+    try {
+      // first search for the alert by id, then use the alert info to check if user has access to it
+      const alertsSearchResponse = await this.singleSearchAfterAndAudit({
+        query,
+        aggs,
+        _source,
+        track_total_hits: trackTotalHits,
+        size,
+        index,
+        operation: ReadOperations.Find,
+      });
+
+      if (alertsSearchResponse == null) {
+        const errorMessage = `Unable to retrieve alert details for alert with query and operation ${ReadOperations.Find}`;
+        this.logger.error(errorMessage);
+        throw Boom.notFound(errorMessage);
+      }
+
+      return alertsSearchResponse;
+    } catch (error) {
+      this.logger.error(`find threw an error: ${error}`);
+      throw error;
+    }
+  }
+
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
     try {
+      // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
+      // return all of the features that you can access and does not care about your featureIds
       const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
         featureIds,
         [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
@@ -614,11 +668,18 @@ export class AlertsClient {
         authorizedFeatures.add(ruleType.producer);
       }
 
-      const toReturn = Array.from(authorizedFeatures).flatMap((feature) => {
-        if (isValidFeatureId(feature)) {
-          return mapConsumerToIndexName[feature];
+      const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
+        (feature): feature is ValidFeatureId =>
+          featureIds.includes(feature) && isValidFeatureId(feature)
+      );
+
+      const toReturn = validAuthorizedFeatures.flatMap((feature) => {
+        const indices = this.ruleDataService.findIndicesByFeature(feature, Dataset.alerts);
+        if (feature === 'siem') {
+          return indices.map((i) => `${i.baseName}-${this.spaceId}`);
+        } else {
+          return indices.map((i) => i.baseName);
         }
-        return [];
       });
 
       return toReturn;

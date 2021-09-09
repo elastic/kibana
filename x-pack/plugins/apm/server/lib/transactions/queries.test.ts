@@ -11,7 +11,7 @@ import {
   SearchParamsMock,
 } from '../../utils/test_helpers';
 import { getTransactionBreakdown } from './breakdown';
-import { getTransactionDistribution } from './distribution';
+import { getTransactionTraceSamples } from './trace_samples';
 import { getTransaction } from './get_transaction';
 
 describe('transaction queries', () => {
@@ -50,16 +50,15 @@ describe('transaction queries', () => {
     expect(mock.params).toMatchSnapshot();
   });
 
-  it('fetches transaction distribution', async () => {
+  it('fetches transaction trace samples', async () => {
     mock = await inspectSearchParams((setup) =>
-      getTransactionDistribution({
+      getTransactionTraceSamples({
         serviceName: 'foo',
         transactionName: 'bar',
         transactionType: 'baz',
         traceId: 'qux',
         transactionId: 'quz',
         setup,
-        searchAggregatedTransactions: false,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
       })

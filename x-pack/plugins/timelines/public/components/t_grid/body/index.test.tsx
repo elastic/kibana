@@ -66,8 +66,11 @@ describe('Body', () => {
     excludedRowRendererIds: [],
     id: 'timeline-test',
     isSelectAllChecked: false,
+    isLoading: false,
+    itemsPerPageOptions: [],
     loadingEventIds: [],
     loadPage: jest.fn(),
+    pageSize: 25,
     renderCellValue: TestCellRenderer,
     rowRenderers: [],
     selectedEventIds: {},
@@ -75,14 +78,14 @@ describe('Body', () => {
     sort: mockSort,
     showCheckboxes: false,
     tabType: TimelineTabs.query,
-    totalPages: 1,
+    tableView: 'gridView',
     totalItems: 1,
     leadingControlColumns: [],
     trailingControlColumns: [],
     filterStatus: 'open',
     filterQuery: '',
-    indexNames: [''],
     refetch: jest.fn(),
+    indexNames: [''],
   };
 
   describe('rendering', () => {
@@ -125,9 +128,13 @@ describe('Body', () => {
       expect(wrapper.find('div.euiDataGridRowCell').first().exists()).toEqual(true);
     });
 
-    test.skip('it renders a tooltip for timestamp', () => {
+    test('it renders cell value', () => {
       const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
-      const testProps = { ...props, columnHeaders: headersJustTimestamp };
+      const testProps = {
+        ...props,
+        columnHeaders: headersJustTimestamp,
+        data: mockTimelineData.slice(0, 1),
+      };
       const wrapper = mount(
         <TestProviders>
           <BodyComponent {...testProps} />
@@ -136,10 +143,10 @@ describe('Body', () => {
       wrapper.update();
       expect(
         wrapper
-          .find('[data-test-subj="data-driven-columns"]')
-          .first()
-          .find('[data-test-subj="statefulCell"]')
-          .last()
+          .find('[data-test-subj="dataGridRowCell"]')
+          .at(0)
+          .find('.euiDataGridRowCell__truncate')
+          .childAt(0)
           .text()
       ).toEqual(mockTimelineData[0].ecs.timestamp);
     });

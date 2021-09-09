@@ -53,6 +53,7 @@ export class SourceFormat extends FieldFormat {
     }
 
     const highlights = (hit && hit.highlight) || {};
+    // TODO: remove index pattern dependency
     const formatted = indexPattern.formatHit(hit);
     const highlightPairs: any[] = [];
     const sourcePairs: any[] = [];

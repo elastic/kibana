@@ -11,6 +11,7 @@ import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { EventFieldsData } from './types';
+import { get } from 'lodash/fp';
 
 jest.mock('../../lib/kibana');
 interface Column {
@@ -78,13 +79,13 @@ describe('getColumns', () => {
       });
     });
 
-    describe('add to timeline', () => {
-      test('it renders an add to timeline button', () => {
+    describe('overflow button', () => {
+      test('it renders an overflow button', () => {
         const wrapper = mount(
           <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
         ) as ReactWrapper;
 
-        expect(wrapper.find('[data-test-subj="hover-actions-add-timeline"]').exists()).toBeTruthy();
+        expect(wrapper.find('[data-test-subj="more-actions-agent.id"]').exists()).toBeTruthy();
       });
     });
 
@@ -95,8 +96,32 @@ describe('getColumns', () => {
         ) as ReactWrapper;
 
         expect(
-          wrapper.find('[data-test-subj="hover-actions-toggle-column"]').exists()
-        ).toBeTruthy();
+          get(['items', 0, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
+        ).toEqual('hover-actions-toggle-column');
+      });
+    });
+
+    describe('add to timeline', () => {
+      test('it renders an add to timeline button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(
+          get(['items', 1, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
+        ).toEqual('hover-actions-add-timeline');
+      });
+    });
+
+    describe('topN', () => {
+      test('it renders a show topN button', () => {
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(
+          get(['items', 2, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
+        ).toEqual('hover-actions-show-top-n');
       });
     });
 
@@ -106,7 +131,9 @@ describe('getColumns', () => {
           <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
         ) as ReactWrapper;
 
-        expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBeTruthy();
+        expect(
+          get(['items', 3, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
+        ).toEqual('hover-actions-copy-button');
       });
     });
   });

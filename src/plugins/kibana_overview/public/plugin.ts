@@ -90,31 +90,12 @@ export class KibanaOverviewPlugin
       home.featureCatalogue.registerSolution({
         id: 'kibana',
         title: i18n.translate('kibanaOverview.kibana.solution.title', {
-          defaultMessage: 'Kibana',
+          defaultMessage: 'Analytics',
         }),
-        subtitle: i18n.translate('kibanaOverview.kibana.solution.subtitle', {
-          defaultMessage: 'Visualize & analyze',
+        description: i18n.translate('kibanaOverview.kibana.solution.description', {
+          defaultMessage:
+            'Explore, visualize, and analyze your data using a powerful suite of analytical tools and applications.',
         }),
-        appDescriptions: [
-          i18n.translate('kibanaOverview.kibana.appDescription1', {
-            defaultMessage: 'Analyze data in dashboards.',
-          }),
-          i18n.translate('kibanaOverview.kibana.appDescription2', {
-            defaultMessage: 'Search and find insights.',
-          }),
-          i18n.translate('kibanaOverview.kibana.appDescription3', {
-            defaultMessage: 'Design pixel-perfect presentations.',
-          }),
-          i18n.translate('kibanaOverview.kibana.appDescription4', {
-            defaultMessage: 'Plot geographic data.',
-          }),
-          i18n.translate('kibanaOverview.kibana.appDescription5', {
-            defaultMessage: 'Model, predict, and detect.',
-          }),
-          i18n.translate('kibanaOverview.kibana.appDescription6', {
-            defaultMessage: 'Reveal patterns and relationships.',
-          }),
-        ],
         icon: 'logoKibana',
         path: PLUGIN_PATH,
         order: 400,

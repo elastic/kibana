@@ -30,18 +30,6 @@
           },
           {
             "parentPluginId": "telemetry",
-            "id": "def-public.TelemetryPluginConfig.url",
-            "type": "string",
-            "tags": [],
-            "label": "url",
-            "description": [
-              "Remote telemetry service's URL"
-            ],
-            "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "telemetry",
             "id": "def-public.TelemetryPluginConfig.banner",
             "type": "boolean",
             "tags": [],
@@ -81,12 +69,15 @@
           },
           {
             "parentPluginId": "telemetry",
-            "id": "def-public.TelemetryPluginConfig.optInStatusUrl",
-            "type": "string",
+            "id": "def-public.TelemetryPluginConfig.sendUsageTo",
+            "type": "CompoundType",
             "tags": [],
-            "label": "optInStatusUrl",
+            "label": "sendUsageTo",
             "description": [
-              "Opt-in/out notification URL"
+              "Specify if telemetry should send usage to the prod or staging remote telemetry service"
+            ],
+            "signature": [
+              "\"prod\" | \"staging\""
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false
@@ -537,7 +528,7 @@
               "When the data comes from a matching index-pattern, the name of the pattern"
             ],
             "signature": [
-              "\"search\" | \"logstash\" | \"enterprise-search\" | \"app-search\" | \"magento2\" | \"magento\" | \"shopify\" | \"wordpress\" | \"drupal\" | \"joomla\" | \"sharepoint\" | \"squarespace\" | \"sitecore\" | \"weebly\" | \"acquia\" | \"filebeat\" | \"metricbeat\" | \"apm\" | \"functionbeat\" | \"heartbeat\" | \"fluentd\" | \"telegraf\" | \"prometheusbeat\" | \"fluentbit\" | \"nginx\" | \"apache\" | \"endgame\" | \"logs-endpoint\" | \"metrics-endpoint\" | \"siem-signals\" | \"auditbeat\" | \"winlogbeat\" | \"packetbeat\" | \"tomcat\" | \"artifactory\" | \"aruba\" | \"barracuda\" | \"bluecoat\" | \"arcsight\" | \"checkpoint\" | \"cisco\" | \"citrix\" | \"cyberark\" | \"cylance\" | \"fireeye\" | \"fortinet\" | \"infoblox\" | \"kaspersky\" | \"mcafee\" | \"paloaltonetworks\" | \"rsa\" | \"snort\" | \"sonicwall\" | \"sophos\" | \"squid\" | \"symantec\" | \"tippingpoint\" | \"trendmicro\" | \"tripwire\" | \"zscaler\" | \"zeek\" | \"sigma_doc\" | \"ecs-corelight\" | \"suricata\" | \"wazuh\" | \"meow\" | undefined"
+              "\"search\" | \"logstash\" | \"enterprise-search\" | \"app-search\" | \"magento2\" | \"magento\" | \"shopify\" | \"wordpress\" | \"drupal\" | \"joomla\" | \"sharepoint\" | \"squarespace\" | \"sitecore\" | \"weebly\" | \"acquia\" | \"filebeat\" | \"metricbeat\" | \"apm\" | \"functionbeat\" | \"heartbeat\" | \"fluentd\" | \"telegraf\" | \"prometheusbeat\" | \"fluentbit\" | \"nginx\" | \"apache\" | \"endgame\" | \"logs-endpoint\" | \"metrics-endpoint\" | \"siem-signals\" | \"auditbeat\" | \"winlogbeat\" | \"packetbeat\" | \"tomcat\" | \"artifactory\" | \"aruba\" | \"barracuda\" | \"bluecoat\" | \"arcsight\" | \"checkpoint\" | \"cisco\" | \"citrix\" | \"cyberark\" | \"cylance\" | \"fireeye\" | \"fortinet\" | \"infoblox\" | \"kaspersky\" | \"mcafee\" | \"paloaltonetworks\" | \"rsa\" | \"snort\" | \"sonicwall\" | \"sophos\" | \"squid\" | \"symantec\" | \"tippingpoint\" | \"trendmicro\" | \"tripwire\" | \"zscaler\" | \"zeek\" | \"sigma_doc\" | \"ecs-corelight\" | \"suricata\" | \"wazuh\" | \"meow\" | \"host_risk_score\" | undefined"
             ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
             "deprecated": false

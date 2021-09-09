@@ -16,6 +16,7 @@ import {
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_PANEL,
   TIMELINE_TAB_CONTENT_EQL,
+  TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
 } from '../../screens/timeline';
 import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 
@@ -90,7 +91,9 @@ describe('Timelines', (): void => {
 
     it('can be added notes', () => {
       addNotesToTimeline(getTimeline().notes);
-      cy.get(NOTES_TEXT).should('have.text', getTimeline().notes);
+      cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
+        .find(NOTES_TEXT)
+        .should('have.text', getTimeline().notes);
     });
 
     it('should update timeline after adding eql', () => {

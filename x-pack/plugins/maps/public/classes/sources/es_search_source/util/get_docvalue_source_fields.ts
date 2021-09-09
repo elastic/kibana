@@ -34,9 +34,7 @@ export function getDocValueAndSourceFields(
           lang: field.lang || '',
         },
       };
-    }
-    // @ts-expect-error runtimeField has not been added to public API yet. exact shape of type TBD.
-    else if (field.readFromDocValues || field.runtimeField) {
+    } else if (field.readFromDocValues || field.runtimeField) {
       const docValueField =
         field.type === 'date'
           ? {

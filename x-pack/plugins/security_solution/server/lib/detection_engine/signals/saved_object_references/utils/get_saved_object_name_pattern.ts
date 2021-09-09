@@ -6,7 +6,7 @@
  */
 
 /**
- * Given a name and index this will return the pattern of "${name_${index}"
+ * Given a name and index this will return the pattern of "${name}_${index}"
  * @param name The name to suffix the string
  * @param index The index to suffix the string
  * @returns The pattern "${name_${index}"

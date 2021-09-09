@@ -62,7 +62,7 @@ describe('core deprecations', () => {
       expect(migrated.server.xsrf.allowlist).toEqual(['/path']);
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"server.xsrf.whitelist\\" is deprecated and has been replaced by \\"server.xsrf.allowlist\\"",
+          "Setting \\"server.xsrf.whitelist\\" has been replaced by \\"server.xsrf.allowlist\\"",
         ]
       `);
     });

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup, LegacyRequest } from 'src/core/server';
+import type { CoreSetup } from 'src/core/server';
 
-import { KibanaRequest, SavedObjectsClient } from '../../../../../src/core/server';
+import { SavedObjectsClient } from '../../../../../src/core/server';
 import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { SpacesService } from '../plugin';
@@ -44,30 +44,25 @@ export function setupSavedObjects({
   savedObjects,
   getSpacesService,
 }: SetupSavedObjectsParams) {
-  const getKibanaRequest = (request: KibanaRequest | LegacyRequest) =>
-    request instanceof KibanaRequest ? request : KibanaRequest.from(request);
-
   savedObjects.setClientFactoryProvider(
     (repositoryFactory) => ({ request, includedHiddenTypes }) => {
-      const kibanaRequest = getKibanaRequest(request);
       return new SavedObjectsClient(
-        authz.mode.useRbacForRequest(kibanaRequest)
+        authz.mode.useRbacForRequest(request)
           ? repositoryFactory.createInternalRepository(includedHiddenTypes)
-          : repositoryFactory.createScopedRepository(kibanaRequest, includedHiddenTypes)
+          : repositoryFactory.createScopedRepository(request, includedHiddenTypes)
       );
     }
   );
 
   savedObjects.addClientWrapper(Number.MAX_SAFE_INTEGER - 1, 'security', ({ client, request }) => {
-    const kibanaRequest = getKibanaRequest(request);
-    return authz.mode.useRbacForRequest(kibanaRequest)
+    return authz.mode.useRbacForRequest(request)
       ? new SecureSavedObjectsClientWrapper({
           actions: authz.actions,
           legacyAuditLogger,
-          auditLogger: audit.asScoped(kibanaRequest),
+          auditLogger: audit.asScoped(request),
           baseClient: client,
           checkSavedObjectsPrivilegesAsCurrentUser: authz.checkSavedObjectsPrivilegesWithRequest(
-            kibanaRequest
+            request
           ),
           errors: SavedObjectsClient.errors,
           getSpacesService,

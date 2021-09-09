@@ -33,6 +33,8 @@ export const WEBHOOK_ACTION_ID: ActionTypeId = '.webhook';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
+export type RuleAction = Omit<AlertAction, 'actionTypeId'>;
+
 const getRecoveryMessage = (selectedMonitor: Ping) => {
   return i18n.translate('xpack.uptime.alerts.monitorStatus.recoveryMessage', {
     defaultMessage: 'Monitor {monitor} with url {url} has recovered with status Up',
@@ -44,18 +46,16 @@ const getRecoveryMessage = (selectedMonitor: Ping) => {
 };
 
 export function populateAlertActions({ defaultActions, selectedMonitor }: NewAlertParams) {
-  const actions: AlertAction[] = [];
+  const actions: RuleAction[] = [];
   defaultActions.forEach((aId) => {
-    const action: AlertAction = {
+    const action: RuleAction = {
       id: aId.id,
-      actionTypeId: aId.actionTypeId,
       group: MONITOR_STATUS.id,
       params: {},
     };
 
-    const recoveredAction: AlertAction = {
+    const recoveredAction: RuleAction = {
       id: aId.id,
-      actionTypeId: aId.actionTypeId,
       group: 'recovered',
       params: {
         message: getRecoveryMessage(selectedMonitor),

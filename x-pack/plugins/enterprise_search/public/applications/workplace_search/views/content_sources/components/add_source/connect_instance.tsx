@@ -55,8 +55,6 @@ interface ConnectInstanceProps {
   objTypes?: string[];
   name: string;
   serviceType: string;
-  sourceDescription: string;
-  connectStepDescription: string;
   needsPermissions: boolean;
   onFormCreated(name: string): void;
 }

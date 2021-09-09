@@ -75,7 +75,7 @@ export interface IndexOptions {
   /**
    * Additional properties for the namespaced index template.
    */
-  indexTemplate: IndexTemplateOptions;
+  indexTemplate?: IndexTemplateOptions;
 
   /**
    * Optional custom ILM policy for the index.
@@ -120,7 +120,6 @@ export type Meta = estypes.Metadata;
  */
 export interface ComponentTemplateOptions {
   name: string;
-  version: Version; // TODO: encapsulate versioning (base on Kibana version)
   mappings?: Mappings;
   settings?: Settings;
   _meta?: Meta;
@@ -140,7 +139,6 @@ export interface ComponentTemplateOptions {
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/index-templates.html
  */
 export interface IndexTemplateOptions {
-  version: Version; // TODO: encapsulate versioning (base on Kibana version)
   _meta?: Meta;
 }
 

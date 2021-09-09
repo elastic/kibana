@@ -8,7 +8,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["management", "data"],
-  "optionalPlugins": ["dashboard", "visualizations", "discover", "home", "savedObjectsTaggingOss", "spacesOss"],
+  "optionalPlugins": ["dashboard", "visualizations", "discover", "home", "savedObjectsTaggingOss", "spaces"],
   "extraPublicDirs": ["public/lib"],
   "requiredBundles": ["kibanaReact", "home"]
 }

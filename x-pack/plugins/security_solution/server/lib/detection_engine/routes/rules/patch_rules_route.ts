@@ -24,7 +24,6 @@ import { buildSiemResponse } from '../utils';
 
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
 
@@ -171,6 +170,7 @@ export const patchRulesRoute = (
           threatQuery,
           threatMapping,
           threatLanguage,
+          throttle,
           concurrentSearches,
           itemsPerSearch,
           timestampOverride,
@@ -183,22 +183,13 @@ export const patchRulesRoute = (
           exceptionsList,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
-          const ruleActions = await updateRulesNotifications({
-            ruleAlertId: rule.id,
-            rulesClient,
-            savedObjectsClient,
-            enabled: rule.enabled,
-            actions,
-            throttle,
-            name: rule.name,
-          });
           const ruleStatuses = await ruleStatusClient.find({
             logsCount: 1,
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
 
-          const [validated, errors] = transformValidate(rule, ruleActions, ruleStatuses[0]);
+          const [validated, errors] = transformValidate(rule, ruleStatuses[0]);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

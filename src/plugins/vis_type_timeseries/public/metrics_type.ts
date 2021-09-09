@@ -13,10 +13,42 @@ import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
 import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
 import { TSVB_DEFAULT_COLOR } from '../common/constants';
 import { toExpressionAst } from './to_ast';
-import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
+import {
+  Vis,
+  VIS_EVENT_TO_TRIGGER,
+  VisGroups,
+  VisParams,
+  VisTypeDefinition,
+} from '../../visualizations/public';
 import { getDataStart } from './services';
+import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 
-export const metricsVisDefinition = {
+export const withReplacedIds = (
+  vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
+): Vis<TimeseriesVisParams> => {
+  const doReplace = (
+    obj: Partial<{
+      id: string | (() => string);
+    }>
+  ) => {
+    if (typeof obj?.id === 'function') {
+      obj.id = obj.id();
+    }
+  };
+
+  doReplace(vis.params);
+
+  vis.params.series?.forEach((series) => {
+    doReplace(series);
+    series.metrics?.forEach((metric) => doReplace(metric));
+  });
+
+  return vis;
+};
+
+export const metricsVisDefinition: VisTypeDefinition<
+  TimeseriesVisParams | TimeseriesVisDefaultParams
+> = {
   name: 'metrics',
   title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
   description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
@@ -26,11 +58,11 @@ export const metricsVisDefinition = {
   group: VisGroups.PROMOTED,
   visConfig: {
     defaults: {
-      id: uuid(),
+      id: () => uuid(),
       type: PANEL_TYPES.TIMESERIES,
       series: [
         {
-          id: uuid(),
+          id: () => uuid(),
           color: TSVB_DEFAULT_COLOR,
           split_mode: 'everything',
           palette: {
@@ -39,7 +71,7 @@ export const metricsVisDefinition = {
           },
           metrics: [
             {
-              id: uuid(),
+              id: () => uuid(),
               type: 'count',
             },
           ],
@@ -61,17 +93,20 @@ export const metricsVisDefinition = {
       axis_formatter: 'number',
       axis_scale: 'normal',
       show_legend: 1,
+      truncate_legend: 1,
+      max_lines_legend: 1,
       show_grid: 1,
       tooltip_mode: TOOLTIP_MODES.SHOW_ALL,
       drop_last_bucket: 0,
     },
   },
+  setup: (vis) => Promise.resolve(withReplacedIds(vis)),
   editorConfig: {
     editor: TSVB_EDITOR_NAME,
   },
   options: {
-    showQueryBar: false,
-    showFilterBar: false,
+    showQueryBar: true,
+    showFilterBar: true,
     showIndexSelection: false,
   },
   toExpressionAst,
@@ -82,6 +117,7 @@ export const metricsVisDefinition = {
     return [];
   },
   inspectorAdapters: {},
+  requiresSearch: true,
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();
     const indexPatternValue = params.index_pattern;

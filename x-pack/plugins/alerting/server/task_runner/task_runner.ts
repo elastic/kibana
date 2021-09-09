@@ -262,44 +262,55 @@ export class TaskRunner<
 
     let updatedAlertTypeState: void | Record<string, unknown>;
     try {
-      updatedAlertTypeState = await this.alertType.executor({
-        alertId,
-        services: {
-          ...services,
-          alertInstanceFactory: createAlertInstanceFactory<
-            InstanceState,
-            InstanceContext,
-            WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-          >(alertInstances),
-        },
-        params,
-        state: alertTypeState as State,
-        startedAt: this.taskInstance.startedAt!,
-        previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
-        spaceId,
-        namespace,
-        name,
-        tags,
-        createdBy,
-        updatedBy,
-        rule: {
+      const ctx = {
+        type: 'alert',
+        name: `execute ${alert.alertTypeId}`,
+        id: alertId,
+        description: `execute [${alert.alertTypeId}] with name [${name}] in [${
+          namespace ?? 'default'
+        }] namespace`,
+      };
+
+      updatedAlertTypeState = await this.context.executionContext.withContext(ctx, () =>
+        this.alertType.executor({
+          alertId,
+          services: {
+            ...services,
+            alertInstanceFactory: createAlertInstanceFactory<
+              InstanceState,
+              InstanceContext,
+              WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+            >(alertInstances),
+          },
+          params,
+          state: alertTypeState as State,
+          startedAt: this.taskInstance.startedAt!,
+          previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
+          spaceId,
+          namespace,
           name,
           tags,
-          consumer,
-          producer: alertType.producer,
-          ruleTypeId: alert.alertTypeId,
-          ruleTypeName: alertType.name,
-          enabled,
-          schedule,
-          actions,
           createdBy,
           updatedBy,
-          createdAt,
-          updatedAt,
-          throttle,
-          notifyWhen,
-        },
-      });
+          rule: {
+            name,
+            tags,
+            consumer,
+            producer: alertType.producer,
+            ruleTypeId: alert.alertTypeId,
+            ruleTypeName: alertType.name,
+            enabled,
+            schedule,
+            actions,
+            createdBy,
+            updatedBy,
+            createdAt,
+            updatedAt,
+            throttle,
+            notifyWhen,
+          },
+        })
+      );
     } catch (err) {
       event.message = `alert execution failure: ${alertLabel}`;
       event.error = event.error || {};

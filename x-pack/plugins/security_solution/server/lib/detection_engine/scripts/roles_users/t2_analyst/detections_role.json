@@ -27,7 +27,7 @@
     {
       "feature": {
         "ml": ["read"],
-        "siem": ["read"],
+        "siem": ["read", "read_alerts"],
         "actions": ["read"],
         "builtInAlerts": ["read"]
       },

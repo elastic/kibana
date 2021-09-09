@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldBase, IndexPatternBase, KueryNode } from '../..';
+import { estypes } from '@elastic/elasticsearch';
+import { IndexPatternFieldBase, IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
 import * as literal from '../node_types/literal';
 
 export function buildNodeParams(fieldName: string) {
@@ -18,9 +19,9 @@ export function buildNodeParams(fieldName: string) {
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IndexPatternBase,
-  config: Record<string, any> = {},
+  config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-) {
+): estypes.QueryDslQueryContainer {
   const {
     arguments: [fieldNameArg],
   } = node;
@@ -28,7 +29,7 @@ export function toElasticsearchQuery(
     ...fieldNameArg,
     value: context?.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
   };
-  const fieldName = literal.toElasticsearchQuery(fullFieldNameArg);
+  const fieldName = literal.toElasticsearchQuery(fullFieldNameArg) as string;
   const field = indexPattern?.fields?.find((fld: IndexPatternFieldBase) => fld.name === fieldName);
 
   if (field?.scripted) {

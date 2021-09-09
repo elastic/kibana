@@ -14,7 +14,7 @@ import { DefaultDraggable } from '../../../../../common/components/draggables';
 
 const mapping = {
   open: 'primary',
-  'in-progress': 'warning',
+  acknowledged: 'warning',
   closed: 'default',
 };
 

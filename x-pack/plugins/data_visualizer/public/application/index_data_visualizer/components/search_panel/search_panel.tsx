@@ -8,12 +8,8 @@
 import React, { FC, useEffect, useState } from 'react';
 import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  esKuery,
-  esQuery,
-  Query,
-  QueryStringInput,
-} from '../../../../../../../../src/plugins/data/public';
+import { Query, fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import { QueryStringInput } from '../../../../../../../../src/plugins/data/public';
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DatavisualizerFieldTypeFilter } from './field_type_filter';
@@ -83,12 +79,9 @@ export const SearchPanel: FC<Props> = ({
     let filterQuery;
     try {
       if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
-        filterQuery = esKuery.toElasticsearchQuery(
-          esKuery.fromKueryExpression(query.query),
-          indexPattern
-        );
+        filterQuery = toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);
       } else if (query.language === SEARCH_QUERY_LANGUAGE.LUCENE) {
-        filterQuery = esQuery.luceneStringToDsl(query.query);
+        filterQuery = luceneStringToDsl(query.query);
       } else {
         filterQuery = {};
       }

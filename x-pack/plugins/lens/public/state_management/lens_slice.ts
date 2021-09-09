@@ -6,12 +6,14 @@
  */
 
 import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
+import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getInitialDatasourceId, getResolvedDateRange } from '../utils';
 import { LensAppState, LensStoreDeps } from './types';
 
 export const initialState: LensAppState = {
+  persistedDoc: undefined,
   searchSessionId: '',
   filters: [],
   query: { language: 'kuery', query: '' },
@@ -299,6 +301,8 @@ export const lensSlice = createSlice({
       payload: PayloadAction<{
         initialInput?: LensEmbeddableInput;
         redirectCallback: (savedObjectId?: string) => void;
+        emptyState: LensAppState;
+        history: History<unknown>;
       }>
     ) => state,
   },

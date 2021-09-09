@@ -9,3 +9,5 @@ plugins:
   initialize: false
 migrations:
   skip: true
+elasticsearch:
+  skipStartupConnectionCheck: true

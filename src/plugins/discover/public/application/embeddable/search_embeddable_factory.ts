@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { auto } from 'angular';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { getServices } from '../../kibana_services';
@@ -30,8 +29,6 @@ interface StartServices {
 export class SearchEmbeddableFactory
   implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SavedSearchEmbeddable> {
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
-  private $injector: auto.IInjectorService | null;
-  private getInjector: () => Promise<auto.IInjectorService> | null;
   public readonly savedObjectMetaData = {
     name: i18n.translate('discover.savedSearch.savedObjectName', {
       defaultMessage: 'Saved search',
@@ -40,13 +37,7 @@ export class SearchEmbeddableFactory
     getIconForSavedObject: () => 'discoverApp',
   };
 
-  constructor(
-    private getStartServices: () => Promise<StartServices>,
-    getInjector: () => Promise<auto.IInjectorService>
-  ) {
-    this.$injector = null;
-    this.getInjector = getInjector;
-  }
+  constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public canCreateNew() {
     return false;
@@ -67,10 +58,6 @@ export class SearchEmbeddableFactory
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
   ): Promise<SavedSearchEmbeddable | ErrorEmbeddable> => {
-    if (!this.$injector) {
-      this.$injector = await this.getInjector();
-    }
-
     const filterManager = getServices().filterManager;
 
     const url = await getServices().getSavedSearchUrlById(savedObjectId);

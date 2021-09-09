@@ -24,7 +24,6 @@ import {
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
@@ -39,6 +38,7 @@ type ServiceInstanceDetails = APIReturnType<'GET /api/apm/services/{serviceName}
 interface Props {
   serviceName: string;
   serviceNodeName: string;
+  kuery: string;
 }
 
 function toKeyValuePairs(keys: string[], data: ServiceInstanceDetails) {
@@ -60,12 +60,13 @@ const cloudDetailsKeys = [
   CLOUD_PROVIDER,
 ];
 
-export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
+export function InstanceDetails({
+  serviceName,
+  serviceNodeName,
+  kuery,
+}: Props) {
   const theme = useTheme();
   const history = useHistory();
-  const {
-    urlParams: { kuery },
-  } = useUrlParams();
 
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,

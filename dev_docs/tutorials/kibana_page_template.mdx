@@ -126,7 +126,7 @@ This is a built-in configuration that displays a very specific UI and requires v
 
 The `noDataConfig` is of type [`NoDataPagProps`](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx):
 
-1. `solution: string`: Single name for the current solution, used to auto-generate the title, logo, description, and button label *(required)*
+1. `solution: string`: Single name for the current solution, used to auto-generate the title, logo, and description *(required)*
 2. `docsLink: string`: Required to set the docs link for the whole solution *(required)*
 3. `logo?: string`: Optionally replace the auto-generated logo
 4. `pageTitle?: string`: Optionally replace the auto-generated page title (h1)
@@ -136,7 +136,7 @@ The `noDataConfig` is of type [`NoDataPagProps`](https://github.com/elastic/kiba
 
 There are two main actions for adding data that we promote throughout Kibana, Elastic Agent and Beats. They are added to the cards that are displayed by using the keys `elasticAgent` and `beats` respectively. For consistent messaging, these two cards are pre-configured but require specific `href`s and/or `onClick` handlers for directing the user to the right location for that solution.
 
-It also accepts a `recommended` prop as a boolean to promote one or more of the cards through visuals added to the UI. It will also place the `recommended` ones first in the list. By default, the configuration will recommend `elasticAgent`. Optionally you can also replace the `button` label by passing a string, or the whole component by passing a `ReactNode`.
+It also accepts a `recommended` prop as a boolean to promote one or more of the cards through visuals added to the UI. It will also place the `recommended` ones first in the list. Optionally you can also replace the `button` label by passing a string, or the whole component by passing a `ReactNode`.
 
 
 ```tsx
@@ -145,18 +145,20 @@ const hasData = checkForData();
 
 // No data configuration
 const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
-  solution: 'Observability',
+  solution: 'Analytics',
+  logo: 'logoKibana',
   docsLink: '#',
   actions: {
-    elasticAgent: {
+    beats: {
       href: '#',
     },
-    beats: {
+    elasticAgent: {
       href: '#',
     },
   },
 };
 
+// Conditionally apply the configuration if there is no data
 <KibanaPageTemplate
   solutionNav={/* Solution navigation still show if it exists and use the right template type */}
   pageHeader={/* Page header will be ignored */}

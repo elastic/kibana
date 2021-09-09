@@ -87,6 +87,7 @@ describe('config schema', () => {
             ],
             "requestTimeout": "PT30S",
             "shardTimeout": "PT30S",
+            "skipStartupConnectionCheck": false,
             "sniffInterval": false,
             "sniffOnConnectionFault": false,
             "sniffOnStart": false,
@@ -106,6 +107,7 @@ describe('config schema', () => {
             "index": "metricbeat-*",
           },
           "min_interval_seconds": 10,
+          "render_react_app": false,
           "show_license_expiration": true,
         },
       }

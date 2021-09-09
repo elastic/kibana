@@ -160,20 +160,24 @@ export const setInitializeTgridSettings = ({
 }: InitializeTgridParams): TimelineById => {
   const timeline = timelineById[id];
 
-  return {
-    ...timelineById,
-    [id]: {
-      ...tGridDefaults,
-      ...timeline,
-      ...getTGridManageDefaults(id),
-      ...tGridSettingsProps,
-      ...(!timeline || (isEmpty(timeline.columns) && !isEmpty(tGridSettingsProps.defaultColumns))
-        ? { columns: tGridSettingsProps.defaultColumns }
-        : {}),
-      sort: tGridSettingsProps.sort ?? tGridDefaults.sort,
-      loadingEventIds: tGridDefaults.loadingEventIds,
-    },
-  };
+  return !timeline?.initialized
+    ? {
+        ...timelineById,
+        [id]: {
+          ...tGridDefaults,
+          ...getTGridManageDefaults(id),
+          ...timeline,
+          ...tGridSettingsProps,
+          ...(!timeline ||
+          (isEmpty(timeline.columns) && !isEmpty(tGridSettingsProps.defaultColumns))
+            ? { columns: tGridSettingsProps.defaultColumns }
+            : {}),
+          sort: tGridSettingsProps.sort ?? tGridDefaults.sort,
+          loadingEventIds: tGridDefaults.loadingEventIds,
+          initialized: true,
+        },
+      }
+    : timelineById;
 };
 
 interface ApplyDeltaToTimelineColumnWidth {

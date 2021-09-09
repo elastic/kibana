@@ -27,7 +27,6 @@ export interface UsageStats {
   'autocomplete:useTimeRange': boolean;
   'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
-  'visualization:visualize:legacyChartsLibrary': boolean;
   'visualization:visualize:legacyPieChartsLibrary': boolean;
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
@@ -60,7 +59,6 @@ export interface UsageStats {
   'securitySolution:enableNewsFeed': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
-  'courier:batchSearches': boolean;
   'courier:setRequestPreference': string;
   'courier:customRequestPreference': string;
   'courier:ignoreFilterIfFieldNotInIndex': boolean;

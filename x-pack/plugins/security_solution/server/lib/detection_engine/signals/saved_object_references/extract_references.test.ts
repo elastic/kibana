@@ -8,8 +8,11 @@
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { extractReferences } from './extract_references';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
-import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils';
+import {
+  EXCEPTION_LIST_NAMESPACE,
+  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+} from '@kbn/securitysolution-list-constants';
+import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils/constants';
 
 describe('extract_references', () => {
   type FuncReturn = ReturnType<typeof extractReferences>;
@@ -43,6 +46,36 @@ describe('extract_references', () => {
         {
           id: '123',
           name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
+          type: EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+        },
+      ],
+    });
+  });
+
+  test('It returns params untouched and the references extracted as 2 exception list saved object references', () => {
+    const params: Partial<RuleParams> = {
+      note: 'some note',
+      exceptionsList: [
+        mockExceptionsList()[0],
+        { ...mockExceptionsList()[0], id: '456', namespace_type: 'single' },
+      ],
+    };
+    expect(
+      extractReferences({
+        logger,
+        params: params as RuleParams,
+      })
+    ).toEqual<FuncReturn>({
+      params: params as RuleParams,
+      references: [
+        {
+          id: '123',
+          name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
+          type: EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+        },
+        {
+          id: '456',
+          name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_1`,
           type: EXCEPTION_LIST_NAMESPACE,
         },
       ],

@@ -32,12 +32,13 @@ import {
 } from '../../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
 import { ChartContainer } from '../../charts/chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../../charts/helper/helper';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 interface Props {
   fetchStatus: FETCH_STATUS;
@@ -63,9 +64,14 @@ export function BreakdownChart({
   const chartTheme = useChartTheme();
 
   const { chartRef, setPointerEvent } = useChartPointerEventContext();
-  const { urlParams } = useUrlParams();
+
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/:serviceName');
+
   const theme = useTheme();
-  const { start, end } = urlParams;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const min = moment.utc(start).valueOf();
   const max = moment.utc(end).valueOf();

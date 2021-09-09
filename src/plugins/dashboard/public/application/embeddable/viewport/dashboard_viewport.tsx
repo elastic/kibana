@@ -117,7 +117,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
             <div className="dshDashboardEmptyScreen">
               <DashboardEmptyScreen
                 isReadonlyMode={
-                  this.props.container.getInput().dashboardCapabilities?.hideWriteControls
+                  !this.props.container.getInput().dashboardCapabilities?.showWriteControls
                 }
                 isEditMode={isEditMode}
                 uiSettings={this.context.services.uiSettings}

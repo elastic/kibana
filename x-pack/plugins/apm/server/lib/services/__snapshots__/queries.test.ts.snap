@@ -63,14 +63,10 @@ Object {
     ],
   },
   "body": Object {
-    "aggs": Object {
-      "agents": Object {
-        "terms": Object {
-          "field": "agent.name",
-          "size": 1,
-        },
-      },
-    },
+    "_source": Array [
+      "agent.name",
+      "service.runtime.name",
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -88,10 +84,20 @@ Object {
               },
             },
           },
+          Object {
+            "exists": Object {
+              "field": "agent.name",
+            },
+          },
         ],
+        "should": Object {
+          "exists": Object {
+            "field": "service.runtime.name",
+          },
+        },
       },
     },
-    "size": 0,
+    "size": 1,
   },
   "terminateAfter": 1,
 }

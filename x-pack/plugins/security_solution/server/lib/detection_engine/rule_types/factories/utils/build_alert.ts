@@ -10,6 +10,7 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
@@ -109,7 +110,7 @@ export const buildAlert = (
     [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
     [SPACE_IDS]: spaceId != null ? [spaceId] : [],
     [ALERT_ANCESTORS]: ancestors,
-    [ALERT_STATUS]: 'open',
+    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
     [ALERT_WORKFLOW_STATUS]: 'open',
     [ALERT_DEPTH]: depth,
     [ALERT_REASON]: reason,

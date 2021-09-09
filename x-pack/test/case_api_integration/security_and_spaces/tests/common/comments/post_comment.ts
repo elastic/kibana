@@ -394,7 +394,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(getQuerySignalIds([alert._id]))
           .expect(200);
 
-        expect(updatedAlert.hits.hits[0]._source.signal.status).eql('in-progress');
+        expect(updatedAlert.hits.hits[0]._source.signal.status).eql('acknowledged');
       });
 
       it('should NOT change the status of the alert if sync alert is off', async () => {

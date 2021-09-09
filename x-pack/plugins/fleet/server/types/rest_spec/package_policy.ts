@@ -41,5 +41,6 @@ export const UpgradePackagePoliciesRequestSchema = {
   body: schema.object({
     packagePolicyIds: schema.arrayOf(schema.string()),
     dryRun: schema.maybe(schema.boolean()),
+    packageVersion: schema.maybe(schema.string()),
   }),
 };

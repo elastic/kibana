@@ -72,13 +72,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>, ",
               {
                 "pluginId": "expressions",
@@ -112,13 +106,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>, {}>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -157,7 +145,7 @@
                 "text": "ExecutionContext"
               },
               "<InspectorAdapters, ",
-              "Serializable",
+              "SerializableRecord",
               ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -199,13 +187,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -346,13 +328,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -836,13 +812,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution_contract.ts",
@@ -1465,13 +1435,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/executor/executor.ts",
@@ -1847,13 +1811,7 @@
                 "text": "VersionedState"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -1882,13 +1840,7 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/executor/executor.ts",
@@ -2017,7 +1969,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.input",
+                "id": "def-public.ExpressionFunction.fn.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "input",
@@ -2030,7 +1982,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.params",
+                "id": "def-public.ExpressionFunction.fn.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -2043,7 +1995,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.handlers",
+                "id": "def-public.ExpressionFunction.fn.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "handlers",
@@ -2130,7 +2082,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.state",
+                "id": "def-public.ExpressionFunction.telemetry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -2151,7 +2103,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.telemetryData",
+                "id": "def-public.ExpressionFunction.telemetry.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "telemetryData",
@@ -2198,7 +2150,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.state",
+                "id": "def-public.ExpressionFunction.extract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -2253,7 +2205,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.state",
+                "id": "def-public.ExpressionFunction.inject.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -2274,7 +2226,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.references",
+                "id": "def-public.ExpressionFunction.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
@@ -2297,21 +2249,9 @@
             "description": [],
             "signature": [
               "{ [key: string]: (state: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ") => ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               "; }"
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
@@ -2681,7 +2621,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.domNode",
+                "id": "def-public.ExpressionRenderer.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "domNode",
@@ -2694,7 +2634,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.config",
+                "id": "def-public.ExpressionRenderer.render.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -2707,7 +2647,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.handlers",
+                "id": "def-public.ExpressionRenderer.render.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "handlers",
@@ -3042,7 +2982,7 @@
                 "id": "def-public.ExpressionRenderHandler.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      hasCompatibleActions = async () => false,\n    }",
+                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      interactive,\n      hasCompatibleActions = async () => false,\n    }",
                 "description": [],
                 "signature": [
                   "ExpressionRenderHandlerParams"
@@ -3272,7 +3212,7 @@
             "section": "def-common.ExpressionsService",
             "text": "ExpressionsService"
           },
-          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
+          ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -3346,7 +3286,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+              ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "path": "src/plugins/expressions/public/plugin.ts",
             "deprecated": false,
@@ -3475,7 +3415,7 @@
             "section": "def-common.ExpressionsService",
             "text": "ExpressionsService"
           },
-          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
+          ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -3549,7 +3489,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+              ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "path": "src/plugins/expressions/public/plugin.ts",
             "deprecated": false,
@@ -3996,13 +3936,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -4296,7 +4230,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.ast",
+                "id": "def-public.ExpressionsService.execute.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "ast",
@@ -4316,7 +4250,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.input",
+                "id": "def-public.ExpressionsService.execute.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "input",
@@ -4329,7 +4263,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.params",
+                "id": "def-public.ExpressionsService.execute.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -4612,13 +4546,7 @@
                 "text": "VersionedState"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -4647,13 +4575,7 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -4681,7 +4603,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+              ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -4810,7 +4732,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.type",
+                "id": "def-public.ExpressionType.validate.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "type",
@@ -5957,6 +5879,29 @@
       },
       {
         "parentPluginId": "expressions",
+        "id": "def-public.createDefaultInspectorAdapters",
+        "type": "Function",
+        "tags": [],
+        "label": "createDefaultInspectorAdapters",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DefaultInspectorAdapters",
+            "text": "DefaultInspectorAdapters"
+          }
+        ],
+        "path": "src/plugins/expressions/common/util/create_default_inspector_adapters.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
         "id": "def-public.format",
         "type": "Function",
         "tags": [],
@@ -6545,13 +6490,7 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
@@ -7659,6 +7598,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+              },
+              {
+                "plugin": "visTypeXy",
+                "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
               }
             ]
           }
@@ -7709,7 +7652,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7755,7 +7698,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7793,7 +7736,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7831,7 +7774,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7869,7 +7812,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7931,7 +7874,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -7993,7 +7936,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8055,7 +7998,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8117,7 +8060,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -8610,13 +8553,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -9066,7 +9003,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -9079,7 +9016,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -9105,7 +9042,7 @@
             "label": "searchContext",
             "description": [],
             "signature": [
-              "Serializable",
+              "SerializableRecord",
               " | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
@@ -9224,6 +9161,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.interactive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "interactive",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.IExpressionLoaderParams.onRenderError",
             "type": "Function",
             "tags": [],
@@ -9257,7 +9207,7 @@
             "label": "renderMode",
             "description": [],
             "signature": [
-              "\"display\" | \"noInteractivity\" | \"edit\" | \"preview\" | undefined"
+              "\"edit\" | \"preview\" | \"view\" | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
             "deprecated": false
@@ -9304,13 +9254,7 @@
             "label": "executionContext",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
@@ -9527,6 +9471,23 @@
                 "section": "def-common.RenderMode",
                 "text": "RenderMode"
               }
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IInterpreterRenderHandlers.isInteractive",
+            "type": "Function",
+            "tags": [],
+            "label": "isInteractive",
+            "description": [
+              "\nThe chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing."
+            ],
+            "signature": [
+              "() => boolean"
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
@@ -10235,7 +10196,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -10289,7 +10250,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"ip\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -10519,7 +10480,7 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-public.props",
+            "id": "def-public.ExpressionRendererComponent.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -10532,7 +10493,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-public.context",
+            "id": "def-public.ExpressionRendererComponent.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -10590,7 +10551,7 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-public.input",
+            "id": "def-public.ExpressionValueConverter.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "input",
@@ -10603,7 +10564,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-public.availableTypes",
+            "id": "def-public.ExpressionValueConverter.$2",
             "type": "Object",
             "tags": [],
             "label": "availableTypes",
@@ -10634,13 +10595,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -10741,7 +10696,7 @@
           "\nThis type contains a unions of all supported font labels, or the the name of\nthe font the user would see in a UI."
         ],
         "signature": [
-          "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
+          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -10757,7 +10712,7 @@
           "\nThis type contains a union of all supported font values, equivalent to the CSS\n`font-value` property."
         ],
         "signature": [
-          "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -10782,13 +10737,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -11052,7 +11001,43 @@
         "\nExpressions public setup contract, extends {@link ExpressionsServiceSetup}"
       ],
       "signature": [
-        "{ readonly getType: (name: string) => ",
+        "{ readonly inject: (state: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        ", references: ",
+        "SavedObjectReference",
+        "[]) => ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        "; readonly extract: (state: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        ") => { state: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        "; references: ",
+        "SavedObjectReference",
+        "[]; }; readonly getType: (name: string) => ",
         {
           "pluginId": "expressions",
           "scope": "common",
@@ -11191,13 +11176,7 @@
           "text": "ErrorLike"
         },
         "; info?: ",
-        {
-          "pluginId": "kibanaUtils",
-          "scope": "common",
-          "docId": "kibKibanaUtilsPluginApi",
-          "section": "def-common.Serializable",
-          "text": "Serializable"
-        },
+        "SerializableRecord",
         " | undefined; }> | Output>>; readonly fork: () => ",
         {
           "pluginId": "expressions",
@@ -11309,7 +11288,7 @@
           "children": [
             {
               "parentPluginId": "expressions",
-              "id": "def-public.element",
+              "id": "def-public.ExpressionsStart.loader.$1",
               "type": "Object",
               "tags": [],
               "label": "element",
@@ -11322,7 +11301,7 @@
             },
             {
               "parentPluginId": "expressions",
-              "id": "def-public.expression",
+              "id": "def-public.ExpressionsStart.loader.$2",
               "type": "CompoundType",
               "tags": [],
               "label": "expression",
@@ -11342,7 +11321,7 @@
             },
             {
               "parentPluginId": "expressions",
-              "id": "def-public.params",
+              "id": "def-public.ExpressionsStart.loader.$3",
               "type": "Object",
               "tags": [],
               "label": "params",
@@ -11385,7 +11364,7 @@
           "children": [
             {
               "parentPluginId": "expressions",
-              "id": "def-public.__0",
+              "id": "def-public.ExpressionsStart.ReactExpressionRenderer.$1",
               "type": "Object",
               "tags": [],
               "label": "__0",
@@ -11429,7 +11408,7 @@
           "children": [
             {
               "parentPluginId": "expressions",
-              "id": "def-public.element",
+              "id": "def-public.ExpressionsStart.render.$1",
               "type": "Object",
               "tags": [],
               "label": "element",
@@ -11442,7 +11421,7 @@
             },
             {
               "parentPluginId": "expressions",
-              "id": "def-public.data",
+              "id": "def-public.ExpressionsStart.render.$2",
               "type": "Any",
               "tags": [],
               "label": "data",
@@ -11455,7 +11434,7 @@
             },
             {
               "parentPluginId": "expressions",
-              "id": "def-public.options",
+              "id": "def-public.ExpressionsStart.render.$3",
               "type": "Object",
               "tags": [],
               "label": "options",
@@ -11546,13 +11525,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>, ",
               {
                 "pluginId": "expressions",
@@ -11586,13 +11559,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>, {}>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -11631,7 +11598,7 @@
                 "text": "ExecutionContext"
               },
               "<InspectorAdapters, ",
-              "Serializable",
+              "SerializableRecord",
               ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -11673,13 +11640,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -11820,13 +11781,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -12741,13 +12696,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/executor/executor.ts",
@@ -13123,13 +13072,7 @@
                 "text": "VersionedState"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -13158,13 +13101,7 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/executor/executor.ts",
@@ -13293,7 +13230,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.input",
+                "id": "def-server.ExpressionFunction.fn.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "input",
@@ -13306,7 +13243,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.params",
+                "id": "def-server.ExpressionFunction.fn.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -13319,7 +13256,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.handlers",
+                "id": "def-server.ExpressionFunction.fn.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "handlers",
@@ -13406,7 +13343,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.state",
+                "id": "def-server.ExpressionFunction.telemetry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -13427,7 +13364,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.telemetryData",
+                "id": "def-server.ExpressionFunction.telemetry.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "telemetryData",
@@ -13474,7 +13411,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.state",
+                "id": "def-server.ExpressionFunction.extract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -13529,7 +13466,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.state",
+                "id": "def-server.ExpressionFunction.inject.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -13550,7 +13487,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.references",
+                "id": "def-server.ExpressionFunction.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
@@ -13573,21 +13510,9 @@
             "description": [],
             "signature": [
               "{ [key: string]: (state: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ") => ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               "; }"
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
@@ -13957,7 +13882,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.domNode",
+                "id": "def-server.ExpressionRenderer.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "domNode",
@@ -13970,7 +13895,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.config",
+                "id": "def-server.ExpressionRenderer.render.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -13983,7 +13908,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.handlers",
+                "id": "def-server.ExpressionRenderer.render.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "handlers",
@@ -14257,7 +14182,7 @@
             "section": "def-common.ExpressionsService",
             "text": "ExpressionsService"
           },
-          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
+          ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -14350,7 +14275,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+              ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "path": "src/plugins/expressions/server/plugin.ts",
             "deprecated": false,
@@ -14479,7 +14404,7 @@
             "section": "def-common.ExpressionsService",
             "text": "ExpressionsService"
           },
-          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
+          ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -14572,7 +14497,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+              ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "path": "src/plugins/expressions/server/plugin.ts",
             "deprecated": false,
@@ -14720,7 +14645,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.type",
+                "id": "def-server.ExpressionType.validate.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "type",
@@ -16308,13 +16233,7 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
@@ -17393,6 +17312,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+              },
+              {
+                "plugin": "visTypeXy",
+                "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
               }
             ]
           }
@@ -17443,7 +17366,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17489,7 +17412,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17527,7 +17450,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17565,7 +17488,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17603,7 +17526,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17665,7 +17588,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17727,7 +17650,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17789,7 +17712,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -17851,7 +17774,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -18334,7 +18257,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -18347,7 +18270,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -18533,6 +18456,23 @@
                 "section": "def-common.RenderMode",
                 "text": "RenderMode"
               }
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.IInterpreterRenderHandlers.isInteractive",
+            "type": "Function",
+            "tags": [],
+            "label": "isInteractive",
+            "description": [
+              "\nThe chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing."
+            ],
+            "signature": [
+              "() => boolean"
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
@@ -18962,7 +18902,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -19016,7 +18956,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"ip\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -19266,7 +19206,7 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-server.input",
+            "id": "def-server.ExpressionValueConverter.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "input",
@@ -19279,7 +19219,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-server.availableTypes",
+            "id": "def-server.ExpressionValueConverter.$2",
             "type": "Object",
             "tags": [],
             "label": "availableTypes",
@@ -19310,13 +19250,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -19417,7 +19351,7 @@
           "\nThis type contains a unions of all supported font labels, or the the name of\nthe font the user would see in a UI."
         ],
         "signature": [
-          "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
+          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -19433,7 +19367,7 @@
           "\nThis type contains a union of all supported font values, equivalent to the CSS\n`font-value` property."
         ],
         "signature": [
-          "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -19458,13 +19392,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -19696,7 +19624,43 @@
       "label": "ExpressionsServerSetup",
       "description": [],
       "signature": [
-        "{ readonly getType: (name: string) => ",
+        "{ readonly inject: (state: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        ", references: ",
+        "SavedObjectReference",
+        "[]) => ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        "; readonly extract: (state: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        ") => { state: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        "; references: ",
+        "SavedObjectReference",
+        "[]; }; readonly getType: (name: string) => ",
         {
           "pluginId": "expressions",
           "scope": "common",
@@ -19835,13 +19799,7 @@
           "text": "ErrorLike"
         },
         "; info?: ",
-        {
-          "pluginId": "kibanaUtils",
-          "scope": "common",
-          "docId": "kibKibanaUtilsPluginApi",
-          "section": "def-common.Serializable",
-          "text": "Serializable"
-        },
+        "SerializableRecord",
         " | undefined; }> | Output>>; readonly fork: () => ",
         {
           "pluginId": "expressions",
@@ -19951,13 +19909,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>, ",
               {
                 "pluginId": "expressions",
@@ -19991,13 +19943,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>, {}>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -20036,7 +19982,7 @@
                 "text": "ExecutionContext"
               },
               "<InspectorAdapters, ",
-              "Serializable",
+              "SerializableRecord",
               ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -20078,13 +20024,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -20225,13 +20165,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
@@ -20715,13 +20649,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution_contract.ts",
@@ -21344,13 +21272,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/executor/executor.ts",
@@ -21726,13 +21648,7 @@
                 "text": "VersionedState"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -21761,13 +21677,7 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/executor/executor.ts",
@@ -21896,7 +21806,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.input",
+                "id": "def-common.ExpressionFunction.fn.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "input",
@@ -21909,7 +21819,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.params",
+                "id": "def-common.ExpressionFunction.fn.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -21922,7 +21832,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.handlers",
+                "id": "def-common.ExpressionFunction.fn.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "handlers",
@@ -22009,7 +21919,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExpressionFunction.telemetry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -22030,7 +21940,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.telemetryData",
+                "id": "def-common.ExpressionFunction.telemetry.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "telemetryData",
@@ -22077,7 +21987,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExpressionFunction.extract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -22132,7 +22042,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExpressionFunction.inject.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -22153,7 +22063,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.references",
+                "id": "def-common.ExpressionFunction.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
@@ -22176,21 +22086,9 @@
             "description": [],
             "signature": [
               "{ [key: string]: (state: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ") => ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               "; }"
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
@@ -22560,7 +22458,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.domNode",
+                "id": "def-common.ExpressionRenderer.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "domNode",
@@ -22573,7 +22471,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.config",
+                "id": "def-common.ExpressionRenderer.render.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -22586,7 +22484,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.handlers",
+                "id": "def-common.ExpressionRenderer.render.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "handlers",
@@ -23244,13 +23142,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -23544,7 +23436,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.ast",
+                "id": "def-common.ExpressionsService.execute.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "ast",
@@ -23564,7 +23456,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.input",
+                "id": "def-common.ExpressionsService.execute.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "input",
@@ -23577,7 +23469,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.params",
+                "id": "def-common.ExpressionsService.execute.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -23860,13 +23752,7 @@
                 "text": "VersionedState"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -23895,13 +23781,7 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -23929,7 +23809,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+              ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -24058,7 +23938,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.type",
+                "id": "def-common.ExpressionType.validate.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "type",
@@ -25306,7 +25186,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-common.buildResultColumns.$5.options",
+            "id": "def-common.buildResultColumns.$5",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -25316,7 +25196,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.buildResultColumns.$5.options.allowColumnOverwrite",
+                "id": "def-common.buildResultColumns.$5.allowColumnOverwrite",
                 "type": "boolean",
                 "tags": [],
                 "label": "allowColumnOverwrite",
@@ -25327,6 +25207,29 @@
             ]
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.createDefaultInspectorAdapters",
+        "type": "Function",
+        "tags": [],
+        "label": "createDefaultInspectorAdapters",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DefaultInspectorAdapters",
+            "text": "DefaultInspectorAdapters"
+          }
+        ],
+        "path": "src/plugins/expressions/common/util/create_default_inspector_adapters.ts",
+        "deprecated": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -25363,13 +25266,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }>"
         ],
         "path": "src/plugins/expressions/common/util/create_error.ts",
@@ -25533,7 +25430,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">"
         ],
         "path": "src/plugins/expressions/common/util/test_utils.ts",
@@ -25919,13 +25816,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }>"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -26391,7 +26282,7 @@
             "label": "fontFamily",
             "description": [],
             "signature": [
-              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\" | undefined"
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\" | undefined"
             ],
             "path": "src/plugins/expressions/common/types/style.ts",
             "deprecated": false
@@ -26699,7 +26590,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"ip\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false
@@ -26796,7 +26687,7 @@
               "\nany extra parameters for the source that produced this column"
             ],
             "signature": [
-              "Serializable",
+              "SerializableRecord",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
@@ -27111,13 +27002,7 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
@@ -28551,13 +28436,7 @@
             "label": "searchContext",
             "description": [],
             "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -28667,13 +28546,7 @@
             "label": "executionContext",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -28959,6 +28832,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+              },
+              {
+                "plugin": "visTypeXy",
+                "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
               }
             ]
           }
@@ -29009,7 +28886,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29055,7 +28932,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29093,7 +28970,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29131,7 +29008,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29169,7 +29046,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29231,7 +29108,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29293,7 +29170,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29355,7 +29232,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29417,7 +29294,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -29878,13 +29755,7 @@
                 "text": "ErrorLike"
               },
               "; info?: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
@@ -30334,7 +30205,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
+              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -30347,7 +30218,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
             ],
             "path": "src/plugins/expressions/common/fonts.ts",
             "deprecated": false
@@ -30533,6 +30404,23 @@
                 "section": "def-common.RenderMode",
                 "text": "RenderMode"
               }
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.IInterpreterRenderHandlers.isInteractive",
+            "type": "Function",
+            "tags": [],
+            "label": "isInteractive",
+            "description": [
+              "\nThe chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing."
+            ],
+            "signature": [
+              "() => boolean"
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
@@ -31260,7 +31148,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/types.ts",
@@ -31335,7 +31223,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"ip\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -31566,13 +31454,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }> | undefined; rawError?: any; duration: number | undefined; }"
         ],
         "path": "src/plugins/expressions/common/ast/types.ts",
@@ -31640,7 +31522,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/clog.ts",
@@ -31703,7 +31585,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/cumulative_sum.ts",
@@ -31766,7 +31648,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/derivative.ts",
@@ -31813,7 +31695,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/font.ts",
@@ -31876,7 +31758,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/moving_average.ts",
@@ -31939,7 +31821,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
@@ -31978,7 +31860,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
@@ -32033,7 +31915,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
@@ -32072,7 +31954,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
@@ -32111,7 +31993,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
@@ -32128,7 +32010,43 @@
           "\nThe public contract that `ExpressionsService` provides to other plugins\nin Kibana Platform in *setup* life-cycle."
         ],
         "signature": [
-          "{ readonly getType: (name: string) => ",
+          "{ readonly inject: (state: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          ", references: ",
+          "SavedObjectReference",
+          "[]) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          "; readonly extract: (state: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          ") => { state: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          "; references: ",
+          "SavedObjectReference",
+          "[]; }; readonly getType: (name: string) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -32267,13 +32185,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }> | Output>>; readonly fork: () => ",
           {
             "pluginId": "expressions",
@@ -32332,7 +32244,7 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-common.input",
+            "id": "def-common.ExpressionValueConverter.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "input",
@@ -32345,7 +32257,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-common.availableTypes",
+            "id": "def-common.ExpressionValueConverter.$2",
             "type": "Object",
             "tags": [],
             "label": "availableTypes",
@@ -32376,13 +32288,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -32467,7 +32373,7 @@
           "\nThis type contains a unions of all supported font labels, or the the name of\nthe font the user would see in a UI."
         ],
         "signature": [
-          "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
+          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -32483,7 +32389,7 @@
           "\nA collection of supported fonts."
         ],
         "signature": [
-          "({ label: \"American Typewriter\"; value: \"'American Typewriter', 'Courier New', Courier, Monaco, mono\"; } | { label: \"Arial\"; value: \"Arial, sans-serif\"; } | { label: \"Baskerville\"; value: \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Book Antiqua\"; value: \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Brush Script\"; value: \"'Brush Script MT', 'Comic Sans', sans-serif\"; } | { label: \"Chalkboard\"; value: \"Chalkboard, 'Comic Sans', sans-serif\"; } | { label: \"Didot\"; value: \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Futura\"; value: \"Futura, Impact, Helvetica, Arial, sans-serif\"; } | { label: \"Gill Sans\"; value: \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Helvetica Neue\"; value: \"'Helvetica Neue', Helvetica, Arial, sans-serif\"; } | { label: \"Hoefler Text\"; value: \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\"; } | { label: \"Lucida Grande\"; value: \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Myriad\"; value: \"Myriad, Helvetica, Arial, sans-serif\"; } | { label: \"Open Sans\"; value: \"'Open Sans', Helvetica, Arial, sans-serif\"; } | { label: \"Optima\"; value: \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Palatino\"; value: \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; })[]"
+          "({ label: \"Open Sans\"; value: \"'Open Sans', Helvetica, Arial, sans-serif\"; } | { label: \"American Typewriter\"; value: \"'American Typewriter', 'Courier New', Courier, Monaco, mono\"; } | { label: \"Arial\"; value: \"Arial, sans-serif\"; } | { label: \"Baskerville\"; value: \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Book Antiqua\"; value: \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Brush Script\"; value: \"'Brush Script MT', 'Comic Sans', sans-serif\"; } | { label: \"Chalkboard\"; value: \"Chalkboard, 'Comic Sans', sans-serif\"; } | { label: \"Didot\"; value: \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Futura\"; value: \"Futura, Impact, Helvetica, Arial, sans-serif\"; } | { label: \"Gill Sans\"; value: \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Helvetica Neue\"; value: \"'Helvetica Neue', Helvetica, Arial, sans-serif\"; } | { label: \"Hoefler Text\"; value: \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\"; } | { label: \"Lucida Grande\"; value: \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Myriad\"; value: \"Myriad, Helvetica, Arial, sans-serif\"; } | { label: \"Optima\"; value: \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Palatino\"; value: \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; })[]"
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -32499,7 +32405,7 @@
           "\nThis type contains a union of all supported font values, equivalent to the CSS\n`font-value` property."
         ],
         "signature": [
-          "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
         ],
         "path": "src/plugins/expressions/common/fonts.ts",
         "deprecated": false,
@@ -32546,13 +32452,7 @@
             "text": "ErrorLike"
           },
           "; info?: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -32775,31 +32675,11 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/progress.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/progress.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/render.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/render.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/render.ts"
           },
           {
             "plugin": "canvas",
@@ -32816,6 +32696,22 @@
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/target/types/canvas_plugin_src/functions/browser/markdown.d.ts"
+          },
+          {
+            "plugin": "visTypePie",
+            "path": "src/plugins/vis_types/pie/public/pie_fn.ts"
+          },
+          {
+            "plugin": "visTypePie",
+            "path": "src/plugins/vis_types/pie/public/pie_fn.ts"
+          },
+          {
+            "plugin": "visTypeXy",
+            "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
+          },
+          {
+            "plugin": "visTypeXy",
+            "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
           }
         ],
         "initialIsOpen": false
@@ -32827,10 +32723,10 @@
         "tags": [],
         "label": "RenderMode",
         "description": [
-          "\nMode of the expression render environment.\nThis value can be set from a consumer embedding an expression renderer and is accessible\nfrom within the active render function as part of the handlers.\nThe following modes are supported:\n* display (default): The chart is rendered in a container with the main purpose of viewing the chart (e.g. in a container like dashboard or canvas)\n* preview: The chart is rendered in very restricted space (below 100px width and height) and should only show a rough outline\n* edit: The chart is rendered within an editor and configuration elements within the chart should be displayed\n* noInteractivity: The chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing"
+          "\nMode of the expression render environment.\nThis value can be set from a consumer embedding an expression renderer and is accessible\nfrom within the active render function as part of the handlers.\nThe following modes are supported:\n* view (default): The chart is rendered in a container with the main purpose of viewing the chart (e.g. in a container like dashboard or canvas)\n* preview: The chart is rendered in very restricted space (below 100px width and height) and should only show a rough outline\n* edit: The chart is rendered within an editor and configuration elements within the chart should be displayed"
         ],
         "signature": [
-          "\"display\" | \"noInteractivity\" | \"edit\" | \"preview\""
+          "\"edit\" | \"preview\" | \"view\""
         ],
         "path": "src/plugins/expressions/common/expression_renderers/types.ts",
         "deprecated": false,
@@ -34890,13 +34786,7 @@
                     "text": "ErrorLike"
                   },
                   "; info?: ",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   " | undefined; }>) => ",
                   {
                     "pluginId": "expressions",
@@ -34922,13 +34812,7 @@
                     "text": "ErrorLike"
                   },
                   "; info?: ",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   " | undefined; }>, \"error\" | \"info\">; }>"
                 ],
                 "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -34958,13 +34842,7 @@
                         "text": "ErrorLike"
                       },
                       "; info?: ",
-                      {
-                        "pluginId": "kibanaUtils",
-                        "scope": "common",
-                        "docId": "kibKibanaUtilsPluginApi",
-                        "section": "def-common.Serializable",
-                        "text": "Serializable"
-                      },
+                      "SerializableRecord",
                       " | undefined; }>"
                     ],
                     "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
@@ -36220,7 +36098,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"boolean\" | \"string\" | \"null\")[]"
+                      "(\"number\" | \"string\" | \"boolean\" | \"null\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
                     "deprecated": false
@@ -36961,7 +36839,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">) => ",
               {
                 "pluginId": "expressions",
@@ -37038,7 +36916,7 @@
                     "text": "Adapters"
                   },
                   ", ",
-                  "Serializable",
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
@@ -39686,7 +39564,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">) => any"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
@@ -39744,7 +39622,7 @@
                     "text": "Adapters"
                   },
                   ", ",
-                  "Serializable",
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
@@ -40166,7 +40044,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">) => any"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
@@ -40224,7 +40102,7 @@
                     "text": "Adapters"
                   },
                   ", ",
-                  "Serializable",
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/expression_functions/specs/var.ts",
@@ -40429,7 +40307,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">) => unknown"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
@@ -40487,7 +40365,7 @@
                     "text": "Adapters"
                   },
                   ", ",
-                  "Serializable",
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",

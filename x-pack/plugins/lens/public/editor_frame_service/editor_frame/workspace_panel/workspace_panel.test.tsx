@@ -28,12 +28,15 @@ import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { fromExpression } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
-import { esFilters, IFieldType, IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { esFilters, IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
 import { LensRootStore, setState } from '../../../state_management';
+import { getLensInspectorService } from '../../../lens_inspector_service';
+import { inspectorPluginMock } from '../../../../../../../src/plugins/inspector/public/mocks';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -59,6 +62,7 @@ const defaultProps = {
     data: mockDataPlugin(),
   },
   getSuggestionForField: () => undefined,
+  lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
   toggleFullscreen: jest.fn(),
 };
 
@@ -416,7 +420,7 @@ describe('workspace_panel', () => {
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
 
     const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-    const field = ({ name: 'myfield' } as unknown) as IFieldType;
+    const field = ({ name: 'myfield' } as unknown) as FieldSpec;
 
     await act(async () => {
       instance.setProps({

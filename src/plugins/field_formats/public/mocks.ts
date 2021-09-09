@@ -8,15 +8,36 @@
 
 import { CoreSetup } from 'src/core/public';
 import { baseFormattersPublic } from './lib/constants';
-import { FieldFormatsRegistry } from '../common';
-import type { FieldFormatsStart, FieldFormatsSetup } from '.';
+import { FieldFormatsRegistry, FORMATS_UI_SETTINGS } from '../common';
+import type { FieldFormatsSetup, FieldFormatsStart } from '.';
 import { fieldFormatsMock } from '../common/mocks';
 
 export const getFieldFormatsRegistry = (core: CoreSetup) => {
   const fieldFormatsRegistry = new FieldFormatsRegistry();
   const getConfig = core.uiSettings.get.bind(core.uiSettings);
 
-  fieldFormatsRegistry.init(getConfig, {}, baseFormattersPublic);
+  const getConfigWithFallbacks = (key: string) => {
+    switch (key) {
+      case FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP:
+        return (
+          getConfig(key) ??
+          `{
+  "ip": { "id": "ip", "params": {} },
+  "date": { "id": "date", "params": {} },
+  "date_nanos": { "id": "date_nanos", "params": {}, "es": true },
+  "number": { "id": "number", "params": {} },
+  "boolean": { "id": "boolean", "params": {} },
+  "histogram": { "id": "histogram", "params": {} },
+  "_source": { "id": "_source", "params": {} },
+  "_default_": { "id": "string", "params": {} }
+}`
+        );
+      default:
+        return getConfig(key);
+    }
+  };
+
+  fieldFormatsRegistry.init(getConfigWithFallbacks, {}, baseFormattersPublic);
 
   return fieldFormatsRegistry;
 };

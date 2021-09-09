@@ -120,9 +120,14 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
    * needed for merging new with old field counts, high likely legacy, but kept this behavior
    * because not 100% sure in this case
    */
-  const fieldCounts = useRef<Record<string, number>>(
-    calcFieldCounts({}, props.documents$.getValue().result, props.selectedIndexPattern)
-  );
+  const fieldCounts = useRef<Record<string, number> | null>(null);
+  if (fieldCounts.current === null) {
+    fieldCounts.current = calcFieldCounts(
+      {},
+      props.documents$.getValue().result,
+      props.selectedIndexPattern
+    );
+  }
 
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
   useEffect(() => {
@@ -130,7 +135,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       if (next.fetchStatus !== documentState.fetchStatus) {
         if (next.result) {
           fieldCounts.current = calcFieldCounts(
-            next.result.length ? fieldCounts.current : {},
+            next.result.length && fieldCounts.current ? fieldCounts.current : {},
             next.result,
             props.selectedIndexPattern!
           );

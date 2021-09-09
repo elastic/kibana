@@ -27,6 +27,11 @@ exports[`xy_expression XYChart component it renders area 1`] = `
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
@@ -245,6 +250,11 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
@@ -477,6 +487,11 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
@@ -709,6 +724,11 @@ exports[`xy_expression XYChart component it renders line 1`] = `
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
@@ -927,6 +947,11 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
@@ -1153,6 +1178,11 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={
@@ -1393,6 +1423,11 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
           "color": undefined,
         },
         "barSeriesStyle": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
       }
     }
     tooltip={

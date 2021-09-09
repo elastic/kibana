@@ -201,6 +201,21 @@ describe('createRouter', () => {
         },
       });
     });
+
+    it('supports multiple paths', () => {
+      history.push('/service-map?rangeFrom=now-15m&rangeTo=now&maxNumNodes=3');
+
+      const params = router.getParams('/services', '/service-map', history.location);
+
+      expect(params).toEqual({
+        path: {},
+        query: {
+          maxNumNodes: 3,
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+        },
+      });
+    });
   });
 
   describe('matchRoutes', () => {

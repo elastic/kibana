@@ -38,6 +38,7 @@ function page<TPath extends string>({
   tab: React.ComponentProps<typeof ApmServiceTemplate>['selectedTab'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: {
+    showKueryBar?: boolean;
     showTransactionTypeSelector?: boolean;
     showTimeComparison?: boolean;
     hidden?: boolean;
@@ -245,6 +246,9 @@ export const serviceDetail = {
         defaultMessage: 'Logs',
       }),
       element: <ServiceLogs />,
+      searchBarOptions: {
+        showKueryBar: false,
+      },
     }),
     page({
       path: '/profiling',

@@ -14,15 +14,21 @@ const toggleDeletePhase = async (testBed: TestBed) => {
   const { find, component } = testBed;
 
   let button = find('disableDeletePhaseButton');
+  let action = 'disable';
   if (!button.length) {
     button = find('enableDeletePhaseButton');
+    action = 'enable';
   }
   if (!button.length) {
     throw new Error(`Button to enable/disable delete phase was not found.`);
   }
 
   await act(async () => {
-    button.simulate('click');
+    if (action === 'disable') {
+      button.simulate('click');
+    } else {
+      button.find('input').simulate('change');
+    }
   });
   component.update();
 };

@@ -53,7 +53,7 @@ describe('useRestoreHistory', () => {
     test('with location state not matching store state', () => {
       const history = {
         location: {
-          state: encode({ prior: 'state' }),
+          state: encode({ prior: 'state' }) as string | undefined,
           pathname: 'somepath',
         },
         push: jest.fn(),
@@ -100,7 +100,7 @@ describe('useRestoreHistory', () => {
 
       const history = {
         location: {
-          state: encode({ old: 'state' }),
+          state: encode({ old: 'state' }) as string | undefined,
           pathname: 'somepath',
           search: '',
         },
@@ -200,7 +200,7 @@ describe('useRestoreHistory', () => {
 
       const history = {
         location: {
-          state: encode(state.persistent),
+          state: encode(state.persistent) as string | undefined,
           pathname: 'somepath',
         },
         push: jest.fn(),
@@ -231,7 +231,7 @@ describe('useRestoreHistory', () => {
 
       const history = {
         location: {
-          state: encode(state.persistent),
+          state: encode(state.persistent) as string | undefined,
           pathname: 'somepath',
           search: '',
         },
