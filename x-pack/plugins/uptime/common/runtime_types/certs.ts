@@ -48,7 +48,6 @@ export const CertType = t.intersection([
 export const CertResultType = t.type({
   certs: t.array(CertType),
   total: t.number,
-  loading: t.boolean,
 });
 
 export type Cert = t.TypeOf<typeof CertType>;

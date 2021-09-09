@@ -11,7 +11,7 @@ import { Direction, EuiBasicTable } from '@elastic/eui';
 import { CertStatus } from './cert_status';
 import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
-import { Cert, CertMonitor } from '../../../common/runtime_types';
+import { Cert, CertMonitor, CertResult } from '../../../common/runtime_types';
 import { FingerprintCol } from './fingerprint_col';
 import { NO_CERTS_AVAILABLE } from './translations';
 
@@ -38,11 +38,10 @@ interface Props {
   page: Page;
   sort: CertSort;
   onChange: (page: Page, sort: CertSort) => void;
+  certificates: CertResult & { loading?: boolean };
 }
 
 export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onChange }) => {
-  console.log(certificates);
-
   const onTableChange = (newVal: Partial<Props>) => {
     onChange(newVal.page as Page, newVal.sort as CertSort);
   };

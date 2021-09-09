@@ -28,3 +28,5 @@ export interface MonitorDurationResult {
 export interface MonitorIdParam {
   monitorId: string;
 }
+
+export type { CertificatesResults } from '../../server/lib/requests/get_certs';

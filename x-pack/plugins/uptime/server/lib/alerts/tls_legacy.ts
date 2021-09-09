@@ -13,7 +13,6 @@ import { TLS_LEGACY } from '../../../common/constants/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
-import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 import { ActionGroupIdsOf } from '../../../../alerting/common';
 
 import { AlertInstanceContext } from '../../../../alerting/common';
@@ -27,6 +26,8 @@ export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_LEGACY>;
 type TLSAlertInstance = AlertInstance<Record<string, any>, AlertInstanceContext, ActionGroupIds>;
 
 const DEFAULT_SIZE = 20;
+const DEFAULT_FROM = 'now-5m';
+const DEFAULT_TO = 'now';
 
 interface TlsAlertState {
   count: number;
@@ -125,7 +126,7 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
       uptimeEsClient,
       from: DEFAULT_FROM,
       to: DEFAULT_TO,
-      index: 0,
+      pageIndex: 0,
       size: DEFAULT_SIZE,
       notValidAfter: `now+${
         dynamicSettings?.certExpirationThreshold ??
