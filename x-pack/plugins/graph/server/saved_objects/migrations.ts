@@ -88,5 +88,4 @@ export const graphMigrations = {
     doc.references = [];
     return doc;
   },
-  '8.0.0': (doc: SavedObjectUnsanitizedDoc<any>) => doc, // no-op, bump migration version to satisfy integration tests after adding convertToMultiNamespaceTypeVersion to graph_workspace SO
 };
