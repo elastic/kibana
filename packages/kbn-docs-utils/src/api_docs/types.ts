@@ -6,22 +6,6 @@
  * Side Public License, v 1.
  */
 
-export interface AnchorLink {
-  /**
-   * The plugin that contains the API being referenced.
-   */
-  pluginName: string;
-  /**
-   * It's possible the client and the server both emit an API with
-   * the same name so we need scope in here to add uniqueness.
-   */
-  scope: ApiScope;
-  /**
-   * The name of the api.
-   */
-  apiName: string;
-}
-
 /**
  * The kinds of typescript types we want to show in the docs. `Unknown` is used if
  * we aren't accounting for a particular type. See {@link getPropertyTypeKind}
