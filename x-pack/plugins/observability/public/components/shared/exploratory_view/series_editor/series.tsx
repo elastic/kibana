@@ -44,7 +44,7 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
   };
 
   return (
-    <EuiPanel hasBorder={true}>
+    <EuiPanel hasBorder={true} data-test-subj={`exploratoryViewSeriesPanel${0}`}>
       <StyledAccordion
         id={`exploratoryViewSeriesAccordion${id}`}
         forceState={isExpanded ? 'open' : 'closed'}

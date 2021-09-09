@@ -63,5 +63,7 @@ describe('ExploratoryView', () => {
 
     expect((await screen.findAllByText('Performance distribution'))[0]).toBeInTheDocument();
     expect(await screen.findByText(/Lens Embeddable Component/i)).toBeInTheDocument();
+
+    expect(screen.getByTestId('exploratoryViewSeriesPanel0')).toBeInTheDocument();
   });
 });
