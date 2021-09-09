@@ -7,6 +7,10 @@
 
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import _ from 'lodash';
+import {
+  ALERT_ORIGINAL_EVENT_KIND,
+  ALERT_ORIGINAL_EVENT_MODULE,
+} from '../../../../timelines/common';
 import { Ecs } from '../../../common/ecs';
 import { generateMockDetailItemData } from '../mock';
 import { isAlertFromEndpointAlert, isAlertFromEndpointEvent } from './endpoint_alert_check';
@@ -58,8 +62,8 @@ describe('isAlertFromEndpointAlert', () => {
   it('should return true if detections data comes from an endpoint rule', () => {
     const mockEcsData = {
       _id: 'mockId',
-      'signal.original_event.module': ['endpoint'],
-      'signal.original_event.kind': ['alert'],
+      [ALERT_ORIGINAL_EVENT_MODULE]: ['endpoint'],
+      [ALERT_ORIGINAL_EVENT_KIND]: ['alert'],
     } as Ecs;
     expect(isAlertFromEndpointAlert({ ecsData: mockEcsData })).toBe(true);
   });
@@ -71,7 +75,7 @@ describe('isAlertFromEndpointAlert', () => {
   it('should return false if it is not an Alert', () => {
     const mockEcsData = {
       _id: 'mockId',
-      'signal.original_event.module': ['endpoint'],
+      [ALERT_ORIGINAL_EVENT_MODULE]: ['endpoint'],
     } as Ecs;
     expect(isAlertFromEndpointAlert({ ecsData: mockEcsData })).toBeFalsy();
   });
@@ -79,7 +83,7 @@ describe('isAlertFromEndpointAlert', () => {
   it('should return false if it is not an endpoint module', () => {
     const mockEcsData = {
       _id: 'mockId',
-      'signal.original_event.kind': ['alert'],
+      [ALERT_ORIGINAL_EVENT_KIND]: ['alert'],
     } as Ecs;
     expect(isAlertFromEndpointAlert({ ecsData: mockEcsData })).toBeFalsy();
   });
