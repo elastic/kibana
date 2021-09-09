@@ -465,6 +465,23 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual(expected);
   });
 
+  test('You can send in a namespace', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      namespace: 'a namespace',
+    };
+
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
+      namespace: 'a namespace',
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
   test('You can send in an empty array to threat', () => {
     const payload: AddPrepackagedRulesSchema = {
       ...getAddPrepackagedRulesSchemaMock(),
