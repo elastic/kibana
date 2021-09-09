@@ -87,6 +87,10 @@ export const SeriesEditor = React.memo(function () {
   );
 
   useEffect(() => {
+    setItemIdToExpandedRowMap({});
+  }, [allSeries.length]);
+
+  useEffect(() => {
     const newExpandRows: ExpandedRowMap = {};
 
     setEditorItems((prevState) => {
