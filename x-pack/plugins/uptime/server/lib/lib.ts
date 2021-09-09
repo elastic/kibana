@@ -155,7 +155,3 @@ export function debugESCall({
   }
   console.log(`\n`);
 }
-
-export function createEsQuery<T extends estypes.SearchRequest>(params: T): T {
-  return params;
-}
