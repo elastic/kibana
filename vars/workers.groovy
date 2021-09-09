@@ -20,7 +20,7 @@ def label(size) {
     case 'xl-highmem':
       return 'docker && tests-xl-highmem'
     case 'xxl':
-      return 'docker && tests-xxl && gobld/machineType:custom-64-270336'
+      return 'docker && tests-xxl && gobld/machineType:custom-64-327680'
     case 'n2-standard-16':
       return 'docker && linux && immutable && gobld/machineType:n2-standard-16'
   }
