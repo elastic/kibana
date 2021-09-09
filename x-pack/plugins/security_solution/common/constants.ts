@@ -189,19 +189,18 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
 /**
  * Id for the signals alerting type
  */
-export const SIGNALS_ID = `siem.signals`;
+export const SIGNALS_ID = `siem.signals` as const;
 
 /**
- * Id's for reference rule types
+ * IDs for RAC rule types
  */
-export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
-export const REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID = `siem.referenceRulePersistence`;
-
-export const QUERY_ALERT_TYPE_ID = `siem.queryRule`;
-export const EQL_ALERT_TYPE_ID = `siem.eqlRule`;
-export const INDICATOR_ALERT_TYPE_ID = `siem.indicatorRule`;
-export const ML_ALERT_TYPE_ID = `siem.mlRule`;
-export const THRESHOLD_ALERT_TYPE_ID = `siem.thresholdRule`;
+const RULE_TYPE_PREFIX = `siem` as const;
+export const EQL_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.eqlRule` as const;
+export const INDICATOR_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.indicatorRule` as const;
+export const ML_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.mlRule` as const;
+export const QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.queryRule` as const;
+export const SAVED_QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.savedQueryRule` as const;
+export const THRESHOLD_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.thresholdRule` as const;
 
 /**
  * Id for the notifications alerting type

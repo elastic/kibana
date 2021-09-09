@@ -39,8 +39,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/106492
-  describe.skip('alerts', () => {
+  describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
@@ -501,19 +500,6 @@ instanceStateValue: true
                 ],
               })
             );
-
-          // Enqueue non ephemerically so we the latter code can query properly
-          const enqueueResponse = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts_fixture/${createdAction.id}/enqueue_action`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                reference,
-                index: ES_TEST_INDEX_NAME,
-                retryAt: retryDate.getTime(),
-              },
-            });
-          expect(enqueueResponse.status).to.eql(204);
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
