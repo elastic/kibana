@@ -50,7 +50,7 @@ ruleTester.run('@kbn/eslint/no_async_foreach', rule, {
         {
           line: 1,
           message:
-            'Passing an async function to .forEach() prevents promise rejections from being handled. Use asyncForEach() or similar helper from "@kbn/utils" instead.',
+            'Passing an async function to .forEach() prevents promise rejections from being handled. Use asyncForEach() or similar helper from "@kbn/std" instead.',
         },
       ],
     },
@@ -64,7 +64,7 @@ ruleTester.run('@kbn/eslint/no_async_foreach', rule, {
         {
           line: 1,
           message:
-            'Passing an async function to .forEach() prevents promise rejections from being handled. Use asyncForEach() or similar helper from "@kbn/utils" instead.',
+            'Passing an async function to .forEach() prevents promise rejections from being handled. Use asyncForEach() or similar helper from "@kbn/std" instead.',
         },
       ],
     },

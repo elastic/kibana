@@ -17,7 +17,7 @@ const esTypes = tsEstree.AST_NODE_TYPES;
 /** @typedef {import("eslint").Rule.RuleFixer} Fixer */
 
 const ERROR_MSG =
-  'Passing an async function to .forEach() prevents promise rejections from being handled. Use asyncForEach() or similar helper from "@kbn/utils" instead.';
+  'Passing an async function to .forEach() prevents promise rejections from being handled. Use asyncForEach() or similar helper from "@kbn/std" instead.';
 
 /**
  * @param {Node} node
