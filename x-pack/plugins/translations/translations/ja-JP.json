@@ -5826,8 +5826,6 @@
     "visTypeVega.vegaParser.widthAndHeightParamsAreRequired": "{autoSizeParam}が{noneParam}に設定されているときには、カットまたは繰り返された{vegaLiteParam}仕様を使用している間に何も表示されません。修正するには、{autoSizeParam}を削除するか、{vegaParam}を使用してください。",
     "visTypeVega.visualization.renderErrorTitle": "Vega エラー",
     "visTypeVega.visualization.unableToRenderWithoutDataWarningMessage": "データなしにはレンダリングできません",
-    "visTypeVislib.advancedSettings.visualization.dimmingOpacityText": "チャートの別のエレメントが選択された時に暗くなるチャート項目の透明度です。この数字が小さければ小さいほど、ハイライトされたエレメントが目立ちます。0と1の間の数字で設定します。",
-    "visTypeVislib.advancedSettings.visualization.dimmingOpacityTitle": "減光透明度",
     "visTypeVislib.advancedSettings.visualization.heatmap.maxBucketsText": "1つのデータソースが返せるバケットの最大数です。値が大きいとブラウザのレンダリング速度が下がる可能性があります。",
     "visTypeVislib.advancedSettings.visualization.heatmap.maxBucketsTitle": "ヒートマップの最大バケット数",
     "visTypeVislib.aggResponse.allDocsTitle": "すべてのドキュメント",

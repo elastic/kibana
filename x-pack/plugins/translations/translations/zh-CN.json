@@ -5872,8 +5872,6 @@
     "visTypeVega.vegaParser.widthAndHeightParamsAreRequired": "{autoSizeParam} 设置为 {noneParam} 时，如果使用分面或重复 {vegaLiteParam} 规格，将不会呈现任何内容。要解决问题，请移除 {autoSizeParam} 或使用 {vegaParam}。",
     "visTypeVega.visualization.renderErrorTitle": "Vega 错误",
     "visTypeVega.visualization.unableToRenderWithoutDataWarningMessage": "没有数据时无法渲染",
-    "visTypeVislib.advancedSettings.visualization.dimmingOpacityText": "突出显示图表的其他元素时变暗图表项的透明度。此数字越低，突出显示的元素越突出。必须是介于 0 和 1 之间的数字。",
-    "visTypeVislib.advancedSettings.visualization.dimmingOpacityTitle": "变暗透明度",
     "visTypeVislib.advancedSettings.visualization.heatmap.maxBucketsText": "单个数据源可以返回的最大存储桶数目。较高的数目可能对浏览器呈现性能有负面影响",
     "visTypeVislib.advancedSettings.visualization.heatmap.maxBucketsTitle": "热图最大存储桶数",
     "visTypeVislib.aggResponse.allDocsTitle": "所有文档",
