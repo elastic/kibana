@@ -11,20 +11,7 @@ import { toArray } from 'rxjs/operators';
 import { lastValueFrom } from '../rxjs_7';
 
 import { map$, mapWithLimit$ } from './observable';
-
-const list = (size: number) =>
-  ' '
-    .repeat(size)
-    .split('')
-    .map((_, i) => i);
-
-const generator = function* (size: number) {
-  for (const n of list(size)) {
-    yield n;
-  }
-};
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+import { list, sleep, generator } from './helpers.test';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -56,10 +43,12 @@ describe('mapWithLimit$', () => {
   });
 
   it.each([
+    ['empty array', [], []] as const,
+    ['empty generator', generator(0), []] as const,
     ['generator', generator(5), [0, 1, 2, 3, 4]] as const,
     ['set', new Set([5, 4, 3, 2, 1]), [5, 4, 3, 2, 1]] as const,
     ['observable', Rx.of(1, 2, 3, 4, 5), [1, 2, 3, 4, 5]] as const,
-  ])('works with %1', async (_, iter, expected) => {
+  ])('works with %p', async (_, iter, expected) => {
     const mock = jest.fn(async (n) => n);
     const results = await lastValueFrom(mapWithLimit$(iter, 1, mock).pipe(toArray()));
     expect(results).toEqual(expected);

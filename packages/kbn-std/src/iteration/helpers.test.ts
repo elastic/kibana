@@ -6,9 +6,17 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-std'],
-  testPathIgnorePatterns: ['helpers.test.ts'],
+export const list = (size: number) =>
+  ' '
+    .repeat(size)
+    .split('')
+    .filter(Boolean)
+    .map((_, i) => i);
+
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+export const generator = function* (size: number) {
+  for (const n of list(size)) {
+    yield n;
+  }
 };

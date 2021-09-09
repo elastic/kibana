@@ -10,6 +10,7 @@ import * as Rx from 'rxjs';
 import { mapTo } from 'rxjs/operators';
 
 import { asyncMap, asyncMapWithLimit } from './map';
+import { list } from './helpers.test';
 
 jest.mock('./observable');
 const mapWithLimit$: jest.Mock = jest.requireMock('./observable').mapWithLimit$;
@@ -18,12 +19,6 @@ mapWithLimit$.mockImplementation(jest.requireActual('./observable').mapWithLimit
 beforeEach(() => {
   jest.clearAllMocks();
 });
-
-const list = (size: number) =>
-  ' '
-    .repeat(size)
-    .split('')
-    .map((_, i) => i);
 
 describe('asyncMapWithLimit', () => {
   it('calls mapWithLimit$ and resolves with properly sorted results', async () => {
@@ -49,6 +44,14 @@ describe('asyncMapWithLimit', () => {
 
     expect(mapWithLimit$).toHaveBeenCalledTimes(1);
     expect(mapWithLimit$).toHaveBeenCalledWith(iter, limit, expect.any(Function));
+  });
+
+  it.each([
+    [list(0), []] as const,
+    [list(1), ['foo']] as const,
+    [list(2), ['foo', 'foo']] as const,
+  ])('resolves when iterator is %p', async (input, output) => {
+    await expect(asyncMapWithLimit(input, 100, async () => 'foo')).resolves.toEqual(output);
   });
 });
 

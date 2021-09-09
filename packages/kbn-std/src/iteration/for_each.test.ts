@@ -9,6 +9,7 @@
 import * as Rx from 'rxjs';
 
 import { asyncForEach, asyncForEachWithLimit } from './for_each';
+import { list, sleep } from './helpers.test';
 
 jest.mock('./observable');
 const mockMapWithLimit$: jest.Mock = jest.requireMock('./observable').mapWithLimit$;
@@ -16,14 +17,6 @@ const mockMapWithLimit$: jest.Mock = jest.requireMock('./observable').mapWithLim
 beforeEach(() => {
   jest.clearAllMocks();
 });
-
-const list = (size: number) =>
-  ' '
-    .repeat(size)
-    .split('')
-    .map((_, i) => i);
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 describe('asyncForEachWithLimit', () => {
   it('calls mapWithLimit$ and resolves with undefined when it completes', async () => {
@@ -54,7 +47,7 @@ describe('asyncForEachWithLimit', () => {
   });
 
   it('resolves when iterator is empty', async () => {
-    mockMapWithLimit$.mockReturnValue(Rx.EMPTY);
+    mockMapWithLimit$.mockImplementation((x) => Rx.from(x));
     await expect(asyncForEachWithLimit([], 100, async () => 'foo')).resolves.toBe(undefined);
   });
 });
