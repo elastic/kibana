@@ -7,8 +7,6 @@
 
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { isNewApmRuleFromStackManagement } from '../helper';
-import { NewAlertEmptyPrompt } from '../new_alert_empty_prompt';
 
 interface Props {
   setAlertParams: (key: string, value: any) => void;
@@ -19,14 +17,7 @@ interface Props {
 }
 
 export function ServiceAlertTrigger(props: Props) {
-  const {
-    alertParams,
-    fields,
-    metadata,
-    setAlertParams,
-    defaults,
-    chartPreview,
-  } = props;
+  const { fields, setAlertParams, defaults, chartPreview } = props;
 
   const params: Record<string, any> = {
     ...defaults,
@@ -40,10 +31,6 @@ export function ServiceAlertTrigger(props: Props) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  if (isNewApmRuleFromStackManagement(alertParams, metadata)) {
-    return <NewAlertEmptyPrompt />;
-  }
 
   return (
     <>
