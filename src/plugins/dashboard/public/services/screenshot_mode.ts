@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-export {
-  getScreenshotMode,
-  setScreenshotModeEnabled,
-  setScreenshotModeDisabled,
-  KBN_SCREENSHOT_MODE_ENABLED_KEY,
-  KBN_SCREENSHOT_MODE_LAYOUT_KEY,
-  setScreenshotLayout,
-  getScreenshotLayout,
-  Layout,
-} from './get_set_browser_screenshot_mode';
-
-export { KBN_SCREENSHOT_MODE_HEADER } from './constants';
+export type {
+  ScreenshotModePluginStart,
+  ScreenshotModePluginSetup,
+} from '../../../screenshot_mode/public';

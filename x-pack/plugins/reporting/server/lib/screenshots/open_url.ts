@@ -12,6 +12,7 @@ import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { ConditionalHeaders } from '../../export_types/common';
 import { CaptureConfig } from '../../types';
+import { Layout } from '../layouts';
 
 export const openUrl = async (
   captureConfig: CaptureConfig,
@@ -19,6 +20,7 @@ export const openUrl = async (
   urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple,
   waitForSelector: string,
   conditionalHeaders: ConditionalHeaders,
+  layout: undefined | Layout,
   logger: LevelLogger
 ): Promise<void> => {
   const endTrace = startTrace('open_url', 'wait');
@@ -33,7 +35,11 @@ export const openUrl = async (
 
   try {
     const timeout = durationToNumber(captureConfig.timeouts.openUrl);
-    await browser.open(url, { conditionalHeaders, waitForSelector, timeout, locator }, logger);
+    await browser.open(
+      url,
+      { conditionalHeaders, waitForSelector, timeout, locator, layout },
+      logger
+    );
   } catch (err) {
     logger.error(err);
     throw new Error(

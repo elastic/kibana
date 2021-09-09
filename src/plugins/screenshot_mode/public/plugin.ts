@@ -10,11 +10,12 @@ import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 
 import { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
 
-import { getScreenshotMode } from '../common';
+import { getScreenshotMode, getScreenshotLayout } from '../common';
 
 export class ScreenshotModePlugin implements Plugin<ScreenshotModePluginSetup> {
   private publicContract = Object.freeze({
     isScreenshotMode: () => getScreenshotMode() === true,
+    getScreenshotLayout,
   });
 
   public setup(core: CoreSetup): ScreenshotModePluginSetup {

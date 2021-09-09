@@ -37,6 +37,7 @@ import { NavigationPublicPluginStart as NavigationStart } from './services/navig
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from './services/data';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from './services/share';
 import type { SavedObjectTaggingOssPluginStart } from './services/saved_objects_tagging_oss';
+import type { ScreenshotModePluginSetup } from './services/screenshot_mode';
 import {
   getSavedObjectFinder,
   SavedObjectLoader,
@@ -103,6 +104,7 @@ export interface DashboardSetupDependencies {
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
+  screenshotMode: ScreenshotModePluginSetup;
 }
 
 export interface DashboardStartDependencies {
@@ -162,10 +164,21 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data, usageCollection }: DashboardSetupDependencies
+    {
+      share,
+      embeddable,
+      home,
+      urlForwarding,
+      data,
+      usageCollection,
+      screenshotMode,
+    }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const startServices = core.getStartServices();
+
+    console.error('!!!!!' + screenshotMode.isScreenshotMode());
+    console.error('!!!!!' + screenshotMode.getScreenshotLayout());
 
     if (share) {
       this.dashboardUrlGenerator = share.urlGenerators.registerUrlGenerator(

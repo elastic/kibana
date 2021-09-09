@@ -71,6 +71,7 @@ export function getScreenshots$(
                 urlOrUrlLocatorTuple,
                 pageLoadSelector,
                 conditionalHeaders,
+                layout,
                 logger
               );
             }),
