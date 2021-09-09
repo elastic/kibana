@@ -18,6 +18,24 @@ describe('core deprecations', () => {
     process.env = { ...initialEnv };
   });
 
+  describe('kibanaPathConf', () => {
+    it('logs a warning if KIBANA_PATH_CONF environ variable is set', () => {
+      process.env.KIBANA_PATH_CONF = 'somepath';
+      const { messages } = applyCoreDeprecations();
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "Environment variable \\"KIBANA_PATH_CONF\\" is deprecated. It has been replaced with \\"KBN_PATH_CONF\\" pointing to a config folder",
+        ]
+      `);
+    });
+
+    it('does not log a warning if KIBANA_PATH_CONF environ variable is unset', () => {
+      delete process.env.KIBANA_PATH_CONF;
+      const { messages } = applyCoreDeprecations();
+      expect(messages).toHaveLength(0);
+    });
+  });
+
   describe('xsrfDeprecation', () => {
     it('logs a warning if server.xsrf.whitelist is set', () => {
       const { migrated, messages } = applyCoreDeprecations({
