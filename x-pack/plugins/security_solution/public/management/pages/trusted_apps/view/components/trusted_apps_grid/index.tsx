@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -52,6 +52,25 @@ const RootWrapper = styled.div`
   }
 `;
 
+const BACK_TO_TRUSTED_APPS_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.grid.policyDetailsLinkBackLabel',
+  { defaultMessage: 'Back to trusted Applications' }
+);
+
+const EDIT_TRUSTED_APP_ACTION_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.grid.cardAction.edit',
+  {
+    defaultMessage: 'Edit trusted application',
+  }
+);
+
+const DELETE_TRUSTED_APP_ACTION_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.grid.cardAction.delete',
+  {
+    defaultMessage: 'Delete trusted application',
+  }
+);
+
 export const TrustedAppsGrid = memo(() => {
   const history = useHistory();
   const dispatch = useDispatch<Dispatch<AppAction>>();
@@ -72,97 +91,93 @@ export const TrustedAppsGrid = memo(() => {
     page_size: pageSize,
   }));
 
-  const handleArtifactCardProps = useMemo(() => {
-    // cache card props to avoid re-renders
+  const artifactCardPropsPerItem = useMemo(() => {
     const cachedCardProps: Record<string, ArtifactEntryCardProps> = {};
 
-    return (trustedApp: TrustedApp): ArtifactEntryCardProps => {
-      if (!cachedCardProps[trustedApp.id]) {
-        let policies: ArtifactEntryCardProps['policies'];
+    // Casting `listItems` below to remove the `Immutable<>` from it in order to prevent errors
+    // with common component's props
+    for (const trustedApp of listItems as TrustedApp[]) {
+      let policies: ArtifactEntryCardProps['policies'];
 
-        if (trustedApp.effectScope.type === 'policy' && trustedApp.effectScope.policies.length) {
-          policies = trustedApp.effectScope.policies.reduce<
-            Required<ArtifactEntryCardProps>['policies']
-          >((policyToNavOptionsMap, policyId) => {
-            const currentPagePath = getTrustedAppsListPath({
-              ...location,
-            });
+      if (trustedApp.effectScope.type === 'policy' && trustedApp.effectScope.policies.length) {
+        policies = trustedApp.effectScope.policies.reduce<
+          Required<ArtifactEntryCardProps>['policies']
+        >((policyToNavOptionsMap, policyId) => {
+          const currentPagePath = getTrustedAppsListPath({
+            ...location,
+          });
 
-            const policyDetailsPath = getPolicyDetailPath(policyId);
+          const policyDetailsPath = getPolicyDetailPath(policyId);
 
-            const routeState: PolicyDetailsRouteState = {
-              backLink: {
-                label: i18n.translate(
-                  'xpack.securitySolution.trustedapps.grid.policyDetailsLinkBackLabel',
-                  { defaultMessage: 'Back to trusted Applications' }
-                ),
-                navigateTo: [
-                  APP_ID,
-                  {
-                    path: currentPagePath,
-                  },
-                ],
-                href: getAppUrl({ path: currentPagePath }),
-              },
-            };
-
-            policyToNavOptionsMap[policyId] = {
-              navigateAppId: APP_ID,
-              navigateOptions: {
-                path: policyDetailsPath,
-                state: routeState,
-              },
-              href: getAppUrl({ path: policyDetailsPath }),
-              children: policyListById[policyId]?.name ?? policyId,
-            };
-            return policyToNavOptionsMap;
-          }, {});
-        }
-
-        cachedCardProps[trustedApp.id] = {
-          item: trustedApp,
-          policies,
-          'data-test-subj': 'trustedAppCard',
-          actions: [
-            {
-              icon: 'controlsHorizontal',
-              onClick: () => {
-                history.push(
-                  getTrustedAppsListPath({
-                    ...location,
-                    show: 'edit',
-                    id: trustedApp.id,
-                  })
-                );
-              },
-              'data-test-subj': 'editTrustedAppAction',
-              children: i18n.translate('xpack.securitySolution.trustedapps.grid.cardAction.edit', {
-                defaultMessage: 'Edit trusted application',
-              }),
-            },
-            {
-              icon: 'trash',
-              onClick: () => {
-                dispatch({
-                  type: 'trustedAppDeletionDialogStarted',
-                  payload: { entry: trustedApp },
-                });
-              },
-              'data-test-subj': 'deleteTrustedAppAction',
-              children: i18n.translate(
-                'xpack.securitySolution.trustedapps.grid.cardAction.delete',
+          const routeState: PolicyDetailsRouteState = {
+            backLink: {
+              label: BACK_TO_TRUSTED_APPS_LABEL,
+              navigateTo: [
+                APP_ID,
                 {
-                  defaultMessage: 'Delete trusted application',
-                }
-              ),
+                  path: currentPagePath,
+                },
+              ],
+              href: getAppUrl({ path: currentPagePath }),
             },
-          ],
-        };
+          };
+
+          policyToNavOptionsMap[policyId] = {
+            navigateAppId: APP_ID,
+            navigateOptions: {
+              path: policyDetailsPath,
+              state: routeState,
+            },
+            href: getAppUrl({ path: policyDetailsPath }),
+            children: policyListById[policyId]?.name ?? policyId,
+          };
+          return policyToNavOptionsMap;
+        }, {});
       }
 
-      return cachedCardProps[trustedApp.id];
-    };
-  }, [dispatch, getAppUrl, history, location, policyListById]);
+      cachedCardProps[trustedApp.id] = {
+        item: trustedApp,
+        policies,
+        'data-test-subj': 'trustedAppCard',
+        actions: [
+          {
+            icon: 'controlsHorizontal',
+            onClick: () => {
+              history.push(
+                getTrustedAppsListPath({
+                  ...location,
+                  show: 'edit',
+                  id: trustedApp.id,
+                })
+              );
+            },
+            'data-test-subj': 'editTrustedAppAction',
+            children: EDIT_TRUSTED_APP_ACTION_LABEL,
+          },
+          {
+            icon: 'trash',
+            onClick: () => {
+              dispatch({
+                type: 'trustedAppDeletionDialogStarted',
+                payload: { entry: trustedApp },
+              });
+            },
+            'data-test-subj': 'deleteTrustedAppAction',
+            children: DELETE_TRUSTED_APP_ACTION_LABEL,
+          },
+        ],
+      };
+    }
+
+    return cachedCardProps;
+  }, [dispatch, getAppUrl, history, listItems, location, policyListById]);
+
+  const handleArtifactCardProps = useCallback(
+    (trustedApp: TrustedApp) => {
+      return artifactCardPropsPerItem[trustedApp.id];
+    },
+    [artifactCardPropsPerItem]
+  );
 
   return (
     <RootWrapper>
