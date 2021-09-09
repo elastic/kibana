@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source .buildkite/scripts/common/util.sh
+
 KIBANA_BUILDBUDDY_CI_API_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibana-buildbuddy-ci-api-key)
 export KIBANA_BUILDBUDDY_CI_API_KEY
 

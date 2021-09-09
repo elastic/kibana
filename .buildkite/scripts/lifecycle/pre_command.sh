@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 cd '.buildkite'
 yarn install
 cd -
@@ -78,7 +80,6 @@ export GITHUB_TOKEN
 # It can be skipped for pipeline upload steps though, to make job start time a little faster
 if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
   if [[ -d .buildkite/scripts && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* ]]; then
-    source .buildkite/scripts/common/util.sh
     source .buildkite/scripts/common/env.sh
     source .buildkite/scripts/common/setup_node.sh
     source .buildkite/scripts/common/setup_bazel.sh
