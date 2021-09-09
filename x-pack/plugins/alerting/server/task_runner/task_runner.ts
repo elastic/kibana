@@ -9,7 +9,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { addSpaceIdToPath } from '../../../spaces/server';
-import { Logger, KibanaRequest } from '../../../../../src/core/server';
+import { Logger, KibanaRequest, SavedObject } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
@@ -92,6 +92,7 @@ export class TaskRunner<
     RecoveryActionGroupId
   >;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
+  private ruleSavedObject: SavedObject<RawAlert> | undefined;
 
   constructor(
     alertType: NormalizedAlertType<
@@ -113,19 +114,22 @@ export class TaskRunner<
     this.ruleTypeRegistry = context.ruleTypeRegistry;
   }
 
-  async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
-    const namespace = this.context.spaceIdToNamespace(spaceId);
-    // Only fetch encrypted attributes here, we'll create a saved objects client
-    // scoped with the API key to fetch the remaining data.
-    const {
-      attributes: { apiKey },
-    } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+  private async getRuleSavedObject(
+    alertId: string,
+    namespace: string | undefined
+  ): Promise<SavedObject<RawAlert>> {
+    return await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
       'alert',
       alertId,
       { namespace }
     );
+  }
 
-    return apiKey;
+  private getApiKeyForAlertPermissions() {
+    if (!this.ruleSavedObject) {
+      throw new Error('unable to get API key for rule because rule not found');
+    }
+    return this.ruleSavedObject.attributes.apiKey;
   }
 
   private getFakeKibanaRequest(spaceId: string, apiKey: RawAlert['apiKey']) {
@@ -475,7 +479,7 @@ export class TaskRunner<
     } = this.taskInstance;
     let apiKey: string | null;
     try {
-      apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId || 'default');
+      apiKey = this.getApiKeyForAlertPermissions();
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
@@ -521,6 +525,18 @@ export class TaskRunner<
     const runDate = new Date();
     const runDateString = runDate.toISOString();
     this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDateString}`);
+
+    try {
+      this.ruleSavedObject = await this.getRuleSavedObject(alertId, spaceId);
+    } catch (err) {
+      this.logger.error(
+        `error executing rule ${alertId} in space ${spaceId ?? 'default'}: ${err.message}`
+      );
+      return {
+        state: originalState,
+        schedule: { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL },
+      };
+    }
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
