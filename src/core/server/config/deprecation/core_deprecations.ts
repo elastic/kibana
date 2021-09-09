@@ -8,6 +8,19 @@
 
 import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
+const kibanaPathConf: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
+  if (process.env?.KIBANA_PATH_CONF) {
+    addDeprecation({
+      message: `Environment variable "KIBANA_PATH_CONF" is deprecated. It has been replaced with "KBN_PATH_CONF" pointing to a config folder`,
+      correctiveActions: {
+        manualSteps: [
+          'Use "KBN_PATH_CONF" instead of "KIBANA_PATH_CONF" to point to a config folder.',
+        ],
+      },
+    });
+  }
+};
+
 const configPathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (process.env?.CONFIG_PATH) {
     addDeprecation({
@@ -392,6 +405,7 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   rename('server.xsrf.whitelist', 'server.xsrf.allowlist'),
   rewriteCorsSettings,
   configPathDeprecation,
+  kibanaPathConf,
   dataPathDeprecation,
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
