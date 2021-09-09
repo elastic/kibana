@@ -144,7 +144,7 @@ export function EmbeddedMapComponent({
   return (
     <div
       data-test-subj="dataVisualizerEmbeddedMapContent"
-      className="embeddedMapContent dataVisualizerPanelWrapper"
+      className="embeddedMapContent"
       ref={embeddableRoot}
     />
   );

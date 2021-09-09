@@ -11,7 +11,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_VIEW_MODES } from './constants';
 
-// @todo: Revisit naming/terminology
 const toggleButtons = [
   {
     id: DISCOVER_VIEW_MODES.DOCUMENT_LEVEL,
@@ -31,11 +30,9 @@ export const DocumentViewModeToggle = ({
   setDiscoverViewMode: (id: string) => void;
 }) => {
   return (
-    // <EuiButtonEmpty size="xs">Table controls</EuiButtonEmpty>
     <EuiButtonGroup
-      legend={i18n.translate('discover.viewModes.legend', { defaultMessage: 'Document view mode' })}
-      color={'ghost'}
-      // style={{ paddingRight: 20 }}
+      legend={i18n.translate('discover.viewModes.legend', { defaultMessage: 'View modes' })}
+      style={{ paddingRight: 20 }}
       buttonSize={'compressed'}
       options={toggleButtons}
       idSelected={discoverViewMode}

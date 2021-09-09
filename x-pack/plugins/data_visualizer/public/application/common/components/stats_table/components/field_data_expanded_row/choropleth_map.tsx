@@ -103,10 +103,12 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   );
 
   return (
-    <EuiFlexItem data-test-subj={'fileDataVisualizerChoroplethMapTopValues'}>
-      <div style={{ width: '100%', minHeight: 300 }}>
-        <EmbeddedMapComponent layerList={layerList} />
-      </div>
+    <EuiFlexItem
+      data-test-subj={'fileDataVisualizerChoroplethMapTopValues'}
+      className={'dataVisualizerPanelWrapper'}
+      style={{ minHeight: 300 }}
+    >
+      <EmbeddedMapComponent layerList={layerList} />
       {isTopValuesSampled === true && (
         <>
           <EuiSpacer size="xs" />
