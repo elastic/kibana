@@ -185,17 +185,21 @@ export class DeprecationsService
       deprecationsRegistry.registerDeprecations({
         getDeprecations: () => {
           return deprecationsContexts.map(
-            ({ title, message, correctiveActions, documentationUrl }) => {
-              return {
-                title: title || `${domainId} has a deprecated setting`,
-                level: 'critical',
-                deprecationType: 'config',
-                message,
-                correctiveActions,
-                documentationUrl,
-                requireRestart: true,
-              };
-            }
+            ({
+              title = `${domainId} has a deprecated setting`,
+              level = 'critical',
+              message,
+              correctiveActions,
+              documentationUrl,
+            }) => ({
+              title,
+              level,
+              message,
+              correctiveActions,
+              documentationUrl,
+              deprecationType: 'config',
+              requireRestart: true,
+            })
           );
         },
       });
