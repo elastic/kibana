@@ -76,7 +76,7 @@ describe('buildAlert', () => {
       [ALERT_WORKFLOW_STATUS]: 'open',
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
-        id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+        uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
         updated_at: new Date(ANCHOR_DATE).toISOString(),
         created_by: 'elastic',
@@ -100,7 +100,6 @@ describe('buildAlert', () => {
         status_date: '2020-02-22T16:47:50.047Z',
         last_success_at: '2020-02-22T16:47:50.047Z',
         last_success_message: 'succeeded',
-        output_index: '.siem-signals-default',
         max_signals: 100,
         risk_score: 55,
         risk_score_mapping: [],
@@ -153,7 +152,7 @@ describe('buildAlert', () => {
       [ALERT_WORKFLOW_STATUS]: 'open',
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         author: [],
-        id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+        uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
         created_at: new Date(ANCHOR_DATE).toISOString(),
         updated_at: new Date(ANCHOR_DATE).toISOString(),
         created_by: 'elastic',
@@ -177,7 +176,6 @@ describe('buildAlert', () => {
         status_date: '2020-02-22T16:47:50.047Z',
         last_success_at: '2020-02-22T16:47:50.047Z',
         last_success_message: 'succeeded',
-        output_index: '.siem-signals-default',
         max_signals: 100,
         risk_score: 55,
         risk_score_mapping: [],
