@@ -29,7 +29,7 @@ export const StatusItem: React.FC<StatusItemProps> = ({ details }) => {
   const closePopover = () => setIsPopoverOpen(false);
   const formattedDetails = details.join('\n');
 
-  const tooltipPopoverTrigger = (
+  const popoverTrigger = (
     <EuiButtonIcon
       onClick={onButtonClick}
       color="text"
@@ -39,7 +39,7 @@ export const StatusItem: React.FC<StatusItemProps> = ({ details }) => {
   );
 
   const infoPopover = (
-    <EuiPopover button={tooltipPopoverTrigger} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover button={popoverTrigger} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiCodeBlock
         language="bash"
         fontSize="m"
