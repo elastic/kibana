@@ -31,14 +31,12 @@ export const StatusItem: React.FC<StatusItemProps> = ({ details }) => {
   const formattedDetails = details.join('\n');
 
   const tooltipPopoverTrigger = (
-    <EuiToolTip position="top" content={STATUS_POPOVER_TOOLTIP}>
-      <EuiButtonIcon
-        onClick={onButtonClick}
-        color="text"
-        iconType="questionInCircle"
-        aria-label={STATUS_POPOVER_TOOLTIP}
-      />
-    </EuiToolTip>
+    <EuiButtonIcon
+      onClick={onButtonClick}
+      color="text"
+      iconType="questionInCircle"
+      aria-label={STATUS_POPOVER_TOOLTIP}
+    />
   );
 
   const infoPopover = (
