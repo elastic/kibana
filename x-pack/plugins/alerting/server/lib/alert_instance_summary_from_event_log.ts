@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { mean } from 'lodash';
 import { SanitizedAlert, AlertInstanceSummary, AlertInstanceStatus } from '../types';
 import { IEvent } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
@@ -36,9 +37,11 @@ export function alertInstanceSummaryFromEventLog(
     lastRun: undefined,
     errorMessages: [],
     instances: {},
+    duration: {},
   };
 
   const instances = new Map<string, AlertInstanceStatus>();
+  const eventDurations: number[] = [];
 
   // loop through the events
   // should be sorted newest to oldest, we want oldest to newest, so reverse
@@ -64,6 +67,10 @@ export function alertInstanceSummaryFromEventLog(
         });
       } else {
         alertInstanceSummary.status = 'OK';
+      }
+
+      if (event?.event?.duration) {
+        eventDurations.push(event?.event?.duration);
       }
 
       continue;
@@ -107,6 +114,14 @@ export function alertInstanceSummaryFromEventLog(
     if (Array.from(instances.values()).some((instance) => instance.status === 'Active')) {
       alertInstanceSummary.status = 'Active';
     }
+  }
+
+  if (eventDurations.length > 0) {
+    alertInstanceSummary.duration = {
+      average: mean(eventDurations),
+      max: Math.max(...eventDurations),
+      min: Math.min(...eventDurations),
+    };
   }
 
   alertInstanceSummary.errorMessages.sort((a, b) => a.date.localeCompare(b.date));

@@ -8,7 +8,16 @@
 import React, { useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiHealth, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiHealth,
+  EuiSpacer,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCallOut,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
@@ -163,6 +172,52 @@ export function AlertInstances({
 
   return (
     <>
+      {alertInstanceSummary.duration && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiSpacer />
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.triggersActionsUI.sections.alertDetails.alerts.durationTitle',
+                {
+                  defaultMessage: 'Rule execution duration',
+                }
+              )}
+              color="primary"
+              iconType="clock"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.durationText"
+                  defaultMessage="Average duration (nanoseconds): {average}"
+                  values={{
+                    average: alertInstanceSummary.duration.average,
+                  }}
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.durationText"
+                  defaultMessage="Max duration (nanoseconds): {max}"
+                  values={{
+                    max: alertInstanceSummary.duration.max,
+                  }}
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.durationText"
+                  defaultMessage="Min duration (nanoseconds): {min}"
+                  values={{
+                    min: alertInstanceSummary.duration.min,
+                  }}
+                />
+              </p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+
       <EuiSpacer size="xl" />
       <input
         type="hidden"
