@@ -126,14 +126,14 @@ export function JSErrors() {
               )
             }
             description={I18LABELS.totalErrors}
-            isLoading={status !== 'success'}
+            isLoading={status === FETCH_STATUS.LOADING}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiBasicTable
         data-test-subj={'uxJsErrorTable'}
-        loading={status !== 'success'}
+        loading={status === FETCH_STATUS.LOADING}
         error={
           status === FETCH_STATUS.FAILURE
             ? i18n.translate('xpack.apm.rum.jsErrorsTable.errorMessage', {

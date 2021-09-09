@@ -180,7 +180,7 @@ export function ServiceInventory() {
     !userHasDismissedCallout;
 
   const isLoading = mainStatisticsStatus === FETCH_STATUS.LOADING;
-  const errorFetching = mainStatisticsStatus === FETCH_STATUS.FAILURE;
+  const isFailure = mainStatisticsStatus === FETCH_STATUS.FAILURE;
 
   return (
     <>
@@ -194,7 +194,7 @@ export function ServiceInventory() {
         <EuiFlexItem>
           <ServiceList
             isLoading={isLoading}
-            errorFetching={errorFetching}
+            isFailure={isFailure}
             items={mainStatisticsData.items}
             comparisonData={comparisonData}
             noItemsMessage={<NoServicesMessage status={mainStatisticsStatus} />}
