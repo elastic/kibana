@@ -10,7 +10,7 @@ import * as Rx from 'rxjs';
 import { mapTo } from 'rxjs/operators';
 
 import { asyncMap, asyncMapWithLimit } from './map';
-import { list } from './helpers.test';
+import { list } from './test_helpers';
 
 jest.mock('./observable');
 const mapWithLimit$: jest.Mock = jest.requireMock('./observable').mapWithLimit$;

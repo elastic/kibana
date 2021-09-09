@@ -9,7 +9,7 @@
 import * as Rx from 'rxjs';
 
 import { asyncForEach, asyncForEachWithLimit } from './for_each';
-import { list, sleep } from './helpers.test';
+import { list, sleep } from './test_helpers';
 
 jest.mock('./observable');
 const mockMapWithLimit$: jest.Mock = jest.requireMock('./observable').mapWithLimit$;

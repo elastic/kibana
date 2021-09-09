@@ -11,7 +11,7 @@ import { toArray } from 'rxjs/operators';
 import { lastValueFrom } from '../rxjs_7';
 
 import { map$, mapWithLimit$ } from './observable';
-import { list, sleep, generator } from './helpers.test';
+import { list, sleep, generator } from './test_helpers';
 
 beforeEach(() => {
   jest.clearAllMocks();
