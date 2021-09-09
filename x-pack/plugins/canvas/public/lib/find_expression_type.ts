@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-//import { datasourceRegistry } from '../expression_types/datasource';
-import { transformRegistry } from '../expression_types/transform';
-import { modelRegistry } from '../expression_types/model';
-import { viewRegistry } from '../expression_types/view';
+import { transformRegistry } from '../expression_types/transform_registry';
+import { modelRegistry } from '../expression_types/model_registry';
+import { viewRegistry } from '../expression_types/view_registry';
+import { ArgType, ExpressionType } from '../expression_types/types';
 
-const expressionTypes = ['view', 'model', 'transform', 'datasource'];
+const expressionTypes: ArgType[] = ['view', 'model', 'transform', 'datasource'];
 
-export function findExpressionType(name, type) {
+export function findExpressionType(name: string, type?: ArgType | null) {
   const checkTypes = expressionTypes.filter(
     (expressionType) => type == null || expressionType === type
   );
 
-  const matches = checkTypes.reduce((acc, checkType) => {
+  const matches = checkTypes.reduce((acc: ExpressionType[], checkType) => {
     let expression;
     switch (checkType) {
       case 'view':
