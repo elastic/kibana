@@ -61,6 +61,7 @@ interface EventDetailsPanelProps {
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
+  isDraggable?: boolean;
   isFlyoutView?: boolean;
   tabType: TimelineTabs;
   timelineId: string;
@@ -72,6 +73,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,
   handleOnEventClosed,
+  isDraggable,
   isFlyoutView,
   tabType,
   timelineId,
@@ -186,6 +188,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             detailsData={detailsData}
             event={expandedEvent}
             isAlert={isAlert}
+            isDraggable={isDraggable}
             loading={loading}
             timelineId={timelineId}
             timelineTabType="flyout"
@@ -217,6 +220,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         detailsData={detailsData}
         event={expandedEvent}
         isAlert={isAlert}
+        isDraggable={isDraggable}
         loading={loading}
         timelineId={timelineId}
         timelineTabType={tabType}

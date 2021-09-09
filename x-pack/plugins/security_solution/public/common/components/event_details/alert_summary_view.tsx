@@ -40,7 +40,7 @@ import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { getEmptyValue } from '../empty_value';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
-import { TimelineEventsDetailsItem } from '../../../../common';
+import { TimelineEventsDetailsItem, TimelineId } from '../../../../common';
 import { EventCode } from '../../../../common/ecs/event';
 
 export const Indent = styled.div`
@@ -133,6 +133,7 @@ const getDescription = ({
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
+        isDraggable={timelineId === TimelineId.active}
         values={values}
       />
       <ActionCell
