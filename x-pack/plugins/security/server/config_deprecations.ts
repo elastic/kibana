@@ -136,22 +136,25 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     }
   },
   (settings, fromPath, addDeprecation) => {
-    if (settings?.xpack?.security?.enabled === false) {
+    if ('enabled' in (settings?.xpack?.security || {})) {
       addDeprecation({
         title: i18n.translate('xpack.security.deprecations.enabledTitle', {
-          defaultMessage: 'Disabling the security plugin "xpack.security.enabled" is deprecated',
+          defaultMessage: 'Setting "xpack.security.enabled" is deprecated',
         }),
         message: i18n.translate('xpack.security.deprecations.enabledMessage', {
           defaultMessage:
-            'Disabling the security plugin "xpack.security.enabled" will only be supported by disable security in Elasticsearch.',
+            'Enabling or disabling the security plugin from Kibana using "xpack.security.enabled" is deprecated. This should instead be controlled via Elasticsearch.',
         }),
+        documentationUrl:
+          'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#general-security-settings',
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.enabled.manualStepOneMessage', {
-              defaultMessage: `Remove "xpack.security.enabled" from your Kibana configuration.`,
+              defaultMessage: 'Remove "xpack.security.enabled" from your Kibana configuration.',
             }),
             i18n.translate('xpack.security.deprecations.enabled.manualStepTwoMessage', {
-              defaultMessage: `To turn off security features, disable them in Elasticsearch instead.`,
+              defaultMessage:
+                'To turn security features on or off, set "xpack.security.enabled" accordingly in Elasticsearch instead.',
             }),
           ],
         },
