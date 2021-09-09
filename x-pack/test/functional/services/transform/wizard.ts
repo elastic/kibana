@@ -246,10 +246,6 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         log.warning('Not running color assertions in cloud');
         return;
       }
-      if (process.platform === 'win32') {
-        log.warning('Not running color assertions on Windows');
-        return;
-      }
 
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.

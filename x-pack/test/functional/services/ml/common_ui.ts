@@ -245,10 +245,7 @@ export function MachineLearningCommonUIProvider({
         log.warning('Not running color assertions in cloud');
         return;
       }
-      if (process.platform === 'win32') {
-        log.warning('Not running color assertions on Windows');
-        return;
-      }
+
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail(dataTestSubj);
 
