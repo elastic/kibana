@@ -7,7 +7,7 @@ To customize the data fields in your index pattern, you can add runtime fields t
 [[runtime-fields]]
 === Explore your data with runtime fields 
 
-Runtime fields are fields that you add to documents after you've ingested your data, and are evaluated at query time. With runtime fields, you allow for a smaller index and faster ingest time so that you can use less resources and reduce your operating costs. You can use runtime fields anywhere index patterns are used.
+Runtime fields are fields that you add to documents after you've ingested your data, and are evaluated at query time. With runtime fields, you allow for a smaller index and faster ingest time so that you can use less resources and reduce your operating costs. You can use runtime fields anywhere index patterns are used, for example, you can explore runtime fields in *Discover* and create visualizations with runtime fields for your dashboard.
 
 With runtime fields, you can:
 
@@ -18,10 +18,6 @@ With runtime fields, you can:
 * Start working on your data without understanding the structure. 
 
 * Add fields to existing documents without reindexing your data. 
-
-* Explore runtime field data in *Discover*.
-
-* Create visualizations with runtime fields to display on a dashboard.
 
 WARNING: Runtime fields can impact {kib} performance. When you run a query, {es} uses the fields you index first to shorten the response time. 
 Index the fields that you commonly search for and filter on, such as `timestamp`, then use runtime fields to limit the number of fields {es} uses to calculate values. 
@@ -50,7 +46,7 @@ To add runtime fields to your index patterns, open the index pattern you want to
 
 * To filter the fields list, enter the keyword in *Filter fields*.
 
-* To pin frequently used fields to the top of the list, hover over the field, then click image:images/stackManagement-indexPatterns-pinRuntimeField-7.15.png[Icon to pin field to the top of the list]
+* To pin frequently used fields to the top of the list, hover over the field, then click image:images/stackManagement-indexPatterns-pinRuntimeField-7.15.png[Icon to pin field to the top of the list].
 
 . Click *Create field*.
 
@@ -64,7 +60,7 @@ Try the runtime field examples on your own using the <<gs-get-data-into-kibana,*
 [[simple-hello-world-example]]
 ==== Return a keyword value
 
-Return a `Hello World!` value:
+Return `Hello World!`:
 
 [source,text]
 ----
@@ -105,7 +101,7 @@ emit("");
 [[replace-nulls-with-blanks]]
 ===== Replace nulls with blanks
 
-Replace `null` values with `None` values:
+Replace `null` values with `None`:
 
 [source,text]
 ----
