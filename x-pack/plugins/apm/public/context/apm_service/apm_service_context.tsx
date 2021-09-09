@@ -17,6 +17,7 @@ import { useServiceAgentFetcher } from './use_service_agent_fetcher';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
+import { useTimeRange } from '../../hooks/use_time_range';
 
 export type APMServiceAlert = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
@@ -39,11 +40,18 @@ export function ApmServiceContextProvider({
   const {
     path: { serviceName },
     query,
+    query: { rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName');
 
   const { agentName, runtimeName } = useServiceAgentFetcher(serviceName);
 
-  const transactionTypes = useServiceTransactionTypesFetcher(serviceName);
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const transactionTypes = useServiceTransactionTypesFetcher({
+    serviceName,
+    start,
+    end,
+  });
 
   const transactionType = getTransactionType({
     transactionType: query.transactionType,

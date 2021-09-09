@@ -25,6 +25,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         serviceName: 'opbeans-java',
         transactionType: 'request' as string | undefined,
         environment: 'ENVIRONMENT_ALL',
+        interval: '5m',
       },
     },
   });

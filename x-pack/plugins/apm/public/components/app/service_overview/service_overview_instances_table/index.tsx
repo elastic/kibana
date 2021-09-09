@@ -26,6 +26,7 @@ import {
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
+import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 
 type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
@@ -109,6 +110,10 @@ export function ServiceOverviewInstancesTable({
     setItemIdToExpandedRowMap(expandedRowMapValues);
   };
 
+  // Hide the spark plots if we're below 1600 px
+  const { isXl } = useBreakpoints();
+  const shouldShowSparkPlots = !isXl;
+
   const columns = getColumns({
     agentName,
     serviceName,
@@ -119,6 +124,7 @@ export function ServiceOverviewInstancesTable({
     itemIdToExpandedRowMap,
     toggleRowActionMenu,
     itemIdToOpenActionMenuRowMap,
+    shouldShowSparkPlots,
   });
 
   const pagination = {

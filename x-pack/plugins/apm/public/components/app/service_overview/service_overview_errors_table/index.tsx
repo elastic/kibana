@@ -23,7 +23,7 @@ import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
-import { getColumns } from './get_column';
+import { getColumns } from './get_columns';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {
