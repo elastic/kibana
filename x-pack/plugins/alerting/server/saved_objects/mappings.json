@@ -101,6 +101,9 @@
           "lastExecutionDate": {
             "type": "date"
           },
+          "lastDuration": {
+            "type": "long"
+          },
           "error": {
             "properties": {
               "reason": {

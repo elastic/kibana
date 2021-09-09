@@ -183,6 +183,7 @@ export interface AlertMeta extends SavedObjectAttributes {
 export interface RawAlertExecutionStatus extends SavedObjectAttributes {
   status: AlertExecutionStatuses;
   lastExecutionDate: string;
+  lastDuration: number | null;
   error: null | {
     reason: AlertExecutionStatusErrorReasons;
     message: string;

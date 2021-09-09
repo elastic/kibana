@@ -396,6 +396,25 @@ export const AlertsList: React.FunctionComponent = () => {
       },
     },
     {
+      field: 'executionStatus.lastDuration',
+      name: '',
+      sortable: false,
+      width: '60px',
+      render: (_executionStatus: AlertExecutionStatus, item: AlertTableItem) => {
+        return item.executionStatus.lastDuration &&
+          item.executionStatus.lastDuration > 0 /* 300000000000*/ ? (
+          <EuiIconTip
+            type="clock"
+            color="danger"
+            content={`Last rule execution took ${item.executionStatus.lastDuration} nanoseconds, which is unusually long!`}
+            position="right"
+          />
+        ) : (
+          <></>
+        );
+      },
+    },
+    {
       field: 'alertType',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle',

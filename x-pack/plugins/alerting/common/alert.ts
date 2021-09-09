@@ -35,6 +35,7 @@ export enum AlertExecutionStatusErrorReasons {
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
   lastExecutionDate: Date;
+  lastDuration?: number;
   error?: {
     reason: AlertExecutionStatusErrorReasons;
     message: string;

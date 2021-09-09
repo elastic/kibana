@@ -601,7 +601,7 @@ export class TaskRunner<
 
     const client = this.context.internalSavedObjectsRepository;
     const attributes = {
-      executionStatus: alertExecutionStatusToRaw(executionStatus),
+      executionStatus: alertExecutionStatusToRaw(executionStatus, event.event?.duration),
     };
 
     try {
