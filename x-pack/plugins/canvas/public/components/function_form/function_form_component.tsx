@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { FunctionComponent } from 'react';
+import { RenderArgData } from '../../expression_types/types';
 
-export const FunctionFormComponent = (props) => {
+type FunctionFormComponentProps = RenderArgData;
+
+export const FunctionFormComponent: FunctionComponent<FunctionFormComponentProps> = (props) => {
   const passedProps = {
+    name: props.name,
     argResolver: props.argResolver,
     args: props.args,
     argType: props.argType,
@@ -24,27 +27,8 @@ export const FunctionFormComponent = (props) => {
     onValueAdd: props.onValueAdd,
     onValueChange: props.onValueChange,
     onValueRemove: props.onValueRemove,
+    updateContext: props.updateContext,
   };
 
   return <div className="canvasFunctionForm">{props.expressionType.render(passedProps)}</div>;
-};
-
-FunctionFormComponent.propTypes = {
-  // props passed into expression type render functions
-  argResolver: PropTypes.func.isRequired,
-  args: PropTypes.object.isRequired,
-  argType: PropTypes.string.isRequired,
-  argTypeDef: PropTypes.object.isRequired,
-  filterGroups: PropTypes.array.isRequired,
-  context: PropTypes.object,
-  expressionIndex: PropTypes.number.isRequired,
-  expressionType: PropTypes.object.isRequired,
-  nextArgType: PropTypes.string,
-  nextExpressionType: PropTypes.object,
-  onAssetAdd: PropTypes.func.isRequired,
-  onValueAdd: PropTypes.func.isRequired,
-  onValueChange: PropTypes.func.isRequired,
-  onValueChange: PropTypes.func.isRequired,
-  onValueRemove: PropTypes.func.isRequired,
-  onValueRemove: PropTypes.func.isRequired,
 };
