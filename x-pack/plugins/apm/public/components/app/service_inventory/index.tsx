@@ -42,7 +42,7 @@ function useServicesFetcher() {
 
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
-  } = useApmParams('/services/:serviceName', '/services');
+  } = useApmParams('/services/{serviceName}', '/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
