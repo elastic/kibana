@@ -24,7 +24,7 @@ export interface ForcemergeFields {
 
 interface ShrinkFields {
   shrink: {
-    isUsingShardCount: boolean;
+    isUsingShardSize: boolean;
     maxPrimaryShardSizeUnits?: string;
   };
 }

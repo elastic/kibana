@@ -6,7 +6,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiToolTip, EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 
 import { get } from 'lodash';
@@ -26,18 +26,18 @@ interface Props {
 
 export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
   const globalFields = useGlobalFields();
-  const { setValue: setIsUsingShardCount } = globalFields[
-    `${phase}IsUsingShardCount` as 'hotIsUsingShardCount'
+  const { setValue: setIsUsingShardSize } = globalFields[
+    `${phase}IsUsingShardSize` as 'hotIsUsingShardSize'
   ];
   const { policy } = useEditPolicyContext();
-  const isUsingShardCountPath = `_meta.${phase}.shrink.isUsingShardCount`;
-  const [formData] = useFormData({ watch: [isUsingShardCountPath] });
-  const isUsingShardCount: boolean | undefined = get(formData, isUsingShardCountPath);
-  const toggleIsUsingShardCount = () => {
-    setIsUsingShardCount(!isUsingShardCount);
+  const isUsingShardSizePath = `_meta.${phase}.shrink.isUsingShardSize`;
+  const [formData] = useFormData({ watch: [isUsingShardSizePath] });
+  const isUsingShardSize: boolean | undefined = get(formData, isUsingShardSizePath);
+  const toggleIsUsingShardSize = () => {
+    setIsUsingShardSize(!isUsingShardSize);
   };
   const path = `phases.${phase}.actions.shrink.${
-    isUsingShardCount ? 'number_of_shards' : 'max_primary_shard_size'
+    isUsingShardSize ? 'max_primary_shard_size' : 'number_of_shards'
   }`;
   return (
     <DescribedFormRow
@@ -66,16 +66,16 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
       }}
       fullWidth
     >
-      {isUsingShardCount === undefined ? null : (
+      {isUsingShardSize === undefined ? null : (
         <UseField
           path={path}
           component={NumericField}
           componentProps={{
             fullWidth: false,
             euiFieldProps: {
-              'data-test-subj': `${phase}-primaryShard${isUsingShardCount ? 'Count' : 'Size'}`,
+              'data-test-subj': `${phase}-primaryShard${isUsingShardSize ? 'Size' : 'Count'}`,
               min: 1,
-              append: isUsingShardCount ? null : (
+              append: isUsingShardSize ? (
                 <UnitField
                   path={`_meta.${phase}.shrink.maxPrimaryShardSizeUnits`}
                   options={byteSizeUnits}
@@ -84,26 +84,28 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
                     'aria-label': i18nTexts.editPolicy.maxPrimaryShardSizeUnitsLabel,
                   }}
                 />
-              ),
+              ) : null,
             },
             labelAppend: (
               <EuiText size="xs">
-                <EuiLink
-                  onClick={() => toggleIsUsingShardCount()}
-                  data-test-subj={`${phase}-toggleIsUsingShardCount`}
-                >
-                  {isUsingShardCount ? (
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardSizeLabel"
-                      defaultMessage="Configure shard size"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardCountLabel"
-                      defaultMessage="Configure shard count"
-                    />
-                  )}
-                </EuiLink>
+                <EuiToolTip content={i18nTexts.editPolicy.shrinkCountOrSizeTooltip}>
+                  <EuiLink
+                    onClick={() => toggleIsUsingShardSize()}
+                    data-test-subj={`${phase}-toggleIsUsingShardSize`}
+                  >
+                    {isUsingShardSize ? (
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardCountLabel"
+                        defaultMessage="Configure shard count"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardSizeLabel"
+                        defaultMessage="Configure shard size"
+                      />
+                    )}
+                  </EuiLink>
+                </EuiToolTip>
               </EuiText>
             ),
           }}

@@ -113,11 +113,11 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
          */
         if (!updatedPolicy.phases.hot?.actions?.shrink) {
           delete hotPhaseActions.shrink;
-        } else if (_meta.hot.shrink.isUsingShardCount) {
-          delete hotPhaseActions.shrink!.max_primary_shard_size;
-        } else {
+        } else if (_meta.hot.shrink.isUsingShardSize) {
           delete hotPhaseActions.shrink!.number_of_shards;
           hotPhaseActions.shrink!.max_primary_shard_size = `${hotPhaseActions.shrink?.max_primary_shard_size}${_meta.hot?.shrink.maxPrimaryShardSizeUnits}`;
+        } else {
+          delete hotPhaseActions.shrink!.max_primary_shard_size;
         }
       } else {
         delete hotPhaseActions.rollover;
@@ -203,11 +203,11 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
        */
       if (!updatedPolicy.phases.warm?.actions?.shrink) {
         delete warmPhase.actions.shrink;
-      } else if (_meta.warm.shrink.isUsingShardCount) {
-        delete warmPhase.actions.shrink!.max_primary_shard_size;
-      } else {
+      } else if (_meta.warm.shrink.isUsingShardSize) {
         delete warmPhase.actions.shrink!.number_of_shards;
         warmPhase.actions.shrink!.max_primary_shard_size = `${warmPhase.actions.shrink?.max_primary_shard_size}${_meta.warm?.shrink.maxPrimaryShardSizeUnits}`;
+      } else {
+        delete warmPhase.actions.shrink!.max_primary_shard_size;
       }
     } else {
       delete draft.phases.warm;

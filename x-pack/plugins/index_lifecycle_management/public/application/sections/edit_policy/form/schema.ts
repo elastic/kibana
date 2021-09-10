@@ -191,7 +191,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
       shrink: {
-        isUsingShardCount: {
+        isUsingShardSize: {
           defaultValue: false,
         },
         maxPrimaryShardSizeUnits: {
@@ -233,7 +233,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
       shrink: {
-        isUsingShardCount: {
+        isUsingShardSize: {
           defaultValue: false,
         },
         maxPrimaryShardSizeUnits: {

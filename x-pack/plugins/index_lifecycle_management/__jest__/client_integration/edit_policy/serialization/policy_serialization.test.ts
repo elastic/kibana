@@ -171,7 +171,7 @@ describe('<EditPolicy /> serialization', () => {
       await actions.hot.toggleForceMerge();
       await actions.hot.setForcemergeSegmentsCount('123');
       await actions.hot.setBestCompression(true);
-      await actions.hot.setShrinkSize('20');
+      await actions.hot.setShrinkCount('2');
       await actions.hot.toggleReadonly();
       await actions.hot.setIndexPriority('123');
 
@@ -199,7 +199,7 @@ describe('<EditPolicy /> serialization', () => {
                   "priority": 123,
                 },
                 "shrink": Object {
-                  "max_primary_shard_size": "20gb",
+                  "number_of_shards": 2,
                 },
               },
               "min_age": "0ms",
@@ -274,7 +274,7 @@ describe('<EditPolicy /> serialization', () => {
       await actions.warm.setDataAllocation('node_attrs');
       await actions.warm.setSelectedNodeAttribute('test:123');
       await actions.warm.setReplicas('123');
-      await actions.warm.setShrinkSize('12');
+      await actions.warm.setShrinkCount('123');
       await actions.warm.toggleForceMerge();
       await actions.warm.setForcemergeSegmentsCount('123');
       await actions.warm.setBestCompression(true);
@@ -314,7 +314,7 @@ describe('<EditPolicy /> serialization', () => {
                   "priority": 123,
                 },
                 "shrink": Object {
-                  "max_primary_shard_size": "12gb",
+                  "number_of_shards": 123,
                 },
               },
               "min_age": "11d",
@@ -548,13 +548,13 @@ describe('<EditPolicy /> serialization', () => {
   });
 
   describe('shrink', () => {
-    test('shrink count', async () => {
+    test('shrink shard size', async () => {
       const { actions } = testBed;
-      await actions.hot.setShrinkCount('6');
+      await actions.hot.setShrinkSize('50');
 
       await actions.togglePhase('warm');
       await actions.warm.setMinAgeValue('11');
-      await actions.warm.setShrinkCount('3');
+      await actions.warm.setShrinkSize('100');
 
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
@@ -570,7 +570,7 @@ describe('<EditPolicy /> serialization', () => {
                   "max_primary_shard_size": "50gb",
                 },
                 "shrink": Object {
-                  "number_of_shards": 6,
+                  "max_primary_shard_size": "50gb",
                 },
               },
               "min_age": "0ms",
@@ -581,7 +581,7 @@ describe('<EditPolicy /> serialization', () => {
                   "priority": 50,
                 },
                 "shrink": Object {
-                  "number_of_shards": 3,
+                  "max_primary_shard_size": "100gb",
                 },
               },
               "min_age": "11d",

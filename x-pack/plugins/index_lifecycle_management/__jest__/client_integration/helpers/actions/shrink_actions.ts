@@ -16,7 +16,7 @@ export const createShrinkActions = (testBed: TestBed, phase: Phase) => {
   const shrinkCountSelector = `${phase}-primaryShardCount`;
 
   const toggleIsUsingShardCount = async () =>
-    await testBed.find(`${phase}-toggleIsUsingShardCount`).simulate('click');
+    await testBed.find(`${phase}-toggleIsUsingShardSize`).simulate('click');
   return {
     shrinkExists: () => exists(toggleShrinkSelector),
     setShrinkCount: async (value: string) => {

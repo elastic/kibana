@@ -9,8 +9,12 @@ import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
   editPolicy: {
-    shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.indexFieldLabel', {
+    shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.enableShrinkLabel', {
       defaultMessage: 'Shrink index',
+    }),
+    shrinkCountOrSizeTooltip: i18n.translate('xpack.indexLifecycleMgmt.shrink.countOrSizeTooltip', {
+      defaultMessage:
+        'Set a number of shards or the maximum primary shard size for the target index.',
     }),
     rolloverOffsetsHotPhaseTiming: i18n.translate(
       'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescription',
