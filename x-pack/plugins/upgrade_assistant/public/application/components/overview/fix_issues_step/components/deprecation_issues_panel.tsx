@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { EuiCard, EuiStat, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getDeprecationsUpperLimit } from '../../../../lib/utils';
 import { NoDeprecationIssues } from './no_deprecation_issues';
 
