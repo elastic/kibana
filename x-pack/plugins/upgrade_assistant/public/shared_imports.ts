@@ -18,8 +18,6 @@ export {
 
 export { Storage } from '../../../../src/plugins/kibana_utils/public';
 
-export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
-
 export { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 export { APP_WRAPPER_CLASS } from '../../../../src/core/public';

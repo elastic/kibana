@@ -49,7 +49,6 @@ describe('Overview - Fix deprecation logs step', () => {
 
   describe('Step status', () => {
     test(`It's complete when there are no deprecation logs since last checkpoint`, async () => {
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
 
       await act(async () => {
@@ -64,7 +63,6 @@ describe('Overview - Fix deprecation logs step', () => {
     });
 
     test(`It's incomplete when there are deprecation logs since last checkpoint`, async () => {
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 5 });
 
       await act(async () => {
@@ -79,7 +77,6 @@ describe('Overview - Fix deprecation logs step', () => {
     });
 
     test(`It's incomplete when log collection is disabled `, async () => {
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
 
       await act(async () => {
