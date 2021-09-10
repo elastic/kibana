@@ -37,6 +37,7 @@ export function defineActionTypes(
   actions.registerType(getDelayedActionType());
   actions.registerType(getFailingActionType());
   actions.registerType(getRateLimitedActionType());
+  actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
 }
 
@@ -159,6 +160,42 @@ function getRateLimitedActionType() {
     name: 'Test: Rate Limit',
     minimumLicenseRequired: 'gold',
     maxAttempts: 2,
+    validate: {
+      params: paramsSchema,
+    },
+    async executor({ config, params, services }) {
+      await services.scopedClusterClient.index({
+        index: params.index,
+        refresh: 'wait_for',
+        body: {
+          params,
+          config,
+          reference: params.reference,
+          source: 'action:test.rate-limit',
+        },
+      });
+      return {
+        status: 'error',
+        retry: new Date(params.retryAt),
+        actionId: '',
+      };
+    },
+  };
+  return result;
+}
+
+function getNoAttemptsRateLimitedActionType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+    retryAt: schema.number(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: ActionType<{}, {}, ParamsType> = {
+    id: 'test.no-attempts-rate-limit',
+    name: 'Test: Rate Limit',
+    minimumLicenseRequired: 'gold',
+    maxAttempts: 0,
     validate: {
       params: paramsSchema,
     },
