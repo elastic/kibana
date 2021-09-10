@@ -164,7 +164,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       addDeprecation({
         level: 'warning',
         title: i18n.translate('xpack.security.deprecations.idleTimeoutTitle', {
-          defaultMessage: 'The xpack.security.session.idleTimeout default is changing',
+          defaultMessage: 'The "xpack.security.session.idleTimeout" default is changing',
         }),
         message: i18n.translate('xpack.security.deprecations.idleTimeoutMessage', {
           defaultMessage: 'The session idle timeout will default to 1 hour in 8.0.',
@@ -188,7 +188,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       addDeprecation({
         level: 'warning',
         title: i18n.translate('xpack.security.deprecations.lifespanTitle', {
-          defaultMessage: 'The xpack.security.session.lifespan default is changing',
+          defaultMessage: 'The "xpack.security.session.lifespan" default is changing',
         }),
         message: i18n.translate('xpack.security.deprecations.lifespanMessage', {
           defaultMessage: 'The session lifespan will default to 30 days in 8.0.',
