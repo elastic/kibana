@@ -11,52 +11,10 @@ import { KibanaFeature } from '.';
 import { LicenseType, LICENSE_TYPE } from '../../licensing/server';
 
 describe('buildOSSFeatures', () => {
-  it('returns features including timelion', () => {
-    expect(
-      buildOSSFeatures({
-        savedObjectTypes: ['foo', 'bar'],
-        includeTimelion: true,
-        includeReporting: false,
-      }).map((f) => f.id)
-    ).toMatchInlineSnapshot(`
-Array [
-  "discover",
-  "visualize",
-  "dashboard",
-  "dev_tools",
-  "advancedSettings",
-  "indexPatterns",
-  "savedObjectsManagement",
-  "timelion",
-]
-`);
-  });
-
-  it('returns features excluding timelion', () => {
-    expect(
-      buildOSSFeatures({
-        savedObjectTypes: ['foo', 'bar'],
-        includeTimelion: false,
-        includeReporting: false,
-      }).map((f) => f.id)
-    ).toMatchInlineSnapshot(`
-Array [
-  "discover",
-  "visualize",
-  "dashboard",
-  "dev_tools",
-  "advancedSettings",
-  "indexPatterns",
-  "savedObjectsManagement",
-]
-`);
-  });
-
   it('returns features including reporting subfeatures', () => {
     expect(
       buildOSSFeatures({
         savedObjectTypes: ['foo', 'bar'],
-        includeTimelion: false,
         includeReporting: true,
       }).map(({ id, subFeatures }) => ({ id, subFeatures }))
     ).toMatchSnapshot();
@@ -66,7 +24,6 @@ Array [
     expect(
       buildOSSFeatures({
         savedObjectTypes: ['foo', 'bar'],
-        includeTimelion: false,
         includeReporting: false,
       }).map(({ id, subFeatures }) => ({ id, subFeatures }))
     ).toMatchSnapshot();
@@ -74,7 +31,6 @@ Array [
 
   const features = buildOSSFeatures({
     savedObjectTypes: ['foo', 'bar'],
-    includeTimelion: true,
     includeReporting: false,
   });
   features.forEach((featureConfig) => {
