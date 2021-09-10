@@ -36,31 +36,6 @@ const i18nTexts = {
       defaultMessage: 'Critical',
     }
   ),
-  getLoadingMessage: (deprecationSource: string) =>
-    i18n.translate('xpack.upgradeAssistant.deprecationStats.loadingText', {
-      defaultMessage: 'Loading {deprecationSource} deprecation stats…',
-      values: {
-        deprecationSource,
-      },
-    }),
-  getCriticalDeprecationsMessage: (deprecationSource: string, criticalDeprecations: number) =>
-    i18n.translate('xpack.upgradeAssistant.deprecationStats.criticalDeprecationsLabel', {
-      defaultMessage:
-        '{deprecationSource} has {criticalDeprecations} critical {criticalDeprecations, plural, one {deprecation} other {deprecations}}',
-      values: {
-        deprecationSource,
-        criticalDeprecations,
-      },
-    }),
-  getWarningDeprecationsMessage: (deprecationSource: string, warningDeprecations: number) =>
-    i18n.translate('xpack.upgradeAssistant.deprecationStats.getWarningDeprecationsMessage', {
-      defaultMessage:
-        '{deprecationSource} has {warningDeprecations} warning {warningDeprecations, plural, one {deprecation} other {deprecations}}',
-      values: {
-        deprecationSource,
-        warningDeprecations,
-      },
-    }),
 };
 
 interface Props {
@@ -136,20 +111,7 @@ export const DeprecationIssuesPanel = (props: Props) => {
               description={i18nTexts.criticalDeprecationsTitle}
               titleColor="danger"
               isLoading={isLoading}
-            >
-              {!hasError && (
-                <EuiScreenReaderOnly>
-                  <p>
-                    {isLoading
-                      ? i18nTexts.getLoadingMessage(deprecationSource)
-                      : i18nTexts.getCriticalDeprecationsMessage(
-                          deprecationSource,
-                          criticalDeprecationsCount
-                        )}
-                  </p>
-                </EuiScreenReaderOnly>
-              )}
-            </EuiStat>
+            />
           </EuiFlexItem>
 
           <EuiFlexItem>
@@ -171,20 +133,7 @@ export const DeprecationIssuesPanel = (props: Props) => {
               titleElement="span"
               description={i18nTexts.warningDeprecationsTitle}
               isLoading={isLoading}
-            >
-              {!hasError && (
-                <EuiScreenReaderOnly>
-                  <p>
-                    {isLoading
-                      ? i18nTexts.getLoadingMessage(deprecationSource)
-                      : i18nTexts.getWarningDeprecationsMessage(
-                          deprecationSource,
-                          warningDeprecationsCount
-                        )}
-                  </p>
-                </EuiScreenReaderOnly>
-              )}
-            </EuiStat>
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
