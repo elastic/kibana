@@ -26,6 +26,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const supertest = getService('supertest');
+  const supertestNoAuth = getService('supertestWithoutAuth');
   const esSupertest = getService('esSupertest');
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -102,6 +103,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
+  const getTestReportingUserAuth = () => ({
+    username: 'reporting_user',
+    password: 'reporting_user-password',
+  });
+
   const createTestReportingUser = async () => {
     await security.user.create('reporting_user', {
       password: 'reporting_user-password',
@@ -160,12 +166,30 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const scheduleReport = async (
     exportType: string,
     postUrl: string,
-    interval: ScheduleIntervalSchemaType
+    interval: ScheduleIntervalSchemaType,
+    auth?: { username: string; password: string }
   ) => {
-    return await supertest
-      .post(`/api/reporting/schedule/${exportType}`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ post_url: postUrl, interval });
+    const path = `/api/reporting/schedule/${exportType}`;
+    let response;
+    if (auth) {
+      // non-superuser
+      response = await supertestNoAuth
+        .post(path)
+        .auth(auth.username, auth.password)
+        .set('kbn-xsrf', 'xxx')
+        .send({ post_url: postUrl, interval });
+    } else {
+      // elastic user
+      response = await supertest
+        .post(path)
+        .set('kbn-xsrf', 'xxx')
+        .send({ post_url: postUrl, interval });
+    }
+
+    log.debug('Waiting for Task Manager to refresh...');
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    return response;
   };
 
   const deleteAllReports = async () => {
@@ -196,6 +220,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
         })
         .expect(200);
     });
+
+    log.debug('Waiting for Task Manager to refresh...');
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   };
 
   const checkIlmMigrationStatus = async () => {
@@ -239,6 +266,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     createDataAnalystRole,
     createDataAnalyst,
     createTestReportingUserRole,
+    getTestReportingUserAuth,
     createTestReportingUser,
     downloadCsv,
     generatePdf,

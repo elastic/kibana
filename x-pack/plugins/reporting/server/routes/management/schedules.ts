@@ -30,7 +30,7 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
         query: schema.object({}),
       },
     },
-    authorizedUserPreRouting(reporting, async (_user, context, _req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, _req, res) => {
       if (!context.reporting) {
         return handleUnavailable(res);
       }
@@ -40,7 +40,18 @@ export function registerScheduleInfoRoutes(reporting: ReportingCore) {
       const { taskManager } = await reporting.getPluginStartDeps();
       const { docs } = await taskManager.fetch({
         size: 100,
-        query: { constant_score: { filter: { term: { 'task.taskType': 'report:execute' } } } },
+        query: {
+          constant_score: {
+            filter: {
+              bool: {
+                must: [
+                  { term: { 'task.taskType': 'report:execute' } },
+                  { term: { 'task.user': user ? user.username : user } },
+                ],
+              },
+            },
+          },
+        },
       });
 
       const tasks = docs.map((task) => {
