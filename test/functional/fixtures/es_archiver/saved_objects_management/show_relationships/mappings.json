@@ -372,31 +372,31 @@
                 "type": "boolean"
               }
             }
-          }
-        },
-        "type": {
-          "type": "keyword"
-        },
-        "updated_at": {
-          "type": "date"
-        },
-        "url": {
-          "properties": {
-            "accessCount": {
-              "type": "long"
-            },
-            "accessDate": {
-              "type": "date"
-            },
-            "createDate": {
-              "type": "date"
-            },
-            "url": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "updated_at": {
+            "type": "date"
+          },
+          "url": {
+            "properties": {
+              "accessCount": {
+                "type": "long"
+              },
+              "accessDate": {
+                "type": "date"
+              },
+              "createDate": {
+                "type": "date"
+              },
+              "url": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 2048
+                  }
                 }
               }
             }
