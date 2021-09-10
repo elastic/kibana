@@ -90,7 +90,7 @@ describe('SearchLogic', () => {
         jest.runAllTimers();
         await nextTick();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/some-engine/search', {
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines/some-engine/search', {
           query: { query: 'hello world' },
         });
         expect(logic.actions.onSearch).toHaveBeenCalledWith(MOCK_SEARCH_RESPONSE);

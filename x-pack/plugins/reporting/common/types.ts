@@ -76,7 +76,7 @@ export interface BasePayload extends BaseParams {
 
 export interface ReportSource {
   /*
-   * Required fields: populated in enqueue_job when the request comes in to
+   * Required fields: populated in RequestHandler.enqueueJob when the request comes in to
    * generate the report
    */
   jobtype: string; // refers to `ExportTypeDefinition.jobType`
