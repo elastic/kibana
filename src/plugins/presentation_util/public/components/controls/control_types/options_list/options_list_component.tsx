@@ -15,7 +15,7 @@ import { OptionsListStrings } from './options_list_strings';
 import { OptionsListPopover } from './options_list_popover_component';
 
 import './options_list.scss';
-import { useStateObservable } from '../../use_state_observable';
+import { useStateObservable } from '../../hooks/use_state_observable';
 
 export interface OptionsListComponentState {
   availableOptions?: EuiSelectableOption[];

@@ -17,7 +17,7 @@ import { esFilters } from '../../../../../../data/public';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
 import { Embeddable } from '../../../../../../embeddable/public';
-import { InputControlInput, InputControlOutput } from '../../embeddable/types';
+import { InputControlInput, InputControlOutput } from '../../types';
 
 const toggleAvailableOptions = (
   indices: number[],
@@ -58,7 +58,7 @@ export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 export interface OptionsListEmbeddableInput extends InputControlInput {
   field: string;
   indexPattern: string;
-  multiSelect: boolean;
+  singleSelect?: boolean;
   defaultSelections?: string[];
 }
 export class OptionsListEmbeddable extends Embeddable<

@@ -1,10 +1,13 @@
 .controlGroup {
-  transition: background-color 150ms ease;
-  background-color: none;
+  margin-left: $euiSizeXS;
 }
 
 .controlFrame--cloneWrapper {
   width: max-content;
+
+  .euiFormLabel {
+    cursor: grabbing !important; // prevents cursor flickering while dragging the clone
+  }
 
   .controlFrame--formControlLayout {
     &-clone {
@@ -24,6 +27,27 @@
   position: relative;
   display: block;
 
+  .controlFrame--formControlLayout {
+    width: 100%;
+    min-width: $euiSize * 14;
+    transition:background-color .1s, color .1s;
+
+    &:not(.controlFrame--formControlLayout-clone) {
+      .controlFrame--dragHandle {
+        cursor: grab;
+      }
+    }
+
+    .controlFrame--control {
+      height: 100%;
+      transition: opacity .1s;
+
+      &.controlFrame--twoLine {
+        width: 100%;
+      }
+    }
+  }
+
   &-small {
     width: $euiSize * 14;
   }
@@ -34,6 +58,31 @@
 
   &-large {
     width: $euiSize * 50;
+  }
+
+  &-insertBefore,
+  &-insertAfter {
+    .controlFrame--formControlLayout:after {
+      content: '';
+      position: absolute;
+      background-color: transparentize($euiColorSecondary, .5);
+      border-radius: $euiBorderRadius;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+    }
+  }
+
+  &-insertBefore {
+    .controlFrame--formControlLayout:after {
+      left: -$euiSizeS;
+    }
+  }
+
+  &-insertAfter {
+    .controlFrame--formControlLayout:after {
+      right: -$euiSizeS;
+    }
   }
 
   .controlFrame--floatingActions {
@@ -69,34 +118,20 @@
     }
   }
 
-  .controlFrame--formControlLayout {
-    width: 100%;
-    min-width: $euiSize * 14;
-
-    &-over {
-      box-shadow: 0 0 0 1pt transparentize($euiColorSecondary, .5);
+  &-isDragging {
+    .euiFormRow__labelWrapper {
+      opacity: 0;
     }
-
-    &-isDragging {
+    .controlFrame--formControlLayout {
       background-color: $euiColorEmptyShade !important;
-      color: $euiColorLightShade !important;
-    }
+      color: transparent !important;
 
-    &:not(.controlFrame--formControlLayout-clone) {
-      .controlFrame--dragHandle {
-        cursor: grab;
-      }
-    }
-
-    .controlFrame--control {
-      height: 100%;
-
-      &-isDragging {
-        opacity: .3;
+      .euiFormLabel {
+        opacity: 0;
       }
 
-      &.controlFrame--twoLine {
-        width: 100%;
+      .controlFrame--control {
+        opacity: 0;
       }
     }
   }

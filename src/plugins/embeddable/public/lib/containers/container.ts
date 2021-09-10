@@ -45,6 +45,7 @@ export abstract class Container<
     parent?: Container
   ) {
     super(input, output, parent);
+    this.getFactory = getFactory;
     this.subscription = this.getInput$()
       // At each update event, get both the previous and current state
       .pipe(startWith(input), pairwise())

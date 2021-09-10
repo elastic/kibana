@@ -1,0 +1,165 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  arrayMove,
+  SortableContext,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  LayoutMeasuringStrategy,
+} from '@dnd-kit/core';
+
+import './control_group.scss';
+import classNames from 'classnames';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { OPTIONS_LIST_CONTROL } from '../../control_types/options_list/options_list_embeddable';
+import { ControlClone, SortableControl } from './control_group_sortable_item';
+import { ControlGroupContainer } from '../embeddable/control_group_container';
+import { PresentationOverlaysService } from '../../../../services/overlays';
+import { toMountPoint } from '../../../../../../kibana_react/public';
+import { ControlWidth } from '../control_group_constants';
+
+export interface InputControlMeta {
+  id: string;
+  width: ControlWidth;
+  title: string;
+}
+
+interface ControlGroupProps {
+  openFlyout: PresentationOverlaysService['openFlyout'];
+  controlGroupContainer: ControlGroupContainer;
+}
+
+export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroupProps) => {
+  const [controlIds, setControlIds] = useState<string[]>([]);
+
+  // sync controlIds every time input panels change
+  useEffect(() => {
+    const subscription = controlGroupContainer.getInput$().subscribe(() =>
+      setControlIds((currentIds) => {
+        // sync control Ids with panels from container input.
+        const { panels } = controlGroupContainer.getInput();
+        const newIds: string[] = [];
+        const allIds = [...currentIds, ...Object.keys(panels)];
+        allIds.forEach((id) => {
+          const currentIndex = currentIds.indexOf(id);
+          if (!panels[id] && currentIndex !== -1) {
+            currentIds.splice(currentIndex, 1);
+          }
+          if (currentIndex === -1 && Boolean(panels[id])) {
+            newIds.push(id);
+          }
+        });
+        return [...currentIds, ...newIds];
+      })
+    );
+    return () => subscription.unsubscribe();
+  }, [controlGroupContainer]);
+
+  // const [controlStyle, setControlStyle] = useState<ControlStyle>('oneLine');
+
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
+  const draggingIndex = useMemo(() => (draggingId ? controlIds.indexOf(draggingId) : -1), [
+    controlIds,
+    draggingId,
+  ]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const onDragEnd = ({ over }: DragEndEvent) => {
+    if (over) {
+      const overIndex = controlIds.indexOf(over.id);
+      if (draggingIndex !== overIndex) {
+        const newIndex = overIndex;
+        setControlIds((currentControlIds) => arrayMove(currentControlIds, draggingIndex, newIndex));
+      }
+    }
+    setDraggingId(null);
+  };
+
+  return (
+    <>
+      <EuiFlexGroup wrap={false} direction="row" alignItems="center">
+        <EuiFlexItem>
+          <DndContext
+            onDragStart={({ active }) => setDraggingId(active.id)}
+            onDragEnd={onDragEnd}
+            onDragCancel={() => setDraggingId(null)}
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            layoutMeasuring={{
+              strategy: LayoutMeasuringStrategy.Always,
+            }}
+          >
+            <SortableContext items={controlIds} strategy={rectSortingStrategy}>
+              <EuiFlexGroup
+                className={classNames('controlGroup', { 'controlGroup-isDragging': draggingId })}
+                alignItems="center"
+                gutterSize={'m'}
+                wrap={true}
+              >
+                {controlIds.map((controlId, index) => (
+                  <SortableControl
+                    onEdit={() => openFlyout(toMountPoint(<div>TEST EDITING {controlId}</div>))}
+                    onRemove={() => controlGroupContainer.removeEmbeddable(controlId)}
+                    dragInfo={{ index, draggingIndex }}
+                    container={controlGroupContainer}
+                    controlStyle={'oneLine'}
+                    embeddableId={controlId}
+                    width={'auto'}
+                    key={controlId}
+                  />
+                ))}
+              </EuiFlexGroup>
+            </SortableContext>
+            <DragOverlay>
+              {draggingId ? (
+                <ControlClone embeddableId={draggingId} container={controlGroupContainer} />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {/* <ManageControlGroupComponent
+            controlMeta={controlMeta}
+            controlStyle={controlStyle}
+            setControlMeta={setControlMeta}
+            setControlStyle={setControlStyle}
+          /> */}
+          <EuiButton onClick={() => controlGroupContainer.createNewControl(OPTIONS_LIST_CONTROL)}>
+            create hello
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {/* {!isNil(editingIndex) && (
+        <ManageControlComponent
+          controlMeta={controlMeta[editingIndex]}
+          index={editingIndex}
+          setControlMeta={setControlMeta}
+          onClose={() => setEditingIndex(undefined)}
+        />
+      )} */}
+    </>
+  );
+};

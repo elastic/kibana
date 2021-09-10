@@ -26,7 +26,7 @@ import {
   EuiFlyoutBody,
 } from '@elastic/eui';
 import { ControlGroupStrings } from '../control_group_strings';
-import { InputControlMeta, ControlWidth } from '../control_group_component';
+import { InputControlMeta, ControlWidth } from '../component/control_group_component';
 import { widthOptions } from './manage_control_group_component';
 
 interface ManageControlProps {

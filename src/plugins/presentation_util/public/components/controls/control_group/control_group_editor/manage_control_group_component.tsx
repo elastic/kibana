@@ -22,7 +22,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlStyle, ControlWidth, InputControlMeta } from '../control_group_component';
+import { ControlStyle, ControlWidth, InputControlMeta } from '../component/control_group_component';
 
 export const widthOptions = [
   {
