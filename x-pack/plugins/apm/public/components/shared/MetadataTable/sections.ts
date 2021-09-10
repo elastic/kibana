@@ -21,6 +21,14 @@ export const LABELS: Section = {
   }),
 };
 
+export const EVENT: Section = {
+  key: 'event',
+  label: i18n.translate('xpack.apm.metadataTable.section.eventLabel', {
+    defaultMessage: 'event',
+  }),
+  properties: ['outcome'],
+};
+
 export const HTTP: Section = {
   key: 'http',
   label: i18n.translate('xpack.apm.metadataTable.section.httpLabel', {
