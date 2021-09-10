@@ -45,7 +45,7 @@ import { getTopNavConfig } from '../top_nav_config';
 import { MapQuery } from '../../../../common/descriptor_types';
 import { goToSpecifiedPath } from '../../../render_app';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { getFullPath, APP_ID } from '../../../../common/constants';
+import { getFullPath, getEditPath, APP_ID } from '../../../../common/constants';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
@@ -447,12 +447,12 @@ export class MapApp extends React.Component<Props, State> {
     if (this.props.spacesApi && resolvedSavedObject?.outcome === 'conflict') {
       const currentObjectId = resolvedSavedObject.saved_object.id;
       const otherObjectId = resolvedSavedObject.alias_target_id!;
-      const otherObjectPath = this.props.http.basePath.prepend(getFullPath(otherObjectId));
+      const otherObjectPath = getEditPath(otherObjectId);
       this.setState({
         savedObjectWarning: (
           <>
             {this.props.spacesApi.ui.components.getLegacyUrlConflict({
-              objectNoun: 'Saved map',
+              objectNoun: 'saved map',
               currentObjectId,
               otherObjectId,
               otherObjectPath,
