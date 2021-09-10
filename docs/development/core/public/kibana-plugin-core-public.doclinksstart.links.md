@@ -190,6 +190,9 @@ readonly links: {
         }>;
         readonly observability: Readonly<{
             guide: string;
+            infrastructureThreshold: string;
+            logsThreshold: string;
+            metricsThreshold: string;
             monitorStatus: string;
             monitorUptime: string;
             tlsCertificate: string;

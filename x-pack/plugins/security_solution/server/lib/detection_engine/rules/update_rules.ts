@@ -14,11 +14,12 @@ import { readRules } from './read_rules';
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
-import { InternalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
+import { RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
 import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 export const updateRules = async ({
+  isRuleRegistryEnabled,
   spaceId,
   rulesClient,
   ruleStatusClient,
@@ -26,6 +27,7 @@ export const updateRules = async ({
   ruleUpdate,
 }: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
   const existingRule = await readRules({
+    isRuleRegistryEnabled,
     rulesClient,
     ruleId: ruleUpdate.rule_id,
     id: ruleUpdate.id,
@@ -36,7 +38,7 @@ export const updateRules = async ({
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
-  const newInternalRule: InternalRuleUpdate = {
+  const newInternalRule = {
     name: ruleUpdate.name,
     tags: addTags(ruleUpdate.tags ?? [], existingRule.params.ruleId, existingRule.params.immutable),
     params: {
@@ -63,6 +65,7 @@ export const updateRules = async ({
       timestampOverride: ruleUpdate.timestamp_override,
       to: ruleUpdate.to ?? 'now',
       references: ruleUpdate.references ?? [],
+      namespace: ruleUpdate.namespace,
       note: ruleUpdate.note,
       // Always use the version from the request if specified. If it isn't specified, leave immutable rules alone and
       // increment the version of mutable rules by 1.

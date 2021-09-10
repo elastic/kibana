@@ -482,7 +482,7 @@
             "children": [
               {
                 "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable._dispatchSetQuery.$1.forceRefresh",
+                "id": "def-public.MapEmbeddable._dispatchSetQuery.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ forceRefresh }",
@@ -492,7 +492,7 @@
                 "children": [
                   {
                     "parentPluginId": "maps",
-                    "id": "def-public.MapEmbeddable._dispatchSetQuery.$1.forceRefresh.forceRefresh",
+                    "id": "def-public.MapEmbeddable._dispatchSetQuery.$1.forceRefresh",
                     "type": "boolean",
                     "tags": [],
                     "label": "forceRefresh",
@@ -1036,7 +1036,7 @@
             "children": [
               {
                 "parentPluginId": "maps",
-                "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerIdfeatureIdmbProperties",
+                "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    layerId,\n    featureId,\n    mbProperties,\n  }",
@@ -1046,7 +1046,7 @@
                 "children": [
                   {
                     "parentPluginId": "maps",
-                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerIdfeatureIdmbProperties.layerId",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerId",
                     "type": "string",
                     "tags": [],
                     "label": "layerId",
@@ -1056,7 +1056,7 @@
                   },
                   {
                     "parentPluginId": "maps",
-                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerIdfeatureIdmbProperties.featureId",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.featureId",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "featureId",
@@ -1069,7 +1069,7 @@
                   },
                   {
                     "parentPluginId": "maps",
-                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerIdfeatureIdmbProperties.mbProperties",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.mbProperties",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "mbProperties",
@@ -1100,7 +1100,7 @@
             "children": [
               {
                 "parentPluginId": "maps",
-                "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.layerIdfeatureId",
+                "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    layerId,\n    featureId,\n  }",
@@ -1110,7 +1110,7 @@
                 "children": [
                   {
                     "parentPluginId": "maps",
-                    "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.layerIdfeatureId.layerId",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.layerId",
                     "type": "string",
                     "tags": [],
                     "label": "layerId",
@@ -1120,7 +1120,7 @@
                   },
                   {
                     "parentPluginId": "maps",
-                    "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.layerIdfeatureId.featureId",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.featureId",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "featureId",
@@ -2567,7 +2567,7 @@
         "children": [
           {
             "parentPluginId": "maps",
-            "id": "def-common.value",
+            "id": "def-common.FieldFormatter.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "value",
