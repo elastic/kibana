@@ -28,6 +28,7 @@ exports[`should not render fields-editor when there is no layername 1`] = `
         anchorClassName="eui-alignMiddle"
         content="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <span>
@@ -84,6 +85,7 @@ exports[`should render with fields 1`] = `
         anchorClassName="eui-alignMiddle"
         content="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <span>
@@ -132,6 +134,7 @@ exports[`should render with fields 1`] = `
           </React.Fragment>
         }
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <span>
@@ -182,6 +185,7 @@ exports[`should render without fields 1`] = `
         anchorClassName="eui-alignMiddle"
         content="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <span>

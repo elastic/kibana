@@ -14,7 +14,7 @@ import { SavedObject } from 'src/core/types';
 import { buildEsQuery, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
-import { ML_ALERT_TYPE_ID } from '../../../../common/constants';
+import { ML_RULE_TYPE_ID } from '../../../../common/constants';
 import { SecurityRuleRegistry } from '../../../plugin';
 
 const createSecurityMlRuleType = createPersistenceRuleTypeFactory<SecurityRuleRegistry>();
@@ -38,7 +38,7 @@ import { MachineLearningRuleAttributes } from '../signals/types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../signals/utils';
 
 export const mlAlertType = createSecurityMlRuleType({
-  id: ML_ALERT_TYPE_ID,
+  id: ML_RULE_TYPE_ID,
   name: 'Machine Learning Rule',
   validate: {
     params: schema.object({
