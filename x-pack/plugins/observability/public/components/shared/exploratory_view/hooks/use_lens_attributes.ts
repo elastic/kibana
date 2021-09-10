@@ -34,7 +34,7 @@ export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitio
 };
 
 export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null => {
-  const { storage, autoApply, allSeries, lastRefresh, reportType } = useSeriesStorage();
+  const { storage, allSeries, lastRefresh, reportType } = useSeriesStorage();
 
   const { indexPatterns } = useAppIndexPatternContext();
 
@@ -45,9 +45,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
       return null;
     }
 
-    const allSeriesT: AllSeries = autoApply
-      ? allSeries
-      : convertAllShortSeries(storage.get(allSeriesKey) ?? []);
+    const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
 
     const layerConfigs: LayerConfig[] = [];
 
@@ -95,5 +93,5 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
     const lensAttributes = new LensAttributes(layerConfigs);
 
     return lensAttributes.getJSON(lastRefresh);
-  }, [indexPatterns, allSeries, reportType, autoApply, storage, theme, lastRefresh]);
+  }, [indexPatterns, allSeries, reportType, storage, theme, lastRefresh]);
 };

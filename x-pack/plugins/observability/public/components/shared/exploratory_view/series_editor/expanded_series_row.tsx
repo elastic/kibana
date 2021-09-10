@@ -13,7 +13,7 @@ import { SeriesConfig, SeriesUrl } from '../types';
 import { ReportDefinitionCol } from './columns/report_definition_col';
 import { OperationTypeSelect } from './columns/operation_type_select';
 import { parseCustomFieldName } from '../configurations/lens_attributes';
-import { SeriesFilter } from '../series_viewer/columns/series_filter';
+import { SeriesFilter } from './columns/series_filter';
 
 function getColumnType(seriesConfig: SeriesConfig, selectedMetricField?: string) {
   const { columnType } = parseCustomFieldName(seriesConfig, selectedMetricField);

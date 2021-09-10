@@ -7,14 +7,12 @@
 
 import React from 'react';
 import { isEmpty } from 'lodash';
-import { EuiBadge, EuiBadgeGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useRouteMatch } from 'react-router-dom';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SeriesChartTypes } from './chart_types';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { SeriesColorPicker } from '../../components/series_color_picker';
-import { dataTypes } from '../../series_editor/columns/data_type_select';
+import { SeriesChartTypes } from './chart_type_select';
 
 interface Props {
   seriesId: number;
@@ -23,8 +21,6 @@ interface Props {
 }
 
 export function SeriesInfo({ seriesId, series, seriesConfig }: Props) {
-  const isConfigure = !!useRouteMatch('/exploratory-view/configure');
-
   const { dataType, reportDefinitions, selectedMetricField } = series;
 
   const { loading } = useAppIndexPatternContext();
@@ -51,7 +47,7 @@ export function SeriesInfo({ seriesId, series, seriesConfig }: Props) {
     incompleteMessage = MISSING_DATA_TYPE_LABEL;
   }
 
-  if (!isIncomplete && seriesConfig && isConfigure) {
+  if (!isIncomplete && seriesConfig) {
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -69,13 +65,6 @@ export function SeriesInfo({ seriesId, series, seriesConfig }: Props) {
       <EuiFlexItem grow={false}>
         {isIncomplete && <EuiBadge color="warning">{incompleteMessage}</EuiBadge>}
       </EuiFlexItem>
-      {!isConfigure && (
-        <EuiFlexItem>
-          <EuiBadgeGroup>
-            <EuiBadge>{dataTypes.find(({ id }) => id === dataType)!.label}</EuiBadge>
-          </EuiBadgeGroup>
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 }

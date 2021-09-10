@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import { mockAppIndexPattern, mockIndexPattern, mockUxSeries, render } from '../rtl_helpers';
+import { mockAppIndexPattern, mockIndexPattern, mockUxSeries, render } from '../../rtl_helpers';
 import { SelectedFilters } from './selected_filters';
-import { getDefaultConfigs } from '../configurations/default_configs';
-import { USER_AGENT_NAME } from '../configurations/constants/elasticsearch_fieldnames';
+import { getDefaultConfigs } from '../../configurations/default_configs';
+import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('SelectedFilters', function () {
   mockAppIndexPattern();

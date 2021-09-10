@@ -50,7 +50,7 @@ export function createExploratoryViewUrl(
 
   return (
     baseHref +
-    `/app/observability/exploratory-view/configure#?reportType=${reportType}&sr=${rison.encode(
+    `/app/observability/exploratory-view/#?reportType=${reportType}&sr=${rison.encode(
       (allShortSeries as unknown) as RisonValue
     )}`
   );

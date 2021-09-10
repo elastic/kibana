@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { EuiFilterGroup, EuiSpacer } from '@elastic/eui';
-import { useRouteMatch } from 'react-router-dom';
 import { FilterExpanded } from './filter_expanded';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { FieldLabels } from '../../configurations/constants/constants';
-import { SelectedFilters } from '../selected_filters';
+import { SelectedFilters } from './selected_filters';
 
 interface Props {
   seriesId: number;
@@ -27,8 +26,6 @@ export interface Field {
 }
 
 export function SeriesFilter({ series, seriesConfig, seriesId }: Props) {
-  const isPreview = !!useRouteMatch('/exploratory-view/preview');
-
   const options: Field[] = seriesConfig.filterFields.map((field) => {
     if (typeof field === 'string') {
       return { label: seriesConfig.labels?.[field] ?? FieldLabels[field], field };
@@ -44,25 +41,21 @@ export function SeriesFilter({ series, seriesConfig, seriesId }: Props) {
 
   return (
     <>
-      {!isPreview && (
-        <>
-          <EuiFilterGroup>
-            {options.map((opt) => (
-              <FilterExpanded
-                series={series}
-                key={opt.label}
-                seriesId={seriesId}
-                field={opt.field}
-                label={opt.label}
-                nestedField={opt.nested}
-                isNegated={opt.isNegated}
-                filters={seriesConfig.baseFilters}
-              />
-            ))}
-          </EuiFilterGroup>
-          <EuiSpacer size="s" />
-        </>
-      )}
+      <EuiFilterGroup>
+        {options.map((opt) => (
+          <FilterExpanded
+            series={series}
+            key={opt.label}
+            seriesId={seriesId}
+            field={opt.field}
+            label={opt.label}
+            nestedField={opt.nested}
+            isNegated={opt.isNegated}
+            filters={seriesConfig.baseFilters}
+          />
+        ))}
+      </EuiFilterGroup>
+      <EuiSpacer size="s" />
       <SelectedFilters seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
     </>
   );

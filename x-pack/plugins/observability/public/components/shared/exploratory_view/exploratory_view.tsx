@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import { EuiButtonEmpty, EuiPanel, EuiResizableContainer, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { useRouteMatch } from 'react-router-dom';
 import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
@@ -82,8 +81,6 @@ export function ExploratoryView({
 
   const [hiddenPanel, setHiddenPanel] = useState('');
 
-  const isPreview = !!useRouteMatch('/exploratory-view/preview');
-
   const onCollapse = (panelId: string) => {
     setHiddenPanel((prevState) => (panelId === prevState ? '' : panelId));
   };
@@ -116,9 +113,9 @@ export function ExploratoryView({
                 return (
                   <>
                     <EuiResizablePanel
-                      initialSize={isPreview ? 70 : 40}
-                      minSize={isPreview ? '70%' : '30%'}
-                      mode={isPreview ? 'main' : 'collapsible'}
+                      initialSize={40}
+                      minSize={'30%'}
+                      mode={'collapsible'}
                       id="chartPanel"
                     >
                       {lensAttributes ? (
@@ -132,25 +129,24 @@ export function ExploratoryView({
                     </EuiResizablePanel>
                     <EuiResizableButton />
                     <EuiResizablePanel
-                      initialSize={isPreview ? 30 : 60}
+                      initialSize={60}
                       minSize="10%"
-                      mode={isPreview ? 'collapsible' : 'main'}
+                      mode={'main'}
                       id="seriesPanel"
                     >
-                      {!isPreview &&
-                        (hiddenPanel === 'chartPanel' ? (
-                          <ShowChart onClick={() => onChange('chartPanel')} iconType="arrowDown">
-                            {SHOW_CHART_LABEL}
-                          </ShowChart>
-                        ) : (
-                          <HideChart
-                            onClick={() => onChange('chartPanel')}
-                            iconType="arrowUp"
-                            color="text"
-                          >
-                            {HIDE_CHART_LABEL}
-                          </HideChart>
-                        ))}
+                      {hiddenPanel === 'chartPanel' ? (
+                        <ShowChart onClick={() => onChange('chartPanel')} iconType="arrowDown">
+                          {SHOW_CHART_LABEL}
+                        </ShowChart>
+                      ) : (
+                        <HideChart
+                          onClick={() => onChange('chartPanel')}
+                          iconType="arrowUp"
+                          color="text"
+                        >
+                          {HIDE_CHART_LABEL}
+                        </HideChart>
+                      )}
                       <SeriesViews
                         seriesBuilderRef={seriesBuilderRef}
                         onSeriesPanelCollapse={onChange}
