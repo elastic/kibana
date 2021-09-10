@@ -30,8 +30,6 @@ export {
   StringFormat,
   TruncateFormat,
   HistogramFormat,
-  DateNanosFormat,
-  NumeralFormat,
 } from './converters';
 
 export { getHighlightRequest } from './utils';

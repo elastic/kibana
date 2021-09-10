@@ -20,5 +20,3 @@ export { TruncateFormat } from './truncate';
 export { BoolFormat } from './boolean';
 export { StaticLookupFormat } from './static_lookup';
 export { HistogramFormat } from './histogram';
-export { DateNanosFormat } from './date_nanos_shared';
-export type { NumeralFormat } from './numeral';
