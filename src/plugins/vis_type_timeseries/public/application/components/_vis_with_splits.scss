@@ -24,11 +24,19 @@
   }
 }
 
-.tvbSplitVis__split__one {
-  display: flex;
-  flex: 1 0 25%;
-}
-
 .tvbSplitVis__one {
   flex: 1;
+}
+
+// When there is only one visualization, expand the full height and remove all minimum sizes
+.tvbSplitVis--one {
+  flex: 1;
+  
+  .tvbSplitVis__split {
+    min-width: 0;
+    
+    > .tvbVis {
+      min-height: 0;
+    }
+  }
 }

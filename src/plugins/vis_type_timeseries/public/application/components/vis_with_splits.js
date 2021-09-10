@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback } from 'react';
+import classNames from 'classnames';
 import { getDisplayName } from './lib/get_display_name';
 import { labelDateFormatter } from './lib/label_date_formatter';
 import { findIndex, first } from 'lodash';
@@ -106,9 +107,7 @@ export function visWithSplits(WrappedComponent) {
       return (
         <div
           key={key}
-          className={
-            visData[model.id].series.length === 1 ? 'tvbSplitVis__split__one' : 'tvbSplitVis__split'
-          }
+          className="tvbSplitVis__split"
         >
           <WrappedComponent
             model={model}
@@ -123,9 +122,11 @@ export function visWithSplits(WrappedComponent) {
       );
     });
 
+    const hasOneVis = visData[model.id].series.length === 1;
+
     return (
       <div
-        className={`tvbSplitVis ${visData[model.id].series.length === 1 ? 'tvbSplitVis__one' : ''}`}
+        className={classNames('tvbSplitVis', {'tvbSplitVis--one': hasOneVis})}
       >
         {rows}
       </div>
