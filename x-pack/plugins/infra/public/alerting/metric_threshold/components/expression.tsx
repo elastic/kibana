@@ -444,9 +444,7 @@ export const Expressions: React.FC<Props> = (props) => {
           <EuiText size="xs" color="danger">
             <FormattedMessage
               id="xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError"
-              defaultMessage={
-                'This rule will only alert per one {matchedGroups} because the filter query contains an exact match for {groupCount, plural, one {this field} other {these fields}}.'
-              }
+              defaultMessage="This rule will only alert per one {matchedGroups} because the filter query contains an exact match for {groupCount, plural, one {this field} other {these fields}}."
               values={{
                 matchedGroups: <strong>{redundantFilterGroupBy.join(', ')}</strong>,
                 groupCount: redundantFilterGroupBy.length,
