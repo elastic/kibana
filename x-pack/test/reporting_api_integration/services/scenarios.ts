@@ -14,6 +14,7 @@ import { JobParamsCSV } from '../../../plugins/reporting/server/export_types/csv
 import { JobParamsDownloadCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource_immediate/types';
 import { JobParamsPNG } from '../../../plugins/reporting/server/export_types/png/types';
 import { JobParamsPDF } from '../../../plugins/reporting/server/export_types/printable_pdf/types';
+import { ScheduleIntervalSchemaType } from '../../../plugins/reporting/server/lib/tasks/scheduling';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -156,6 +157,17 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return body.path;
   };
 
+  const scheduleReport = async (
+    exportType: string,
+    postUrl: string,
+    interval: ScheduleIntervalSchemaType
+  ) => {
+    return await supertest
+      .post(`/api/reporting/schedule/${exportType}`)
+      .set('kbn-xsrf', 'xxx')
+      .send({ post_url: postUrl, interval });
+  };
+
   const deleteAllReports = async () => {
     log.debug('ReportingAPI.deleteAllReports');
 
@@ -234,6 +246,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     generateCsv,
     postJob,
     postJobJSON,
+    scheduleReport,
     deleteAllReports,
     deleteAllSchedules,
     checkIlmMigrationStatus,
