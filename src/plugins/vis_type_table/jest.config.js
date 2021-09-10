@@ -11,5 +11,9 @@ module.exports = {
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/vis_type_table'],
   testRunner: 'jasmine2',
-  collectCoverageFrom: ['<rootDir>/src/plugins/vis_type_table/**/*.{js,ts,tsx}'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/vis_type_table',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/plugins/vis_type_table/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
 };

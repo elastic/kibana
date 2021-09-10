@@ -23,7 +23,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
+import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 interface AlertParams {
@@ -47,10 +47,11 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
   createCallApmApi(services as CoreStart);
-
-  const transactionTypes = useServiceTransactionTypesFetcher(
-    metadata?.serviceName
-  );
+  const transactionTypes = useServiceTransactionTypesFetcher({
+    serviceName: metadata?.serviceName,
+    start: metadata?.start,
+    end: metadata?.end,
+  });
 
   const params = defaults(
     { ...omit(metadata, ['start', 'end']), ...alertParams },
@@ -72,15 +73,21 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (params.windowSize && params.windowUnit) {
+      const { interval, start, end } = getIntervalAndTimeRange({
+        windowSize: params.windowSize,
+        windowUnit: params.windowUnit as TimeUnit,
+      });
+      if (interval && start && end) {
         return callApmApi({
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
           params: {
             query: {
-              ...getAbsoluteTimeRange(params.windowSize, params.windowUnit),
               environment: params.environment,
               serviceName: params.serviceName,
               transactionType: params.transactionType,
+              interval,
+              start,
+              end,
             },
           },
         });
