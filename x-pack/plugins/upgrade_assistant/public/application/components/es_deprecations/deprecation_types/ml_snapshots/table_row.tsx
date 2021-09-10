@@ -67,6 +67,7 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
           <EuiTableRowCell key={field} truncateText={false} data-test-subj={`mlTableCell-${field}`}>
             <EsDeprecationsTableCells
               fieldName={field}
+              isResolved={snapshotState.snapshotState.status === 'complete'}
               openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
               resolutionTableCell={<MlSnapshotsResolutionCell />}

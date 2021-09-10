@@ -131,14 +131,12 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
+        <DeprecationBadge
+          isCritical={deprecation.isCritical}
+          isResolved={reindexState.status === ReindexStatus.completed}
+        />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2>
-            <div>
-              <DeprecationBadge
-                isCritical={deprecation.isCritical}
-                isResolved={reindexState.status === ReindexStatus.completed}
-              />
-            </div>
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.flyoutHeader"
               defaultMessage="Reindex {index}"

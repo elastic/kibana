@@ -41,13 +41,6 @@ const buttonLabel = (status?: ReindexStatus) => {
           defaultMessage="Reindexing…"
         />
       );
-    case ReindexStatus.completed:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.doneLabel"
-          defaultMessage="Resolved"
-        />
-      );
     case ReindexStatus.paused:
       return (
         <FormattedMessage
