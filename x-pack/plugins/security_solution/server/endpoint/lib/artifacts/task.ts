@@ -123,6 +123,7 @@ export class ManifestTask {
         this.logger.debug('User manifest not available yet.');
         return;
       }
+      await manifestManager.cleanup(oldManifest);
 
       // New computed manifest based on current manifest
       const newManifest = await manifestManager.buildNewManifest(oldManifest);

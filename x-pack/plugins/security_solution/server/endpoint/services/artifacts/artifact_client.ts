@@ -7,7 +7,6 @@
 
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import { Artifact, ArtifactsClientInterface } from '../../../../../fleet/server';
-import { ListResult } from '../../../../../fleet/common';
 
 export interface EndpointArtifactClientInterface {
   getArtifact(id: string): Promise<InternalArtifactCompleteSchema | undefined>;

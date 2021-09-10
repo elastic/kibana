@@ -497,9 +497,8 @@ export class ManifestManager {
 
   /**
    * Cleanup .fleet-agents indice if there are som orphan artifacts
-   * @returns {Promise<Error | null>} Any error encountered.
    */
-  public async cleanup(manifest: ManifestSchema) {
+  public async cleanup(manifest: Manifest) {
     try {
       const fleetArtifacts = await this.artifactClient.listArtifacts();
 
@@ -512,7 +511,10 @@ export class ManifestManager {
       );
 
       const artifactsToDelete = [];
-      const manifestArtifactsIds = getArtifactIds(manifest);
+      const manifestArtifactsIds = manifest
+        .getAllArtifacts()
+        .map((artifact) => getArtifactId(artifact));
+
       for (const fleetArtifact of fleetArtifacts) {
         const artifactId = getArtifactId(fleetArtifact);
         const isArtifactInManifest = manifestArtifactsIds.includes(artifactId);
@@ -529,7 +531,6 @@ export class ManifestManager {
     } catch (error) {
       this.logger.error('There was an error cleaning orphan artifacts in .fleet-artifacts index');
       this.logger.error(error);
-      return error;
     }
   }
 }
