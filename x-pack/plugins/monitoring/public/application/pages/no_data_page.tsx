@@ -31,24 +31,38 @@ export const NoDataPage = () => {
   const ccs = state.ccs;
 
   const [shouldRedirect, setShouldRedirect] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const [model, setModel] = useState({
+    errors: [], // errors can happen from trying to check or set ES settings
+    checkMessage: null, // message to show while waiting for api response
+    isLoading: true, // flag for in-progress state of checking for no data reason
+    isCollectionEnabledUpdating: false, // flags to indicate whether to show a spinner while waiting for ajax
+    isCollectionEnabledUpdated: false,
+    isCollectionIntervalUpdating: false,
+    isCollectionIntervalUpdated: false,
+  } as any);
+
+  // From x-pack/plugins/monitoring/public/views/no_data/model_updater.js
+  const updateModel = (properties: any) => {
+    const updated = { ...model };
+    const keys = Object.keys(properties);
+
+    keys.forEach((key) => {
+      if (Array.isArray(updated[key])) {
+        updated[key].push(properties[key]);
+      } else {
+        updated[key] = properties[key];
+      }
+    });
+    setModel(updated);
+  };
 
   // TODO work on porting these checkers over
   // const checkers = [new ClusterSettingsChecker($http), new NodeSettingsChecker($http)];
   // await startChecks(checkers, updateModel);
 
-  const model = {
-    errors: [], // errors can happen from trying to check or set ES settings
-    checkMessage: null, // message to show while waiting for api response
-    isLoading: isLoading, // flag for in-progress state of checking for no data reason
-    isCollectionEnabledUpdating: false, // flags to indicate whether to show a spinner while waiting for ajax
-    isCollectionEnabledUpdated: false,
-    isCollectionIntervalUpdating: false,
-    isCollectionIntervalUpdated: false,
-  };
-
   const getPageData = useCallback(async () => {
-    setIsLoading(true);
+    updateModel({ isLoading: true });
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const min = bounds.min.toISOString();
     const max = bounds.max.toISOString();
@@ -69,8 +83,8 @@ export const NoDataPage = () => {
       });
 
       const clusters = formatClusters(response);
-      setIsLoading(false);
-      console.log('did a refresh from nodatapage');
+      updateModel({ isLoading: false });
+      console.log('did a refresh from no data page');
 
       if (clusters && clusters.length) {
         setShouldRedirect(true);
@@ -85,9 +99,8 @@ export const NoDataPage = () => {
       // }
       console.log(err);
     }
-  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http, setIsLoading]);
+  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
 
-  const { updateModel } = new ModelUpdater(model);
   const enabler = new Enabler(updateModel);
 
   return (
@@ -131,7 +144,7 @@ class Enabler {
       });
     } catch (err) {
       this.updateModel({
-        errors: err.data,
+        errors: (err as any).data,
         isCollectionIntervalUpdated: false,
         isCollectionIntervalUpdating: false,
       });
@@ -149,32 +162,10 @@ class Enabler {
       });
     } catch (err) {
       this.updateModel({
-        errors: err.data,
+        errors: (err as any).data,
         isCollectionEnabledUpdated: false,
         isCollectionEnabledUpdating: false,
       });
     }
-  }
-}
-
-// From x-pack/plugins/monitoring/public/views/no_data/model_updater.js
-class ModelUpdater {
-  model: any;
-
-  constructor(model: any) {
-    this.model = model;
-    this.updateModel = this.updateModel.bind(this);
-  }
-
-  updateModel(properties: any) {
-    const model = this.model;
-    const keys = Object.keys(properties);
-    keys.forEach((key) => {
-      if (Array.isArray(model[key])) {
-        model[key].push(properties[key]);
-      } else {
-        model[key] = properties[key];
-      }
-    });
   }
 }
