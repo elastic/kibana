@@ -17,7 +17,8 @@ import {
   getImportListItemsToStreamOptionsMock,
   getWriteBufferToItemsOptionsMock,
 } from './write_lines_to_bulk_list_items.mock';
-import { createListItemsBulk } from './create_list_items_bulk';
+
+import { createListItemsBulk } from '.';
 
 jest.mock('./create_list_items_bulk', () => ({
   createListItemsBulk: jest.fn(),
