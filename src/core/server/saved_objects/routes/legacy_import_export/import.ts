@@ -7,10 +7,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, SavedObject } from 'src/core/server';
-import { importDashboards } from '../lib';
+import { IRouter, Logger, SavedObject } from '../../..';
+import { CoreUsageDataSetup } from '../../../core_usage_data';
+import { importDashboards } from './lib';
 
-export const registerImportRoute = (router: IRouter, maxImportPayloadBytes: number) => {
+export const registerLegacyImportRoute = (
+  router: IRouter,
+  {
+    maxImportPayloadBytes,
+    coreUsageData,
+    logger,
+  }: { maxImportPayloadBytes: number; coreUsageData: CoreUsageDataSetup; logger: Logger }
+) => {
   router.post(
     {
       path: '/api/kibana/dashboards/import',
@@ -34,9 +42,17 @@ export const registerImportRoute = (router: IRouter, maxImportPayloadBytes: numb
       },
     },
     async (ctx, req, res) => {
+      logger.warn(
+        "The import dashboard API '/api/kibana/dashboards/import' is deprecated. Use the saved objects import objects API '/api/saved_objects/_import' instead."
+      );
+
       const { client } = ctx.core.savedObjects;
       const objects = req.body.objects as SavedObject[];
       const { force, exclude } = req.query;
+
+      const usageStatsClient = coreUsageData.getClient();
+      usageStatsClient.incrementLegacyDashboardsImport({ request: req }).catch(() => {});
+
       const result = await importDashboards(client, objects, {
         overwrite: force,
         exclude: Array.isArray(exclude) ? exclude : [exclude],

@@ -166,10 +166,6 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Utilities for building Kibana plugins.
 
 
-|{kib-repo}blob/{branch}/src/plugins/legacy_export/README.md[legacyExport]
-|The legacyExport plugin adds support for the legacy saved objects export format.
-
-
 |{kib-repo}blob/{branch}/src/plugins/management[management]
 |WARNING: Missing README.
 
