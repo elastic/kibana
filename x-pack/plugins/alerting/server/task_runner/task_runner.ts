@@ -375,7 +375,7 @@ export class TaskRunner<
       rule: alert,
     });
 
-    if (!muteAll) {
+    if (!muteAll && !this.cancelled$.getValue()) {
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
       scheduleActionsForRecoveredInstances<InstanceState, InstanceContext, RecoveryActionGroupId>({
@@ -429,7 +429,14 @@ export class TaskRunner<
         )
       );
     } else {
-      this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
+      if (muteAll) {
+        this.logger.debug(`no scheduling of actions for alert ${alertLabel}: alert is muted.`);
+      }
+      if (this.cancelled$.getValue()) {
+        this.logger.debug(
+          `no scheduling of actions for alert ${alertLabel}: alert execution has been cancelled.`
+        );
+      }
     }
 
     return {
