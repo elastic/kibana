@@ -44,7 +44,8 @@ export const getAllFieldsByName = (
   browserFields: BrowserFields
 ): { [fieldName: string]: Partial<BrowserField> } =>
   keyBy('name', getAllBrowserFields(browserFields));
-
+// move index field documentation mapping to server side
+// getIndexFields, getBrowserFields, getDocValueFields
 export const getIndexFields = memoizeOne(
   (title: string, fields: IndexField[]): IIndexPattern =>
     fields && fields.length > 0
