@@ -142,7 +142,6 @@ export class TaskManagerRunner implements TaskRunner {
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
-  private cancelled: boolean;
   private readonly executionContext: ExecutionContextStart;
 
   /**
@@ -175,7 +174,6 @@ export class TaskManagerRunner implements TaskRunner {
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
-    this.cancelled = false;
   }
 
   /**
@@ -410,7 +408,6 @@ export class TaskManagerRunner implements TaskRunner {
       this.task = undefined;
       return task.cancel();
     }
-    this.cancelled = true;
     this.logger.debug(`The task ${this} is not cancellable.`);
   }
 
@@ -502,7 +499,9 @@ export class TaskManagerRunner implements TaskRunner {
       unwrap
     )(result);
 
-    if (!this.cancelled) {
+    // If the task has exceeded the configured timeout by the time it returns
+    // we ignore the result
+    if (!this.isExpired) {
       this.instance = asRan(
         await this.bufferedTaskStore.update(
           defaults(
