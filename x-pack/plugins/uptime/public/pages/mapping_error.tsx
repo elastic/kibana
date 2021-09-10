@@ -57,7 +57,7 @@ export const MappingErrorPage = () => {
             <p>
               <FormattedMessage
                 id="xpack.uptime.public.pages.mappingError.bodyDocsLink"
-                defaultMessage="You can how to troubleshoot this issue in the {docsLink}."
+                defaultMessage="You can learn how to troubleshoot this issue in the {docsLink}."
                 values={{
                   docsLink: (
                     <EuiLink
