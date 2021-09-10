@@ -4,7 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-node .buildkite/scripts/lifecycle/pre_command.sh
+node .buildkite/scripts/lifecycle/print_agent_links.js
 
 echo '--- Job Environment Setup'
 
