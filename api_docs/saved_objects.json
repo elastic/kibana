@@ -679,14 +679,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/public/management_section/object_view/components/form.tsx"
-          },
-          {
-            "plugin": "timelion",
-            "path": "src/plugins/timelion/public/services/saved_sheets.ts"
-          },
-          {
-            "plugin": "timelion",
-            "path": "src/plugins/timelion/public/services/saved_sheets.ts"
           }
         ],
         "children": [
@@ -3860,10 +3852,6 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-            },
-            {
-              "plugin": "timelion",
-              "path": "src/plugins/timelion/public/services/_saved_sheet.ts"
             }
           ]
         },
