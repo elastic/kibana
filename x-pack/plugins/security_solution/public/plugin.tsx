@@ -353,7 +353,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         // check for/generate default Security Solution Kibana index pattern
         const a = await coreStart.http.fetch(SOURCERER_API_URL, {
           method: 'POST',
-          body: JSON.stringify({ patternList: [...configPatternList, signal.name] }),
+          body: JSON.stringify({
+            patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
+          }),
         });
         defaultDataView = a.defaultDataView;
         kibanaDataViews = a.kibanaDataViews;
