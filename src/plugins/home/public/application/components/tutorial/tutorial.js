@@ -17,7 +17,6 @@ import {
   EuiSpacer,
   EuiPage,
   EuiPanel,
-  EuiText,
   EuiPageBody,
   EuiButtonGroup,
   EuiFlexGroup,
@@ -27,6 +26,7 @@ import * as StatusCheckStates from './status_check_states';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../../kibana_services';
+import { KibanaPageTemplate } from '../../../../../kibana_react/public';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -363,17 +363,32 @@ class TutorialUi extends React.Component {
     let content;
     if (this.state.notFound) {
       content = (
-        <div className="homTutorial__notFoundPanel">
-          <EuiText>
-            <p>
+        <KibanaPageTemplate
+          isEmptyState={true}
+          pageHeader={{
+            iconType: 'faceSad',
+            iconProps: {
+              color: 'subdued',
+            },
+            pageTitle: (
               <FormattedMessage
                 id="home.tutorial.noTutorialLabel"
                 defaultMessage="Unable to find tutorial {tutorialId}"
                 values={{ tutorialId: this.props.tutorialId }}
               />
-            </p>
-          </EuiText>
-        </div>
+            ),
+            rightSideItems: [
+              <EuiButton
+                href={this.props.addBasePath('/app/home#/tutorial_directory')}
+                fill
+                iconType="sortLeft"
+                iconSide="left"
+              >
+                Back to directory
+              </EuiButton>,
+            ],
+          }}
+        />
       );
     }
 
