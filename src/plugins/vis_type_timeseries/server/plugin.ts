@@ -117,7 +117,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       getFieldFormatsService: async (uiSettings) => {
         const [, { data }] = await core.getStartServices();
 
-        return await data.fieldFormats.fieldFormatServiceFactory(uiSettings);
+        return data.fieldFormats.fieldFormatServiceFactory(uiSettings);
       },
     };
 
