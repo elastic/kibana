@@ -97,6 +97,7 @@ const basicTimeline: TimelineModel = {
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
   expandedDetail: {},
+  filterManager: 'mockFilterManager',
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'foo',
@@ -193,6 +194,20 @@ describe('Timeline', () => {
           show: true,
         },
       });
+    });
+
+    test('should contain existing filterManager', () => {
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          ...basicTimeline,
+          status: TimelineStatus.immutable,
+          timelineType: TimelineType.template,
+        },
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update.foo.filterManager).toEqual('mockFilterManager');
     });
   });
 
