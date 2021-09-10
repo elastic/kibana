@@ -8,7 +8,12 @@
 import { isEmpty } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { setSourcererScopeLoading, setSelectedKip, setSignalIndexName, setSource } from './actions';
+import {
+  setSourcererScopeLoading,
+  setSelectedDataView,
+  setSignalIndexName,
+  setSource,
+} from './actions';
 import { initialSourcererState, SourcererModel } from './model';
 import { defaultDataViewByEventType } from './helpers';
 
@@ -29,7 +34,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       },
     },
   }))
-  .case(setSelectedKip, (state, payload) => {
+  .case(setSelectedDataView, (state, payload) => {
     const { id, eventType, ...rest } = payload;
     return {
       ...state,

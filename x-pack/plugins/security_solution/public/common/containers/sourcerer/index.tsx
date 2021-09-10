@@ -82,7 +82,7 @@ export const useInitSourcerer = (
     ) {
       initialTimelineSourcerer.current = false;
       dispatch(
-        sourcererActions.setSelectedKip({
+        sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: getScopePatternListSelection(
@@ -99,7 +99,7 @@ export const useInitSourcerer = (
     ) {
       initialTimelineSourcerer.current = false;
       dispatch(
-        sourcererActions.setSelectedKip({
+        sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: getScopePatternListSelection(
@@ -129,7 +129,7 @@ export const useInitSourcerer = (
     ) {
       initialDetectionSourcerer.current = false;
       dispatch(
-        sourcererActions.setSelectedKip({
+        sourcererActions.setSelectedDataView({
           id: SourcererScopeName.detections,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: getScopePatternListSelection(
@@ -145,7 +145,7 @@ export const useInitSourcerer = (
       initialTimelineSourcerer.current
     ) {
       initialDetectionSourcerer.current = false;
-      sourcererActions.setSelectedKip({
+      sourcererActions.setSelectedDataView({
         id: SourcererScopeName.detections,
         selectedDataViewId: defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(

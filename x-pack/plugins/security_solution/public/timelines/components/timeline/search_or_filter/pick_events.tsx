@@ -34,7 +34,7 @@ import { TimelineEventsType } from '../../../../../common';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import * as i18n from './translations';
 import { getScopePatternListSelection } from '../../../../common/store/sourcerer/helpers';
-import { SIEM_KIP_LABEL } from '../../../../common/components/sourcerer/translations';
+import { SIEM_DATA_VIEW_LABEL } from '../../../../common/components/sourcerer/translations';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -146,7 +146,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     deepEqual
   );
 
-  const [dataViewId, setKipId] = useState<string>(selectedDataViewId ?? '');
+  const [dataViewId, setDataViewId] = useState<string>(selectedDataViewId ?? '');
   const { patternList, selectablePatterns } = useMemo(() => {
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
     return theDataView != null
@@ -230,7 +230,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const onChangeSuper = useCallback(
     (newSelectedOption) => {
       setFilterEventType('all');
-      setKipId(newSelectedOption);
+      setDataViewId(newSelectedOption);
       setSelectedOptions(
         getScopePatternListSelection(
           kibanaDataViews.find((dataView) => dataView.id === newSelectedOption),
@@ -262,7 +262,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   }, [dataViewId, filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
 
   const resetDataSources = useCallback(() => {
-    setKipId(defaultDataView.id);
+    setDataViewId(defaultDataView.id);
     setSelectedOptions(
       getScopePatternListSelection(
         defaultDataView,
@@ -282,7 +282,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         inputDisplay:
           id === defaultDataView.id ? (
             <span data-test-subj="dataView-option-super">
-              <EuiIcon type="logoSecurity" size="s" /> {SIEM_KIP_LABEL}
+              <EuiIcon type="logoSecurity" size="s" /> {SIEM_DATA_VIEW_LABEL}
             </span>
           ) : (
             <span data-test-subj="dataView-option-super">

@@ -389,7 +389,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
 }: UpdateTimeline): (() => void) => () => {
   if (!isEmpty(timeline.indexNames)) {
     dispatch(
-      sourcererActions.setSelectedKip({
+      sourcererActions.setSelectedDataView({
         id: SourcererScopeName.timeline,
         selectedDataViewId: timeline.dataViewId,
         selectedPatterns: timeline.indexNames,

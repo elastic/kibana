@@ -21,7 +21,7 @@ import { hostToCriteria } from '../../../../common/components/ml/criteria/host_t
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { useHostDetails, ID } from '../../../../hosts/containers/hosts/details';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SelectedKip } from '../../../../common/store/sourcerer/selectors';
+import { SelectedDataView } from '../../../../common/store/sourcerer/selectors';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 interface ExpandableHostProps {
@@ -68,9 +68,9 @@ export const ExpandableHostDetails = ({
     Otherwise, an empty array is defaulted for the `indexNames` in the query which leads to inconsistencies in the data returned
     (i.e. extraneous endpoint data is retrieved from the backend leading to endpoint data not being returned)
   */
-  const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
-  const { selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
-    getSelectedKip(state, SourcererScopeName.default)
+  const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
+  const { selectedPatterns } = useDeepEqualSelector<SelectedDataView>((state) =>
+    getSelectedDataView(state, SourcererScopeName.default)
   );
 
   const [loading, { hostDetails: hostOverview }] = useHostDetails({

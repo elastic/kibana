@@ -24,7 +24,7 @@ export const getScopePatternListSelection = (
 ): string[] => {
   let patternList: string[] = theDataView != null ? theDataView.patternList : [];
 
-  // when our SIEM KIP is set, here are the defaults
+  // when our SIEM DATA_VIEW is set, here are the defaults
   if (theDataView && theDataView.id === DEFAULT_DATA_VIEW_ID) {
     if (sourcererScope === SourcererScopeName.default) {
       patternList = patternList.filter((index) => index !== signalIndexName).sort();

@@ -27,7 +27,7 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { DocValueFields } from '../../../../common/search_strategy/common';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-import { SelectedKip } from '../../store/sourcerer/selectors';
+import { SelectedDataView } from '../../store/sourcerer/selectors';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
@@ -213,9 +213,9 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const dispatch = useDispatch();
-  const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
-  const { dataViewId, patternList, selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
-    getSelectedKip(state, sourcererScopeName)
+  const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
+  const { dataViewId, patternList, selectedPatterns } = useDeepEqualSelector<SelectedDataView>(
+    (state) => getSelectedDataView(state, sourcererScopeName)
   );
   const { addError, addWarning } = useAppToasts();
 
@@ -300,12 +300,12 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       sourcererScopeName,
     ]
   );
-  const refKipId = useRef('');
+  const refDataViewId = useRef('');
   useEffect(() => {
-    if (dataViewId != null && dataViewId !== refKipId.current) {
+    if (dataViewId != null && dataViewId !== refDataViewId.current) {
       indexFieldsSearch(dataViewId);
     }
-    refKipId.current = dataViewId;
+    refDataViewId.current = dataViewId;
     return () => {
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();

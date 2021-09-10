@@ -46,7 +46,7 @@ import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
 import { Direction } from '../../../../common/search_strategy';
-import { SelectedKip } from '../../../common/store/sourcerer/selectors';
+import { SelectedDataView } from '../../../common/store/sourcerer/selectors';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 interface OwnProps<TCache = object> {
@@ -110,9 +110,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
-    const { dataViewId, selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
-      getSelectedKip(state, SourcererScopeName.timeline)
+    const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
+    const { dataViewId, selectedPatterns } = useDeepEqualSelector<SelectedDataView>((state) =>
+      getSelectedDataView(state, SourcererScopeName.timeline)
     );
 
     const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);

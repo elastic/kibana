@@ -22,7 +22,7 @@ import { inputsActions, inputsSelectors } from '../../../../common/store/inputs'
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { appActions } from '../../../../common/store/app';
-import { SelectedKip } from '../../../../common/store/sourcerer/selectors';
+import { SelectedDataView } from '../../../../common/store/sourcerer/selectors';
 
 interface Props {
   timelineId?: string;
@@ -32,9 +32,9 @@ interface Props {
 
 export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
   const dispatch = useDispatch();
-  const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
-  const { dataViewId, selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
-    getSelectedKip(state, SourcererScopeName.timeline)
+  const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
+  const { dataViewId, selectedPatterns } = useDeepEqualSelector<SelectedDataView>((state) =>
+    getSelectedDataView(state, SourcererScopeName.timeline)
   );
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
@@ -45,7 +45,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
         setTimelineFullScreen(false);
       }
       dispatch(
-        sourcererActions.setSelectedKip({
+        sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
           selectedDataViewId: dataViewId,
           selectedPatterns,

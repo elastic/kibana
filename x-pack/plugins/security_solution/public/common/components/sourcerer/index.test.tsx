@@ -105,7 +105,7 @@ describe('Sourcerer component', () => {
       optionsSelected: true,
     });
   });
-  it('onSave dispatches setSelectedKip', async () => {
+  it('onSave dispatches setSelectedDataView', async () => {
     store = createStore(
       {
         ...state,
@@ -151,7 +151,7 @@ describe('Sourcerer component', () => {
     expect(wrapper.find(`[data-test-subj="sourcerer-popover"]`).first().prop('isOpen')).toBeFalsy();
 
     expect(mockDispatch).toHaveBeenCalledWith(
-      sourcererActions.setSelectedKip({
+      sourcererActions.setSelectedDataView({
         id: SourcererScopeName.default,
         selectedDataViewId: id,
         selectedPatterns: patternList.slice(0, 3),

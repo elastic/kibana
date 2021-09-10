@@ -25,17 +25,9 @@ export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; 
   'SET_SOURCERER_SCOPE_LOADING'
 );
 
-export const setSelectedKip = actionCreator<{
+export const setSelectedDataView = actionCreator<{
   id: SourcererScopeName;
   selectedDataViewId: string;
   selectedPatterns?: string[];
   eventType?: TimelineEventsType;
-}>('SET_SELECTED_KIP');
-
-// TODO: Steph/sourcerer gtfo
-export const initTimelineIndexPatterns = actionCreator<{
-  id: SourcererScopeName;
-  // TODO: Need selectedDataViewId
-  selectedPatterns: string[];
-  eventType?: TimelineEventsType;
-}>('INIT_TIMELINE_INDEX_PATTERNS');
+}>('SET_SELECTED_DATA_VIEW');

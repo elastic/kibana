@@ -154,7 +154,7 @@ describe('Sourcerer Hooks', () => {
         payload: { signalIndexName: DEFAULT_SIGNALS_INDEX },
       });
       expect(mockDispatch.mock.calls[3][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_KIP',
+        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'timeline',
           selectedDataViewId: mockSourcererState.defaultDataView.id,
@@ -179,7 +179,7 @@ describe('Sourcerer Hooks', () => {
       await waitForNextUpdate();
       rerender();
       expect(mockDispatch.mock.calls[1][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_KIP',
+        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'detections',
           selectedDataViewId: mockSourcererState.defaultDataView.id,

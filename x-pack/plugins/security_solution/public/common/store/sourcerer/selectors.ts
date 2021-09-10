@@ -40,17 +40,17 @@ export const signalIndexNameSelector = () =>
 export const defaultDataViewSelector = () =>
   createSelector(sourcererDefaultDataViewSelector, (patterns) => patterns);
 
-export interface SelectedKip {
+export interface SelectedDataView {
   dataViewId: string;
   patternList: string[];
   selectedPatterns: string[];
 }
-export const getSelectedKipSelector = () => {
+export const getSelectedDataViewSelector = () => {
   const getScopeSelector = scopeIdSelector();
   const getDefaultDataViewSelector = defaultDataViewSelector();
   const getKibanaDataViewsSelector = kibanaDataViewsSelector();
 
-  return (state: State, scopeId: SourcererScopeName): SelectedKip => {
+  return (state: State, scopeId: SourcererScopeName): SelectedDataView => {
     const scope = getScopeSelector(state, scopeId);
     const defaultDataView = getDefaultDataViewSelector(state);
     const kibanaDataViews = getKibanaDataViewsSelector(state);
@@ -65,9 +65,9 @@ export const getSelectedKipSelector = () => {
         : scope.selectedPatterns;
     return {
       dataViewId,
-      // all patterns in KIP
+      // all patterns in DATA_VIEW
       patternList,
-      // selected patterns in KIP
+      // selected patterns in DATA_VIEW
       selectedPatterns,
     };
   };

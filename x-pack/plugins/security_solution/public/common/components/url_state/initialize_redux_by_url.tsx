@@ -49,7 +49,7 @@ export const dispatchSetInitialStateFromUrl = (
         ) as SourcererScopeName[];
         activeScopes.forEach((scope) => {
           dispatch(
-            sourcererActions.setSelectedKip({
+            sourcererActions.setSelectedDataView({
               id: scope,
               selectedDataViewId: sourcererState[scope]?.id ?? DEFAULT_DATA_VIEW_ID,
               selectedPatterns: sourcererState[scope]?.selectedPatterns,

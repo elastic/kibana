@@ -52,10 +52,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const { selectedDataViewId, selectedPatterns, loading } = sourcererScope;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
-  // TODO: Steph/sourcerer this stinks, we are absolutely counting on sourcererScope having
-  // selectedDataViewId because its initialized from plugin.tsx
-  // but maybe we should do something better
-  const [dataViewId, setKipId] = useState<string>(selectedDataViewId ?? defaultDataView.id);
+  const [dataViewId, setDataViewId] = useState<string>(selectedDataViewId ?? defaultDataView.id);
 
   const { patternList, selectablePatterns } = useMemo(() => {
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
@@ -81,12 +78,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
 
   const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
-  const onChangeKip = useCallback(
-    (newSelectedKip: string, newSelectedPatterns: string[]) => {
+  const onChangeDataView = useCallback(
+    (newSelectedDataView: string, newSelectedPatterns: string[]) => {
       dispatch(
-        sourcererActions.setSelectedKip({
+        sourcererActions.setSelectedDataView({
           id: scopeId,
-          selectedDataViewId: newSelectedKip,
+          selectedDataViewId: newSelectedDataView,
           selectedPatterns: newSelectedPatterns,
         })
       );
@@ -105,7 +102,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const onChangeSuper = useCallback(
     (newSelectedOption) => {
-      setKipId(newSelectedOption);
+      setDataViewId(newSelectedOption);
       setSelectedOptions(
         getScopePatternListSelection(
           kibanaDataViews.find((dataView) => dataView.id === newSelectedOption),
@@ -121,7 +118,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
 
   const resetDataSources = useCallback(() => {
-    setKipId(defaultDataView.id);
+    setDataViewId(defaultDataView.id);
     setSelectedOptions(
       getScopePatternListSelection(defaultDataView, scopeId, signalIndexName).map(
         (indexSelected: string) => ({
@@ -133,12 +130,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, [defaultDataView, scopeId, signalIndexName]);
 
   const handleSaveIndices = useCallback(() => {
-    onChangeKip(
+    onChangeDataView(
       dataViewId,
       selectedOptions.map((so) => so.label)
     );
     setPopoverIsOpen(false);
-  }, [onChangeKip, dataViewId, selectedOptions]);
+  }, [onChangeDataView, dataViewId, selectedOptions]);
 
   const handleClosePopOver = useCallback(() => {
     setPopoverIsOpen(false);
@@ -167,7 +164,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         inputDisplay:
           id === defaultDataView.id ? (
             <span data-test-subj="security-option-super">
-              <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_KIP_LABEL}
+              <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_DATA_VIEW_LABEL}
             </span>
           ) : (
             <span data-test-subj="dataView-option-super">
@@ -210,7 +207,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
 
   useEffect(() => {
-    setKipId((prevSelectedOption) =>
+    setDataViewId((prevSelectedOption) =>
       !deepEqual(selectedDataViewId, prevSelectedOption) && selectedDataViewId != null
         ? selectedDataViewId
         : prevSelectedOption

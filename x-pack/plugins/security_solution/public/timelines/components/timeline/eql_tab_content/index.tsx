@@ -403,20 +403,20 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   updateEventTypeAndIndexesName: (
     newEventType: TimelineEventsType,
     newIndexNames: string[],
-    newKipId: string
+    newDataViewId: string
   ) => {
     dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
     dispatch(
       timelineActions.updateDataView({
-        dataViewId: newKipId,
+        dataViewId: newDataViewId,
         id: timelineId,
         indexNames: newIndexNames,
       })
     );
     dispatch(
-      sourcererActions.setSelectedKip({
+      sourcererActions.setSelectedDataView({
         id: SourcererScopeName.timeline,
-        selectedDataViewId: newKipId,
+        selectedDataViewId: newDataViewId,
         selectedPatterns: newIndexNames,
       })
     );

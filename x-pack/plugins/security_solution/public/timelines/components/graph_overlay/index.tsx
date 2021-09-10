@@ -40,7 +40,7 @@ import {
 } from '../../../common/components/super_date_picker/selectors';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { SelectedKip } from '../../../common/store/sourcerer/selectors';
+import { SelectedDataView } from '../../../common/store/sourcerer/selectors';
 
 const OverlayContainer = styled.div`
   display: flex;
@@ -182,9 +182,9 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
     globalFullScreen,
   ]);
 
-  const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
-  const { selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
-    getSelectedKip(state, SourcererScopeName.timeline)
+  const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
+  const { selectedPatterns } = useDeepEqualSelector<SelectedDataView>((state) =>
+    getSelectedDataView(state, SourcererScopeName.timeline)
   );
 
   if (fullScreen && !isInTimeline) {

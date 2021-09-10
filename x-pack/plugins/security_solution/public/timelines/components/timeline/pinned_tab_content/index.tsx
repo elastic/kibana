@@ -40,7 +40,7 @@ import { DetailsPanel } from '../../side_panel';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { defaultControlColumn } from '../body/control_columns';
-import { SelectedKip } from '../../../../common/store/sourcerer/selectors';
+import { SelectedDataView } from '../../../../common/store/sourcerer/selectors';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -124,9 +124,9 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   } = useSourcererScope(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
 
-  const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
-  const { selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
-    getSelectedKip(state, SourcererScopeName.timeline)
+  const getSelectedDataView = useMemo(() => sourcererSelectors.getSelectedDataViewSelector(), []);
+  const { selectedPatterns } = useDeepEqualSelector<SelectedDataView>((state) =>
+    getSelectedDataView(state, SourcererScopeName.timeline)
   );
 
   const filterQuery = useMemo(() => {

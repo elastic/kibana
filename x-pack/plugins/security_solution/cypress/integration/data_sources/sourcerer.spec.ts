@@ -68,7 +68,7 @@ describe('Sourcerer', () => {
       isSourcererOptions([`metrics-*`, `logs-*`]);
     });
 
-    it('selected KIP gets added to sourcerer', () => {
+    it('selected DATA_VIEW gets added to sourcerer', () => {
       setSourcererOption(`metrics-*`);
       openSourcerer();
       isSourcererSelection(`metrics-*`);
