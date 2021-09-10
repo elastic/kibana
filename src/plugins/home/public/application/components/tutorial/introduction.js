@@ -23,9 +23,9 @@ function IntroductionUI({
   intl,
   notices,
 }) {
-  let img;
+  let rightSideItems;
   if (previewUrl) {
-    img = (
+    rightSideItems = [
       <EuiImage
         size="l"
         allowFullScreen
@@ -35,8 +35,8 @@ function IntroductionUI({
           defaultMessage: 'screenshot of primary dashboard.',
         })}
         url={previewUrl}
-      />
-    );
+      />,
+    ];
   }
   let exportedFields;
   if (exportedFieldsUrl) {
@@ -88,7 +88,7 @@ function IntroductionUI({
           {notices}
         </>
       }
-      rightSideItems={[img]}
+      rightSideItems={rightSideItems}
     />
   );
 }

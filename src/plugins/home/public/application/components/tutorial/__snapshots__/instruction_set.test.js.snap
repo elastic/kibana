@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`render 1`] = `
-<div>
+<EuiPanel
+  paddingSize="l"
+>
   <EuiFlexGroup
     justifyContent="spaceBetween"
     responsive={false}
@@ -22,6 +24,7 @@ exports[`render 1`] = `
       grow={false}
     />
   </EuiFlexGroup>
+  <EuiSpacer />
   <EuiTabs>
     <EuiTab
       isSelected={true}
@@ -38,9 +41,7 @@ exports[`render 1`] = `
       Windows
     </EuiTab>
   </EuiTabs>
-  <EuiSpacer
-    size="m"
-  />
+  <EuiSpacer />
   <EuiSteps
     firstStepNumber={1}
     steps={
@@ -78,11 +79,13 @@ exports[`render 1`] = `
       ]
     }
   />
-</div>
+</EuiPanel>
 `;
 
 exports[`statusCheckState checking status 1`] = `
-<div>
+<EuiPanel
+  paddingSize="l"
+>
   <EuiFlexGroup
     justifyContent="spaceBetween"
     responsive={false}
@@ -103,6 +106,7 @@ exports[`statusCheckState checking status 1`] = `
       grow={false}
     />
   </EuiFlexGroup>
+  <EuiSpacer />
   <EuiTabs>
     <EuiTab
       isSelected={true}
@@ -119,9 +123,7 @@ exports[`statusCheckState checking status 1`] = `
       Windows
     </EuiTab>
   </EuiTabs>
-  <EuiSpacer
-    size="m"
-  />
+  <EuiSpacer />
   <EuiSteps
     firstStepNumber={1}
     steps={
@@ -158,29 +160,18 @@ exports[`statusCheckState checking status 1`] = `
         },
         Object {
           "children": <React.Fragment>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
-              <EuiFlexItem>
-                <Content
-                  text="custom status check description"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-              >
-                <EuiButton
-                  isLoading={true}
-                  onClick={[Function]}
-                >
-                  custom btn label
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <Content
+              text="custom status check description"
+            />
             <EuiSpacer
               size="s"
             />
+            <EuiButton
+              isLoading={true}
+              onClick={[Function]}
+            >
+              custom btn label
+            </EuiButton>
           </React.Fragment>,
           "key": "checkStatusStep",
           "status": "incomplete",
@@ -189,11 +180,13 @@ exports[`statusCheckState checking status 1`] = `
       ]
     }
   />
-</div>
+</EuiPanel>
 `;
 
 exports[`statusCheckState failed status check - error 1`] = `
-<div>
+<EuiPanel
+  paddingSize="l"
+>
   <EuiFlexGroup
     justifyContent="spaceBetween"
     responsive={false}
@@ -214,6 +207,7 @@ exports[`statusCheckState failed status check - error 1`] = `
       grow={false}
     />
   </EuiFlexGroup>
+  <EuiSpacer />
   <EuiTabs>
     <EuiTab
       isSelected={true}
@@ -230,9 +224,7 @@ exports[`statusCheckState failed status check - error 1`] = `
       Windows
     </EuiTab>
   </EuiTabs>
-  <EuiSpacer
-    size="m"
-  />
+  <EuiSpacer />
   <EuiSteps
     firstStepNumber={1}
     steps={
@@ -269,33 +261,27 @@ exports[`statusCheckState failed status check - error 1`] = `
         },
         Object {
           "children": <React.Fragment>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
-              <EuiFlexItem>
-                <Content
-                  text="custom status check description"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-              >
-                <EuiButton
-                  isLoading={false}
-                  onClick={[Function]}
-                >
-                  custom btn label
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <Content
+              text="custom status check description"
+            />
             <EuiSpacer
               size="s"
             />
-            <EuiCallOut
-              color="warning"
-              title="custom error msg"
-            />
+            <EuiButton
+              isLoading={false}
+              onClick={[Function]}
+            >
+              custom btn label
+            </EuiButton>
+            <React.Fragment>
+              <EuiSpacer
+                size="s"
+              />
+              <EuiCallOut
+                color="warning"
+                title="custom error msg"
+              />
+            </React.Fragment>
           </React.Fragment>,
           "key": "checkStatusStep",
           "status": "danger",
@@ -304,11 +290,13 @@ exports[`statusCheckState failed status check - error 1`] = `
       ]
     }
   />
-</div>
+</EuiPanel>
 `;
 
 exports[`statusCheckState failed status check - no data 1`] = `
-<div>
+<EuiPanel
+  paddingSize="l"
+>
   <EuiFlexGroup
     justifyContent="spaceBetween"
     responsive={false}
@@ -329,6 +317,7 @@ exports[`statusCheckState failed status check - no data 1`] = `
       grow={false}
     />
   </EuiFlexGroup>
+  <EuiSpacer />
   <EuiTabs>
     <EuiTab
       isSelected={true}
@@ -345,9 +334,7 @@ exports[`statusCheckState failed status check - no data 1`] = `
       Windows
     </EuiTab>
   </EuiTabs>
-  <EuiSpacer
-    size="m"
-  />
+  <EuiSpacer />
   <EuiSteps
     firstStepNumber={1}
     steps={
@@ -384,33 +371,27 @@ exports[`statusCheckState failed status check - no data 1`] = `
         },
         Object {
           "children": <React.Fragment>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
-              <EuiFlexItem>
-                <Content
-                  text="custom status check description"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-              >
-                <EuiButton
-                  isLoading={false}
-                  onClick={[Function]}
-                >
-                  custom btn label
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <Content
+              text="custom status check description"
+            />
             <EuiSpacer
               size="s"
             />
-            <EuiCallOut
-              color="warning"
-              title="custom error msg"
-            />
+            <EuiButton
+              isLoading={false}
+              onClick={[Function]}
+            >
+              custom btn label
+            </EuiButton>
+            <React.Fragment>
+              <EuiSpacer
+                size="s"
+              />
+              <EuiCallOut
+                color="warning"
+                title="custom error msg"
+              />
+            </React.Fragment>
           </React.Fragment>,
           "key": "checkStatusStep",
           "status": "warning",
@@ -419,11 +400,13 @@ exports[`statusCheckState failed status check - no data 1`] = `
       ]
     }
   />
-</div>
+</EuiPanel>
 `;
 
 exports[`statusCheckState initial state - no check has been attempted 1`] = `
-<div>
+<EuiPanel
+  paddingSize="l"
+>
   <EuiFlexGroup
     justifyContent="spaceBetween"
     responsive={false}
@@ -444,6 +427,7 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
       grow={false}
     />
   </EuiFlexGroup>
+  <EuiSpacer />
   <EuiTabs>
     <EuiTab
       isSelected={true}
@@ -460,9 +444,7 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
       Windows
     </EuiTab>
   </EuiTabs>
-  <EuiSpacer
-    size="m"
-  />
+  <EuiSpacer />
   <EuiSteps
     firstStepNumber={1}
     steps={
@@ -499,29 +481,18 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
         },
         Object {
           "children": <React.Fragment>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
-              <EuiFlexItem>
-                <Content
-                  text="custom status check description"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-              >
-                <EuiButton
-                  isLoading={true}
-                  onClick={[Function]}
-                >
-                  custom btn label
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <Content
+              text="custom status check description"
+            />
             <EuiSpacer
               size="s"
             />
+            <EuiButton
+              isLoading={true}
+              onClick={[Function]}
+            >
+              custom btn label
+            </EuiButton>
           </React.Fragment>,
           "key": "checkStatusStep",
           "status": "incomplete",
@@ -530,11 +501,13 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
       ]
     }
   />
-</div>
+</EuiPanel>
 `;
 
 exports[`statusCheckState successful status check 1`] = `
-<div>
+<EuiPanel
+  paddingSize="l"
+>
   <EuiFlexGroup
     justifyContent="spaceBetween"
     responsive={false}
@@ -555,6 +528,7 @@ exports[`statusCheckState successful status check 1`] = `
       grow={false}
     />
   </EuiFlexGroup>
+  <EuiSpacer />
   <EuiTabs>
     <EuiTab
       isSelected={true}
@@ -571,9 +545,7 @@ exports[`statusCheckState successful status check 1`] = `
       Windows
     </EuiTab>
   </EuiTabs>
-  <EuiSpacer
-    size="m"
-  />
+  <EuiSpacer />
   <EuiSteps
     firstStepNumber={1}
     steps={
@@ -610,33 +582,27 @@ exports[`statusCheckState successful status check 1`] = `
         },
         Object {
           "children": <React.Fragment>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
-              <EuiFlexItem>
-                <Content
-                  text="custom status check description"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-              >
-                <EuiButton
-                  isLoading={false}
-                  onClick={[Function]}
-                >
-                  custom btn label
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <Content
+              text="custom status check description"
+            />
             <EuiSpacer
               size="s"
             />
-            <EuiCallOut
-              color="success"
-              title="custom success msg"
-            />
+            <EuiButton
+              isLoading={false}
+              onClick={[Function]}
+            >
+              custom btn label
+            </EuiButton>
+            <React.Fragment>
+              <EuiSpacer
+                size="s"
+              />
+              <EuiCallOut
+                color="success"
+                title="custom success msg"
+              />
+            </React.Fragment>
           </React.Fragment>,
           "key": "checkStatusStep",
           "status": "complete",
@@ -645,5 +611,5 @@ exports[`statusCheckState successful status check 1`] = `
       ]
     }
   />
-</div>
+</EuiPanel>
 `;

@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
@@ -286,7 +286,7 @@ class TutorialUi extends React.Component {
       offset += instructionSet.instructionVariants[0].instructions.length;
 
       return (
-        <>
+        <Fragment key={index}>
           <InstructionSet
             title={instructionSet.title}
             callOut={instructionSet.callOut}
@@ -301,11 +301,10 @@ class TutorialUi extends React.Component {
             paramValues={this.state.paramValues}
             setParameter={this.setParameter}
             replaceTemplateStrings={this.props.replaceTemplateStrings}
-            key={index}
             isCloudEnabled={this.props.isCloudEnabled}
           />
           {index < instructions.instructionSets.length - 1 && <EuiSpacer />}
-        </>
+        </Fragment>
       );
     });
   };
