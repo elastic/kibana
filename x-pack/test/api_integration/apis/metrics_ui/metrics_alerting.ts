@@ -48,7 +48,9 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           expect(result.hits).to.be.ok();
-          expect(result.aggregations).to.be.ok();
+          if (aggType !== 'count') {
+            expect(result.aggregations).to.be.ok();
+          }
         });
       }
       it('should work with a filterQuery', async () => {

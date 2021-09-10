@@ -147,9 +147,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
   const graphOverlay = useMemo(
     () =>
-      graphEventId != null && graphEventId.length > 0 ? (
-        <GraphOverlay isEventViewer={true} timelineId={id} />
-      ) : null,
+      graphEventId != null && graphEventId.length > 0 ? <GraphOverlay timelineId={id} /> : null,
     [graphEventId, id]
   );
   const setQuery = useCallback(

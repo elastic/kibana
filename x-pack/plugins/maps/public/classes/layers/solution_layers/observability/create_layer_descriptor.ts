@@ -179,6 +179,7 @@ export function createLayerDescriptor({
             whereQuery: apmSourceQuery,
             applyGlobalQuery: true,
             applyGlobalTime: true,
+            applyForceRefresh: true,
           },
         },
       ],

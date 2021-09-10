@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import {
   EuiCallOut,
   EuiFlyout,
@@ -66,7 +67,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         if (isValid && ecsFieldValue) {
           onSave({
             ...payload,
-            ecs_mapping: ecsFieldValue,
+            ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
           });
           onClose();
         }
@@ -81,7 +82,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     [integrationPackageVersion]
   );
 
-  const { submit, setFieldValue, reset } = form;
+  const { submit, setFieldValue, reset, isSubmitting } = form;
 
   const [{ query }] = useFormData({
     form,
@@ -245,7 +246,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={submit} fill>
+            <EuiButton isLoading={isSubmitting} onClick={submit} fill>
               <FormattedMessage
                 id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.saveButtonLabel"
                 defaultMessage="Save"

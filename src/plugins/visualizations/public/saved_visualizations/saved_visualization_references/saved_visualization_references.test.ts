@@ -115,7 +115,7 @@ describe('injectReferences', () => {
   });
 
   test('injects references into context', () => {
-    const context = {
+    const context = ({
       id: '1',
       title: 'test',
       savedSearchRefName: 'search_0',
@@ -133,7 +133,7 @@ describe('injectReferences', () => {
           ],
         },
       } as unknown) as SavedVisState,
-    } as VisSavedObject;
+    } as unknown) as VisSavedObject;
     const references = [
       {
         name: 'search_0',
@@ -182,7 +182,7 @@ describe('injectReferences', () => {
   });
 
   test(`fails when it can't find the index pattern reference in the array`, () => {
-    const context = {
+    const context = ({
       id: '1',
       title: 'test',
       visState: ({
@@ -196,7 +196,7 @@ describe('injectReferences', () => {
           ],
         },
       } as unknown) as SavedVisState,
-    } as VisSavedObject;
+    } as unknown) as VisSavedObject;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
       `"Could not find index pattern reference \\"control_0_index_pattern\\""`
     );
