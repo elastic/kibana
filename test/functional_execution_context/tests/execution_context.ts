@@ -19,6 +19,7 @@ const endOfLine = /(?<=})\s*\n/;
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home']);
   const retry = getService('retry');
+  const log = getService('log');
 
   async function assertLogContains(
     description: string,
@@ -43,6 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     if (!record) return false;
     try {
       const object = JSON.parse(record);
+      log.debug('log', record);
+      log.debug('shouldMatch id', executionContext.id);
       return isEqual(object, executionContext);
     } catch (e) {
       return false;
