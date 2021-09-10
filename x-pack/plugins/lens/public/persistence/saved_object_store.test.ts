@@ -12,7 +12,6 @@ describe('LensStore', () => {
   function testStore(testId?: string) {
     const client = {
       create: jest.fn(() => Promise.resolve({ id: testId || 'testid' })),
-      update: jest.fn((_type: string, id: string) => Promise.resolve({ id })),
       resolve: jest.fn(),
     };
 
@@ -79,7 +78,7 @@ describe('LensStore', () => {
     });
 
     test('updates and returns a visualization document', async () => {
-      const { client, store } = testStore();
+      const { client, store } = testStore('Gandalf');
       const doc = await store.save({
         savedObjectId: 'Gandalf',
         title: 'Even the very wise cannot see all ends.',
@@ -106,21 +105,10 @@ describe('LensStore', () => {
         },
       });
 
-      expect(client.update).toHaveBeenCalledTimes(2);
-      expect(client.update.mock.calls).toEqual([
+      expect(client.create).toHaveBeenCalledTimes(1);
+      expect(client.create.mock.calls).toEqual([
         [
           'lens',
-          'Gandalf',
-          {
-            title: null,
-            visualizationType: null,
-            state: null,
-          },
-          { references: [] },
-        ],
-        [
-          'lens',
-          'Gandalf',
           {
             title: 'Even the very wise cannot see all ends.',
             visualizationType: 'line',
@@ -131,7 +119,7 @@ describe('LensStore', () => {
               filters: [],
             },
           },
-          { references: [] },
+          { references: [], id: 'Gandalf', overwrite: true },
         ],
       ]);
     });
