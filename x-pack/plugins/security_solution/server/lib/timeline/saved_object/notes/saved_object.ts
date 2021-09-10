@@ -42,8 +42,7 @@ export const deleteNote = async (request: FrameworkRequest, noteIds: string[]) =
 export const deleteNoteByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
     type: noteSavedObjectType,
-    search: timelineId,
-    searchFields: ['timelineId'],
+    hasReference: { type: timelineSavedObjectType, id: timelineId },
   };
   const notesToBeDeleted = await getAllSavedNote(request, options);
   const savedObjectsClient = request.context.core.savedObjects.client;
@@ -81,8 +80,7 @@ export const getNotesByTimelineId = async (
 ): Promise<NoteSavedObject[]> => {
   const options: SavedObjectsFindOptions = {
     type: noteSavedObjectType,
-    search: timelineId,
-    searchFields: ['timelineId'],
+    hasReference: { type: timelineSavedObjectType, id: timelineId },
   };
   const notesByTimelineId = await getAllSavedNote(request, options);
   return notesByTimelineId.notes;
@@ -106,6 +104,7 @@ export const getAllNotes = async (
   return getAllSavedNote(request, options);
 };
 
+// TODO: migrate timelineId
 export const persistNote = async (
   request: FrameworkRequest,
   noteId: string | null,
