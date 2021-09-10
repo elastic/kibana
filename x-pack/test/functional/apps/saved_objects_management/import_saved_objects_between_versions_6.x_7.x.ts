@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.savedObjects.clickImportDone();
       const importedSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
       // verifying the count of saved objects after importing .json
-      await expect(importedSavedObjects).to.be('Export 33 objects');
+      await expect(importedSavedObjects).to.be('Export 34 objects');
     });
 
     // This test is because of this bug - https://github.com/elastic/kibana/issues/101430
