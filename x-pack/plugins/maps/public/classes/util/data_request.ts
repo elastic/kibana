@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { DataRequestDescriptor, DataMeta } from '../../../common/descriptor_types';
+import { DataRequestDescriptor, DataRequestMeta } from '../../../common/descriptor_types';
 
 export class DataRequest {
   private readonly _descriptor: DataRequestDescriptor;
@@ -26,11 +26,11 @@ export class DataRequest {
     return !!this._descriptor.dataRequestToken;
   }
 
-  getMeta(): DataMeta {
-    if (this._descriptor.dataMetaAtStart) {
-      return this._descriptor.dataMetaAtStart;
-    } else if (this._descriptor.dataMeta) {
-      return this._descriptor.dataMeta;
+  getMeta(): DataRequestMeta {
+    if (this._descriptor.dataRequestMetaAtStart) {
+      return this._descriptor.dataRequestMetaAtStart;
+    } else if (this._descriptor.dataRequestMeta) {
+      return this._descriptor.dataRequestMeta;
     } else {
       return {};
     }
