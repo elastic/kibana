@@ -11,8 +11,16 @@ import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 
 const rulesClient = rulesClientMock.create();
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+jest.mock('../../lib/track_legacy_route_usage', () => ({
+  trackLegacyRouteUsage: jest.fn(),
+}));
 
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -138,5 +146,24 @@ describe('aggregateAlertRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('should track every call', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    aggregateAlertRoute(router, licenseState, mockUsageCounter);
+    const [_, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        query: {
+          default_search_operator: 'AND',
+        },
+      },
+      ['ok']
+    );
+    await handler(context, req, res);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('aggregate', mockUsageCounter);
   });
 });
