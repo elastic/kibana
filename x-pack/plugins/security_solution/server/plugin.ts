@@ -381,7 +381,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               taskManager,
             });
           } else {
-            logger.debug('User artifacts task not available.');
+            logger.error(new Error('User artifacts task not available.'));
           }
         });
       });

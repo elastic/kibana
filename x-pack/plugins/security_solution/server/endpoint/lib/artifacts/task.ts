@@ -105,14 +105,14 @@ export class ManifestTask {
     // Check that this task is current
     if (taskId !== this.getTaskId()) {
       // old task, return
-      this.logger.debug(`Outdated task running: ${taskId}`);
+      this.logger.info(`Outdated task running: ${taskId}`);
       return;
     }
 
     const manifestManager = this.endpointAppContext.service.getManifestManager();
 
     if (manifestManager === undefined) {
-      this.logger.debug('Manifest Manager not available.');
+      this.logger.error('Manifest Manager not available.');
       return;
     }
 
@@ -120,7 +120,7 @@ export class ManifestTask {
       // Last manifest we computed, which was saved to ES
       const oldManifest = await manifestManager.getLastComputedManifest();
       if (oldManifest == null) {
-        this.logger.debug('User manifest not available yet.');
+        this.logger.debug('Last computed manifest not available yet');
         return;
       }
 

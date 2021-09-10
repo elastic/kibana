@@ -34,6 +34,7 @@ import {
 import { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { EndpointError } from '../../../errors';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -321,7 +322,9 @@ export class ManifestManager {
       const manifestSo = await this.getManifestClient().getManifest();
 
       if (manifestSo.version === undefined) {
-        throw new Error('No version returned for manifest.');
+        // FIXME:PT can we recover here? maybe just log an error and return a default manifest?
+
+        throw new EndpointError('No version returned for manifest.', manifestSo);
       }
 
       const manifest = new Manifest({
@@ -334,10 +337,15 @@ export class ManifestManager {
         const artifact = await this.artifactClient.getArtifact(entry.artifactId);
 
         if (!artifact) {
-          throw new Error(`artifact id [${entry.artifactId}] not found!`);
+          this.logger.error(
+            new EndpointError(`artifact id [${entry.artifactId}] not found!`, {
+              entry,
+              action: 'removed from internal ManifestManger tracking map',
+            })
+          );
+        } else {
+          manifest.addEntry(artifact, entry.policyId);
         }
-
-        manifest.addEntry(artifact, entry.policyId);
       }
 
       return manifest;
