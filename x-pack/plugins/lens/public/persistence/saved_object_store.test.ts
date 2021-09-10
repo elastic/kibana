@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsBulkUpdateObject } from 'kibana/public';
+import { SavedObjectsClientContract } from 'kibana/public';
 import { SavedObjectIndexStore } from './saved_object_store';
 
 describe('LensStore', () => {
   function testStore(testId?: string) {
     const client = {
       create: jest.fn(() => Promise.resolve({ id: testId || 'testid' })),
-      bulkUpdate: jest.fn(([{ id }]: SavedObjectsBulkUpdateObject[]) =>
-        Promise.resolve({ savedObjects: [{ id }, { id }] })
-      ),
+      update: jest.fn((_type: string, id: string) => Promise.resolve({ id })),
       resolve: jest.fn(),
     };
 
@@ -108,23 +106,22 @@ describe('LensStore', () => {
         },
       });
 
-      expect(client.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(client.bulkUpdate).toHaveBeenCalledWith([
-        {
-          type: 'lens',
-          id: 'Gandalf',
-          references: [],
-          attributes: {
+      expect(client.update).toHaveBeenCalledTimes(2);
+      expect(client.update.mock.calls).toEqual([
+        [
+          'lens',
+          'Gandalf',
+          {
             title: null,
             visualizationType: null,
             state: null,
           },
-        },
-        {
-          type: 'lens',
-          id: 'Gandalf',
-          references: [],
-          attributes: {
+          { references: [] },
+        ],
+        [
+          'lens',
+          'Gandalf',
+          {
             title: 'Even the very wise cannot see all ends.',
             visualizationType: 'line',
             state: {
@@ -134,7 +131,8 @@ describe('LensStore', () => {
               filters: [],
             },
           },
-        },
+          { references: [] },
+        ],
       ]);
     });
   });

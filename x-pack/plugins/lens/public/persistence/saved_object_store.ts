@@ -81,12 +81,9 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     Object.keys(attributes).forEach((key) => {
       resetAttributes[key] = null;
     });
-    return (
-      await this.client.bulkUpdate([
-        { type: DOC_TYPE, id: savedObjectId, attributes: resetAttributes, references },
-        { type: DOC_TYPE, id: savedObjectId, attributes, references },
-      ])
-    ).savedObjects[1];
+
+    await this.client.update(DOC_TYPE, savedObjectId, resetAttributes, { references });
+    return this.client.update(DOC_TYPE, savedObjectId, attributes, { references });
   }
 
   async load(savedObjectId: string): Promise<ResolvedSimpleSavedObject<LensSavedObjectAttributes>> {
