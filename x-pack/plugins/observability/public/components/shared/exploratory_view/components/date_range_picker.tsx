@@ -31,7 +31,7 @@ export function DateRangePicker({ seriesId, series }: { seriesId: number; series
   const endDate = parseAbsoluteDate(seriesTo ?? mainTo, { roundUp: true })!;
 
   const getTotalDuration = () => {
-    const mainStartDate = parseAbsoluteDate(mainTo)!;
+    const mainStartDate = parseAbsoluteDate(mainFrom)!;
     const mainEndDate = parseAbsoluteDate(mainTo, { roundUp: true })!;
     return mainEndDate.diff(mainStartDate, 'millisecond');
   };
