@@ -73,11 +73,7 @@ export function TransactionDistribution({
 
   const { urlParams } = useUrlParams();
 
-  const {
-    waterfall,
-    exceedsMax,
-    status: waterfallStatus,
-  } = useWaterfallFetcher();
+  const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
 
   const markerCurrentTransaction =
     waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
@@ -215,7 +211,6 @@ export function TransactionDistribution({
             urlParams={urlParams}
             waterfall={waterfall}
             isLoading={waterfallStatus === FETCH_STATUS.LOADING}
-            exceedsMax={exceedsMax}
             traceSamples={traceSamples}
           />
         </>

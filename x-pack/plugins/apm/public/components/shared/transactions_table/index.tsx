@@ -28,6 +28,7 @@ import { getTimeRangeComparison } from '../time_comparison/get_time_range_compar
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
 import { ElasticDocsLink } from '../Links/ElasticDocsLink';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
@@ -57,6 +58,7 @@ const DEFAULT_SORT = {
 
 interface Props {
   hideViewTransactionsLink?: boolean;
+  isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
   showAggregationAccurateCallout?: boolean;
   environment: string;
@@ -69,6 +71,7 @@ interface Props {
 export function TransactionsTable({
   fixedHeight = false,
   hideViewTransactionsLink = false,
+  isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
   showAggregationAccurateCallout = false,
   environment,
@@ -86,6 +89,10 @@ export function TransactionsTable({
     pageIndex: 0,
     sort: DEFAULT_SORT,
   });
+
+  // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
+  const { isXl } = useBreakpoints();
+  const shouldShowSparkPlots = isSingleColumn || !isXl;
 
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
@@ -214,6 +221,7 @@ export function TransactionsTable({
     latencyAggregationType,
     transactionGroupDetailedStatistics,
     comparisonEnabled,
+    shouldShowSparkPlots,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING;
