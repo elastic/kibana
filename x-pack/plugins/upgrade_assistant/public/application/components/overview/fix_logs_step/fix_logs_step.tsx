@@ -61,6 +61,15 @@ const FixLogsStep: FunctionComponent<Props> = ({ setIsComplete }) => {
     saveLogsCheckpoint(checkpoint);
   }, [checkpoint]);
 
+  useEffect(() => {
+    if (!state.isDeprecationLogIndexingEnabled) {
+      setIsComplete(false);
+    }
+
+    // Depending upon setIsComplete would create an infinite loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.isDeprecationLogIndexingEnabled]);
+
   return (
     <>
       <EuiText>

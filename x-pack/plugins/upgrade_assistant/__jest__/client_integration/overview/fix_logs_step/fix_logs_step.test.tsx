@@ -50,11 +50,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
   describe('Step status', () => {
     test(`It's complete when there are no deprecation logs since last checkpoint`, async () => {
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
-
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
-        count: 0,
-      });
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
 
       await act(async () => {
         testBed = await setupOverviewPage();
@@ -68,11 +64,7 @@ describe('Overview - Fix deprecation logs step', () => {
     });
 
     test(`It's incomplete when there are deprecation logs since last checkpoint`, async () => {
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
-
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
-        count: 5,
-      });
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 5 });
 
       await act(async () => {
         testBed = await setupOverviewPage();
@@ -81,6 +73,26 @@ describe('Overview - Fix deprecation logs step', () => {
       const { exists, component } = testBed;
 
       component.update();
+
+      expect(exists(`fixLogsStep-incomplete`)).toBe(true);
+    });
+
+    test(`It's incomplete when log collection is disabled `, async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { actions, exists, component } = testBed;
+
+      component.update();
+
+      expect(exists(`fixLogsStep-complete`)).toBe(true);
+
+      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(false));
+
+      await actions.clickDeprecationToggle();
 
       expect(exists(`fixLogsStep-incomplete`)).toBe(true);
     });
