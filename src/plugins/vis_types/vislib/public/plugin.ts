@@ -13,16 +13,11 @@ import { VisualizationsSetup } from '../../../visualizations/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { KibanaLegacyStart } from '../../../kibana_legacy/public';
-import { LEGACY_CHARTS_LIBRARY } from '../../xy/common/index';
 import { LEGACY_PIE_CHARTS_LIBRARY } from '../../pie/common/index';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
-import {
-  convertedTypeDefinitions,
-  pieVisTypeDefinition,
-  visLibVisTypeDefinitions,
-} from './vis_type_vislib_vis_types';
+import { visLibVisTypeDefinitions, pieVisTypeDefinition } from './vis_type_vislib_vis_types';
 import { setFormatService, setDataActions } from './services';
 import { getVislibVisRenderer } from './vis_renderer';
 
@@ -51,11 +46,8 @@ export class VisTypeVislibPlugin
     core: VisTypeVislibCoreSetup,
     { expressions, visualizations, charts }: VisTypeVislibPluginSetupDependencies
   ) {
-    const typeDefinitions = !core.uiSettings.get(LEGACY_CHARTS_LIBRARY, false)
-      ? convertedTypeDefinitions
-      : visLibVisTypeDefinitions;
     // register vislib XY axis charts
-    typeDefinitions.forEach(visualizations.createBaseVisualization);
+    visLibVisTypeDefinitions.forEach(visualizations.createBaseVisualization);
     expressions.registerRenderer(getVislibVisRenderer(core, charts));
     expressions.registerFunction(createVisTypeVislibVisFn());
 
