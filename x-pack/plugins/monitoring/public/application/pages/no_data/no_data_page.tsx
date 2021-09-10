@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
@@ -15,7 +15,6 @@ import { PageTemplate } from '../page_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { Legacy } from '../../../legacy_shims';
-import { GlobalStateContext } from '../../global_state_context';
 import { Enabler } from './enabler';
 
 const CODE_PATHS = [CODE_PATH_LICENSE];
@@ -30,6 +29,17 @@ interface SettingsChecker {
   api: string;
   next?: SettingsChecker;
 }
+
+const checkers: SettingsChecker[] = [
+  {
+    message: 'Checking cluster settings API on production cluster',
+    api: '../api/monitoring/v1/elasticsearch_settings/check/cluster',
+  },
+  {
+    message: 'Checking nodes settings API on production cluster',
+    api: '../api/monitoring/v1/elasticsearch_settings/check/nodes',
+  },
+];
 
 export const NoDataPage = () => {
   const title = i18n.translate('xpack.monitoring.noData.routeTitle', {
@@ -49,45 +59,41 @@ export const NoDataPage = () => {
     isCollectionIntervalUpdated: false,
   } as any);
 
-  const checkers: SettingsChecker[] = [
-    {
-      message: 'Checking cluster settings API on production cluster',
-      api: '../api/monitoring/v1/elasticsearch_settings/check/cluster',
-    },
-    {
-      message: 'Checking nodes settings API on production cluster',
-      api: '../api/monitoring/v1/elasticsearch_settings/check/nodes',
-    },
-  ];
-
   // From x-pack/plugins/monitoring/public/views/no_data/model_updater.js
-  const updateModel = (properties: any) => {
-    const updated = { ...model };
-    const keys = Object.keys(properties);
+  const updateModel = useCallback(
+    (properties: any) => {
+      setModel((model: any) => {
+        const updated = { ...model };
+        const keys = Object.keys(properties);
 
-    keys.forEach((key) => {
-      if (Array.isArray(updated[key])) {
-        updated[key].push(properties[key]);
-      } else {
-        updated[key] = properties[key];
-      }
-    });
-    setModel(updated);
-  };
+        keys.forEach((key) => {
+          if (Array.isArray(updated[key])) {
+            updated[key].push(properties[key]);
+          } else {
+            updated[key] = properties[key];
+          }
+        });
+
+        return updated;
+      });
+    },
+    [setModel]
+  );
 
   const getPageData = useCallback(async () => {
-    updateModel({ isLoading: true });
-
     try {
       const clusters = await getClusters(services);
 
       if (clusters && clusters.length) {
-        updateModel({ isLoading: false });
+        // updateModel({ isLoading: false });
         setShouldRedirect(true);
         return;
       }
 
+      // TODO this check might be required for internal collection enablement to work smoothly
+      // if (!model.isCollectionEnabledUpdating && !model.isCollectionIntervalUpdating) {
       await startChecks(checkers, services.http, updateModel);
+      //}
     } catch (err) {
       // TODO something useful with the error reason
       // if (err && err.status === 503) {
@@ -97,7 +103,7 @@ export const NoDataPage = () => {
       //   };
       // }
     }
-  }, [services, services.http, checkers, updateModel]);
+  }, [services, checkers, updateModel]);
 
   const enabler = new Enabler(services.http, updateModel);
 
