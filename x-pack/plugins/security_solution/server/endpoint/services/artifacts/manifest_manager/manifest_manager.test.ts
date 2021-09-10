@@ -212,6 +212,59 @@ describe('ManifestManager', () => {
         new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
       );
     });
+
+    test("Retrieve non empty manifest and skips over artifacts that can't be found", async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const manifestManagerContext = buildManifestManagerContextMock({ savedObjectsClient });
+      const manifestManager = new ManifestManager(manifestManagerContext);
+
+      savedObjectsClient.get = jest
+        .fn()
+        .mockImplementation(async (objectType: string, id: string) => {
+          if (objectType === ManifestConstants.SAVED_OBJECT_TYPE) {
+            return {
+              attributes: {
+                created: '20-01-2020 10:00:00.000Z',
+                schemaVersion: 'v2',
+                semanticVersion: '1.0.0',
+                artifacts: [
+                  { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
+                  { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
+                  { artifactId: ARTIFACT_ID_EXCEPTIONS_LINUX, policyId: undefined },
+                  { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
+                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_2 },
+                ],
+              },
+              version: '2.0.0',
+            };
+          } else {
+            return null;
+          }
+        });
+
+      (manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>).getArtifact.mockImplementation(
+        async (id) => {
+          // report the MACOS Exceptions artifact as not found
+          return id === ARTIFACT_ID_EXCEPTIONS_MACOS ? undefined : ARTIFACTS_BY_ID[id];
+        }
+      );
+
+      const manifest = await manifestManager.getLastComputedManifest();
+
+      expect(manifest?.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(1, 5));
+
+      expect(manifestManagerContext.logger.error).toHaveBeenCalledWith(
+        new InvalidInternalManifestError(
+          `artifact id [${ARTIFACT_ID_EXCEPTIONS_MACOS}] not found!`,
+          {
+            entry: ARTIFACTS_BY_ID[ARTIFACT_ID_EXCEPTIONS_MACOS],
+            action: 'removed from internal ManifestManger tracking map',
+          }
+        )
+      );
+    });
   });
 
   describe('buildNewManifest', () => {
