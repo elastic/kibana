@@ -364,6 +364,37 @@ test('read "enabled" even if its schema is not present', async () => {
   expect(isEnabled).toBe(true);
 });
 
+test('logs deprecation if schema is not present and "enabled" is used', async () => {
+  const initialConfig = {
+    foo: {
+      enabled: true,
+    },
+  };
+
+  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+
+  await configService.isEnabledAtPath('foo');
+  expect(configService.getHandledDeprecatedConfigs()).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "foo",
+        Array [
+          Object {
+            "correctiveActions": Object {
+              "manualSteps": Array [
+                "Remove foo.enabled from your Kibana config.",
+              ],
+            },
+            "message": "\\"foo.enabled\\" has been deprecated and will be removed in 8.0.",
+            "title": "Setting \\"foo.enabled\\" is deprecated",
+          },
+        ],
+      ],
+    ]
+  `);
+});
+
 test('allows plugins to specify "enabled" flag via validation schema', async () => {
   const initialConfig = {};
 
