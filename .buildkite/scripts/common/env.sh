@@ -52,6 +52,9 @@ else
 fi
 
 CHECKS_REPORTER_ACTIVE="true" # TODO remove before merge
+export ghprbGhRepository="elastic/kibana" # TODO remove before merge
+export ghprbActualCommit="$BUILDKITE_COMMIT" # TODO remove before merge
+export BUILD_URL="$BUILDKITE_BUILD_URL" # TODO remove before merge
 
 export FLEET_PACKAGE_REGISTRY_PORT=6104
 export TEST_CORS_SERVER_PORT=6105
