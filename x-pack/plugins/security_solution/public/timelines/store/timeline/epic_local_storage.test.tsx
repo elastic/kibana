@@ -40,7 +40,12 @@ import { Sort } from '../../components/timeline/body/sort';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
-import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineStatus,
+  TimelineTabs,
+  TimelineType,
+} from '../../../../common/types/timeline';
 import { Direction } from '../../../../common/search_strategy';
 
 jest.mock('../../containers/local_storage');
@@ -86,6 +91,7 @@ describe('epicLocalStorage', () => {
       status: TimelineStatus.active,
       sort,
       timelineId: 'foo',
+      timelineType: TimelineType.default,
       timerangeKind: 'absolute',
       updateEventTypeAndIndexesName: jest.fn(),
       activeTab: TimelineTabs.query,
