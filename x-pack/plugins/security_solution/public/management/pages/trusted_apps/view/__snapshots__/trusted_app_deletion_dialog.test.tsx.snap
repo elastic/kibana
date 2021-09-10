@@ -82,7 +82,7 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion failed 1`] = `
                     class="euiTextColor euiTextColor--default"
                   >
                     <p>
-                      Deleting this entry will remove it from all policies it is associated with.
+                      Deleting this entry will remove it from all associated policies.
                     </p>
                   </div>
                 </div>
@@ -216,7 +216,7 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion is in progress
                     class="euiTextColor euiTextColor--default"
                   >
                     <p>
-                      Deleting this entry will remove it from all policies it is associated with.
+                      Deleting this entry will remove it from all associated policies.
                     </p>
                   </div>
                 </div>
@@ -355,7 +355,7 @@ exports[`TrustedAppDeletionDialog renders correctly when dialog started 1`] = `
                     class="euiTextColor euiTextColor--default"
                   >
                     <p>
-                      Deleting this entry will remove it from all policies it is associated with.
+                      Deleting this entry will remove it from all associated policies.
                     </p>
                   </div>
                 </div>
