@@ -19,12 +19,23 @@ import { GlobalStateContext } from '../global_state_context';
 
 const CODE_PATHS = [CODE_PATH_LICENSE];
 
+interface NoDataPageSetupDeps {
+  http: any;
+  data: any;
+}
+
+interface SettingsChecker {
+  message: string;
+  api: string;
+  next?: SettingsChecker;
+}
+
 export const NoDataPage = () => {
   const title = i18n.translate('xpack.monitoring.noData.routeTitle', {
     defaultMessage: 'Setup Monitoring',
   });
 
-  const { services } = useKibana<{ data: any }>();
+  const { services } = useKibana<NoDataPageSetupDeps>();
 
   const state = useContext(GlobalStateContext);
   const clusterUuid = state.cluster_uuid;
@@ -42,6 +53,17 @@ export const NoDataPage = () => {
     isCollectionIntervalUpdated: false,
   } as any);
 
+  const checkers: SettingsChecker[] = [
+    {
+      message: 'Checking cluster settings API on production cluster',
+      api: '../api/monitoring/v1/elasticsearch_settings/check/cluster',
+    },
+    {
+      message: 'Checking nodes settings API on production cluster',
+      api: '../api/monitoring/v1/elasticsearch_settings/check/nodes',
+    },
+  ];
+
   // From x-pack/plugins/monitoring/public/views/no_data/model_updater.js
   const updateModel = (properties: any) => {
     const updated = { ...model };
@@ -57,38 +79,20 @@ export const NoDataPage = () => {
     setModel(updated);
   };
 
-  // TODO work on porting these checkers over
-  // const checkers = [new ClusterSettingsChecker($http), new NodeSettingsChecker($http)];
-  // await startChecks(checkers, updateModel);
-
   const getPageData = useCallback(async () => {
     updateModel({ isLoading: true });
-    const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    const min = bounds.min.toISOString();
-    const max = bounds.max.toISOString();
-
-    const url = '../api/monitoring/v1/clusters';
 
     try {
-      const response = await services.http?.fetch(url, {
-        method: 'POST',
-        body: JSON.stringify({
-          css: undefined,
-          timeRange: {
-            min,
-            max,
-          },
-          codePaths: CODE_PATHS,
-        }),
-      });
-
-      const clusters = formatClusters(response);
-      updateModel({ isLoading: false });
+      const clusters = await getClusters(services);
       console.log('did a refresh from no data page');
 
       if (clusters && clusters.length) {
+        updateModel({ isLoading: false });
         setShouldRedirect(true);
+        return;
       }
+
+      await startChecks(checkers, services.http, updateModel);
     } catch (err) {
       // TODO something useful with the error reason
       // if (err && err.status === 503) {
@@ -99,7 +103,7 @@ export const NoDataPage = () => {
       // }
       console.log(err);
     }
-  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
+  }, [ccs, clusterUuid, services, services.http]);
 
   const enabler = new Enabler(updateModel);
 
@@ -114,7 +118,97 @@ export const NoDataPage = () => {
   );
 };
 
-function formatClusters(clusters: any) {
+async function getClusters(services: NoDataPageSetupDeps): Promise<any[]> {
+  const url = '../api/monitoring/v1/clusters';
+  const bounds = services.data?.query.timefilter.timefilter.getBounds();
+  const min = bounds.min.toISOString();
+  const max = bounds.max.toISOString();
+
+  const response = await services.http?.fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({
+      css: undefined,
+      timeRange: {
+        min,
+        max,
+      },
+      codePaths: CODE_PATHS,
+    }),
+  });
+
+  return formatClusters(response);
+}
+
+// From x-pack/plugins/monitoring/public/lib/elasticsearch_settings/start_checks.js
+const mapCheckers = (_checkers: SettingsChecker[]) => {
+  return _checkers.map((current, checkerIndex) => {
+    const next = _checkers[checkerIndex + 1];
+    if (next !== undefined) {
+      current.next = next;
+    }
+
+    return current;
+  });
+};
+
+// From x-pack/plugins/monitoring/public/lib/elasticsearch_settings/start_checks.js
+function startChecks(
+  checkers: SettingsChecker[],
+  http: { fetch: any },
+  updateModel: (properties: any) => void
+) {
+  const runCheck = async (currentChecker: SettingsChecker): Promise<any> => {
+    updateModel({ checkMessage: currentChecker.message });
+
+    const { found, reason, error, errorReason } = await executeCheck(currentChecker, http);
+
+    if (error) {
+      updateModel({ errors: errorReason });
+      if (currentChecker.next) {
+        return runCheck(currentChecker.next);
+      }
+    } else if (found) {
+      return updateModel({
+        reason,
+        isLoading: false,
+        checkMessage: null,
+      });
+    } else if (currentChecker.next) {
+      return runCheck(currentChecker.next);
+    }
+
+    // dead end
+    updateModel({
+      reason: null,
+      isLoading: false,
+      checkMessage: null,
+    });
+  };
+
+  const _checkers = mapCheckers(checkers);
+  return runCheck(_checkers[0]);
+}
+
+async function executeCheck(checker: SettingsChecker, http: { fetch: any }): Promise<any> {
+  try {
+    const response = await http.fetch(checker.api, {
+      method: 'GET',
+    });
+    const { found, reason } = response;
+
+    return { found, reason };
+  } catch (err: any) {
+    const { data } = err;
+
+    return {
+      error: true,
+      found: false,
+      errorReason: data,
+    };
+  }
+}
+
+function formatClusters(clusters: any): any[] {
   return clusters.map(formatCluster);
 }
 
