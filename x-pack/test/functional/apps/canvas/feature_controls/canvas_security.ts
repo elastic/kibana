@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           kibana: [
             {
               feature: {
-                canvas: ['minimal_all'],
+                canvas: ['all'],
               },
               spaces: ['*'],
             },
