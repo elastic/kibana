@@ -10,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerSettingsRoutes } from './settings';
 
 describe('log settings routes', () => {
-  describe('GET /api/app_search/log_settings', () => {
+  describe('GET /internal/app_search/log_settings', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/log_settings',
+        path: '/internal/app_search/log_settings',
       });
 
       registerSettingsRoutes({
@@ -33,14 +33,14 @@ describe('log settings routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/log_settings', () => {
+  describe('PUT /internal/app_search/log_settings', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/app_search/log_settings',
+        path: '/internal/app_search/log_settings',
       });
 
       registerSettingsRoutes({
