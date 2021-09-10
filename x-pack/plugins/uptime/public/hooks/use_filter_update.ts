@@ -71,5 +71,6 @@ export const useFilterUpdate = (
       // reset pagination whenever filters change
       updateUrl({ ...update, pagination: '' });
     }
-  }, [fieldName, values, notValues, filters, excludedFilters, shouldUpdateUrl, updateUrl]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fieldName, values, notValues]);
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FilterValueLabel } from '../../../../../observability/public';
 import { useIndexPattern } from '../../../contexts/uptime_index_pattern_context';
@@ -21,61 +21,59 @@ export const SelectedFilters = ({ onChange }: Props) => {
   if (!indexPattern) return null;
 
   return (
-    <EuiFlexGroup gutterSize="xs">
-      {filtersList.map(({ field, selectedItems, excludedItems, label }) => (
-        <Fragment key={field}>
-          {selectedItems.map((value) => (
-            <EuiFlexItem key={field + value} grow={false}>
-              <FilterValueLabel
-                indexPattern={indexPattern}
-                removeFilter={() => {
-                  onChange(
-                    field,
-                    selectedItems.filter((valT) => valT !== value),
-                    excludedItems
-                  );
-                }}
-                invertFilter={(val) => {
-                  onChange(
-                    field,
-                    selectedItems.filter((valT) => valT !== value),
-                    [...excludedItems, value]
-                  );
-                }}
-                field={field}
-                value={value}
-                negate={false}
-                label={label}
-              />
-            </EuiFlexItem>
-          ))}
-          {excludedItems.map((value) => (
-            <EuiFlexItem key={field + value} grow={false}>
-              <FilterValueLabel
-                indexPattern={indexPattern}
-                removeFilter={() => {
-                  onChange(
-                    field,
-                    selectedItems,
-                    excludedItems.filter((valT) => valT !== value)
-                  );
-                }}
-                invertFilter={(val) => {
-                  onChange(
-                    field,
-                    [...selectedItems, value],
-                    excludedItems.filter((valT) => valT !== value)
-                  );
-                }}
-                field={field}
-                value={value}
-                negate={true}
-                label={label}
-              />
-            </EuiFlexItem>
-          ))}
-        </Fragment>
-      ))}
+    <EuiFlexGroup gutterSize="xs" wrap>
+      {filtersList.map(({ field, selectedItems, excludedItems, label }) => [
+        ...selectedItems.map((value) => (
+          <EuiFlexItem key={field + value} grow={false}>
+            <FilterValueLabel
+              indexPattern={indexPattern}
+              removeFilter={() => {
+                onChange(
+                  field,
+                  selectedItems.filter((valT) => valT !== value),
+                  excludedItems
+                );
+              }}
+              invertFilter={(val) => {
+                onChange(
+                  field,
+                  selectedItems.filter((valT) => valT !== value),
+                  [...excludedItems, value]
+                );
+              }}
+              field={field}
+              value={value}
+              negate={false}
+              label={label}
+            />
+          </EuiFlexItem>
+        )),
+        ...excludedItems.map((value) => (
+          <EuiFlexItem key={field + value} grow={false}>
+            <FilterValueLabel
+              indexPattern={indexPattern}
+              removeFilter={() => {
+                onChange(
+                  field,
+                  selectedItems,
+                  excludedItems.filter((valT) => valT !== value)
+                );
+              }}
+              invertFilter={(val) => {
+                onChange(
+                  field,
+                  [...selectedItems, value],
+                  excludedItems.filter((valT) => valT !== value)
+                );
+              }}
+              field={field}
+              value={value}
+              negate={true}
+              label={label}
+            />
+          </EuiFlexItem>
+        )),
+      ])}
     </EuiFlexGroup>
   );
 };
