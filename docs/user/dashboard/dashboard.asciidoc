@@ -283,37 +283,15 @@ To enable series interactions, refer to <<settings-explore-data-in-chart,`xpack.
 [[download-csv]]
 == Download panel data
 
-Download panel data in a CSV file. You can download most panels in a CSV file, but there is a shortcut available
-for *Lens* panels.
-
-[float]
-[role="xpack"]
-[[download-lens-data]]
-=== Download Lens data
-
-When you download *Lens* panel data, each layer produces a single CSV file with columns.
-When you download multiple layers, the file names combine the visualization and layer index names.
-
-. Open the *Lens* panel menu
-
-. Select *More > Download as CSV*.
-
-[float]
-[[download-other-panel-data]]
-=== Download all other panel data
-
-Download the data for non-*Lens* panels.  
+Download panel data in a CSV file. When you download visualization panels with multiple layers, each layer produces a CSV file, and the file names contain the visualization and layer index names.
 
 . Open the panel menu, then select *Inspect*.
 
-. Click *Download CSV*, then select the CSV type from the dropdown:
+. Click *Download CSV*, then select the format type from the dropdown:
 
 * *Formatted CSV* &mdash; Contains human-readable dates and numbers.
 
 * *Unformatted* &mdash; Best used for computer use.
-+
-[role="screenshot"]
-image:images/Dashboard_inspect.png[Inspect in dashboard]
 
 [float]
 [[defer-loading-panels-below-the-fold]]

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
-import '../../../__mocks__/shallow_useeffect.mock';
+import { setMockValues } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
@@ -84,11 +83,6 @@ const crawlRequests: CrawlRequestFromServer[] = [
 ];
 
 describe('CrawlerOverview', () => {
-  const mockActions = {
-    fetchCrawlerData: jest.fn(),
-    getLatestCrawlRequests: jest.fn(),
-  };
-
   const mockValues = {
     dataLoading: false,
     domains,
@@ -97,32 +91,27 @@ describe('CrawlerOverview', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockActions(mockActions);
-  });
-
-  it('calls fetchCrawlerData and starts polling on page load', () => {
-    setMockValues(mockValues);
-
-    shallow(<CrawlerOverview />);
-
-    expect(mockActions.fetchCrawlerData).toHaveBeenCalledTimes(1);
-    expect(mockActions.getLatestCrawlRequests).toHaveBeenCalledWith(false);
   });
 
   it('contains a crawler status banner', () => {
     setMockValues(mockValues);
+
     const wrapper = shallow(<CrawlerOverview />);
 
     expect(wrapper.find(CrawlerStatusBanner)).toHaveLength(1);
   });
 
   it('contains a crawler status indicator', () => {
+    setMockValues(mockValues);
+
     const wrapper = shallow(<CrawlerOverview />);
 
     expect(getPageHeaderActions(wrapper).find(CrawlerStatusIndicator)).toHaveLength(1);
   });
 
   it('contains a popover to manage crawls', () => {
+    setMockValues(mockValues);
+
     const wrapper = shallow(<CrawlerOverview />);
 
     expect(getPageHeaderActions(wrapper).find(ManageCrawlsPopover)).toHaveLength(1);

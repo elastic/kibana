@@ -30,6 +30,12 @@ This is the path to the Cloud deployment management page for the deployment to w
 
 **Example:** `{baseUrl}/deployments/bfdad4ef99a24212a06d387593686d63`
 
+### `snapshotsUrl`
+
+This is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.
+
+**Example:** `{deploymentUrl}/elasticsearch/snapshots`
+
 ### `profileUrl`
 
 This is the path to the Cloud User Profile page. The value is already prepended with `baseUrl`.

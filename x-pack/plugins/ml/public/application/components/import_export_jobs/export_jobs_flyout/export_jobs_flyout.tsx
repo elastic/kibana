@@ -63,6 +63,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
   const [exporting, setExporting] = useState(false);
   const [selectedJobType, setSelectedJobType] = useState<JobType>(currentTab);
   const [switchTabConfirmVisible, setSwitchTabConfirmVisible] = useState(false);
+  const [switchTabNextTab, setSwitchTabNextTab] = useState<JobType>(currentTab);
   const { displayErrorToast, displaySuccessToast } = useMemo(
     () => toastNotificationServiceProvider(toasts),
     [toasts]
@@ -170,16 +171,23 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     }
   }
 
-  const attemptTabSwitch = useCallback(() => {
-    // if the user has already selected some jobs, open a confirm modal
-    // rather than changing tabs
-    if (selectedJobIds.length > 0) {
-      setSwitchTabConfirmVisible(true);
-      return;
-    }
+  const attemptTabSwitch = useCallback(
+    (jobType: JobType) => {
+      if (jobType === selectedJobType) {
+        return;
+      }
+      // if the user has already selected some jobs, open a confirm modal
+      // rather than changing tabs
+      if (selectedJobIds.length > 0) {
+        setSwitchTabNextTab(jobType);
+        setSwitchTabConfirmVisible(true);
+        return;
+      }
 
-    switchTab();
-  }, [selectedJobIds]);
+      switchTab(jobType);
+    },
+    [selectedJobIds]
+  );
 
   useEffect(() => {
     setSelectedJobDependencies(
@@ -187,10 +195,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     );
   }, [selectedJobIds]);
 
-  function switchTab() {
-    const jobType =
-      selectedJobType === 'anomaly-detector' ? 'data-frame-analytics' : 'anomaly-detector';
-
+  function switchTab(jobType: JobType) {
     setSwitchTabConfirmVisible(false);
     setSelectedJobIds([]);
     setSelectedJobType(jobType);
@@ -211,7 +216,12 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
 
       {showFlyout === true && isDisabled === false && (
         <>
-          <EuiFlyout onClose={() => setShowFlyout(false)} hideCloseButton size="s">
+          <EuiFlyout
+            onClose={() => setShowFlyout(false)}
+            hideCloseButton
+            size="s"
+            data-test-subj="mlJobMgmtExportJobsFlyout"
+          >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="m">
                 <h2>
@@ -227,8 +237,9 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
               <EuiTabs size="s">
                 <EuiTab
                   isSelected={selectedJobType === 'anomaly-detector'}
-                  onClick={attemptTabSwitch}
+                  onClick={() => attemptTabSwitch('anomaly-detector')}
                   disabled={exporting}
+                  data-test-subj="mlJobMgmtExportJobsADTab"
                 >
                   <FormattedMessage
                     id="xpack.ml.importExport.exportFlyout.adTab"
@@ -237,8 +248,9 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                 </EuiTab>
                 <EuiTab
                   isSelected={selectedJobType === 'data-frame-analytics'}
-                  onClick={attemptTabSwitch}
+                  onClick={() => attemptTabSwitch('data-frame-analytics')}
                   disabled={exporting}
+                  data-test-subj="mlJobMgmtExportJobsDFATab"
                 >
                   <FormattedMessage
                     id="xpack.ml.importExport.exportFlyout.dfaTab"
@@ -254,26 +266,40 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                       <LoadingSpinner />
                     ) : (
                       <>
-                        <EuiButtonEmpty size="xs" onClick={onSelectAll} isDisabled={isDisabled}>
-                          <FormattedMessage
-                            id="xpack.ml.importExport.exportFlyout.adSelectAllButton"
-                            defaultMessage="Select all"
-                          />
+                        <EuiButtonEmpty
+                          size="xs"
+                          onClick={onSelectAll}
+                          isDisabled={isDisabled}
+                          data-test-subj="mlJobMgmtExportJobsSelectAllButton"
+                        >
+                          {selectedJobIds.length === adJobIds.length ? (
+                            <FormattedMessage
+                              id="xpack.ml.importExport.exportFlyout.adDeselectAllButton"
+                              defaultMessage="Deselect all"
+                            />
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.ml.importExport.exportFlyout.adSelectAllButton"
+                              defaultMessage="Select all"
+                            />
+                          )}
                         </EuiButtonEmpty>
 
                         <EuiSpacer size="xs" />
 
-                        {adJobIds.map((id) => (
-                          <div key={id}>
-                            <EuiCheckbox
-                              id={id}
-                              label={id}
-                              checked={selectedJobIds.includes(id)}
-                              onChange={(e) => toggleSelectedJob(e.target.checked, id)}
-                            />
-                            <EuiSpacer size="s" />
-                          </div>
-                        ))}
+                        <div data-test-subj="mlJobMgmtExportJobsADJobList">
+                          {adJobIds.map((id) => (
+                            <div key={id}>
+                              <EuiCheckbox
+                                id={id}
+                                label={id}
+                                checked={selectedJobIds.includes(id)}
+                                onChange={(e) => toggleSelectedJob(e.target.checked, id)}
+                              />
+                              <EuiSpacer size="s" />
+                            </div>
+                          ))}
+                        </div>
                       </>
                     )}
                   </>
@@ -284,26 +310,39 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                       <LoadingSpinner />
                     ) : (
                       <>
-                        <EuiButtonEmpty size="xs" onClick={onSelectAll} isDisabled={isDisabled}>
-                          <FormattedMessage
-                            id="xpack.ml.importExport.exportFlyout.dfaSelectAllButton"
-                            defaultMessage="Select all"
-                          />
+                        <EuiButtonEmpty
+                          size="xs"
+                          onClick={onSelectAll}
+                          isDisabled={isDisabled}
+                          data-test-subj="mlJobMgmtExportJobsSelectAllButton"
+                        >
+                          {selectedJobIds.length === dfaJobIds.length ? (
+                            <FormattedMessage
+                              id="xpack.ml.importExport.exportFlyout.dfaDeselectAllButton"
+                              defaultMessage="Deselect all"
+                            />
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.ml.importExport.exportFlyout.dfaSelectAllButton"
+                              defaultMessage="Select all"
+                            />
+                          )}
                         </EuiButtonEmpty>
 
                         <EuiSpacer size="xs" />
-
-                        {dfaJobIds.map((id) => (
-                          <div key={id}>
-                            <EuiCheckbox
-                              id={id}
-                              label={id}
-                              checked={selectedJobIds.includes(id)}
-                              onChange={(e) => toggleSelectedJob(e.target.checked, id)}
-                            />
-                            <EuiSpacer size="s" />
-                          </div>
-                        ))}
+                        <div data-test-subj="mlJobMgmtExportJobsDFAJobList">
+                          {dfaJobIds.map((id) => (
+                            <div key={id}>
+                              <EuiCheckbox
+                                id={id}
+                                label={id}
+                                checked={selectedJobIds.includes(id)}
+                                onChange={(e) => toggleSelectedJob(e.target.checked, id)}
+                              />
+                              <EuiSpacer size="s" />
+                            </div>
+                          ))}
+                        </div>
                       </>
                     )}
                   </>
@@ -329,6 +368,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                     disabled={selectedJobIds.length === 0 || exporting === true}
                     onClick={onExport}
                     fill
+                    data-test-subj="mlJobMgmtExportExportButton"
                   >
                     <FormattedMessage
                       id="xpack.ml.importExport.exportFlyout.exportButton"
@@ -343,7 +383,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
           {switchTabConfirmVisible === true ? (
             <SwitchTabsConfirm
               onCancel={setSwitchTabConfirmVisible.bind(null, false)}
-              onConfirm={switchTab}
+              onConfirm={() => switchTab(switchTabNextTab)}
             />
           ) : null}
         </>

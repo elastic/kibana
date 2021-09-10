@@ -16,7 +16,7 @@ import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_n
 type ServicesDetailedStatisticsReturn = APIReturnType<'GET /api/apm/services/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];

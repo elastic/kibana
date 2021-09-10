@@ -15,7 +15,7 @@ import { toAbsoluteDates } from '../../../../../../src/plugins/data/common';
 import type { ExpressionValueSearchContext } from '../../../../../../src/plugins/data/common';
 
 import type { LensMultiTable } from '../../types';
-import { Adapters } from '../../../../../../src/plugins/inspector/common';
+import type { Adapters } from '../../../../../../src/plugins/inspector/common';
 
 interface MergeTables {
   layerIds: string[];

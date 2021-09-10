@@ -148,6 +148,7 @@ describe('alert actions', () => {
             },
             deletedEventIds: [],
             description: 'This is a sample rule description',
+            documentType: '',
             eqlOptions: {
               eventCategoryField: 'event.category',
               query: '',
@@ -204,7 +205,9 @@ describe('alert actions', () => {
             noteIds: [],
             pinnedEventIds: {},
             pinnedEventsSaveObject: {},
+            queryFields: [],
             savedObjectId: null,
+            selectAll: false,
             selectedEventIds: {},
             show: true,
             showCheckboxes: false,

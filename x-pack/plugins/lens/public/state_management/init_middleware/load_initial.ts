@@ -8,8 +8,10 @@
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { History } from 'history';
 import { LensAppState, setState } from '..';
 import { updateLayer, updateVisualizationState, LensStoreDeps } from '..';
+import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
 import { initializeDatasources } from '../../editor_frame_service/editor_frame';
@@ -19,22 +21,50 @@ import {
   switchToSuggestion,
 } from '../../editor_frame_service/editor_frame/suggestion_helpers';
 import { LensAppServices } from '../../app_plugin/types';
-import { getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
+import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { Document, injectFilterReferences } from '../../persistence';
 
 export const getPersisted = async ({
   initialInput,
   lensServices,
+  history,
 }: {
   initialInput: LensEmbeddableInput;
   lensServices: LensAppServices;
-}): Promise<{ doc: Document } | undefined> => {
-  const { notifications, attributeService } = lensServices;
+  history?: History<unknown>;
+}): Promise<
+  { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'errorJSON'> } | undefined
+> => {
+  const { notifications, spaces, attributeService } = lensServices;
   let doc: Document;
 
   try {
-    const attributes = await attributeService.unwrapAttributes(initialInput);
-
+    const result = await attributeService.unwrapAttributes(initialInput);
+    if (!result) {
+      return {
+        doc: ({
+          ...initialInput,
+          type: LENS_EMBEDDABLE_TYPE,
+        } as unknown) as Document,
+        sharingSavedObjectProps: {
+          outcome: 'exactMatch',
+        },
+      };
+    }
+    const { sharingSavedObjectProps, ...attributes } = result;
+    if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch' && history) {
+      // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newPath = lensServices.http.basePath.prepend(
+        `${getEditPath(newObjectId)}${history.location.search}`
+      );
+      await spaces.ui.redirectLegacyUrl(
+        newPath,
+        i18n.translate('xpack.lens.legacyUrlConflict.objectNoun', {
+          defaultMessage: 'Lens visualization',
+        })
+      );
+    }
     doc = {
       ...initialInput,
       ...attributes,
@@ -43,6 +73,10 @@ export const getPersisted = async ({
 
     return {
       doc,
+      sharingSavedObjectProps: {
+        aliasTargetId: sharingSavedObjectProps?.aliasTargetId,
+        outcome: sharingSavedObjectProps?.outcome,
+      },
     };
   } catch (e) {
     notifications.toasts.addDanger(
@@ -62,9 +96,17 @@ export function loadInitial(
     embeddableEditorIncomingState,
     initialContext,
   }: LensStoreDeps,
-  redirectCallback: (savedObjectId?: string) => void,
-  initialInput?: LensEmbeddableInput,
-  emptyState?: LensAppState
+  {
+    redirectCallback,
+    initialInput,
+    emptyState,
+    history,
+  }: {
+    redirectCallback: (savedObjectId?: string) => void;
+    initialInput?: LensEmbeddableInput;
+    emptyState?: LensAppState;
+    history?: History<unknown>;
+  }
 ) {
   const { getState, dispatch } = store;
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
@@ -146,11 +188,11 @@ export function loadInitial(
         redirectCallback();
       });
   }
-  getPersisted({ initialInput, lensServices })
+  getPersisted({ initialInput, lensServices, history })
     .then(
       (persisted) => {
         if (persisted) {
-          const { doc } = persisted;
+          const { doc, sharingSavedObjectProps } = persisted;
           if (attributeService.inputIsRefType(initialInput)) {
             lensServices.chrome.recentlyAccessed.add(
               getFullPath(initialInput.savedObjectId),
@@ -190,6 +232,7 @@ export function loadInitial(
 
               dispatch(
                 setState({
+                  sharingSavedObjectProps,
                   query: doc.state.query,
                   searchSessionId:
                     dashboardFeatureFlag.allowByValueEmbeddables &&

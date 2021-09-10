@@ -88,6 +88,7 @@ const basicTimeline: TimelineModel = {
   },
   deletedEventIds: [],
   description: '',
+  documentType: '',
   eqlOptions: {
     eventCategoryField: 'event.category',
     tiebreakerField: '',
@@ -113,7 +114,9 @@ const basicTimeline: TimelineModel = {
   noteIds: [],
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
+  queryFields: [],
   savedObjectId: null,
+  selectAll: false,
   selectedEventIds: {},
   show: true,
   showCheckboxes: false,

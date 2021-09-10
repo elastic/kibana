@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   ExceptionListSchema,
   UseExceptionListsProps,
@@ -17,7 +17,19 @@ import { fetchExceptionLists } from '@kbn/securitysolution-list-api';
 import { getFilters } from '@kbn/securitysolution-list-utils';
 
 export type Func = () => void;
-export type ReturnExceptionLists = [boolean, ExceptionListSchema[], Pagination, Func | null];
+export type ReturnExceptionLists = [
+  loading: boolean,
+  exceptionLists: ExceptionListSchema[],
+  pagination: Pagination,
+  setPagination: React.Dispatch<React.SetStateAction<Pagination>>,
+  fetchLists: Func | null
+];
+
+const DEFAULT_PAGINATION = {
+  page: 1,
+  perPage: 20,
+  total: 0,
+};
 
 /**
  * Hook for fetching ExceptionLists
@@ -29,17 +41,13 @@ export type ReturnExceptionLists = [boolean, ExceptionListSchema[], Pagination, 
  * @param notifications kibana service for displaying toasters
  * @param showTrustedApps boolean - include/exclude trusted app lists
  * @param showEventFilters boolean - include/exclude event filters lists
- * @param pagination
+ * @param initialPagination
  *
  */
 export const useExceptionLists = ({
   errorMessage,
   http,
-  pagination = {
-    page: 1,
-    perPage: 20,
-    total: 0,
-  },
+  initialPagination = DEFAULT_PAGINATION,
   filterOptions = {},
   namespaceTypes,
   notifications,
@@ -47,9 +55,9 @@ export const useExceptionLists = ({
   showEventFilters = false,
 }: UseExceptionListsProps): ReturnExceptionLists => {
   const [exceptionLists, setExceptionLists] = useState<ExceptionListSchema[]>([]);
-  const [paginationInfo, setPagination] = useState<Pagination>(pagination);
+  const [pagination, setPagination] = useState<Pagination>(initialPagination);
   const [loading, setLoading] = useState(true);
-  const fetchExceptionListsRef = useRef<Func | null>(null);
+  const abortCtrlRef = useRef<AbortController>();
 
   const namespaceTypesAsString = useMemo(() => namespaceTypes.join(','), [namespaceTypes]);
   const filters = useMemo(
@@ -58,66 +66,57 @@ export const useExceptionLists = ({
     [namespaceTypes, filterOptions, showTrustedApps, showEventFilters]
   );
 
-  useEffect(() => {
-    let isSubscribed = true;
-    const abortCtrl = new AbortController();
+  const fetchData = useCallback(async (): Promise<void> => {
+    try {
+      setLoading(true);
 
-    const fetchData = async (): Promise<void> => {
-      try {
-        setLoading(true);
+      abortCtrlRef.current = new AbortController();
 
-        const { page, per_page: perPage, total, data } = await fetchExceptionLists({
-          filters,
-          http,
-          namespaceTypes: namespaceTypesAsString,
-          pagination: {
-            page: pagination.page,
-            perPage: pagination.perPage,
-          },
-          signal: abortCtrl.signal,
+      const { page, per_page: perPage, total, data } = await fetchExceptionLists({
+        filters,
+        http,
+        namespaceTypes: namespaceTypesAsString,
+        pagination: {
+          page: pagination.page,
+          perPage: pagination.perPage,
+        },
+        signal: abortCtrlRef.current.signal,
+      });
+
+      setPagination({
+        page,
+        perPage,
+        total,
+      });
+      setExceptionLists(data);
+      setLoading(false);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        notifications.toasts.addError(error, {
+          title: errorMessage,
         });
-
-        if (isSubscribed) {
-          setPagination({
-            page,
-            perPage,
-            total,
-          });
-          setExceptionLists(data);
-          setLoading(false);
-        }
-      } catch (error) {
-        if (isSubscribed) {
-          notifications.toasts.addError(error, {
-            title: errorMessage,
-          });
-          setExceptionLists([]);
-          setPagination({
-            page: 1,
-            perPage: 20,
-            total: 0,
-          });
-          setLoading(false);
-        }
+        setExceptionLists([]);
+        setPagination(DEFAULT_PAGINATION);
+        setLoading(false);
       }
-    };
-
-    fetchData();
-
-    fetchExceptionListsRef.current = fetchData;
-    return (): void => {
-      isSubscribed = false;
-      abortCtrl.abort();
-    };
+    }
   }, [
     errorMessage,
-    notifications,
+    filters,
+    http,
+    namespaceTypesAsString,
+    notifications.toasts,
     pagination.page,
     pagination.perPage,
-    filters,
-    namespaceTypesAsString,
-    http,
   ]);
 
-  return [loading, exceptionLists, paginationInfo, fetchExceptionListsRef.current];
+  useEffect(() => {
+    fetchData();
+
+    return (): void => {
+      abortCtrlRef.current?.abort();
+    };
+  }, [fetchData]);
+
+  return [loading, exceptionLists, pagination, setPagination, fetchData];
 };

@@ -101,7 +101,7 @@ describe('Vislib xAxis Class Test Suite', function () {
 
     const visConfig = new VisConfig(
       {
-        type: 'histogram',
+        type: 'heatmap',
       },
       data,
       mockUiState,

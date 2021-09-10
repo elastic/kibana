@@ -214,7 +214,21 @@ export default function (providerContext: FtrProviderContext) {
       });
       expect(resSettings.statusCode).equal(200);
       expect(resSettings.body.component_templates[0].component_template.template.settings).eql({
-        index: { lifecycle: { name: 'reference2' } },
+        index: {
+          lifecycle: { name: 'reference2' },
+          codec: 'best_compression',
+          mapping: {
+            total_fields: {
+              limit: '10000',
+            },
+          },
+          number_of_routing_shards: '30',
+          number_of_shards: '1',
+          query: {
+            default_field: ['logs_test_name', 'new_field_name'],
+          },
+          refresh_interval: '5s',
+        },
       });
       const resUserSettings = await es.transport.request({
         method: 'GET',
@@ -360,12 +374,20 @@ export default function (providerContext: FtrProviderContext) {
             type: 'index_template',
           },
           {
+            id: 'logs-all_assets.test_logs2@settings',
+            type: 'component_template',
+          },
+          {
             id: 'logs-all_assets.test_logs2@custom',
             type: 'component_template',
           },
           {
             id: 'metrics-all_assets.test_metrics',
             type: 'index_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics@settings',
+            type: 'component_template',
           },
           {
             id: 'metrics-all_assets.test_metrics@custom',
