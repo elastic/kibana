@@ -30,17 +30,6 @@ interface SettingsChecker {
   next?: SettingsChecker;
 }
 
-const checkers: SettingsChecker[] = [
-  {
-    message: 'Checking cluster settings API on production cluster',
-    api: '../api/monitoring/v1/elasticsearch_settings/check/cluster',
-  },
-  {
-    message: 'Checking nodes settings API on production cluster',
-    api: '../api/monitoring/v1/elasticsearch_settings/check/nodes',
-  },
-];
-
 export const NoDataPage = () => {
   const title = i18n.translate('xpack.monitoring.noData.routeTitle', {
     defaultMessage: 'Setup Monitoring',
@@ -59,11 +48,22 @@ export const NoDataPage = () => {
     isCollectionIntervalUpdated: false,
   } as any);
 
+  const checkers: SettingsChecker[] = [
+    {
+      message: 'Checking cluster settings API on production cluster',
+      api: '../api/monitoring/v1/elasticsearch_settings/check/cluster',
+    },
+    {
+      message: 'Checking nodes settings API on production cluster',
+      api: '../api/monitoring/v1/elasticsearch_settings/check/nodes',
+    },
+  ];
+
   // From x-pack/plugins/monitoring/public/views/no_data/model_updater.js
   const updateModel = useCallback(
     (properties: any) => {
-      setModel((model: any) => {
-        const updated = { ...model };
+      setModel((previousModel: any) => {
+        const updated = { ...previousModel };
         const keys = Object.keys(properties);
 
         keys.forEach((key) => {
@@ -93,7 +93,6 @@ export const NoDataPage = () => {
       // TODO this check might be required for internal collection enablement to work smoothly
       // if (!model.isCollectionEnabledUpdating && !model.isCollectionIntervalUpdating) {
       await startChecks(checkers, services.http, updateModel);
-      //}
     } catch (err) {
       // TODO something useful with the error reason
       // if (err && err.status === 503) {
@@ -103,7 +102,7 @@ export const NoDataPage = () => {
       //   };
       // }
     }
-  }, [services, checkers, updateModel]);
+  }, [services, updateModel]);
 
   const enabler = new Enabler(services.http, updateModel);
 
