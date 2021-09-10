@@ -9,7 +9,7 @@
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
 import './context_app.scss';
 import classNames from 'classnames';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { esFilters, SortDirection } from '../../../../../data/public';
@@ -138,7 +138,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
   };
 
   return (
-    <I18nProvider>
+    <Fragment>
       {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
         <ContextErrorMessage status={fetchedState.anchorStatus} />
       ) : (
@@ -182,6 +182,6 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
           </EuiPage>
         </Fragment>
       )}
-    </I18nProvider>
+    </Fragment>
   );
 };
