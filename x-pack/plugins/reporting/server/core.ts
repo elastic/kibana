@@ -30,7 +30,12 @@ import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factor
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { ReportingStore } from './lib/store';
-import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
+import {
+  ExecuteReportTask,
+  MonitorReportsTask,
+  ReportTaskParams,
+  ScheduledReportTaskParams,
+} from './lib/tasks';
 import { ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
@@ -218,7 +223,7 @@ export class ReportingCore {
     return this.exportTypesRegistry;
   }
 
-  public async scheduleTask(report: ReportTaskParams) {
+  public async scheduleTask(report: ReportTaskParams | ScheduledReportTaskParams) {
     return await this.executeTask.scheduleTask(report);
   }
 

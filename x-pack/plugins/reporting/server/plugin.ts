@@ -90,7 +90,7 @@ export class ReportingPlugin
 
   public start(core: CoreStart, plugins: ReportingStartDeps) {
     // use data plugin for csv formats
-    setFieldFormats(plugins.data.fieldFormats);
+    setFieldFormats(plugins.data.fieldFormats); // FIXME: fieldFormats is deprecated
     const reportingCore = this.reportingCore!;
 
     // async background start
