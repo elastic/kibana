@@ -14,6 +14,8 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { ENGINE_CRAWLER_PATH } from '../../routes';
 import { EngineLogic, generateEnginePath } from '../engine';
 
+import { CrawlerLogic } from './crawler_logic';
+
 import { CrawlerDomain, EntryPoint, Sitemap, CrawlRule } from './types';
 import { crawlerDomainServerToClient, getDeleteDomainSuccessMessage } from './utils';
 
@@ -78,6 +80,7 @@ export const CrawlerSingleDomainLogic = kea<
           `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}`
         );
 
+        CrawlerLogic.actions.fetchCrawlerData();
         flashSuccessToast(getDeleteDomainSuccessMessage(domain.url));
         KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CRAWLER_PATH));
       } catch (e) {
