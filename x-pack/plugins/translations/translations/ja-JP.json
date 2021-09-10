@@ -22385,7 +22385,6 @@
     "xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.network": "ネットワーク",
     "xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.process": "プロセス",
     "xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.a": "ユーザー通知オプションを選択すると、{ protectionName }が防御または検出されたときに、ホストユーザーに通知を表示します。",
-    "xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.b": " ユーザー通知は、以下のテキストボックスでカスタマイズできます。括弧内のタグを使用すると、該当するアクション（防御または検出など）とファイル名を動的に入力できます。",
     "xpack.securitySolution.endpoint.policyDetailsConfig.protectionLevel": "保護レベル",
     "xpack.securitySolution.endpoint.policyDetailsConfig.userNotification": "ユーザー通知",
     "xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.dllDriverLoad": "DLL とドライバーの読み込み",
