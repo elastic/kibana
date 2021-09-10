@@ -72,14 +72,6 @@ export interface PolicyDetailsState {
   license?: ILicense;
 }
 
-/**
- * The URL search params that are supported by the Policy List page view
- */
-export interface PolicyListUrlSearchParams {
-  page_index: number;
-  page_size: number;
-}
-
 export enum OS {
   windows = 'windows',
   mac = 'mac',
