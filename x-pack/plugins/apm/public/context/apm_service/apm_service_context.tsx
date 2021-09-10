@@ -41,7 +41,7 @@ export function ApmServiceContextProvider({
     path: { serviceName },
     query,
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -51,7 +51,11 @@ export function ApmServiceContextProvider({
     end,
   });
 
-  const transactionTypes = useServiceTransactionTypesFetcher(serviceName);
+  const transactionTypes = useServiceTransactionTypesFetcher({
+    serviceName,
+    start,
+    end,
+  });
 
   const transactionType = getTransactionType({
     transactionType: query.transactionType,
