@@ -67,11 +67,11 @@ import {
   SERVER_APP_ID,
   SIGNALS_ID,
   NOTIFICATIONS_ID,
-  QUERY_ALERT_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
   DEFAULT_SPACE_ID,
-  INDICATOR_ALERT_TYPE_ID,
-  ML_ALERT_TYPE_ID,
-  EQL_ALERT_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -277,7 +277,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.security,
       plugins.ml,
       ruleDataService,
-      ruleDataClient
+      isRuleRegistryEnabled
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
@@ -287,10 +287,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerActionRoutes(router, endpointContext);
 
     const racRuleTypes = [
-      EQL_ALERT_TYPE_ID,
-      QUERY_ALERT_TYPE_ID,
-      INDICATOR_ALERT_TYPE_ID,
-      ML_ALERT_TYPE_ID,
+      EQL_RULE_TYPE_ID,
+      QUERY_RULE_TYPE_ID,
+      INDICATOR_RULE_TYPE_ID,
+      ML_RULE_TYPE_ID,
     ];
     const ruleTypes = [
       SIGNALS_ID,

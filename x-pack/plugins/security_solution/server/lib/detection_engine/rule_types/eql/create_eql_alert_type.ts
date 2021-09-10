@@ -7,7 +7,7 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { EQL_ALERT_TYPE_ID } from '../../../../../common/constants';
+import { EQL_RULE_TYPE_ID } from '../../../../../common/constants';
 import { eqlRuleParams, EqlRuleParams } from '../../schemas/rule_schemas';
 import { eqlExecutor } from '../../signals/executors/eql';
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
@@ -33,7 +33,7 @@ export const createEqlAlertType = (createOptions: CreateRuleOptions) => {
     ruleDataService,
   });
   return createSecurityRuleType<EqlRuleParams, {}, PersistenceServices, {}>({
-    id: EQL_ALERT_TYPE_ID,
+    id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
     validate: {
       params: {

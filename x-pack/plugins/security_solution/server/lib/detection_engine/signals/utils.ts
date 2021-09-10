@@ -62,6 +62,12 @@ import {
 import { WrappedRACAlert } from '../rule_types/types';
 import { SearchTypes } from '../../../../common/detection_engine/types';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import {
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SIGNALS_ID,
+} from '../../../../common/constants';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -1001,4 +1007,16 @@ export const getField = <T extends SearchTypes>(event: SimpleHit, field: string)
   } else if (isWrappedEventHit(event)) {
     return get(event._source, field) as T;
   }
+};
+
+/**
+ * Maps legacy rule types to RAC rule type IDs.
+ */
+export const ruleTypeMappings = {
+  eql: SIGNALS_ID,
+  machine_learning: ML_RULE_TYPE_ID,
+  query: QUERY_RULE_TYPE_ID,
+  saved_query: SIGNALS_ID,
+  threat_match: INDICATOR_RULE_TYPE_ID,
+  threshold: SIGNALS_ID,
 };
