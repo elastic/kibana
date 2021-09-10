@@ -70,7 +70,7 @@ export const DetailsPanel = React.memo(
     let visiblePanel = null; // store in variable to make return statement more readable
     let panelSize: EuiFlyoutProps['size'] = 's';
     const contextID = `${timelineId}-${activeTab}`;
-    const isDraggable = timelineId === TimelineId.active;
+    const isDraggable = timelineId === TimelineId.active && activeTab === TimelineTabs.query;
     if (currentTabDetail?.panelView === 'eventDetail' && currentTabDetail?.params?.eventId) {
       panelSize = 'm';
       visiblePanel = (
