@@ -37,6 +37,8 @@ import {
 
 import { ManifestManager } from './manifest_manager';
 import { EndpointArtifactClientInterface } from '../artifact_client';
+import { EndpointError } from '../../../errors';
+import { InvalidInternalManifestError } from '../errors';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
@@ -104,11 +106,13 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(
         buildManifestManagerContextMock({ savedObjectsClient })
       );
-      const error = { output: { statusCode: 500 } };
+      const error = { message: 'bad request', output: { statusCode: 500 } };
 
       savedObjectsClient.get = jest.fn().mockRejectedValue(error);
 
-      await expect(manifestManager.getLastComputedManifest()).rejects.toStrictEqual(error);
+      await expect(manifestManager.getLastComputedManifest()).rejects.toThrow(
+        new EndpointError('bad request', error)
+      );
     });
 
     test('Throws error when no version on the manifest', async () => {
@@ -120,7 +124,7 @@ describe('ManifestManager', () => {
       savedObjectsClient.get = jest.fn().mockResolvedValue({});
 
       await expect(manifestManager.getLastComputedManifest()).rejects.toStrictEqual(
-        new Error('No version returned for manifest.')
+        new InvalidInternalManifestError('Internal Manifest map SavedObject is missing version')
       );
     });
 
@@ -565,7 +569,10 @@ describe('ManifestManager', () => {
         )
       ).resolves.toStrictEqual([
         error,
-        new Error(`Incomplete artifact: ${ARTIFACT_ID_TRUSTED_APPS_MACOS}`),
+        new EndpointError(
+          `Incomplete artifact: ${ARTIFACT_ID_TRUSTED_APPS_MACOS}`,
+          ARTIFACTS_BY_ID[ARTIFACT_ID_TRUSTED_APPS_MACOS]
+        ),
       ]);
 
       expect(artifactClient.createArtifact).toHaveBeenCalledTimes(2);
@@ -720,7 +727,7 @@ describe('ManifestManager', () => {
       ]);
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([
-        new Error(`Package Policy ${TEST_POLICY_ID_1} has no config.`),
+        new EndpointError(`Package Policy ${TEST_POLICY_ID_1} has no 'inputs[0].config'`),
       ]);
 
       expect(context.packagePolicyService.update).toHaveBeenCalledTimes(0);

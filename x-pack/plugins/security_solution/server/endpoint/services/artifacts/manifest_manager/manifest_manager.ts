@@ -285,7 +285,7 @@ export class ManifestManager {
           newManifest.replaceArtifact(fleetArtifact);
         }
       } else {
-        errors.push(new EndpointError(`Incomplete artifact: ${getArtifactId(artifact)}`), artifact);
+        errors.push(new EndpointError(`Incomplete artifact: ${getArtifactId(artifact)}`, artifact));
       }
     }
     return errors;
