@@ -7,7 +7,7 @@
 
 import semver from 'semver';
 import LRU from 'lru-cache';
-import { isEqual } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import { ListResult } from '../../../../../../fleet/common';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
@@ -493,5 +493,43 @@ export class ManifestManager {
 
   public getArtifactsClient(): EndpointArtifactClientInterface {
     return this.artifactClient;
+  }
+
+  /**
+   * Cleanup .fleet-agents indice if there are som orphan artifacts
+   * @returns {Promise<Error | null>} Any error encountered.
+   */
+  public async cleanup(manifest: ManifestSchema) {
+    try {
+      const fleetArtifacts = await this.artifactClient.listArtifacts();
+
+      if (isEmpty(fleetArtifacts)) {
+        return;
+      }
+
+      this.logger.info(
+        `Starting .fleet-agents cleanup, ${fleetArtifacts.length} are going to check`
+      );
+
+      const artifactsToDelete = [];
+      const manifestArtifactsIds = getArtifactIds(manifest);
+      for (const fleetArtifact of fleetArtifacts) {
+        const artifactId = getArtifactId(fleetArtifact);
+        const isArtifactInManifest = manifestArtifactsIds.includes(artifactId);
+
+        if (!isArtifactInManifest) {
+          this.logger.info(`Artifact ${artifactId} needs to be removed because it's orphan`);
+          artifactsToDelete.push(this.artifactClient.deleteArtifact(artifactId));
+        }
+      }
+
+      Promise.all(artifactsToDelete);
+
+      this.logger.info(`All orphan artifacts has been removed succesfully`);
+    } catch (error) {
+      this.logger.error('There was an error cleaning orphan artifacts in .fleet-artifacts index');
+      this.logger.error(error);
+      return error;
+    }
   }
 }
