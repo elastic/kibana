@@ -22,7 +22,6 @@ import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { ActionTypeDisabledError } from './errors';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
@@ -62,7 +61,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create({ taskInstance }: RunContext) {
+  public create({ taskInstance }: RunContext, maxAttempts: number = 1) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -78,6 +77,7 @@ export class TaskRunnerFactory {
 
     const taskInfo = {
       scheduled: taskInstance.runAt,
+      attempts: taskInstance.attempts,
     };
 
     return {
@@ -119,7 +119,14 @@ export class TaskRunnerFactory {
 
         basePathService.set(fakeRequest, path);
 
-        let executorResult: ActionTypeExecutorResult<unknown>;
+        // Throwing an executor error means we will attempt to retry the task
+        // TM will treat a task as a failure if `attempts >= maxAttempts`
+        // so we need to handle that here to avoid TM persisting the failed task
+        const isRetryableBasedOnAttempts = taskInfo.attempts < (maxAttempts ?? 1);
+        const willRetryMessage = `and will retry`;
+        const willNotRetryMessage = `and will not retry`;
+
+        let executorResult: ActionTypeExecutorResult<unknown> | undefined;
         try {
           executorResult = await actionExecutor.execute({
             params,
@@ -131,20 +138,39 @@ export class TaskRunnerFactory {
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
-          if (e instanceof ActionTypeDisabledError) {
-            // We'll stop re-trying due to action being forbidden
-            throw new ExecutorError(e.message, {}, false);
+          logger.error(
+            `Action '${actionId}' failed ${
+              isRetryableBasedOnAttempts ? willRetryMessage : willNotRetryMessage
+            }: ${e.message}`
+          );
+          if (isRetryableBasedOnAttempts) {
+            // In order for retry to work, we need to indicate to task manager this task
+            // failed
+            throw new ExecutorError(e.message, {}, true);
           }
-          throw e;
         }
 
-        if (executorResult.status === 'error') {
+        if (
+          executorResult &&
+          executorResult?.status === 'error' &&
+          executorResult?.retry !== undefined &&
+          isRetryableBasedOnAttempts
+        ) {
+          logger.error(
+            `Action '${actionId}' failed ${
+              !!executorResult.retry ? willRetryMessage : willNotRetryMessage
+            }: ${executorResult.message}`
+          );
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
           throw new ExecutorError(
             executorResult.message,
             executorResult.data,
-            executorResult.retry == null ? false : executorResult.retry
+            executorResult.retry as boolean | Date
+          );
+        } else if (executorResult && executorResult?.status === 'error') {
+          logger.error(
+            `Action '${actionId}' failed ${willNotRetryMessage}: ${executorResult.message}`
           );
         }
 

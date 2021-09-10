@@ -51,7 +51,11 @@ export function ApmServiceContextProvider({
     end,
   });
 
-  const transactionTypes = useServiceTransactionTypesFetcher(serviceName);
+  const transactionTypes = useServiceTransactionTypesFetcher({
+    serviceName,
+    start,
+    end,
+  });
 
   const transactionType = getTransactionType({
     transactionType: query.transactionType,
