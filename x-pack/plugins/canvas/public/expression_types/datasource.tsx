@@ -100,7 +100,6 @@ export class Datasource extends BaseForm {
 
   render(props: DatasourceRenderProps) {
     const expressionFormHandlers = new ExpressionFormHandlers();
-    console.log('render');
     return (
       <DatasourceWrapper spec={this} handlers={expressionFormHandlers} datasourceProps={props} />
     );
