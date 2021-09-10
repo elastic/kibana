@@ -34,12 +34,6 @@ const instructionVariants = [
   },
 ];
 
-jest.mock('../../../../../kibana_react/public', () => {
-  return {
-    Markdown: () => <div className="markdown" />,
-  };
-});
-
 test('render', () => {
   const component = shallowWithIntl(
     <InstructionSet.WrappedComponent
