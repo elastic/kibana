@@ -71,8 +71,10 @@ import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';
 import {
   getBulkOperationError,
+  getCurrentTime,
   getExpectedVersionProperties,
   getSavedObjectFromSource,
+  normalizeNamespace,
   rawDocExistsInNamespace,
   rawDocExistsInNamespaces,
 } from './internal_utils';
@@ -297,7 +299,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
     let savedObjectNamespace: string | undefined;
     let savedObjectNamespaces: string[] | undefined;
 
@@ -373,7 +375,7 @@ export class SavedObjectsRepository {
   ): Promise<SavedObjectsBulkResponse<T>> {
     const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const namespace = normalizeNamespace(options.namespace);
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
 
     let bulkGetRequestIndexCounter = 0;
     const expectedResults: Either[] = objects.map((object) => {
@@ -1136,7 +1138,7 @@ export class SavedObjectsRepository {
     }
 
     const rawAliasId = this._serializer.generateRawLegacyUrlAliasId(namespace, type, id);
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
 
     // retrieve the alias, and if it is not disabled, update it
     const aliasResponse = await this.client.update<{ [LEGACY_URL_ALIAS_TYPE]: LegacyUrlAlias }>(
@@ -1298,7 +1300,7 @@ export class SavedObjectsRepository {
       preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
     }
 
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
 
     let rawUpsert: SavedObjectsRawDoc | undefined;
     if (upsert) {
@@ -1436,7 +1438,7 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
     const namespace = normalizeNamespace(options.namespace);
 
     let bulkGetRequestIndexCounter = 0;
@@ -1837,7 +1839,7 @@ export class SavedObjectsRepository {
     });
     const namespace = normalizeNamespace(options.namespace);
 
-    const time = this._getCurrentTime();
+    const time = getCurrentTime();
     let savedObjectNamespace;
     let savedObjectNamespaces: string[] | undefined;
 
@@ -2120,10 +2122,6 @@ export class SavedObjectsRepository {
     return unique(types.map((t) => this.getIndexForType(t)));
   }
 
-  private _getCurrentTime() {
-    return new Date().toISOString();
-  }
-
   private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
     const savedObject = this._serializer.rawToSavedObject(raw);
     const { namespace, type } = savedObject;
@@ -2321,20 +2319,6 @@ function getSavedObjectNamespaces(
   }
   return [SavedObjectsUtils.namespaceIdToString(namespace)];
 }
-
-/**
- * Ensure that a namespace is always in its namespace ID representation.
- * This allows `'default'` to be used interchangeably with `undefined`.
- */
-const normalizeNamespace = (namespace?: string) => {
-  if (namespace === ALL_NAMESPACES_STRING) {
-    throw SavedObjectsErrorHelpers.createBadRequestError('"options.namespace" cannot be "*"');
-  } else if (namespace === undefined) {
-    return namespace;
-  } else {
-    return SavedObjectsUtils.namespaceStringToId(namespace);
-  }
-};
 
 /**
  * Extracts the contents of a decorated error to return the attributes for bulk operations.

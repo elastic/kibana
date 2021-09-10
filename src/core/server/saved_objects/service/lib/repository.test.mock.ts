@@ -21,12 +21,16 @@ jest.mock('./collect_multi_namespace_references', () => ({
 export const mockGetBulkOperationError = jest.fn() as jest.MockedFunction<
   typeof InternalUtils['getBulkOperationError']
 >;
+export const mockGetCurrentTime = jest.fn() as jest.MockedFunction<
+  typeof InternalUtils['getCurrentTime']
+>;
 
 jest.mock('./internal_utils', () => {
   const actual = jest.requireActual('./internal_utils');
   return {
     ...actual,
     getBulkOperationError: mockGetBulkOperationError,
+    getCurrentTime: mockGetCurrentTime,
   };
 });
 

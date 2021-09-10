@@ -11,6 +11,7 @@ import {
   mockCollectMultiNamespaceReferences,
   mockGetBulkOperationError,
   mockUpdateObjectsSpaces,
+  mockGetCurrentTime,
 } from './repository.test.mock';
 
 import { CORE_USAGE_STATS_TYPE, REPOSITORY_RESOLVE_OUTCOME_STATS } from '../../../core_usage_data';
@@ -33,6 +34,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 const { nodeTypes } = esKuery;
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
+
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
@@ -298,7 +300,7 @@ describe('SavedObjectsRepository', () => {
       logger,
     });
 
-    savedObjectsRepository._getCurrentTime = jest.fn(() => mockTimestamp);
+    mockGetCurrentTime.mockReturnValue(mockTimestamp);
     getSearchDslNS.getSearchDsl.mockClear();
   });
 

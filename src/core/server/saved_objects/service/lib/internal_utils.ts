@@ -121,6 +121,8 @@ export function getSavedObjectFromSource<T>(
  * @param registry
  * @param raw
  * @param namespace
+ *
+ * @internal
  */
 export function rawDocExistsInNamespace(
   registry: ISavedObjectTypeRegistry,
@@ -153,6 +155,8 @@ export function rawDocExistsInNamespace(
  * @param registry
  * @param raw
  * @param namespaces
+ *
+ * @internal
  */
 export function rawDocExistsInNamespaces(
   registry: ISavedObjectTypeRegistry,
@@ -178,4 +182,31 @@ export function rawDocExistsInNamespaces(
   }
 
   return existingNamespaces.some((x) => x === ALL_NAMESPACES_STRING || namespacesToCheck.has(x));
+}
+
+/**
+ * Ensure that a namespace is always in its namespace ID representation.
+ * This allows `'default'` to be used interchangeably with `undefined`.
+ *
+ * @param namespace
+ *
+ * @internal
+ */
+export function normalizeNamespace(namespace?: string) {
+  if (namespace === ALL_NAMESPACES_STRING) {
+    throw SavedObjectsErrorHelpers.createBadRequestError('"options.namespace" cannot be "*"');
+  } else if (namespace === undefined) {
+    return namespace;
+  } else {
+    return SavedObjectsUtils.namespaceStringToId(namespace);
+  }
+}
+
+/**
+ * Returns the current time. For use in Elasticsearch operations.
+ *
+ * @internal
+ */
+export function getCurrentTime() {
+  return new Date(Date.now()).toISOString();
 }
