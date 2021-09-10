@@ -24,13 +24,21 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   packagePolicy: InMemoryPackagePolicy;
   viewDataStep?: EuiStepProps;
   showAddAgent?: boolean;
+  isOpen?: boolean;
   upgradePackagePolicyHref: string;
-}> = ({ agentPolicy, packagePolicy, viewDataStep, showAddAgent, upgradePackagePolicyHref }) => {
+}> = ({
+  agentPolicy,
+  packagePolicy,
+  viewDataStep,
+  showAddAgent,
+  upgradePackagePolicyHref,
+  isOpen = false,
+}) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
   const refreshAgentPolicy = useAgentPolicyRefresh();
-  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(isOpen);
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
@@ -84,6 +92,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       disabled={!packagePolicy.hasUpgrade}
       icon="refresh"
       href={upgradePackagePolicyHref}
+      key="packagePolicyUpgrade"
     >
       <FormattedMessage
         id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
@@ -135,7 +144,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       <ContextMenuActions
         isOpen={isActionsMenuOpen}
         items={menuItems}
-        onChange={(isOpen) => setIsActionsMenuOpen(isOpen)}
+        onChange={(open) => setIsActionsMenuOpen(open)}
       />
     </>
   );
