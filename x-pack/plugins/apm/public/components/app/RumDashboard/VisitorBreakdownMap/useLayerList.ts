@@ -45,6 +45,7 @@ const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
   indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
   applyGlobalQuery: true,
   applyGlobalTime: true,
+  applyForceRefresh: true,
 };
 
 const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
@@ -60,6 +61,7 @@ const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
   indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
   applyGlobalQuery: true,
   applyGlobalTime: true,
+  applyForceRefresh: true,
 };
 
 const getWhereQuery = (serviceName: string) => {

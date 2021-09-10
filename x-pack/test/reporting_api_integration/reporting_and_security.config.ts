@@ -36,6 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.reporting.capture.networkPolicy.rules=${JSON.stringify(testPolicyRules)}`,
         `--xpack.reporting.capture.maxAttempts=1`,
         `--xpack.reporting.csv.maxSizeBytes=6000`,
+        '--xpack.reporting.roles.enabled=false', // Reporting access control is implemented by sub-feature application privileges
       ],
     },
   };
