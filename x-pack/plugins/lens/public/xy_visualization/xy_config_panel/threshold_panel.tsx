@@ -21,15 +21,58 @@ import { updateLayer, idPrefix } from '.';
 import { useDebouncedValue } from '../../shared_components';
 
 const icons = [
-  { value: 'none', label: 'None' },
-  { value: 'asterisk', label: 'Asterisk' },
-  { value: 'bell', label: 'Bell' },
-  { value: 'bolt', label: 'Bolt' },
-  { value: 'bug', label: 'Bug' },
-  { value: 'editorComment', label: 'Comment' },
-  { value: 'alert', label: 'Alert' },
-  { value: 'flag', label: 'Flag' },
-  { value: 'tag', label: 'Tag' },
+  {
+    value: 'none',
+    label: i18n.translate('xpack.lens.xyChart.thresholds.noIconLabel', { defaultMessage: 'None' }),
+  },
+  {
+    value: 'asterisk',
+    label: i18n.translate('xpack.lens.xyChart.thresholds.asteriskIconLabel', {
+      defaultMessage: 'Asterisk',
+    }),
+  },
+  {
+    value: 'bell',
+    label: i18n.translate('xpack.lens.xyChart.thresholds.bellIconLabel', {
+      defaultMessage: 'Bell',
+    }),
+  },
+  {
+    value: 'bolt',
+    label: i18n.translate('xpack.lens.xyChart.thresholds.boltIconLabel', {
+      defaultMessage: 'Bolt',
+    }),
+  },
+  {
+    value: 'bug',
+    label: i18n.translate('xpack.lens.xyChart.thresholds.bugIconLabel', {
+      defaultMessage: 'Bug',
+    }),
+  },
+  {
+    value: 'editorComment',
+    label: i18n.translate('xpack.lens.xyChart.thresholds.commentIconLabel', {
+      defaultMessage: 'Comment',
+    }),
+  },
+  {
+    value: 'alert',
+    label: i18n.translate('xpack.lens.xyChart.thresholds.alertIconLabel', {
+      defaultMessage: 'Alert',
+    }),
+  },
+  {
+    value: 'flag',
+    label: i18n.translate('xpack.lens.xyChart.thresholds.flagIconLabel', {
+      defaultMessage: 'Flag',
+    }),
+  },
+  {
+    value: 'tag',
+    label: i18n.translate('xpack.lens.xyChart.thresholds.tagIconLabel', {
+      defaultMessage: 'Tag',
+    }),
+  },
 ];
 
 const IconView = (props: { value?: string; label: string }) => {
