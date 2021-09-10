@@ -109,7 +109,7 @@ export class ManifestTask {
     // Check that this task is current
     if (taskId !== this.getTaskId()) {
       // old task, return
-      this.logger.info(`Outdated task running: ${taskId}`);
+      this.logger.debug(`Outdated task running: ${taskId}`);
       return;
     }
 
