@@ -6,7 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -23,7 +22,7 @@ import { RuleExecutionStatus } from '../../../../../common/detection_engine/sche
 
 export const readRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: IRuleDataClient | null
+  isRuleRegistryEnabled: boolean
 ) => {
   router.get(
     {
@@ -55,8 +54,9 @@ export const readRulesRoute = (
 
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const rule = await readRules({
-          rulesClient,
           id,
+          isRuleRegistryEnabled,
+          rulesClient,
           ruleId,
         });
         if (rule != null) {
@@ -72,7 +72,7 @@ export const readRulesRoute = (
             currentStatus.attributes.statusDate = rule.executionStatus.lastExecutionDate.toISOString();
             currentStatus.attributes.status = RuleExecutionStatus.failed;
           }
-          const transformed = transform(rule, currentStatus);
+          const transformed = transform(rule, currentStatus, isRuleRegistryEnabled);
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {
