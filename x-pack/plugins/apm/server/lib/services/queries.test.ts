@@ -9,7 +9,7 @@ import { getServiceAgent } from './get_service_agent';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getServicesItems } from './get_services/get_services_items';
 import { getLegacyDataStatus } from './get_services/get_legacy_data_status';
-import { hasHistoricalAgentData } from './get_services/has_historical_agent_data';
+import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 import {
   SearchParamsMock,
   inspectSearchParams,
