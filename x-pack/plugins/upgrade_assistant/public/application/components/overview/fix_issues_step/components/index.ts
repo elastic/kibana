@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { ElasticsearchDeprecationStats } from './es_stats';
 export { KibanaDeprecationStats } from './kibana_stats';
