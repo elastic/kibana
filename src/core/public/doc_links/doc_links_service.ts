@@ -273,7 +273,6 @@ export class DocLinksService {
         },
         visualize: {
           guide: `${KIBANA_DOCS}dashboard.html`,
-          timelionDeprecation: `${KIBANA_DOCS}timelion.html`,
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
           lensPanels: `${KIBANA_DOCS}lens.html`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
