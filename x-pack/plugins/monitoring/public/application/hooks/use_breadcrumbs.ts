@@ -8,7 +8,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import createContainer from 'constate';
 import { History } from 'history';
-import { Legacy } from '../../legacy_shims';
+import { Observable } from 'rxjs';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Crumb {
   url?: string | null;
@@ -212,30 +213,65 @@ function buildBreadcrumbs(clusterName: string, mainInstance?: any | null) {
     breadcrumbs = breadcrumbs.concat(getApmBreadcrumbs(mainInstance));
   }
 
-  Legacy.shims.breadcrumbs.set(
-    breadcrumbs.map((b) => ({
-      text: b.label,
-      href: b.url ? b.url : undefined,
-      'data-test-subj': b.testSubj,
-      ignoreGlobalState: b.ignoreGlobalState,
-    }))
-  );
-
   return breadcrumbs;
+}
+interface BreadcrumbItem {
+  ['data-test-subj']?: string;
+  href?: string;
+  text: string;
+  ignoreGlobalState?: boolean;
 }
 
 export const useBreadcrumbs = ({ history }: { history: History }) => {
+  const chrome = useKibana().services.chrome;
   const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
-  const generate = useCallback(
-    (cluster: string, mainInstance?: any) => {
-      setBreadcrumbs(buildBreadcrumbs(cluster, mainInstance));
+
+  const update = useCallback(
+    (bcrumbs?: BreadcrumbItem[]) => {
+      if (!chrome) return;
+      if (!bcrumbs) {
+        const currentBreadcrumbs: Observable<any> & {
+          value?: BreadcrumbItem[];
+        } = chrome.getBreadcrumbs$()?.source;
+        if (currentBreadcrumbs && currentBreadcrumbs.value) {
+          bcrumbs = currentBreadcrumbs.value;
+        }
+      }
+      const globalStateStr = location.hash.split('?')[1];
+      if (
+        !bcrumbs?.length ||
+        globalStateStr?.indexOf('_g') !== 0 ||
+        bcrumbs[0].href?.split('?')[1] === globalStateStr
+      ) {
+        return;
+      }
+      bcrumbs.forEach((breadcrumb: BreadcrumbItem) => {
+        const breadcrumbHref = breadcrumb.href?.split('?')[0];
+        if (breadcrumbHref && !breadcrumb.ignoreGlobalState) {
+          breadcrumb.href = `${breadcrumbHref}?${globalStateStr}`;
+        }
+        delete breadcrumb.ignoreGlobalState;
+      });
+      chrome.setBreadcrumbs(bcrumbs.slice(0));
     },
-    [setBreadcrumbs]
+    [chrome]
   );
 
-  const update = useCallback(() => {
-    Legacy.shims.breadcrumbs.update();
-  }, []);
+  const generate = useCallback(
+    (cluster: string, mainInstance?: any) => {
+      const crumbs = buildBreadcrumbs(cluster, mainInstance);
+      setBreadcrumbs(crumbs);
+      update(
+        crumbs.map((b) => ({
+          text: b.label,
+          href: b.url ? b.url : undefined,
+          'data-test-subj': b.testSubj,
+          ignoreGlobalState: b.ignoreGlobalState,
+        }))
+      );
+    },
+    [setBreadcrumbs, update]
+  );
 
   useEffect(() => {
     history.listen((location, action) => {
