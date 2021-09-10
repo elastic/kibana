@@ -74,7 +74,21 @@ export const spatialFilterOperator = {
   getFilterParams: (filter: Filter) => {
     return { query: filter.query };
   },
-  isFilterValid: () => { return true; },
+  isFilterValid: (
+    indexPattern?: IIndexPattern,
+    field?: IFieldType,
+    params?: any,
+  ) => {
+    if (indexPattern && field) {
+      return true;
+    }
+
+    if (params?.query) {
+      return true;
+    }
+
+    return false;
+  },
 };
 
 export const isOperator = {
