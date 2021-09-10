@@ -374,8 +374,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         migrateArtifactsToFleet(savedObjectsClient, artifactClient, logger).finally(() => {
           logger.info('Dependent plugin setup complete - Starting ManifestTask');
 
-          // FIXME: need to detect and fix bad artifacts
-
           if (this.manifestTask) {
             this.manifestTask.start({
               taskManager,
