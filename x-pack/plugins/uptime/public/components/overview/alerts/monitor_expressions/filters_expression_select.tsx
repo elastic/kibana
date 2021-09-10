@@ -158,6 +158,7 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
                   asCombobox={false}
                   cardinalityField="monitor.id"
                   time={{ from, to }}
+                  allowExclusions={false}
                 />
               )}
             </EuiFlexItem>
