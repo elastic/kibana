@@ -254,6 +254,7 @@ function ObservabilityActions({
             iconType="expand"
             color="text"
             onClick={() => setFlyoutAlert(alert)}
+            data-test-subj="openFlyoutButton"
           />
         </EuiFlexItem>
         <EuiFlexItem>
