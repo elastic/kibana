@@ -36,6 +36,7 @@ import { ManifestClient } from '../manifest_client';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
+import { EndpointError } from '../../../errors';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -284,7 +285,7 @@ export class ManifestManager {
           newManifest.replaceArtifact(fleetArtifact);
         }
       } else {
-        errors.push(new Error(`Incomplete artifact: ${getArtifactId(artifact)}`));
+        errors.push(new EndpointError(`Incomplete artifact: ${getArtifactId(artifact)}`), artifact);
       }
     }
     return errors;
@@ -391,7 +392,10 @@ export class ManifestManager {
       await iterateArtifactsBuildResult(result, async (artifact, policyId) => {
         const artifactToAdd = baselineManifest.getArtifact(getArtifactId(artifact)) || artifact;
         if (!internalArtifactCompleteSchema.is(artifactToAdd)) {
-          throw new Error(`Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`);
+          throw new EndpointError(
+            `Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`,
+            artifactToAdd
+          );
         }
 
         manifest.addEntry(artifactToAdd, policyId);
@@ -426,7 +430,12 @@ export class ManifestManager {
             const serializedManifest = manifest.toPackagePolicyManifest(packagePolicy.id);
 
             if (!manifestDispatchSchema.is(serializedManifest)) {
-              errors.push(new Error(`Invalid manifest for policy ${packagePolicy.id}`));
+              errors.push(
+                new EndpointError(
+                  `Invalid manifest for policy ${packagePolicy.id}`,
+                  serializedManifest
+                )
+              );
             } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
               newPackagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
 
@@ -453,7 +462,9 @@ export class ManifestManager {
             this.logger.debug(`No change in manifest version for package policy: ${id}`);
           }
         } else {
-          errors.push(new Error(`Package Policy ${id} has no config.`));
+          errors.push(
+            new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, newPackagePolicy)
+          );
         }
       }
     );
