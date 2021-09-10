@@ -458,7 +458,7 @@ describe('createAlertRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
     });
-    const [_, handler] = router.post.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('create', mockUsageCounter);

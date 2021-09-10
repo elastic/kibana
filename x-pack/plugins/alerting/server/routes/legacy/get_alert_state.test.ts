@@ -160,7 +160,7 @@ describe('getAlertStateRoute', () => {
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
     getAlertStateRoute(router, licenseState, mockUsageCounter);
-    const [_, handler] = router.get.mock.calls[0];
+    const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: '1' } }, [
       'ok',
     ]);

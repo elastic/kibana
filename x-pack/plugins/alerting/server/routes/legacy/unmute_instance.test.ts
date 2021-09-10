@@ -97,7 +97,7 @@ describe('unmuteAlertInstanceRoute', () => {
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
     unmuteAlertInstanceRoute(router, licenseState, mockUsageCounter);
-    const [_, handler] = router.post.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
     ]);

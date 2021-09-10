@@ -91,7 +91,7 @@ describe('disableAlertRoute', () => {
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
     disableAlertRoute(router, licenseState, mockUsageCounter);
-    const [_, handler] = router.post.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: '1' } }, [
       'ok',
     ]);

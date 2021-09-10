@@ -153,7 +153,7 @@ describe('aggregateAlertRoute', () => {
     const router = httpServiceMock.createRouter();
 
     aggregateAlertRoute(router, licenseState, mockUsageCounter);
-    const [_, handler] = router.get.mock.calls[0];
+    const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {

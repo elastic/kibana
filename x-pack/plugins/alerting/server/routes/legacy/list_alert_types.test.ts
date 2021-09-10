@@ -217,7 +217,7 @@ describe('listAlertTypesRoute', () => {
     rulesClient.listAlertTypes.mockResolvedValueOnce(new Set([]));
 
     listAlertTypesRoute(router, licenseState, mockUsageCounter);
-    const [_, handler] = router.get.mock.calls[0];
+    const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       { params: { id: '1' }, body: {} },
