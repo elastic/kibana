@@ -51,11 +51,18 @@ export interface IndexField {
 
 export type BeatFields = Record<string, FieldInfo>;
 
-export interface IndexFieldsStrategyRequest extends IEsSearchRequest {
-  dataViewId?: string;
+export interface IndexFieldsStrategyRequestByIndices extends IEsSearchRequest {
   indices: string[];
   onlyCheckIfIndicesExist: boolean;
 }
+export interface IndexFieldsStrategyRequestById extends IEsSearchRequest {
+  dataViewId: string;
+  onlyCheckIfIndicesExist: boolean;
+}
+
+export type IndexFieldsStrategyRequest<T = 'dataView'> = T extends 'dataView'
+  ? IndexFieldsStrategyRequestById
+  : IndexFieldsStrategyRequestByIndices;
 
 export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
   indexFields: IndexField[];

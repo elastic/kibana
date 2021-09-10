@@ -26,10 +26,6 @@ import {
 } from '../../../common/search_strategy/index_fields';
 import { StartPlugins } from '../../types';
 
-// SOMEONE EXPLAIN WHY I SHOULDN'T DELETE?
-// const apmIndexPattern = 'apm-*-transaction*';
-// const apmDataStreamsPattern = 'traces-apm*';
-
 export const indexFieldsProvider = (
   getStartServices: StartServicesAccessor<StartPlugins>
 ): ISearchStrategy<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse> => {
@@ -68,8 +64,11 @@ export const requestIndexFieldSearch = async (
 ): Promise<IndexFieldsStrategyResponse> => {
   const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
   const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
+  // TODO: Throw error when both request.indices and request.dataViewId
 
-  const dedupeIndices = dedupeIndexName(request.indices);
+  if ('dataViewId' in request && 'indices' in request) {
+    throw new Error('Provide index field search with either `dataViewId` or `indices`, not both');
+  }
   const [
     ,
     {
@@ -81,23 +80,30 @@ export const requestIndexFieldSearch = async (
     esClient.asCurrentUser
   );
 
-  // check at the top if indicesExist
-  const indicesExist: boolean[] = await findExistingIndices(dedupeIndices, esClient.asCurrentUser);
-
-  let fieldDescriptor: FieldDescriptor[][];
-  // if dataViewId is provided, get fields from the Kibana Data View
-
+  let indicesExist: boolean[] = [];
+  let existingIndices: string[];
   let indexFields: IndexField[] = [];
   let runtimeMappings = {};
-  if (!request.onlyCheckIfIndicesExist) {
-    if (request.dataViewId) {
-      // TODO: Steph/sourcerer needs unit test
-      const dataView = await dataViewService.get(request.dataViewId);
+
+  // if dataViewId is provided, get fields and indices from the Kibana Data View
+  if ('dataViewId' in request) {
+    // TODO: Steph/sourcerer needs unit test
+    const dataView = await dataViewService.get(request.dataViewId);
+    const patternList = dataView.title.split(',');
+    indicesExist = await findExistingIndices(patternList, esClient.asCurrentUser);
+    existingIndices = patternList.filter((index, i) => indicesExist[i]);
+    if (!request.onlyCheckIfIndicesExist) {
       // type cast because index pattern type is FieldSpec and timeline type is FieldDescriptor, same diff
-      fieldDescriptor = [Object.values(dataView.fields.toSpec()) as FieldDescriptor[]];
+      const fieldDescriptor = [Object.values(dataView.fields.toSpec()) as FieldDescriptor[]];
       runtimeMappings = dataView.runtimeFieldMap;
-    } else {
-      fieldDescriptor = await Promise.all(
+      indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
+    }
+  } else {
+    const dedupeIndices = dedupeIndexName(request.indices);
+    indicesExist = await findExistingIndices(dedupeIndices, esClient.asCurrentUser);
+    existingIndices = dedupeIndices.filter((index, i) => indicesExist[i]);
+    if (!request.onlyCheckIfIndicesExist) {
+      const fieldDescriptor = await Promise.all(
         dedupeIndices
           .filter((index, i) => indicesExist[i])
           .map(async (index, n) => {
@@ -112,13 +118,14 @@ export const requestIndexFieldSearch = async (
             });
           })
       );
+      indexFields = await formatIndexFields(beatFields, fieldDescriptor, dedupeIndices);
     }
-    indexFields = await formatIndexFields(beatFields, fieldDescriptor, dedupeIndices);
   }
+
   return {
     indexFields,
     runtimeMappings,
-    indicesExist: dedupeIndices.filter((index, i) => indicesExist[i]),
+    indicesExist: existingIndices,
     rawResponse: {
       timed_out: false,
       took: -1,

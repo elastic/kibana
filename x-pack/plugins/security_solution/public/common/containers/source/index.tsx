@@ -123,6 +123,10 @@ interface FetchIndexReturn {
   indexPatterns: IIndexPattern;
 }
 
+/**
+ * Independent index fields hook/request
+ * returns state directly, no redux
+ */
 export const useFetchIndex = (
   indexNames: string[],
   onlyCheckIfIndicesExist: boolean = false
@@ -147,9 +151,8 @@ export const useFetchIndex = (
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-        // TODO: Steph/sourcerer this stinks i think bug here
         searchSubscription$.current = data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+          .search<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse>(
             { indices: iNames, onlyCheckIfIndicesExist },
             {
               abortSignal: abortCtrl.current.signal,
@@ -163,7 +166,7 @@ export const useFetchIndex = (
 
                 previousIndexesName.current = response.indicesExist;
                 setLoading(false);
-                // TODO: Steph/sourcerer IMO all the below formatting should be happening serverside. follow up with X
+                // TODO: Steph/sourcerer all the below formatting should be happening serverside. follow up different PR
                 setState({
                   browserFields: getBrowserFields(stringifyIndices, response.indexFields),
                   docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
@@ -208,6 +211,10 @@ export const useFetchIndex = (
   return [isLoading, state];
 };
 
+/**
+ * Sourcerer specific index fields hook/request
+ * sets redux state, returns nothing
+ */
 export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
@@ -235,7 +242,6 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             {
               dataViewId: selectedDataViewId,
-              indices: patternList,
               onlyCheckIfIndicesExist: false,
             },
             {
@@ -255,7 +261,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                   sourcererActions.setSource({
                     id: sourcererScopeName,
                     payload: {
-                      // TODO: Steph/sourcerer IMO all the below formatting should be happening serverside. follow up with X
+                      // TODO: Steph/sourcerer all the below formatting should be happening serverside. follow up different PR
                       browserFields: getBrowserFields(patternString, response.indexFields),
                       docValueFields: getDocValueFields(patternString, response.indexFields),
                       errorMessage: null,
