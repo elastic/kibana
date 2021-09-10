@@ -4,22 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import moment from 'moment';
 import React, { useContext, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import { useHistory } from 'react-router-dom';
 import { PageTemplate } from '../page_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../global_state_context';
 import { TabMenuItem } from '../page_template';
 import { ElasticsearchOverview } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { Legacy } from '../../../legacy_shims';
+import { useCharts } from '../../hooks/use_charts';
 
 export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
-  const history = useHistory();
+  const { zoomInfo, onBrush } = useCharts();
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
@@ -83,40 +81,6 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
     setData(response);
   }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
 
-  let zoomInLevel = 0;
-  // TODO: clear timeout on component destroy
-  let deferTimer;
-
-  const popstateHandler = () => zoomInLevel > 0 && --zoomInLevel;
-  // TODO: remove listener on component destroy
-  const removePopstateHandler = () => window.removeEventListener('popstate', popstateHandler);
-  const addPopstateHandler = () => window.addEventListener('popstate', popstateHandler);
-
-  const onBrush = ({ xaxis }) => {
-    removePopstateHandler();
-    const { to, from } = xaxis;
-    const timezone = services.uiSettings?.get('dateFormat:tz');
-    const offset = getOffsetInMS(timezone);
-    Legacy.shims.timefilter.setTime({
-      from: moment(from - offset),
-      to: moment(to - offset),
-      mode: 'absolute',
-    });
-
-    ++zoomInLevel;
-    clearTimeout(deferTimer);
-    /*
-      Needed to defer 'popstate' event, so it does not fire immediately after it's added.
-      10ms is to make sure the event is not added with the same code digest
-    */
-    deferTimer = setTimeout(() => addPopstateHandler(), 10);
-  };
-
-  const zoomInfo = {
-    zoomOutHandler: () => history.goBack(),
-    showZoomOutBtn: () => zoomInLevel > 0,
-  };
-
   const renderOverview = (overviewData) => {
     if (overviewData === null) {
       return null;
@@ -149,13 +113,4 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
       {renderOverview(data)}
     </PageTemplate>
   );
-};
-
-const getOffsetInMS = (timezone) => {
-  if (timezone === 'Browser') {
-    return 0;
-  }
-  const offsetInMinutes = moment.tz(timezone).utcOffset();
-  const offsetInMS = offsetInMinutes * 1 * 60 * 1000;
-  return offsetInMS;
 };
