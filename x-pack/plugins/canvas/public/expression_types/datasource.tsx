@@ -62,10 +62,18 @@ const DatasourceWrapper: React.FunctionComponent<DatasourceWrapperProps> = (prop
 
   useEffect(() => {
     callRenderFn();
-    return () => {
+  }, [callRenderFn, props]);
+
+  useEffect(
+    () => () => {
       handlers.destroy();
-    };
-  }, [callRenderFn, handlers, props]);
+    },
+    // new created handlers are coming from the component, which is rendering
+    // and returned function from 'useEffect' is calling for cleanup, not on unmount,
+    // but 'destroy' need to be called on unmount of the component
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   return (
     <RenderToDom
@@ -92,6 +100,7 @@ export class Datasource extends BaseForm {
 
   render(props: DatasourceRenderProps) {
     const expressionFormHandlers = new ExpressionFormHandlers();
+    console.log('render');
     return (
       <DatasourceWrapper spec={this} handlers={expressionFormHandlers} datasourceProps={props} />
     );
