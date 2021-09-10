@@ -80,6 +80,7 @@ describe('TelemetryEventsSender', () => {
             executable: null, // null fields are never allowlisted
             working_directory: '/some/usr/dir',
           },
+          Responses: '{ "result": 0 }',  // >= 7.15
           Target: {
             process: {
               name: 'bar.exe',
@@ -88,6 +89,9 @@ describe('TelemetryEventsSender', () => {
                 id: 1234,
               },
             },
+          },
+          threat: {
+            ignored_object: true // this field is not allowlisted
           },
         },
       ];
@@ -136,6 +140,7 @@ describe('TelemetryEventsSender', () => {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
           },
+          Responses: '{ "result": 0 }',
           Target: {
             process: {
               name: 'bar.exe',
