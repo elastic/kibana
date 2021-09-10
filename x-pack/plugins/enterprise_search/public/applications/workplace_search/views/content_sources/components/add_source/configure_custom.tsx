@@ -22,6 +22,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { CUSTOM_SOURCE_DOCS_URL } from '../../../../routes';
 
+import { SOURCE_NAME_LABEL } from '../../constants';
+
 import { AddSourceLogic } from './add_source_logic';
 import { CONFIG_CUSTOM_BUTTON, CONFIG_CUSTOM_LINK_TEXT } from './constants';
 
@@ -70,7 +72,7 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
             </p>
           </EuiText>
           <EuiSpacer size="xxl" />
-          <EuiFormRow label="Source Name">
+          <EuiFormRow label={SOURCE_NAME_LABEL}>
             <EuiFieldText
               name="source-name"
               required
