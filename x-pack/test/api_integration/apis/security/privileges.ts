@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
             timelion: ['all', 'read'],
             graph: ['all', 'read'],
             maps: ['all', 'read'],
-            canvas: ['all', 'read', 'minimal_all', 'minimal_read', 'generate_report'],
+            canvas: ['all', 'read'],
             infrastructure: ['all', 'read'],
             logs: ['all', 'read'],
             observabilityCases: ['all', 'read'],
