@@ -19,7 +19,10 @@ export function getEnvironmentLabel(environment: string) {
     });
   }
 
-  if (environment === ENVIRONMENT_ALL_VALUE) {
+  if (
+    environment === ENVIRONMENT_ALL_VALUE ||
+    environment === 'ALL_OPTION_VALUE' // FIXME: REMOVE THIS
+  ) {
     return i18n.translate('xpack.apm.filter.environment.allLabel', {
       defaultMessage: 'All',
     });

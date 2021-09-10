@@ -93,8 +93,8 @@ export function ErrorCountAlertTrigger(props: Props) {
     <ServiceField value={params.serviceName} />,
     <EnvironmentField
       currentValue={params.environment}
-      options={environmentOptions}
-      onChange={(e) => setAlertParams('environment', e.target.value)}
+      onChange={(value) => setAlertParams('environment', value)}
+      serviceName={params.serviceName}
     />,
     <IsAboveField
       value={params.threshold}

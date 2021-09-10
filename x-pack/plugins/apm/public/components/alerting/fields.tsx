@@ -14,6 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getEnvironmentLabel } from '../../../common/environment_filter_values';
+import { EnvironmentSelect } from '../shared/selects/environment_select';
 import { PopoverExpression } from './service_alert_trigger/popover_expression';
 
 const ALL_OPTION = i18n.translate('xpack.apm.alerting.fields.all_option', {
@@ -33,32 +34,25 @@ export function ServiceField({ value }: { value?: string }) {
 
 export function EnvironmentField({
   currentValue,
-  options,
   onChange,
+  serviceName,
 }: {
   currentValue: string;
-  options: EuiSelectOption[];
-  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange: (value: string) => void;
+  serviceName?: string;
 }) {
-  const title = i18n.translate('xpack.apm.alerting.fields.environment', {
-    defaultMessage: 'Environment',
-  });
-  if (options.length === 1) {
-    return (
-      <EuiExpression
-        description={title}
-        value={getEnvironmentLabel(currentValue)}
-      />
-    );
-  }
-
   return (
-    <PopoverExpression value={getEnvironmentLabel(currentValue)} title={title}>
-      <EuiSelect
+    <PopoverExpression
+      value={getEnvironmentLabel(currentValue)}
+      title={i18n.translate('xpack.apm.alerting.fields.environment', {
+        defaultMessage: 'Environment',
+      })}
+    >
+      <EnvironmentSelect
+        compressed={true}
         defaultValue={currentValue}
-        options={options}
         onChange={onChange}
-        compressed
+        serviceName={serviceName}
       />
     </PopoverExpression>
   );
