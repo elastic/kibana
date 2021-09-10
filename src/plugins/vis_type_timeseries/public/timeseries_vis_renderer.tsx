@@ -51,13 +51,14 @@ export const getTimeseriesVisRenderer: (deps: {
       unmountComponentAtNode(domNode);
     });
     const { visParams: model, visData, syncColors } = config;
-
     const { palettes } = getCharts();
-    const showNoResult = !checkIfDataExists(visData, model);
-    const palettesService = await palettes.getPalettes();
-
     const { indexPatterns } = getDataStart();
-    const { indexPattern } = await fetchIndexPattern(model.index_pattern, indexPatterns);
+
+    const showNoResult = !checkIfDataExists(visData, model);
+    const [palettesService, { indexPattern }] = await Promise.all([
+      palettes.getPalettes(),
+      fetchIndexPattern(model.index_pattern, indexPatterns),
+    ]);
 
     render(
       <I18nProvider>

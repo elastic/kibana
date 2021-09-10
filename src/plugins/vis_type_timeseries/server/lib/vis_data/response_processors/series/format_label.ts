@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { BUCKET_TYPES, PANEL_TYPES } from '../../../../../common/enums';
 import type { Panel, PanelData, Series } from '../../../../../common/types';
 import type { FieldFormatsRegistry } from '../../../../../../field_formats/common';
@@ -40,8 +41,12 @@ export function formatLabel(
       results
         .filter(({ seriesId }) => series.id === seriesId)
         .forEach((item) => {
-          const itemFieldFormat = getFieldFormatByName(termsField!);
-          item.label = item.labelFormatted = itemFieldFormat.convert(item.label);
+          const formattedLabel = getFieldFormatByName(termsField!).convert(item.label);
+          item.label = formattedLabel;
+          const termsFieldType = indexPattern?.fields.find(({ name }) => name === termsField)?.type;
+          if (termsFieldType === KBN_FIELD_TYPES.DATE) {
+            item.labelFormatted = formattedLabel;
+          }
         });
     }
 

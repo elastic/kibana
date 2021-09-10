@@ -18,7 +18,6 @@ import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
-import { FIELD_FORMAT_IDS } from '../../../../../../field_formats/common';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -48,24 +47,15 @@ function MetricVisualization(props) {
       const seriesDef = model.series.find((s) => includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        if (seriesDef.formatter === DATA_FORMATTERS.DEFAULT) {
-          const metricsField = getMetricsField(seriesDef.metrics);
-          // skip color field formatting if color rules applied
-          const shouldSkipFormat =
-            fieldFormatMap?.[metricsField]?.id === FIELD_FORMAT_IDS.COLOR && colors.color;
-          newProps.formatter = createFieldFormatter(
-            // pass undefined to apply default value formatting
-            shouldSkipFormat ? undefined : metricsField,
-            fieldFormatMap,
-            'html'
-          );
-        } else {
-          newProps.formatter = createTickFormatter(
-            seriesDef.formatter,
-            seriesDef.value_template,
-            getConfig
-          );
-        }
+        newProps.formatter =
+          seriesDef.formatter === DATA_FORMATTERS.DEFAULT
+            ? createFieldFormatter(
+                getMetricsField(seriesDef.metrics),
+                fieldFormatMap,
+                'html',
+                colors.color
+              )
+            : createTickFormatter(seriesDef.formatter, seriesDef.value_template, getConfig);
       }
       if (i === 0 && colors.color) newProps.color = colors.color;
       return assign({}, pick(row, ['label', 'data']), newProps);

@@ -18,13 +18,14 @@ const mockUiSettings = ({
   [FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: '0,0.[000]',
 } as unknown) as CoreSetup['uiSettings'];
 
-describe('createFieldFormatter(fieldName, fieldFormatMap?, contextType?)', () => {
+describe('createFieldFormatter(fieldName, fieldFormatMap?, contextType?, hasColorRules)', () => {
   setFieldFormats(
     getFieldFormatsRegistry(({
       uiSettings: mockUiSettings,
     } as unknown) as CoreSetup)
   );
   const value = 1234567890;
+  const stringValue = 'some string';
   const fieldFormatMap = {
     bytesField: {
       id: 'bytes',
@@ -78,6 +79,18 @@ describe('createFieldFormatter(fieldName, fieldFormatMap?, contextType?)', () =>
     );
   });
 
+  it('should return number formatted value wrapped in span for colorField when color rules are applied', () => {
+    const formatter = createFieldFormatter('colorField', fieldFormatMap, 'html', true);
+
+    expect(formatter(value)).toBe('<span ng-non-bindable>1,234,567,890</span>');
+  });
+
+  it('should return not formatted string value for colorField when color rules are applied', () => {
+    const formatter = createFieldFormatter('colorField', fieldFormatMap, 'html', true);
+
+    expect(formatter(stringValue)).toBe(stringValue);
+  });
+
   it('should return url formatted value for urlField', () => {
     const formatter = createFieldFormatter('urlField', fieldFormatMap, 'html');
 
@@ -107,6 +120,6 @@ describe('createFieldFormatter(fieldName, fieldFormatMap?, contextType?)', () =>
   it('should not format string value when field has no format', () => {
     const formatter = createFieldFormatter('noSuchField', fieldFormatMap);
 
-    expect(formatter('any string')).toBe('any string');
+    expect(formatter(stringValue)).toBe(stringValue);
   });
 });

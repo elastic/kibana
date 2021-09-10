@@ -9,22 +9,34 @@
 import { isNumber } from 'lodash';
 import { getFieldFormats } from '../../../services';
 import { isEmptyValue, DISPLAY_EMPTY_VALUE } from '../../../../common/last_value_utils';
+import { FIELD_FORMAT_IDS } from '../../../../../field_formats/common';
 import type { FieldFormatMap } from '../../../../../data/common';
 import type { FieldFormatsContentType } from '../../../../../field_formats/common';
+
+const DEFAULT_FIELD_FORMAT = { id: 'number' };
 
 export const createFieldFormatter = (
   fieldName: string = '',
   fieldFormatMap?: FieldFormatMap,
-  contextType?: FieldFormatsContentType
+  contextType?: FieldFormatsContentType,
+  hasColorRules: boolean = false
 ) => {
   const serializedFieldFormat = fieldFormatMap?.[fieldName];
-  const fieldFormat = getFieldFormats().deserialize(serializedFieldFormat ?? { id: 'number' });
+  // field formatting should be skipped either there's no such field format in fieldFormatMap
+  // or it's color formatting and color rules are already applied
+  const shouldSkipFormatting =
+    !serializedFieldFormat ||
+    (hasColorRules && serializedFieldFormat?.id === FIELD_FORMAT_IDS.COLOR);
+
+  const fieldFormat = getFieldFormats().deserialize(
+    shouldSkipFormatting ? DEFAULT_FIELD_FORMAT : serializedFieldFormat
+  );
 
   return (value: unknown) => {
     if (isEmptyValue(value)) {
       return DISPLAY_EMPTY_VALUE;
     }
-    return serializedFieldFormat || isNumber(value)
+    return isNumber(value) || !shouldSkipFormatting
       ? fieldFormat.convert(value, contextType)
       : value;
   };

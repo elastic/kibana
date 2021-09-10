@@ -82,22 +82,19 @@ class TableVis extends Component {
       .map((item) => {
         const column = this.visibleSeries.find((c) => c.id === item.id);
         if (!column) return null;
-        const isFieldFormatter = column.formatter === DATA_FORMATTERS.DEFAULT;
-        const field = getMetricsField(column.metrics);
-        const formatter = isFieldFormatter
-          ? createFieldFormatter(field, fieldFormatMap, 'html')
-          : createTickFormatter(column.formatter, column.value_template, getConfig);
-        // we should skip color field formatting for value if tsvb column have color_rules
         const hasColorRules = column.color_rules?.some(
           ({ value, operator, text }) => value || operator || text
         );
-        const value =
-          isFieldFormatter &&
-          fieldFormatMap?.[field]?.id === FIELD_FORMAT_IDS.COLOR &&
-          hasColorRules
-            ? item.last
-            : formatter(item.last);
-
+        const formatter =
+          column.formatter === DATA_FORMATTERS.DEFAULT
+            ? createFieldFormatter(
+                getMetricsField(column.metrics),
+                fieldFormatMap,
+                'html',
+                hasColorRules
+              )
+            : createTickFormatter(column.formatter, column.value_template, getConfig);
+        const value = formatter(item.last);
         let trend;
         if (column.trend_arrows) {
           const trendIcon = item.slope > 0 ? 'sortUp' : 'sortDown';

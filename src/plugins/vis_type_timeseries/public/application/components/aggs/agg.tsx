@@ -63,14 +63,9 @@ export function Agg(props: AggProps) {
     [name, onChange, siblings, series]
   );
 
-  const isLastAgg = useMemo(() => siblings[siblings.length - 1]?.id === model.id, [
-    model.id,
-    siblings,
-  ]);
-
   useEffect(() => {
     // formatter is based on the last agg, i.e. active or resulting one as pipeline
-    if (isLastAgg) {
+    if (siblings[siblings.length - 1]?.id === model.id) {
       const formatterType = getFormatterType(series.formatter);
       const isNumericMetric = checkIfNumericMetric(model, fields, indexPattern);
       const isNumberFormatter = ![DATA_FORMATTERS.DEFAULT, DATA_FORMATTERS.CUSTOM].includes(
@@ -88,7 +83,7 @@ export function Agg(props: AggProps) {
         });
       }
     }
-  }, [indexPattern, model, onChange, fields, series.formatter, isKibanaIndexPattern, isLastAgg]);
+  }, [indexPattern, model, onChange, fields, series.formatter, isKibanaIndexPattern, siblings]);
 
   return (
     <div className={props.className} style={style}>

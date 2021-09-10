@@ -110,6 +110,8 @@ interface DataFormatPickerProps {
   shouldIncludeNumberOptions: boolean;
 }
 
+const htmlId = htmlIdGenerator();
+
 export const DataFormatPicker = ({
   formatterValue,
   changeModelFormatter,
@@ -184,8 +186,6 @@ export const DataFormatPicker = ({
       handleDurationParamsChange('decimals', event.target.value),
     [handleDurationParamsChange]
   );
-
-  const htmlId = htmlIdGenerator();
 
   let duration;
   if (selectedFormatter === DATA_FORMATTERS.DURATION) {

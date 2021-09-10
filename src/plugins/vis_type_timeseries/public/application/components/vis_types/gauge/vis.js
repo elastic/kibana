@@ -17,7 +17,6 @@ import { Gauge } from '../../../visualizations/views/gauge';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
-import { FIELD_FORMAT_IDS } from '../../../../../../field_formats/common';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -48,24 +47,16 @@ function GaugeVisualization(props) {
       const seriesDef = model.series.find((s) => includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        if (seriesDef.formatter === DATA_FORMATTERS.DEFAULT) {
-          const metricsField = getMetricsField(seriesDef.metrics);
-          const hasTextColorRules = model.gauge_color_rules.some(({ text }) => text);
-          const shouldSkipFormat =
-            fieldFormatMap?.[metricsField]?.id === FIELD_FORMAT_IDS.COLOR && hasTextColorRules;
-          newProps.formatter = createFieldFormatter(
-            // pass undefined to apply default value formatting
-            shouldSkipFormat ? undefined : metricsField,
-            fieldFormatMap,
-            'html'
-          );
-        } else {
-          newProps.formatter = createTickFormatter(
-            seriesDef.formatter,
-            seriesDef.value_template,
-            getConfig
-          );
-        }
+        const hasTextColorRules = model.gauge_color_rules.some(({ text }) => text);
+        newProps.formatter =
+          seriesDef.formatter === DATA_FORMATTERS.DEFAULT
+            ? createFieldFormatter(
+                getMetricsField(seriesDef.metrics),
+                fieldFormatMap,
+                'html',
+                hasTextColorRules
+              )
+            : createTickFormatter(seriesDef.formatter, seriesDef.value_template, getConfig);
       }
       if (i === 0 && colors.gauge) newProps.color = colors.gauge;
       return assign({}, row, newProps);
