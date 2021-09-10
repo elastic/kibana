@@ -10,12 +10,13 @@ import { Redirect } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { NoData } from '../../components/no_data';
-import { PageTemplate } from './page_template';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import { Legacy } from '../../legacy_shims';
-import { GlobalStateContext } from '../global_state_context';
+import { NoData } from '../../../components/no_data';
+import { PageTemplate } from '../page_template';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
+import { Legacy } from '../../../legacy_shims';
+import { GlobalStateContext } from '../../global_state_context';
+import { Enabler } from './enabler';
 
 const CODE_PATHS = [CODE_PATH_LICENSE];
 
@@ -105,7 +106,7 @@ export const NoDataPage = () => {
     }
   }, [ccs, clusterUuid, services, services.http]);
 
-  const enabler = new Enabler(updateModel);
+  const enabler = new Enabler(services.http, updateModel);
 
   return (
     <PageTemplate title={title} getPageData={getPageData}>
@@ -217,49 +218,4 @@ function formatCluster(cluster: any) {
     cluster.cluster_name = 'Standalone Cluster';
   }
   return cluster;
-}
-
-// From x-pack/plugins/monitoring/public/lib/elasticsearch_settings/enabler.js
-class Enabler {
-  updateModel: any;
-
-  constructor(updateModel: (properties: any) => void) {
-    this.updateModel = updateModel;
-  }
-
-  async enableCollectionInterval() {
-    try {
-      this.updateModel({ isCollectionIntervalUpdating: true });
-      // TODO actually set it
-      // await this.$http.put('../api/monitoring/v1/elasticsearch_settings/set/collection_interval');
-      this.updateModel({
-        isCollectionIntervalUpdated: true,
-        isCollectionIntervalUpdating: false,
-      });
-    } catch (err) {
-      this.updateModel({
-        errors: (err as any).data,
-        isCollectionIntervalUpdated: false,
-        isCollectionIntervalUpdating: false,
-      });
-    }
-  }
-
-  async enableCollectionEnabled() {
-    try {
-      this.updateModel({ isCollectionEnabledUpdating: true });
-      // TODO actually set it
-      // await this.$http.put('../api/monitoring/v1/elasticsearch_settings/set/collection_enabled');
-      this.updateModel({
-        isCollectionEnabledUpdated: true,
-        isCollectionEnabledUpdating: false,
-      });
-    } catch (err) {
-      this.updateModel({
-        errors: (err as any).data,
-        isCollectionEnabledUpdated: false,
-        isCollectionEnabledUpdating: false,
-      });
-    }
-  }
 }

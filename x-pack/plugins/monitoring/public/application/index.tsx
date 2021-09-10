@@ -19,7 +19,7 @@ import { ExternalConfigContext, ExternalConfig } from './external_config_context
 import { createPreserveQueryHistory } from './preserve_query_history';
 import { RouteInit } from './route_init';
 import { MonitoringTimeContainer } from './pages/use_monitoring_time';
-import { NoDataPage } from './pages/no_data_page';
+import { NoDataPage } from './pages/no_data';
 
 export const renderApp = (
   core: CoreStart,
