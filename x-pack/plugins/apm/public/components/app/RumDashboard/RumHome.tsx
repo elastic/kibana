@@ -16,22 +16,51 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
+import { useHasRumData } from './hooks/useHasRumData';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'Dashboard',
 });
 
 export function RumHome() {
-  const { observability } = useApmPluginContext();
+  const { core, observability } = useApmPluginContext();
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
   const { isSmall, isXXL } = useBreakpoints();
 
+  const rumData = useHasRumData();
+
   const envStyle = isSmall ? {} : { maxWidth: 500 };
+
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !rumData?.hasData
+    ? {
+        solution: i18n.translate('xpack.apm.ux.overview.solutionName', {
+          defaultMessage: 'Observability',
+        }),
+        actions: {
+          beats: {
+            title: i18n.translate('xpack.apm.ux.overview.beatsCard.title', {
+              defaultMessage: 'Add RUM data',
+            }),
+            description: i18n.translate(
+              'xpack.apm.ux.overview.beatsCard.description',
+              {
+                defaultMessage:
+                  'Use the RUM (JS) agent to collect user experience data.',
+              }
+            ),
+            href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
+          },
+        },
+        docsLink: core.docLinks.links.observability.guide,
+      }
+    : undefined;
 
   return (
     <CsmSharedContextProvider>
       <PageTemplateComponent
+        noDataConfig={noDataConfig}
         pageHeader={
           isXXL
             ? {
