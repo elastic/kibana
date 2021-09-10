@@ -26,6 +26,9 @@ const alertParamsRt = t.intersection([
   }),
   environmentRt,
   rangeRt,
+  t.type({
+    interval: t.string,
+  }),
 ]);
 
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;

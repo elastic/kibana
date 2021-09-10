@@ -95,7 +95,7 @@ describe('SchemaBaseLogic', () => {
         SchemaBaseLogic.actions.loadSchema();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/schema');
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines/some-engine/schema');
         expect(SchemaBaseLogic.actions.onSchemaLoad).toHaveBeenCalledWith(MOCK_RESPONSE);
       });
 
