@@ -307,6 +307,13 @@ export const SAVE_CUSTOM_VISUAL_WALKTHROUGH_TITLE = i18n.translate(
   }
 );
 
+export const SAVE_CUSTOM_VISUAL_WALKTHROUGH_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.visualWalkthrough.link',
+  {
+    defaultMessage: 'Check out the documentation',
+  }
+);
+
 export const SAVE_CUSTOM_STYLING_RESULTS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.stylingResults.title',
   {
@@ -314,10 +321,24 @@ export const SAVE_CUSTOM_STYLING_RESULTS_TITLE = i18n.translate(
   }
 );
 
+export const SAVE_CUSTOM_STYLING_RESULTS_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.stylingResults.link',
+  {
+    defaultMessage: 'Display Settings',
+  }
+);
+
 export const SAVE_CUSTOM_DOC_PERMISSIONS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.docPermissions.title',
   {
     defaultMessage: 'Set document-level permissions',
+  }
+);
+
+export const SAVE_CUSTOM_DOC_PERMISSIONS_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.docPermissions.link',
+  {
+    defaultMessage: 'Document-level permissions',
   }
 );
 
