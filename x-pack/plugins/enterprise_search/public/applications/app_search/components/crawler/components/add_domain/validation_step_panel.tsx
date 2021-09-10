@@ -7,7 +7,14 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiMarkdownFormat,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { CrawlerDomainValidationStep } from '../../types';
 
@@ -26,9 +33,14 @@ export const ValidationStepPanel: React.FC<ValidationStepPanelProps> = ({
   action,
 }) => {
   const showErrorMessage = step.state === 'invalid' || step.state === 'warning';
+  const styleOverride = showErrorMessage ? { paddingBottom: 0 } : {};
 
   return (
-    <EuiPanel hasShadow={false} color={domainValidationStateToPanelColor(step.state)}>
+    <EuiPanel
+      hasShadow={false}
+      color={domainValidationStateToPanelColor(step.state)}
+      style={styleOverride}
+    >
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <ValidationStateIcon state={step.state} />
@@ -41,13 +53,14 @@ export const ValidationStepPanel: React.FC<ValidationStepPanelProps> = ({
       </EuiFlexGroup>
       {showErrorMessage && (
         <>
-          <EuiText size="s" data-test-subj="errorMessage">
-            <p>{step.message}</p>
-          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiMarkdownFormat textSize="s" data-test-subj="errorMessage">
+            {step.message || ''}
+          </EuiMarkdownFormat>
           {action && (
             <>
-              <EuiSpacer />
               {action}
+              <EuiSpacer />
             </>
           )}
         </>
