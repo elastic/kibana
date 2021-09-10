@@ -96,16 +96,18 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
           label={i18n.translate('xpack.fleet.newEnrollmentKey.nameLabel', {
             defaultMessage: 'Token name',
           })}
+          helpText={i18n.translate('xpack.fleet.newEnrollmentKey.helpText', {
+            defaultMessage: 'Token id will be used when this is left empty.',
+          })}
         >
-          <EuiFlexItem>
-            <EuiFieldText
-              name="name"
-              autoComplete="off"
-              placeholder="Enter a token name"
-              {...form.apiKeyNameInput.props}
-            />
-            <EuiFormHelpText>Token id will be used when this is left empty.</EuiFormHelpText>
-          </EuiFlexItem>
+          <EuiFieldText
+            name="name"
+            autoComplete="off"
+            placeholder={i18n.translate('xpack.fleet.newEnrollmentKey.placeholder', {
+              defaultMessage: 'Enter a token name',
+            })}
+            {...form.apiKeyNameInput.props}
+          />
         </EuiFormRow>
 
         <EuiFormRow
