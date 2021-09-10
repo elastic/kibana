@@ -7,9 +7,10 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import { ECOMMERCE_INDEX_PATTERN } from './index';
+
 export default function ({ getService }: FtrProviderContext) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const screenshot = getService('screenshots');
 
@@ -17,8 +18,6 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['mlqa']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await browser.setWindowSize(1920, 1080);
 
@@ -36,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('loads the advanced wizard');
       await ml.jobManagement.navigateToNewJobSourceSelection();
-      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_ecommerce');
+      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(ECOMMERCE_INDEX_PATTERN);
       await ml.jobTypeSelection.selectAdvancedJob();
 
       await ml.testExecution.logTestStep('continues to the pick fields step');
@@ -70,6 +69,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await ml.testExecution.logTestStep('takes the screenshot');
+      // open and close the Kibana nav to un-focus the last used element
+      await ml.navigation.openKibanaNav();
+      await ml.navigation.closeKibanaNav();
+
       await screenshot.take('ecommerce-advanced-wizard-geopoint_new');
     });
   });

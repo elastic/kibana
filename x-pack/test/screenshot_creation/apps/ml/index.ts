@@ -7,8 +7,11 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+export const ECOMMERCE_INDEX_PATTERN = 'kibana_sample_data_ecommerce';
+export const FLIGHTS_INDEX_PATTERN = 'kibana_sample_data_flights';
+export const LOGS_INDEX_PATTERN = 'kibana_sample_data_logs';
+
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   describe('machine learning', function () {
@@ -17,17 +20,15 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
+
+      await ml.testResources.installAllKibanaSampleData();
     });
 
     after(async () => {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
 
-      await ml.testResources.deleteSavedSearches();
-
-      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
-
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
+      await ml.testResources.removeAllKibanaSampleData();
 
       await ml.testResources.resetKibanaTimeZone();
     });
