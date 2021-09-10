@@ -20,7 +20,7 @@ import type {
   PreconfigurationError,
   PreconfiguredOutput,
 } from '../../common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, normalizeHostsForAgents } from '../../common';
 import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_LATEST_KEYWORD,
@@ -51,9 +51,14 @@ function isPreconfiguredOutputDifferentFromCurrent(
     existingOutput.is_default !== preconfiguredOutput.is_default ||
     existingOutput.name !== preconfiguredOutput.name ||
     existingOutput.type !== preconfiguredOutput.type ||
-    !isEqual(existingOutput.hosts, preconfiguredOutput.hosts) ||
+    (preconfiguredOutput.hosts &&
+      !isEqual(
+        existingOutput.hosts?.map(normalizeHostsForAgents),
+        preconfiguredOutput.hosts.map(normalizeHostsForAgents)
+      )) ||
     existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
-    existingOutput.config_yaml !== preconfiguredOutput.config_yaml
+    existingOutput.config_yaml !== preconfiguredOutput.config_yaml ||
+    !isEqual(existingOutput.fleet_server, preconfiguredOutput.fleet_server)
   );
 }
 

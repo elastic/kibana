@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import uuid from 'uuid/v5';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
@@ -16,6 +17,30 @@ import { appContextService } from './app_context';
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 const DEFAULT_ES_HOSTS = ['http://localhost:9200'];
+
+// differentiate
+function isUUID(val: string) {
+  return (
+    typeof val === 'string' &&
+    val.match(/[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/)
+  );
+}
+
+export function outputIdToUuid(id: string) {
+  if (isUUID(id)) {
+    return id;
+  }
+
+  return uuid(id, uuid.DNS);
+}
+
+function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
+  const { output_id: outputId, ...atributes } = so.attributes;
+  return {
+    id: outputId ?? so.id,
+    ...atributes,
+  };
+}
 
 class OutputService {
   public async getDefaultOutput(soClient: SavedObjectsClientContract) {
@@ -39,10 +64,7 @@ class OutputService {
       return await this.create(soClient, newDefaultOutput);
     }
 
-    return {
-      id: outputs.saved_objects[0].id,
-      ...outputs.saved_objects[0].attributes,
-    };
+    return outputSavedObjectToOutput(outputs.saved_objects[0]);
   }
 
   public getDefaultESHosts(): string[] {
@@ -74,7 +96,7 @@ class OutputService {
     output: NewOutput,
     options?: { id?: string }
   ): Promise<Output> {
-    const data = { ...output };
+    const data: OutputSOAttributes = { ...output };
 
     // ensure only default output exists
     if (data.is_default) {
@@ -88,33 +110,36 @@ class OutputService {
       data.hosts = data.hosts.map(normalizeHostsForAgents);
     }
 
+    if (options?.id) {
+      data.output_id = options?.id;
+    }
+
     const newSo = await soClient.create<OutputSOAttributes>(
       SAVED_OBJECT_TYPE,
-      data as Output,
-      options
+      data,
+      options?.id ? { id: outputIdToUuid(options.id) } : undefined
     );
 
     return {
-      id: newSo.id,
+      id: options?.id ?? newSo.id,
       ...newSo.attributes,
     };
   }
 
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
-    const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, id);
+    const outputSO = await appContextService
+      .getEncryptedSavedObjects()
+      .getDecryptedAsInternalUser<OutputSOAttributes>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
     }
 
-    return {
-      id: outputSO.id,
-      ...outputSO.attributes,
-    };
+    return outputSavedObjectToOutput(outputSO);
   }
 
   public async delete(soClient: SavedObjectsClientContract, id: string) {
-    return soClient.delete(SAVED_OBJECT_TYPE, id);
+    return soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }
 
   public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
@@ -123,8 +148,11 @@ class OutputService {
     if (updateData.hosts) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
-
-    const outputSO = await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, updateData);
+    const outputSO = await soClient.update<OutputSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      outputIdToUuid(id),
+      updateData
+    );
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
@@ -140,12 +168,7 @@ class OutputService {
     });
 
     return {
-      items: outputs.saved_objects.map<Output>((outputSO) => {
-        return {
-          id: outputSO.id,
-          ...outputSO.attributes,
-        };
-      }),
+      items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
       total: outputs.total,
       page: 1,
       perPage: 10000,
@@ -160,12 +183,7 @@ class OutputService {
     });
 
     return {
-      items: outputs.saved_objects.map<Output>((outputSO) => {
-        return {
-          id: outputSO.id,
-          ...outputSO.attributes,
-        };
-      }),
+      items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
       total: outputs.total,
       page: 1,
       perPage: 1000,

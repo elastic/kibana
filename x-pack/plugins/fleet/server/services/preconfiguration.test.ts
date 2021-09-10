@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/serve
 
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
-import type { PreconfiguredAgentPolicy } from '../../common/types';
+import type { PreconfiguredAgentPolicy, PreconfiguredOutput } from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
@@ -510,8 +510,19 @@ describe('output preconfiguration', () => {
               name: 'Output 1',
               // @ts-ignore
               type: 'elasticsearch',
-              hosts: ['http://es.co:9201'],
+              hosts: ['http://es.co:80'],
               is_preconfigured: true,
+            };
+          case 'existing-output-fleet-server-service-token':
+            return {
+              id: 'existing-output-1',
+              is_default: false,
+              name: 'Output 1',
+              // @ts-ignore
+              type: 'elasticsearch',
+              hosts: ['http://es.co:80'],
+              is_preconfigured: true,
+              fleet_server: { service_token: 'test123' },
             };
           default:
             throw soClient.errors.createGenericNotFoundError(id);
@@ -567,20 +578,50 @@ describe('output preconfiguration', () => {
     expect(mockedOutputService.update).toBeCalled();
   });
 
-  it('should do nothing if preconfigured output exists and did not changed', async () => {
-    const soClient = savedObjectsClientMock.create();
-    await ensurePreconfiguredOutputs(soClient, [
-      {
+  const SCENARIOS: Array<{ name: string; data: PreconfiguredOutput }> = [
+    {
+      name: 'no changes',
+      data: {
         id: 'existing-output-1',
         is_default: false,
         name: 'Output 1',
         type: 'elasticsearch',
-        hosts: ['http://es.co:9201'],
+        hosts: ['http://es.co:80'],
       },
-    ]);
+    },
+    {
+      name: 'hosts without port',
+      data: {
+        id: 'existing-output-1',
+        is_default: false,
+        name: 'Output 1',
+        type: 'elasticsearch',
+        hosts: ['http://es.co'],
+      },
+    },
+    {
+      name: 'with fleet server service token',
+      data: {
+        id: 'existing-output-fleet-server-service-token',
+        is_default: false,
+        name: 'Output 1',
+        type: 'elasticsearch',
+        hosts: ['http://es.co:80'],
+        fleet_server: {
+          service_token: 'test123',
+        },
+      },
+    },
+  ];
+  SCENARIOS.forEach((scenario) => {
+    const { data, name } = scenario;
+    it(`should do nothing if preconfigured output exists and did not changed (${name})`, async () => {
+      const soClient = savedObjectsClientMock.create();
+      await ensurePreconfiguredOutputs(soClient, [data]);
 
-    expect(mockedOutputService.create).not.toBeCalled();
-    expect(mockedOutputService.update).not.toBeCalled();
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).not.toBeCalled();
+    });
   });
 
   it('should not delete non deleted preconfigured output', async () => {

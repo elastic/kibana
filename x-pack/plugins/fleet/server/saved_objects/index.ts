@@ -198,6 +198,7 @@ const getSavedObjectTypes = (
     },
     mappings: {
       properties: {
+        output_id: { type: 'keyword' },
         name: { type: 'keyword' },
         type: { type: 'keyword' },
         is_default: { type: 'boolean' },
@@ -206,13 +207,7 @@ const getSavedObjectTypes = (
         config: { type: 'flattened', index: false },
         config_yaml: { type: 'text', index: false },
         is_preconfigured: { type: 'boolean' },
-        fleet_server: {
-          type: 'nested',
-          enabled: false,
-          properties: {
-            service_token: { type: 'text', index: false },
-          },
-        },
+        fleet_server: { type: 'binary' },
       },
     },
     migrations: {
@@ -426,5 +421,21 @@ export function registerEncryptedSavedObjects(
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['data']),
     attributesToExcludeFromAAD: new Set(['agent_id', 'type', 'sent_at', 'created_at']),
+  });
+
+  encryptedSavedObjects.registerType({
+    type: OUTPUT_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['fleet_server']),
+    attributesToExcludeFromAAD: new Set([
+      'output_id',
+      'name',
+      'type',
+      'is_default',
+      'hosts',
+      'ca_sha256',
+      'config',
+      'config_yaml',
+      'is_preconfigured',
+    ]),
   });
 }

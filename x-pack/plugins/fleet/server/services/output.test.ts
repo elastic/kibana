@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { outputService } from './output';
+import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import type { OutputSOAttributes } from '../types';
+import type { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 
+import { outputService, outputIdToUuid } from './output';
 import { appContextService } from './app_context';
 
 jest.mock('./app_context');
@@ -34,7 +38,78 @@ const CONFIG_WITHOUT_ES_HOSTS = {
   },
 };
 
+let mockedEncryptedSO: jest.Mocked<EncryptedSavedObjectsClient>;
+
 describe('Output Service', () => {
+  beforeEach(() => {
+    mockedEncryptedSO = encryptedSavedObjectsMock.createClient();
+    mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(mockedEncryptedSO);
+    mockedEncryptedSO.getDecryptedAsInternalUser.mockImplementation(
+      async (type: string, id: string) => {
+        switch (id) {
+          case outputIdToUuid('output-test'): {
+            return {
+              id: outputIdToUuid('output-test'),
+              type: 'ingest-outputs',
+              references: [],
+              attributes: {
+                output_id: 'output-test',
+              },
+            };
+          }
+          default:
+            throw new Error('not found');
+        }
+      }
+    );
+  });
+
+  afterEach(() => {
+    mockedAppContextService.getEncryptedSavedObjects.mockRestore();
+  });
+  describe('create', () => {
+    it('work with a predefined id', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.create.mockResolvedValue({
+        id: outputIdToUuid('output-test'),
+        type: 'ingest-output',
+        attributes: {},
+        references: [],
+      });
+      await outputService.create(
+        soClient,
+        {
+          is_default: false,
+          name: 'Test',
+          type: 'elasticsearch',
+        },
+        { id: 'output-test' }
+      );
+
+      expect(soClient.create).toBeCalled();
+
+      // ID should always be the same for a predefined id
+      expect(soClient.create.mock.calls[0][2]?.id).toEqual(outputIdToUuid('output-test'));
+      expect((soClient.create.mock.calls[0][1] as OutputSOAttributes).output_id).toEqual(
+        'output-test'
+      );
+    });
+  });
+
+  describe('get', () => {
+    it('work with a predefined id', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const output = await outputService.get(soClient, 'output-test');
+
+      expect(mockedEncryptedSO.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        'ingest-outputs',
+        outputIdToUuid('output-test')
+      );
+
+      expect(output.id).toEqual('output-test');
+    });
+  });
+
   describe('getDefaultESHosts', () => {
     afterEach(() => {
       mockedAppContextService.getConfig.mockReset();

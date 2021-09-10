@@ -24,7 +24,9 @@ export interface NewOutput {
   };
 }
 
-export type OutputSOAttributes = NewOutput;
+export type OutputSOAttributes = NewOutput & {
+  output_id?: string;
+};
 
 export type Output = NewOutput & {
   id: string;
