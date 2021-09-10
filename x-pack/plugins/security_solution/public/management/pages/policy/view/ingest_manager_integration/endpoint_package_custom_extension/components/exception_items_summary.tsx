@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import React, { FC, memo, useCallback } from 'react';
 import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React, { FC, memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
 
 const SUMMARY_KEYS: Readonly<Array<keyof GetExceptionSummaryResponse>> = [
@@ -36,39 +37,68 @@ const SUMMARY_LABELS: Readonly<{ [key in keyof GetExceptionSummaryResponse]: str
   ),
 };
 
+export const StyledEuiFlexGridGroup = styled(EuiFlexGroup)`
+  display: grid;
+  min-width: 240px;
+  grid-template-columns: 50% 50%;
+`;
+
 const CSS_BOLD: Readonly<React.CSSProperties> = { fontWeight: 'bold' };
 
 interface ExceptionItemsSummaryProps {
   stats: GetExceptionSummaryResponse | undefined;
+  multiRow?: boolean;
 }
 
-export const ExceptionItemsSummary = memo<ExceptionItemsSummaryProps>(({ stats }) => {
-  return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
-      {SUMMARY_KEYS.map((stat) => {
-        return (
-          <EuiFlexItem key={stat}>
-            <SummaryStat
-              value={stats?.[stat] ?? 0}
-              color={stat === 'total' ? 'primary' : 'default'}
-              key={stat}
-            >
-              {SUMMARY_LABELS[stat]}
-            </SummaryStat>
-          </EuiFlexItem>
-        );
-      })}
-    </EuiFlexGroup>
-  );
-});
+export const ExceptionItemsSummary = memo<ExceptionItemsSummaryProps>(
+  ({ stats, multiRow = false }) => {
+    const getItem = useCallback(
+      (stat: keyof GetExceptionSummaryResponse) => (
+        <EuiFlexItem key={stat}>
+          <SummaryStat
+            value={stats?.[stat] ?? 0}
+            color={stat === 'total' ? 'primary' : 'default'}
+            key={stat}
+            multiRow
+          >
+            {SUMMARY_LABELS[stat]}
+          </SummaryStat>
+        </EuiFlexItem>
+      ),
+      [stats]
+    );
+    if (multiRow) {
+      return (
+        <>
+          <StyledEuiFlexGridGroup alignItems="center" justifyContent="flexEnd">
+            {SUMMARY_KEYS.slice(0, 2).map((stat) => getItem(stat))}
+          </StyledEuiFlexGridGroup>
+          <StyledEuiFlexGridGroup alignItems="center" justifyContent="flexEnd">
+            {SUMMARY_KEYS.slice(2, 4).map((stat) => getItem(stat))}
+          </StyledEuiFlexGridGroup>
+        </>
+      );
+    } else {
+      return (
+        <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
+          {SUMMARY_KEYS.map((stat) => getItem(stat))}
+        </EuiFlexGroup>
+      );
+    }
+  }
+);
 
 ExceptionItemsSummary.displayName = 'ExceptionItemsSummary';
 
-const SummaryStat: FC<{ value: number; color?: EuiBadgeProps['color'] }> = memo(
-  ({ children, value, color, ...commonProps }) => {
+const SummaryStat: FC<{ value: number; color?: EuiBadgeProps['color']; multiRow?: boolean }> = memo(
+  ({ children, value, color, multiRow = false, ...commonProps }) => {
     return (
       <EuiText className="eui-displayInlineBlock" size="s">
-        <EuiFlexGroup justifyContent="center" direction="row" alignItems="center">
+        <EuiFlexGroup
+          justifyContent={multiRow ? 'flexEnd' : 'center'}
+          direction="row"
+          alignItems="center"
+        >
           <EuiFlexItem grow={false} style={color === 'primary' ? CSS_BOLD : undefined}>
             {children}
           </EuiFlexItem>

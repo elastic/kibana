@@ -12,7 +12,7 @@ export const StyledEuiFlexGridGroup = styled(EuiFlexGroup)<{
 }>`
   display: grid;
   grid-template-columns: ${({ cardSize = 'l' }) =>
-    cardSize === 'l' ? '25% 45% 30%' : '20% 60% 20%'};
+    cardSize === 'l' ? '25% 45% 30%' : '30% 30% 40%'};
   grid-template-areas: 'title summary link';
   align-items: ${({ cardSize = 'l' }) => (cardSize === 'l' ? 'inherit' : 'center')};
 `;

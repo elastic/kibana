@@ -76,7 +76,7 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
             </EuiText>
           </StyledEuiFlexGridItem>
           <StyledEuiFlexGridItem gridarea="summary">
-            <ExceptionItemsSummary stats={stats} />
+            <ExceptionItemsSummary stats={stats} multiRow={cardSize === 'm'} />
           </StyledEuiFlexGridItem>
           <StyledEuiFlexGridItem gridarea="link" alignitems="flex-end">
             {customLink}
