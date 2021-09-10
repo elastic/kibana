@@ -7,15 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiConfirmModal,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiSelect,
-  EuiFormHelpText,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiForm, EuiFormRow, EuiFieldText, EuiSelect } from '@elastic/eui';
 
 import type { AgentPolicy, EnrollmentAPIKey } from '../types';
 import { useInput, useStartServices, sendCreateEnrollmentAPIKey } from '../hooks';
