@@ -57,7 +57,7 @@ describe('credentialStore', () => {
     expect(credStore.get(reindexOpMock)).not.toBeDefined();
   });
 
-  it('updates credentials', async () => {
+  it('retrieves credentials after update', async () => {
     const credStore = credentialStoreFactory(logMock);
 
     await credStore.set({
