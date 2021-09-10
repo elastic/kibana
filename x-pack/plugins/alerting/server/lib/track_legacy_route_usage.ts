@@ -11,7 +11,7 @@ export function trackLegacyRouteUsage(route: string, usageCounter?: UsageCounter
   if (usageCounter) {
     usageCounter.incrementCounter({
       counterName: `legacy_route_${route}`,
-      counterType: 'route_access',
+      counterType: 'legacy_api_usage',
       incrementBy: 1,
     });
   }
