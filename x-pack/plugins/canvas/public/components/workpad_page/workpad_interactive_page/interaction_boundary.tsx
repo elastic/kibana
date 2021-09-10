@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import React, { CSSProperties, PureComponent } from 'react';
+import React, { CSSProperties, useState, forwardRef, useEffect, Ref } from 'react';
 import { WORKPAD_CONTAINER_ID } from '../../workpad_app';
-
-interface State {
-  height: string;
-  width: string;
-  marginLeft: string;
-  marginTop: string;
-}
 
 // This adds a bit of a buffer to make room for scroll bars, etc.
 const BUFFER = 24;
@@ -23,41 +16,35 @@ const BUFFER = 24;
  * of the `InteractiveWorkpadPage` to the corners of the `WorkpadApp`, allowing
  * mouse events started outside to fire and be tracked within.
  */
-export class InteractionBoundary extends PureComponent<{}, State> {
-  // Implemented with state, as I think there'll be cases where we want to
-  // re-evaluate the size of the interaction boundary in the future.
-  constructor(props: {}) {
-    super(props);
-    this.state = {
-      height: '0',
-      width: '0',
-      marginLeft: '0',
-      marginTop: '0',
-    };
-  }
+export const InteractionBoundary = forwardRef((_props: {}, ref: Ref<HTMLDivElement>) => {
+  const [dimensions, setDimensions] = useState({
+    height: '0',
+    width: '0',
+    marginLeft: '0',
+    marginTop: '0',
+  });
 
-  componentDidMount() {
+  useEffect(() => {
     const container = $('#' + WORKPAD_CONTAINER_ID);
     const height = container.height();
     const width = container.width();
 
     if (height && width) {
-      this.setState({
+      setDimensions({
         height: height - BUFFER + 'px',
         width: width - BUFFER + 'px',
-        marginLeft: -((width - BUFFER) / 2) + 'px',
-        marginTop: -((height - BUFFER) / 2) + 'px',
+        marginLeft: -(width / 2) + BUFFER + 'px',
+        marginTop: -(height / 2) + BUFFER + 'px',
       });
     }
-  }
+  }, []);
 
-  render() {
-    const style: CSSProperties = {
-      top: '50%',
-      left: '50%',
-      position: 'absolute',
-      ...this.state,
-    };
-    return <div id="canvasInteractionBoundary" style={style} />;
-  }
-}
+  const style: CSSProperties = {
+    top: '50%',
+    left: '50%',
+    position: 'absolute',
+    ...dimensions,
+  };
+
+  return <div id="canvasInteractionBoundary" style={style} ref={ref} />;
+});

@@ -39,7 +39,12 @@ export interface Props extends ShortcutProps {
 export const InteractiveWorkpadPage = ({ commit, zoomScale, canDragElement, ...props }: Props) => {
   const page = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
-  const handlers = useInteractionHandlers(page, stage, { commit, zoomScale, canDragElement });
+  const boundary = useRef<HTMLDivElement>(null);
+  const handlers = useInteractionHandlers(page, stage, boundary, {
+    commit,
+    zoomScale,
+    canDragElement,
+  });
 
   const { pageId, pageStyle, className, elements, cursor = 'auto', height, width } = props;
 
@@ -54,7 +59,7 @@ export const InteractiveWorkpadPage = ({ commit, zoomScale, canDragElement, ...p
       style={{ ...pageStyle, height, width, cursor }}
       {...handlers}
     >
-      <InteractionBoundary />
+      <InteractionBoundary ref={boundary} />
       <WorkpadShortcuts {...{ commit, ...props }} />
       <div ref={stage}>
         {elements

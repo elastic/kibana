@@ -2,6 +2,7 @@
   user-select: none;
 }
 
-.canvas-dragging .canvasElement {
+.canvas-dragging .canvasElement,
+#kibana-body[aria-hidden='true'] .canvasElement {
   pointer-events: none;
 }

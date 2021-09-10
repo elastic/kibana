@@ -9,9 +9,22 @@ import { useState, MutableRefObject, useLayoutEffect } from 'react';
 import { CommitFn } from '../../../lib/aeroelastic';
 import { WORKPAD_CONTAINER_ID } from '../../workpad_app/workpad_app.component';
 
+const BUFFER = 3;
+
 // Determines if the target of an event is a child of the Workpad container.
 const isContainedByCanvas = (target: EventTarget | null) =>
   target instanceof Element && target.closest(`#${WORKPAD_CONTAINER_ID}`);
+
+const hasLeftContainer = (
+  event: MouseEvent | React.MouseEvent,
+  boundary: HTMLElement,
+  zoomScale: number
+) => {
+  const { x, y } = getMousePosition(event, boundary, zoomScale);
+  const { height, width } = boundary.getBoundingClientRect();
+
+  return x <= BUFFER || y <= BUFFER || x >= width - BUFFER || y >= height - BUFFER;
+};
 
 // Get the relative position of the mouse from the top left corner of a given container.
 const getMousePosition = (
@@ -56,6 +69,7 @@ export interface HandlerParameters {
 export const useInteractionHandlers = (
   pageRef: MutableRefObject<HTMLElement | null>,
   stageRef: MutableRefObject<HTMLElement | null>,
+  boundaryRef: MutableRefObject<HTMLElement | null>,
   { zoomScale, commit, canDragElement }: HandlerParameters
 ) => {
   // Keep track of the page container for the handlers we're going to provide.
@@ -65,9 +79,10 @@ export const useInteractionHandlers = (
   useLayoutEffect(() => {
     const { current: currentPage } = pageRef;
     const { current: currentStage } = stageRef;
+    const { current: currentBoundary } = boundaryRef;
 
     // If the refs aren't available, we're not ready to handle interactions.
-    if (!currentPage || !currentStage) {
+    if (!currentPage || !currentStage || !currentBoundary) {
       return;
     }
 
@@ -83,6 +98,22 @@ export const useInteractionHandlers = (
       if (buttons !== 1 && currentStage.classList.contains('canvas-dragging')) {
         currentStage.classList.remove('canvas-dragging');
         currentStage.removeEventListener('mousemove', onContainerDrag, { capture: true });
+      }
+
+      // If we are currently dragging, and the mouse cursor has left the interaction boundary,
+      // we need to reset and stop everything...
+      if (buttons === 1 && hasLeftContainer(event, currentBoundary, zoomScale)) {
+        // ...remove the current dragging listener...
+        currentStage.removeEventListener('mousemove', onContainerDrag, { capture: true });
+
+        // ...log a mouse-up event to aeroelastic...
+        const { x, y } = getMousePosition(event, currentPage, zoomScale);
+        const { altKey, metaKey, shiftKey, ctrlKey } = event;
+        commit('mouseEvent', { event: 'mouseUp', x, y, altKey, metaKey, shiftKey, ctrlKey });
+
+        // ...stop the drag.
+        currentStage.classList.remove('canvas-dragging');
+        return;
       }
 
       const canDrag = canDragElement || (() => true);
@@ -103,14 +134,13 @@ export const useInteractionHandlers = (
     // or other mitigation before any interactions are triggered on the targets.
     const onContainerDrag = () => {
       currentStage.classList.add('canvas-dragging');
+      currentStage.removeEventListener('mousemove', onContainerDrag, { capture: true });
     };
 
-    // Step 3: any time the mouse button is released, remove the class and
-    // remove the event listener.
+    // Step 3: any time the mouse button is released, remove the class.
     const onWindowMouseUp = () => {
       if (currentStage.classList.contains('canvas-dragging')) {
         currentStage.classList.remove('canvas-dragging');
-        currentStage.removeEventListener('mousemove', onContainerDrag, { capture: true });
       }
     };
 
@@ -133,7 +163,7 @@ export const useInteractionHandlers = (
       window.removeEventListener('mouseup', onWindowMouseUp, { capture: true });
       window.removeEventListener('mousemove', onWindowMouseMove);
     };
-  }, [canDragElement, commit, pageRef, setPageContainer, stageRef, zoomScale]);
+  }, [canDragElement, commit, pageRef, boundaryRef, setPageContainer, stageRef, zoomScale]);
 
   // If we don't have an available page container, return no handlers.
   if (!pageContainer) {
