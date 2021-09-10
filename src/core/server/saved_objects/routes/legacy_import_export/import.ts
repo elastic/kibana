@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter, Logger, SavedObject } from '../../..';
-import { InternalCoreUsageDataSetup } from '../../../core_usage_data';
+import { CoreUsageDataSetup } from '../../../core_usage_data';
 import { importDashboards } from './lib';
 
 export const registerLegacyImportRoute = (
@@ -17,7 +17,7 @@ export const registerLegacyImportRoute = (
     maxImportPayloadBytes,
     coreUsageData,
     logger,
-  }: { maxImportPayloadBytes: number; coreUsageData: InternalCoreUsageDataSetup; logger: Logger }
+  }: { maxImportPayloadBytes: number; coreUsageData: CoreUsageDataSetup; logger: Logger }
 ) => {
   router.post(
     {
