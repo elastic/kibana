@@ -180,7 +180,7 @@ export function registerApmAlerts(
       return `${docLinks.links.alerting.apmRules}`;
     },
     alertParamsExpression: lazy(
-      () => import('./transaction_error_rate_alert_trigger')
+      () => import('./failed_transaction_rate_alert_trigger')
     ),
     validate: () => ({
       errors: [],

@@ -24,7 +24,7 @@ const transactionDurationLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.transactionDuration',
   { defaultMessage: 'Latency' }
 );
-const transactionErrorRateLabel = i18n.translate(
+const failedTransactionRateLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.transactionErrorRate',
   { defaultMessage: 'Failed transaction rate' }
 );
@@ -42,7 +42,7 @@ const createAnomalyAlertAlertLabel = i18n.translate(
 
 const CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID =
   'create_transaction_duration_panel';
-const CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID =
+const CREATE_FAILED_TRANSACTION_RATE_ALERT_PANEL_ID =
   'create_transaction_error_rate_panel';
 const CREATE_ERROR_COUNT_ALERT_PANEL_ID = 'create_error_count_panel';
 
@@ -87,8 +87,8 @@ export function AlertingPopoverAndFlyout({
                 panel: CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID,
               },
               {
-                name: transactionErrorRateLabel,
-                panel: CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID,
+                name: failedTransactionRateLabel,
+                panel: CREATE_FAILED_TRANSACTION_RATE_ALERT_PANEL_ID,
               },
               {
                 name: errorCountLabel,
@@ -148,8 +148,8 @@ export function AlertingPopoverAndFlyout({
 
     // Failed transactions panel
     {
-      id: CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID,
-      title: transactionErrorRateLabel,
+      id: CREATE_FAILED_TRANSACTION_RATE_ALERT_PANEL_ID,
+      title: failedTransactionRateLabel,
       items: [
         // threshold alerts
         {

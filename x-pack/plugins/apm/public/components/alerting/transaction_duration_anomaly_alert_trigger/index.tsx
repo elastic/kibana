@@ -26,16 +26,16 @@ import {
 } from './select_anomaly_severity';
 
 interface AlertParams {
-  anomalySeverityType:
+  anomalySeverityType?:
     | ANOMALY_SEVERITY.CRITICAL
     | ANOMALY_SEVERITY.MAJOR
     | ANOMALY_SEVERITY.MINOR
     | ANOMALY_SEVERITY.WARNING;
-  environment: string;
+  environment?: string;
   serviceName?: string;
   transactionType?: string;
-  windowSize: number;
-  windowUnit: string;
+  windowSize?: number;
+  windowUnit?: string;
 }
 
 interface Props {

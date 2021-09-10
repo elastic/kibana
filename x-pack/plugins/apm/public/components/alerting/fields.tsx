@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EuiSelect, EuiExpression, EuiFieldNumber } from '@elastic/eui';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiSelectOption } from '@elastic/eui';
 import {
-  ENVIRONMENT_ALL,
-  getEnvironmentLabel,
-} from '../../../common/environment_filter_values';
+  EuiExpression,
+  EuiFieldNumber,
+  EuiSelect,
+  EuiSelectOption,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { getEnvironmentLabel } from '../../../common/environment_filter_values';
 import { PopoverExpression } from './service_alert_trigger/popover_expression';
 
 const ALL_OPTION = i18n.translate('xpack.apm.alerting.fields.all_option', {
@@ -46,7 +47,7 @@ export function EnvironmentField({
     return (
       <EuiExpression
         description={title}
-        value={currentValue || ENVIRONMENT_ALL.text}
+        value={getEnvironmentLabel(currentValue)}
       />
     );
   }

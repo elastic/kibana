@@ -6,11 +6,11 @@
  */
 
 import { defaults, omit } from 'lodash';
-import React from 'react';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import React, { useEffect } from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
@@ -27,12 +27,12 @@ import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 interface AlertParams {
-  windowSize: number;
-  windowUnit: string;
-  threshold: number;
-  serviceName: string;
-  transactionType: string;
-  environment: string;
+  windowSize?: number;
+  windowUnit?: string;
+  threshold?: number;
+  serviceName?: string;
+  transactionType?: string;
+  environment?: string;
 }
 
 interface Props {
@@ -46,7 +46,10 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   const { services } = useKibana();
   const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
-  createCallApmApi(services as CoreStart);
+  useEffect(() => {
+    createCallApmApi(services as CoreStart);
+  }, [services]);
+
   const transactionTypes = useServiceTransactionTypesFetcher({
     serviceName: metadata?.serviceName,
     start: metadata?.start,

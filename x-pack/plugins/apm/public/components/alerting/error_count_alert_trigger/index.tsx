@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { asInteger } from '../../../../common/utils/formatters';
@@ -17,13 +17,16 @@ import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
 import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { createCallApmApi } from '../../../services/rest/createCallApmApi';
+import { CoreStart } from '../../../../../../../src/core/public';
 
 export interface AlertParams {
-  windowSize: number;
-  windowUnit: string;
-  threshold: number;
-  serviceName: string;
-  environment: string;
+  windowSize?: number;
+  windowUnit?: TimeUnit;
+  threshold?: number;
+  serviceName?: string;
+  environment?: string;
 }
 
 interface Props {
@@ -34,7 +37,12 @@ interface Props {
 }
 
 export function ErrorCountAlertTrigger(props: Props) {
+  const { services } = useKibana();
   const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
+
+  useEffect(() => {
+    createCallApmApi(services as CoreStart);
+  }, [services]);
 
   const { environmentOptions } = useEnvironmentsFetcher({
     serviceName: metadata?.serviceName,

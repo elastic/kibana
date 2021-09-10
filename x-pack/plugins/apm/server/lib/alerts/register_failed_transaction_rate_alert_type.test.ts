@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
+import { registerTransactionErrorRateAlertType } from './register_failed_transaction_rate_alert_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { createRuleTypeMocks } from './test_utils';
