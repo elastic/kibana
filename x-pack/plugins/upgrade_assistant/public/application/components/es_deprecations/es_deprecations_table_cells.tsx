@@ -16,6 +16,7 @@ interface Props {
   resolutionTableCell?: React.ReactNode;
   fieldName: DeprecationTableColumns;
   deprecation: EnrichedDeprecationInfo;
+  isResolved: boolean;
   openFlyout: () => void;
 }
 
@@ -24,6 +25,12 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.criticalBadgeLabel',
     {
       defaultMessage: 'Critical',
+    }
+  ),
+  resolvedBadgeLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.resolvedBadgeLabel',
+    {
+      defaultMessage: 'Resolved',
     }
   ),
   warningBadgeLabel: i18n.translate(
@@ -46,19 +53,34 @@ const i18nTexts = {
   ),
 };
 
+export const DeprecationBadge = ({
+  isCritical,
+  isResolved,
+}: {
+  isCritical: boolean;
+  isResolved?: boolean;
+}) => {
+  if (isResolved) {
+    return <EuiBadge color="success">{i18nTexts.resolvedBadgeLabel}</EuiBadge>;
+  }
+
+  if (isCritical) {
+    return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
+  }
+
+  return <EuiBadge color="default">{i18nTexts.warningBadgeLabel}</EuiBadge>;
+};
+
 export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
   resolutionTableCell,
   fieldName,
   deprecation,
   openFlyout,
+  isResolved,
 }) => {
   // "Status column"
   if (fieldName === 'isCritical') {
-    if (deprecation.isCritical === true) {
-      return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
-    }
-
-    return <EuiBadge color="default">{i18nTexts.warningBadgeLabel}</EuiBadge>;
+    return <DeprecationBadge isCritical={deprecation.isCritical} isResolved={isResolved} />;
   }
 
   // "Issue" column
