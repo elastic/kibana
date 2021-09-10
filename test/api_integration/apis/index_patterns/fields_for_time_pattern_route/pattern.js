@@ -131,6 +131,7 @@ export default function ({ getService }) {
                 aggregatable: false,
                 searchable: false,
                 readFromDocValues: false,
+                metadata_field: true,
               },
               {
                 name: 'meta2',
@@ -138,6 +139,7 @@ export default function ({ getService }) {
                 aggregatable: false,
                 searchable: false,
                 readFromDocValues: false,
+                metadata_field: true,
               },
             ],
           });
