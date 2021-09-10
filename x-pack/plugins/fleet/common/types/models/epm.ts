@@ -384,10 +384,15 @@ export interface PackageUsageStats {
   agent_policy_count: number;
 }
 
-export type Installable<T> = Installed<T> | NotInstalled<T>;
+export type Installable<T> = Installed<T> | Installing<T> | NotInstalled<T>;
 
 export type Installed<T = {}> = T & {
   status: InstallationStatus['Installed'];
+  savedObject: SavedObject<Installation>;
+};
+
+export type Installing<T = {}> = T & {
+  status: InstallationStatus['Installing'];
   savedObject: SavedObject<Installation>;
 };
 
