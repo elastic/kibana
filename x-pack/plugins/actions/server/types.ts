@@ -19,6 +19,7 @@ import {
   SavedObjectReference,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
+import { TaskInfo } from './lib/action_executor';
 export { ActionTypeExecutorResult } from '../common';
 export { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
 export { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
@@ -59,6 +60,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   secrets: Secrets;
   params: Params;
   isEphemeral?: boolean;
+  taskInfo?: TaskInfo;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
