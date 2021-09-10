@@ -167,6 +167,8 @@ describe('when using the ArtifactEntryCard component', () => {
     it.todo('should display effected scope as a button');
 
     it.todo('should show popup menu with list of associated policies when clicked');
+
+    it.todo('should display policy ID if no policy menu item found in `policies` prop');
   });
 
   describe('and a basic/simple Exception is used', () => {
