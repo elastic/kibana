@@ -93,6 +93,7 @@ const numberOfShardsField = {
   label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
     defaultMessage: 'Number of primary shards',
   }),
+  defaultValue: 1,
   validations: [
     {
       validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
