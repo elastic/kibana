@@ -43,7 +43,7 @@ export class StaticLookupFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val) => {
+  textConvert: TextContextTypeConvert = (val: string) => {
     const lookupEntries = this.param('lookupEntries');
     const unknownKeyValue = this.param('unknownKeyValue');
 

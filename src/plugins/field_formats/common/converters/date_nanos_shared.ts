@@ -84,7 +84,7 @@ export class DateNanosFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val) => {
+  textConvert: TextContextTypeConvert = (val: string | number) => {
     // don't give away our ref to converter so
     // we can hot-swap when config changes
     const pattern = this.param('pattern');
@@ -98,7 +98,7 @@ export class DateNanosFormat extends FieldFormat {
       this.timeZone = timezone;
       this.memoizedPattern = pattern;
 
-      this.memoizedConverter = memoize(function converter(value: string | null | undefined) {
+      this.memoizedConverter = memoize(function converter(value: string | number) {
         if (value === null || value === undefined) {
           return '-';
         }
@@ -109,7 +109,7 @@ export class DateNanosFormat extends FieldFormat {
           // fallback for max/min aggregation, where unixtime in ms is returned as a number
           // aggregations in Elasticsearch generally just return ms
           return date.format(fallbackPattern);
-        } else if (date.isValid()) {
+        } else if (date.isValid() && typeof value === 'string') {
           return formatWithNanos(date, value, fractPattern);
         } else {
           return value;

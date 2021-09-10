@@ -34,7 +34,7 @@ export class DateFormat extends FieldFormat {
   ) {
     super(params, getConfig);
 
-    this.memoizedConverter = memoize((val: string | null | undefined) => {
+    this.memoizedConverter = memoize((val: string | number) => {
       if (val == null) {
         return '-';
       }
@@ -68,7 +68,7 @@ export class DateFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val) => {
+  textConvert: TextContextTypeConvert = (val: string | number) => {
     // don't give away our ref to converter so we can hot-swap when config changes
     const pattern = this.param('pattern');
     const timezone = this.param('timezone');

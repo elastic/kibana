@@ -41,9 +41,9 @@ export class SourceFormat extends FieldFormat {
   static title = '_source';
   static fieldType = KBN_FIELD_TYPES._SOURCE;
 
-  textConvert: TextContextTypeConvert = (value) => JSON.stringify(value);
+  textConvert: TextContextTypeConvert = (value: string) => JSON.stringify(value);
 
-  htmlConvert: HtmlContextTypeConvert = (value, options = {}) => {
+  htmlConvert: HtmlContextTypeConvert = (value: string, options = {}) => {
     const { field, hit, indexPattern } = options;
 
     if (!field) {

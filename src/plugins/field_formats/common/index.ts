@@ -30,6 +30,8 @@ export {
   StringFormat,
   TruncateFormat,
   HistogramFormat,
+  DateNanosFormat,
+  NumeralFormat,
 } from './converters';
 
 export { getHighlightRequest } from './utils';
@@ -46,10 +48,15 @@ export {
   FieldFormatId,
   SerializedFieldFormat,
   FormatFactory,
-  // Used in field format plugin only
   FieldFormatInstanceType,
   IFieldFormat,
   FieldFormatsStartCommon,
   FieldFormatParams,
   FieldFormatMetaParams,
+  FieldFormatConvert,
+  FieldFormatConvertFunction,
+  HtmlContextTypeConvert,
+  HtmlContextTypeOptions,
+  TextContextTypeConvert,
+  TextContextTypeOptions,
 } from './types';

@@ -12,7 +12,9 @@ import { FieldFormatsRegistry } from './field_formats_registry';
 /** @public **/
 export type FieldFormatsContentType = 'html' | 'text';
 
-/** @internal **/
+/**
+ * Html converter options
+ */
 export interface HtmlContextTypeOptions {
   field?: { name: string };
   // TODO: get rid of indexPattern dep completely
@@ -22,19 +24,32 @@ export interface HtmlContextTypeOptions {
   hit?: { highlight: Record<string, string[]> };
 }
 
-/** @internal **/
+/**
+ * To html converter function
+ * @public
+ */
 export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptions) => string;
 
-/** @internal **/
-export type TextContextTypeOptions = Record<string, any>;
+/**
+ * Plain text converter options
+ * @remark
+ * no options for now
+ */
+export type TextContextTypeOptions = object;
 
-/** @internal **/
+/**
+ * To plain text converter function
+ * @public
+ */
 export type TextContextTypeConvert = (value: any, options?: TextContextTypeOptions) => string;
 
-/** @internal **/
+/**
+ * Converter function
+ * @public
+ */
 export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTypeConvert;
 
-/** @internal **/
+/** @public **/
 export interface FieldFormatConvert {
   text: TextContextTypeConvert;
   html: HtmlContextTypeConvert;
@@ -89,7 +104,10 @@ export type IFieldFormat = FieldFormat;
  */
 export type FieldFormatId = FIELD_FORMAT_IDS | string;
 
-/** @internal **/
+/**
+ * Alternative to typeof {@link FieldFormat} but with specified ids
+ * @public
+ */
 export type FieldFormatInstanceType = (new (
   params?: FieldFormatParams,
   getConfig?: FieldFormatsGetConfigFn
