@@ -26,7 +26,7 @@ const { useGlobalFlyout } = GlobalFlyout;
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.pageTitle', {
-    defaultMessage: 'Kibana deprecation warnings',
+    defaultMessage: 'Kibana deprecation issues',
   }),
   pageDescription: (
     <FormattedMessage
@@ -50,25 +50,25 @@ const i18nTexts = {
     defaultMessage: 'Kibana',
   }),
   isLoading: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.loadingText', {
-    defaultMessage: 'Loading deprecations…',
+    defaultMessage: 'Loading deprecation issues…',
   }),
   kibanaDeprecationErrorTitle: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.kibanaDeprecationErrorTitle',
     {
-      defaultMessage: 'Deprecation warnings may be incomplete',
+      defaultMessage: 'List of deprecation issues might be incomplete',
     }
   ),
   getKibanaDeprecationErrorDescription: (pluginIds: string[]) =>
     i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.kibanaDeprecationErrorDescription', {
       defaultMessage:
-        'Failed to get deprecation warnings for {pluginCount, plural, one {this plugin} other {these plugins}}: {pluginIds}. Check the Kibana server logs for more details.',
+        'Failed to get deprecation issues for {pluginCount, plural, one {this plugin} other {these plugins}}: {pluginIds}. Check the Kibana server logs for more information.',
       values: {
         pluginCount: pluginIds.length,
         pluginIds: pluginIds.join(', '),
       },
     }),
   requestErrorTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.requestErrorTitle', {
-    defaultMessage: 'Could not retrieve Kibana deprecations',
+    defaultMessage: 'Could not retrieve Kibana deprecation issues',
   }),
   requestErrorDescription: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecationErrors.requestErrorDescription',

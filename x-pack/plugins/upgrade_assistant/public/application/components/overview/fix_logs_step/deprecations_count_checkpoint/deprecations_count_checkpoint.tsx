@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButton, EuiLoadingContent } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
-import { Storage } from '../../../../../shared_imports';
-
-const LS_SETTING_ID = 'kibana.upgradeAssistant.lastCheckpoint';
-const localStorage = new Storage(window.localStorage);
 
 const i18nTexts = {
   calloutTitle: (warningsCount: number, previousCheck: string) => (
@@ -51,39 +47,44 @@ const i18nTexts = {
   ),
 };
 
-const getPreviousCheckpointDate = () => {
-  const storedValue = moment(localStorage.get(LS_SETTING_ID));
+interface Props {
+  checkpoint: string;
+  setCheckpoint: (value: string) => void;
+  setHasNoDeprecationLogs: (hasNoLogs: boolean) => void;
+}
 
-  if (storedValue.isValid()) {
-    return storedValue.toISOString();
-  }
-
-  const now = moment().toISOString();
-  localStorage.set(LS_SETTING_ID, now);
-
-  return now;
-};
-
-export const DeprecationsCountCheckpoint: FunctionComponent = () => {
+export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
+  checkpoint,
+  setCheckpoint,
+  setHasNoDeprecationLogs,
+}) => {
   const {
     services: { api },
   } = useAppContext();
-  const [previousCheck, setPreviousCheck] = useState(getPreviousCheckpointDate());
   const { data, error, isLoading, resendRequest, isInitialRequest } = api.getDeprecationLogsCount(
-    previousCheck
+    checkpoint
   );
 
-  const warningsCount = data?.count || 0;
-  const calloutTint = warningsCount > 0 ? 'warning' : 'success';
-  const calloutIcon = warningsCount > 0 ? 'alert' : 'check';
-  const calloutTestId = warningsCount > 0 ? 'hasWarningsCallout' : 'noWarningsCallout';
+  const logsCount = data?.count || 0;
+  const hasLogs = logsCount > 0;
+  const calloutTint = hasLogs ? 'warning' : 'success';
+  const calloutIcon = hasLogs ? 'alert' : 'check';
+  const calloutTestId = hasLogs ? 'hasWarningsCallout' : 'noWarningsCallout';
 
   const onResetClick = () => {
     const now = moment().toISOString();
-
-    setPreviousCheck(now);
-    localStorage.set(LS_SETTING_ID, now);
+    setCheckpoint(now);
   };
+
+  useEffect(() => {
+    // Loading shouldn't invalidate the previous state.
+    if (!isLoading) {
+      // An error should invalidate the previous state.
+      setHasNoDeprecationLogs(!error && !hasLogs);
+    }
+    // Depending upon setHasNoDeprecationLogs would create an infinite loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error, isLoading, hasLogs]);
 
   if (isInitialRequest && isLoading) {
     return <EuiLoadingContent lines={6} />;
@@ -109,7 +110,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent = () => {
 
   return (
     <EuiCallOut
-      title={i18nTexts.calloutTitle(warningsCount, previousCheck)}
+      title={i18nTexts.calloutTitle(logsCount, checkpoint)}
       color={calloutTint}
       iconType={calloutIcon}
       data-test-subj={calloutTestId}

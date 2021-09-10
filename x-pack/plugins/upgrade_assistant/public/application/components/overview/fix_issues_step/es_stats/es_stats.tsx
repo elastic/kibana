@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import {
-  EuiStat,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCard,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
+import { EuiStat, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
@@ -40,27 +33,13 @@ const i18nTexts = {
       defaultMessage: 'Critical',
     }
   ),
-  loadingText: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.loadingText', {
-    defaultMessage: 'Loading Elasticsearch deprecation stats…',
-  }),
-  getCriticalDeprecationsMessage: (criticalDeprecations: number) =>
-    i18n.translate('xpack.upgradeAssistant.esDeprecationStats.criticalDeprecationsLabel', {
-      defaultMessage: 'This cluster has {criticalDeprecations} critical deprecations',
-      values: {
-        criticalDeprecations,
-      },
-    }),
-  getWarningDeprecationMessage: (warningDeprecations: number) =>
-    i18n.translate('xpack.upgradeAssistant.esDeprecationStats.warningDeprecationsTooltip', {
-      defaultMessage:
-        'This cluster has {warningDeprecations} non-critical {warningDeprecations, plural, one {deprecation} other {deprecations}}',
-      values: {
-        warningDeprecations,
-      },
-    }),
 };
 
-export const ESDeprecationStats: FunctionComponent = () => {
+interface Props {
+  setIsFixed: (isFixed: boolean) => void;
+}
+
+export const ESDeprecationStats: FunctionComponent<Props> = ({ setIsFixed }) => {
   const history = useHistory();
   const {
     services: { api },
@@ -68,10 +47,21 @@ export const ESDeprecationStats: FunctionComponent = () => {
 
   const { data: esDeprecations, isLoading, error } = api.useLoadEsDeprecations();
 
-  const warningDeprecations =
-    esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical === false) || [];
-  const criticalDeprecations =
-    esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical) || [];
+  const warningDeprecations = useMemo(
+    () =>
+      esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical === false) || [],
+    [esDeprecations]
+  );
+  const criticalDeprecations = useMemo(
+    () => esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical) || [],
+    [esDeprecations]
+  );
+
+  useEffect(() => {
+    if (!isLoading && !error) {
+      setIsFixed(criticalDeprecations.length === 0);
+    }
+  }, [setIsFixed, criticalDeprecations, isLoading, error]);
 
   const hasWarnings = warningDeprecations.length > 0;
   const hasCritical = criticalDeprecations.length > 0;
@@ -107,17 +97,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
               description={i18nTexts.criticalDeprecationsTitle}
               titleColor="danger"
               isLoading={isLoading}
-            >
-              {error === null && (
-                <EuiScreenReaderOnly>
-                  <p>
-                    {isLoading
-                      ? i18nTexts.loadingText
-                      : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecations.length)}
-                  </p>
-                </EuiScreenReaderOnly>
-              )}
-            </EuiStat>
+            />
           </EuiFlexItem>
         )}
 
@@ -129,17 +109,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
               titleElement="span"
               description={i18nTexts.warningDeprecationsTitle}
               isLoading={isLoading}
-            >
-              {!error && (
-                <EuiScreenReaderOnly>
-                  <p>
-                    {isLoading
-                      ? i18nTexts.loadingText
-                      : i18nTexts.getWarningDeprecationMessage(warningDeprecations.length)}
-                  </p>
-                </EuiScreenReaderOnly>
-              )}
-            </EuiStat>
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
