@@ -135,7 +135,6 @@ export default function ({ getService, getPageObjects }) {
       it('should see scripted field value in Discover', async function () {
         const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
         const toTime = 'Sep 18, 2015 @ 18:31:44.000';
-        await PageObjects.common.sleep(1000 * 10);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
