@@ -11,7 +11,7 @@ import {
   TestElasticsearchUtils,
   TestKibanaUtils,
 } from '../../../test_helpers/kbn_server';
-import { isInlineScriptingDisabled } from '../deprecations/scripting_disabled';
+import { isInlineScriptingDisabled } from '../deprecations/is_scripting_disabled';
 
 describe('isInlineScriptingDisabled', () => {
   let esServer: TestElasticsearchUtils;

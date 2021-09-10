@@ -7,7 +7,7 @@
  */
 
 import type { RegisterDeprecationsConfig } from '../../deprecations';
-import { getScriptingDisabledDeprecations } from './scripting_disabled';
+import { getScriptingDisabledDeprecations } from './scripting_disabled_deprecation';
 
 export const getElasticsearchDeprecationsProvider = (): RegisterDeprecationsConfig => {
   return {

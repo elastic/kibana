@@ -8,32 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DeprecationsDetails } from '../../deprecations';
-import { IScopedClusterClient, ElasticsearchClient } from '../../elasticsearch';
-
-const scriptAllowedTypesKey = 'script.allowed_types';
-
-export const isInlineScriptingDisabled = async ({
-  client,
-}: {
-  client: ElasticsearchClient;
-}): Promise<boolean> => {
-  const { body: settings } = await client.cluster.getSettings({
-    include_defaults: true,
-    flat_settings: true,
-  });
-
-  // priority: transient -> persistent -> default
-  const scriptAllowedTypes: string[] =
-    settings.transient[scriptAllowedTypesKey] ??
-    settings.persistent[scriptAllowedTypesKey] ??
-    settings.defaults![scriptAllowedTypesKey] ??
-    [];
-
-  // when unspecified, the setting as a default `[]` value that means that both scriptings are allowed.
-  const scriptAllowed = scriptAllowedTypes.length === 0 || scriptAllowedTypes.includes('inline');
-
-  return !scriptAllowed;
-};
+import { IScopedClusterClient } from '../../elasticsearch';
+import { isInlineScriptingDisabled } from './is_scripting_disabled';
 
 interface GetScriptingDisabledDeprecations {
   esClient: IScopedClusterClient;
