@@ -141,6 +141,7 @@ export const useSavedSearch = ({
         fieldCounts: {},
         chartData: undefined,
         bucketInterval: undefined,
+        fetchError: undefined,
       });
     },
     [data$, initialFetchStatus]
@@ -212,6 +213,7 @@ export const useSavedSearch = ({
             inspectorAdapters,
             fieldCounts: calcFieldCounts(refs.current.fieldCounts, documents, indexPattern),
             hits: res.rawResponse.hits.total as number,
+            fetchError: undefined,
           };
 
           if (chartAggConfigs) {
