@@ -107,7 +107,6 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       // To determine row and column of a cell, we're utilizing the screen reader
       // help text, which enumerates the rows and columns 1-based.
       const cells = $.findTestSubjects('dataGridRowCell')
-        .find('.euiDataGridRowCell__truncate')
         .toArray()
         .map((cell) => {
           const cellText = $(cell).text();

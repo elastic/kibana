@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { DrawFilterControl } from './draw_filter_control';
 import { setDrawMode, updateDrawState } from '../../../../actions';
 import { getDrawState, getGeoFieldNames } from '../../../../selectors/map_selectors';
-import { DRAW_MODE } from '../../../../../common';
+import { DRAW_MODE } from '../../../../../common/constants';
 import { MapStoreState } from '../../../../reducers/store';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
 
