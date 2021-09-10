@@ -57,6 +57,7 @@ export async function getFieldCapabilities(
         searchable: false,
         aggregatable: false,
         readFromDocValues: false,
+        metadata_field: metaFields.includes(name),
       })
     )
     .map(mergeOverrides);

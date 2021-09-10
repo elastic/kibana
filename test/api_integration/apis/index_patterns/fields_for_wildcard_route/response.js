@@ -71,7 +71,7 @@ export default function ({ getService }) {
     },
   ];
 
-  describe('fields_for_wildcard_route response', () => {
+  describe.only('fields_for_wildcard_route response', () => {
     before(() =>
       esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );
@@ -105,6 +105,7 @@ export default function ({ getService }) {
               readFromDocValues: false,
               searchable: true,
               type: 'string',
+              metadata_field: true,
             },
             {
               aggregatable: false,
@@ -113,6 +114,7 @@ export default function ({ getService }) {
               readFromDocValues: false,
               searchable: false,
               type: '_source',
+              metadata_field: true,
             },
             {
               type: 'boolean',
@@ -121,6 +123,7 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'bar',
               readFromDocValues: true,
+              metadata_field: false,
             },
             {
               aggregatable: false,
@@ -129,6 +132,7 @@ export default function ({ getService }) {
               readFromDocValues: false,
               searchable: true,
               type: 'string',
+              metadata_field: false,
             },
             {
               type: 'string',
@@ -138,6 +142,7 @@ export default function ({ getService }) {
               name: 'baz.keyword',
               readFromDocValues: true,
               subType: { multi: { parent: 'baz' } },
+              metadata_field: false,
             },
             {
               aggregatable: false,
@@ -145,6 +150,7 @@ export default function ({ getService }) {
               readFromDocValues: false,
               searchable: false,
               type: 'string',
+              metadata_field: true,
             },
             {
               type: 'number',
@@ -153,6 +159,7 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'foo',
               readFromDocValues: true,
+              metadata_field: false,
             },
             {
               aggregatable: true,
@@ -166,6 +173,7 @@ export default function ({ getService }) {
                 },
               },
               type: 'string',
+              metadata_field: false,
             },
           ],
         })
