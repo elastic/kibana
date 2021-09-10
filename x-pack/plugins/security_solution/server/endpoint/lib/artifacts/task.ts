@@ -14,7 +14,10 @@ import {
 import { EndpointAppContext } from '../../types';
 import { getArtifactId, reportErrors } from './common';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
-import { isEmptyManifestDiff } from './manifest';
+import { isEmptyManifestDiff, Manifest } from './manifest';
+import { InvalidInternalManifestError } from '../../services/artifacts/errors';
+import { ManifestManager } from '../../services';
+import { wrapErrorIfNeeded } from '../../utils';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
@@ -117,9 +120,21 @@ export class ManifestTask {
     }
 
     try {
-      // Last manifest we computed, which was saved to ES
-      const oldManifest = await manifestManager.getLastComputedManifest();
-      if (oldManifest == null) {
+      let oldManifest: Manifest | null;
+
+      try {
+        // Last manifest we computed, which was saved to ES
+        oldManifest = await manifestManager.getLastComputedManifest();
+      } catch (e) {
+        // Lets recover from a failure in getting the internal manifest map by creating an empty default manifest
+        if (e instanceof InvalidInternalManifestError) {
+          this.logger.error(e);
+          this.logger.info('recovering from invalid internal manifest');
+          oldManifest = ManifestManager.createDefaultManifest();
+        }
+      }
+
+      if (oldManifest! == null) {
         this.logger.debug('Last computed manifest not available yet');
         return;
       }
@@ -159,7 +174,7 @@ export class ManifestTask {
         reportErrors(this.logger, deleteErrors);
       }
     } catch (err) {
-      this.logger.error(err);
+      this.logger.error(wrapErrorIfNeeded(err));
     }
   };
 }

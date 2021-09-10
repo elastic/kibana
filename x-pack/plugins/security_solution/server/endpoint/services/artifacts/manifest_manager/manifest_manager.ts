@@ -34,7 +34,8 @@ import {
 import { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
-import { EndpointError } from '../../../errors';
+import { InvalidInternalManifestError } from '../errors';
+import { wrapErrorIfNeeded } from '../../../utils';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -311,8 +312,8 @@ export class ManifestManager {
   }
 
   /**
-   * Returns the last computed manifest based on the state of the
-   * user-artifact-manifest SO.
+   * Returns the last computed manifest based on the state of the user-artifact-manifest SO. If no
+   * artifacts have been created yet (ex. no Endpoint policies are in use), then method return `null`
    *
    * @returns {Promise<Manifest | null>} The last computed manifest, or null if does not exist.
    * @throws Throws/rejects if there is an unexpected error retrieving the manifest.
@@ -322,9 +323,10 @@ export class ManifestManager {
       const manifestSo = await this.getManifestClient().getManifest();
 
       if (manifestSo.version === undefined) {
-        // FIXME:PT can we recover here? maybe just log an error and return a default manifest?
-
-        throw new EndpointError('No version returned for manifest.', manifestSo);
+        throw new InvalidInternalManifestError(
+          'Internal Manifest map SavedObject is missing version',
+          manifestSo
+        );
       }
 
       const manifest = new Manifest({
@@ -338,7 +340,7 @@ export class ManifestManager {
 
         if (!artifact) {
           this.logger.error(
-            new EndpointError(`artifact id [${entry.artifactId}] not found!`, {
+            new InvalidInternalManifestError(`artifact id [${entry.artifactId}] not found!`, {
               entry,
               action: 'removed from internal ManifestManger tracking map',
             })
@@ -351,7 +353,7 @@ export class ManifestManager {
       return manifest;
     } catch (error) {
       if (!error.output || error.output.statusCode !== 404) {
-        throw error;
+        throw wrapErrorIfNeeded(error);
       }
       return null;
     }
