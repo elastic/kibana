@@ -136,6 +136,13 @@ export const CONFIG_INTRO_STEP1_HEADING = i18n.translate(
   }
 );
 
+export const CONFIG_INTRO_STEP1_BADGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.step1.badge',
+  {
+    defaultMessage: 'One-Time Action',
+  }
+);
+
 export const CONFIG_INTRO_STEP1_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.step1.text',
   {
