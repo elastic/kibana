@@ -7,14 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  EuiCard,
-  EuiStat,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
+import { EuiCard, EuiStat, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
