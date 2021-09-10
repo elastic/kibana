@@ -26,7 +26,6 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import {
   Filter,
   FieldFilter,
-  buildFilter,
   buildCustomFilter,
   cleanFilter,
   getFilterParams,
@@ -39,12 +38,10 @@ import {
   getFilterableFields,
   getOperatorFromFilter,
   getOperatorOptions,
+  getOperatorTypes,
   isFilterValid,
 } from './lib/filter_editor_utils';
 import { Operator } from './lib/filter_operators';
-import { PhraseValueInput } from './phrase_value_input';
-import { PhrasesValuesInput } from './phrases_values_input';
-import { RangeValueInput } from './range_value_input';
 import { getIndexPatternFromFilter } from '../../../query';
 import { IIndexPattern, IFieldType } from '../../..';
 
@@ -71,11 +68,12 @@ interface State {
 class FilterEditorUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    const selectedOperator = getOperatorFromFilter(props.filter);
     this.state = {
       selectedIndexPattern: this.getIndexPatternFromFilter(),
       selectedField: this.getFieldFromFilter(),
-      selectedOperator: this.getSelectedOperator(),
-      params: getFilterParams(props.filter),
+      selectedOperator,
+      params: selectedOperator ? selectedOperator.getFilterParams(props.filter) : getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
       customLabel: props.filter.meta.alias || '',
       queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
@@ -121,7 +119,7 @@ class FilterEditorUI extends Component<Props, State> {
           <EuiForm>
             {this.renderIndexPatternInput()}
 
-            {this.state.isCustomEditorOpen ? this.renderCustomEditor() : this.renderRegularEditor()}
+            {this.renderEditor()}
 
             <EuiSpacer size="m" />
 
@@ -192,6 +190,10 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   private renderIndexPatternInput() {
+    if (this.props.filter.meta.isMultiIndex) {
+      return '';
+    }
+
     if (
       this.props.indexPatterns.length <= 1 &&
       this.props.indexPatterns.find(
@@ -233,21 +235,6 @@ class FilterEditorUI extends Component<Props, State> {
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-    );
-  }
-
-  private renderRegularEditor() {
-    return (
-      <div>
-        <EuiFlexGroup responsive={true} gutterSize="s">
-          <EuiFlexItem grow={2}>{this.renderFieldInput()}</EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ flexBasis: 160 }}>
-            {this.renderOperatorInput()}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <div data-test-subj="filterParams">{this.renderParamsEditor()}</div>
-      </div>
     );
   }
 
@@ -320,68 +307,60 @@ class FilterEditorUI extends Component<Props, State> {
     );
   }
 
-  private renderCustomEditor() {
+  private renderEditor() {
+    if (this.state.isCustomEditorOpen) {
+      return (
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('data.filter.filterEditor.queryDslLabel', {
+            defaultMessage: 'Elasticsearch Query DSL',
+          })}
+        >
+          <EuiCodeEditor
+            value={this.state.queryDsl}
+            onChange={this.onQueryDslChange}
+            mode="json"
+            width="100%"
+            height="250px"
+            data-test-subj="customEditorInput"
+          />
+        </EuiFormRow>
+      );
+    }
+
+    const operatorEditor = this.state.selectedOperator && this.state.selectedOperator.editor !== null
+      ? <div data-test-subj="filterParams">
+          <this.state.selectedOperator.editor
+            indexPattern={this.state.selectedIndexPattern}
+            field={this.state.selectedField}
+            value={this.state.params}
+            onChange={this.onParamsChange}
+            timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
+            fullWidth
+          />
+        </div>
+      : null;
+
+    // Do not show operator select for multi-index filters since they operate on many fields 
+    // and cannot transition to different operator types
+    const operatorSelect = !this.props.filter.meta.isMultiIndex
+      ? <>
+          <EuiFlexGroup responsive={true} gutterSize="s">
+            <EuiFlexItem grow={2}>{this.renderFieldInput()}</EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ flexBasis: 160 }}>
+              {this.renderOperatorInput()}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      : null;
+      
     return (
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('data.filter.filterEditor.queryDslLabel', {
-          defaultMessage: 'Elasticsearch Query DSL',
-        })}
-      >
-        <EuiCodeEditor
-          value={this.state.queryDsl}
-          onChange={this.onQueryDslChange}
-          mode="json"
-          width="100%"
-          height="250px"
-          data-test-subj="customEditorInput"
-        />
-      </EuiFormRow>
+      <div>
+        {operatorSelect}
+        {operatorEditor}
+      </div>
     );
-  }
-
-  private renderParamsEditor() {
-    const indexPattern = this.state.selectedIndexPattern;
-    if (!indexPattern || !this.state.selectedOperator) {
-      return '';
-    }
-
-    switch (this.state.selectedOperator.type) {
-      case 'exists':
-        return '';
-      case 'phrase':
-        return (
-          <PhraseValueInput
-            indexPattern={indexPattern}
-            field={this.state.selectedField}
-            value={this.state.params}
-            onChange={this.onParamsChange}
-            data-test-subj="phraseValueInput"
-            timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
-            fullWidth
-          />
-        );
-      case 'phrases':
-        return (
-          <PhrasesValuesInput
-            indexPattern={indexPattern}
-            field={this.state.selectedField}
-            values={this.state.params}
-            onChange={this.onParamsChange}
-            timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
-            fullWidth
-          />
-        );
-      case 'range':
-        return (
-          <RangeValueInput
-            field={this.state.selectedField}
-            value={this.state.params}
-            onChange={this.onParamsChange}
-            fullWidth
-          />
-        );
-    }
   }
 
   private toggleCustomEditor = () => {
@@ -391,7 +370,7 @@ class FilterEditorUI extends Component<Props, State> {
 
   private isUnknownFilterType() {
     const { type } = this.props.filter.meta;
-    return !!type && !['phrase', 'phrases', 'range', 'exists'].includes(type);
+    return !!type && !getOperatorTypes().includes(type);
   }
 
   private getIndexPatternFromFilter() {
@@ -401,10 +380,6 @@ class FilterEditorUI extends Component<Props, State> {
   private getFieldFromFilter() {
     const indexPattern = this.getIndexPatternFromFilter();
     return indexPattern && getFieldFromFilter(this.props.filter as FieldFilter, indexPattern);
-  }
-
-  private getSelectedOperator() {
-    return getOperatorFromFilter(this.props.filter);
   }
 
   private isFilterValid() {
@@ -426,7 +401,11 @@ class FilterEditorUI extends Component<Props, State> {
       }
     }
 
-    return isFilterValid(indexPattern, field, operator, params);
+    if (!operator) {
+      return false;
+    }
+
+    return operator.isFilterValid(indexPattern, field, params);
   }
 
   private onIndexPatternChange = ([selectedIndexPattern]: IIndexPattern[]) => {
@@ -488,14 +467,14 @@ class FilterEditorUI extends Component<Props, State> {
     }
     const alias = useCustomLabel ? customLabel : null;
 
+    let filter: Filter | undefined;
     if (isCustomEditorOpen) {
       const { index, disabled = false, negate = false } = this.props.filter.meta;
       const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
-      const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
-      this.props.onSubmit(filter);
-    } else if (indexPattern && field && operator) {
-      const filter = buildFilter(
+      filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
+    } else if (operator) {
+      filter = operator.buildFilter(
         indexPattern,
         field,
         operator.type,
@@ -505,6 +484,9 @@ class FilterEditorUI extends Component<Props, State> {
         alias,
         $state.store
       );
+    }
+
+    if (filter) {
       this.props.onSubmit(filter);
     }
   };

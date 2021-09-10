@@ -7,14 +7,54 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FILTERS } from '@kbn/es-query';
+import { FILTERS, getFilterParams } from '@kbn/es-query';
+import { ReactElement } from 'react';
+import { PhraseValueInput } from '../phrase_value_input';
+import { PhrasesValuesInput } from '../phrases_values_input';
+import { RangeValueInput } from '../range_value_input';
+import { buildEsQueryFilter, isExistsFilterValid, isPhraseFilterValid, isPhrasesFilterValid, isRangeFilterValid } from './filter_editor_utils';
 
 export interface Operator {
   message: string;
   type: FILTERS;
   negate: boolean;
   fieldTypes?: string[];
+  editor: ReactElement | null;
+  buildFilter: (
+    indexPattern: IndexPatternBase,
+    field: IndexPatternFieldBase,
+    type: FILTERS,
+    negate: boolean,
+    disabled: boolean,
+    params: Serializable,
+    alias: string | null,
+    store?: FilterStateStore
+  ) => Filter | undefined;
+  getFilterParams: (filter: Filter) => any;
+  isFilterValid: (
+    indexPattern?: IIndexPattern,
+    field?: IFieldType,
+    params?: any,
+  ) => boolean;
 }
+
+export const spatialFilterOperator = {
+  message: i18n.translate('data.filter.filterEditor.spatialFilterLabel', {
+    defaultMessage: 'spatial filter',
+  }),
+  type: FILTERS.SPATIAL_FILTER,
+  negate: false,
+  fieldTypes: ['geo_point', 'geo_shape'],
+  editor: null,
+  buildFilter: () => {
+    return undefined;
+  },
+  getFilterParams: (filter: Filter) => {
+    console.log(filter);
+    return undefined;
+  },
+  isFilterValid: () => { return true; },
+};
 
 export const isOperator = {
   message: i18n.translate('data.filter.filterEditor.isOperatorOptionLabel', {
@@ -22,6 +62,10 @@ export const isOperator = {
   }),
   type: FILTERS.PHRASE,
   negate: false,
+  editor: PhraseValueInput,
+  buildFilter: buildEsQueryFilter,
+  getFilterParams,
+  isFilterValid: isPhraseFilterValid,
 };
 
 export const isNotOperator = {
@@ -30,6 +74,10 @@ export const isNotOperator = {
   }),
   type: FILTERS.PHRASE,
   negate: true,
+  editor: PhraseValueInput,
+  buildFilter: buildEsQueryFilter,
+  getFilterParams,
+  isFilterValid: isPhraseFilterValid,
 };
 
 export const isOneOfOperator = {
@@ -39,6 +87,10 @@ export const isOneOfOperator = {
   type: FILTERS.PHRASES,
   negate: false,
   fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
+  editor: PhrasesValuesInput,
+  buildFilter: buildEsQueryFilter,
+  getFilterParams,
+  isFilterValid: isPhrasesFilterValid,
 };
 
 export const isNotOneOfOperator = {
@@ -48,6 +100,10 @@ export const isNotOneOfOperator = {
   type: FILTERS.PHRASES,
   negate: true,
   fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
+  editor: PhrasesValuesInput,
+  buildFilter: buildEsQueryFilter,
+  getFilterParams,
+  isFilterValid: isPhrasesFilterValid,
 };
 
 export const isBetweenOperator = {
@@ -57,6 +113,10 @@ export const isBetweenOperator = {
   type: FILTERS.RANGE,
   negate: false,
   fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
+  editor: RangeValueInput,
+  buildFilter: buildEsQueryFilter,
+  getFilterParams,
+  isFilterValid: isRangeFilterValid,
 };
 
 export const isNotBetweenOperator = {
@@ -66,6 +126,10 @@ export const isNotBetweenOperator = {
   type: FILTERS.RANGE,
   negate: true,
   fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
+  editor: RangeValueInput,
+  buildFilter: buildEsQueryFilter,
+  getFilterParams,
+  isFilterValid: isRangeFilterValid,
 };
 
 export const existsOperator = {
@@ -74,6 +138,10 @@ export const existsOperator = {
   }),
   type: FILTERS.EXISTS,
   negate: false,
+  editor: null,
+  buildFilter: buildEsQueryFilter,
+  getFilterParams,
+  isFilterValid: isExistsFilterValid,
 };
 
 export const doesNotExistOperator = {
@@ -82,6 +150,10 @@ export const doesNotExistOperator = {
   }),
   type: FILTERS.EXISTS,
   negate: true,
+  editor: null,
+  buildFilter: buildEsQueryFilter,
+  getFilterParams,
+  isFilterValid: isExistsFilterValid,
 };
 
 export const FILTER_OPERATORS: Operator[] = [
@@ -93,4 +165,5 @@ export const FILTER_OPERATORS: Operator[] = [
   isNotBetweenOperator,
   existsOperator,
   doesNotExistOperator,
+  spatialFilterOperator,
 ];

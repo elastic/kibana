@@ -30,31 +30,12 @@ function createMultiGeoFieldFilter(
     throw new Error('Unable to create filter, geo fields not provided');
   }
 
-  if (geoFieldNames.length === 1) {
-    return {
-      meta: {
-        ...meta,
-        key: geoFieldNames[0],
-      },
-      query: {
-        bool: {
-          must: [
-            {
-              exists: {
-                field: geoFieldNames[0],
-              },
-            },
-            createGeoFilter(geoFieldNames[0]),
-          ],
-        },
-      },
-    };
-  }
-
   return {
     meta: {
       ...meta,
       key: undefined,
+      // Regardless of whether there is a single geo field or multile geo fields, 
+      // the filter is considered "isMultiIndex" because the geo field is not couple to a single index pattern
       isMultiIndex: true,
     },
     query: {

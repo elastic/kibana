@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import dateMath from '@elastic/datemath';
-import { Filter, FieldFilter } from '@kbn/es-query';
+import { buildFilter, Filter, FieldFilter } from '@kbn/es-query';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 import { isFilterable, IIndexPattern, IFieldType, IpAddress } from '../../../../../common';
 
@@ -19,6 +20,13 @@ export function getOperatorFromFilter(filter: Filter) {
   return FILTER_OPERATORS.find((operator) => {
     return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
   });
+}
+
+export function getOperatorTypes() {
+  const types = FILTER_OPERATORS.map((operator) => {
+    return operator.type;
+  });
+  return _.uniq(types);
 }
 
 export function getFilterableFields(indexPattern: IIndexPattern) {
@@ -47,34 +55,75 @@ export function validateParams(params: any, type: string) {
   }
 }
 
-export function isFilterValid(
+export function isPhraseFilterValid(
   indexPattern?: IIndexPattern,
   field?: IFieldType,
-  operator?: Operator,
-  params?: any
+  params?: any,
 ) {
-  if (!indexPattern || !field || !operator) {
+  if (!indexPattern || !field) {
     return false;
   }
-  switch (operator.type) {
-    case 'phrase':
-      return validateParams(params, field.type);
-    case 'phrases':
-      if (!Array.isArray(params) || !params.length) {
-        return false;
-      }
-      return params.every((phrase) => validateParams(phrase, field.type));
-    case 'range':
-      if (typeof params !== 'object') {
-        return false;
-      }
-      return (
-        (!params.from || validateParams(params.from, field.type)) &&
-        (!params.to || validateParams(params.to, field.type))
-      );
-    case 'exists':
-      return true;
-    default:
-      throw new Error(`Unknown operator type: ${operator.type}`);
+  return validateParams(params, field.type);
+}
+
+export function isPhrasesFilterValid(
+  indexPattern?: IIndexPattern,
+  field?: IFieldType,
+  params?: any,
+) {
+  if (!indexPattern || !field) {
+    return false;
   }
+  if (!Array.isArray(params) || !params.length) {
+    return false;
+  }
+  return params.every((phrase) => validateParams(phrase, field.type));
+}
+
+export function isRangeFilterValid(
+  indexPattern?: IIndexPattern,
+  field?: IFieldType,
+  params?: any,
+) {
+  if (!indexPattern || !field) {
+    return false;
+  }
+  if (typeof params !== 'object') {
+    return false;
+  }
+  return (
+    (!params.from || validateParams(params.from, field.type)) &&
+    (!params.to || validateParams(params.to, field.type))
+  );
+}
+
+export function isExistsFilterValid(
+  indexPattern?: IIndexPattern,
+  field?: IFieldType,
+) {
+  return indexPattern && field;
+}
+
+export function buildEsQueryFilter(
+  indexPattern: IndexPatternBase,
+  field: IndexPatternFieldBase,
+  type: FILTERS,
+  negate: boolean,
+  disabled: boolean,
+  params: Serializable,
+  alias: string | null,
+  store?: FilterStateStore
+) {
+  return indexPattern && field
+    ? buildFilter(
+      indexPattern,
+      field,
+      type,
+      negate,
+      disabled,
+      params,
+      alias,
+      store
+    )
+    : undefined;
 }
