@@ -11,7 +11,7 @@ import React, { ReactNode } from 'react';
 import { SettingsTemplate } from './settings_template';
 import { createMemoryHistory } from 'history';
 import { MemoryRouter, RouteComponentProps } from 'react-router-dom';
-import { CoreStart } from 'kibana/public';
+import { CoreStart, DocLinksStart, HttpStart } from 'kibana/public';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 
 const { location } = createMemoryHistory();
@@ -25,6 +25,20 @@ const KibanaReactContext = createKibanaReactContext({
       },
     },
   },
+  http: {
+    basePath: {
+      prepend: (path: string) => `/basepath${path}`,
+      get: () => `/basepath`,
+    },
+  } as HttpStart,
+  docLinks: ({
+    DOC_LINK_VERSION: '0',
+    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    links: {
+      apm: {},
+      observability: { guide: '' },
+    },
+  } as unknown) as DocLinksStart,
 } as Partial<CoreStart>);
 
 function Wrapper({ children }: { children?: ReactNode }) {
