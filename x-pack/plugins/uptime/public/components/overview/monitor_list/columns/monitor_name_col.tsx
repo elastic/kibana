@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { MonitorPageLink } from '../../../common/monitor_page_link';
@@ -41,12 +41,15 @@ export const MonitorNameColumn = ({ summary }: Props) => {
   const linkParameters = stringifyUrlParams(params, true);
 
   const currFilters = parseCurrentFilters(params.filters);
-  const currExcludedFilters = parseCurrentFilters(params.excludedFilters);
 
   const [filterType, setFilterType] = useState<string[]>(currFilters.get('monitor.type') ?? []);
-  const excludedFilters = React.useRef<string[]>(currExcludedFilters.get('monitor.type') ?? []);
 
-  useFilterUpdate('monitor.type', filterType, excludedFilters.current);
+  const excludedTypeFilters = useMemo(() => {
+    const currExcludedFilters = parseCurrentFilters(params.excludedFilters);
+    return currExcludedFilters.get('monitor.type') ?? [];
+  }, [params.excludedFilters]);
+
+  useFilterUpdate('monitor.type', filterType, excludedTypeFilters);
 
   const filterLabel = i18n.translate('xpack.uptime.monitorList.monitorType.filter', {
     defaultMessage: 'Filter all monitors with type {type}',

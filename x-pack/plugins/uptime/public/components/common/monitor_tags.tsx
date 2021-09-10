@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiBadge, EuiBadgeGroup, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -68,12 +68,15 @@ export const MonitorTags = ({ ping, summary }: Props) => {
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
 
   const currFilters = parseCurrentFilters(params.filters);
-  const currExcludedFilters = parseCurrentFilters(params.excludedFilters);
 
   const [tagFilters, setTagFilters] = useState<string[]>(currFilters.get('tags') ?? []);
-  const excludedTagFilters = useRef<string[]>(currExcludedFilters.get('tags') ?? []);
 
-  useFilterUpdate('tags', tagFilters, excludedTagFilters.current);
+  const excludedTagFilters = useMemo(() => {
+    const currExcludedFilters = parseCurrentFilters(params.excludedFilters);
+    return currExcludedFilters.get('tags') ?? [];
+  }, [params.excludedFilters]);
+
+  useFilterUpdate('tags', tagFilters, excludedTagFilters);
 
   if (tags.length === 0) {
     return summary ? null : (
