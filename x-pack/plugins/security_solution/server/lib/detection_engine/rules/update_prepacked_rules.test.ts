@@ -13,7 +13,10 @@ import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/dete
 import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 jest.mock('./patch_rules');
 
-describe('updatePrepackagedRules', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
 
@@ -33,14 +36,15 @@ describe('updatePrepackagedRules', () => {
     ];
     const outputIndex = 'outputIndex';
     const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
-    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
     await updatePrepackagedRules(
       rulesClient,
       'default',
       ruleStatusClient,
       [{ ...prepackagedRule, actions }],
-      outputIndex
+      outputIndex,
+      isRuleRegistryEnabled
     );
 
     expect(patchRules).toHaveBeenCalledWith(
