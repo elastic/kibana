@@ -14,7 +14,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';

@@ -58,7 +58,7 @@ export const useInvalidFilterQuery = ({
     }
     // This disable is required to only trigger the toast once per render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, filterQuery, addError, query, startDate, endDate]);
+  }, [id, filterQuery, addError, query, startDate, endDate, timelineType]);
 
   useEffect(() => {
     const myError = errors.find((e) => e.id === id);
