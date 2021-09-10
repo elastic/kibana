@@ -8,6 +8,7 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Query } from 'src/plugins/data/public';
+import { TimelineType } from '../../../common/types';
 import { appSelectors } from '../store';
 import { appActions } from '../store/app';
 import { useAppToasts } from './use_app_toasts';
@@ -23,6 +24,7 @@ export const useInvalidFilterQuery = ({
   query,
   startDate,
   endDate,
+  timelineType,
 }: {
   id: string;
   filterQuery?: string;
@@ -30,6 +32,7 @@ export const useInvalidFilterQuery = ({
   query: Query;
   startDate: string;
   endDate: string;
+  timelineType?: TimelineType;
 }) => {
   const { addError } = useAppToasts();
   const dispatch = useDispatch();
@@ -37,7 +40,7 @@ export const useInvalidFilterQuery = ({
   const errors = useDeepEqualSelector(getErrorsSelector);
 
   useEffect(() => {
-    if (filterQuery === undefined && kqlError != null) {
+    if (filterQuery === undefined && kqlError != null && timelineType !== TimelineType.template) {
       // Local util for creating an replicatable error hash
       const hashCode = kqlError.message
         .split('')

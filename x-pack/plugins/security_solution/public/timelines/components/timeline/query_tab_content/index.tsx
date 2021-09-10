@@ -14,7 +14,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
@@ -179,6 +179,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   status,
   sort,
   timerangeKind,
+  timelineType,
   updateEventTypeAndIndexesName,
 }) => {
   const dispatch = useDispatch();
@@ -216,6 +217,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     kqlError: combinedQueries?.kqlError,
     query: kqlQuery,
     startDate: start,
+    timelineType,
     endDate: end,
   });
 
@@ -483,6 +485,7 @@ const makeMapStateToProps = () => {
       sort,
       start: input.timerange.from,
       status,
+      timelineType,
       timerangeKind: input.timerange.kind,
     };
   };
