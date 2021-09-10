@@ -163,7 +163,7 @@ export class DataPublicPlugin
 
     const query = this.queryService.start({
       storage: this.storage,
-      savedObjectsClient: savedObjects.client,
+      http: core.http,
       uiSettings,
     });
 

@@ -10,15 +10,25 @@ import { CoreSetup, Plugin } from 'kibana/server';
 import { querySavedObjectType } from '../saved_objects';
 import {
   extract,
-  inject,
-  telemetry,
-  migrateToLatest,
   getAllMigrations,
+  inject,
+  migrateToLatest,
+  telemetry,
 } from '../../common/query/persistable_state';
+import { registerSavedQueryRoutes } from './routes';
+import {
+  registerSavedQueryRouteHandlerContext,
+  SavedQueryRouteHandlerContext,
+} from './route_handler_context';
 
 export class QueryService implements Plugin<void> {
   public setup(core: CoreSetup) {
     core.savedObjects.registerType(querySavedObjectType);
+    core.http.registerRouteHandlerContext<SavedQueryRouteHandlerContext, 'savedQuery'>(
+      'savedQuery',
+      registerSavedQueryRouteHandlerContext
+    );
+    registerSavedQueryRoutes(core);
 
     return {
       filterManager: {
