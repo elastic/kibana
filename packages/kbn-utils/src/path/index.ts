@@ -16,7 +16,6 @@ const isString = (v: any): v is string => typeof v === 'string';
 const CONFIG_PATHS = [
   process.env.KBN_PATH_CONF && join(process.env.KBN_PATH_CONF, 'kibana.yml'),
   process.env.KIBANA_PATH_CONF && join(process.env.KIBANA_PATH_CONF, 'kibana.yml'), // deprecated
-  process.env.CONFIG_PATH, // deprecated
   join(REPO_ROOT, 'config/kibana.yml'),
   '/etc/kibana/kibana.yml',
 ].filter(isString);
@@ -28,11 +27,7 @@ const CONFIG_DIRECTORIES = [
   '/etc/kibana',
 ].filter(isString);
 
-const DATA_PATHS = [
-  process.env.DATA_PATH, // deprecated
-  join(REPO_ROOT, 'data'),
-  '/var/lib/kibana',
-].filter(isString);
+const DATA_PATHS = [join(REPO_ROOT, 'data'), '/var/lib/kibana'].filter(isString);
 
 function findFile(paths: string[]) {
   const availablePath = paths.find((configPath) => {

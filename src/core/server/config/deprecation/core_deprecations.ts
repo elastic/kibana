@@ -21,30 +21,6 @@ const kibanaPathConf: ConfigDeprecation = (settings, fromPath, addDeprecation) =
   }
 };
 
-const configPathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
-  if (process.env?.CONFIG_PATH) {
-    addDeprecation({
-      message: `Environment variable "CONFIG_PATH" is deprecated. It has been replaced with "KBN_PATH_CONF" pointing to a config folder`,
-      correctiveActions: {
-        manualSteps: ['Use "KBN_PATH_CONF" instead of "CONFIG_PATH" to point to a config folder.'],
-      },
-    });
-  }
-};
-
-const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
-  if (process.env?.DATA_PATH) {
-    addDeprecation({
-      message: `Environment variable "DATA_PATH" will be removed.  It has been replaced with kibana.yml setting "path.data"`,
-      correctiveActions: {
-        manualSteps: [
-          `Set 'path.data' in the config file or CLI flag with the value of the environment variable "DATA_PATH".`,
-        ],
-      },
-    });
-  }
-};
-
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (settings.server?.basePath && !settings.server?.rewriteBasePath) {
     addDeprecation({
@@ -404,9 +380,7 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   rename('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
   rename('server.xsrf.whitelist', 'server.xsrf.allowlist'),
   rewriteCorsSettings,
-  configPathDeprecation,
   kibanaPathConf,
-  dataPathDeprecation,
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
   opsLoggingEventDeprecation,
