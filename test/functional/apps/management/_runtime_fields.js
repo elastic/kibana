@@ -23,16 +23,12 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({});
     });
 
     after(async function afterAll() {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
     describe('create runtime field', function describeIndexTests() {
