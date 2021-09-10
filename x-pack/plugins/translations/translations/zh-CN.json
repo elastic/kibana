@@ -22770,7 +22770,6 @@
     "xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.network": "网络",
     "xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.process": "进程",
     "xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.a": "选择用户通知选项后，在阻止或检测到{ protectionName }时将向主机用户显示通知。",
-    "xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.b": " 可在下方文本框中定制用户通知。括号中的标签可用于动态填充适用操作（如已阻止或已检测）和文件名。",
     "xpack.securitySolution.endpoint.policyDetailsConfig.protectionLevel": "防护级别",
     "xpack.securitySolution.endpoint.policyDetailsConfig.userNotification": "用户通知",
     "xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.dllDriverLoad": "DLL 和驱动程序加载",
