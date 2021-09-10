@@ -4,6 +4,10 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+node .buildkite/scripts/lifecycle/pre_command.sh
+
+echo '--- Job Environment Setup'
+
 cd '.buildkite'
 yarn install
 cd -
