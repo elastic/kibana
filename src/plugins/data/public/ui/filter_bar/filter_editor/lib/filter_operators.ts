@@ -46,12 +46,33 @@ export const spatialFilterOperator = {
   negate: false,
   fieldTypes: ['geo_point', 'geo_shape'],
   editor: null,
-  buildFilter: () => {
-    return undefined;
+  buildFilter: (
+    indexPattern: IndexPatternBase,
+    field: IndexPatternFieldBase,
+    type: FILTERS,
+    negate: boolean,
+    disabled: boolean,
+    params: Serializable,
+    alias: string | null,
+    store?: FilterStateStore
+  ) => {
+    const filter: Filter = {
+      meta: {
+        alias,
+        negate,
+        disabled,
+        isMultiIndex: true,
+        type,
+      },
+      query: params.query
+    };
+    if (store) {
+      filter.$state = { store };
+    }
+    return filter;
   },
   getFilterParams: (filter: Filter) => {
-    console.log(filter);
-    return undefined;
+    return { query: filter.query };
   },
   isFilterValid: () => { return true; },
 };
