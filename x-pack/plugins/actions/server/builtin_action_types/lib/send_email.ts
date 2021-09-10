@@ -160,15 +160,13 @@ function getTransportConfig(
     };
   }
 
-  const useProxy = getUseProxy();
+  const useProxy = getUseProxy(host, proxySettings);
   let customHostSettings: CustomHostSettings | undefined;
 
   if (service === JSON_TRANSPORT_SERVICE) {
     transportConfig.jsonTransport = true;
     delete transportConfig.auth;
     return transportConfig;
-  } else if (service != null) {
-    transportConfig.service = service;
   } else {
     transportConfig.host = host;
     transportConfig.port = port;

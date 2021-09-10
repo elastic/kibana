@@ -31,7 +31,7 @@ describe('send_email module', () => {
   });
 
   test('handles authenticated email using service', async () => {
-    const sendEmailOptions = getSendEmailOptions();
+    const sendEmailOptions = getSendEmailOptions({ transport: {service: '__json'} });
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -41,7 +41,12 @@ describe('send_email module', () => {
             "pass": "changeme",
             "user": "elastic",
           },
-          "service": "whatever",
+          "host": undefined,
+          "port": undefined,
+          "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": true,
+          },
         },
       ]
     `);
@@ -525,7 +530,7 @@ function getSendEmailOptions(
     },
     transport: {
       ...transport,
-      service: 'whatever',
+      service: 'other',
       user: 'elastic',
       password: 'changeme',
     },
@@ -560,6 +565,7 @@ function getSendEmailOptionsNoAuth(
       bcc: [],
     },
     transport: {
+      service: 'other',
       ...transport,
     },
     hasAuth: false,

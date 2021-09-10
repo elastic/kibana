@@ -63,6 +63,8 @@ describe('config validation', () => {
       host: null,
       port: null,
       secure: null,
+      clientId: null,
+      tenantId: null,
     });
   });
 
@@ -77,12 +79,14 @@ describe('config validation', () => {
       ...config,
       service: 'other',
       secure: null,
+      clientId: null,
+      tenantId: null,
     });
   });
 
   test(`config validation succeeds when config is valid and service requires custom host/port value`, () => {
     const config: Record<string, unknown> = {
-      service: 'exchange_server',
+      service: 'other',
       from: 'bob@example.com',
       host: 'elastic.co',
       port: 8080,
@@ -91,6 +95,24 @@ describe('config validation', () => {
     expect(validateConfig(actionType, config)).toEqual({
       ...config,
       secure: null,
+      clientId: null,
+      tenantId: null,
+    });
+  });
+
+  test(`config validation succeeds when config is valid and service is exchange_server`, () => {
+    const config: Record<string, unknown> = {
+      service: 'exchange_server',
+      from: 'bob@example.com',
+      clientId: '123456',
+      tenantId: '12345778',
+      hasAuth: true,
+    };
+    expect(validateConfig(actionType, config)).toEqual({
+      ...config,
+      secure: null,
+      host: null,
+      port: null,
     });
   });
 
@@ -105,6 +127,8 @@ describe('config validation', () => {
       host: null,
       port: null,
       secure: null,
+      clientId: null,
+      tenantId: null,
     });
   });
 
@@ -124,21 +148,21 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, baseConfig);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: either [service] or [host]/[port] is required"`
+      `"error validating action type config: [host]/[port] is required"`
     );
 
     // host but no port
     expect(() => {
       validateConfig(actionType, { ...baseConfig, host: 'elastic.co' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [port] is required if [service] is not provided"`
+      `"error validating action type config: [port] is required"`
     );
 
     // port but no host
     expect(() => {
       validateConfig(actionType, { ...baseConfig, port: 8080 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [host] is required if [service] is not provided"`
+      `"error validating action type config: [host] is required"`
     );
 
     // invalid service
@@ -149,6 +173,38 @@ describe('config validation', () => {
       });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [service] value 'bad-nodemailer-service' is not valid"`
+    );
+
+    // invalid exchange_server no clientId and no tenantId
+    expect(() => {
+      validateConfig(actionType, {
+        ...baseConfig,
+        service: 'exchange_server',
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [clientId]/[tenantId] is required"`
+    );
+
+    // invalid exchange_server no clientId
+    expect(() => {
+      validateConfig(actionType, {
+        ...baseConfig,
+        service: 'exchange_server',
+        tenantId: '342342342',
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [clientId] is required"`
+    );
+
+    // invalid exchange_server no tenantId
+    expect(() => {
+      validateConfig(actionType, {
+        ...baseConfig,
+        service: 'exchange_server',
+        clientId: '12345667',
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [tenantId] is required"`
     );
   });
 
@@ -211,22 +267,30 @@ describe('config validation', () => {
 });
 
 describe('secrets validation', () => {
-  test('secrets validation succeeds when secrets is valid', () => {
+  test('secrets validation succeeds when secrets is valid for Basic Auth', () => {
     const secrets: Record<string, unknown> = {
       user: 'bob',
       password: 'supersecret',
     };
-    expect(validateSecrets(actionType, secrets)).toEqual(secrets);
+    expect(validateSecrets(actionType, secrets)).toEqual({ ...secrets, clientSecret: null });
   });
 
   test('secrets validation succeeds when secrets props are null/undefined', () => {
     const secrets: Record<string, unknown> = {
       user: null,
       password: null,
+      clientSecret: null
     };
     expect(validateSecrets(actionType, {})).toEqual(secrets);
     expect(validateSecrets(actionType, { user: null })).toEqual(secrets);
     expect(validateSecrets(actionType, { password: null })).toEqual(secrets);
+  });
+
+  test('secrets validation succeeds when secrets is valid for OAuth 2.0 Client Credentials', () => {
+    const secrets: Record<string, unknown> = {
+      clientSecret: '12345678'
+    };
+    expect(validateSecrets(actionType, secrets)).toEqual({ ...secrets, user: null, password: null });
   });
 });
 
