@@ -37,16 +37,20 @@ export class MapPage extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      savedMap: new SavedMap({
-        defaultLayers: getInitialLayersFromUrlParam(),
-        mapEmbeddableInput: props.mapEmbeddableInput,
-        embeddableId: props.embeddableId,
-        originatingApp: props.originatingApp,
-        stateTransfer: props.stateTransfer,
-        onSaveCallback: this.updateSaveCounter,
-      }),
+      savedMap: this._getNewSavedMap(),
       saveCounter: 0,
     };
+  }
+
+  _getNewSavedMap() {
+    return new SavedMap({
+      defaultLayers: getInitialLayersFromUrlParam(),
+      mapEmbeddableInput: this.props.mapEmbeddableInput,
+      embeddableId: this.props.embeddableId,
+      originatingApp: this.props.originatingApp,
+      stateTransfer: this.props.stateTransfer,
+      onSaveCallback: this.updateSaveCounter,
+    });
   }
 
   componentDidMount() {
@@ -55,6 +59,18 @@ export class MapPage extends Component<Props, State> {
 
   componentWillUnmount() {
     this._isMounted = false;
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (
+      this.props?.mapEmbeddableInput?.savedObjectId &&
+      this.props.mapEmbeddableInput.savedObjectId !== prevProps?.mapEmbeddableInput?.savedObjectId
+    ) {
+      this.setState({
+        savedMap: this._getNewSavedMap(),
+        saveCounter: 0,
+      });
+    }
   }
 
   updateSaveCounter = () => {

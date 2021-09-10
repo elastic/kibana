@@ -32,6 +32,7 @@ interface MapEmbeddableState {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  savedObjectId?: string;
 }
 export type MapByValueInput = {
   attributes: MapSavedObjectAttributes;
