@@ -35,5 +35,13 @@ export function TrustedAppsPageProvider({ getService, getPageObjects }: FtrProvi
       await this.ensureIsOnTrustedAppsListPage();
       return testSubjects.find('backToOrigin');
     },
+
+    /**
+     * Clicks on the actions menu icon in the (only one) truated app card to show the popup with list of actions
+     */
+    async clickCardActionMenu() {
+      await this.ensureIsOnTrustedAppsListPage();
+      await testSubjects.click('trustedAppCard-header-actions-button');
+    },
   };
 }
