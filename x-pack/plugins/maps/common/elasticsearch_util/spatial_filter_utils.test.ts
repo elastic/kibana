@@ -27,7 +27,8 @@ describe('createExtentFilter', () => {
       meta: {
         alias: null,
         disabled: false,
-        key: 'location',
+        isMultiIndex: true,
+        key: undefined,
         negate: false,
       },
       query: {
@@ -63,7 +64,8 @@ describe('createExtentFilter', () => {
       meta: {
         alias: null,
         disabled: false,
-        key: 'location',
+        isMultiIndex: true,
+        key: undefined,
         negate: false,
       },
       query: {
@@ -99,7 +101,8 @@ describe('createExtentFilter', () => {
       meta: {
         alias: null,
         disabled: false,
-        key: 'location',
+        isMultiIndex: true,
+        key: undefined,
         negate: false,
       },
       query: {
@@ -135,7 +138,8 @@ describe('createExtentFilter', () => {
       meta: {
         alias: null,
         disabled: false,
-        key: 'location',
+        isMultiIndex: true,
+        key: undefined,
         negate: false,
       },
       query: {
@@ -171,7 +175,8 @@ describe('createExtentFilter', () => {
       meta: {
         alias: null,
         disabled: false,
-        key: 'location',
+        isMultiIndex: true,
+        key: undefined,
         negate: false,
       },
       query: {
@@ -280,7 +285,8 @@ describe('createSpatialFilterWithGeometry', () => {
       meta: {
         alias: 'intersects myShape',
         disabled: false,
-        key: 'geo.coordinates',
+        isMultiIndex: true,
+        key: undefined,
         negate: false,
         type: 'spatial_filter',
       },
@@ -427,7 +433,8 @@ describe('createDistanceFilterWithMeta', () => {
       meta: {
         alias: 'within 1000km of 120, 30',
         disabled: false,
-        key: 'geo.coordinates',
+        isMultiIndex: true,
+        key: undefined,
         negate: false,
         type: 'spatial_filter',
       },

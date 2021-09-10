@@ -30,14 +30,34 @@ function createMultiGeoFieldFilter(
     throw new Error('Unable to create filter, geo fields not provided');
   }
 
+  // Regardless of whether there is a single geo field or multile geo fields, 
+  // the filter is considered "isMultiIndex" because the geo field(s) is not couple to a single index pattern
+  const spatialFilterMeta = {
+    ...meta,
+    key: undefined,
+    isMultiIndex: true,
+  };
+
+  if (geoFieldNames.length === 1) {
+    return {
+      meta: spatialFilterMeta,
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: geoFieldNames[0],
+              },
+            },
+            createGeoFilter(geoFieldNames[0]),
+          ],
+        },
+      },
+    };
+  }
+
   return {
-    meta: {
-      ...meta,
-      key: undefined,
-      // Regardless of whether there is a single geo field or multile geo fields, 
-      // the filter is considered "isMultiIndex" because the geo field is not couple to a single index pattern
-      isMultiIndex: true,
-    },
+    meta: spatialFilterMeta,
     query: {
       bool: {
         should: geoFieldNames.map((geoFieldName) => {
@@ -183,19 +203,20 @@ export function extractFeaturesFromFilters(filters: GeoFilter[]): Feature[] {
       return filter.meta.type === SPATIAL_FILTER_TYPE;
     })
     .forEach((filter) => {
+      
+      let geoFieldName: string | undefined;
+      let spatialClause: GeoFilter | undefined;
+      if (filter?.query?.bool?.must) {
+        geoFieldName = filter?.query?.bool?.must?.[0]?.exists?.field;
+        spatialClause = filter?.query?.bool?.must?.[1];
+      } else if (filter?.query?.bool?.should) {
+        geoFieldName = filter?.query?.bool?.should?.[0]?.bool?.must?.[0]?.exists?.field;
+        spatialClause = filter?.query?.bool?.should?.[0]?.bool?.must?.[1];
+      }
+
       let geometry: Geometry | undefined;
-      if (filter.meta.isMultiIndex) {
-        const geoFieldName = filter?.query?.bool?.should?.[0]?.bool?.must?.[0]?.exists?.field;
-        const spatialClause = filter?.query?.bool?.should?.[0]?.bool?.must?.[1];
-        if (geoFieldName && spatialClause) {
-          geometry = extractGeometryFromFilter(geoFieldName, spatialClause);
-        }
-      } else {
-        const geoFieldName = filter.meta.key;
-        const spatialClause = filter?.query?.bool?.must?.[1];
-        if (geoFieldName && spatialClause) {
-          geometry = extractGeometryFromFilter(geoFieldName, spatialClause);
-        }
+      if (geoFieldName && spatialClause) {
+        geometry = extractGeometryFromFilter(geoFieldName, spatialClause);
       }
 
       if (geometry) {

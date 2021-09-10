@@ -13,7 +13,6 @@ export const mapSpatialFilter = (filter: Filter) => {
   if (
     filter.meta &&
     filter.meta.key &&
-    filter.meta.alias &&
     filter.meta.type === FILTERS.SPATIAL_FILTER
   ) {
     return {
@@ -26,8 +25,7 @@ export const mapSpatialFilter = (filter: Filter) => {
   if (
     filter.meta &&
     filter.meta.type === FILTERS.SPATIAL_FILTER &&
-    filter.meta.isMultiIndex &&
-    filter.query?.bool?.should
+    filter.meta.isMultiIndex
   ) {
     return {
       key: 'query',
