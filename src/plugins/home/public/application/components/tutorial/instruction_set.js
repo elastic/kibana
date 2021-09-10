@@ -21,8 +21,8 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiCallOut,
-  EuiButtonEmpty,
   EuiTitle,
+  EuiPanel,
 } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 
@@ -97,7 +97,12 @@ class InstructionSetUi extends React.Component {
         color = 'warning';
         break;
     }
-    return <EuiCallOut title={message} color={color} />;
+    return (
+      <>
+        <EuiSpacer size="s" />
+        <EuiCallOut title={message} color={color} />
+      </>
+    );
   }
 
   getStepStatus(statusCheckState) {
@@ -131,27 +136,20 @@ class InstructionSetUi extends React.Component {
     const { statusCheckState, statusCheckConfig, onStatusCheck } = this.props;
     const checkStatusStep = (
       <Fragment>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem>
-            <Content text={statusCheckConfig.text} />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={onStatusCheck}
-              isLoading={statusCheckState === StatusCheckStates.FETCHING}
-            >
-              {statusCheckConfig.btnLabel || (
-                <FormattedMessage
-                  id="home.tutorial.instructionSet.checkStatusButtonLabel"
-                  defaultMessage="Check status"
-                />
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <Content text={statusCheckConfig.text} />
 
         <EuiSpacer size="s" />
+        <EuiButton
+          onClick={onStatusCheck}
+          isLoading={statusCheckState === StatusCheckStates.FETCHING}
+        >
+          {statusCheckConfig.btnLabel || (
+            <FormattedMessage
+              id="home.tutorial.instructionSet.checkStatusButtonLabel"
+              defaultMessage="Check status"
+            />
+          )}
+        </EuiButton>
 
         {this.renderStatusCheckMessage()}
       </Fragment>
@@ -213,7 +211,8 @@ class InstructionSetUi extends React.Component {
         defaultMessage: 'toggle command parameters visibility',
       });
       paramsVisibilityToggle = (
-        <EuiButtonEmpty
+        <EuiButton
+          size="s"
           iconType={this.state.isParamFormVisible ? 'arrowDown' : 'arrowRight'}
           aria-label={ariaLabel}
           onClick={this.handleToggleVisibility}
@@ -222,7 +221,7 @@ class InstructionSetUi extends React.Component {
             id="home.tutorial.instructionSet.customizeLabel"
             defaultMessage="Customize your code snippets"
           />
-        </EuiButtonEmpty>
+        </EuiButton>
       );
     }
 
@@ -245,11 +244,14 @@ class InstructionSetUi extends React.Component {
     }
 
     return (
-      <EuiCallOut
-        title={this.props.callOut.title}
-        children={this.props.callOut.message}
-        iconType={this.props.callOut.iconType}
-      />
+      <>
+        <EuiSpacer />
+        <EuiCallOut
+          title={this.props.callOut.title}
+          children={this.props.callOut.message}
+          iconType={this.props.callOut.iconType}
+        />
+      </>
     );
   };
 
@@ -273,10 +275,10 @@ class InstructionSetUi extends React.Component {
 
         {paramsForm}
 
+        <EuiSpacer />
         <EuiTabs>{this.renderTabs()}</EuiTabs>
 
-        <EuiSpacer size="m" />
-
+        <EuiSpacer />
         {this.renderInstructions()}
       </EuiPanel>
     );
