@@ -97,13 +97,15 @@ const shouldEnableHistogramMode = (
   seriesParams: SeriesParam[],
   yAxes: Array<AxisConfig<ScaleContinuousType>>
 ): boolean => {
-  const bars = seriesParams.filter(({ type }) => type === ChartType.Histogram);
-  const groupIds = [
-    ...bars.reduce<Set<string>>((acc, { valueAxis: groupId, mode }) => {
-      acc.add(groupId);
-      return acc;
-    }, new Set()),
-  ];
+  const bars = seriesParams.filter(({ type, show }) => show && type === ChartType.Histogram);
+  const groupsCount = bars.reduce<Record<string, number>>((acc, { valueAxis: groupId }) => {
+    acc[groupId] = (acc[groupId] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const groupIds = Object.keys(groupsCount)
+    .filter((groupId) => groupsCount[groupId] > 1)
+    .map((groupId) => groupsCount[groupId]);
 
   if (groupIds.length > 1) {
     return false;
