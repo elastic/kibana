@@ -323,6 +323,10 @@ export const ArgumentStrings = {
       i18n.translate('xpack.canvas.uis.arguments.visDimensionLabel', {
         defaultMessage: 'Generates visConfig dimension object',
       }),
+    getDefaultOptionName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.visDimensionDefaultOptionName', {
+        defaultMessage: 'Select column',
+      }),
   },
 };
 

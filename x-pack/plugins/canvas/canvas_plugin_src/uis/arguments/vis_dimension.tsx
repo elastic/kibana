@@ -64,9 +64,10 @@ const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
   );
 
   const options = [
-    { value: '', text: 'select column', disabled: true },
+    { value: '', text: strings.getDefaultOptionName(), disabled: true },
     ...columns.map((column: DatatableColumn) => ({ value: column.name, text: column.name })),
   ];
+
   const selectedValue = value.chain[0].arguments._?.[0];
 
   const column =

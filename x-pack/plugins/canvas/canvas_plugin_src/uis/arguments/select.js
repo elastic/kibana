@@ -13,15 +13,8 @@ import { ArgumentStrings } from '../../../i18n';
 
 const { Select: strings } = ArgumentStrings;
 
-const SelectArgInput = ({
-  typeInstance,
-  onValueChange,
-  argValue,
-  argId,
-  choises: dynamicChoises,
-}) => {
-  const existChoises = typeInstance.options.choices ?? dynamicChoises?.[typeInstance.name] ?? [];
-  const choices = existChoises.map(({ value, name }) => ({ value, text: name }));
+const SelectArgInput = ({ typeInstance, onValueChange, argValue, argId }) => {
+  const choices = typeInstance.options.choices.map(({ value, name }) => ({ value, text: name }));
   const handleChange = (ev) => {
     // Get the value from the choices passed in since it could be a number or
     // boolean, but ev.target.value is always a string
@@ -46,7 +39,7 @@ SelectArgInput.propTypes = {
           value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool])
             .isRequired,
         })
-      ),
+      ).isRequired,
     }),
   }),
   argId: PropTypes.string.isRequired,
