@@ -8,10 +8,18 @@
 
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
-import { exportDashboards } from '../lib';
+import { CoreUsageDataSetup } from 'src/core/server/core_usage_data';
+import { IRouter, Logger } from '../../..';
+import { exportDashboards } from './lib';
 
-export const registerExportRoute = (router: IRouter, kibanaVersion: string) => {
+export const registerLegacyExportRoute = (
+  router: IRouter,
+  {
+    kibanaVersion,
+    coreUsageData,
+    logger,
+  }: { kibanaVersion: string; coreUsageData: CoreUsageDataSetup; logger: Logger }
+) => {
   router.get(
     {
       path: '/api/kibana/dashboards/export',
@@ -25,8 +33,15 @@ export const registerExportRoute = (router: IRouter, kibanaVersion: string) => {
       },
     },
     async (ctx, req, res) => {
+      logger.warn(
+        "The export dashboard API '/api/kibana/dashboards/export' is deprecated. Use the saved objects export objects API '/api/saved_objects/_export' instead."
+      );
+
       const ids = Array.isArray(req.query.dashboard) ? req.query.dashboard : [req.query.dashboard];
       const { client } = ctx.core.savedObjects;
+
+      const usageStatsClient = coreUsageData.getClient();
+      usageStatsClient.incrementLegacyDashboardsExport({ request: req }).catch(() => {});
 
       const exported = await exportDashboards(ids, client, kibanaVersion);
       const filename = `kibana-dashboards.${moment.utc().format('YYYY-MM-DD-HH-mm-ss')}.json`;
