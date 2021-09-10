@@ -62,8 +62,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yThresholdLeftPanel')).to.eql([
-        'Median of bytes',
         'Static value: 4992.44',
+        'Median of bytes',
       ]);
     });
   });
