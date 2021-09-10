@@ -18,7 +18,7 @@ import {
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../fleet/common';
 import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
-import { ListPageRouteState } from '../../../../../../common/endpoint/types';
+import { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
 import { getPolicyDetailPath, getPolicyTrustedAppsPath } from '../../../../common/routing';
 import { PolicyDetailsForm } from '../policy_details_form';
 import { AppAction } from '../../../../../common/store/actions';
@@ -107,29 +107,31 @@ const WrappedPolicyDetailsForm = memo<{
   }, [onChange, updatedPolicy]);
 
   const policyTrustedAppsPath = useMemo(() => getPolicyTrustedAppsPath(policyId), [policyId]);
-  const policyTrustedAppRouteState = useMemo<ListPageRouteState>(() => {
+  const policyTrustedAppRouteState = useMemo<PolicyDetailsRouteState>(() => {
     const fleetPackageIntegrationCustomUrlPath = `#${
       pagePathGetters.integration_policy_edit({ packagePolicyId: policyId })[1]
     }`;
 
     return {
-      backButtonLabel: i18n.translate(
-        'xpack.securitySolution.endpoint.fleetCustomExtension.artifacts.backButtonLabel',
-        {
-          defaultMessage: `Back to {name} policy`,
-          values: { name: updatedPolicy?.name },
-        }
-      ),
-      onBackButtonNavigateTo: [
-        INTEGRATIONS_PLUGIN_ID,
-        {
+      backLink: {
+        label: i18n.translate(
+          'xpack.securitySolution.endpoint.fleetCustomExtension.artifacts.backButtonLabel',
+          {
+            defaultMessage: `Back to {name} policy`,
+            values: { name: updatedPolicy?.name },
+          }
+        ),
+        navigateTo: [
+          INTEGRATIONS_PLUGIN_ID,
+          {
+            path: fleetPackageIntegrationCustomUrlPath,
+          },
+        ],
+        href: getAppUrl({
+          appId: INTEGRATIONS_PLUGIN_ID,
           path: fleetPackageIntegrationCustomUrlPath,
-        },
-      ],
-      backButtonUrl: getAppUrl({
-        appId: INTEGRATIONS_PLUGIN_ID,
-        path: fleetPackageIntegrationCustomUrlPath,
-      }),
+        }),
+      },
     };
   }, [getAppUrl, updatedPolicy, policyId]);
 
