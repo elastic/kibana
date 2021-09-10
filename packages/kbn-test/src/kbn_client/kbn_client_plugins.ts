@@ -16,6 +16,7 @@ export class KbnClientPlugins {
   public async getEnabledIds() {
     const apiResp = await this.status.get();
 
-    return Object.keys(apiResp.status.plugins);
+    // Status may not be available at the `preboot` stage.
+    return Object.keys(apiResp.status?.plugins ?? {});
   }
 }
