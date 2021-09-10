@@ -71,7 +71,7 @@ export default function ({ getService }) {
     },
   ];
 
-  describe.only('fields_for_wildcard_route response', () => {
+  describe('fields_for_wildcard_route response', () => {
     before(() =>
       esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );
