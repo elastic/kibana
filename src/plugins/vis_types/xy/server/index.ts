@@ -8,10 +8,10 @@
 
 import { PluginConfigDescriptor } from 'src/core/server';
 import { configSchema, ConfigSchema } from '../config';
-import { VisTypePieServerPlugin } from './plugin';
+import { VisTypeXYServerPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export const plugin = () => new VisTypePieServerPlugin();
+export const plugin = () => new VisTypeXYServerPlugin();
