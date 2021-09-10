@@ -122,6 +122,32 @@ describe('FieldMigrator', () => {
 
       expect(result.references).toEqual([{ id: '1', name: 'name', type: 'type' }]);
     });
+
+    it('removes reference when field is set to null', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      const result = migrator.extractFieldsToReferences({
+        data: {
+          hello: null,
+        },
+        existingReferences: [{ id: '2', name: 'name', type: 'type' }],
+      });
+
+      expect(result.references).toEqual([]);
+    });
+
+    it('removes reference when field is set to undefined', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      const result = migrator.extractFieldsToReferences({
+        data: {
+          hello: undefined,
+        },
+        existingReferences: [{ id: '2', name: 'name', type: 'type' }],
+      });
+
+      expect(result.references).toEqual([]);
+    });
   });
 
   describe('populateFieldsFromReferencesForPatch', () => {

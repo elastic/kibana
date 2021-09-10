@@ -32,9 +32,6 @@ export class FieldMigrator {
     for (const field of this.fieldsToMigrate) {
       const fieldValue = _.get(copyOfData, field.path);
 
-      // this will do nothing if the field wasn't present
-      _.unset(copyOfData, field.path);
-
       // the field is null, or if it is undefined and the path exists (undefined is the default return of _.get which is
       // why we need to distinguish if it is a valid path)
       if (fieldValue === null || (fieldValue === undefined && _.has(copyOfData, field.path))) {
@@ -42,6 +39,9 @@ export class FieldMigrator {
       } else if (fieldValue !== undefined) {
         references.set(field.name, { id: fieldValue, name: field.name, type: field.type });
       }
+
+      // this will do nothing if the field wasn't present
+      _.unset(copyOfData, field.path);
     }
 
     return { transformedFields: copyOfData as T, references: Array.from(references.values()) };

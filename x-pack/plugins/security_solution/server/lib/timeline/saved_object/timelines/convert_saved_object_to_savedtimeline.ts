@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { intersection, type, partial, literal, union, string, TypeOf } from 'io-ts/lib/index';
+import { intersection, type, partial, literal, union, string } from 'io-ts/lib/index';
 import { failure } from 'io-ts/lib/PathReporter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
@@ -32,10 +32,6 @@ const TimelineSavedObjectWithDraftRuntime = intersection([
     savedObjectId: string,
   }),
 ]);
-
-export type TimelineSavedObjectWithDraftRuntimeType = TypeOf<
-  typeof TimelineSavedObjectWithDraftRuntime
->;
 
 const getTimelineTypeAndStatus = (
   timelineType: TimelineType | 'draft' | null = TimelineType.default,
