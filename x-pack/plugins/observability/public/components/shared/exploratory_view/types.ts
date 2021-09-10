@@ -117,3 +117,9 @@ export interface FieldFormat {
     params: FieldFormatParams;
   };
 }
+
+export interface BuilderItem {
+  id: number;
+  series: SeriesUrl;
+  seriesConfig?: SeriesConfig;
+}

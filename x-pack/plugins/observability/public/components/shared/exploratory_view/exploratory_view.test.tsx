@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/dom';
+import { screen } from '@testing-library/dom';
 import { render, mockAppIndexPattern } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
 import * as obsvInd from './utils/observability_index_patterns';
@@ -64,8 +64,6 @@ describe('ExploratoryView', () => {
     expect((await screen.findAllByText('Performance distribution'))[0]).toBeInTheDocument();
     expect(await screen.findByText(/Lens Embeddable Component/i)).toBeInTheDocument();
 
-    await waitFor(() => {
-      screen.getByRole('table', { name: /this table contains 1 rows\./i });
-    });
+    expect(screen.getByTestId('exploratoryViewSeriesPanel0')).toBeInTheDocument();
   });
 });

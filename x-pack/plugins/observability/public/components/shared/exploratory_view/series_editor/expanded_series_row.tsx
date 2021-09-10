@@ -24,7 +24,7 @@ function getColumnType(seriesConfig: SeriesConfig, selectedMetricField?: string)
 interface Props {
   seriesId: number;
   series: SeriesUrl;
-  seriesConfig: SeriesConfig;
+  seriesConfig?: SeriesConfig;
 }
 export function ExpandedSeriesRow({ seriesId, series, seriesConfig }: Props) {
   if (!seriesConfig) {
