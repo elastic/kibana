@@ -12,7 +12,6 @@ import { FIELD_FORMAT_IDS } from '../../../../src/plugins/field_formats/common';
 import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['settings', 'common']);
