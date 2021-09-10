@@ -226,6 +226,17 @@ export function getAlertType(
 
     const { body: searchResult } = await services.abortableEsClient(query, false);
 
+    // artificially set long delay for testing
+    await new Promise<void>((done) => setTimeout(() => done(), 120000));
+
+    // check if execution is cancelled
+    if (services.executionIsCancelled()) {
+      logger.warn(`cancel signal received! return early from rule executor`);
+      return;
+    } else {
+      logger.info('execution is not cancelled!');
+    }
+
     logger.info(
       `alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`
     );

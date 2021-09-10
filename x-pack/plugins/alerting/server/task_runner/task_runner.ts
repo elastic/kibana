@@ -290,6 +290,7 @@ export class TaskRunner<
               cancelled$: this.cancelled$,
               logger: this.logger,
             }),
+            executionIsCancelled: createExecutionCancelledService(this.cancelled$),
           },
           params,
           state: alertTypeState as State,
@@ -1015,4 +1016,10 @@ async function errorAsAlertTaskRunResult(
       schedule: asErr(e),
     };
   }
+}
+
+function createExecutionCancelledService(cancelled$: BehaviorSubject<boolean>) {
+  return () => {
+    return cancelled$.getValue();
+  };
 }

@@ -82,6 +82,7 @@ export interface AlertServices<
     query: ESSearchRequest,
     asInternalUser: boolean
   ) => TransportRequestPromise<ApiResponse<SearchResponse<unknown>, unknown>>;
+  executionIsCancelled: () => boolean;
 }
 
 export interface AlertExecutorOptions<
