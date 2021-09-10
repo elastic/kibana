@@ -180,6 +180,13 @@ export const CONFIG_CUSTOM_BUTTON = i18n.translate(
   }
 );
 
+export const CONFIG_CUSTOM_LINK_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.docs.link.text',
+  {
+    defaultMessage: 'Read the documentation',
+  }
+);
+
 export const CONFIG_OAUTH_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configOauth.label',
   {
