@@ -63,6 +63,10 @@ export interface LocatorPublic<P extends SerializableRecord> extends Persistable
   /**
    * Returns a URL as a string.
    *
+   * @deprecated Use `getRedirectUrl` instead. `getRedirectUrl` will preserve
+   * the location state, whereas the `getUrl` just return the URL without
+   * the location state.
+   *
    * @param params URL locator parameters.
    * @param getUrlParams URL construction parameters.
    */
