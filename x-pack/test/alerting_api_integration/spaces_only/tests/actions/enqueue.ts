@@ -23,7 +23,8 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  describe('enqueue', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/111812
+  describe.skip('enqueue', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
