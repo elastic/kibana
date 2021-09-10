@@ -252,6 +252,7 @@ class TutorialUi extends React.Component {
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
+              buttonSize="m"
               options={radioButtons}
               idSelected={this.state.visibleInstructions}
               onChange={this.setVisibleInstructions}
@@ -428,9 +429,9 @@ class TutorialUi extends React.Component {
             exportedFieldsUrl={exportedFieldsUrl}
             iconType={icon}
             isBeta={this.state.tutorial.isBeta}
+            notices={this.renderModuleNotices()}
           />
 
-          {this.renderModuleNotices()}
           <EuiSpacer />
           <div className="eui-textCenter">{this.renderInstructionSetsToggle()}</div>
 
