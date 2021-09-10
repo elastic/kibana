@@ -34,23 +34,6 @@ const kibanaDeprecations: DomainDeprecationDetails[] = [
   },
 ];
 
-const mockedKibanaCriticalOnlyDeprecations: DomainDeprecationDetails[] = [
-  {
-    correctiveActions: {
-      manualSteps: ['Step 1', 'Step 2', 'Step 3'],
-      api: {
-        method: 'POST',
-        path: '/test',
-      },
-    },
-    domainId: 'test_domain_1',
-    level: 'critical',
-    title: 'Test deprecation title 1',
-    message: 'Test deprecation message 1',
-    deprecationType: 'config',
-  },
-];
-
 const setLoadDeprecations = ({
   deprecationService,
   response,
@@ -108,6 +91,5 @@ export const kibanaDeprecationsServiceHelpers = {
     mockedConfigKibanaDeprecations: kibanaDeprecations.filter(
       (deprecation) => deprecation.deprecationType === 'config'
     ),
-    mockedKibanaCriticalOnlyDeprecations,
   },
 };

@@ -18,7 +18,7 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   const {
     mockedKibanaDeprecations,
-    mockedKibanaCriticalOnlyDeprecations,
+    mockedCriticalKibanaDeprecations,
   } = kibanaDeprecationsServiceHelpers.defaultMockedResponses;
 
   afterAll(() => {
@@ -69,7 +69,7 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
 
     describe('when there are critical but no warning issues', () => {
       beforeEach(async () => {
-        await setup(mockedKibanaCriticalOnlyDeprecations);
+        await setup(mockedCriticalKibanaDeprecations);
       });
 
       test('renders a count for critical issues and success state for warning issues', () => {
