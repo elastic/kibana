@@ -18,6 +18,7 @@ import { isEmptyManifestDiff, Manifest } from './manifest';
 import { InvalidInternalManifestError } from '../../services/artifacts/errors';
 import { ManifestManager } from '../../services';
 import { wrapErrorIfNeeded } from '../../utils';
+import { EndpointError } from '../../errors';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
@@ -90,7 +91,7 @@ export class ManifestTask {
         params: { version: ManifestTaskConstants.VERSION },
       });
     } catch (e) {
-      this.logger.debug(`Error scheduling task, received ${e.message}`);
+      this.logger.error(new EndpointError(`Error scheduling task, received ${e.message}`, e));
     }
   };
 
