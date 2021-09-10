@@ -168,6 +168,24 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
+  const deleteAllSchedules = async () => {
+    log.debug('ReportingAPI.deleteAllSchedules');
+
+    // ignores 409 errs and keeps retrying
+    await retry.tryForTime(5000, async () => {
+      await esSupertest
+        .post('/.kibana_task_manager/_delete_by_query')
+        .send({
+          query: {
+            match: {
+              'task.taskType': 'report:execute',
+            },
+          },
+        })
+        .expect(200);
+    });
+  };
+
   const checkIlmMigrationStatus = async () => {
     log.debug('ReportingAPI.checkIlmMigrationStatus');
     const { body } = await supertest
@@ -217,6 +235,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     postJob,
     postJobJSON,
     deleteAllReports,
+    deleteAllSchedules,
     checkIlmMigrationStatus,
     migrateReportingIndices,
     makeAllReportingIndicesUnmanaged,
