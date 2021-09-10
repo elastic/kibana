@@ -96,7 +96,7 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
         <FormattedMessage id="timelion.vis.expressionLabel" defaultMessage="Timelion expression" />
       </EuiFormLabel>
       <div className="timExpressionInput__editor">
-        <div className="timExpressionInput__absolute">
+        <div className="timExpressionInput__absolute" data-test-subj="timelionCodeEditor">
           <CodeEditor
             languageId={LANGUAGE_ID}
             value={value}
