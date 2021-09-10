@@ -17,8 +17,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FLAKY https://github.com/elastic/kibana/issues/111022
-  describe.skip('find', () => {
+  describe('find', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());

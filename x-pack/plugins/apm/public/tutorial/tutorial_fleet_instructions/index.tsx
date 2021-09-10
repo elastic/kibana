@@ -80,7 +80,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
             display="plain"
             textAlign="left"
             title={i18n.translate('xpack.apm.tutorial.apmServer.fleet.title', {
-              defaultMessage: 'Elastic APM (beta) now available in Fleet!',
+              defaultMessage: 'Elastic APM now available in Fleet!',
             })}
             description={i18n.translate(
               'xpack.apm.tutorial.apmServer.fleet.message',
