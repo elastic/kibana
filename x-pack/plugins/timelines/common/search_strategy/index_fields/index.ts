@@ -60,7 +60,7 @@ export interface IndexFieldsStrategyRequestById extends IEsSearchRequest {
   onlyCheckIfIndicesExist: boolean;
 }
 
-export type IndexFieldsStrategyRequest<T = 'dataView'> = T extends 'dataView'
+export type IndexFieldsStrategyRequest<T extends 'indices' | 'dataView'> = T extends 'dataView'
   ? IndexFieldsStrategyRequestById
   : IndexFieldsStrategyRequestByIndices;
 

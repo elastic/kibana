@@ -240,7 +240,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
         abortCtrl.current = new AbortController();
         setLoading(true);
         searchSubscription$.current = data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+          .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
             {
               dataViewId: selectedDataViewId,
               onlyCheckIfIndicesExist: false,

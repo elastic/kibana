@@ -28,7 +28,10 @@ import { StartPlugins } from '../../types';
 
 export const indexFieldsProvider = (
   getStartServices: StartServicesAccessor<StartPlugins>
-): ISearchStrategy<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse> => {
+): ISearchStrategy<
+  IndexFieldsStrategyRequest<'indices' | 'dataView'>,
+  IndexFieldsStrategyResponse
+> => {
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -57,15 +60,13 @@ export const findExistingIndices = async (
   );
 
 export const requestIndexFieldSearch = async (
-  request: IndexFieldsStrategyRequest,
+  request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
   { savedObjectsClient, esClient }: SearchStrategyDependencies,
   beatFields: BeatFields,
   getStartServices: StartServicesAccessor<StartPlugins>
 ): Promise<IndexFieldsStrategyResponse> => {
   const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
   const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
-  // TODO: Throw error when both request.indices and request.dataViewId
-
   if ('dataViewId' in request && 'indices' in request) {
     throw new Error('Provide index field search with either `dataViewId` or `indices`, not both');
   }
@@ -81,7 +82,7 @@ export const requestIndexFieldSearch = async (
   );
 
   let indicesExist: boolean[] = [];
-  let existingIndices: string[];
+  let existingIndices: string[] = [];
   let indexFields: IndexField[] = [];
   let runtimeMappings = {};
 
@@ -98,7 +99,7 @@ export const requestIndexFieldSearch = async (
       runtimeMappings = dataView.runtimeFieldMap;
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
-  } else {
+  } else if ('indices' in request) {
     const dedupeIndices = dedupeIndexName(request.indices);
     indicesExist = await findExistingIndices(dedupeIndices, esClient.asCurrentUser);
     existingIndices = dedupeIndices.filter((index, i) => indicesExist[i]);

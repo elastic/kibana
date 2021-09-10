@@ -127,7 +127,7 @@ export const useFetchIndex = (
         abortCtrl.current = new AbortController();
         setLoading(true);
         searchSubscription$.current = data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+          .search<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse>(
             { indices: iNames, onlyCheckIfIndicesExist },
             {
               abortSignal: abortCtrl.current.signal,
