@@ -266,7 +266,7 @@ class InstructionSetUi extends React.Component {
     }
 
     return (
-      <div>
+      <EuiPanel paddingSize="l">
         {this.renderHeader()}
 
         {this.renderCallOut()}
@@ -278,7 +278,7 @@ class InstructionSetUi extends React.Component {
         <EuiSpacer size="m" />
 
         {this.renderInstructions()}
-      </div>
+      </EuiPanel>
     );
   }
 }

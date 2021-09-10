@@ -15,9 +15,8 @@ import { InstructionSet } from './instruction_set';
 import { SavedObjectsInstaller } from './saved_objects_installer';
 import {
   EuiSpacer,
-  EuiPage,
   EuiPanel,
-  EuiPageBody,
+  EuiButton,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -286,23 +285,26 @@ class TutorialUi extends React.Component {
       offset += instructionSet.instructionVariants[0].instructions.length;
 
       return (
-        <InstructionSet
-          title={instructionSet.title}
-          callOut={instructionSet.callOut}
-          instructionVariants={instructionSet.instructionVariants}
-          statusCheckConfig={instructionSet.statusCheck}
-          statusCheckState={this.state.statusCheckStates[index]}
-          onStatusCheck={() => {
-            this.onStatusCheck(index);
-          }}
-          offset={currentOffset}
-          params={instructions.params}
-          paramValues={this.state.paramValues}
-          setParameter={this.setParameter}
-          replaceTemplateStrings={this.props.replaceTemplateStrings}
-          key={index}
-          isCloudEnabled={this.props.isCloudEnabled}
-        />
+        <>
+          <InstructionSet
+            title={instructionSet.title}
+            callOut={instructionSet.callOut}
+            instructionVariants={instructionSet.instructionVariants}
+            statusCheckConfig={instructionSet.statusCheck}
+            statusCheckState={this.state.statusCheckStates[index]}
+            onStatusCheck={() => {
+              this.onStatusCheck(index);
+            }}
+            offset={currentOffset}
+            params={instructions.params}
+            paramValues={this.state.paramValues}
+            setParameter={this.setParameter}
+            replaceTemplateStrings={this.props.replaceTemplateStrings}
+            key={index}
+            isCloudEnabled={this.props.isCloudEnabled}
+          />
+          {index < instructions.instructionSets.length - 1 && <EuiSpacer />}
+        </>
       );
     });
   };
@@ -313,11 +315,16 @@ class TutorialUi extends React.Component {
     }
 
     return (
-      <SavedObjectsInstaller
-        bulkCreate={this.props.bulkCreate}
-        savedObjects={this.state.tutorial.savedObjects}
-        installMsg={this.state.tutorial.savedObjectsInstallMsg}
-      />
+      <>
+        <EuiSpacer />
+        <EuiPanel paddingSize="l">
+          <SavedObjectsInstaller
+            bulkCreate={this.props.bulkCreate}
+            savedObjects={this.state.tutorial.savedObjects}
+            installMsg={this.state.tutorial.savedObjectsInstallMsg}
+          />
+        </EuiPanel>
+      </>
     );
   };
 
@@ -338,22 +345,23 @@ class TutorialUi extends React.Component {
     }
 
     if (url && label) {
-      return <Footer label={label} url={url} />;
+      return (
+        <>
+          <EuiSpacer />
+          <EuiPanel paddingSize="l">
+            <Footer label={label} url={url} />
+          </EuiPanel>
+        </>
+      );
     }
   };
 
   renderModuleNotices() {
     const notices = getServices().tutorialService.getModuleNotices();
     if (notices.length && this.state.tutorial.moduleName) {
-      return (
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {notices.map((ModuleNotice, index) => (
-            <EuiFlexItem key={index}>
-              <ModuleNotice moduleName={this.state.tutorial.moduleName} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      );
+      return notices.map((ModuleNotice, index) => (
+        <ModuleNotice key={index} moduleName={this.state.tutorial.moduleName} />
+      ));
     } else {
       return null;
     }
@@ -427,20 +435,14 @@ class TutorialUi extends React.Component {
           <div className="eui-textCenter">{this.renderInstructionSetsToggle()}</div>
 
           <EuiSpacer />
-          <EuiPanel paddingSize="l">
-            {this.renderInstructionSets(instructions)}
-            {this.renderSavedObjectsInstaller()}
-            {this.renderFooter()}
-          </EuiPanel>
+          {this.renderInstructionSets(instructions)}
+          {this.renderSavedObjectsInstaller()}
+          {this.renderFooter()}
         </div>
       );
     }
 
-    return (
-      <EuiPage restrictWidth={1200}>
-        <EuiPageBody>{content}</EuiPageBody>
-      </EuiPage>
-    );
+    return <KibanaPageTemplate template="empty">{content}</KibanaPageTemplate>;
   }
 }
 
