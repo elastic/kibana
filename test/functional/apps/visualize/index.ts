@@ -53,8 +53,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_timelion'));
     });
 
-    describe('visualize ciGroup9', function () {
-      this.tags('ciGroup9');
+    describe('visualize ciGroup5', function () {
+      this.tags('ciGroup5');
 
       loadTestFile(require.resolve('./_embedding_chart'));
       loadTestFile(require.resolve('./_data_table'));
@@ -63,8 +63,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_chart_types'));
     });
 
-    describe('visualize ciGroup10', function () {
-      this.tags('ciGroup10');
+    describe('visualize ciGroup5', function () {
+      this.tags('ciGroup5');
 
       loadTestFile(require.resolve('./_inspector'));
       loadTestFile(require.resolve('./_experimental_vis'));
@@ -87,8 +87,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_add_to_dashboard.ts'));
     });
 
-    describe('visualize ciGroup12', function () {
-      this.tags('ciGroup12');
+    describe('visualize ciGroup1', function () {
+      this.tags('ciGroup1');
 
       loadTestFile(require.resolve('./_tag_cloud'));
       loadTestFile(require.resolve('./_tsvb_chart'));

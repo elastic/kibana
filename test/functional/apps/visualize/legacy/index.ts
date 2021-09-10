@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService, loadTestFile }: FtrProvid
     });
 
     describe('legacy data table visualization', function () {
-      this.tags('ciGroup9');
+      this.tags('ciGroup5');
 
       loadTestFile(require.resolve('./_data_table'));
     });

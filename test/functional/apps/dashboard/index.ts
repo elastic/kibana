@@ -104,7 +104,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('using legacy data', function () {
-      this.tags('ciGroup5');
+      this.tags('ciGroup3');
       before(loadLogstash);
       after(unloadLogstash);
 

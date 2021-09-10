@@ -50,7 +50,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
     label: 'OSS CI Group'
-    parallelism: 12
+    parallelism: 7
     agents:
       queue: ci-group-4d
     artifact_paths: target/junit/**/*.xml

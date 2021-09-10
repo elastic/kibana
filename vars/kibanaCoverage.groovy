@@ -220,11 +220,6 @@ def ossProks() {
     'oss-ciGroup5' : kibanaPipeline.ossCiGroupProcess(5),
     'oss-ciGroup6' : kibanaPipeline.ossCiGroupProcess(6),
     'oss-ciGroup7' : kibanaPipeline.ossCiGroupProcess(7),
-    'oss-ciGroup8' : kibanaPipeline.ossCiGroupProcess(8),
-    'oss-ciGroup9' : kibanaPipeline.ossCiGroupProcess(9),
-    'oss-ciGroup10': kibanaPipeline.ossCiGroupProcess(10),
-    'oss-ciGroup11': kibanaPipeline.ossCiGroupProcess(11),
-    'oss-ciGroup12': kibanaPipeline.ossCiGroupProcess(12),
   ]
 }
 
