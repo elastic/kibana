@@ -38,8 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async function afterAll() {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await PageObjects.settings.navigateTo();
-      await esArchiver.emptyKibanaIndex();
     });
 
     describe('set and change field formatter', function describeIndexTests() {
