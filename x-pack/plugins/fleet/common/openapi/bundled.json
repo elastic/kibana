@@ -181,6 +181,7 @@
                           "type": "string",
                           "enum": [
                             "installed",
+                            "installing",
                             "not_installed"
                           ]
                         },
