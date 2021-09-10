@@ -12876,7 +12876,6 @@
     "xpack.indexLifecycleMgmt.searchableSnapshot.disallowedCalloutBody": "このフェーズで検索可能なスナップショットを使用するには、ホットフェーズで検索可能なスナップショットを無効にする必要があります。",
     "xpack.indexLifecycleMgmt.searchableSnapshot.disallowedCalloutTitle": "検索可能スナップショットが無効です",
     "xpack.indexLifecycleMgmt.searchSnapshotlicenseCheckErrorMessage": "検索可能なスナップショットを使用するには、1 つ以上のエンタープライズレベルのライセンスが必要です。",
-    "xpack.indexLifecycleMgmt.shrink.indexFieldLabel": "インデックスを縮小",
     "xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel": "プライマリシャードの数",
     "xpack.indexLifecycleMgmt.templateNotFoundMessage": "テンプレート{name}が見つかりません。",
     "xpack.indexLifecycleMgmt.timeline.coldPhaseSectionTitle": "コールドフェーズ",

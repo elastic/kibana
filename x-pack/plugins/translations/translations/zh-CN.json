@@ -13048,7 +13048,6 @@
     "xpack.indexLifecycleMgmt.searchableSnapshot.disallowedCalloutBody": "要在此阶段使用可搜索快照，必须在热阶段禁用可搜索快照。",
     "xpack.indexLifecycleMgmt.searchableSnapshot.disallowedCalloutTitle": "可搜索快照已禁用",
     "xpack.indexLifecycleMgmt.searchSnapshotlicenseCheckErrorMessage": "要使用可搜索快照，至少需要企业级许可证。",
-    "xpack.indexLifecycleMgmt.shrink.indexFieldLabel": "缩小索引",
     "xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel": "主分片数目",
     "xpack.indexLifecycleMgmt.templateNotFoundMessage": "找不到模板 {name}。",
     "xpack.indexLifecycleMgmt.timeline.coldPhaseSectionTitle": "冷阶段",
