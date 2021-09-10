@@ -13,9 +13,16 @@ import { Logger } from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { CustomHostSettings } from '../../config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
+import { AdditionalEmailServices } from '../email';
+import { sendEmailGraphApi } from './send_email_graph_api';
+import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
+// The value is the resource identifier (Application ID URI) of the resource you want, affixed with the .default suffix. For Microsoft Graph, the value is https://graph.microsoft.com/.default. This value informs the Microsoft identity platform endpoint that of all the application permissions you have configured for your app in the app registration portal, it should issue a token for the ones associated with the resource you want to use.
+export const GRAPH_API_OAUTH_SCOPE = 'https://graph.microsoft.com/.default';
+export const OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE = 'client_credentials';
+export const EXCHANGE_ONLINE_SERVER_HOST = 'login.microsoftonline.com';
 
 export interface SendEmailOptions {
   transport: Transport;
@@ -33,6 +40,10 @@ export interface Transport {
   host?: string;
   port?: number;
   secure?: boolean; // see: https://nodemailer.com/smtp/#tls-options
+  // OAuth 2.0 Client Credentials flow options
+  clientId?: string;
+  clientSecret?: string;
+  tenantId?: string;
 }
 
 export interface Routing {
@@ -78,12 +89,26 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       useProxy = false;
     }
   }
+  if (service === AdditionalEmailServices.EXCHANGE) {
+    if (
+      proxySettings?.proxyBypassHosts &&
+      proxySettings?.proxyBypassHosts?.has(EXCHANGE_ONLINE_SERVER_HOST)
+    ) {
+      useProxy = false;
+    }
+    if (
+      proxySettings?.proxyOnlyHosts &&
+      !proxySettings?.proxyOnlyHosts?.has(EXCHANGE_ONLINE_SERVER_HOST)
+    ) {
+      useProxy = false;
+    }
+  }
   let customHostSettings: CustomHostSettings | undefined;
 
   if (service === JSON_TRANSPORT_SERVICE) {
     transportConfig.jsonTransport = true;
     delete transportConfig.auth;
-  } else if (service != null) {
+  } else if (service === AdditionalEmailServices.EXCHANGE) {
     transportConfig.service = service;
   } else {
     transportConfig.host = host;
@@ -139,6 +164,34 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
 
   const nodemailerTransport = nodemailer.createTransport(transportConfig);
   const messageHTML = htmlFromMarkdown(logger, message);
+
+  if (service === AdditionalEmailServices.EXCHANGE) {
+    // request access token for microsoft exchange online server with Graph API scope
+    const res = await requestOAuthClientCredentialsToken(
+      `https://login.microsoftonline.com/${transport.tenantId}/oauth2/v2.0/token`,
+      logger,
+      {
+        scope: GRAPH_API_OAUTH_SCOPE,
+        grantType: OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,
+        clientId: transport.clientId,
+        clientSecret: transport.clientSecret,
+      }
+    );
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `${res.tokenType} ${res.accessToken}`,
+    };
+    try {
+      return await sendEmailGraphApi(
+        { options, headers, messageHTML },
+        logger,
+        configurationUtilities
+      );
+    } catch (err) {
+      logger.warn(`error thrown posting Microsoft Exchange email: ${err.message}`);
+      throw err;
+    }
+  }
 
   const email = {
     // email routing
