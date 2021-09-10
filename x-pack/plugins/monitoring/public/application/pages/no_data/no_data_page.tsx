@@ -37,11 +37,6 @@ export const NoDataPage = () => {
   });
 
   const { services } = useKibana<NoDataPageSetupDeps>();
-
-  const state = useContext(GlobalStateContext);
-  const clusterUuid = state.cluster_uuid;
-  const ccs = state.ccs;
-
   const [shouldRedirect, setShouldRedirect] = useState(false);
 
   const [model, setModel] = useState({
@@ -85,7 +80,6 @@ export const NoDataPage = () => {
 
     try {
       const clusters = await getClusters(services);
-      console.log('did a refresh from no data page');
 
       if (clusters && clusters.length) {
         updateModel({ isLoading: false });
@@ -102,9 +96,8 @@ export const NoDataPage = () => {
       //     message: err.data.message,
       //   };
       // }
-      console.log(err);
     }
-  }, [ccs, clusterUuid, services, services.http]);
+  }, [services, services.http, checkers, updateModel]);
 
   const enabler = new Enabler(services.http, updateModel);
 
