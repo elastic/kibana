@@ -166,8 +166,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           defaultMessage: 'The xpack.security.session.idleTimeout default is changing',
         }),
         message: i18n.translate('xpack.security.deprecations.idleTimeoutMessage', {
-          defaultMessage:
-            'The session idle timeout will default to 1 hour in 8.0.',
+          defaultMessage: 'The session idle timeout will default to 1 hour in 8.0.',
         }),
         documentationUrl:
           'https://www.elastic.co/guide/en/kibana/current/xpack-security-session-management.html#session-idle-timeout',
@@ -190,8 +189,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           defaultMessage: 'The xpack.security.session.lifespan default is changing',
         }),
         message: i18n.translate('xpack.security.deprecations.lifespanMessage', {
-          defaultMessage:
-            'The session lifespan will default to 30 days in 8.0.',
+          defaultMessage: 'The session lifespan will default to 30 days in 8.0.',
         }),
         documentationUrl:
           'https://www.elastic.co/guide/en/kibana/current/xpack-security-session-management.html#session-lifespan',
