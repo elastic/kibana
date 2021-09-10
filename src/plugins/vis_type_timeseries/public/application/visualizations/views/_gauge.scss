@@ -47,6 +47,7 @@
   font-size: .9em; /* 1 */
   line-height: 1em;  /* 1 */
   text-align: center;
+  // make gauge value the target for pointer-events
   pointer-events: all;
 
   .tvbVisGauge--reversed & {
@@ -72,5 +73,6 @@
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
+  // disable gauge container pointer-events as it shouldn't be event target
   pointer-events: none;
 }
