@@ -66,6 +66,8 @@ export interface OwnProps {
   additionalFilters?: React.ReactNode;
   hasAlertsCrud?: boolean;
   unit?: (n: number) => string;
+  itemsPerPage?: number;
+  itemsPerPageOptions?: number[];
 }
 
 type Props = OwnProps & PropsFromRedux;
@@ -245,7 +247,15 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
+  const mapStateToProps = (
+    state: State,
+    {
+      id,
+      defaultModel,
+      itemsPerPage: passedItemsPerPage,
+      itemsPerPageOptions: passedItemsPerPageOptions,
+    }: OwnProps
+  ) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
     const {
@@ -271,8 +281,8 @@ const makeMapStateToProps = () => {
       filters: getGlobalFiltersQuerySelector(state),
       id,
       isLive: input.policy.kind === 'interval',
-      itemsPerPage,
-      itemsPerPageOptions,
+      itemsPerPage: passedItemsPerPage ?? itemsPerPage,
+      itemsPerPageOptions: passedItemsPerPageOptions ?? itemsPerPageOptions,
       kqlMode,
       query: getGlobalQuerySelector(state),
       sort,

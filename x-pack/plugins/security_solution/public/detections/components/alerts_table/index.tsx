@@ -106,6 +106,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const { addWarning } = useAppToasts();
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
+  const itemsPerPageOptions: number[] = useMemo(() => [10, 25], []);
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -380,6 +381,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       end={to}
       currentFilter={filterGroup}
       id={timelineId}
+      itemsPerPageOptions={itemsPerPageOptions}
       onRuleChange={onRuleChange}
       renderCellValue={RenderCellValue}
       rowRenderers={defaultRowRenderers}

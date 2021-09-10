@@ -45,7 +45,7 @@ export const timelineDefaults: SubsetTimelineModel &
   isSelectAllChecked: false,
   isLoading: false,
   isSaving: false,
-  itemsPerPage: 25,
+  itemsPerPage: 10,
   itemsPerPageOptions: [10, 25, 50, 100],
   kqlMode: 'filter',
   kqlQuery: {

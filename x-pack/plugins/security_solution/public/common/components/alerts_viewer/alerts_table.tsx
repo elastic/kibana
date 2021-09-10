@@ -81,6 +81,7 @@ const AlertsTableComponent: React.FC<Props> = ({
   const { filterManager } = useKibana().services.data.query;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+  const itemsPerPageOptions: number[] = useMemo(() => [10, 25], []);
 
   useEffect(() => {
     dispatch(
@@ -112,6 +113,7 @@ const AlertsTableComponent: React.FC<Props> = ({
       end={endDate}
       entityType={entityType}
       id={timelineId}
+      itemsPerPageOptions={itemsPerPageOptions}
       renderCellValue={DefaultCellRenderer}
       rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.default}

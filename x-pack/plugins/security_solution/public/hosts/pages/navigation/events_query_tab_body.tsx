@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { TimelineId } from '../../../../common/types/timeline';
@@ -71,6 +71,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   const { globalFullScreen } = useGlobalFullScreen();
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+  const itemsPerPageOptions: number[] = useMemo(() => [10, 25], []);
 
   useEffect(() => {
     dispatch(
@@ -115,6 +116,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         end={endDate}
         entityType="events"
         id={TimelineId.hostsPageEvents}
+        itemsPerPageOptions={itemsPerPageOptions}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
         scopeId={SourcererScopeName.default}
