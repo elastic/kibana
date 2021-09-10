@@ -22,11 +22,11 @@ const tableHeight = 282;
  *
  * Only do this when we're at a non-mobile breakpoint.
  *
- * Hide the empty message when we don't yet have any items and are still loading.
+ * Hide the empty message when we don't yet have any items and are still not initiated.
  */
 const OverviewTableContainerDiv = euiStyled.div<{
   fixedHeight?: boolean;
-  isEmptyAndLoading: boolean;
+  isEmptyAndNotInitiated: boolean;
   shouldUseMobileLayout: boolean;
 }>`
   ${({ fixedHeight, shouldUseMobileLayout }) =>
@@ -48,26 +48,26 @@ const OverviewTableContainerDiv = euiStyled.div<{
   `}
 
   .euiTableRowCell {
-    visibility: ${({ isEmptyAndLoading }) =>
-      isEmptyAndLoading ? 'hidden' : 'visible'};
+    visibility: ${({ isEmptyAndNotInitiated }) =>
+      isEmptyAndNotInitiated ? 'hidden' : 'visible'};
   }
 `;
 
 export function OverviewTableContainer({
   children,
   fixedHeight,
-  isEmptyAndLoading,
+  isEmptyAndNotInitiated,
 }: {
   children?: ReactNode;
   fixedHeight?: boolean;
-  isEmptyAndLoading: boolean;
+  isEmptyAndNotInitiated: boolean;
 }) {
   const { isMedium } = useBreakPoints();
 
   return (
     <OverviewTableContainerDiv
       fixedHeight={fixedHeight}
-      isEmptyAndLoading={isEmptyAndLoading}
+      isEmptyAndNotInitiated={isEmptyAndNotInitiated}
       shouldUseMobileLayout={isMedium}
     >
       {children}

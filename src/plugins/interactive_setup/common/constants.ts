@@ -6,17 +6,4 @@
  * Side Public License, v 1.
  */
 
-export async function importLegacyFile(file: File) {
-  return new Promise((resolve, reject) => {
-    const fr = new FileReader();
-    fr.onload = (event) => {
-      const result = event.target!.result as string;
-      try {
-        resolve(JSON.parse(result));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    fr.readAsText(file);
-  });
-}
+export const VERIFICATION_CODE_LENGTH = 6;

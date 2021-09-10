@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart } from 'src/core/public';
-
-export async function logLegacyImport(http: HttpStart) {
-  return http.post('/api/saved_objects/_log_legacy_import');
-}
+export const getFormatService = () => ({
+  deserialize: (target: any) => ({
+    convert: (text: string, format: string) => text,
+  }),
+});

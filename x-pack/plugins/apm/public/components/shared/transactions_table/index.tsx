@@ -217,6 +217,7 @@ export function TransactionsTable({
   });
 
   const isLoading = status === FETCH_STATUS.LOADING;
+  const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
 
   const pagination = {
     pageIndex,
@@ -296,7 +297,9 @@ export function TransactionsTable({
           <TableFetchWrapper status={status}>
             <OverviewTableContainer
               fixedHeight={fixedHeight}
-              isEmptyAndLoading={transactionGroupsTotalItems === 0 && isLoading}
+              isEmptyAndNotInitiated={
+                transactionGroupsTotalItems === 0 && isNotInitiated
+              }
             >
               <EuiBasicTable
                 noItemsMessage={

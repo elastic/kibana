@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { isRumAgentName, isIosAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -26,6 +27,7 @@ import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { replace } from '../../shared/Links/url_helpers';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -34,16 +36,28 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 export const chartHeight = 288;
 
 export function ServiceOverview() {
-  const { agentName, serviceName } = useApmServiceContext();
+  const { agentName, serviceName, transactionType } = useApmServiceContext();
   const {
     query,
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      transactionType: transactionTypeFromUrl,
+    },
   } = useApmParams('/services/:serviceName/overview');
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
-
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const history = useHistory();
+
+  // redirect to first transaction type
+  if (!transactionTypeFromUrl && transactionType) {
+    replace(history, { query: { transactionType } });
+  }
 
   // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
   // observe the window width and set the flex directions of rows accordingly

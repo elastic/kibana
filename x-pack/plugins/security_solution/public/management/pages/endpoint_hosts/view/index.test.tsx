@@ -832,6 +832,15 @@ describe('when on the endpoint list page', () => {
         });
         const actionData = fleetActionGenerator.generate({
           agents: [agentId],
+          data: {
+            comment: 'some comment',
+          },
+        });
+        const isolatedActionData = fleetActionGenerator.generateIsolateAction({
+          agents: [agentId],
+          data: {
+            comment: ' ', // has space for comment,
+          },
         });
 
         getMockData = () => ({
@@ -852,6 +861,13 @@ describe('when on the endpoint list page', () => {
               item: {
                 id: 'some_id_1',
                 data: actionData,
+              },
+            },
+            {
+              type: 'action',
+              item: {
+                id: 'some_id_3',
+                data: isolatedActionData,
               },
             },
           ],
@@ -890,7 +906,7 @@ describe('when on the endpoint list page', () => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
         });
         const logEntries = await renderResult.queryAllByTestId('timelineEntry');
-        expect(logEntries.length).toEqual(2);
+        expect(logEntries.length).toEqual(3);
         expect(`${logEntries[0]} .euiCommentTimeline__icon--update`).not.toBe(null);
         expect(`${logEntries[1]} .euiCommentTimeline__icon--regular`).not.toBe(null);
       });
@@ -947,7 +963,7 @@ describe('when on the endpoint list page', () => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
         });
         const logEntries = await renderResult.queryAllByTestId('timelineEntry');
-        expect(logEntries.length).toEqual(2);
+        expect(logEntries.length).toEqual(3);
       });
 
       it('should display a callout message if no log data', async () => {
@@ -974,6 +990,29 @@ describe('when on the endpoint list page', () => {
 
         const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
         expect(activityLogCallout).not.toBeNull();
+      });
+
+      it('should correctly display non-empty comments only for actions', async () => {
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          history.push(
+            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+          );
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
+        );
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
+        });
+        const commentTexts = await renderResult.queryAllByTestId('activityLogCommentText');
+        expect(commentTexts.length).toEqual(1);
+        expect(commentTexts[0].textContent).toEqual('some comment');
+        expect(commentTexts[0].parentElement?.parentElement?.className).toContain(
+          'euiCommentEvent--regular'
+        );
       });
     });
 

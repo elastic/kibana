@@ -95,18 +95,55 @@ describe('Enroll routes', () => {
       );
 
       expect(
-        bodySchema.validate(
-          bodySchema.validate({
-            apiKey: 'some-key',
-            hosts: ['https://localhost:9200'],
-            caFingerprint: 'a'.repeat(64),
-          })
-        )
-      ).toEqual({
-        apiKey: 'some-key',
-        hosts: ['https://localhost:9200'],
-        caFingerprint: 'a'.repeat(64),
+        bodySchema.validate({
+          apiKey: 'some-key',
+          hosts: ['https://localhost:9200'],
+          caFingerprint: 'a'.repeat(64),
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "apiKey": "some-key",
+          "caFingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "hosts": Array [
+            "https://localhost:9200",
+          ],
+        }
+      `);
+      expect(
+        bodySchema.validate({
+          apiKey: 'some-key',
+          hosts: ['https://localhost:9200'],
+          caFingerprint: 'a'.repeat(64),
+          code: '123456',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "apiKey": "some-key",
+          "caFingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "code": "123456",
+          "hosts": Array [
+            "https://localhost:9200",
+          ],
+        }
+      `);
+    });
+
+    it('fails if verification code is invalid.', async () => {
+      mockRouteParams.verificationCode.verify.mockReturnValue(false);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
+
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 403,
+        })
+      );
+
+      expect(mockRouteParams.elasticsearch.enroll).not.toHaveBeenCalled();
+      expect(mockRouteParams.kibanaConfigWriter.writeConfig).not.toHaveBeenCalled();
+      expect(mockRouteParams.preboot.completeSetup).not.toHaveBeenCalled();
     });
 
     it('fails if setup is not on hold.', async () => {

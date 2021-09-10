@@ -9,14 +9,23 @@
 import { tagcloudFunction } from './tagcloud_function';
 
 import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
+import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
 
 describe('interpreter/functions#tagcloud', () => {
   const fn = functionWrapper(tagcloudFunction());
+  const column1 = 'Count';
+  const column2 = 'country';
   const context = {
     type: 'datatable',
-    rows: [{ 'col-0-1': 0 }],
-    columns: [{ id: 'col-0-1', name: 'Count' }],
+    columns: [
+      { id: column1, name: column1 },
+      { id: column2, name: column2 },
+    ],
+    rows: [
+      { [column1]: 0, [column2]: 'US' },
+      { [column1]: 10, [column2]: 'UK' },
+    ],
   };
   const visConfig = {
     scale: 'linear',
@@ -24,12 +33,52 @@ describe('interpreter/functions#tagcloud', () => {
     minFontSize: 18,
     maxFontSize: 72,
     showLabel: true,
-    metric: { accessor: 0, format: { id: 'number' } },
-    bucket: { accessor: 1, format: { id: 'number' } },
   };
 
-  it('returns an object with the correct structure', () => {
-    const actual = fn(context, visConfig, undefined);
+  const numberAccessors = {
+    metric: { accessor: 0 },
+    bucket: { accessor: 1 },
+  };
+
+  const stringAccessors: {
+    metric: ExpressionValueVisDimension;
+    bucket: ExpressionValueVisDimension;
+  } = {
+    metric: {
+      type: 'vis_dimension',
+      accessor: {
+        id: column1,
+        name: column1,
+        meta: {
+          type: 'number',
+        },
+      },
+      format: {
+        params: {},
+      },
+    },
+    bucket: {
+      type: 'vis_dimension',
+      accessor: {
+        id: column2,
+        name: column2,
+        meta: {
+          type: 'string',
+        },
+      },
+      format: {
+        params: {},
+      },
+    },
+  };
+
+  it('returns an object with the correct structure for number accessors', () => {
+    const actual = fn(context, { ...visConfig, ...numberAccessors }, undefined);
+    expect(actual).toMatchSnapshot();
+  });
+
+  it('returns an object with the correct structure for string accessors', () => {
+    const actual = fn(context, { ...visConfig, ...stringAccessors }, undefined);
     expect(actual).toMatchSnapshot();
   });
 
@@ -44,7 +93,7 @@ describe('interpreter/functions#tagcloud', () => {
         },
       },
     };
-    await fn(context, visConfig, handlers as any);
+    await fn(context, { ...visConfig, ...numberAccessors }, handlers as any);
 
     expect(loggedTable!).toMatchSnapshot();
   });
