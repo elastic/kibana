@@ -16,6 +16,7 @@ import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_opti
 import { AdditionalEmailServices } from '../email';
 import { sendEmailGraphApi } from './send_email_graph_api';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
+import { ProxySettings } from '../../types';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -61,12 +62,92 @@ export interface Content {
 // send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
-  const { service, host, port, secure, user, password } = transport;
+  const { service } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
 
+  const messageHTML = htmlFromMarkdown(logger, message);
+
+  if (service === AdditionalEmailServices.EXCHANGE) {
+    // request access token for microsoft exchange online server with Graph API scope
+    const res = await requestOAuthClientCredentialsToken(
+      `https://login.microsoftonline.com/${transport.tenantId}/oauth2/v2.0/token`,
+      logger,
+      {
+        scope: GRAPH_API_OAUTH_SCOPE,
+        grantType: OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,
+        clientId: transport.clientId,
+        clientSecret: transport.clientSecret,
+      },
+      configurationUtilities
+    );
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `${res.tokenType} ${res.accessToken}`,
+    };
+    try {
+      return await sendEmailGraphApi(
+        { options, headers, messageHTML },
+        logger,
+        configurationUtilities
+      );
+    } catch (err) {
+      logger.warn(`error thrown posting Microsoft Exchange email: ${err.message}`);
+      throw err;
+    }
+  }
+
+  const email = {
+    // email routing
+    from,
+    to,
+    cc,
+    bcc,
+    // email content
+    subject,
+    html: messageHTML,
+    text: message,
+  };
+
   // The transport options do not seem to be exposed as a type, and we reference
   // some deep properties, so need to use any here.
+  const transportConfig = getTransportConfig(configurationUtilities, logger, transport, hasAuth);
+  const nodemailerTransport = nodemailer.createTransport(transportConfig);
+  const result = await nodemailerTransport.sendMail(email);
+
+  if (service === JSON_TRANSPORT_SERVICE) {
+    try {
+      result.message = JSON.parse(result.message);
+    } catch (err) {
+      // try parsing the message for ease of debugging, on error, ignore
+    }
+  }
+
+  return result;
+}
+
+// try rendering markdown to html, return markdown on any kind of error
+function htmlFromMarkdown(logger: Logger, markdown: string) {
+  try {
+    const md = MarkdownIt({
+      linkify: true,
+    });
+
+    return md.render(markdown);
+  } catch (err) {
+    logger.debug(`error rendering markdown to html: ${err.message}`);
+
+    return markdown;
+  }
+}
+
+function getTransportConfig(
+  configurationUtilities: ActionsConfigurationUtilities,
+  logger: Logger,
+  transport: Transport,
+  hasAuth: boolean
+) {
+  const { service, host, port, secure, user, password } = transport;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transportConfig: Record<string, any> = {};
   const proxySettings = configurationUtilities.getProxySettings();
@@ -79,36 +160,14 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     };
   }
 
-  let useProxy = !!proxySettings;
-
-  if (host) {
-    if (proxySettings?.proxyBypassHosts && proxySettings?.proxyBypassHosts?.has(host)) {
-      useProxy = false;
-    }
-    if (proxySettings?.proxyOnlyHosts && !proxySettings?.proxyOnlyHosts?.has(host)) {
-      useProxy = false;
-    }
-  }
-  if (service === AdditionalEmailServices.EXCHANGE) {
-    if (
-      proxySettings?.proxyBypassHosts &&
-      proxySettings?.proxyBypassHosts?.has(EXCHANGE_ONLINE_SERVER_HOST)
-    ) {
-      useProxy = false;
-    }
-    if (
-      proxySettings?.proxyOnlyHosts &&
-      !proxySettings?.proxyOnlyHosts?.has(EXCHANGE_ONLINE_SERVER_HOST)
-    ) {
-      useProxy = false;
-    }
-  }
+  const useProxy = getUseProxy();
   let customHostSettings: CustomHostSettings | undefined;
 
   if (service === JSON_TRANSPORT_SERVICE) {
     transportConfig.jsonTransport = true;
     delete transportConfig.auth;
-  } else if (service === AdditionalEmailServices.EXCHANGE) {
+    return transportConfig;
+  } else if (service != null) {
     transportConfig.service = service;
   } else {
     transportConfig.host = host;
@@ -161,74 +220,17 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       }
     }
   }
-
-  const nodemailerTransport = nodemailer.createTransport(transportConfig);
-  const messageHTML = htmlFromMarkdown(logger, message);
-
-  if (service === AdditionalEmailServices.EXCHANGE) {
-    // request access token for microsoft exchange online server with Graph API scope
-    const res = await requestOAuthClientCredentialsToken(
-      `https://login.microsoftonline.com/${transport.tenantId}/oauth2/v2.0/token`,
-      logger,
-      {
-        scope: GRAPH_API_OAUTH_SCOPE,
-        grantType: OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,
-        clientId: transport.clientId,
-        clientSecret: transport.clientSecret,
-      }
-    );
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `${res.tokenType} ${res.accessToken}`,
-    };
-    try {
-      return await sendEmailGraphApi(
-        { options, headers, messageHTML },
-        logger,
-        configurationUtilities
-      );
-    } catch (err) {
-      logger.warn(`error thrown posting Microsoft Exchange email: ${err.message}`);
-      throw err;
-    }
-  }
-
-  const email = {
-    // email routing
-    from,
-    to,
-    cc,
-    bcc,
-    // email content
-    subject,
-    html: messageHTML,
-    text: message,
-  };
-
-  const result = await nodemailerTransport.sendMail(email);
-
-  if (service === JSON_TRANSPORT_SERVICE) {
-    try {
-      result.message = JSON.parse(result.message);
-    } catch (err) {
-      // try parsing the message for ease of debugging, on error, ignore
-    }
-  }
-
-  return result;
+  return transportConfig;
 }
 
-// try rendering markdown to html, return markdown on any kind of error
-function htmlFromMarkdown(logger: Logger, markdown: string) {
-  try {
-    const md = MarkdownIt({
-      linkify: true,
-    });
-
-    return md.render(markdown);
-  } catch (err) {
-    logger.debug(`error rendering markdown to html: ${err.message}`);
-
-    return markdown;
+function getUseProxy(host?: string, proxySettings?: ProxySettings) {
+  if (host) {
+    if (proxySettings?.proxyBypassHosts && proxySettings?.proxyBypassHosts?.has(host)) {
+      return false;
+    }
+    if (proxySettings?.proxyOnlyHosts && !proxySettings?.proxyOnlyHosts?.has(host)) {
+      return false;
+    }
   }
+  return !!proxySettings;
 }

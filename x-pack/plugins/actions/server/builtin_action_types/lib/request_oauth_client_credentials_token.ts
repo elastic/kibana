@@ -6,8 +6,10 @@
  */
 
 import qs from 'query-string';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { Logger } from '../../../../../../src/core/server';
+import { request } from './axios_utils';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 interface ClientCredentialsRequestParams {
   scope?: string;
@@ -25,13 +27,17 @@ interface ClientCredentialsResponse {
 export async function requestOAuthClientCredentialsToken(
   tokenUrl: string,
   logger: Logger,
-  params: ClientCredentialsRequestParams
+  params: ClientCredentialsRequestParams,
+  configurationUtilities: ActionsConfigurationUtilities
 ): Promise<ClientCredentialsResponse> {
   const axiosInstance = axios.create();
   const { clientId, clientSecret, grantType, scope } = params;
   try {
-    const res = await axiosInstance(tokenUrl, {
+    const res = await request({
+      axios: axiosInstance,
+      url: tokenUrl,
       method: 'post',
+      logger,
       data: qs.stringify({
         scope,
         client_id: clientId,
@@ -41,6 +47,8 @@ export async function requestOAuthClientCredentialsToken(
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       },
+      configurationUtilities,
+      validateStatus: () => true,
     });
     if (res.status === 200) {
       return res.data;
