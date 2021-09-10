@@ -23,7 +23,7 @@ const i18nTexts = {
     defaultMessage: 'Identify deprecated API use and update your applications',
   }),
   toggleTitle: i18n.translate('xpack.upgradeAssistant.overview.toggleTitle', {
-    defaultMessage: 'Log Elasticsearch deprecation warnings',
+    defaultMessage: 'Log Elasticsearch deprecation issues',
   }),
   analyzeTitle: i18n.translate('xpack.upgradeAssistant.overview.analyzeTitle', {
     defaultMessage: 'Analyze deprecation logs',

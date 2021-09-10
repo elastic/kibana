@@ -51,7 +51,7 @@ export function registerUpgradeStatusRoute({ router, lib: { handleEsError } }: R
 
             return i18n.translate('xpack.upgradeAssistant.status.deprecationsUnresolvedMessage', {
               defaultMessage:
-                'You have {esTotalCriticalDeps} Elasticsearch deprecation warnings and {kibanaTotalCriticalDeps} Kibana deprecation warnings that must be resolved before upgrading.',
+                'You have {esTotalCriticalDeps} Elasticsearch deprecation {esTotalCriticalDeps, plural, one {issue} other {issues}} and {kibanaTotalCriticalDeps} Kibana deprecation {kibanaTotalCriticalDeps, plural, one {issue} other {issues}} that must be resolved before upgrading.',
               values: { esTotalCriticalDeps, kibanaTotalCriticalDeps },
             });
           };
