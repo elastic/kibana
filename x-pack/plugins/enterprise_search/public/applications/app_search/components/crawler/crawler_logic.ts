@@ -45,7 +45,7 @@ interface CrawlerActions {
 }
 
 export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
-  path: ['enterprise_search', 'app_search', 'crawler', 'crawler_overview'],
+  path: ['enterprise_search', 'app_search', 'crawler_logic'],
   actions: {
     clearTimeoutId: true,
     createNewTimeoutForCrawlRequests: (duration) => ({ duration }),
@@ -104,7 +104,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/api/app_search/engines/${engineName}/crawler`);
+        const response = await http.get(`/internal/app_search/engines/${engineName}/crawler`);
 
         const crawlerData = crawlerDataServerToClient(response);
 
@@ -118,7 +118,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { engineName } = EngineLogic.values;
 
       try {
-        await http.post(`/api/app_search/engines/${engineName}/crawler/crawl_requests`);
+        await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests`);
         actions.getLatestCrawlRequests();
       } catch (e) {
         flashAPIErrors(e);
@@ -129,7 +129,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { engineName } = EngineLogic.values;
 
       try {
-        await http.post(`/api/app_search/engines/${engineName}/crawler/crawl_requests/cancel`);
+        await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests/cancel`);
         actions.getLatestCrawlRequests();
       } catch (e) {
         flashAPIErrors(e);
@@ -152,7 +152,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
 
       try {
         const crawlRequestsFromServer: CrawlRequestFromServer[] = await http.get(
-          `/api/app_search/engines/${engineName}/crawler/crawl_requests`
+          `/internal/app_search/engines/${engineName}/crawler/crawl_requests`
         );
         const crawlRequests = crawlRequestsFromServer.map(crawlRequestServerToClient);
         actions.onReceiveCrawlRequests(crawlRequests);

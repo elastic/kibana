@@ -6,42 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { InterfaceDeclaration } from 'ts-morph';
-import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
+import { ApiDeclaration, TypeKind } from '../types';
 import { buildApiDeclaration } from './build_api_declaration';
 import { isInternal } from '../utils';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
+import { BuildApiDecOpts } from './types';
+import { getOptsForChild } from './utils';
 
 export function buildInterfaceDec(
   node: InterfaceDeclaration,
-  plugins: KibanaPlatformPlugin[],
-  anchorLink: AnchorLink,
-  currentPluginId: string,
-  log: ToolingLog,
-  captureReferences: boolean
+  opts: BuildApiDecOpts
 ): ApiDeclaration {
   return {
-    ...buildBasicApiDeclaration({
-      currentPluginId,
-      anchorLink,
-      node,
-      plugins,
-      log,
-      captureReferences,
-      apiName: node.getName(),
+    ...buildBasicApiDeclaration(node, {
+      ...opts,
+      name: node.getName(),
     }),
     type: TypeKind.InterfaceKind,
     children: node.getMembers().reduce((acc, m) => {
-      const child = buildApiDeclaration({
-        node: m,
-        plugins,
-        log,
-        currentPluginId: anchorLink.pluginName,
-        scope: anchorLink.scope,
-        captureReferences,
-        parentApiId: anchorLink.apiName,
-      });
+      const child = buildApiDeclaration(m, getOptsForChild(m, opts));
       if (!isInternal(child)) {
         acc.push(child);
       }
