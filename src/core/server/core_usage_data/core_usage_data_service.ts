@@ -27,7 +27,7 @@ import type {
   CoreServicesUsageData,
   CoreUsageData,
   CoreUsageDataStart,
-  CoreUsageDataSetup,
+  InternalCoreUsageDataSetup,
   ConfigUsageData,
   CoreConfigUsageData,
 } from './types';
@@ -39,6 +39,7 @@ import { LEGACY_URL_ALIAS_TYPE } from '../saved_objects/object_types';
 import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { MetricsServiceSetup, OpsMetrics } from '..';
+import { CoreIncrementUsageCounter } from './types';
 
 export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
 
@@ -86,7 +87,8 @@ const isCustomIndex = (index: string) => {
   return index !== '.kibana';
 };
 
-export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, CoreUsageDataStart> {
+export class CoreUsageDataService
+  implements CoreService<InternalCoreUsageDataSetup, CoreUsageDataStart> {
   private logger: Logger;
   private elasticsearchConfig?: ElasticsearchConfigType;
   private configService: CoreContext['configService'];
@@ -98,6 +100,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
   private kibanaConfig?: KibanaConfigType;
   private coreUsageStatsClient?: CoreUsageStatsClient;
   private deprecatedConfigPaths: ChangedDeprecatedPaths = { set: [], unset: [] };
+  private incrementUsageCounter: CoreIncrementUsageCounter = () => {}; // Initially set to noop
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-usage-stats-service');
@@ -495,7 +498,24 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
 
     this.coreUsageStatsClient = getClient();
 
-    return { registerType, getClient } as CoreUsageDataSetup;
+    const contract: InternalCoreUsageDataSetup = {
+      registerType,
+      getClient,
+      registerUsageCounter: (usageCounter) => {
+        this.incrementUsageCounter = (params) => usageCounter.incrementCounter(params);
+      },
+      incrementUsageCounter: (params) => {
+        try {
+          this.incrementUsageCounter(params);
+        } catch (e) {
+          // Self-defense mechanism since the handler is externally registered
+          this.logger.debug('Failed to increase the usage counter');
+          this.logger.debug(e);
+        }
+      },
+    };
+
+    return contract;
   }
 
   start({ savedObjects, elasticsearch, exposedConfigsToUsage }: StartDeps) {

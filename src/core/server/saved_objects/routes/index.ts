@@ -7,7 +7,7 @@
  */
 
 import { InternalHttpServiceSetup } from '../../http';
-import { CoreUsageDataSetup } from '../../core_usage_data';
+import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import { Logger } from '../../logging';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { IKibanaMigrator } from '../migrations';
@@ -20,7 +20,6 @@ import { registerUpdateRoute } from './update';
 import { registerBulkGetRoute } from './bulk_get';
 import { registerBulkCreateRoute } from './bulk_create';
 import { registerBulkUpdateRoute } from './bulk_update';
-import { registerLogLegacyImportRoute } from './log_legacy_import';
 import { registerExportRoute } from './export';
 import { registerImportRoute } from './import';
 import { registerResolveImportErrorsRoute } from './resolve_import_errors';
@@ -34,7 +33,7 @@ export function registerRoutes({
   migratorPromise,
 }: {
   http: InternalHttpServiceSetup;
-  coreUsageData: CoreUsageDataSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
   config: SavedObjectConfig;
   migratorPromise: Promise<IKibanaMigrator>;
@@ -50,7 +49,6 @@ export function registerRoutes({
   registerBulkGetRoute(router, { coreUsageData });
   registerBulkCreateRoute(router, { coreUsageData });
   registerBulkUpdateRoute(router, { coreUsageData });
-  registerLogLegacyImportRoute(router, logger);
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });

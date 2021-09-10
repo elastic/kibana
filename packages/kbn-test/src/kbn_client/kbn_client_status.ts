@@ -9,13 +9,11 @@
 import { KbnClientRequester } from './kbn_client_requester';
 
 interface Status {
-  state: 'green' | 'red' | 'yellow';
-  title?: string;
-  id?: string;
-  icon: string;
-  message: string;
-  uiColor: string;
-  since: string;
+  level: 'available' | 'degraded' | 'unavailable' | 'critical';
+  summary: string;
+  detail?: string;
+  documentationUrl?: string;
+  meta?: Record<string, unknown>;
 }
 
 interface ApiResponseStatus {
@@ -29,7 +27,8 @@ interface ApiResponseStatus {
   };
   status: {
     overall: Status;
-    statuses: Status[];
+    core: Record<string, Status>;
+    plugins: Record<string, Status>;
   };
   metrics: unknown;
 }
@@ -55,6 +54,6 @@ export class KbnClientStatus {
    */
   public async getOverallState() {
     const status = await this.get();
-    return status.status.overall.state;
+    return status.status.overall.level;
   }
 }

@@ -15,9 +15,10 @@ import {
   Render,
   Style,
 } from '../../../expressions/public';
-import { visType, DimensionsVisParam, VisParams } from './types';
+import { visType, VisParams } from './types';
 import { prepareLogTable, Dimension } from '../../../visualizations/public';
 import { ColorSchemas, vislibColorMaps, ColorMode } from '../../../charts/public';
+import { ExpressionValueVisDimension } from '../../../visualizations/public';
 
 export type Input = Datatable;
 
@@ -32,8 +33,8 @@ interface Arguments {
   subText: string;
   colorRange: Range[];
   font: Style;
-  metric: any[]; // these aren't typed yet
-  bucket: any; // these aren't typed yet
+  metric: ExpressionValueVisDimension[];
+  bucket: ExpressionValueVisDimension;
 }
 
 export interface MetricVisRenderValue {
@@ -150,14 +151,6 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
     },
   },
   fn(input, args, handlers) {
-    const dimensions: DimensionsVisParam = {
-      metrics: args.metric,
-    };
-
-    if (args.bucket) {
-      dimensions.bucket = args.bucket;
-    }
-
     if (args.percentageMode && (!args.colorRange || args.colorRange.length === 0)) {
       throw new Error('colorRange must be provided when using percentageMode');
     }
@@ -184,6 +177,7 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
       const logTable = prepareLogTable(input, argsTable);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
+
     return {
       type: 'render',
       as: 'metric_vis',
@@ -209,7 +203,10 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
               fontSize,
             },
           },
-          dimensions,
+          dimensions: {
+            metrics: args.metric,
+            ...(args.bucket ? { bucket: args.bucket } : {}),
+          },
         },
       },
     };

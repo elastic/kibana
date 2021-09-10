@@ -359,6 +359,16 @@ export interface CoreEnvironmentUsageData {
 // @internal (undocumented)
 export type CoreId = symbol;
 
+// @internal
+export interface CoreIncrementCounterParams {
+    counterName: string;
+    counterType?: string;
+    incrementBy?: number;
+}
+
+// @internal
+export type CoreIncrementUsageCounter = (params: CoreIncrementCounterParams) => void;
+
 // @public
 export interface CorePreboot {
     // (undocumented)
@@ -395,6 +405,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
+    // @internal (undocumented)
+    coreUsageData: CoreUsageDataSetup;
     // (undocumented)
     deprecations: DeprecationsServiceSetup;
     // (undocumented)
@@ -450,6 +462,12 @@ export interface CoreStatus {
 }
 
 // @internal
+export interface CoreUsageCounter {
+    // (undocumented)
+    incrementCounter: CoreIncrementUsageCounter;
+}
+
+// @internal
 export interface CoreUsageData extends CoreUsageStats {
     // (undocumented)
     config: CoreConfigUsageData;
@@ -457,6 +475,11 @@ export interface CoreUsageData extends CoreUsageStats {
     environment: CoreEnvironmentUsageData;
     // (undocumented)
     services: CoreServicesUsageData;
+}
+
+// @internal
+export interface CoreUsageDataSetup {
+    registerUsageCounter: (usageCounter: CoreUsageCounter) => void;
 }
 
 // @internal

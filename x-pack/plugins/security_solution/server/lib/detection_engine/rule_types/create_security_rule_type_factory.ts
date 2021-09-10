@@ -40,6 +40,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
   lists,
   logger,
   mergeStrategy,
+  ignoreFields,
   ruleDataClient,
   ruleDataService,
 }) => (type) => {
@@ -208,6 +209,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
 
         const wrapHits = wrapHitsFactory({
           logger,
+          ignoreFields,
           mergeStrategy,
           ruleSO,
           spaceId,

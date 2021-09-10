@@ -15,8 +15,10 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const supertestAsApmReadUserWithoutMlAccess = getService('supertestAsApmReadUserWithoutMlAccess');
+  const supertest = getService('legacySupertestAsApmReadUser');
+  const supertestAsApmReadUserWithoutMlAccess = getService(
+    'legacySupertestAsApmReadUserWithoutMlAccess'
+  );
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];

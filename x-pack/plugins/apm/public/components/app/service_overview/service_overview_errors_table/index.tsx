@@ -207,8 +207,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         <TableFetchWrapper status={status}>
           <OverviewTableContainer
             fixedHeight={true}
-            isEmptyAndLoading={
-              totalItems === 0 && status === FETCH_STATUS.LOADING
+            isEmptyAndNotInitiated={
+              totalItems === 0 && status === FETCH_STATUS.NOT_INITIATED
             }
           >
             <EuiBasicTable

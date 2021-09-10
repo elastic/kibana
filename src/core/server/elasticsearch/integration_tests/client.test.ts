@@ -96,8 +96,8 @@ describe('fake elasticsearch', () => {
 
   test('should return unknown product when it cannot perform the Product check (503 response)', async () => {
     const resp = await supertest(kibanaHttpServer).get('/api/status').expect(503);
-    expect(resp.body.status.overall.state).toBe('red');
-    expect(resp.body.status.statuses[0].message).toBe(
+    expect(resp.body.status.overall.level).toBe('critical');
+    expect(resp.body.status.core.elasticsearch.summary).toBe(
       'Unable to retrieve version information from Elasticsearch nodes. The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
     );
   });
