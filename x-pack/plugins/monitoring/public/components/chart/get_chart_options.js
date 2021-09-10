@@ -15,7 +15,7 @@ export async function getChartOptions(axisOptions) {
     const $injector = Legacy.shims.getAngularInjector();
     timezone = $injector.get('config').get('dateFormat:tz');
   } catch {
-    timezone = 'utc';
+    timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');
   }
   const opts = {
     legend: {

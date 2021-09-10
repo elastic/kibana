@@ -21,8 +21,8 @@ const getFormattedDateTimeLocal = (timestamp) => {
     const timezone = injector.get('config').get('dateFormat:tz');
     return formatDateTimeLocal(timestamp, timezone);
   } catch {
-    // TODO: get timezone from usekibana
-    return formatDateTimeLocal();
+    const timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');
+    return formatDateTimeLocal(timestamp, timezone);
   }
 };
 
