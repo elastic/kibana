@@ -44,8 +44,7 @@ export const getAllFieldsByName = (
   browserFields: BrowserFields
 ): { [fieldName: string]: Partial<BrowserField> } =>
   keyBy('name', getAllBrowserFields(browserFields));
-// move index field documentation mapping to server side
-// getIndexFields, getBrowserFields, getDocValueFields
+
 export const getIndexFields = memoizeOne(
   (title: string, fields: IndexField[]): IIndexPattern =>
     fields && fields.length > 0
@@ -167,7 +166,8 @@ export const useFetchIndex = (
 
                 previousIndexesName.current = response.indicesExist;
                 setLoading(false);
-                // TODO: Steph/sourcerer all the below formatting should be happening serverside. follow up different PR
+                // TODO: Steph/sourcerer all the below formatting should be happening serverside
+                // https://github.com/elastic/security-team/issues/1730
                 setState({
                   browserFields: getBrowserFields(stringifyIndices, response.indexFields),
                   docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
@@ -262,7 +262,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                   sourcererActions.setSource({
                     id: sourcererScopeName,
                     payload: {
-                      // TODO: Steph/sourcerer all the below formatting should be happening serverside. follow up different PR
+                      // TODO: Steph/sourcerer all the below formatting should be happening serverside
+                      // https://github.com/elastic/security-team/issues/1730
                       browserFields: getBrowserFields(patternString, response.indexFields),
                       docValueFields: getDocValueFields(patternString, response.indexFields),
                       errorMessage: null,

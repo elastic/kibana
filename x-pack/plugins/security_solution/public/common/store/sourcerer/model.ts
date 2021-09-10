@@ -31,6 +31,7 @@ export interface ManageScope {
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
   loading: boolean;
+  // Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
   runtimeMappings: MappingRuntimeFields;
   selectedDataViewId: string;
   selectedPatterns: string[];
