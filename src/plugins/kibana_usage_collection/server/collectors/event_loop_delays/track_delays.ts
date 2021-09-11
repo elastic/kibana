@@ -24,6 +24,7 @@ import { storeHistogram } from './saved_objects';
  */
 export function startTrackingEventLoopDelaysUsage(
   internalRepository: ISavedObjectsRepository,
+  instanceUuid: string,
   stopMonitoringEventLoop$: Observable<void>,
   eventLoopDelaysMonitor: EventLoopDelaysMonitor,
   configs: {
@@ -51,6 +52,6 @@ export function startTrackingEventLoopDelaysUsage(
       if (shouldReset) {
         eventLoopDelaysMonitor.reset();
       }
-      await storeHistogram(histogram, internalRepository);
+      await storeHistogram(histogram, internalRepository, instanceUuid);
     });
 }

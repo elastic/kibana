@@ -14,13 +14,13 @@ export declare class EventLoopDelaysMonitor
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)()](./kibana-plugin-core-server.eventloopdelaysmonitor._constructor_.md) |  | Constructs a new instance of the <code>EventLoopDelaysMonitor</code> class |
+|  [(constructor)()](./kibana-plugin-core-server.eventloopdelaysmonitor._constructor_.md) |  | Creating a new instance from EventLoopDelaysMonitor will automatically start tracking event loop delays. |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [collect()](./kibana-plugin-core-server.eventloopdelaysmonitor.collect.md) |  |  |
-|  [reset()](./kibana-plugin-core-server.eventloopdelaysmonitor.reset.md) |  |  |
-|  [stop()](./kibana-plugin-core-server.eventloopdelaysmonitor.stop.md) |  |  |
+|  [collect()](./kibana-plugin-core-server.eventloopdelaysmonitor.collect.md) |  | Collect gathers event loop delays metrics from nodejs perf\_hooks.monitorEventLoopDelay the histogram calculations start from the last time <code>reset</code> was called or this EventLoopDelaysMonitor instance was created. |
+|  [reset()](./kibana-plugin-core-server.eventloopdelaysmonitor.reset.md) |  | Resets the collected histogram data. |
+|  [stop()](./kibana-plugin-core-server.eventloopdelaysmonitor.stop.md) |  | Disables updating the interval timer for collecting new data points. |
 

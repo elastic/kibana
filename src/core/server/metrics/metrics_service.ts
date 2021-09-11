@@ -16,7 +16,6 @@ import { InternalMetricsServiceSetup, InternalMetricsServiceStart, OpsMetrics } 
 import { OpsMetricsCollector } from './ops_metrics_collector';
 import { opsConfig, OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
-import { InternalEnvironmentServiceSetup } from '../environment';
 
 interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;

@@ -9,6 +9,10 @@
 import type { EventLoopDelayMonitor } from 'perf_hooks';
 import { monitorEventLoopDelay } from 'perf_hooks';
 
+/**
+ * an IntervalHistogram object that samples and reports the event loop delay over time.
+ * The delays will be reported in nanoseconds.
+ */
 export interface IntervalHistogram {
   fromTimestamp: string;
   lastUpdatedAt: string;
@@ -29,13 +33,22 @@ export class EventLoopDelaysMonitor {
   private readonly loopMonitor: EventLoopDelayMonitor;
   private fromTimestamp: Date;
 
+  /**
+   * Creating a new instance from EventLoopDelaysMonitor will
+   * automatically start tracking event loop delays.
+   */
   constructor() {
     const monitor = monitorEventLoopDelay();
     monitor.enable();
     this.fromTimestamp = new Date();
     this.loopMonitor = monitor;
   }
-
+  /**
+   * Collect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay
+   * the histogram calculations start from the last time `reset` was called or this
+   * EventLoopDelaysMonitor instance was created.
+   * @returns {IntervalHistogram}
+   */
   public collect(): IntervalHistogram {
     const lastUpdated = new Date();
     this.loopMonitor.disable();
@@ -61,11 +74,17 @@ export class EventLoopDelaysMonitor {
     return collectedData;
   }
 
+  /**
+   * Resets the collected histogram data.
+   */
   public reset() {
     this.loopMonitor.reset();
     this.fromTimestamp = new Date();
   }
 
+  /**
+   * Disables updating the interval timer for collecting new data points.
+   */
   public stop() {
     this.loopMonitor.disable();
   }

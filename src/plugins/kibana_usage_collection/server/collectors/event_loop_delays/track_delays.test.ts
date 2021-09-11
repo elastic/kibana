@@ -14,6 +14,8 @@ describe('startTrackingEventLoopDelaysUsage', () => {
   const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
   const mockInternalRepository = savedObjectsRepositoryMock.create();
   const stopMonitoringEventLoop$ = new Subject<void>();
+  const instanceUuid = 'mock_uuid';
+
   beforeAll(() => jest.useFakeTimers('modern'));
   beforeEach(() => jest.clearAllMocks());
   afterEach(() => stopMonitoringEventLoop$.next());
@@ -22,6 +24,7 @@ describe('startTrackingEventLoopDelaysUsage', () => {
     const collectionStartDelay = 1000;
     startTrackingEventLoopDelaysUsage(
       mockInternalRepository,
+      instanceUuid,
       stopMonitoringEventLoop$,
       eventLoopDelaysMonitor,
       {
@@ -39,6 +42,7 @@ describe('startTrackingEventLoopDelaysUsage', () => {
     const collectionInterval = 1000;
     startTrackingEventLoopDelaysUsage(
       mockInternalRepository,
+      instanceUuid,
       stopMonitoringEventLoop$,
       eventLoopDelaysMonitor,
       {
@@ -60,8 +64,10 @@ describe('startTrackingEventLoopDelaysUsage', () => {
     const collectionStartDelay = 0;
     const collectionInterval = 1000;
     const histogramReset = 5000;
+
     startTrackingEventLoopDelaysUsage(
       mockInternalRepository,
+      instanceUuid,
       stopMonitoringEventLoop$,
       eventLoopDelaysMonitor,
       {
@@ -81,6 +87,7 @@ describe('startTrackingEventLoopDelaysUsage', () => {
   it('stops monitoring event loop delays once stopMonitoringEventLoop$.next is called', () => {
     startTrackingEventLoopDelaysUsage(
       mockInternalRepository,
+      instanceUuid,
       stopMonitoringEventLoop$,
       eventLoopDelaysMonitor
     );

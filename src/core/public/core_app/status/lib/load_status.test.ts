@@ -62,7 +62,6 @@ const mockedResponse: StatusResponse = {
       },
     },
     process: {
-      name: 'server_worker' as const,
       pid: 1,
       memory: {
         heap: {
@@ -78,7 +77,6 @@ const mockedResponse: StatusResponse = {
     },
     processes: [
       {
-        name: 'server_worker' as const,
         pid: 1,
         memory: {
           heap: {

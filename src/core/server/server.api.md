@@ -943,11 +943,8 @@ export interface ErrorHttpResponseOptions {
 // @public (undocumented)
 export class EventLoopDelaysMonitor {
     constructor();
-    // (undocumented)
     collect(): IntervalHistogram;
-    // (undocumented)
     reset(): void;
-    // (undocumented)
     stop(): void;
 }
 
@@ -1186,7 +1183,7 @@ export interface IKibanaSocket {
 
 // Warning: (ae-missing-release-tag) "IntervalHistogram" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public (undocumented)
+// @public
 export interface IntervalHistogram {
     // (undocumented)
     exceeds: number;
@@ -1548,7 +1545,6 @@ export interface OpsProcessMetrics {
         };
         resident_set_size_in_bytes: number;
     };
-    name: 'coordinator' | 'server_worker';
     pid: number;
     uptime_in_millis: number;
 }

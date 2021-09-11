@@ -4,6 +4,8 @@
 
 ## EventLoopDelaysMonitor.reset() method
 
+Resets the collected histogram data.
+
 <b>Signature:</b>
 
 ```typescript

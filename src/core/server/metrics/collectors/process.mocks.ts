@@ -12,7 +12,6 @@ export function createMockOpsProcessMetrics(): OpsProcessMetrics {
   const histogram = mocked.createHistogram();
 
   return {
-    name: 'server_worker' as const,
     memory: {
       heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
       resident_set_size_in_bytes: 1,

@@ -56,6 +56,7 @@ type SavedObjectsRegisterType = SavedObjectsServiceSetup['registerType'];
 export class KibanaUsageCollectionPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly legacyConfig$: Observable<SharedGlobalConfig>;
+  private readonly instanceUuid: string;
   private savedObjectsClient?: ISavedObjectsRepository;
   private uiSettingsClient?: IUiSettingsClient;
   private metric$: Subject<OpsMetrics>;
@@ -68,6 +69,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     this.metric$ = new Subject<OpsMetrics>();
     this.pluginStop$ = new Subject();
+    this.instanceUuid = initializerContext.env.instanceUuid;
   }
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
@@ -95,6 +97,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.coreUsageData = core.coreUsageData;
     startTrackingEventLoopDelaysUsage(
       this.savedObjectsClient,
+      this.instanceUuid,
       this.pluginStop$.asObservable(),
       new EventLoopDelaysMonitor()
     );

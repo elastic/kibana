@@ -4,7 +4,7 @@
 
 ## EventLoopDelaysMonitor.(constructor)
 
-Constructs a new instance of the `EventLoopDelaysMonitor` class
+Creating a new instance from EventLoopDelaysMonitor will automatically start tracking event loop delays.
 
 <b>Signature:</b>
 

@@ -29,14 +29,17 @@ const { startES } = createTestServers({
 const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
 function createRawObject(date: moment.MomentInput) {
   const pid = Math.round(Math.random() * 10000);
+  const instanceUuid = 'mock_instance';
+
   return {
     type: SAVED_OBJECTS_DAILY_TYPE,
-    id: serializeSavedObjectId({ pid, date }),
+    id: serializeSavedObjectId({ pid, date, instanceUuid }),
     attributes: {
       ...eventLoopDelaysMonitor.collect(),
       fromTimestamp: moment(date).startOf('day').toISOString(),
       lastUpdatedAt: moment(date).toISOString(),
       processId: pid,
+      instanceUuid,
     },
   };
 }

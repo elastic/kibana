@@ -29,7 +29,6 @@ Object {
       },
       "resident_set_size_in_bytes": 1,
     },
-    "name": "server_worker",
     "uptime_in_millis": 1,
   },
   "processes": Array [
@@ -44,7 +43,6 @@ Object {
         },
         "resident_set_size_in_bytes": 1,
       },
-      "name": "server_worker",
       "uptime_in_millis": 1,
     },
   ],
