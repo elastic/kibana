@@ -127,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // The cookie that includes some state of the in-progress authentication, that doesn't allow
       // to fully authenticate user yet.
-      const intermediateAuthCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+      const intermediateAuthCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
 
       // When user tries to access any other page in Kibana.
       const response = await supertest
