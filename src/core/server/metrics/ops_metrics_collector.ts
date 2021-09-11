@@ -22,7 +22,7 @@ export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
   private readonly serverCollector: ServerMetricsCollector;
 
   constructor(server: HapiServer, opsOptions: OpsMetricsCollectorOptions) {
-    this.processCollector = new ProcessMetricsCollector();
+    this.processCollector = new ProcessMetricsCollector(opsOptions);
     this.osCollector = new OsMetricsCollector(opsOptions);
     this.serverCollector = new ServerMetricsCollector(server);
   }
