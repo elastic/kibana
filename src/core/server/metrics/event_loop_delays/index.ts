@@ -7,4 +7,3 @@
  */
 
 export { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
-export type { IntervalHistogram } from './event_loop_delays_monitor';

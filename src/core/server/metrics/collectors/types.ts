@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IntervalHistogram } from '../event_loop_delays';
+import type { IntervalHistogram } from '../types';
 
 /** Base interface for all metrics gatherers */
 export interface MetricsCollector<T> {

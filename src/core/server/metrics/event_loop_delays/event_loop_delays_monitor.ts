@@ -8,26 +8,7 @@
 
 import type { EventLoopDelayMonitor } from 'perf_hooks';
 import { monitorEventLoopDelay } from 'perf_hooks';
-
-/**
- * an IntervalHistogram object that samples and reports the event loop delay over time.
- * The delays will be reported in nanoseconds.
- */
-export interface IntervalHistogram {
-  fromTimestamp: string;
-  lastUpdatedAt: string;
-  min: number;
-  max: number;
-  mean: number;
-  exceeds: number;
-  stddev: number;
-  percentiles: {
-    50: number;
-    75: number;
-    95: number;
-    99: number;
-  };
-}
+import type { IntervalHistogram } from '../types';
 
 export class EventLoopDelaysMonitor {
   private readonly loopMonitor: EventLoopDelayMonitor;

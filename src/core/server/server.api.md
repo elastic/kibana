@@ -1181,8 +1181,6 @@ export interface IKibanaSocket {
     }): Promise<void>;
 }
 
-// Warning: (ae-missing-release-tag) "IntervalHistogram" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface IntervalHistogram {
     // (undocumented)
