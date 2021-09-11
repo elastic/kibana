@@ -28,10 +28,7 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
   useEffect(() => {
     const path = window.location.hash.substr(1);
     getUrlTracker().restorePreviousUrl();
-    const { navigated } = urlForwarding.navigateToLegacyKibanaUrl(path);
-    if (!navigated) {
-      urlForwarding.navigateToDefaultApp();
-    }
+    urlForwarding.navigateToLegacyKibanaUrl(path);
 
     const bannerMessage = i18n.translate('discover.noMatchRoute.bannerTitleText', {
       defaultMessage: 'Page not found',

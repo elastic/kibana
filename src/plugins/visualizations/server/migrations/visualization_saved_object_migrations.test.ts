@@ -2115,6 +2115,87 @@ describe('migration visualization', () => {
     });
   });
 
+  describe('7.14.0 tsvb - add drop last bucket into TSVB model', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.14.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const createTestDocWithType = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{
+          "type":"metrics",
+          "params": ${JSON.stringify(params)}
+        }`,
+      },
+    });
+
+    it('should add "drop_last_bucket" into model if it not exist', () => {
+      const params = {};
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(migratedParams).toMatchInlineSnapshot(`
+        Object {
+          "drop_last_bucket": 1,
+        }
+      `);
+    });
+
+    it('should add "series_drop_last_bucket" into model if it not exist', () => {
+      const params = {
+        series: [
+          {
+            override_index_pattern: 1,
+          },
+          {
+            override_index_pattern: 1,
+          },
+          { override_index_pattern: 0 },
+          {},
+          {
+            override_index_pattern: 1,
+            series_drop_last_bucket: 0,
+          },
+          {
+            override_index_pattern: 1,
+            series_drop_last_bucket: 1,
+          },
+        ],
+      };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(migratedParams.series).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "override_index_pattern": 1,
+            "series_drop_last_bucket": 1,
+          },
+          Object {
+            "override_index_pattern": 1,
+            "series_drop_last_bucket": 1,
+          },
+          Object {
+            "override_index_pattern": 0,
+          },
+          Object {},
+          Object {
+            "override_index_pattern": 1,
+            "series_drop_last_bucket": 0,
+          },
+          Object {
+            "override_index_pattern": 1,
+            "series_drop_last_bucket": 1,
+          },
+        ]
+      `);
+    });
+  });
+
   describe('7.14.0 update pie visualization defaults', () => {
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.14.0'](

@@ -295,12 +295,6 @@ is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 | `interpreter.enableInVisualize`
   | Enables use of interpreter in Visualize. *Default: `true`*
 
-| `kibana.defaultAppId:`
- | deprecated:[7.9.0,This setting will be removed in Kibana 8.0.]
- Instead, use the <<defaultroute,`defaultRoute` advanced setting>>.
- +
- The default application to load. *Default: `"home"`*
-
 |[[kibana-index]] `kibana.index:`
  | deprecated:[7.11.0,This setting will be removed in 8.0.] Multitenancy by
  changing `kibana.index` will not be supported starting in 8.0. See

@@ -109,7 +109,7 @@ describe('ExecutionContextService', () => {
         expect(loggingSystemMock.collect(core.logger).debug).toMatchInlineSnapshot(`
           Array [
             Array [
-              "set the execution context: {\\"type\\":\\"type-a\\",\\"name\\":\\"name-a\\",\\"id\\":\\"id-a\\",\\"description\\":\\"description-a\\"}",
+              "{\\"type\\":\\"type-a\\",\\"name\\":\\"name-a\\",\\"id\\":\\"id-a\\",\\"description\\":\\"description-a\\"}",
             ],
           ]
         `);
@@ -351,7 +351,7 @@ describe('ExecutionContextService', () => {
         expect(loggingSystemMock.collect(core.logger).debug).toMatchInlineSnapshot(`
                   Array [
                     Array [
-                      "stored the execution context: {\\"type\\":\\"type-a\\",\\"name\\":\\"name-a\\",\\"id\\":\\"id-a\\",\\"description\\":\\"description-a\\"}",
+                      "{\\"type\\":\\"type-a\\",\\"name\\":\\"name-a\\",\\"id\\":\\"id-a\\",\\"description\\":\\"description-a\\"}",
                     ],
                   ]
               `);

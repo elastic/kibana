@@ -7,7 +7,7 @@
 
 import {
   ALERT_DURATION,
-  ALERT_ID,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_PRODUCER,
   ALERT_START,
   ALERT_WORKFLOW_STATUS,
@@ -275,7 +275,7 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
 
 export const requiredFieldMappingsForActionsRuleRegistry = {
   '@timestamp': '@timestamp',
-  'alert.id': ALERT_ID,
+  'alert.instance.id': ALERT_INSTANCE_ID,
   'event.kind': 'event.kind',
   'alert.start': ALERT_START,
   'alert.uuid': ALERT_UUID,

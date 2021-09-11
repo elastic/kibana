@@ -13,7 +13,7 @@ import { EuiBasicTable, EuiEmptyPrompt, EuiTableFieldDataColumnType } from '@ela
 
 import { i18n } from '@kbn/i18n';
 
-import { CrawlerOverviewLogic } from '../crawler_overview_logic';
+import { CrawlerLogic } from '../crawler_logic';
 import { CrawlRequest, readableCrawlerStatuses } from '../types';
 
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
@@ -53,7 +53,7 @@ const columns: Array<EuiTableFieldDataColumnType<CrawlRequest>> = [
 ];
 
 export const CrawlRequestsTable: React.FC = () => {
-  const { crawlRequests } = useValues(CrawlerOverviewLogic);
+  const { crawlRequests } = useValues(CrawlerLogic);
 
   return (
     <EuiBasicTable

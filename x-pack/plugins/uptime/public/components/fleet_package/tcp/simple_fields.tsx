@@ -157,7 +157,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
         helpText={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags.helpText"
-            defaultMessage="A list of tags that will be sent with the monitor event. Press enter to add a new tab. Displayed in Uptime and enables searching by tag."
+            defaultMessage="A list of tags that will be sent with the monitor event. Press enter to add a new tag. Displayed in Uptime and enables searching by tag."
           />
         }
       >

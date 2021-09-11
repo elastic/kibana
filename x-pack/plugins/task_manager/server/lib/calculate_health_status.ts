@@ -9,32 +9,42 @@ import { isString } from 'lodash';
 import { JsonValue } from '@kbn/utility-types';
 import { HealthStatus, RawMonitoringStats } from '../monitoring';
 import { TaskManagerConfig } from '../config';
+import { Logger } from '../../../../../src/core/server';
 
 export function calculateHealthStatus(
   summarizedStats: RawMonitoringStats,
-  config: TaskManagerConfig
+  config: TaskManagerConfig,
+  logger: Logger
 ): HealthStatus {
   const now = Date.now();
 
-  // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
-  // consider the system unhealthy
-  const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
+  // if "hot" health stats are any more stale than monitored_stats_required_freshness
+  // times a multiplier, consider the system unhealthy
+  const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness * 3;
 
-  // if "cold" health stats are any more stale than the configured refresh (+ a buffer), consider the system unhealthy
+  // if "cold" health stats are any more stale than the configured refresh
+  // times a multiplier, consider the system unhealthy
   const requiredColdStatsFreshness: number = config.monitored_aggregated_stats_refresh_rate * 1.5;
 
-  /**
-   * If the monitored stats aren't fresh, return a red status
-   */
-  const healthStatus =
-    hasStatus(summarizedStats.stats, HealthStatus.Error) ||
-    hasExpiredHotTimestamps(summarizedStats, now, requiredHotStatsFreshness) ||
-    hasExpiredColdTimestamps(summarizedStats, now, requiredColdStatsFreshness)
-      ? HealthStatus.Error
-      : hasStatus(summarizedStats.stats, HealthStatus.Warning)
-      ? HealthStatus.Warning
-      : HealthStatus.OK;
-  return healthStatus;
+  if (hasStatus(summarizedStats.stats, HealthStatus.Error)) {
+    return HealthStatus.Error;
+  }
+
+  if (hasExpiredHotTimestamps(summarizedStats, now, requiredHotStatsFreshness)) {
+    logger.debug('setting HealthStatus.Error because of expired hot timestamps');
+    return HealthStatus.Error;
+  }
+
+  if (hasExpiredColdTimestamps(summarizedStats, now, requiredColdStatsFreshness)) {
+    logger.debug('setting HealthStatus.Error because of expired cold timestamps');
+    return HealthStatus.Error;
+  }
+
+  if (hasStatus(summarizedStats.stats, HealthStatus.Warning)) {
+    return HealthStatus.Warning;
+  }
+
+  return HealthStatus.OK;
 }
 
 function hasStatus(stats: RawMonitoringStats['stats'], status: HealthStatus): boolean {

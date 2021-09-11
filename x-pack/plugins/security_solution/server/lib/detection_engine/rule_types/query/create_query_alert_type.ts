@@ -7,7 +7,7 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { QUERY_ALERT_TYPE_ID } from '../../../../../common/constants';
+import { QUERY_RULE_TYPE_ID } from '../../../../../common/constants';
 import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
@@ -19,6 +19,7 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
     lists,
     logger,
     mergeStrategy,
+    ignoreFields,
     ruleDataClient,
     version,
     ruleDataService,
@@ -27,11 +28,12 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
     lists,
     logger,
     mergeStrategy,
+    ignoreFields,
     ruleDataClient,
     ruleDataService,
   });
   return createSecurityRuleType<QueryRuleParams, {}, PersistenceServices, {}>({
-    id: QUERY_ALERT_TYPE_ID,
+    id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
     validate: {
       params: {

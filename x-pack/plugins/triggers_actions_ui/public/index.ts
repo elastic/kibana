@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110895
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { Plugin } from './plugin';
 
 export type {
