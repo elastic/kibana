@@ -22,8 +22,6 @@ export interface MetricsCollector<T> {
 export interface OpsProcessMetrics {
   /** pid of the kibana process */
   pid: number;
-  /** uuid of the kibana instance */
-  instanceUuid: string;
   /** name of process (example: 'coordinator' | 'server_worker' | 'task_worker' | 'reporting_worker') */
   name: 'coordinator' | 'server_worker';
   /** process memory usage */

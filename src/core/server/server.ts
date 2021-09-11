@@ -216,10 +216,7 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const metricsSetup = await this.metrics.setup({
-      http: httpSetup,
-      environment: environmentSetup,
-    });
+    const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const coreUsageDataSetup = this.coreUsageData.setup({
       http: httpSetup,

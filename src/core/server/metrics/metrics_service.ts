@@ -20,7 +20,6 @@ import { InternalEnvironmentServiceSetup } from '../environment';
 
 interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
-  environment: InternalEnvironmentServiceSetup;
 }
 
 /** @internal */
@@ -38,18 +37,14 @@ export class MetricsService
     this.opsMetricsLogger = coreContext.logger.get('metrics', 'ops');
   }
 
-  public async setup({
-    http,
-    environment,
-  }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
+  public async setup({ http }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
     const config = await this.coreContext.configService
       .atPath<OpsConfigType>(opsConfig.path)
       .pipe(first())
       .toPromise();
-    const { instanceUuid } = environment;
+
     this.metricsCollector = new OpsMetricsCollector(http.server, {
       logger: this.logger,
-      instanceUuid,
       ...config.cGroupOverrides,
     });
 

@@ -10,15 +10,7 @@ import v8 from 'v8';
 import { OpsProcessMetrics, MetricsCollector } from './types';
 import { EventLoopDelaysMonitor } from '../event_loop_delays';
 
-export interface ProcessMetricsCollectorOptions {
-  instanceUuid: string;
-}
-
 export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetrics[]> {
-  private readonly instanceUuid: string;
-  constructor({ instanceUuid }: ProcessMetricsCollectorOptions) {
-    this.instanceUuid = instanceUuid;
-  }
   static getMainThreadMetrics(processes: OpsProcessMetrics[]): undefined | OpsProcessMetrics {
     return processes.find(({ name }) => name === 'server_worker');
   }
@@ -41,7 +33,6 @@ export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetri
         resident_set_size_in_bytes: memoryUsage.rss,
       },
       pid: process.pid,
-      instanceUuid: this.instanceUuid,
       event_loop_delay: eventLoopDelayHistogram.mean,
       event_loop_delay_histogram: eventLoopDelayHistogram,
       uptime_in_millis: process.uptime() * 1000,

@@ -16,7 +16,6 @@ import { OsCgroupMetricsCollector } from './cgroup';
 const getos = promisify(getosAsync);
 
 export interface OpsMetricsCollectorOptions {
-  instanceUuid: string;
   logger: Logger;
   cpuPath?: string;
   cpuAcctPath?: string;
