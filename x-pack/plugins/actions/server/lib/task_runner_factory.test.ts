@@ -136,6 +136,7 @@ test('executes the task by calling the executor with proper parameters, using gi
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 
@@ -191,6 +192,7 @@ test('executes the task by calling the executor with proper parameters, using st
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 
@@ -341,6 +343,7 @@ test('uses API key when provided', async () => {
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 
@@ -401,6 +404,7 @@ test('uses relatedSavedObjects merged with references when provided', async () =
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 });
@@ -451,6 +455,7 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 });
@@ -499,6 +504,7 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
     relatedSavedObjects: [],
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 });
@@ -538,6 +544,7 @@ test(`doesn't use API key when not provided`, async () => {
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 
@@ -549,9 +556,15 @@ test(`doesn't use API key when not provided`, async () => {
 });
 
 test(`throws an error when license doesn't support the action type`, async () => {
-  const taskRunner = taskRunnerFactory.create({
-    taskInstance: mockedTaskInstance,
-  });
+  const taskRunner = taskRunnerFactory.create(
+    {
+      taskInstance: {
+        ...mockedTaskInstance,
+        attempts: 1,
+      },
+    },
+    2
+  );
 
   mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -579,6 +592,138 @@ test(`throws an error when license doesn't support the action type`, async () =>
   } catch (e) {
     expect(e instanceof ExecutorError).toEqual(true);
     expect(e.data).toEqual({});
-    expect(e.retry).toEqual(false);
+    expect(e.retry).toEqual(true);
   }
+});
+
+test(`treats errors as errors if the task is retryable`, async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: {
+      ...mockedTaskInstance,
+      attempts: 0,
+    },
+  });
+
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+  mockedActionExecutor.execute.mockResolvedValueOnce({
+    status: 'error',
+    actionId: '2',
+    message: 'Error message',
+    data: { foo: true },
+    retry: false,
+  });
+
+  let err;
+  try {
+    await taskRunner.run();
+  } catch (e) {
+    err = e;
+  }
+  expect(err).toBeDefined();
+  expect(err instanceof ExecutorError).toEqual(true);
+  expect(err.data).toEqual({ foo: true });
+  expect(err.retry).toEqual(false);
+  expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+    `Action '2' failed and will not retry: Error message`
+  );
+});
+
+test(`treats errors as successes if the task is not retryable`, async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: {
+      ...mockedTaskInstance,
+      attempts: 1,
+    },
+  });
+
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+  mockedActionExecutor.execute.mockResolvedValueOnce({
+    status: 'error',
+    actionId: '2',
+    message: 'Error message',
+    data: { foo: true },
+    retry: false,
+  });
+
+  let err;
+  try {
+    await taskRunner.run();
+  } catch (e) {
+    err = e;
+  }
+  expect(err).toBeUndefined();
+  expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+    `Action '2' failed and will not retry: Error message`
+  );
+});
+
+test('treats errors as errors if the error is thrown instead of returned', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: {
+      ...mockedTaskInstance,
+      attempts: 0,
+    },
+  });
+
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+  mockedActionExecutor.execute.mockRejectedValueOnce({});
+
+  let err;
+  try {
+    await taskRunner.run();
+  } catch (e) {
+    err = e;
+  }
+  expect(err).toBeDefined();
+  expect(err instanceof ExecutorError).toEqual(true);
+  expect(err.data).toEqual({});
+  expect(err.retry).toEqual(true);
+  expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+    `Action '2' failed and will retry: undefined`
+  );
 });
