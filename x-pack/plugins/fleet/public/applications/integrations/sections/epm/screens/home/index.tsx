@@ -103,11 +103,12 @@ const InstalledPackages: React.FC = memo(() => {
     history.push(url);
   }
   function setSearchTerm(search: string) {
-    const url = pagePathGetters.integrations_installed({
-      category: selectedCategory,
-      query: search,
-    })[1];
-    history.push(url);
+    history.replace(
+      pagePathGetters.integrations_installed({
+        category: selectedCategory,
+        query: search,
+      })[1]
+    );
   }
 
   const allInstalledPackages = useMemo(
@@ -186,7 +187,7 @@ const AvailablePackages: React.FC = memo(() => {
     history.push(url);
   }
   function setSearchTerm(search: string) {
-    history.push(
+    history.replace(
       pagePathGetters.integrations_all({ category: selectedCategory, query: search })[1]
     );
   }
