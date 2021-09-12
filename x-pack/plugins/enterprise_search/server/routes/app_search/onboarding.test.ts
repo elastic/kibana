@@ -10,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerOnboardingRoutes } from './onboarding';
 
 describe('engine routes', () => {
-  describe('POST /api/app_search/onboarding_complete', () => {
+  describe('POST /internal/app_search/onboarding_complete', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/onboarding_complete',
+        path: '/internal/app_search/onboarding_complete',
       });
 
       registerOnboardingRoutes({
