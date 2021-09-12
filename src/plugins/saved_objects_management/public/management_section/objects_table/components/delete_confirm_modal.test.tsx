@@ -14,15 +14,21 @@ import { DeleteConfirmModal } from './delete_confirm_modal';
 
 interface CreateObjectOptions {
   namespaces?: string[];
+  hiddenType?: boolean;
 }
 
-const createObject = ({ namespaces }: CreateObjectOptions = {}): SavedObjectWithMetadata => ({
+const createObject = ({
+  namespaces,
+  hiddenType = false,
+}: CreateObjectOptions = {}): SavedObjectWithMetadata => ({
   id: 'foo',
   type: 'bar',
   attributes: {},
   references: [],
   namespaces,
-  meta: {},
+  meta: {
+    hiddenType,
+  },
 });
 
 describe('DeleteConfirmModal', () => {
@@ -81,13 +87,88 @@ describe('DeleteConfirmModal', () => {
         isDeleting={false}
         onConfirm={onConfirm}
         onCancel={onCancel}
-        selectedObjects={[]}
+        selectedObjects={[createObject()]}
       />
     );
     wrapper.find('EuiButton').simulate('click');
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
     expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  describe('when trying to delete hidden objects', () => {
+    it('excludes the hidden objects from the table', () => {
+      const objs = [
+        createObject({ hiddenType: true }),
+        createObject({ hiddenType: false }),
+        createObject({ hiddenType: true }),
+      ];
+      const wrapper = mountWithIntl(
+        <DeleteConfirmModal
+          isDeleting={false}
+          onConfirm={onConfirm}
+          onCancel={onCancel}
+          selectedObjects={objs}
+        />
+      );
+      expect(wrapper.find('.euiTableRow')).toHaveLength(1);
+    });
+
+    it('displays a callout when at least one object cannot be deleted', () => {
+      const objs = [
+        createObject({ hiddenType: false }),
+        createObject({ hiddenType: false }),
+        createObject({ hiddenType: true }),
+      ];
+      const wrapper = mountWithIntl(
+        <DeleteConfirmModal
+          isDeleting={false}
+          onConfirm={onConfirm}
+          onCancel={onCancel}
+          selectedObjects={objs}
+        />
+      );
+
+      const callout = findTestSubject(wrapper, 'cannotDeleteObjectsConfirmWarning');
+      expect(callout).toHaveLength(1);
+    });
+
+    it('does not display a callout when all objects can be deleted', () => {
+      const objs = [
+        createObject({ hiddenType: false }),
+        createObject({ hiddenType: false }),
+        createObject({ hiddenType: false }),
+      ];
+      const wrapper = mountWithIntl(
+        <DeleteConfirmModal
+          isDeleting={false}
+          onConfirm={onConfirm}
+          onCancel={onCancel}
+          selectedObjects={objs}
+        />
+      );
+
+      const callout = findTestSubject(wrapper, 'cannotDeleteObjectsConfirmWarning');
+      expect(callout).toHaveLength(0);
+    });
+
+    it('disable the submit button when all objects cannot be deleted', () => {
+      const objs = [
+        createObject({ hiddenType: true }),
+        createObject({ hiddenType: true }),
+        createObject({ hiddenType: true }),
+      ];
+      const wrapper = mountWithIntl(
+        <DeleteConfirmModal
+          isDeleting={false}
+          onConfirm={onConfirm}
+          onCancel={onCancel}
+          selectedObjects={objs}
+        />
+      );
+
+      expect(wrapper.find('EuiButton').getDOMNode()).toBeDisabled();
+    });
   });
 
   describe('shared objects warning', () => {
