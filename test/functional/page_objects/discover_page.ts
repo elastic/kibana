@@ -83,6 +83,10 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('addFilter');
   }
 
+  public async closeAddFilterPanel() {
+    await this.testSubjects.click('addFilter');
+  }
+
   public async waitUntilSearchingHasFinished() {
     await this.testSubjects.missingOrFail('loadingSpinner', {
       timeout: this.defaultFindTimeout * 10,

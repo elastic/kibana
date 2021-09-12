@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test on add filter panel', async () => {
       await PageObjects.discover.openAddFilterPanel();
       await a11y.testAppSnapshot();
+      await PageObjects.discover.closeAddFilterPanel();
       await filterBar.addFilter('OriginCityName', 'is', 'Rome');
     });
 
