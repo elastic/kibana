@@ -8,8 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/config-schema';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { deepFreeze } from '@kbn/std';
 
 import type { PluginStart, DataRequestHandlerContext } from '../../../../src/plugins/data/server';
 import { CoreSetup, PluginInitializerContext, Plugin } from '../../../../src/core/server';
@@ -21,13 +19,6 @@ import { runRoute } from './routes/run';
 import { ConfigManager } from './lib/config_manager';
 import { getUiSettings } from './ui_settings';
 
-/**
- * Describes public Timelion plugin contract returned at the `setup` stage.
- */
-export interface PluginSetupContract {
-  uiEnabled: boolean;
-}
-
 export interface TimelionPluginStartDeps {
   data: PluginStart;
 }
@@ -35,11 +26,10 @@ export interface TimelionPluginStartDeps {
 /**
  * Represents Timelion Plugin instance that will be managed by the Kibana plugin system.
  */
-export class TimelionPlugin
-  implements Plugin<RecursiveReadonly<PluginSetupContract>, void, TimelionPluginStartDeps> {
+export class TimelionPlugin implements Plugin<void, void, TimelionPluginStartDeps> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup<TimelionPluginStartDeps>): RecursiveReadonly<PluginSetupContract> {
+  public setup(core: CoreSetup<TimelionPluginStartDeps>): void {
     const config = this.initializerContext.config.get<TypeOf<typeof configSchema>>();
 
     const configManager = new ConfigManager(this.initializerContext.config);
@@ -76,8 +66,6 @@ export class TimelionPlugin
     validateEsRoute(router);
 
     core.uiSettings.register(getUiSettings(config));
-
-    return deepFreeze({ uiEnabled: config.ui.enabled });
   }
 
   public start() {

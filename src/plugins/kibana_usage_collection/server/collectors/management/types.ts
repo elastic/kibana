@@ -49,10 +49,7 @@ export interface UsageStats {
   'timelion:max_buckets': number;
   'timelion:es.timefield': string;
   'timelion:min_interval': string;
-  'timelion:default_rows': number;
-  'timelion:default_columns': number;
   'timelion:es.default_index': string;
-  'timelion:showTutorial': boolean;
   'securitySolution:timeDefaults': string;
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
