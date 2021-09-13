@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiSpacer,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +16,7 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -72,6 +72,11 @@ export function DiscoverLayout({
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
+
+  const discoverViewMode = useMemo(
+    () => state.discoverViewMode ?? DISCOVER_VIEW_MODE.DOCUMENT_LEVEL,
+    [state.discoverViewMode]
+  );
 
   const setDiscoverViewMode = useCallback(
     (mode: DISCOVER_VIEW_MODE) => {
@@ -197,7 +202,7 @@ export function DiscoverLayout({
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onEditRuntimeField={onEditRuntimeField}
-              discoverViewMode={state.discoverViewMode}
+              discoverViewMode={discoverViewMode}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
@@ -264,12 +269,12 @@ export function DiscoverLayout({
                       services={services}
                       stateContainer={stateContainer}
                       timefield={timeField}
-                      discoverViewMode={state.discoverViewMode}
+                      discoverViewMode={discoverViewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
                     />
                   </EuiFlexItem>
                   <EuiHorizontalRule margin="none" />
-                  {state.discoverViewMode === DISCOVER_VIEW_MODE.DOCUMENT_LEVEL ? (
+                  {discoverViewMode === DISCOVER_VIEW_MODE.DOCUMENT_LEVEL ? (
                     <DiscoverDocuments
                       documents$={savedSearchData$.documents$}
                       expandedDoc={expandedDoc}
