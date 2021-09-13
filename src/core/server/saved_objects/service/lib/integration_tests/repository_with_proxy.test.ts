@@ -400,13 +400,14 @@ describe('404s from proxies', () => {
     });
 
     it('returns an EsUnavailable error on `resolve` requests with a 404 proxy response and wrong product header for an exact match', async () => {
+      setProxyInterrupt('internalBulkResolve');
       let testResolveErr: any;
       try {
         await repository.resolve('my_type', 'myTypeId1');
       } catch (err) {
         testResolveErr = err;
       }
-      expect(genericNotFoundEsUnavailableError(testResolveErr, 'my_type', 'myTypeId1'));
+      expect(genericNotFoundEsUnavailableError(testResolveErr));
     });
 
     it('returns an EsUnavailable error on `bulkGet` requests with a 404 proxy response and wrong product header', async () => {
