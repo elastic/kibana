@@ -11,8 +11,6 @@ import {
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
   VectorStyleDescriptor,
-} from '../../../../../../maps/common/descriptor_types';
-import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
@@ -20,7 +18,7 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
-} from '../../../../../../maps/common/constants';
+} from '../../../../../../maps/common';
 
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -45,6 +43,7 @@ const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
   indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
   applyGlobalQuery: true,
   applyGlobalTime: true,
+  applyForceRefresh: true,
 };
 
 const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
@@ -60,6 +59,7 @@ const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
   indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
   applyGlobalQuery: true,
   applyGlobalTime: true,
+  applyForceRefresh: true,
 };
 
 const getWhereQuery = (serviceName: string) => {
