@@ -77,7 +77,7 @@ export const metricsVisDefinition: VisTypeDefinition<
           ],
           separate_axis: 0,
           axis_position: 'right',
-          formatter: 'number',
+          formatter: 'default',
           chart_type: 'line',
           line_width: 1,
           point_size: 1,
@@ -105,8 +105,8 @@ export const metricsVisDefinition: VisTypeDefinition<
     editor: TSVB_EDITOR_NAME,
   },
   options: {
-    showQueryBar: false,
-    showFilterBar: false,
+    showQueryBar: true,
+    showFilterBar: true,
     showIndexSelection: false,
   },
   toExpressionAst,
@@ -117,6 +117,7 @@ export const metricsVisDefinition: VisTypeDefinition<
     return [];
   },
   inspectorAdapters: {},
+  requiresSearch: true,
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();
     const indexPatternValue = params.index_pattern;

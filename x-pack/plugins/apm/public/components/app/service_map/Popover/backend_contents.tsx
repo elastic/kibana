@@ -27,7 +27,7 @@ export function BackendContents({
 }: ContentsProps) {
   const { query } = useApmParams(
     '/service-map',
-    '/services/:serviceName/service-map'
+    '/services/{serviceName}/service-map'
   );
 
   const apmRouter = useApmRouter();
@@ -57,11 +57,11 @@ export function BackendContents({
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
-  const detailsUrl = apmRouter.link('/backends/:backendName/overview', {
+  const detailsUrl = apmRouter.link('/backends/{backendName}/overview', {
     path: { backendName },
     query: query as TypeOf<
       ApmRoutes,
-      '/backends/:backendName/overview'
+      '/backends/{backendName}/overview'
     >['query'],
   });
 

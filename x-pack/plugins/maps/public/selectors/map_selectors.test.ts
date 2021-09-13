@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../../common';
+import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../../common/constants';
 
 jest.mock('../classes/layers/tiled_vector_layer/tiled_vector_layer', () => {});
 jest.mock('../classes/layers/blended_vector_layer/blended_vector_layer', () => {});
@@ -58,7 +58,6 @@ describe('getDataFilters', () => {
   const mapZoom = 4;
   const timeFilters = { to: '2001-01-01', from: '2001-12-31' };
   const timeslice = undefined;
-  const refreshTimerLastTriggeredAt = '2001-01-01T00:00:00';
   const query = undefined;
   const filters: Filter[] = [];
   const searchSessionId = '12345';
@@ -77,7 +76,6 @@ describe('getDataFilters', () => {
       mapZoom,
       timeFilters,
       timeslice,
-      refreshTimerLastTriggeredAt,
       query,
       filters,
       searchSessionId,
@@ -94,7 +92,6 @@ describe('getDataFilters', () => {
       mapZoom,
       timeFilters,
       timeslice,
-      refreshTimerLastTriggeredAt,
       query,
       filters,
       searchSessionId,

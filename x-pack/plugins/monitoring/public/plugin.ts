@@ -36,6 +36,7 @@ import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_reject
 import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
 import { createCCRReadExceptionsAlertType } from './alerts/ccr_read_exceptions_alert';
 import { createLargeShardSizeAlertType } from './alerts/large_shard_size_alert';
+import { setConfig } from './external_config';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -125,6 +126,7 @@ export class MonitoringPlugin
         });
 
         const config = Object.fromEntries(externalConfig);
+        setConfig(config);
         if (config.renderReactApp) {
           const { renderApp } = await import('./application');
           return renderApp(coreStart, pluginsStart, params, config);
