@@ -115,7 +115,7 @@ export const getUnknownTypesDeprecations = async (
       correctiveActions: {
         manualSteps: [
           i18n.translate('core.savedObjects.deprecations.unknownTypes.manualSteps.1', {
-            defaultMessage: 'If plugins are disabled, re-enable the, then restart Kibana.',
+            defaultMessage: 'Enable disabled plugins then restart Kibana.',
           }),
           i18n.translate('core.savedObjects.deprecations.unknownTypes.manualSteps.2', {
             defaultMessage:
