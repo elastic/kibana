@@ -22,13 +22,14 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiLoadingSpinner,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
-import { Alert, AlertType, ActionType } from '../../../../types';
+import { Alert, AlertType, ActionType, ActionConnector } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
@@ -40,6 +41,7 @@ import { routeToRuleDetails } from '../../../constants';
 import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { alertReducer } from '../../alert_form/alert_reducer';
+import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 
 export type AlertDetailsProps = {
   alert: Alert;
@@ -72,6 +74,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
+  const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] = useState<boolean>(
+    false
+  );
+
   // Set breadcrumb and page title
   useEffect(() => {
     setBreadcrumbs([
@@ -79,6 +85,28 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
       getAlertDetailsBreadcrumb(alert.id, alert.name),
     ]);
     chrome.docTitle.change(getCurrentDocTitle('alerts'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Determine if any attached action has an issue with its connector
+  useEffect(() => {
+    (async () => {
+      let loadedConnectors: ActionConnector[] = [];
+      try {
+        loadedConnectors = await loadConnectors({ http });
+      } catch (err) {
+        loadedConnectors = [];
+      }
+
+      if (loadedConnectors.length > 0) {
+        const hasActionWithBrokenConnector = alert.actions.some(
+          (action) => !loadedConnectors.find((connector) => connector.id === action.id)
+        );
+        if (setHasActionsWithBrokenConnector) {
+          setHasActionsWithBrokenConnector(hasActionWithBrokenConnector);
+        }
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -197,13 +225,27 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             {uniqueActions && uniqueActions.length ? (
               <>
                 <EuiText size="s">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsTex"
-                      defaultMessage="Actions"
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsTex"
+                    defaultMessage="Actions"
+                  />{' '}
+                  {hasActionsWithBrokenConnector && (
+                    <EuiIconTip
+                      data-test-subj="actionWithBrokenConnector"
+                      type="alert"
+                      color="danger"
+                      content={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsWarningTooltip',
+                        {
+                          defaultMessage:
+                            'Unable to load a connector associated with this rule. Edit this rule to remove or select a new connector.',
+                        }
+                      )}
+                      position="right"
                     />
-                  </p>
+                  )}
                 </EuiText>
+
                 <EuiSpacer size="xs" />
                 <EuiFlexGroup wrap gutterSize="s">
                   {uniqueActions.map((action, index) => (
