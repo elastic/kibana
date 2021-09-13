@@ -37,7 +37,7 @@ If you loaded your own data, follow these steps to create {a-data-source}.
 . Click *Create {data-source}*.
 
 [role="screenshot"]
-image:management/data-views/images/create-index-pattern.png["Create {data-source}"]
+image:management/index-patterns/images/create-index-pattern.png["Create {data-source}"]
 
 . Start typing in the *name* field, and {kib} looks for the names of
 indices, data streams, and aliases that match your input.
@@ -145,4 +145,4 @@ WARNING: Deleting {a-data-source} breaks all visualizations, saved searches, and
 
 . Click the {data-source} to delete.
 
-. Delete (image:management/data-views/images/delete.png[Delete icon]) the {data-source}.
+. Delete (image:management/index-patterns/images/delete.png[Delete icon]) the {data-source}.
