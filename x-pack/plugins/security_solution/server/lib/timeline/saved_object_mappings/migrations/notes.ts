@@ -7,13 +7,12 @@
 
 import {
   SavedObjectMigrationMap,
-  SavedObjectReference,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from 'kibana/server';
 import { timelineSavedObjectType } from '..';
 import { TIMELINE_ID_REF_NAME } from '../../constants';
-import { createReference } from './utils';
+import { createMigratedDoc, createReference } from './utils';
 
 export interface TimelineId {
   timelineId?: string | null;
@@ -38,24 +37,6 @@ export const migrateNoteTimelineIdToReferences = (
     migratedReferences: timelineIdReferences,
   });
 };
-
-const createMigratedDoc = <T>({
-  doc,
-  attributes,
-  docReferences,
-  migratedReferences,
-}: {
-  doc: SavedObjectUnsanitizedDoc<T>;
-  attributes: object;
-  docReferences: SavedObjectReference[];
-  migratedReferences: SavedObjectReference[];
-}): SavedObjectSanitizedDoc<unknown> => ({
-  ...doc,
-  attributes: {
-    ...attributes,
-  },
-  references: [...docReferences, ...migratedReferences],
-});
 
 export const notesMigrations: SavedObjectMigrationMap = {
   '7.16.0': migrateNoteTimelineIdToReferences,
