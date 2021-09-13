@@ -73,6 +73,8 @@ kibana_vars=(
     enterpriseSearch.host
     externalUrl.policy
     i18n.locale
+    interactiveSetup.enabled
+    interactiveSetup.connectionCheck.interval
     interpreter.enableInVisualize
     kibana.autocompleteTerminateAfter
     kibana.autocompleteTimeout
@@ -198,7 +200,6 @@ kibana_vars=(
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
-    timelion.enabled
     url_drilldown.enabled
     vega.enableExternalUrls
     vis_type_vega.enableExternalUrls

@@ -13,7 +13,7 @@ export function registerOverviewRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/overview',
+      path: '/internal/workplace_search/overview',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({

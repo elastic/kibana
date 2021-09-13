@@ -559,7 +559,7 @@ function GraphWorkspace(options) {
         }
         if (self.changeHandler) {
           // Hook to allow any client to respond to position changes
-          // e.g. angular adjusts and repaints node positions on screen.
+          // e.g. react adjusts and repaints node positions on screen.
           self.changeHandler();
         }
       });

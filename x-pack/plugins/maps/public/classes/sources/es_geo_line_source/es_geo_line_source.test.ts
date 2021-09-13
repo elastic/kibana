@@ -20,7 +20,7 @@ describe('getSourceTooltipContent', () => {
     const sourceDataRequest = new DataRequest({
       data: {},
       dataId: 'source',
-      dataMeta: {
+      dataRequestMeta: {
         areResultsTrimmed: false,
         areEntitiesTrimmed: false,
         entityCount: 70,
@@ -39,7 +39,7 @@ describe('getSourceTooltipContent', () => {
     const sourceDataRequest = new DataRequest({
       data: {},
       dataId: 'source',
-      dataMeta: {
+      dataRequestMeta: {
         areResultsTrimmed: true,
         areEntitiesTrimmed: true,
         entityCount: 1000,
@@ -58,7 +58,7 @@ describe('getSourceTooltipContent', () => {
     const sourceDataRequest = new DataRequest({
       data: {},
       dataId: 'source',
-      dataMeta: {
+      dataRequestMeta: {
         areResultsTrimmed: false,
         areEntitiesTrimmed: false,
         entityCount: 70,
@@ -77,7 +77,7 @@ describe('getSourceTooltipContent', () => {
     const sourceDataRequest = new DataRequest({
       data: {},
       dataId: 'source',
-      dataMeta: {
+      dataRequestMeta: {
         areResultsTrimmed: true,
         areEntitiesTrimmed: true,
         entityCount: 1000,
