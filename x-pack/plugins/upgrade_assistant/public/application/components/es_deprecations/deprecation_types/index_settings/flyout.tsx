@@ -26,7 +26,7 @@ import {
 import { EnrichedDeprecationInfo, IndexSettingAction } from '../../../../../../common/types';
 import type { ResponseError } from '../../../../lib/api';
 import type { Status } from '../../../types';
-import { DeprecationBadge } from '../../es_deprecations_table_cells';
+import { DeprecationBadge } from '../../../shared';
 
 export interface RemoveIndexSettingsFlyoutProps {
   deprecation: EnrichedDeprecationInfo;

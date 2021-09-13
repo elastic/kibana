@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
+import { DeprecationBadge } from '../shared';
 
 import './_deprecation_details_flyout.scss';
 
@@ -130,10 +131,16 @@ export const DeprecationDetailsFlyout = ({
   deprecationResolutionState,
 }: DeprecationDetailsFlyoutProps) => {
   const { documentationUrl, message, correctiveActions, title } = deprecation;
+  const isCurrent = deprecationResolutionState?.id === deprecation.id;
+  const isResolved = deprecationResolutionState?.resolveDeprecationStatus === 'ok';
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
+        <DeprecationBadge
+          isCritical={deprecation.level === 'critical'}
+          isResolved={isCurrent && isResolved}
+        />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="kibanaDeprecationDetailsFlyoutTitle" className="eui-textBreakWord">
             {title}
@@ -170,7 +177,7 @@ export const DeprecationDetailsFlyout = ({
         <EuiSpacer />
 
         {/* Hide resolution steps if already resolved */}
-        {deprecationResolutionState?.resolveDeprecationStatus !== 'ok' && (
+        {!isResolved && (
           <div data-test-subj="resolveSection">
             {correctiveActions.api && (
               <>
@@ -215,7 +222,7 @@ export const DeprecationDetailsFlyout = ({
           </EuiFlexItem>
 
           {/* Only show the "Quick resolve" button if deprecation supports it */}
-          {correctiveActions.api && (
+          {correctiveActions.api && !isResolved && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
@@ -224,7 +231,6 @@ export const DeprecationDetailsFlyout = ({
                 isLoading={Boolean(
                   deprecationResolutionState?.resolveDeprecationStatus === 'in_progress'
                 )}
-                disabled={Boolean(deprecationResolutionState?.resolveDeprecationStatus === 'ok')}
               >
                 {getQuickResolveButtonLabel(deprecationResolutionState)}
               </EuiButton>

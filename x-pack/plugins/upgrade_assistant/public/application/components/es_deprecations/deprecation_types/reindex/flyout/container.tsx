@@ -21,7 +21,7 @@ import { useAppContext } from '../../../../../app_context';
 import type { ReindexStateContext } from '../context';
 import { ChecklistFlyoutStep } from './checklist_step';
 import { WarningsFlyoutStep } from './warnings_step';
-import { DeprecationBadge } from '../../../es_deprecations_table_cells';
+import { DeprecationBadge } from '../../../../shared';
 
 enum ReindexFlyoutStep {
   reindexWarnings,

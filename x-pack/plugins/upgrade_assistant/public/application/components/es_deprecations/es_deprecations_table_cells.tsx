@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { DEPRECATION_TYPE_MAP } from '../constants';
 import { DeprecationTableColumns } from '../types';
+import { DeprecationBadge } from '../shared';
 
 interface Props {
   resolutionTableCell?: React.ReactNode;
@@ -21,24 +22,6 @@ interface Props {
 }
 
 const i18nTexts = {
-  criticalBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.criticalBadgeLabel',
-    {
-      defaultMessage: 'Critical',
-    }
-  ),
-  resolvedBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.resolvedBadgeLabel',
-    {
-      defaultMessage: 'Resolved',
-    }
-  ),
-  warningBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.warningBadgeLabel',
-    {
-      defaultMessage: 'Warning',
-    }
-  ),
   manualCellLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.manualCellLabel',
     {
@@ -51,24 +34,6 @@ const i18nTexts = {
       defaultMessage: 'Resolve this deprecation manually.',
     }
   ),
-};
-
-export const DeprecationBadge = ({
-  isCritical,
-  isResolved,
-}: {
-  isCritical: boolean;
-  isResolved?: boolean;
-}) => {
-  if (isResolved) {
-    return <EuiBadge color="success">{i18nTexts.resolvedBadgeLabel}</EuiBadge>;
-  }
-
-  if (isCritical) {
-    return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
-  }
-
-  return <EuiBadge color="default">{i18nTexts.warningBadgeLabel}</EuiBadge>;
 };
 
 export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({

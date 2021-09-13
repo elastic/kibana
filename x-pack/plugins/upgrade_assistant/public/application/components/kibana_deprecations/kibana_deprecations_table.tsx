@@ -6,18 +6,12 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiButton,
-  EuiLink,
-  EuiBadge,
-  Search,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, Search } from '@elastic/eui';
 
 import { PAGINATION_CONFIG } from '../constants';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
 import { ResolutionTableCell } from './resolution_table_cell';
+import { DeprecationBadge } from '../shared';
 
 const i18nTexts = {
   refreshButtonLabel: i18n.translate(
@@ -80,18 +74,6 @@ const i18nTexts = {
       defaultMessage: 'Critical',
     }
   ),
-  criticalBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.criticalBadgeLabel',
-    {
-      defaultMessage: 'critical',
-    }
-  ),
-  warningBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.warningBadgeLabel',
-    {
-      defaultMessage: 'warning',
-    }
-  ),
   searchPlaceholderLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.searchPlaceholderLabel',
     {
@@ -113,6 +95,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
   toggleFlyout,
   deprecationResolutionState,
 }) => {
+  // console.log(deprecations?.length);
   const columns: Array<EuiBasicTableColumn<KibanaDeprecationDetails>> = [
     {
       field: 'level',
@@ -120,17 +103,23 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       width: '5%',
       truncateText: true,
       sortable: true,
-      render: (level: KibanaDeprecationDetails['level']) => {
-        switch (level) {
-          case 'critical':
-            return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
+      render: (level: KibanaDeprecationDetails['level'], deprecation) => {
+        const isCurrent = deprecationResolutionState?.id === deprecation.id;
+        const isResolved = deprecationResolutionState?.resolveDeprecationStatus === 'ok';
 
-          case 'warning':
-            return <EuiBadge color="default">{i18nTexts.warningBadgeLabel}</EuiBadge>;
+        // console.log({
+        // stateId: deprecationResolutionState?.id,
+        // id: deprecation.id,
+        // isCurrent,
+        // isResolved,
+        // });
 
-          default:
-            return <>{''}</>;
-        }
+        return (
+          <DeprecationBadge
+            isCritical={level === 'critical'}
+            isResolved={isCurrent && isResolved}
+          />
+        );
       },
     },
     {

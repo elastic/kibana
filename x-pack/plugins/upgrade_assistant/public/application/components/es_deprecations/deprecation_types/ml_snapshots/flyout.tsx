@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
-import { DeprecationBadge } from '../../es_deprecations_table_cells';
+import { DeprecationBadge } from '../../../shared';
 import { MlSnapshotContext } from './context';
 import { SnapshotState } from './use_snapshot_state';
 
