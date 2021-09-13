@@ -7,7 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
-import apmIndexPattern from '../../tutorial/index_pattern.json';
+import apmDataView from '../../tutorial/index_pattern.json';
 import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 import { Setup } from '../helpers/setup_request';
 import { APMRouteHandlerResources } from '../../routes/typings';
@@ -15,7 +15,7 @@ import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_object
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
 
-type ApmIndexPatternAttributes = typeof apmIndexPattern.attributes & {
+type ApmDataViewAttributes = typeof apmDataView.attributes & {
   title: string;
 };
 
@@ -45,9 +45,9 @@ export async function createStaticDataView({
       return false;
     }
 
-    const apmIndexPatternTitle = getApmDataViewTitle(setup.indices);
+    const apmDataViewTitle = getApmDataViewTitle(setup.indices);
     const forceOverwrite = await getForceOverwrite({
-      apmIndexPatternTitle,
+      apmDataViewTitle,
       overwrite,
       savedObjectsClient,
     });
@@ -57,8 +57,8 @@ export async function createStaticDataView({
         savedObjectsClient.create(
           'index-pattern',
           {
-            ...apmIndexPattern.attributes,
-            title: apmIndexPatternTitle,
+            ...apmDataView.attributes,
+            title: apmDataViewTitle,
           },
           {
             id: APM_STATIC_INDEX_PATTERN_ID,
@@ -83,21 +83,21 @@ export async function createStaticDataView({
 async function getForceOverwrite({
   savedObjectsClient,
   overwrite,
-  apmIndexPatternTitle,
+  apmDataViewTitle,
 }: {
   savedObjectsClient: InternalSavedObjectsClient;
   overwrite: boolean;
-  apmIndexPatternTitle: string;
+  apmDataViewTitle: string;
 }) {
   if (!overwrite) {
     try {
-      const existingIndexPattern = await savedObjectsClient.get<ApmIndexPatternAttributes>(
+      const existingDataView = await savedObjectsClient.get<ApmDataViewAttributes>(
         'index-pattern',
         APM_STATIC_INDEX_PATTERN_ID
       );
 
       // if the existing data view does not matches the new one, force an update
-      return existingIndexPattern.attributes.title !== apmIndexPatternTitle;
+      return existingDataView.attributes.title !== apmDataViewTitle;
     } catch (e) {
       // ignore exception if the data view (saved object) is not found
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {

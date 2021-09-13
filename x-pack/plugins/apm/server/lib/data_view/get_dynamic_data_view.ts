@@ -14,7 +14,7 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
 
-export interface IndexPatternTitleAndFields {
+export interface DataViewTitleAndFields {
   title: string;
   timeFieldName: string;
   fields: FieldDescriptor[];
@@ -30,9 +30,9 @@ export const getDynamicDataView = ({
       savedObjectsClient: context.core.savedObjects.client,
       config,
     });
-    const indexPatternTitle = getApmDataViewTitle(apmIndicies);
+    const dataViewTitle = getApmDataViewTitle(apmIndicies);
 
-    const indexPatternsFetcher = new IndexPatternsFetcher(
+    const DataViewsFetcher = new IndexPatternsFetcher(
       context.core.elasticsearch.client.asCurrentUser
     );
 
@@ -41,22 +41,22 @@ export const getDynamicDataView = ({
     // we have to catch errors here to avoid all endpoints returning 500 for users without APM data
     // (would be a bad first time experience)
     try {
-      const fields = await indexPatternsFetcher.getFieldsForWildcard({
-        pattern: indexPatternTitle,
+      const fields = await DataViewsFetcher.getFieldsForWildcard({
+        pattern: dataViewTitle,
       });
 
-      const indexPattern: IndexPatternTitleAndFields = {
+      const dataView: DataViewTitleAndFields = {
         fields,
         timeFieldName: '@timestamp',
-        title: indexPatternTitle,
+        title: dataViewTitle,
       };
 
-      return indexPattern;
+      return dataView;
     } catch (e) {
       const notExists = e.output?.statusCode === 404;
       if (notExists) {
         logger.error(
-          `Could not get dynamic data view because indices "${indexPatternTitle}" don't exist`
+          `Could not get dynamic data view because indices "${dataViewTitle}" don't exist`
         );
         return;
       }
