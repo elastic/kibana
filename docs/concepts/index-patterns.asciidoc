@@ -9,7 +9,7 @@ For example, {a-data-source} can point to your log data from yesterday,
 or all indices that contain your data.
 
 [float]
-[[{data-sources}-read-only-access]]
+[[index-patterns-read-only-access]]
 === Required permissions
 
 * Access to *{Data-Sources}* requires the <<xpack-kibana-role-management, {kib} privilege>>
@@ -24,7 +24,7 @@ save existing {data-sources} are not visible. For more information,
 refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
 [float]
-[[settings-create-{data-source}]]
+[[settings-create-pattern]]
 === Create {a-data-source}
 
 If you collected data using one of the {kib} <<connect-to-elasticsearch,ingest options>>,
@@ -72,7 +72,7 @@ move between {kib} apps.
 
 [float]
 [[rollup-{data-source}]]
-==== Create a {data-source} for rolled up data
+==== Create {a-data-source} for rolled up data
 
 {A-data-source} can match one rollup index.  For a combination rollup
 {data-source} with both raw and rolled up data, use the standard notation:
@@ -133,7 +133,7 @@ Once you configure {a-data-source} to use the {ccs} syntax, all searches and
 aggregations using that {data-source} in {kib} take advantage of {ccs}.
 
 [float]
-[[delete-{data-source}]]
+[[delete-index-pattern]]
 === Delete {data-sources}
 
 When you delete {a-data-source}, you cannot recover the associated field formatters, runtime fields, source filters,
