@@ -105,24 +105,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     );
   }, [disabled, onButtonClick, ariaLabel]);
 
-  const {
-    exceptionModalType,
-    onAddExceptionCancel,
-    onAddExceptionConfirm,
-    onAddExceptionTypeClick,
-    ruleIndices,
-  } = useExceptionModal({
-    ruleIndex: ecsRowData?.signal?.rule?.index,
-    refetch,
-    timelineId,
-  });
-
-  const {
-    closeAddEventFilterModal,
-    isAddEventFilterModalOpen,
-    onAddEventFilterClick,
-  } = useEventFilterModal();
-
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
     newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
   };
@@ -134,6 +116,24 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       refetchQuery(globalQuery);
     }
   }, [timelineId, globalQuery, timelineQuery]);
+
+  const {
+    exceptionModalType,
+    onAddExceptionCancel,
+    onAddExceptionConfirm,
+    onAddExceptionTypeClick,
+    ruleIndices,
+  } = useExceptionModal({
+    ruleIndex: ecsRowData?.signal?.rule?.index,
+    refetch: refetchAll,
+    timelineId,
+  });
+
+  const {
+    closeAddEventFilterModal,
+    isAddEventFilterModalOpen,
+    onAddEventFilterClick,
+  } = useEventFilterModal();
 
   const { actionItems: statusActionItems } = useAlertsActions({
     alertStatus,
