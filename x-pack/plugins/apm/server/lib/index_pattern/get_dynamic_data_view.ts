@@ -20,12 +20,12 @@ export interface IndexPatternTitleAndFields {
   fields: FieldDescriptor[];
 }
 
-export const getDynamicIndexPattern = ({
+export const getDynamicDataView = ({
   config,
   context,
   logger,
 }: Pick<APMRouteHandlerResources, 'logger' | 'config' | 'context'>) => {
-  return withApmSpan('get_dynamic_index_pattern', async () => {
+  return withApmSpan('get_dynamic_data_view', async () => {
     const apmIndicies = await getApmIndices({
       savedObjectsClient: context.core.savedObjects.client,
       config,
@@ -36,7 +36,7 @@ export const getDynamicIndexPattern = ({
       context.core.elasticsearch.client.asCurrentUser
     );
 
-    // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
+    // Since `getDynamicDataView` is called in setup_request (and thus by every endpoint)
     // and since `getFieldsForWildcard` will throw if the specified indices don't exist,
     // we have to catch errors here to avoid all endpoints returning 500 for users without APM data
     // (would be a bad first time experience)
