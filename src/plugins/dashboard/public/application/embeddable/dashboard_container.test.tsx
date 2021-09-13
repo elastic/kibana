@@ -48,6 +48,7 @@ const options: DashboardContainerServices = {
   notifications: {} as any,
   overlays: {} as any,
   inspector: {} as any,
+  screenshotMode: {} as any,
   SavedObjectFinder: () => null,
   ExitFullScreenButton: () => null,
   uiActions: {} as any,
