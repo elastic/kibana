@@ -57,6 +57,7 @@ interface Props {
   data: TimelineEventsDetailsItem[];
   id: string;
   isAlert: boolean;
+  isDraggable?: boolean;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
 }
@@ -95,6 +96,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   data,
   id,
   isAlert,
+  isDraggable,
   timelineId,
   timelineTabType,
 }) => {
@@ -144,6 +146,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     data,
                     eventId: id,
                     browserFields,
+                    isDraggable,
                     timelineId,
                     title: i18n.DUCOMENT_SUMMARY,
                   }}
@@ -168,13 +171,14 @@ const EventDetailsComponent: React.FC<Props> = ({
         : undefined,
     [
       isAlert,
-      data,
       id,
+      data,
       browserFields,
+      isDraggable,
       timelineId,
-      isEnrichmentsLoading,
       enrichmentCount,
       allEnrichments,
+      isEnrichmentsLoading,
     ]
   );
 
@@ -238,13 +242,14 @@ const EventDetailsComponent: React.FC<Props> = ({
             browserFields={browserFields}
             data={data}
             eventId={id}
+            isDraggable={isDraggable}
             timelineId={timelineId}
             timelineTabType={timelineTabType}
           />
         </>
       ),
     }),
-    [browserFields, data, id, timelineId, timelineTabType]
+    [browserFields, data, id, isDraggable, timelineId, timelineTabType]
   );
 
   const jsonTab = useMemo(
