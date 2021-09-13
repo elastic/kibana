@@ -496,7 +496,7 @@ export class ManifestManager {
   }
 
   /**
-   * Cleanup .fleet-agents indice if there are som orphan artifacts
+   * Cleanup .fleet-agents indice if there are some orphan artifacts
    */
   public async cleanup(manifest: Manifest) {
     try {
@@ -505,10 +505,6 @@ export class ManifestManager {
       if (isEmpty(fleetArtifacts)) {
         return;
       }
-
-      this.logger.info(
-        `Starting .fleet-agents cleanup, ${fleetArtifacts.length} are going to check`
-      );
 
       const artifactsToDelete = [];
       const manifestArtifactsIds = manifest
@@ -524,6 +520,14 @@ export class ManifestManager {
           artifactsToDelete.push(this.artifactClient.deleteArtifact(artifactId));
         }
       }
+
+      if (isEmpty(artifactsToDelete)) {
+        return;
+      }
+
+      this.logger.info(
+        `Starting .fleet-agents cleanup, ${artifactsToDelete.length} orphan artifactes are going to be removed`
+      );
 
       Promise.all(artifactsToDelete);
 
