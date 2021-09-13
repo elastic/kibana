@@ -56,9 +56,9 @@ export const calculateTableColumnsDimensions = (width?: number) => {
       return {
         expander: '25px',
         type: '40px',
-        docCount: '110px',
-        distinctValues: '90px',
-        distributions: '90px',
+        docCount: 'auto',
+        distinctValues: 'auto',
+        distributions: 'auto',
         showIcons: false,
         breakPoint,
       };
@@ -68,9 +68,9 @@ export const calculateTableColumnsDimensions = (width?: number) => {
       return {
         expander: '25px',
         type: '40px',
-        docCount: '110px',
-        distinctValues: '110px',
-        distributions: '150px',
+        docCount: 'auto',
+        distinctValues: 'auto',
+        distributions: 'auto',
         showIcons: false,
         breakPoint,
       };

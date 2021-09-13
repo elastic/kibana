@@ -2,6 +2,10 @@
 @import 'components/field_count_stats/index';
 @import 'components/field_data_row/index';
 
+$panelWidthS:     300px;
+$panelWidthL:     600px;
+$panelWidthXL:    900px;
+
 .dataVisualizerFieldExpandedRow {
   padding-left: $euiSize * 4;
   width: 100%;
@@ -51,6 +55,7 @@
       }
     }
   }
+
   .dataVisualizerSummaryTable {
     max-width: 350px;
     min-width: 250px;
@@ -61,17 +66,26 @@
       display: none;
     }
   }
+
   .dataVisualizerSummaryTableWrapper {
-    max-width: 300px;
+    min-width: $panelWidthS;
+    max-width: $panelWidthS;
     max-height: 120px;
   }
+
   .dataVisualizerMapWrapper {
     min-height: 300px;
-    min-width: 600px;
+    min-width: $panelWidthS;
+    max-width: $panelWidthS;
   }
+
   .dataVisualizerTopValuesWrapper {
-    min-width: 400px;
-    max-width: 600px;
+    min-width: $panelWidthS;
+    max-width: $panelWidthL;
+  }
+
+  .dataVisualizerUniformPanel {
+    width: $panelWidthS;
   }
 
   .dataVisualizerPanelWrapper {
@@ -79,10 +93,12 @@
     border: 1px solid $euiBorderColor;
     padding: 6px;
     margin: 3px 12px 12px 0;
+    height: min-content;
   }
 
   .dataVisualizerTextContent {
-    min-width: 500px;
+    min-width: $panelWidthS;
+    max-width: $panelWidthXL;
   }
 
 }

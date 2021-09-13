@@ -101,7 +101,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
         />
       </EuiFlexItem>
 
-      <EuiFlexItem className={'dataVisualizerPanelWrapper'}>
+      <EuiFlexItem className={'dataVisualizerUniformPanel dataVisualizerPanelWrapper'}>
         <ExpandedRowFieldHeader>
           <FormattedMessage
             id="xpack.dataVisualizer.dataGrid.field.cardBoolean.valuesLabel"

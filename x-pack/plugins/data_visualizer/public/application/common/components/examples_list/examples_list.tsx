@@ -42,7 +42,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
   return (
     <div
       data-test-subj="dataVisualizerFieldDataExamplesList"
-      className="dataVisualizerPanelWrapper"
+      className="dataVisualizerTextContent dataVisualizerPanelWrapper"
     >
       <ExpandedRowFieldHeader>
         <FormattedMessage
