@@ -26,13 +26,11 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
 
   const filters: UrlFilter[] = series.filters ?? [];
 
-  let definitionFilters: UrlFilter[] = [];
-
   const { removeFilter } = useSeriesFilters({ seriesId, series });
 
   const { indexPattern } = useAppIndexPatternContext(series.dataType);
 
-  if ((filters.length === 0 && definitionFilters.length === 0) || !indexPattern) {
+  if (filters.length === 0 || !indexPattern) {
     return null;
   }
 
@@ -78,24 +76,6 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
           )}
         </Fragment>
       ))}
-
-      {definitionFilters.map(({ field, values }) =>
-        values ? (
-          <EuiFlexItem key={field} grow={false} style={{ maxWidth: 350 }}>
-            <FilterLabel
-              series={series}
-              seriesId={seriesId}
-              field={field}
-              label={labels[field]}
-              value={values}
-              removeFilter={() => {}}
-              negate={false}
-              definitionFilter={true}
-              indexPattern={indexPattern}
-            />
-          </EuiFlexItem>
-        ) : null
-      )}
 
       {(series.filters ?? []).length > 0 && (
         <EuiFlexItem grow={false}>
