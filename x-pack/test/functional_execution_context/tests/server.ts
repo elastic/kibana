@@ -16,6 +16,7 @@ function delay(ms: number) {
 export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const log = getService('log');
 
   async function waitForStatus(
     id: string,
@@ -31,8 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     const { status } = response.body.execution_status;
     if (statuses.has(status)) return response.body.execution_status;
 
-    // eslint-disable-next-line no-console
-    console.log(
+    log.debug(
       `waitForStatus(${Array.from(statuses)} for id:${id}): got ${JSON.stringify(
         response.body.execution_status
       )}, retrying`
