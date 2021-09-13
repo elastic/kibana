@@ -301,13 +301,19 @@ export class SavedObjectsRepository {
     let savedObjectNamespaces: string[] | undefined;
 
     if (this._registry.isSingleNamespace(type)) {
-      savedObjectNamespace = initialNamespaces ? initialNamespaces[0] : namespace;
+      savedObjectNamespace = initialNamespaces
+        ? normalizeNamespace(initialNamespaces[0])
+        : namespace;
     } else if (this._registry.isMultiNamespace(type)) {
       if (id && overwrite) {
         // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
         // note: this check throws an error if the object is found but does not exist in this namespace
-        const existingNamespaces = await this.preflightGetNamespaces(type, id, namespace);
-        savedObjectNamespaces = initialNamespaces || existingNamespaces;
+        savedObjectNamespaces = await this.preflightGetNamespaces(
+          type,
+          id,
+          namespace,
+          initialNamespaces
+        );
       } else {
         savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
       }
@@ -453,8 +459,14 @@ export class SavedObjectsRepository {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
         const docFound = indexFound && actualResult?.found === true;
-        // @ts-expect-error MultiGetHit._source is optional
-        if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
+        if (
+          docFound &&
+          !this.rawDocExistsInNamespaces(
+            // @ts-expect-error MultiGetHit._source is optional
+            actualResult!,
+            initialNamespaces ?? [SavedObjectsUtils.namespaceIdToString(namespace)]
+          )
+        ) {
           const { id, type } = object;
           return {
             tag: 'Left' as 'Left',
@@ -476,7 +488,9 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
-          savedObjectNamespace = initialNamespaces ? initialNamespaces[0] : namespace;
+          savedObjectNamespace = initialNamespaces
+            ? normalizeNamespace(initialNamespaces[0])
+            : namespace;
         } else if (this._registry.isMultiNamespace(object.type)) {
           savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
         }
@@ -2136,12 +2150,18 @@ export class SavedObjectsRepository {
    * @param type The type of the saved object.
    * @param id The ID of the saved object.
    * @param namespace The target namespace.
+   * @param initialNamespaces The target namespace(s) we intend to create the object in, if specified.
    * @returns Array of namespaces that this saved object currently includes, or (if the object does not exist yet) the namespaces that a
    * newly-created object will include. Value may be undefined if an existing saved object has no namespaces attribute; this should not
    * happen in normal operations, but it is possible if the Elasticsearch document is manually modified.
    * @throws Will throw an error if the saved object exists and it does not include the target namespace.
    */
-  private async preflightGetNamespaces(type: string, id: string, namespace?: string) {
+  private async preflightGetNamespaces(
+    type: string,
+    id: string,
+    namespace: string | undefined,
+    initialNamespaces?: string[]
+  ) {
     if (!this._registry.isMultiNamespace(type)) {
       throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
     }
@@ -2156,17 +2176,19 @@ export class SavedObjectsRepository {
       }
     );
 
+    const namespaces = initialNamespaces ?? [SavedObjectsUtils.namespaceIdToString(namespace)];
+
     const indexFound = statusCode !== 404;
     if (indexFound && isFoundGetResponse(body)) {
-      if (!this.rawDocExistsInNamespace(body, namespace)) {
+      if (!this.rawDocExistsInNamespaces(body, namespaces)) {
         throw SavedObjectsErrorHelpers.createConflictError(type, id);
       }
-      return getSavedObjectNamespaces(namespace, body);
+      return initialNamespaces ?? getSavedObjectNamespaces(namespace, body);
     } else if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
       // checking if the 404 is from Elasticsearch
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
     }
-    return getSavedObjectNamespaces(namespace);
+    return initialNamespaces ?? getSavedObjectNamespaces(namespace);
   }
 
   /**

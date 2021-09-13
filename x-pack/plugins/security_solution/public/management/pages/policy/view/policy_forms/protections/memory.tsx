@@ -28,13 +28,13 @@ export const MemoryProtection = React.memo(() => {
   const protectionLabel = i18n.translate(
     'xpack.securitySolution.endpoint.policy.protections.memory',
     {
-      defaultMessage: 'Memory manipulation',
+      defaultMessage: 'Memory threat protections',
     }
   );
   return (
     <ConfigForm
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.memory_protection', {
-        defaultMessage: 'Memory manipulation',
+        defaultMessage: 'Memory threat',
       })}
       supportedOss={[OperatingSystem.WINDOWS]}
       dataTestSubj="memoryProtectionsForm"

@@ -29,7 +29,7 @@ export function createMetricThresholdAlertType(): ObservabilityRuleTypeModel<Met
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/metrics-threshold-alert.html`;
+      return `${docLinks.links.observability.metricsThreshold}`;
     },
     alertParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,

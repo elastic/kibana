@@ -14,9 +14,9 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
-} from '../../../../../../../../maps/common/constants';
+  VectorLayerDescriptor,
+} from '../../../../../../../../maps/common';
 import { EMSTermJoinConfig } from '../../../../../../../../maps/public';
-import { VectorLayerDescriptor } from '../../../../../../../../maps/common/descriptor_types';
 import { EmbeddedMapComponent } from '../../../embedded_map';
 import { FieldVisStats } from '../../../../../../../common/types';
 

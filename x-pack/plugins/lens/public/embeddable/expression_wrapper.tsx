@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiIcon,
+  EuiEmptyPrompt,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiSpacer,
+  EuiLink,
+} from '@elastic/eui';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -18,6 +28,7 @@ import type { KibanaExecutionContext } from 'src/core/public';
 import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { ErrorMessage } from '../editor_frame_service/types';
 import { LensInspector } from '../lens_inspector_service';
@@ -27,6 +38,7 @@ export interface ExpressionWrapperProps {
   expression: string | null;
   errors: ErrorMessage[] | undefined;
   variables?: Record<string, unknown>;
+  interactive?: boolean;
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
@@ -102,6 +114,7 @@ export function ExpressionWrapper({
   searchContext,
   variables,
   handleEvent,
+  interactive,
   searchSessionId,
   onData$,
   renderMode,
@@ -126,6 +139,7 @@ export function ExpressionWrapper({
             padding="s"
             variables={variables}
             expression={expression}
+            interactive={interactive}
             searchContext={searchContext}
             searchSessionId={searchSessionId}
             onData$={onData$}
@@ -158,3 +172,52 @@ export function ExpressionWrapper({
     </I18nProvider>
   );
 }
+
+const SavedObjectConflictMessage = ({ json }: { json: string }) => {
+  const [expandError, setExpandError] = useState(false);
+  return (
+    <>
+      <FormattedMessage
+        id="xpack.lens.embeddable.legacyURLConflict.longMessage"
+        defaultMessage="Disable the {documentationLink} associated with this object."
+        values={{
+          documentationLink: (
+            <EuiLink
+              external
+              href="https://www.elastic.co/guide/en/kibana/master/legacy-url-aliases.html"
+              target="_blank"
+            >
+              {i18n.translate('xpack.lens.embeddable.legacyURLConflict.documentationLinkText', {
+                defaultMessage: 'legacy URL alias',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+      <EuiSpacer />
+      {expandError ? (
+        <EuiCallOut
+          title={i18n.translate('xpack.lens.embeddable.legacyURLConflict.expandErrorText', {
+            defaultMessage: `This object has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
+            values: { json },
+          })}
+          color="danger"
+          iconType="alert"
+        />
+      ) : (
+        <EuiButtonEmpty onClick={() => setExpandError(true)}>
+          {i18n.translate('xpack.lens.embeddable.legacyURLConflict.expandError', {
+            defaultMessage: `Show more`,
+          })}
+        </EuiButtonEmpty>
+      )}
+    </>
+  );
+};
+
+export const savedObjectConflictError = (json: string): ErrorMessage => ({
+  shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
+    defaultMessage: `You've encountered a URL conflict`,
+  }),
+  longMessage: <SavedObjectConflictMessage json={json} />,
+});

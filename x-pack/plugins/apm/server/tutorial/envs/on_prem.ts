@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { APMConfig } from '../..';
 import {
   INSTRUCTION_VARIANT,
   InstructionsSchema,
@@ -33,18 +34,16 @@ import {
 } from '../../../common/tutorial/instructions/apm_server_instructions';
 
 export function onPremInstructions({
-  errorIndices,
-  transactionIndices,
-  metricsIndices,
-  sourcemapIndices,
-  onboardingIndices,
+  apmConfig,
   isFleetPluginEnabled,
 }: {
-  errorIndices: string;
-  transactionIndices: string;
-  metricsIndices: string;
-  sourcemapIndices: string;
-  onboardingIndices: string;
+  apmConfig: Pick<
+    APMConfig,
+    | 'apm_oss.errorIndices'
+    | 'apm_oss.transactionIndices'
+    | 'apm_oss.metricsIndices'
+    | 'apm_oss.onboardingIndices'
+  >;
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema {
   const EDIT_CONFIG = createEditConfig();
@@ -145,7 +144,7 @@ export function onPremInstructions({
             }
           ),
           esHitsCheck: {
-            index: onboardingIndices,
+            index: apmConfig['apm_oss.onboardingIndices'],
             query: {
               bool: {
                 filter: [
@@ -238,22 +237,16 @@ export function onPremInstructions({
           ),
           esHitsCheck: {
             index: [
-              errorIndices,
-              transactionIndices,
-              metricsIndices,
-              sourcemapIndices,
+              apmConfig['apm_oss.errorIndices'],
+              apmConfig['apm_oss.transactionIndices'],
+              apmConfig['apm_oss.metricsIndices'],
             ],
             query: {
               bool: {
                 filter: [
                   {
                     terms: {
-                      'processor.event': [
-                        'error',
-                        'transaction',
-                        'metric',
-                        'sourcemap',
-                      ],
+                      'processor.event': ['error', 'transaction', 'metric'],
                     },
                   },
                   { range: { 'observer.version_major': { gte: 7 } } },
