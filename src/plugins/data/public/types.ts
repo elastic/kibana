@@ -22,6 +22,7 @@ import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
 import { Setup as InspectorSetup } from '../../inspector/public';
 import { NowProviderPublicContract } from './now_provider';
+import { FilterEditorSetup } from './ui/filter_bar/filter_editor/filter_editor_service';
 
 export interface DataSetupDependencies {
   bfetch: BfetchPublicSetup;
@@ -44,6 +45,7 @@ export interface DataPublicPluginSetup {
   autocomplete: AutocompleteSetup;
   search: ISearchSetup;
   query: QuerySetup;
+  filterEditor: FilterEditorSetup;
 }
 
 /**

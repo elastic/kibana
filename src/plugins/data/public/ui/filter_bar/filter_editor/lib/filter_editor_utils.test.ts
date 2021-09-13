@@ -20,10 +20,11 @@ import {
   getFilterableFields,
   getOperatorFromFilter,
   getOperatorOptions,
-  isFilterValid,
+  isPhraseFilterValid,
+  isPhrasesFilterValid,
+  isRangeFilterValid,
+  isExistsFilterValid,
 } from './filter_editor_utils';
-
-import { existsOperator, isBetweenOperator, isOneOfOperator, isOperator } from './filter_operators';
 
 describe('Filter editor utils', () => {
   describe('getFieldFromFilter', () => {
@@ -132,46 +133,50 @@ describe('Filter editor utils', () => {
     });
   });
 
-  describe('isFilterValid', () => {
+  describe('isExistsFilterValid', () => {
     it('should return false if index pattern is not provided', () => {
-      const isValid = isFilterValid(undefined, stubFields[0], isOperator, 'foo');
+      const isValid = isExistsFilterValid(undefined, stubFields[0]);
       expect(isValid).toBe(false);
     });
 
     it('should return false if field is not provided', () => {
-      const isValid = isFilterValid(stubIndexPattern, undefined, isOperator, 'foo');
+      const isValid = isExistsFilterValid(stubIndexPattern, undefined);
       expect(isValid).toBe(false);
     });
 
-    it('should return false if operator is not provided', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[0], undefined, 'foo');
-      expect(isValid).toBe(false);
+    it('should return true if index pattern and field are provided', () => {
+      const isValid = isExistsFilterValid(stubIndexPattern, stubFields[0]);
+      expect(isValid).toBe(true);
     });
+  });
 
+  describe('isPhrasesFilterValid', () => {
     it('should return false for phrases filter without phrases', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isOneOfOperator, []);
+      const isValid = isPhrasesFilterValid(stubIndexPattern, stubFields[0], []);
       expect(isValid).toBe(false);
     });
 
     it('should return true for phrases filter with phrases', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isOneOfOperator, ['foo']);
+      const isValid = isPhrasesFilterValid(stubIndexPattern, stubFields[0], ['foo']);
       expect(isValid).toBe(true);
     });
+  });
 
+  describe('isRangeFilterValid', () => {
     it('should return false for range filter without range', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isBetweenOperator, undefined);
+      const isValid = isRangeFilterValid(stubIndexPattern, stubFields[0], undefined);
       expect(isValid).toBe(false);
     });
 
     it('should return true for range filter with from', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isBetweenOperator, {
+      const isValid = isRangeFilterValid(stubIndexPattern, stubFields[0], {
         from: 'foo',
       });
       expect(isValid).toBe(true);
     });
 
     it('should return true for range filter with from/to', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isBetweenOperator, {
+      const isValid = isRangeFilterValid(stubIndexPattern, stubFields[0], {
         from: 'foo',
         to: 'goo',
       });
@@ -179,7 +184,7 @@ describe('Filter editor utils', () => {
     });
 
     it('should return false for date range filter with bad from', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[4], isBetweenOperator, {
+      const isValid = isRangeFilterValid(stubIndexPattern, stubFields[4], {
         from: 'foo',
         to: 'now',
       });
@@ -187,16 +192,11 @@ describe('Filter editor utils', () => {
     });
 
     it('should return false for date range filter with bad to', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[4], isBetweenOperator, {
+      const isValid = isRangeFilterValid(stubIndexPattern, stubFields[4], {
         from: '2020-01-01',
         to: 'mau',
       });
       expect(isValid).toBe(false);
-    });
-
-    it('should return true for exists filter without params', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[0], existsOperator);
-      expect(isValid).toBe(true);
     });
   });
 });

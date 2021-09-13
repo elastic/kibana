@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type {
   VisualizationsSetup,
   VisualizationStage,
-} from '../../../../src/plugins/visualizations/public';
-import type { SavedObject } from '../../../../src/core/types/saved_objects';
-import type { MapSavedObject } from '../common/map_saved_object_type';
+} from '../../../../../src/plugins/visualizations/public';
+import type { SavedObject } from '../../../../../src/core/types/saved_objects';
+import type { MapSavedObject } from '../../common/map_saved_object_type';
 import {
   APP_ID,
   APP_ICON,
@@ -19,7 +19,7 @@ import {
   getEditPath,
   MAP_PATH,
   MAP_SAVED_OBJECT_TYPE,
-} from '../common/constants';
+} from '../../common/constants';
 
 export function getMapsVisTypeAlias(visualizations: VisualizationsSetup) {
   visualizations.hideTypes(['region_map', 'tile_map']);

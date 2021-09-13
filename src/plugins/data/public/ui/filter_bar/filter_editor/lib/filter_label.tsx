@@ -9,9 +9,16 @@
 import React, { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { existsOperator, isOneOfOperator } from './filter_operators';
 import { Filter, FILTERS } from '../../../../../common';
 import type { FilterLabelStatus } from '../../filter_item';
+
+export const EXISTS_LABEL = i18n.translate('data.filter.filterBar.existsLabel', {
+  defaultMessage: 'exists',
+});
+
+export const PHRASES_LABEL = i18n.translate('data.filter.filterBar.phrasesLabel', {
+  defaultMessage: 'is one of',
+});
 
 // @internal
 export interface FilterLabelProps {
@@ -54,14 +61,14 @@ export default function FilterLabel({ filter, valueLabel, filterLabelStatus }: F
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key}: {getValue(`${existsOperator.message}`)}
+          {filter.meta.key}: {getValue(EXISTS_LABEL)}
         </Fragment>
       );
     case FILTERS.PHRASES:
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key}: {getValue(`${isOneOfOperator.message} ${valueLabel}`)}
+          {filter.meta.key}: {getValue(`${PHRASES_LABEL} ${valueLabel}`)}
         </Fragment>
       );
     case FILTERS.QUERY_STRING:

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../common/constants';
-import { esFilters } from '../../../../src/plugins/data/public';
+import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../../common/constants';
+import { esFilters } from '../../../../../src/plugins/data/public';
 import { MapsAppLocatorDefinition } from './locators';
 import { SerializableRecord } from '@kbn/utility-types';
-import { LayerDescriptor } from '../common/descriptor_types';
+import { LayerDescriptor } from '../../common/descriptor_types';
 
 const MAP_ID: string = '2c9c1f60-1909-11e9-919b-ffe5949a18d2';
 const LAYER_ID: string = '13823000-99b9-11ea-9eb6-d9e8adceb647';

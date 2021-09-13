@@ -41,7 +41,7 @@ import {
   getOperatorTypes,
   isFilterValid,
 } from './lib/filter_editor_utils';
-import { Operator } from './lib/filter_operators';
+import { Operator } from './filter_operator_registry';
 import { getIndexPatternFromFilter } from '../../../query';
 import { IIndexPattern, IFieldType } from '../../..';
 
@@ -477,8 +477,6 @@ class FilterEditorUI extends Component<Props, State> {
       filter = operator.buildFilter(
         indexPattern,
         field,
-        operator.type,
-        operator.negate,
         this.props.filter.meta.disabled ?? false,
         params ?? '',
         alias,

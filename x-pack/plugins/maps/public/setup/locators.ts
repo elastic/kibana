@@ -15,13 +15,13 @@ import type {
   Query,
   QueryState,
   RefreshInterval,
-} from '../../../../src/plugins/data/public';
-import { esFilters } from '../../../../src/plugins/data/public';
-import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
-import type { LocatorDefinition, LocatorPublic } from '../../../../src/plugins/share/public';
-import type { LayerDescriptor } from '../common/descriptor_types';
-import { INITIAL_LAYERS_KEY, APP_ID } from '../common/constants';
-import { lazyLoadMapModules } from './lazy_load_bundle';
+} from '../../../../../src/plugins/data/public';
+import { esFilters } from '../../../../../src/plugins/data/public';
+import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
+import type { LocatorDefinition, LocatorPublic } from '../../../../../src/plugins/share/public';
+import type { LayerDescriptor } from '../../common/descriptor_types';
+import { INITIAL_LAYERS_KEY, APP_ID } from '../../common/constants';
+import { lazyLoadMapModules } from '../lazy_load_bundle';
 
 export interface MapsAppLocatorParams extends SerializableRecord {
   /**

@@ -20,7 +20,7 @@ import {
   getShareService,
   getCore,
 } from '../kibana_services';
-import { MapsAppLocator, MAPS_APP_LOCATOR } from '../locators';
+import { MapsAppLocator, MAPS_APP_LOCATOR } from '../setup/locators';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../../common/constants';
 import { LayerDescriptor } from '../../common/descriptor_types';
 

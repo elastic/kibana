@@ -50,6 +50,7 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
 import { getAggsFormats } from '../common';
+import { FilterEditorService } from './ui/filter_bar/filter_editor/filter_editor_service';
 
 export class DataPublicPlugin
   implements
@@ -60,6 +61,7 @@ export class DataPublicPlugin
       DataStartDependencies
     > {
   private readonly autocomplete: AutocompleteService;
+  private readonly filterEditorService: FilterEditorService;
   private readonly searchService: SearchService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
@@ -67,6 +69,7 @@ export class DataPublicPlugin
   private readonly nowProvider: NowProviderInternalContract;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this.filterEditorService = new FilterEditorService();
     this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
 
@@ -132,6 +135,7 @@ export class DataPublicPlugin
       }),
       search: searchService,
       query: queryService,
+      filterEditor: this.filterEditorService.setup(),
     };
   }
 

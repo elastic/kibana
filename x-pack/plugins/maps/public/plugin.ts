@@ -29,8 +29,8 @@ import {
   setMapAppConfig,
   setStartServices,
 } from './kibana_services';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
-import { getMapsVisTypeAlias } from './maps_vis_type_alias';
+import { featureCatalogueEntry } from './setup/feature_catalogue_entry';
+import { getMapsVisTypeAlias } from './setup/maps_vis_type_alias';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import type {
   VisualizationsSetup,
@@ -56,7 +56,7 @@ import {
 } from './api';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/public';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import type { FileUploadPluginStart } from '../../file_upload/public';
 import type { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
@@ -73,7 +73,7 @@ import {
   MapsAppLocatorDefinition,
   MapsAppRegionMapLocatorDefinition,
   MapsAppTileMapLocatorDefinition,
-} from './locators';
+} from './setup/locators';
 import {
   createRegionMapFn,
   regionMapRenderer,
@@ -83,8 +83,10 @@ import {
   tileMapVisType,
 } from './legacy_visualizations';
 import { SecurityPluginStart } from '../../security/public';
+import { spatialFilterOperator } from './setup/spatial_filter_operator';
 
 export interface MapsPluginSetupDependencies {
+  data: DataPublicPluginSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   inspector: InspectorSetupContract;
   home?: HomePublicPluginSetup;
@@ -170,6 +172,8 @@ export class MapsPlugin
     }
     plugins.visualizations.registerAlias(getMapsVisTypeAlias(plugins.visualizations));
     plugins.embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
+
+    plugins.data.filterEditor.registerFilterOperator(spatialFilterOperator);
 
     core.application.register({
       id: APP_ID,

@@ -8,8 +8,8 @@
 
 import _ from 'lodash';
 import dateMath from '@elastic/datemath';
-import { buildFilter, Filter, FieldFilter } from '@kbn/es-query';
-import { FILTER_OPERATORS, Operator } from './filter_operators';
+import { Filter, FieldFilter } from '@kbn/es-query';
+import { filterOperatorRegistry, Operator } from '../filter_operator_registry';
 import { isFilterable, IIndexPattern, IFieldType, IpAddress } from '../../../../../common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {
@@ -17,13 +17,13 @@ export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPatt
 }
 
 export function getOperatorFromFilter(filter: Filter) {
-  return FILTER_OPERATORS.find((operator) => {
+  return filterOperatorRegistry.get().find((operator) => {
     return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
   });
 }
 
 export function getOperatorTypes() {
-  const types = FILTER_OPERATORS.map((operator) => {
+  const types = filterOperatorRegistry.get().map((operator) => {
     return operator.type;
   });
   return _.uniq(types);
@@ -34,7 +34,7 @@ export function getFilterableFields(indexPattern: IIndexPattern) {
 }
 
 export function getOperatorOptions(field: IFieldType) {
-  return FILTER_OPERATORS.filter((operator) => {
+  return filterOperatorRegistry.get().filter((operator) => {
     return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
   });
 }
@@ -101,29 +101,5 @@ export function isExistsFilterValid(
   indexPattern?: IIndexPattern,
   field?: IFieldType,
 ) {
-  return indexPattern && field;
-}
-
-export function buildEsQueryFilter(
-  indexPattern: IndexPatternBase,
-  field: IndexPatternFieldBase,
-  type: FILTERS,
-  negate: boolean,
-  disabled: boolean,
-  params: Serializable,
-  alias: string | null,
-  store?: FilterStateStore
-) {
-  return indexPattern && field
-    ? buildFilter(
-      indexPattern,
-      field,
-      type,
-      negate,
-      disabled,
-      params,
-      alias,
-      store
-    )
-    : undefined;
+  return indexPattern !== undefined && field !== undefined;
 }

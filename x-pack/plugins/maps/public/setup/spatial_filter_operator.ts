@@ -1,21 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { FILTERS, getFilterParams } from '@kbn/es-query';
 import { ReactElement } from 'react';
-import { PhraseValueInput } from '../phrase_value_input';
-import { PhrasesValuesInput } from '../phrases_values_input';
-import { RangeValueInput } from '../range_value_input';
-import { buildEsQueryFilter, isExistsFilterValid, isPhraseFilterValid, isPhrasesFilterValid, isRangeFilterValid } from './filter_editor_utils';
 
 export const spatialFilterOperator = {
-  message: i18n.translate('data.filter.filterEditor.spatialFilterLabel', {
+  message: i18n.translate('xpack.maps.filterOperator.spatialFilterLabel', {
     defaultMessage: 'spatial filter',
   }),
   type: FILTERS.SPATIAL_FILTER,
@@ -25,8 +20,6 @@ export const spatialFilterOperator = {
   buildFilter: (
     indexPattern: IndexPatternBase,
     field: IndexPatternFieldBase,
-    type: FILTERS,
-    negate: boolean,
     disabled: boolean,
     params: Serializable,
     alias: string | null,
@@ -35,10 +28,10 @@ export const spatialFilterOperator = {
     const filter: Filter = {
       meta: {
         alias,
-        negate,
+        negate: false,
         disabled,
         isMultiIndex: true,
-        type,
+        type: FILTERS.SPATIAL_FILTER,
       },
       query: params.query
     };
