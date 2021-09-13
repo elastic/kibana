@@ -6,10 +6,19 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { includes } from 'lodash';
 import { PageTemplate } from '../page_template';
-import { TabMenuItem } from '../page_template';
+import { TabMenuItem, PageTemplateProps } from '../page_template';
+import { ML_SUPPORTED_LICENSES } from '../../../../common/constants';
 
-export const ElasticsearchTemplate: React.FC<{}> = ({ children, ...props }) => {
+interface ElasticsearchTemplateProps extends PageTemplateProps {
+  cluster: any;
+}
+
+export const ElasticsearchTemplate: React.FC<ElasticsearchTemplateProps> = ({
+  cluster,
+  ...props
+}) => {
   const tabs: TabMenuItem[] = [
     {
       id: 'overview',
@@ -35,34 +44,31 @@ export const ElasticsearchTemplate: React.FC<{}> = ({ children, ...props }) => {
       disabled: false,
       route: '/elasticsearch/indices',
     },
-    {
+  ];
+
+  if (mlIsSupported(cluster.license)) {
+    tabs.push({
       id: 'ml',
       label: i18n.translate('xpack.monitoring.esNavigation.jobsLinkText', {
         defaultMessage: 'Machine learning jobs',
       }),
       disabled: false,
       route: '/elasticsearch/ml_jobs',
-    },
-    {
+    });
+  }
+
+  if (cluster.isCcrEnabled) {
+    tabs.push({
       id: 'ccr',
       label: i18n.translate('xpack.monitoring.esNavigation.ccrLinkText', {
         defaultMessage: 'CCR',
       }),
       disabled: false,
       route: '/elasticsearch/ccr',
-    },
-    // {
-    //   id: 'advanced',
-    //   label: i18n.translate('xpack.monitoring.esNavigation.instance.advancedLinkText', {
-    //     defaultMessage: 'Advanced',
-    //   }),
-    //   disabled: false,
-    // },
-  ];
+    });
+  }
 
-  return (
-    <PageTemplate {...props} tabs={tabs}>
-      {children}
-    </PageTemplate>
-  );
+  return <PageTemplate {...props} tabs={tabs} product="elasticsearch" />;
 };
+
+const mlIsSupported = (license: any) => includes(ML_SUPPORTED_LICENSES, license.type);

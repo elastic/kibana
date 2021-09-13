@@ -10,7 +10,6 @@ import { find } from 'lodash';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../global_state_context';
-
 import { ElasticsearchOverview } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
@@ -24,11 +23,6 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
   });
-  // TODO: is this needed for the setup mode? x-pack/plugins/monitoring/public/directives/main/index.js#L258
-  // TODO: this is needed to display tabs conditionally
-  // const isCcrEnabled = cluster.isCcrEnabled;
-  // const [clusters, setClusters] = useState([] as any);
-  // const [loaded, setLoaded] = useState<boolean | null>(false);
   const [data, setData] = useState(null);
   const [showShardActivityHistory, setShowShardActivityHistory] = useState(false);
   const toggleShardActivityHistory = () => {
@@ -39,8 +33,6 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
       return showShardActivityHistory || row.stage !== 'DONE';
     });
   };
-
-  // let tabs: TabMenuItem[] = [];
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.overview.title', {
     defaultMessage: 'Elasticsearch',
@@ -86,6 +78,7 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
         showShardActivityHistory={showShardActivityHistory}
         toggleShardActivityHistory={toggleShardActivityHistory}
         zoomInfo={zoomInfo}
+        data-test-subj="elasticsearchOverviewPage"
       />
     );
   };
@@ -96,8 +89,9 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
       pageTitle={pageTitle}
       getPageData={getPageData}
       data-test-subj="elasticsearchOverviewPage"
+      cluster={cluster}
     >
-      {renderOverview(data)}
+      <div data-test-subj="elasticsearchOverviewPage">{renderOverview(data)}</div>
     </ElasticsearchTemplate>
   );
 };

@@ -12,6 +12,8 @@ import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { MonitoringTimeContainer } from './use_monitoring_time';
 import { PageLoading } from '../../components';
+import { getSetupModeState, isSetupModeFeatureEnabled } from '../setup_mode/setup_mode';
+import { SetupModeFeature } from '../../../common/enums';
 
 export interface TabMenuItem {
   id: string;
@@ -20,11 +22,12 @@ export interface TabMenuItem {
   testSubj?: string;
   route: string;
 }
-interface PageTemplateProps {
+export interface PageTemplateProps {
   title: string;
   pageTitle?: string;
   tabs?: TabMenuItem[];
   getPageData?: () => Promise<void>;
+  product?: string;
 }
 
 export const PageTemplate: React.FC<PageTemplateProps> = ({
@@ -32,6 +35,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   pageTitle,
   tabs,
   getPageData,
+  product,
   children,
 }) => {
   useTitle('', title);
@@ -69,7 +73,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
             return (
               <EuiTab
                 key={idx}
-                disabled={item.disabled}
+                disabled={isDisabledTab(product)}
                 title={item.label}
                 data-test-subj={item.testSubj}
                 href={createHref(item.route)}
@@ -85,3 +89,31 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
     </div>
   );
 };
+
+function isDisabledTab(product: string | undefined) {
+  const setupMode = getSetupModeState();
+  if (!isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
+    return false;
+  }
+
+  if (!setupMode.data) {
+    return false;
+  }
+
+  if (!product) {
+    return false;
+  }
+
+  const data = setupMode.data[product] || {};
+  if (data.totalUniqueInstanceCount === 0) {
+    return true;
+  }
+  if (
+    data.totalUniqueInternallyCollectedCount === 0 &&
+    data.totalUniqueFullyMigratedCount === 0 &&
+    data.totalUniquePartiallyMigratedCount === 0
+  ) {
+    return true;
+  }
+  return false;
+}
