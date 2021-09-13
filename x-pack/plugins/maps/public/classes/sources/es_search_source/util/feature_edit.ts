@@ -11,7 +11,7 @@ import {
   CHECK_IS_DRAWING_INDEX,
   GET_MATCHING_INDEXES_PATH,
   INDEX_FEATURE_PATH,
-} from '../../../../../common';
+} from '../../../../../common/constants';
 import { getHttp } from '../../../../kibana_services';
 
 export const addFeatureToIndex = async (
