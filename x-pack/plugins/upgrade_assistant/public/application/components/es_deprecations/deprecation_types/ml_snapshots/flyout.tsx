@@ -162,7 +162,7 @@ export const FixSnapshotsFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {snapshotState.error && snapshotState.status === 'error' && (
+        {snapshotState.error && snapshotState.status !== 'complete' && (
           <>
             <EuiCallOut
               title={
