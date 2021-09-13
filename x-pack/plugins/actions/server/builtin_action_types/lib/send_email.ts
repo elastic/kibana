@@ -15,7 +15,7 @@ import { CustomHostSettings } from '../../config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 import { AdditionalEmailServices } from '../email';
 import { sendEmailGraphApi } from './send_email_graph_api';
-import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
+import { requestOAuthClientCredentialsToken, ClientCredentialsResponse } from './request_oauth_client_credentials_token';
 import { ProxySettings } from '../../types';
 
 // an email "service" which doesn't actually send, just returns what it would send
@@ -69,7 +69,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
 
   if (service === AdditionalEmailServices.EXCHANGE) {
     // request access token for microsoft exchange online server with Graph API scope
-    const res = await requestOAuthClientCredentialsToken(
+    const tokenResult = await requestOAuthClientCredentialsToken(
       `https://login.microsoftonline.com/${transport.tenantId}/oauth2/v2.0/token`,
       logger,
       {
@@ -78,10 +78,11 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
         clientSecret: transport.clientSecret,
       },
       configurationUtilities
-    );
+    ) as ClientCredentialsResponse;
+
     const headers = {
       'Content-Type': 'application/json',
-      Authorization: `${res.tokenType} ${res.accessToken}`,
+      Authorization: `${tokenResult.tokenType} ${tokenResult.accessToken}`,
     };
     try {
       return await sendEmailGraphApi(
@@ -90,7 +91,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
         configurationUtilities
       );
     } catch (err) {
-      logger.warn(`error thrown posting Microsoft Exchange email: ${err.message}`);
+      logger.warn(`error thrown sending Microsoft Exchange email: ${err.message}`);
       throw err;
     }
   }

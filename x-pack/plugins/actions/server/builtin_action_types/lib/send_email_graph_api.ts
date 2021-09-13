@@ -15,21 +15,24 @@ interface SendEmailGraphApiOptions {
   options: SendEmailOptions;
   headers: Record<string, string>;
   messageHTML: string;
+  graphApiUrl?: string;
 }
+
+const MICROSOFT_GRAPH_API_HOST = 'https://graph.microsoft.com/v1.0';
 
 export async function sendEmailGraphApi(
   sendEmailOptions: SendEmailGraphApiOptions,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): Promise<AxiosResponse> {
-  const { options, headers, messageHTML } = sendEmailOptions;
+  const { options, headers, messageHTML, graphApiUrl } = sendEmailOptions;
 
   const axiosInstance = axios.create();
 
   // POST /users/{id | userPrincipalName}/sendMail
   return await request({
     axios: axiosInstance,
-    url: `https://graph.microsoft.com/v1.0/users/${options.routing.from}/sendMail`,
+    url: `${graphApiUrl ?? MICROSOFT_GRAPH_API_HOST}/users/${options.routing.from}/sendMail`,
     method: 'post',
     logger,
     data: getMessage(options, messageHTML),

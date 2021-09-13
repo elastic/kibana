@@ -11,26 +11,30 @@ import { actionsConfigMock } from '../../actions_config.mock';
 import { CustomHostSettings } from '../../config';
 import { ProxySettings } from '../../types';
 import { sendEmailGraphApi } from './send_email_graph_api';
-jest.mock('axios');
+
+
 const axiosMock = (axios as unknown) as jest.Mock;
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 describe('sendEmailGraphApi', () => {
-  test('email contains the proper message', () => {
-    const configurationUtilities = actionsConfigMock.create();
-    const nodeOption = sendEmailGraphApi(getSendEmailOptions(), logger, configurationUtilities);
-    expect(nodeOption).toMatchObject({
-      rejectUnauthorized: true,
-    });
+  const configurationUtilities = actionsConfigMock.create();
+
+  test('email contains the proper message', async () => {
+    const result = await sendEmailGraphApi({ options: getSendEmailOptions(), messageHTML: 'test1', headers: {}}, logger, configurationUtilities);
+    expect(result.data.message).toBe('test1');
   });
 
-  test('email was sent on behalf of the user "from" mailbox', () => {
-    const configurationUtilities = actionsConfigMock.create();
-    const result = sendEmailGraphApi(getSendEmailOptions(), logger, configurationUtilities);
+  test('email was sent on behalf of the user "from" mailbox', async () => {
+    const result = await sendEmailGraphApi({ options: getSendEmailOptions(), messageHTML: 'test2', headers: {}}, logger, configurationUtilities);
     expect(result).not.toBeNull();
-    expect(result).toBeTruthy();
+    expect(result).toMatchObject({});
   });
 
+  test('sendMail request was sent to the configured Graph API URL', async () => {
+    const result = await sendEmailGraphApi({ options: getSendEmailOptions(), messageHTML: 'test2', headers: {}, graphApiUrl: 'https://test'}, logger, configurationUtilities);
+    expect(result).not.toBeNull();
+    expect(result).toMatchObject({});
+  });
 });
 
 function getSendEmailOptions(

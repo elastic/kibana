@@ -243,10 +243,7 @@ async function executor(
   if (config.service === AdditionalEmailServices.EXCHANGE) {
     transport.clientId = config.clientId!;
     transport.tenantId = config.tenantId!;
-  } else if (
-    CUSTOM_CONFIG_SERVICES.indexOf(config.service) >= 0 &&
-    config.service !== AdditionalEmailServices.EXCHANGE
-  ) {
+  } else if (CUSTOM_CONFIG_SERVICES.indexOf(config.service) >= 0) {
     // use configured host/port/secure values
     // already validated service or host/port is not null ...
     transport.host = config.host!;

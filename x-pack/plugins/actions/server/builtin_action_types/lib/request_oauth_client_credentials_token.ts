@@ -19,7 +19,7 @@ interface ClientCredentialsRequestParams {
   clientSecret?: string;
 }
 
-interface ClientCredentialsResponse {
+export interface ClientCredentialsResponse {
   tokenType: string;
   accessToken: string;
   expiresIn: number;
@@ -56,6 +56,8 @@ export async function requestOAuthClientCredentialsToken(
       accessToken: res.data.access_token,
       expiresIn: res.data.expires_in,
     };
+  } else {
+    logger.warn(`error thrown getting the access token from ${tokenUrl} for clientID: ${clientId}: ${res.data}`);
   }
   return res.data;
 }
