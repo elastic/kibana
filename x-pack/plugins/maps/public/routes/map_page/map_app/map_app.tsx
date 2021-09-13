@@ -93,6 +93,7 @@ export interface State {
   savedQuery?: SavedQuery;
   isRefreshPaused: boolean;
   refreshInterval: number;
+  savedObjectId?: string;
 }
 
 export class MapApp extends React.Component<Props, State> {
@@ -147,6 +148,13 @@ export class MapApp extends React.Component<Props, State> {
       }
       return actions.default() as AppLeaveAction;
     });
+  }
+
+  static getDerivedStateFromProps(props: Props, state: State) {
+    if (state.savedObjectId !== props.savedMap.getSavedObjectId()) {
+      return { initialized: false };
+    }
+    return null;
   }
 
   componentDidMount() {
@@ -358,6 +366,7 @@ export class MapApp extends React.Component<Props, State> {
       return;
     }
 
+    this.setState({ savedObjectId: this.props.savedMap.getSavedObjectId() });
     this.props.savedMap.setBreadcrumbs();
     getCoreChrome().docTitle.change(this.props.savedMap.getTitle());
     const savedObjectId = this.props.savedMap.getSavedObjectId();
