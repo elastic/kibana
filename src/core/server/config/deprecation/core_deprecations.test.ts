@@ -18,24 +18,6 @@ describe('core deprecations', () => {
     process.env = { ...initialEnv };
   });
 
-  describe('configPath', () => {
-    it('logs a warning if CONFIG_PATH environ variable is set', () => {
-      process.env.CONFIG_PATH = 'somepath';
-      const { messages } = applyCoreDeprecations();
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Environment variable \\"CONFIG_PATH\\" is deprecated. It has been replaced with \\"KBN_PATH_CONF\\" pointing to a config folder",
-        ]
-      `);
-    });
-
-    it('does not log a warning if CONFIG_PATH environ variable is unset', () => {
-      delete process.env.CONFIG_PATH;
-      const { messages } = applyCoreDeprecations();
-      expect(messages).toHaveLength(0);
-    });
-  });
-
   describe('kibanaPathConf', () => {
     it('logs a warning if KIBANA_PATH_CONF environ variable is set', () => {
       process.env.KIBANA_PATH_CONF = 'somepath';
@@ -49,24 +31,6 @@ describe('core deprecations', () => {
 
     it('does not log a warning if KIBANA_PATH_CONF environ variable is unset', () => {
       delete process.env.KIBANA_PATH_CONF;
-      const { messages } = applyCoreDeprecations();
-      expect(messages).toHaveLength(0);
-    });
-  });
-
-  describe('dataPath', () => {
-    it('logs a warning if DATA_PATH environ variable is set', () => {
-      process.env.DATA_PATH = 'somepath';
-      const { messages } = applyCoreDeprecations();
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Environment variable \\"DATA_PATH\\" will be removed.  It has been replaced with kibana.yml setting \\"path.data\\"",
-        ]
-      `);
-    });
-
-    it('does not log a warning if DATA_PATH environ variable is unset', () => {
-      delete process.env.DATA_PATH;
       const { messages } = applyCoreDeprecations();
       expect(messages).toHaveLength(0);
     });
