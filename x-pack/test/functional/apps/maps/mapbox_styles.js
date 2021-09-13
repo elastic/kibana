@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { KBN_IS_TILE_COMPLETE, KBN_METADATA_FEATURE } from '../../../../plugins/maps/common';
+import {
+  KBN_IS_TILE_COMPLETE,
+  KBN_METADATA_FEATURE,
+} from '../../../../plugins/maps/common/constants';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
@@ -219,6 +222,7 @@ export default function ({ getPageObjects, getService }) {
       const layer = mapboxStyle.layers.find((mbLayer) => {
         return mbLayer.id === 'n1t6f_toomanyfeatures';
       });
+
       expect(layer).to.eql({
         id: 'n1t6f_toomanyfeatures',
         type: 'fill',

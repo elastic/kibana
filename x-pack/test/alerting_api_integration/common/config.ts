@@ -44,6 +44,7 @@ const enabledActionTypes = [
   'test.noop',
   'test.delayed',
   'test.rate-limit',
+  'test.no-attempts-rate-limit',
   'test.throw',
 ];
 
