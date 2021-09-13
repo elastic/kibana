@@ -159,7 +159,7 @@ async function getFirstSeenVersionByServiceNode(
   filter: ESFilter[],
   searchAggregatedTransactions: boolean
 ) {
-  const response = await apmEventClient.search('get_first_seen_of_version', {
+  const response = await apmEventClient.search('get_first_seen_of_version_by_service_node', {
     apm: {
       events: [
         getProcessorEventForAggregatedTransactions(
