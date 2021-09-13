@@ -137,15 +137,23 @@ export const DeprecationDetailsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge
-          isCritical={deprecation.level === 'critical'}
-          isResolved={isCurrent && isResolved}
-        />
-        <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2 id="kibanaDeprecationDetailsFlyoutTitle" className="eui-textBreakWord">
-            {title}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <div>
+              <DeprecationBadge
+                isCritical={deprecation.level === 'critical'}
+                isResolved={isCurrent && isResolved}
+              />
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="s" data-test-subj="flyoutTitle">
+              <h2 id="kibanaDeprecationDetailsFlyoutTitle" className="eui-textBreakWord">
+                {title}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {deprecationResolutionState?.resolveDeprecationStatus === 'fail' && (
