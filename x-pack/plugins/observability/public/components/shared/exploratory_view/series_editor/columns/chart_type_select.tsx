@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';
-import { i18n } from '../../../../../../../../../../../../../private/var/tmp/_bazel_shahzad-16/974662a0be78d7012b40ce12cff92960/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-i18n';
+import { i18n } from '@kbn/i18n';
 import {
   useKibana,
   ToolbarButton,
