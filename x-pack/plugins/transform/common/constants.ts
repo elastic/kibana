@@ -105,3 +105,7 @@ export const TRANSFORM_FUNCTION = {
 } as const;
 
 export type TransformFunction = typeof TRANSFORM_FUNCTION[keyof typeof TRANSFORM_FUNCTION];
+
+export const TRANSFORM_RULE_TYPE = {
+  TRANSFORM_HEALTH: 'transform_health',
+} as const;
