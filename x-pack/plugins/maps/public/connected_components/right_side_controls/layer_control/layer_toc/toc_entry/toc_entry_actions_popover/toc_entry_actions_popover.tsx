@@ -19,7 +19,7 @@ import {
 } from '../action_labels';
 import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
 import { VectorLayer } from '../../../../../../classes/layers/vector_layer';
-import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common';
+import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common/constants';
 import { ESSearchSourceSyncMeta } from '../../../../../../../common/descriptor_types';
 
 export interface Props {

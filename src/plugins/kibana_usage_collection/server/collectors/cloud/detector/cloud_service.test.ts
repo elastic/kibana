@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CloudService, Response } from './cloud_service';
+import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 
 describe('CloudService', () => {
@@ -30,9 +30,9 @@ describe('CloudService', () => {
 
   describe('_checkIfService', () => {
     it('throws an exception unless overridden', async () => {
-      expect(async () => {
-        await service._checkIfService(undefined);
-      }).rejects.toThrowErrorMatchingInlineSnapshot(`"not implemented"`);
+      await expect(() =>
+        service._checkIfService(undefined)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"not implemented"`);
     });
   });
 
@@ -88,52 +88,59 @@ describe('CloudService', () => {
   describe('_parseResponse', () => {
     const body = { some: { body: {} } };
 
-    it('throws error upon failure to parse body as object', async () => {
-      expect(async () => {
-        await service._parseResponse();
-      }).rejects.toMatchInlineSnapshot(`undefined`);
-      expect(async () => {
-        await service._parseResponse(null);
-      }).rejects.toMatchInlineSnapshot(`undefined`);
-      expect(async () => {
-        await service._parseResponse({});
-      }).rejects.toMatchInlineSnapshot(`undefined`);
-      expect(async () => {
-        await service._parseResponse(123);
-      }).rejects.toMatchInlineSnapshot(`undefined`);
-      expect(async () => {
-        await service._parseResponse('raw string');
-      }).rejects.toMatchInlineSnapshot(`[Error: 'raw string' is not a JSON object]`);
-      expect(async () => {
-        await service._parseResponse('{{}');
-      }).rejects.toMatchInlineSnapshot(`[Error: '{{}' is not a JSON object]`);
+    it('throws error upon failure to parse body as object', () => {
+      expect(() => service._parseResponse()).toThrowErrorMatchingInlineSnapshot(
+        `"Unable to handle body"`
+      );
+      expect(() => service._parseResponse(null)).toThrowErrorMatchingInlineSnapshot(
+        `"Unable to handle body"`
+      );
+      expect(() => service._parseResponse({})).toThrowErrorMatchingInlineSnapshot(
+        `"Unable to handle body"`
+      );
+      expect(() => service._parseResponse(123)).toThrowErrorMatchingInlineSnapshot(
+        `"Unable to handle body"`
+      );
+      expect(() => service._parseResponse('raw string')).toThrowErrorMatchingInlineSnapshot(
+        `"'raw string' is not a JSON object"`
+      );
+      expect(() => service._parseResponse('{{}')).toThrowErrorMatchingInlineSnapshot(
+        `"'{{}' is not a JSON object"`
+      );
     });
 
-    it('expects unusable bodies', async () => {
-      const parseBody = (parsedBody: Response['body']) => {
-        expect(parsedBody).toEqual(body);
+    it('expects unusable bodies', () => {
+      const parseBody = jest.fn().mockReturnValue(null);
 
-        return null;
-      };
+      expect(() =>
+        service._parseResponse(JSON.stringify(body), parseBody)
+      ).toThrowErrorMatchingInlineSnapshot(`"Unable to handle body"`);
+      expect(parseBody).toBeCalledTimes(1);
+      expect(parseBody).toBeCalledWith(body);
+      parseBody.mockClear();
 
-      expect(async () => {
-        await service._parseResponse(JSON.stringify(body), parseBody);
-      }).rejects.toMatchInlineSnapshot(`undefined`);
-      expect(async () => {
-        await service._parseResponse(body, parseBody);
-      }).rejects.toMatchInlineSnapshot(`undefined`);
+      expect(() => service._parseResponse(body, parseBody)).toThrowErrorMatchingInlineSnapshot(
+        `"Unable to handle body"`
+      );
+      expect(parseBody).toBeCalledTimes(1);
+      expect(parseBody).toBeCalledWith(body);
     });
 
     it('uses parsed object to create response', async () => {
       const serviceResponse = new CloudServiceResponse('a123', true, { id: 'xyz' });
-      const parseBody = (parsedBody: Response['body']) => {
-        expect(parsedBody).toEqual(body);
-
-        return serviceResponse;
-      };
+      const parseBody = jest.fn().mockReturnValue(serviceResponse);
 
       const response = await service._parseResponse(body, parseBody);
+      expect(parseBody).toBeCalledWith(body);
+      expect(response).toBe(serviceResponse);
+    });
 
+    it('parses object before passing it to parseBody to create response', async () => {
+      const serviceResponse = new CloudServiceResponse('a123', true, { id: 'xyz' });
+      const parseBody = jest.fn().mockReturnValue(serviceResponse);
+
+      const response = await service._parseResponse(JSON.stringify(body), parseBody);
+      expect(parseBody).toBeCalledWith(body);
       expect(response).toBe(serviceResponse);
     });
   });
