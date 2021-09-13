@@ -10,6 +10,7 @@
 jest.mock('perf_hooks');
 import { monitorEventLoopDelay } from 'perf_hooks';
 import { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
+import { mocked } from './event_loop_delays_monitor.mocks';
 
 describe('EventLoopDelaysMonitor', () => {
   beforeAll(() => {
@@ -38,19 +39,12 @@ describe('EventLoopDelaysMonitor', () => {
     expect(eventLoopDelaysMonitor['loopMonitor'].percentile).toHaveBeenNthCalledWith(3, 95);
     expect(eventLoopDelaysMonitor['loopMonitor'].percentile).toHaveBeenNthCalledWith(4, 99);
 
-    expect(Object.keys(histogramData)).toMatchInlineSnapshot(`
-      Array [
-        "min",
-        "max",
-        "mean",
-        "exceeds",
-        "stddev",
-        "fromTimestamp",
-        "lastUpdatedAt",
-        "percentiles",
-      ]
-    `);
+    // mocked perf_hook returns `mocked.createHistogram()`.
+    // This ensures that the wiring of the `collect` function is correct.
+    const mockedHistogram = mocked.createHistogram();
+    expect(histogramData).toEqual(mockedHistogram);
   });
+
   test('#reset resets histogram data', () => {
     const eventLoopDelaysMonitor = new EventLoopDelaysMonitor();
     eventLoopDelaysMonitor.reset();

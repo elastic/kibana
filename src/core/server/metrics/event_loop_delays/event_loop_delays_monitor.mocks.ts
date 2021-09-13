@@ -10,7 +10,7 @@ import type { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 import type { IntervalHistogram } from '../types';
 
 function createMockHistogram(overwrites: Partial<IntervalHistogram> = {}): IntervalHistogram {
-  const now = moment();
+  const now = Date.now();
 
   return {
     min: 9093120,
@@ -18,8 +18,8 @@ function createMockHistogram(overwrites: Partial<IntervalHistogram> = {}): Inter
     mean: 11993238.600747818,
     exceeds: 0,
     stddev: 1168191.9357543814,
-    fromTimestamp: now.startOf('day').toISOString(),
-    lastUpdatedAt: now.toISOString(),
+    fromTimestamp: moment(now).toISOString(),
+    lastUpdatedAt: moment(now).toISOString(),
     percentiles: {
       '50': 12607487,
       '75': 12615679,
