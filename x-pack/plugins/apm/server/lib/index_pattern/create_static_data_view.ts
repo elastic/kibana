@@ -13,7 +13,7 @@ import { Setup } from '../helpers/setup_request';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client.js';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
+import { getApmDataViewTitle } from './get_apm_data_view_title';
 
 type ApmIndexPatternAttributes = typeof apmIndexPattern.attributes & {
   title: string;
@@ -45,7 +45,7 @@ export async function createStaticDataView({
       return false;
     }
 
-    const apmIndexPatternTitle = getApmIndexPatternTitle(setup.indices);
+    const apmIndexPatternTitle = getApmDataViewTitle(setup.indices);
     const forceOverwrite = await getForceOverwrite({
       apmIndexPatternTitle,
       overwrite,

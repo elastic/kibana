@@ -12,7 +12,7 @@ import {
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
+import { getApmDataViewTitle } from './get_apm_data_view_title';
 
 export interface IndexPatternTitleAndFields {
   title: string;
@@ -30,7 +30,7 @@ export const getDynamicIndexPattern = ({
       savedObjectsClient: context.core.savedObjects.client,
       config,
     });
-    const indexPatternTitle = getApmIndexPatternTitle(apmIndicies);
+    const indexPatternTitle = getApmDataViewTitle(apmIndicies);
 
     const indexPatternsFetcher = new IndexPatternsFetcher(
       context.core.elasticsearch.client.asCurrentUser
