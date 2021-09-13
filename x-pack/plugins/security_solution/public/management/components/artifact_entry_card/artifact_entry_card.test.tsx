@@ -6,42 +6,59 @@
  */
 
 import React from 'react';
+import { cloneDeep } from 'lodash';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from './artifact_entry_card';
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
-import { TrustedApp } from '../../../../common/endpoint/types';
 import { act, fireEvent, getByTestId } from '@testing-library/react';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { AnyArtifact } from './types';
+import { isTrustedApp } from './hooks/use_normalized_artifact';
 
-// FIXME:PT DEV ONLY - REMOVE IT
-// {
-//       description: 'Generator says we trust CrowdStrike Falcon',
-//       name: 'CrowdStrike Falcon',
-//       os: 'windows',
-//       effectScope: { type: 'global' },
-//       entries: [
-//         {
-//           field: 'process.hash.*',
-//           operator: 'included',
-//           type: 'match',
-//           value: '1234234659af249ddf3e40864e9fb241'
-//         },
-//         {
-//           field: 'process.executable.caseless',
-//           operator: 'included',
-//           type: 'match',
-//           value: '/one/two/three'
-//         }
-//       ],
-//       id: '91dcb211-5cc1-47df-899b-320090f55a0b',
-//       version: 'jy6j0',
-//       created_at: '2021-07-01T00:00:00.000Z',
-//       updated_at: '2021-09-09T19:26:10.795Z',
-//       created_by: '`Justa`',
-//       updated_by: 'Mara'
-//     }
+const getCommonItemDataOverrides = () => {
+  return {
+    name: 'some internal app',
+    description: 'this app is trusted by the company',
+    created_at: new Date('2021-07-01').toISOString(),
+  };
+};
 
-describe('when using the ArtifactEntryCard component', () => {
-  let trustedApp: TrustedApp;
+const getTrustedAppProvider = () =>
+  new TrustedAppGenerator('seed').generate(getCommonItemDataOverrides());
+
+const getExceptionProvider = () => {
+  // cloneDeep needed because exception mock generator uses state across instances
+  return cloneDeep(
+    getExceptionListItemSchemaMock({
+      ...getCommonItemDataOverrides(),
+      os_types: ['windows'],
+      updated_at: new Date().toISOString(),
+      created_by: 'Justa',
+      updated_by: 'Mara',
+      entries: [
+        {
+          field: 'process.hash.*',
+          operator: 'included',
+          type: 'match',
+          value: '1234234659af249ddf3e40864e9fb241',
+        },
+        {
+          field: 'process.executable.caseless',
+          operator: 'included',
+          type: 'match',
+          value: '/one/two/three',
+        },
+      ],
+      tags: ['policy:all'],
+    })
+  );
+};
+
+describe.each([
+  ['trusted apps', getTrustedAppProvider],
+  ['exceptions/event filters', getExceptionProvider],
+])('when using the ArtifactEntryCard component with %s', (_, generateItem) => {
+  let item: AnyArtifact;
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: (
@@ -49,17 +66,13 @@ describe('when using the ArtifactEntryCard component', () => {
   ) => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
-    trustedApp = new TrustedAppGenerator('seed').generate({
-      name: 'some internal app',
-      description: 'this app is trusted by the company',
-      created_at: new Date('2021-07-01').toISOString(),
-    });
+    item = generateItem();
     appTestContext = createAppRootMockRenderer();
     render = (props = {}) => {
       renderResult = appTestContext.render(
         <ArtifactEntryCard
           {...{
-            item: trustedApp,
+            item,
             'data-test-subj': 'testCard',
             ...props,
           }}
@@ -102,13 +115,11 @@ describe('when using the ArtifactEntryCard component', () => {
   it('should display description if one exists', async () => {
     render();
 
-    expect(renderResult.getByTestId('testCard-description').textContent).toEqual(
-      trustedApp.description
-    );
+    expect(renderResult.getByTestId('testCard-description').textContent).toEqual(item.description);
   });
 
   it('should display default empty value if description does not exist', async () => {
-    trustedApp.description = undefined;
+    item.description = undefined;
     render();
 
     expect(renderResult.getByTestId('testCard-description').textContent).toEqual('—');
@@ -131,7 +142,6 @@ describe('when using the ArtifactEntryCard component', () => {
 
   describe('and actions were defined', () => {
     let actions: ArtifactEntryCardProps['actions'];
-    const renderWithActions = () => render({ actions });
 
     beforeEach(() => {
       actions = [
@@ -143,13 +153,13 @@ describe('when using the ArtifactEntryCard component', () => {
     });
 
     it('should show the actions icon when actions were defined', () => {
-      renderWithActions();
+      render({ actions });
 
       expect(renderResult.getByTestId('testCard-header-actions-button')).not.toBeNull();
     });
 
     it('should show popup with defined actions', async () => {
-      renderWithActions();
+      render({ actions });
       await act(async () => {
         await fireEvent.click(renderResult.getByTestId('testCard-header-actions-button'));
       });
@@ -162,16 +172,70 @@ describe('when using the ArtifactEntryCard component', () => {
   });
 
   describe('and artifact is defined per policy', () => {
-    it.todo('should display correct label with count of policies');
+    let policies: ArtifactEntryCardProps['policies'];
 
-    it.todo('should display effected scope as a button');
+    beforeEach(() => {
+      if (isTrustedApp(item)) {
+        item.effectScope = {
+          type: 'policy',
+          policies: ['policy-1'],
+        };
+      } else {
+        item.tags = ['policy:policy-1'];
+      }
 
-    it.todo('should show popup menu with list of associated policies when clicked');
+      policies = {
+        'policy-1': {
+          children: 'Policy one',
+          'data-test-subj': 'policyMenuItem',
+        },
+      };
+    });
 
-    it.todo('should display policy ID if no policy menu item found in `policies` prop');
-  });
+    it('should display correct label with count of policies', () => {
+      render({ policies });
 
-  describe('and a basic/simple Exception is used', () => {
-    it.todo('should render the card');
+      expect(renderResult.getByTestId('testCard-subHeader-effectScope-value').textContent).toEqual(
+        'Applied to 1 policy'
+      );
+    });
+
+    it('should display effected scope as a button', () => {
+      render({ policies });
+
+      expect(
+        renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
+      ).not.toBeNull();
+    });
+
+    it('should show popup menu with list of associated policies when clicked', async () => {
+      render({ policies });
+      await act(async () => {
+        await fireEvent.click(
+          renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
+        );
+      });
+
+      expect(
+        renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
+      ).not.toBeNull();
+
+      expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one');
+    });
+
+    it('should display policy ID if no policy menu item found in `policies` prop', async () => {
+      render();
+      await act(async () => {
+        await fireEvent.click(
+          renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
+        );
+      });
+
+      expect(
+        renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
+      ).not.toBeNull();
+
+      expect(renderResult.getByText('policy-1').textContent).not.toBeNull();
+    });
   });
 });
