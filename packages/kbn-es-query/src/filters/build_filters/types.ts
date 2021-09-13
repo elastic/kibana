@@ -59,7 +59,7 @@ export type FilterMeta = {
   negate?: boolean;
   // controlledBy is there to identify who owns the filter
   controlledBy?: string;
-  // index and type are optional only because 1) when you create a new filter, there are no defaults 2) filter may have multiple indices
+  // index and type are optional because 1) when you create a new filter, there are no defaults 2) filter may not be coupled with field or single index
   index?: string;
   isMultiIndex?: boolean;
   type?: string;
