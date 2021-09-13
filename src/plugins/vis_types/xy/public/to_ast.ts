@@ -40,7 +40,7 @@ import { getTimeZone } from './utils';
 import { getColumnByAccessor } from './utils/accessors';
 
 type XDomainPreArgs = Omit<XDomainArguments, 'column'> & {
-  column?: XDomainArguments['column'];
+  column?: Omit<ExpressionValueVisDimension, 'type'>;
 };
 
 const prepareLabel = (data: Labels) => {
@@ -248,6 +248,16 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     .length;
 
   xDomain.considerInterval = considerInterval;
+  xDomain.column =
+    dimensions.x?.accessor !== undefined && dimensions.x?.accessor !== null
+      ? {
+          accessor: dimensions.x?.accessor,
+          format: {
+            ...(dimensions.x?.format ?? {}),
+            params: dimensions.x?.format?.params ?? {},
+          },
+        }
+      : undefined;
 
   const visTypeXy = buildExpressionFunction<VisTypeXyExpressionFunctionDefinition>(visName, {
     type: vis.type.name as XyVisType,

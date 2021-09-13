@@ -25,7 +25,7 @@ export const getAdjustedDomain = (
     intervalUnit: string;
     min: number;
     max: number;
-    minInterval: number;
+    minInterval?: number;
   },
   timezone?: string,
   considerInterval?: boolean
@@ -34,8 +34,8 @@ export const getAdjustedDomain = (
   const [first] = values;
   const last = values[values.length - 1];
   const domainMin = Math.min(first, domain.min);
-  const domainMaxValue = Math.max(domain.max - domain.minInterval, last);
-  const domainMax = considerInterval ? domainMaxValue + domain.minInterval : domainMaxValue;
+  const domainMaxValue = Math.max(domain.max - (domain.minInterval ?? 0), last);
+  const domainMax = considerInterval ? domainMaxValue + (domain.minInterval ?? 0) : domainMaxValue;
   const minInterval = getAdjustedInterval(
     values,
     domain.intervalValue,
@@ -150,13 +150,10 @@ export const xDomain = (): ExpressionFunctionDefinition<
     const domain = { min, max, minInterval, logBase, coordinates };
 
     if (
-      context?.rows &&
       intervalUnit &&
-      timezone &&
       intervalValue !== undefined &&
       min !== undefined &&
       max !== undefined &&
-      minInterval !== undefined &&
       column !== undefined
     ) {
       const adjusted = getAdjustedDomain(
@@ -179,6 +176,6 @@ export const xDomain = (): ExpressionFunctionDefinition<
         adjusted,
       };
     }
-    return { type: X_DOMAIN_EXPRESSION, ...domain };
+    return { type: X_DOMAIN_EXPRESSION, ...domain, adjusted: minInterval ? { minInterval } : {} };
   },
 });
