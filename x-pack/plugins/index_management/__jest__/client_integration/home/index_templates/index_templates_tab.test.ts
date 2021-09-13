@@ -7,9 +7,9 @@
 
 import { act } from 'react-dom/test-utils';
 
-import * as fixtures from '../../../test/fixtures';
-import { API_BASE_PATH } from '../../../common/constants';
-import { setupEnvironment, getRandomString } from '../helpers';
+import * as fixtures from '../../../../test/fixtures';
+import { API_BASE_PATH } from '../../../../common/constants';
+import { setupEnvironment, getRandomString } from '../../helpers';
 
 import { IndexTemplatesTabTestBed, setup } from './index_templates_tab.helpers';
 

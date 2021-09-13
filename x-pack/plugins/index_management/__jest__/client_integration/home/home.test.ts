@@ -54,15 +54,22 @@ describe('<IndexManagementHome />', () => {
     });
 
     describe('tabs', () => {
-      test('should have 2 tabs', () => {
+      test('should have 4 tabs', () => {
         const { find } = testBed;
-        const templatesTab = find('templatesTab');
-        const indicesTab = find('indicesTab');
+        const allTabs = [
+          { label: 'Index Templates', element: find('templatesTab') },
+          { label: 'Indices', element: find('indicesTab') },
+          { label: 'Data Streams', element: find('data_streamsTab') },
+          { label: 'Component Templates', element: find('component_templatesTab') },
+        ];
 
-        expect(indicesTab.length).toBe(1);
-        expect(indicesTab.text()).toEqual('Indices');
-        expect(templatesTab.length).toBe(1);
-        expect(templatesTab.text()).toEqual('Index Templates');
+        expect(allTabs.length).toBe(4);
+
+        allTabs.forEach((tab) => {
+          expect(tab.element).toBeTruthy();
+          expect(tab.element.length).toBe(1);
+          expect(tab.element.text()).toEqual(tab.label);
+        });
       });
 
       test('should navigate to Index Templates tab', async () => {
@@ -82,6 +89,14 @@ describe('<IndexManagementHome />', () => {
 
         expect(exists('indicesList')).toBe(false);
         expect(exists('templateList')).toBe(true);
+      });
+
+      describe('toggles', () => {
+        test('Should show system indices if hidden indices is toggled. ', () => {
+          const { find, actions } = testBed;
+
+          actions.showHiddenIndices();
+        });
       });
     });
   });

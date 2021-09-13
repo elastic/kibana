@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
-import { createDataStreamPayload } from './data_streams_tab.helpers';
+import { createDataStreamPayload } from './data_streams/data_streams_tab.helpers';
 
 /**
  * The below import is required to avoid a console error warn from the "brace" package

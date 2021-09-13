@@ -24,6 +24,7 @@ const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), te
 export interface HomeTestBed extends TestBed<TestSubjects> {
   actions: {
     selectHomeTab: (tab: 'indicesTab' | 'templatesTab') => void;
+    showHiddenIndices: () => void;
   };
 }
 
@@ -38,10 +39,15 @@ export const setup = async (): Promise<HomeTestBed> => {
     testBed.find(tab).simulate('click');
   };
 
+  const showHiddenIndices = () => {
+    testBed.find('indexTableIncludeHiddenIndicesToggle').simulate('click');
+  };
+
   return {
     ...testBed,
     actions: {
       selectHomeTab,
+      showHiddenIndices,
     },
   };
 };
