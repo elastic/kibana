@@ -45,7 +45,8 @@ describe('Inspect component', () => {
     const component = shallowRender();
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
-    expect(component).toMatchSnapshot();
+    const codeEditorComponent = component.find('CodeEditor');
+    expect(codeEditorComponent).toMatchSnapshot();
   });
 
   it("does not include `meta` in the value that's rendered", async () => {

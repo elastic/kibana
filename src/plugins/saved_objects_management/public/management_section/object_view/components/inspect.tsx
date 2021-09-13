@@ -10,43 +10,75 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { omit } from 'lodash';
+import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '../../../../../kibana_react/public';
 import { SavedObjectWithMetadata } from '../../../../common';
 
 export interface InspectProps {
   object: SavedObjectWithMetadata<any>;
 }
-
+const codeEditorAriaLabel = (title: string) =>
+  i18n.translate('savedObjectsManagement.view.inspectCodeEditorAriaLabel', {
+    defaultMessage: 'inspect { title } object',
+    values: {
+      title,
+    },
+  });
+const copyToClipboardLabel = i18n.translate('savedObjectsManagement.view.copyToClipboardLabel', {
+  defaultMessage: 'Copy to clipboard',
+});
+const copyToClipboardAriaLabel = i18n.translate(
+  'savedObjectsManagement.view.copyToClipboardAriaLabel',
+  {
+    defaultMessage: 'Copy to clipboard',
+  }
+);
 export const Inspect: FC<InspectProps> = ({ object }) => {
+  const title = object.meta.title || 'saved object';
   const objectAsJsonString = JSON.stringify(omit(object, 'meta'), null, 2);
   return (
-    <CodeEditor
-      languageId={XJsonLang.ID}
-      value={objectAsJsonString}
-      onChange={() => {}}
-      aria-label={i18n.translate('savedObjectsManagement.view.inspectCodeEditorAriaLabel', {
-        defaultMessage: 'inspect { title } object',
-        values: {
-          title: object.meta.title,
-        },
-      })}
-      height={'100%'}
-      options={{
-        automaticLayout: false,
-        fontSize: 12,
-        lineNumbers: 'on',
-        minimap: {
-          enabled: false,
-        },
-        overviewRulerBorder: false,
-        readOnly: true,
-        scrollbar: {
-          alwaysConsumeMouseWheel: false,
-        },
-        scrollBeyondLastLine: false,
-        wordWrap: 'on',
-        wrappingIndent: 'indent',
-      }}
-    />
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <div className="eui-textRight">
+          <EuiCopy textToCopy={objectAsJsonString}>
+            {(copy) => (
+              <EuiButtonEmpty
+                aria-label={copyToClipboardAriaLabel}
+                size="s"
+                flush="right"
+                iconType="copyClipboard"
+                onClick={copy}
+              >
+                {copyToClipboardLabel}
+              </EuiButtonEmpty>
+            )}
+          </EuiCopy>
+          <EuiSpacer size="s" />
+        </div>
+        <CodeEditor
+          languageId={XJsonLang.ID}
+          value={objectAsJsonString}
+          onChange={() => {}}
+          aria-label={codeEditorAriaLabel(title)}
+          height={'100%'}
+          options={{
+            automaticLayout: false,
+            fontSize: 12,
+            lineNumbers: 'on',
+            minimap: {
+              enabled: false,
+            },
+            overviewRulerBorder: false,
+            readOnly: true,
+            scrollbar: {
+              alwaysConsumeMouseWheel: false,
+            },
+            scrollBeyondLastLine: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

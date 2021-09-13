@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'settings', 'savedObjects']);
-  const browser = getService('browser');
   const find = getService('find');
 
   const focusAndClickButton = async (buttonSubject: string) => {
