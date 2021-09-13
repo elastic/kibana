@@ -7,7 +7,7 @@
 
 import { ConnectorTypeFields } from '../../../common';
 import { CaseUserActions } from '../../containers/types';
-import { parseStringAsConnector } from '../../containers/utils';
+import { parseStringAsConnector } from '../../common/user_actions';
 
 export const getConnectorFieldsFromUserActions = (
   id: string,

@@ -6,13 +6,13 @@
  */
 
 export function isCreateConnector(action?: string, actionFields?: string[]): boolean {
-  return action === 'create' && actionFields?.includes('connector') === true;
+  return action === 'create' && actionFields != null && actionFields.includes('connector');
 }
 
 export function isUpdateConnector(action?: string, actionFields?: string[]): boolean {
-  return action === 'update' && actionFields?.includes('connector') === true;
+  return action === 'update' && actionFields != null && actionFields.includes('connector');
 }
 
 export function isPush(action?: string, actionFields?: string[]): boolean {
-  return action === 'push-to-service' && actionFields?.includes('pushed') === true;
+  return action === 'push-to-service' && actionFields != null && actionFields.includes('pushed');
 }

@@ -27,7 +27,7 @@ import {
 } from '../../../common';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { parseStringAsConnector, parseStringAsExternalService } from '../../containers/utils';
+import { parseStringAsConnector, parseStringAsExternalService } from '../../common/user_actions';
 import { Tags } from '../tag_list/tags';
 import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 import { UserActionTimestamp } from './user_action_timestamp';

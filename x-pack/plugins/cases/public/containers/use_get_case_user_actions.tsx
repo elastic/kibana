@@ -18,7 +18,8 @@ import {
 } from '../../common';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
-import { convertToCamelCase, parseStringAsConnector, parseStringAsExternalService } from './utils';
+import { convertToCamelCase } from './utils';
+import { parseStringAsConnector, parseStringAsExternalService } from '../common/user_actions';
 import { useToasts } from '../common/lib/kibana';
 
 export interface CaseService extends CaseExternalService {
