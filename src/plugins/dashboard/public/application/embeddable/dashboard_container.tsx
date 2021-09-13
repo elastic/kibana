@@ -39,6 +39,7 @@ import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
 import { PresentationUtilPluginStart } from '../../services/presentation_util';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
+import { ScreenshotModePluginStart } from '../../services/screenshot_mode';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
@@ -48,6 +49,7 @@ export interface DashboardContainerServices {
   application: CoreStart['application'];
   inspector: InspectorStartContract;
   overlays: CoreStart['overlays'];
+  screenshotMode: ScreenshotModePluginStart;
   uiSettings: IUiSettingsClient;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
@@ -228,11 +230,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public render(dom: HTMLElement) {
+    const isScreenshotMode = this.services.screenshotMode.isScreenshotMode();
+    const layout = this.services.screenshotMode.getScreenshotLayout();
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
           <this.services.presentationUtil.ContextProvider>
-            <DashboardViewport container={this} />
+            {isScreenshotMode && layout === 'print' ? (
+              <div />
+            ) : (
+              <DashboardViewport container={this} />
+            )}
           </this.services.presentationUtil.ContextProvider>
         </KibanaContextProvider>
       </I18nProvider>,

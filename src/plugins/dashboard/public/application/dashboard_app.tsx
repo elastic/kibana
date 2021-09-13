@@ -45,7 +45,6 @@ export function DashboardApp({
   } = useKibana<DashboardAppServices>().services;
 
   const isScreenshotMode = screenshotMode.isScreenshotMode();
-  const screenshotLayout = screenshotMode.getScreenshotLayout();
 
   const kbnUrlStateStorage = useMemo(
     () =>

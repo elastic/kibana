@@ -21,7 +21,6 @@ import { dashboardStateStore } from './state';
 import { DashboardApp } from './dashboard_app';
 import { DashboardNoMatch } from './listing/dashboard_no_match';
 import { KibanaContextProvider } from '../services/kibana_react';
-import { Layout } from '../services/screenshot_mode';
 import { addHelpMenuToAppChrome, DashboardSessionStorage } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';

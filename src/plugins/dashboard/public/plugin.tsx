@@ -210,6 +210,7 @@ export class DashboardPlugin
         embeddable: deps.embeddable,
         uiActions: deps.uiActions,
         inspector: deps.inspector,
+        screenshotMode: deps.screenshotMode,
         http: coreStart.http,
         ExitFullScreenButton,
         presentationUtil: deps.presentationUtil,
