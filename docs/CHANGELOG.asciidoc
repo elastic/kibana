@@ -26,7 +26,7 @@ Review the {kib} 8.0.0-alpha2 changes, then use the <<upgrade-assistant,Upgrade 
 [[breaking-changes-8.0.0-alpha2]]
 === Breaking changes
 
-Breaking changes can prevent your application from optimal operation and performance. Review the following breaking changes, then mitigrate the impact to your appilication.
+Breaking changes can prevent your application from optimal operation and performance. Review the following breaking changes, then mitigate the impact to your application.
 
 //tag::notable-breaking-changes[]
 
