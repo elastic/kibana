@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable @typescript-eslint/naming-convention */
-import { createStaticIndexPattern } from './create_static_index_pattern';
+import { createStaticDataView } from './create_static_data_view';
 import { Setup } from '../helpers/setup_request';
 import * as HistoricalAgentData from '../../routes/historical_data/has_historical_agent_data';
 import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
@@ -32,10 +32,10 @@ const setup = ({
   },
 } as unknown) as Setup;
 
-describe('createStaticIndexPattern', () => {
+describe('createStaticDataView', () => {
   it(`should not create data view if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
-    await createStaticIndexPattern({
+    await createStaticDataView({
       setup,
       config: { 'xpack.apm.autocreateApmIndexPattern': false } as APMConfig,
       savedObjectsClient,
@@ -52,7 +52,7 @@ describe('createStaticIndexPattern', () => {
 
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
 
-    await createStaticIndexPattern({
+    await createStaticDataView({
       setup,
       config: { 'xpack.apm.autocreateApmIndexPattern': true } as APMConfig,
       savedObjectsClient,
@@ -69,7 +69,7 @@ describe('createStaticIndexPattern', () => {
 
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
 
-    await createStaticIndexPattern({
+    await createStaticDataView({
       setup,
       config: { 'xpack.apm.autocreateApmIndexPattern': true } as APMConfig,
       savedObjectsClient,
@@ -89,7 +89,7 @@ describe('createStaticIndexPattern', () => {
     const expectedIndexPatternTitle =
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*';
 
-    await createStaticIndexPattern({
+    await createStaticDataView({
       setup,
       config: {
         'xpack.apm.autocreateApmIndexPattern': true,
@@ -118,7 +118,7 @@ describe('createStaticIndexPattern', () => {
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
     );
 
-    await createStaticIndexPattern({
+    await createStaticDataView({
       setup,
       config: {
         'xpack.apm.autocreateApmIndexPattern': true,

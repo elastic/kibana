@@ -19,7 +19,7 @@ type ApmIndexPatternAttributes = typeof apmIndexPattern.attributes & {
   title: string;
 };
 
-export async function createStaticIndexPattern({
+export async function createStaticDataView({
   setup,
   config,
   savedObjectsClient,
@@ -32,7 +32,7 @@ export async function createStaticIndexPattern({
   spaceId?: string;
   overwrite?: boolean;
 }): Promise<boolean> {
-  return withApmSpan('create_static_index_pattern', async () => {
+  return withApmSpan('create_static_data_view', async () => {
     // don't autocreate APM data view if it's been disabled via the config
     if (!config['xpack.apm.autocreateApmIndexPattern']) {
       return false;
