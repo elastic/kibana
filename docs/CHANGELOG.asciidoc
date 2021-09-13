@@ -92,57 +92,21 @@ Breaking changes can prevent your application from optimal operation and perform
 Before you upgrade to 7.15.0, review the breaking changes, then mitigate the impact to your application.
 
 // tag::notable-breaking-changes[]
-
-[discrete]
-[[breaking-108961]]
-.Updating UI to work with new kibana privileges abstraction on alerts
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}108961[#108961]
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-104196]]
-.Remove metadata query strategy v1
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}104196[#104196]
-
-*Impact* +
-!!TODO!!
-====
       
 [discrete]
 [[breaking-103652]]
-.ML locator
+.Migrates machine learning URL generators to locators
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}103652[#103652]
+In *Machine Learning*, *APM*, *Logs*, and *Security*, the machine learning URL generator has been replaced with a machine learning locator. For more information, refer to {kibana-pull}103652[#103652].
 
 *Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-103494]]
-.Create expression functions for object types used in agg params
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}103494[#103494]
-
-*Impact* +
-!!TODO!!
+When you upgrade, the URL generators are automatically migrated to use the new locators. 
 ====
 
 [discrete]
-[[breaking-tbd]]
+[[breaking-osquery]]
 .New scheduled query action ID format
 [%collapsible]
 ====
@@ -173,59 +137,82 @@ you make the necessary updates after you upgrade to 7.15.0.
 
 [discrete]
 [[deprecation-108826]]
-.Adds deprecation notice to dashboard import/export docs
+.Deprecates the dashboard APIs
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}108826[#108826]
+The import and export dashboard APIs are deprecated. For more information, refer to {kibana-pull}108826[#108826].
 
 *Impact* +
-!!TODO!!
+Use the <<saved-objects-api-import,Import objects>> and <<saved-objects-api-export,Export objects>> APIs.
 ====
       
 [discrete]
 [[deprecation-108281]]
-.Deprecate ability to disable alerting, actions, task manager, stack alerts, and event log plugins
+.Deprecates alerting and action settings
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}108281[#108281]
+The ability to disable alerts, actions, task manager, stack alerts, and event log plugins is deprecated. For more information, refer to {kibana-pull}108281[#108281].
 
 *Impact* +
-!!TODO!!
+Use the supported <<alert-action-settings-kb,Alerting and actions settings in {kib}>>.
 ====
       
 [discrete]
 [[deprecation-106566]]
-.Move more filter utils to package and cleanup API
+.Moves filter utils to package and cleanup API
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}106566[#106566]
+The following filter-related utilities are deprecated when imported from the data plugin.
+
+On the client side, `esFilters` is now deprecated:
+* `FilterLabel`, `FilterItem`, `getDisplayValueFromFilter`, `generateFilters`, `extractTimeRange` can be imported from `data\public` (not using `esFilters`).
+
+* The following utility functions are available for import from `@kbn/es-query`:
+** `COMPARE_ALL_OPTIONS`
+** `compareFilters`
+** `enableFilter`
+** `pinFilter`
+** `toggleFilterDisabled`
+** `dedupFilters`
+** `onlyDisabledFiltersChanged`
+** `uniqFilters`
+
+* The following functions are deprecated and won't be part of the 8.0.0 public API:
+** `convertRangeFilterToTimeRangeString`
+** `extractTimeFilter`
+** `changeTimeFilter`
+** `mapAndFlattenFilters`
+
+On the server side, `esFilters` is now deprecated. All utility functions are available for import from `@kbn/es-query`.
+
+For more information, refer to {kibana-pull}106566[#106566]
 
 *Impact* +
-!!TODO!!
+Import all utility functions from `@kbn/es-query`.
 ====
       
 [discrete]
 [[deprecation-106232]]
-.Textarea ui argument refactor
+.Refactors `textarea` UI argument
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}106232[#106232]
+Based on the `x-pack/plugins/canvas/CONTRIBUTING.md`, `recompose` has been removed in favor of React hooks at `textarea`. For more information, refer to {kibana-pull}106232[#106232].
 
 *Impact* +
-!!TODO!!
+There are no user-facing changes.
 ====
       
 [discrete]
 [[deprecation-105981]]
-.Deprecate xpack.maps.showMapVisualizationTypes
+.Deprecates `xpack.maps.showMapVisualizationTypes`
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}105981[#105981]
+Deprecates the `xpack.maps.showMapVisualizationTypes` *Maps* setting. For more information, refer to {kibana-pull}105981[#105981].
 
 *Impact* +
 !!TODO!!
