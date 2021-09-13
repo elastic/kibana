@@ -344,9 +344,9 @@ class FilterEditorUI extends Component<Props, State> {
         </div>
       ) : null;
 
-    // Do not show operator select for multi-index filters since they operate on many fields
-    // and cannot transition to different operator types
-    const operatorSelect = !this.props.filter.meta.isMultiIndex ? (
+    // Do not show field and operator select for multi-index filters. 
+    // Multi-index filters operate on many fields and cannot transition to different operator types
+    const fieldAndOperatorSelect = !this.props.filter.meta.isMultiIndex ? (
       <>
         <EuiFlexGroup responsive={true} gutterSize="s">
           <EuiFlexItem grow={2}>{this.renderFieldInput()}</EuiFlexItem>
@@ -360,7 +360,7 @@ class FilterEditorUI extends Component<Props, State> {
 
     return (
       <div>
-        {operatorSelect}
+        {fieldAndOperatorSelect}
         {operatorEditor}
       </div>
     );
