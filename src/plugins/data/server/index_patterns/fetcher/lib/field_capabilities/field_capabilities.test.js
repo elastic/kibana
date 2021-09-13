@@ -69,6 +69,17 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
   });
 
   describe('response order', () => {
+    it('supports fields that start with an underscore', async () => {
+      const fields = ['_field_a', '_field_b'];
+
+      stubDeps({
+        fieldsFromFieldCaps: fields.map((name) => ({ name })),
+      });
+
+      const fieldNames = (await getFieldCapabilities()).map((field) => field.name);
+      expect(fieldNames).toEqual(fields);
+    });
+
     it('always returns fields in alphabetical order', async () => {
       const letters = 'ambcdfjopngihkel'.split('');
       const sortedLetters = sortBy(letters);
