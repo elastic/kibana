@@ -166,10 +166,6 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Utilities for building Kibana plugins.
 
 
-|{kib-repo}blob/{branch}/src/plugins/legacy_export/README.md[legacyExport]
-|The legacyExport plugin adds support for the legacy saved objects export format.
-
-
 |{kib-repo}blob/{branch}/src/plugins/management[management]
 |WARNING: Missing README.
 
@@ -241,11 +237,6 @@ generating deep links to other apps, and creating short URLs.
 
 |{kib-repo}blob/{branch}/src/plugins/tile_map/README.md[tileMap]
 |Create a coordinate map. Display the results of a geohash_tile aggregation as bubbles, rectangles, or heatmap color blobs.
-
-
-|{kib-repo}blob/{branch}/src/plugins/timelion/README.md[timelion]
-|Contains the deprecated timelion application. For the timelion visualization,
-which also contains the timelion APIs and backend, look at the vis_type_timelion plugin.
 
 
 |<<uiactions-plugin>>

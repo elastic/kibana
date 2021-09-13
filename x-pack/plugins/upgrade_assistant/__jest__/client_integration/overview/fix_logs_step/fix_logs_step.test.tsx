@@ -23,8 +23,9 @@ jest.mock('../../../../public/application/lib/logs_checkpoint', () => {
 
 import { DeprecationLoggingStatus } from '../../../../common/types';
 import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../common/constants';
-import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
+import { setupEnvironment, advanceTime } from '../../helpers';
+import { DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS } from '../../../../common/constants';
 
 const getLoggingResponse = (toggle: boolean): DeprecationLoggingStatus => ({
   isDeprecationLogIndexingEnabled: toggle,
@@ -49,11 +50,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
   describe('Step status', () => {
     test(`It's complete when there are no deprecation logs since last checkpoint`, async () => {
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
-
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
-        count: 0,
-      });
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
 
       await act(async () => {
         testBed = await setupOverviewPage();
@@ -67,11 +64,7 @@ describe('Overview - Fix deprecation logs step', () => {
     });
 
     test(`It's incomplete when there are deprecation logs since last checkpoint`, async () => {
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
-
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
-        count: 5,
-      });
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 5 });
 
       await act(async () => {
         testBed = await setupOverviewPage();
@@ -80,6 +73,26 @@ describe('Overview - Fix deprecation logs step', () => {
       const { exists, component } = testBed;
 
       component.update();
+
+      expect(exists(`fixLogsStep-incomplete`)).toBe(true);
+    });
+
+    test(`It's incomplete when log collection is disabled `, async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { actions, exists, component } = testBed;
+
+      component.update();
+
+      expect(exists(`fixLogsStep-complete`)).toBe(true);
+
+      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(false));
+
+      await actions.clickDeprecationToggle();
 
       expect(exists(`fixLogsStep-incomplete`)).toBe(true);
     });
@@ -307,6 +320,43 @@ describe('Overview - Fix deprecation logs step', () => {
       await actions.clickResetButton();
 
       expect(exists('noWarningsCallout')).toBe(true);
+    });
+
+    describe('Poll for logs count', () => {
+      beforeEach(async () => {
+        jest.useFakeTimers();
+
+        // First request should make the step be complete
+        httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+          count: 0,
+        });
+
+        testBed = await setupOverviewPage();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      test('renders step as incomplete when a success state is followed by an error state', async () => {
+        const { exists } = testBed;
+
+        expect(exists('fixLogsStep-complete')).toBe(true);
+
+        // second request will error
+        const error = {
+          statusCode: 500,
+          error: 'Internal server error',
+          message: 'Internal server error',
+        };
+        httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse(undefined, error);
+
+        // Resolve the polling timeout.
+        await advanceTime(DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS);
+        testBed.component.update();
+
+        expect(exists('fixLogsStep-incomplete')).toBe(true);
+      });
     });
   });
 });

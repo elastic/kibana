@@ -115,7 +115,7 @@ export const RemoveIndexSettingsFlyout = ({
           isResolved={statusType === 'complete'}
         />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2>{message}</h2>
+          <h2 id="indexSettingsDetailsFlyoutTitle">{message}</h2>
         </EuiTitle>
         <EuiText>
           <p>

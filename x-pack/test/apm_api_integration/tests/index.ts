@@ -224,6 +224,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./csm/web_core_vitals'));
     });
 
+    describe('historical_data/has_data', function () {
+      loadTestFile(require.resolve('./historical_data/has_data'));
+    });
+
     registry.run(providerContext);
   });
 }
