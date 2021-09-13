@@ -105,10 +105,7 @@ export function visWithSplits(WrappedComponent) {
         },
       };
       return (
-        <div
-          key={key}
-          className="tvbSplitVis__split"
-        >
+        <div key={key} className="tvbSplitVis__split">
           <WrappedComponent
             model={model}
             visData={newVisData}
@@ -125,11 +122,7 @@ export function visWithSplits(WrappedComponent) {
     const hasOneVis = visData[model.id].series.length === 1;
 
     return (
-      <div
-        className={classNames('tvbSplitVis', {'tvbSplitVis--one': hasOneVis})}
-      >
-        {rows}
-      </div>
+      <div className={classNames('tvbSplitVis', { 'tvbSplitVis--one': hasOneVis })}>{rows}</div>
     );
   }
 
