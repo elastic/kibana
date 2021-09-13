@@ -83,7 +83,12 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       },
       {
         ...securityNavGroup.manage,
-        items: [navTabs.endpoints, navTabs.trusted_apps, navTabs.event_filters],
+        items: [
+          navTabs.endpoints,
+          navTabs.trusted_apps,
+          navTabs.event_filters,
+          navTabs.host_isolation_exceptions,
+        ],
       },
     ],
     [navTabs, hasCasesReadPermissions]

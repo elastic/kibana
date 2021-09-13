@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
+  MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from '../common/constants';
@@ -25,6 +26,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { EventFiltersContainer } from './event_filters';
 import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
+import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 
 const NoPermissions = memo(() => {
   return (
@@ -79,6 +81,13 @@ const EventFilterTelemetry = () => (
   </TrackApplicationView>
 );
 
+const HostIsolationExceptionsTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.hostIsolationExceptions}>
+    <SpyRoute pageName={SecurityPageName.administration} />
+    <HostIsolationExceptionsContainer />
+  </TrackApplicationView>
+);
+
 export const ManagementContainer = memo(() => {
   const { loading, canAccessEndpointManagement } = useUserPrivileges().endpointPrivileges;
 
@@ -97,6 +106,10 @@ export const ManagementContainer = memo(() => {
       <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyTelemetry} />
       <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppTelemetry} />
       <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFilterTelemetry} />
+      <Route
+        path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
+        component={HostIsolationExceptionsTelemetry}
+      />
       <Route path={MANAGEMENT_PATH} exact>
         <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
       </Route>
