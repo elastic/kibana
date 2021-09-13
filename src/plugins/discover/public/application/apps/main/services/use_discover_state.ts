@@ -95,12 +95,7 @@ export function useDiscoverState({
   });
 
   useEffect(() => {
-    const stopSync = stateContainer.initializeAndSync(
-      indexPattern,
-      filterManager,
-      data,
-      initialFetchStatus
-    );
+    const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
     return () => stopSync();
   }, [stateContainer, filterManager, data, indexPattern, initialFetchStatus]);
 

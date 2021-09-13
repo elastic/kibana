@@ -35,7 +35,6 @@ import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../../../url_generator';
 import { SavedSearch } from '../../../../saved_searches';
 import { handleSourceColumnState } from '../../../helpers/state_helpers';
-import { FetchStatus } from '../../../types';
 
 export interface AppState {
   /**
@@ -118,8 +117,7 @@ export interface GetStateReturn {
   initializeAndSync: (
     indexPattern: IndexPattern,
     filterManager: FilterManager,
-    data: DataPublicPluginStart,
-    initialFetchStatus: FetchStatus
+    data: DataPublicPluginStart
   ) => () => void;
   /**
    * Start sync between state and URL
@@ -243,8 +241,7 @@ export function getState({
     initializeAndSync: (
       indexPattern: IndexPattern,
       filterManager: FilterManager,
-      data: DataPublicPluginStart,
-      initialFetchStatus: FetchStatus
+      data: DataPublicPluginStart
     ) => {
       if (appStateContainer.getState().index !== indexPattern.id) {
         // used index pattern is different than the given by url/state which is invalid
@@ -256,7 +253,7 @@ export function getState({
         filterManager.setAppFilters(cloneDeep(filters));
       }
       const query = appStateContainer.getState().query;
-      if (query && initialFetchStatus !== FetchStatus.UNINITIALIZED) {
+      if (query) {
         data.query.queryString.setQuery(query);
       }
 
