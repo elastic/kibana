@@ -40,7 +40,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/rollup_job'),
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
-      resolve(__dirname, './apps/timelion'),
       resolve(__dirname, './apps/upgrade_assistant'),
       resolve(__dirname, './apps/visualize'),
       resolve(__dirname, './apps/uptime'),
@@ -87,7 +86,6 @@ export default async function ({ readConfigFile }) {
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
-        '--timelion.ui.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
         '--xpack.observability.unsafe.cases.enabled=true',
         '--xpack.observability.unsafe.alertingExperience.enabled=true', // NOTE: Can be removed once enabled by default

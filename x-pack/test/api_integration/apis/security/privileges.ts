@@ -59,7 +59,6 @@ export default function ({ getService }: FtrProviderContext) {
             advancedSettings: ['all', 'read'],
             indexPatterns: ['all', 'read'],
             savedObjectsManagement: ['all', 'read'],
-            timelion: ['all', 'read'],
             osquery: [
               'all',
               'read',
