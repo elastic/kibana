@@ -93,7 +93,7 @@ export function useSearchStrategy<
   const { serviceName, transactionType } = useApmServiceContext();
   const {
     query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/transactions/view');
+  } = useApmParams('/services/{serviceName}/transactions/view');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { urlParams } = useUrlParams();
   const { transactionName } = urlParams;
