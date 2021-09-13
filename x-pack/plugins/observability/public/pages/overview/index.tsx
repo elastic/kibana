@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../..';
 import { Alert } from '../../../../alerting/common';
 import { EmptySections } from '../../components/app/empty_sections';
@@ -81,28 +80,6 @@ export function OverviewPage({ routeParams }: Props) {
     start: absoluteTime.start,
     end: absoluteTime.end,
   });
-
-  // TODO: GET THE RIGHT CHECK
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = hasAnyData
-    ? undefined
-    : {
-        solution: i18n.translate('xpack.observability.overview.noDataConfig.solutionName', {
-          defaultMessage: 'Observability',
-        }),
-        actions: {
-          beats: {
-            description: i18n.translate(
-              'xpack.observability.overview.noDataConfig.beatsCard.description',
-              {
-                defaultMessage:
-                  'Use Beats and APM agents to send observability data to Elasticsearch. We make it easy with support for many popular systems, apps, and languages.',
-              }
-            ),
-            href: core.http.basePath.prepend(`/app/home#/tutorial_directory/logging`),
-          },
-        },
-        docsLink: core.docLinks.links.observability.guide,
-      };
 
   return (
     <ObservabilityPageTemplate
