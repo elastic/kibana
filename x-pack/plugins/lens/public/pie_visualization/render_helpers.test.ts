@@ -33,13 +33,26 @@ describe('render helpers', () => {
             meta: { type: 'number' },
           }
         )
-      ).toEqual(-100);
+      ).toEqual(0);
     });
 
-    it('returns 0 when metric is 0', () => {
+    it('returns 0 when metric value is 0', () => {
       expect(
         getSliceValue(
           { a: 'Cat', b: 'Home', c: 0 },
+          {
+            id: 'c',
+            name: 'C',
+            meta: { type: 'number' },
+          }
+        )
+      ).toEqual(0);
+    });
+
+    it('returns 0 when metric value is infinite', () => {
+      expect(
+        getSliceValue(
+          { a: 'Cat', b: 'Home', c: Number.POSITIVE_INFINITY },
           {
             id: 'c',
             name: 'C',

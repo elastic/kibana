@@ -187,10 +187,8 @@ const PieComponent = (props: PieComponentProps) => {
   const { visData, visParams, services, syncColors } = props;
 
   function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
-    if (typeof d[metricColumn.id] === 'number') {
-      return d[metricColumn.id];
-    }
-    return 0;
+    const value = d[metricColumn.id];
+    return Number.isFinite(value) && value >= 0 ? value : 0;
   }
 
   // formatters
