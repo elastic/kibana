@@ -14,6 +14,10 @@ async function asyncForEach<T>(array: T[], callback: (item: T, index: number) =>
   }
 }
 
+const ACTIVE_ALERTS_CELL_COUNT = 48;
+const RECOVERED_ALERTS_CELL_COUNT = 24;
+const TOTAL_ALERTS_CELL_COUNT = 72;
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
@@ -24,6 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
     const observability = getService('observability');
+    const browser = getService('browser');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
@@ -40,9 +45,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Renders the correct number of cells', async () => {
-        // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
-        const cells = await observability.alerts.getTableCells();
-        expect(cells.length).to.be(72);
+        await retry.try(async () => {
+          const cells = await observability.alerts.getTableCells();
+          expect(cells.length).to.be(TOTAL_ALERTS_CELL_COUNT);
+        });
       });
 
       describe('Filtering', () => {
@@ -66,7 +72,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await observability.alerts.submitQuery('kibana.alert.status: recovered');
           await retry.try(async () => {
             const cells = await observability.alerts.getTableCells();
-            expect(cells.length).to.be(24);
+            expect(cells.length).to.be(RECOVERED_ALERTS_CELL_COUNT);
           });
         });
 
@@ -113,10 +119,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('Displays the correct title', async () => {
-            const titleText = await (
-              await observability.alerts.getAlertsFlyoutTitle()
-            ).getVisibleText();
-            expect(titleText).to.contain('Log threshold');
+            await retry.try(async () => {
+              const titleText = await (
+                await observability.alerts.getAlertsFlyoutTitle()
+              ).getVisibleText();
+              expect(titleText).to.contain('Log threshold');
+            });
           });
 
           it('Displays the correct content', async () => {
@@ -151,6 +159,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('Displays a View in App button', async () => {
             await observability.alerts.getAlertsFlyoutViewInAppButtonOrFail();
+          });
+        });
+      });
+
+      describe('Cell actions', () => {
+        beforeEach(async () => {
+          await retry.try(async () => {
+            const cells = await observability.alerts.getTableCells();
+            const alertStatusCell = cells[2];
+            await alertStatusCell.moveMouseTo();
+            await retry.waitFor(
+              'cell actions visible',
+              async () => await observability.alerts.copyToClipboardButtonExists()
+            );
+          });
+        });
+
+        afterEach(async () => {
+          await observability.alerts.clearQueryBar();
+        });
+
+        it('Copy button works', async () => {
+          await (await observability.alerts.getCopyToClipboardButton()).click();
+          const text = await browser.getClipboardValue();
+          expect(text).to.be('kibana.alert.status: "active"');
+        });
+
+        it('Filter for value works', async () => {
+          await (await observability.alerts.getFilterForValueButton()).click();
+          const queryBarValue = await (await observability.alerts.getQueryBar()).getAttribute(
+            'value'
+          );
+          expect(queryBarValue).to.be('kibana.alert.status: "active"');
+          // Wait for request
+          await retry.try(async () => {
+            const cells = await observability.alerts.getTableCells();
+            expect(cells.length).to.be(ACTIVE_ALERTS_CELL_COUNT);
           });
         });
       });
