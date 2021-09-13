@@ -11,6 +11,7 @@ import { getPackageInfo } from '../../server/services/epm/packages';
 
 import type { PackagePolicy } from '../types';
 
+export const DEFAULT_INDEX_PRIVILEGES = ['auto_configure', 'create_doc'];
 export const DEFAULT_PERMISSIONS = {
   cluster: ['monitor'],
   indices: [
@@ -22,7 +23,7 @@ export const DEFAULT_PERMISSIONS = {
         'synthetics-*',
         '.logs-endpoint.diagnostic.collection-*',
       ],
-      privileges: ['auto_configure', 'create_doc'],
+      privileges: DEFAULT_INDEX_PRIVILEGES,
     },
   ],
 };
@@ -154,6 +155,6 @@ export function getDataStreamPermissions(dataStream: DataStreamMeta, namespace: 
 
   return {
     names: [index],
-    privileges: dataStream.permissions?.indices || ['auto_configure', 'create_doc'],
+    privileges: dataStream?.permissions?.indices || DEFAULT_INDEX_PRIVILEGES,
   };
 }

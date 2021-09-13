@@ -51,6 +51,7 @@ import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } 
 import {
   storedPackagePoliciesToAgentPermissions,
   DEFAULT_PERMISSIONS,
+  DEFAULT_INDEX_PRIVILEGES,
 } from '../services/package_policies_to_agent_permissions';
 
 import { getPackageInfo } from './epm/packages';
@@ -824,7 +825,7 @@ class AgentPolicyService {
       permissions._elastic_agent_checks.indices = [
         {
           names,
-          privileges: ['auto_configure', 'create_doc'],
+          privileges: DEFAULT_INDEX_PRIVILEGES,
         },
       ];
     }
