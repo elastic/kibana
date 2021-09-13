@@ -47,7 +47,7 @@ export function isMetricAvailableForPanel(
     timeRangeMode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
   ) {
     return (
-      !pipelineAggs.some((agg) => agg.value === aggId) || aggId !== TSVB_METRIC_TYPES.SERIES_AGG
+      !pipelineAggs.some((agg) => agg.value === aggId) && aggId !== TSVB_METRIC_TYPES.SERIES_AGG
     );
   }
 
