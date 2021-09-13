@@ -8,7 +8,9 @@
 import { i18n } from '@kbn/i18n';
 
 import PropTypes from 'prop-types';
-import React, { useState, useEffect } from 'react';
+import { last } from 'lodash';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
 import { YesNo } from '../../yes_no';
@@ -29,6 +31,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
 import { PalettePicker } from '../../palette_picker';
 import { getCharts } from '../../../../services';
+import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 
@@ -328,6 +331,13 @@ export const TimeseriesConfig = injectI18n(function (props) {
     ? props.model.series_index_pattern
     : props.indexPatternForQuery;
 
+  const changeModelFormatter = useCallback((formatter) => props.onChange({ formatter }), [props]);
+  const isNumericMetric = useMemo(
+    () => checkIfNumericMetric(last(model.metrics), props.fields, seriesIndexPattern),
+    [model.metrics, props.fields, seriesIndexPattern]
+  );
+  const isKibanaIndexPattern = props.panel.use_kibana_indexes || seriesIndexPattern === '';
+
   const initialPalette = model.palette ?? {
     type: 'palette',
     name: 'default',
@@ -344,10 +354,13 @@ export const TimeseriesConfig = injectI18n(function (props) {
   return (
     <div className="tvbAggRow">
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
-        </EuiFlexItem>
-        <EuiFlexItem>
+        <DataFormatPicker
+          formatterValue={model.formatter}
+          changeModelFormatter={changeModelFormatter}
+          shouldIncludeDefaultOption={isKibanaIndexPattern}
+          shouldIncludeNumberOptions={isNumericMetric}
+        />
+        <EuiFlexItem grow={3}>
           <EuiFormRow
             id={htmlId('template')}
             label={
@@ -370,6 +383,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             <EuiFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
+              disabled={model.formatter === DATA_FORMATTERS.DEFAULT}
               fullWidth
               data-test-subj="tsvb_series_value"
             />

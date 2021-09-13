@@ -23,11 +23,10 @@ import {
   MINIMUM_ACTIONS_COLUMN_WIDTH,
 } from '../constants';
 import { allowSorting } from '../helpers';
-import * as i18n from './translations';
 
 const defaultActions: EuiDataGridColumnActions = {
-  showSortAsc: { label: i18n.SORT_AZ },
-  showSortDesc: { label: i18n.SORT_ZA },
+  showSortAsc: true,
+  showSortDesc: true,
 };
 
 const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
