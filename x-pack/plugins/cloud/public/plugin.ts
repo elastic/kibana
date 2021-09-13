@@ -12,6 +12,7 @@ import {
   PluginInitializerContext,
   HttpStart,
   IBasePath,
+  ApplicationStart,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -41,6 +42,7 @@ export interface CloudConfigType {
 interface CloudSetupDependencies {
   home?: HomePublicPluginSetup;
   security?: Pick<SecurityPluginSetup, 'authc'>;
+  application?: Promise<ApplicationStart>;
 }
 
 interface CloudStartDependencies {
@@ -68,7 +70,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
-    this.setupFullstory({ basePath: core.http.basePath, security }).catch((e) =>
+    const application = core.getStartServices().then(([coreStart]) => {
+      return coreStart.application;
+    });
+    this.setupFullstory({ basePath: core.http.basePath, security, application }).catch((e) =>
       // eslint-disable-next-line no-console
       console.debug(`Error setting up FullStory: ${e.toString()}`)
     );
@@ -167,6 +172,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private async setupFullstory({
     basePath,
     security,
+    application,
   }: CloudSetupDependencies & { basePath: IBasePath }) {
     const { enabled, org_id: orgId } = this.config.full_story;
     if (!enabled || !orgId) {
@@ -198,7 +204,22 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       if (userId) {
         // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
         const hashedId = sha256(userId.toString());
-        fullStory.identify(hashedId);
+        const kibanaVer = this.initializerContext.env.packageInfo.version.split('.');
+        application?.then(async () => {
+          const appStart = await application;
+          appStart.currentAppId$.subscribe((appId) => {
+            // Update the current application every time it changes
+            fullStory.setUserVars({
+              appId: appId ?? 'unknown',
+            });
+          });
+        });
+        fullStory.identify(hashedId, {
+          version_str: this.initializerContext.env.packageInfo.version,
+          version_major_int: kibanaVer[0] || -1,
+          version_minor_int: kibanaVer[1] || -1,
+          version_patch_int: kibanaVer[2] || -1,
+        });
       }
     } catch (e) {
       // eslint-disable-next-line no-console
