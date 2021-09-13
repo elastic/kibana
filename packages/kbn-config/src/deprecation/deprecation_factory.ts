@@ -24,6 +24,37 @@ const getDeprecationTitle = (deprecationPath: string) => {
   });
 };
 
+const _deprecate = (
+  config: Record<string, any>,
+  rootPath: string,
+  addDeprecation: AddConfigDeprecation,
+  deprecatedKey: string,
+  removeBy: string,
+  details?: Partial<DeprecatedConfigDetails>
+): void => {
+  const fullPath = getPath(rootPath, deprecatedKey);
+  if (get(config, fullPath) === undefined) {
+    return;
+  }
+  addDeprecation({
+    title: getDeprecationTitle(fullPath),
+    message: i18n.translate('kbnConfig.deprecations.deprecatedSettingMessage', {
+      defaultMessage: 'Configuring "{fullPath}" is deprecated and will be removed in {removeBy}.',
+      values: { fullPath, removeBy },
+    }),
+    correctiveActions: {
+      manualSteps: [
+        i18n.translate('kbnConfig.deprecations.deprecatedSetting.manualStepOneMessage', {
+          defaultMessage:
+            'Remove "{fullPath}" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to {removeBy}.',
+          values: { fullPath, removeBy },
+        }),
+      ],
+    },
+    ...details,
+  });
+};
+
 const _rename = (
   config: Record<string, any>,
   rootPath: string,
@@ -125,6 +156,20 @@ const _unused = (
   };
 };
 
+const deprecate = (
+  unusedKey: string,
+  removeBy: string,
+  details?: Partial<DeprecatedConfigDetails>
+): ConfigDeprecation => (config, rootPath, addDeprecation) =>
+  _deprecate(config, rootPath, addDeprecation, unusedKey, removeBy, details);
+
+const deprecateFromRoot = (
+  unusedKey: string,
+  removeBy: string,
+  details?: Partial<DeprecatedConfigDetails>
+): ConfigDeprecation => (config, rootPath, addDeprecation) =>
+  _deprecate(config, '', addDeprecation, unusedKey, removeBy, details);
+
 const rename = (
   oldKey: string,
   newKey: string,
@@ -160,6 +205,8 @@ const getPath = (rootPath: string, subPath: string) =>
  * @internal
  */
 export const configDeprecationFactory: ConfigDeprecationFactory = {
+  deprecate,
+  deprecateFromRoot,
   rename,
   renameFromRoot,
   unused,

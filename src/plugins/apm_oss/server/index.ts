@@ -10,20 +10,10 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { ConfigDeprecationProvider, PluginInitializerContext } from '../../../core/server';
 import { APMOSSPlugin } from './plugin';
 
-const deprecations: ConfigDeprecationProvider = ({ unused }) => [
+const deprecations: ConfigDeprecationProvider = ({ deprecate, unused }) => [
+  deprecate('enabled', '8.0.0'),
   unused('fleetMode'),
   unused('indexPattern'),
-  (settings, fromPath, addDeprecation) => {
-    if (settings.apm_oss?.enabled !== undefined) {
-      addDeprecation({
-        title: `Setting "${fromPath}.enabled" is deprecated`,
-        message: `"${fromPath}.enabled" has been deprecated and will be removed in 8.0.`,
-        correctiveActions: {
-          manualSteps: [`Remove ${fromPath}.enabled from your Kibana config.`],
-        },
-      });
-    }
-  },
 ];
 
 export const config = {
