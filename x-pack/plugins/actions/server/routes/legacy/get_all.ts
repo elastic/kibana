@@ -29,7 +29,7 @@ export const getAllActionRoute = (
       }
       const actionsClient = context.actions.getActionsClient();
       const result = await actionsClient.getAll();
-      trackLegacyRouteUsage('get_all', usageCounter);
+      trackLegacyRouteUsage('getAll', usageCounter);
       return res.ok({
         body: result,
       });

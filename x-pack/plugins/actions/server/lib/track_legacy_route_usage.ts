@@ -10,8 +10,8 @@ import { UsageCounter } from 'src/plugins/usage_collection/server';
 export function trackLegacyRouteUsage(route: string, usageCounter?: UsageCounter) {
   if (usageCounter) {
     usageCounter.incrementCounter({
-      counterName: `legacy_route_${route}`,
-      counterType: 'legacy_api_usage',
+      counterName: `legacyRoute_${route}`,
+      counterType: 'legacyApiUsage',
       incrementBy: 1,
     });
   }

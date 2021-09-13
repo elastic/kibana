@@ -28,7 +28,7 @@ export const listActionTypesRoute = (
         return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
       }
       const actionsClient = context.actions.getActionsClient();
-      trackLegacyRouteUsage('list_action_types', usageCounter);
+      trackLegacyRouteUsage('listActionTypes', usageCounter);
       return res.ok({
         body: await actionsClient.listTypes(),
       });

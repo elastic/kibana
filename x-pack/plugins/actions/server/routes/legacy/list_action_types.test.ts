@@ -163,6 +163,6 @@ describe('listActionTypesRoute', () => {
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {});
     await handler(context, req, res);
-    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('list_action_types', mockUsageCounter);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('listActionTypes', mockUsageCounter);
   });
 });

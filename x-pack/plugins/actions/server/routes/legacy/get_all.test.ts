@@ -111,6 +111,6 @@ describe('getAllActionRoute', () => {
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {});
     await handler(context, req, res);
-    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('get_all', mockUsageCounter);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('getAll', mockUsageCounter);
   });
 });
