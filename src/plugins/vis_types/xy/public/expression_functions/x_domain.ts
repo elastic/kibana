@@ -148,38 +148,37 @@ export const xDomain = (): ExpressionFunctionDefinition<
     } = args;
 
     const domain = { min, max, minInterval, logBase, coordinates };
-    const shouldReturnAdjustedDomain =
+
+    if (
       context?.rows &&
-      column &&
       intervalUnit &&
       timezone &&
       intervalValue !== undefined &&
       min !== undefined &&
       max !== undefined &&
-      minInterval !== undefined;
+      minInterval !== undefined &&
+      column !== undefined
+    ) {
+      const adjusted = getAdjustedDomain(
+        context?.rows ?? [],
+        column,
+        {
+          min,
+          max,
+          minInterval,
+          intervalValue,
+          intervalUnit,
+        },
+        timezone,
+        considerInterval
+      );
 
-    if (!shouldReturnAdjustedDomain) {
-      return { type: X_DOMAIN_EXPRESSION, ...domain };
+      return {
+        type: X_DOMAIN_EXPRESSION,
+        ...domain,
+        adjusted,
+      };
     }
-
-    const adjusted = getAdjustedDomain(
-      context?.rows ?? [],
-      column,
-      {
-        min,
-        max,
-        minInterval,
-        intervalValue,
-        intervalUnit,
-      },
-      timezone,
-      considerInterval
-    );
-
-    return {
-      type: X_DOMAIN_EXPRESSION,
-      ...domain,
-      adjusted,
-    };
+    return { type: X_DOMAIN_EXPRESSION, ...domain };
   },
 });
