@@ -65,7 +65,7 @@ export const hasFieldsSelector = createSelector(
 );
 
 /**
- * Saga making notifying angular when fields are selected to re-calculate the state of the save button.
+ * Saga making notifying react when fields are selected to re-calculate the state of the save button.
  *
  * Won't be necessary once the workspace is moved to redux
  */

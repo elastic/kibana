@@ -6,9 +6,11 @@
  */
 
 import { EuiTab, EuiTabs } from '@elastic/eui';
-import React from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
+import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
+import { PageLoading } from '../../components';
 
 export interface TabMenuItem {
   id: string;
@@ -22,14 +24,40 @@ interface PageTemplateProps {
   title: string;
   pageTitle?: string;
   tabs?: TabMenuItem[];
+  getPageData?: () => Promise<void>;
 }
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({ title, pageTitle, tabs, children }) => {
+export const PageTemplate: React.FC<PageTemplateProps> = ({
+  title,
+  pageTitle,
+  tabs,
+  getPageData,
+  children,
+}) => {
   useTitle('', title);
+
+  const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    getPageData?.()
+      .catch((err) => {
+        // TODO: handle errors
+      })
+      .finally(() => {
+        setLoaded(true);
+      });
+  }, [getPageData, currentTimerange]);
+
+  const onRefresh = () => {
+    getPageData?.().catch((err) => {
+      // TODO: handle errors
+    });
+  };
 
   return (
     <div className="app-container">
-      <MonitoringToolbar pageTitle={pageTitle} />
+      <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
       {tabs && (
         <EuiTabs>
           {tabs.map((item, idx) => {
@@ -47,7 +75,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({ title, pageTitle, ta
           })}
         </EuiTabs>
       )}
-      <div>{children}</div>
+      <div>{!getPageData ? children : loaded ? children : <PageLoading />}</div>
     </div>
   );
 };

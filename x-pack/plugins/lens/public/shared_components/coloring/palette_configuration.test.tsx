@@ -14,6 +14,7 @@ import { ReactWrapper } from 'enzyme';
 import type { CustomPaletteParams } from '../../../common';
 import { applyPaletteParams } from './utils';
 import { CustomizablePalette } from './palette_configuration';
+import { CUSTOM_PALETTE } from './constants';
 import { act } from 'react-dom/test-utils';
 
 // mocking random id generator function
@@ -129,6 +130,21 @@ describe('palette panel', () => {
       });
     });
 
+    it('should restore the reverse initial state on transitioning', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      changePaletteIn(instance, 'negative');
+
+      expect(props.setPalette).toHaveBeenCalledWith({
+        type: 'palette',
+        name: 'negative',
+        params: expect.objectContaining({
+          name: 'negative',
+          reverse: false,
+        }),
+      });
+    });
+
     it('should rewrite the min/max range values on palette change', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
 
@@ -171,6 +187,20 @@ describe('palette panel', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             reverse: true,
+          }),
+        })
+      );
+    });
+
+    it('should transition a predefined palette to a custom one on reverse click', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      toggleReverse(instance, true);
+
+      expect(props.setPalette).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            name: CUSTOM_PALETTE,
           }),
         })
       );
