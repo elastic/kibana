@@ -103,7 +103,11 @@ export function getMigrations(
   const migrateRules716 = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    pipeMigrations(setLegacyId, getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured))
+    pipeMigrations(
+      setLegacyId,
+      getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured),
+      addRACRuleTypes
+    )
   );
 
   const migrationRules800 = createEsoMigration(
@@ -593,6 +597,20 @@ function setLegacyId(
       legacyId: id,
     },
   };
+}
+
+function addRACRuleTypes(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  return isSecuritySolutionRule(doc)
+    ? {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          alertTypeId: doc.attributes.params.type as string,
+        },
+      }
+    : doc;
 }
 
 function getRemovePreconfiguredConnectorsFromReferencesFn(
