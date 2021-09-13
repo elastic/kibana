@@ -18,7 +18,7 @@ import {
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
+import { useDynamicDataViewFetcher } from '../../../hooks/use_dynamic_data_view';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
 // @ts-expect-error
@@ -70,7 +70,7 @@ export function KueryBar(props: {
 
   const example = examples[processorEvent || 'defaults'];
 
-  const { indexPattern } = useDynamicIndexPatternFetcher();
+  const { dataView } = useDynamicDataViewFetcher();
 
   const placeholder =
     props.placeholder ??
@@ -88,7 +88,7 @@ export function KueryBar(props: {
     });
 
   async function onChange(inputValue: string, selectionStart: number) {
-    if (indexPattern == null) {
+    if (dataView == null) {
       return;
     }
 
@@ -101,7 +101,7 @@ export function KueryBar(props: {
       const suggestions = (
         (await data.autocomplete.getQuerySuggestions({
           language: 'kuery',
-          indexPatterns: [indexPattern],
+          indexPatterns: [dataView],
           boolFilter:
             props.boolFilter ??
             getBoolFilter({
@@ -130,15 +130,12 @@ export function KueryBar(props: {
   }
 
   function onSubmit(inputValue: string) {
-    if (indexPattern == null) {
+    if (dataView == null) {
       return;
     }
 
     try {
-      const res = convertKueryToEsQuery(
-        inputValue,
-        indexPattern as IndexPattern
-      );
+      const res = convertKueryToEsQuery(inputValue, dataView as IndexPattern);
       if (!res) {
         return;
       }

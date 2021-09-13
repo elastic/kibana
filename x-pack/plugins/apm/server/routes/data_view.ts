@@ -31,14 +31,14 @@ const staticDataViewRoute = createApmServerRoute({
 
     const spaceId = spaces?.setup.spacesService.getSpaceId(request);
 
-    const didCreateIndexPattern = await createStaticDataView({
+    const didCreateDataView = await createStaticDataView({
       setup,
       config,
       savedObjectsClient,
       spaceId,
     });
 
-    return { created: didCreateIndexPattern };
+    return { created: didCreateDataView };
   },
 });
 
@@ -46,12 +46,12 @@ const dynamicDataViewRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/data_view/dynamic',
   options: { tags: ['access:apm'] },
   handler: async ({ context, config, logger }) => {
-    const dynamicIndexPattern = await getDynamicDataView({
+    const dynamicDataView = await getDynamicDataView({
       context,
       config,
       logger,
     });
-    return { dynamicIndexPattern };
+    return { dynamicDataView };
   },
 });
 
