@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   const expectedData = [
     [
@@ -84,10 +85,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('finds data after load and polling', async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
+          useCreate: true,
+        });
         await esArchiver.load(
           'x-pack/test/functional/es_archives/endpoint/metadata/destination_index',
           { useCreate: true }
         );
+        await browser.refresh();
         await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 1100);
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedData);
@@ -96,11 +101,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('when there is data,', () => {
       before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
+          useCreate: true,
+        });
         await esArchiver.load(
           'x-pack/test/functional/es_archives/endpoint/metadata/destination_index',
           { useCreate: true }
         );
         await pageObjects.endpoint.navigateToEndpointList();
+        await browser.refresh();
       });
       after(async () => {
         await deleteMetadataStream(getService);
@@ -215,11 +224,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('displays the correct table data for the kql queries', () => {
       before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
+          useCreate: true,
+        });
         await esArchiver.load(
           'x-pack/test/functional/es_archives/endpoint/metadata/destination_index',
           { useCreate: true }
         );
         await pageObjects.endpoint.navigateToEndpointList();
+        await browser.refresh();
       });
       after(async () => {
         await deleteMetadataStream(getService);
