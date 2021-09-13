@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Mounter should initialize all datasources with state from doc 1`] = `
+exports[`init_middleware should initialize all datasources with state from doc 1`] = `
 Object {
   "lens": Object {
     "activeDatasourceId": "testDatasource",
