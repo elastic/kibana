@@ -97,7 +97,7 @@ export function useDiscoverState({
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
     return () => stopSync();
-  }, [stateContainer, filterManager, data, indexPattern, initialFetchStatus]);
+  }, [stateContainer, filterManager, data, indexPattern]);
 
   /**
    * Track state changes that should trigger a fetch
