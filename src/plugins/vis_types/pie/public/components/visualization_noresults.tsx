@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const VisualizationNoResults = () => {
+export const VisualizationNoResults = ({ hasNegativeValues = false }) => {
   return (
     <EuiEmptyPrompt
       iconType="visualizeApp"
@@ -18,9 +18,14 @@ export const VisualizationNoResults = () => {
       data-test-subj="pieVisualizationError"
       body={
         <EuiText size="xs">
-          {i18n.translate('visTypePie.noResultsFoundTitle', {
-            defaultMessage: 'No results found',
-          })}
+          {hasNegativeValues
+            ? i18n.translate('visTypePie.negativeValuesFound', {
+                defaultMessage:
+                  "Pie charts can't render with negative values. Try a different visualization type.",
+              })
+            : i18n.translate('visTypePie.noResultsFoundTitle', {
+                defaultMessage: 'No results found',
+              })}
         </EuiText>
       }
     />

@@ -297,10 +297,23 @@ const PieComponent = (props: PieComponentProps) => {
     [visData.rows, metricColumn]
   );
 
+  /**
+   * Checks whether data have negative values.
+   * If so, the no data container is loaded.
+   */
+  const hasNegative = useMemo(
+    () =>
+      visData.rows.some((row) => {
+        const value = row[metricColumn.id];
+        return typeof value === 'number' && value < 0;
+      }),
+    [visData.rows, metricColumn]
+  );
+
   return (
     <div className="pieChart__container" data-test-subj="visTypePieChart">
-      {isAllZeros && <VisualizationNoResults />}
-      {!isAllZeros && (
+      {(isAllZeros || hasNegative) && <VisualizationNoResults hasNegativeValues={hasNegative} />}
+      {!isAllZeros && !hasNegative && (
         <div className="pieChart__wrapper" ref={parentRef}>
           <LegendToggle
             onClick={toggleLegend}

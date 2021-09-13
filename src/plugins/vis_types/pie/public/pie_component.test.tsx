@@ -150,4 +150,33 @@ describe('PieComponent', function () {
     const component = mount(<PieComponent {...newProps} />);
     expect(findTestSubject(component, 'pieVisualizationError').length).toBe(1);
   });
+
+  it('renders the no results component if there are negative values', () => {
+    const newVisData = ({
+      type: 'datatable',
+      columns: [
+        {
+          id: 'col-1-1',
+          name: 'Count',
+        },
+        {
+          id: 'col-0-2',
+          name: 'filters',
+        },
+      ],
+      rows: [
+        {
+          'col-0-2': 'Carrier : "JetBeats" ',
+          'col-1-1': -10,
+        },
+        {
+          'col-0-2': 'Carrier : "ES-Air" ',
+          'col-1-1': -10,
+        },
+      ],
+    } as unknown) as Datatable;
+    const newProps = { ...wrapperProps, visData: newVisData };
+    const component = mount(<PieComponent {...newProps} />);
+    expect(findTestSubject(component, 'pieVisualizationError').length).toBe(1);
+  });
 });
