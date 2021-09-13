@@ -13,9 +13,9 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiListGroup,
   EuiListGroupItem,
-  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -103,7 +103,7 @@ export const Overview: React.FC = () => {
 
   const DocumentSummary = () => {
     let totalDocuments = 0;
-    const tableContent = summary ?.map((item, index) => {
+    const tableContent = summary?.map((item, index) => {
       totalDocuments += item.count;
       return (
         item.count > 0 && (
@@ -144,24 +144,24 @@ export const Overview: React.FC = () => {
           (totalDocuments === 0 ? (
             emptyState
           ) : (
-              <EuiTable>
-                <EuiTableHeader>
-                  <EuiTableHeaderCell>{CONTENT_TYPE_HEADER}</EuiTableHeaderCell>
-                  <EuiTableHeaderCell>{ITEMS_HEADER}</EuiTableHeaderCell>
-                </EuiTableHeader>
-                <EuiTableBody>
-                  {tableContent}
-                  <EuiTableRow>
-                    <EuiTableRowCell>
-                      <strong>{TOTAL_DOCUMENTS_LABEL}</strong>
-                    </EuiTableRowCell>
-                    <EuiTableRowCell>
-                      <strong>{totalDocuments.toLocaleString('en-US')}</strong>
-                    </EuiTableRowCell>
-                  </EuiTableRow>
-                </EuiTableBody>
-              </EuiTable>
-            ))}
+            <EuiTable>
+              <EuiTableHeader>
+                <EuiTableHeaderCell>{CONTENT_TYPE_HEADER}</EuiTableHeaderCell>
+                <EuiTableHeaderCell>{ITEMS_HEADER}</EuiTableHeaderCell>
+              </EuiTableHeader>
+              <EuiTableBody>
+                {tableContent}
+                <EuiTableRow>
+                  <EuiTableRowCell>
+                    <strong>{TOTAL_DOCUMENTS_LABEL}</strong>
+                  </EuiTableRowCell>
+                  <EuiTableRowCell>
+                    <strong>{totalDocuments.toLocaleString('en-US')}</strong>
+                  </EuiTableRowCell>
+                </EuiTableRow>
+              </EuiTableBody>
+            </EuiTable>
+          ))}
       </>
     );
   };
