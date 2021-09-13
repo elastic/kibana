@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { CertResult, GetCertsParams } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CertificatesResults } from '../../server/lib/requests/get_certs';
 import { asMutableArray } from '../utils/as_mutable_array';
 
