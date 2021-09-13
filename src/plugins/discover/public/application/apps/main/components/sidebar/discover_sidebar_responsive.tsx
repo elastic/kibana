@@ -220,7 +220,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         <EuiHideFor sizes={['xs', 's']}>
           <DiscoverSidebar
             {...props}
-            documents={documentState.result ?? []}
+            documents={documentState.result}
             fieldFilter={fieldFilter}
             fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}
@@ -307,7 +307,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               <div className="euiFlyoutBody">
                 <DiscoverSidebar
                   {...props}
-                  documents={documentState.result ?? []}
+                  documents={documentState.result}
                   fieldCounts={fieldCounts.current}
                   fieldFilter={fieldFilter}
                   setFieldFilter={setFieldFilter}
