@@ -13,14 +13,7 @@ import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { SavedObjectsInstaller } from './saved_objects_installer';
-import {
-  EuiSpacer,
-  EuiPanel,
-  EuiButton,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiSpacer, EuiPanel, EuiButton, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -249,20 +242,22 @@ class TutorialUi extends React.Component {
         },
       ];
       return (
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
+        <>
+          <EuiSpacer />
+          <EuiFormRow>
             <EuiButtonGroup
+              isFullWidth
               buttonSize="m"
               options={radioButtons}
               idSelected={this.state.visibleInstructions}
               onChange={this.setVisibleInstructions}
-              color="primary"
+              color="text"
               legend={i18n.translate('home.tutorial.selectionLegend', {
                 defaultMessage: 'Deployment type',
               })}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiFormRow>
+        </>
       );
     }
   };
@@ -431,8 +426,7 @@ class TutorialUi extends React.Component {
             notices={this.renderModuleNotices()}
           />
 
-          <EuiSpacer />
-          <div className="eui-textCenter">{this.renderInstructionSetsToggle()}</div>
+          {this.renderInstructionSetsToggle()}
 
           <EuiSpacer />
           {this.renderInstructionSets(instructions)}

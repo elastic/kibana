@@ -11,10 +11,6 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
       title="jest test tutorial"
     />
     <EuiSpacer />
-    <div
-      className="eui-textCenter"
-    />
-    <EuiSpacer />
     <InjectIntl(InstructionSetUi)
       instructionVariants={
         Array [
@@ -53,39 +49,37 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
       title="jest test tutorial"
     />
     <EuiSpacer />
-    <div
-      className="eui-textCenter"
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      labelType="label"
     >
-      <EuiFlexGroup
-        justifyContent="center"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonGroup
-            buttonSize="m"
-            color="primary"
-            idSelected="onPrem"
-            legend="Deployment type"
-            onChange={[Function]}
-            options={
-              Array [
-                Object {
-                  "data-test-subj": "selfManagedTutorial",
-                  "id": "onPrem",
-                  "label": "Self managed",
-                },
-                Object {
-                  "data-test-subj": "onCloudTutorial",
-                  "id": "onPremElasticCloud",
-                  "label": "Elastic Cloud",
-                },
-              ]
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+      <EuiButtonGroup
+        buttonSize="m"
+        color="text"
+        idSelected="onPrem"
+        isFullWidth={true}
+        legend="Deployment type"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "data-test-subj": "selfManagedTutorial",
+              "id": "onPrem",
+              "label": "Self managed",
+            },
+            Object {
+              "data-test-subj": "onCloudTutorial",
+              "id": "onPremElasticCloud",
+              "label": "Elastic Cloud",
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
     <EuiSpacer />
     <InjectIntl(InstructionSetUi)
       instructionVariants={
@@ -123,10 +117,6 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
       iconType="logoApache"
       notices={null}
       title="jest test tutorial"
-    />
-    <EuiSpacer />
-    <div
-      className="eui-textCenter"
     />
     <EuiSpacer />
     <InjectIntl(InstructionSetUi)
