@@ -48,7 +48,7 @@ describe('Machine learning deprecation flyout', () => {
 
   describe('upgrade snapshots', () => {
     it('successfully upgrades snapshots', async () => {
-      const { find, actions } = testBed;
+      const { find, actions, exists, table } = testBed;
 
       httpRequestsMockHelpers.setUpgradeMlSnapshotResponse({
         nodeId: 'my_node',
@@ -64,6 +64,7 @@ describe('Machine learning deprecation flyout', () => {
         status: 'complete',
       });
 
+      expect(exists('mlSnapshotDetails.criticalDeprecationBadge')).toBe(true);
       expect(find('mlSnapshotDetails.upgradeSnapshotButton').text()).toEqual('Upgrade');
 
       await actions.mlDeprecationFlyout.clickUpgradeSnapshot();
@@ -86,10 +87,14 @@ describe('Machine learning deprecation flyout', () => {
       // Reopen the flyout
       await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
 
-      // Flyout actions should be disabled if deprecation was resolved
-      expect(find('mlSnapshotDetails.upgradeSnapshotButton').props().disabled).toBe(true);
-      expect(find('mlSnapshotDetails.upgradeSnapshotButton').text()).toContain('Upgrade complete');
-      expect(find('mlSnapshotDetails.deleteSnapshotButton').props().disabled).toBe(true);
+      // Flyout actions should be hidden if deprecation was resolved
+      expect(exists('mlSnapshotDetails.upgradeSnapshotButton')).toBe(false);
+      expect(exists('mlSnapshotDetails.deleteSnapshotButton')).toBe(false);
+      // Badge should be updated in flyout title
+      expect(exists('mlSnapshotDetails.resolvedDeprecationBadge')).toBe(true);
+      // Table row badge should also reflect the resolved state
+      const { rows } = table.getMetaData('esDeprecationsTable');
+      expect(find('resolvedDeprecationBadge', rows[0].reactWrapper).text()).toBe('Resolved');
     });
 
     it('handles upgrade failure', async () => {
@@ -133,12 +138,13 @@ describe('Machine learning deprecation flyout', () => {
 
   describe('delete snapshots', () => {
     it('successfully deletes snapshots', async () => {
-      const { find, actions } = testBed;
+      const { find, actions, exists } = testBed;
 
       httpRequestsMockHelpers.setDeleteMlSnapshotResponse({
         acknowledged: true,
       });
 
+      expect(exists('mlSnapshotDetails.criticalDeprecationBadge')).toBe(true);
       expect(find('mlSnapshotDetails.deleteSnapshotButton').text()).toEqual('Delete');
 
       await actions.mlDeprecationFlyout.clickDeleteSnapshot();
@@ -158,10 +164,11 @@ describe('Machine learning deprecation flyout', () => {
       // Reopen the flyout
       await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
 
-      // Flyout actions should be disabled if deprecation was resolved
-      expect(find('mlSnapshotDetails.deleteSnapshotButton').props().disabled).toBe(true);
-      expect(find('mlSnapshotDetails.deleteSnapshotButton').text()).toContain('Deletion complete');
-      expect(find('mlSnapshotDetails.upgradeSnapshotButton').props().disabled).toBe(true);
+      // Flyout actions should be hidden if deprecation was resolved
+      expect(exists('mlSnapshotDetails.upgradeSnapshotButton')).toBe(false);
+      expect(exists('mlSnapshotDetails.deleteSnapshotButton')).toBe(false);
+      // Badge should be updated in flyout title
+      expect(exists('mlSnapshotDetails.resolvedDeprecationBadge')).toBe(true);
     });
 
     it('handles delete failure', async () => {

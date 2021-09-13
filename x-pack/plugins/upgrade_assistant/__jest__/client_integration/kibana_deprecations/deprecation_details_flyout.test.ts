@@ -90,6 +90,7 @@ describe('Kibana deprecation details flyout', () => {
       // Resolve information should not display and Quick resolve button should be disabled
       expect(exists('resolveSection')).toBe(false);
       expect(exists('resolveButton')).toBe(false);
+      // Badge should be updated in flyout title
       expect(exists('kibanaDeprecationDetails.resolvedDeprecationBadge')).toBe(true);
       // Table row badge should also reflect the resolved state
       const { rows } = table.getMetaData('kibanaDeprecationsTable');
