@@ -123,7 +123,7 @@ export function getSuggestions({
   });
   // Pass all table suggestions to all visualization extensions to get visualization suggestions
   // and rank them by score
-  const sug = Object.entries(visualizationMap)
+  return Object.entries(visualizationMap)
     .flatMap(([visualizationId, visualization]) => {
       const supportedLayerTypes = visualization.getSupportedLayers().map(({ type }) => type);
       return datasourceTableSuggestions
@@ -139,11 +139,7 @@ export function getSuggestions({
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
             visualizationId === activeVisualization?.id ? visualizationState : undefined;
-          const palette =
-            mainPalette ||
-            (activeVisualization?.getMainPalette
-              ? activeVisualization.getMainPalette?.(visualizationState)
-              : undefined);
+          const palette = mainPalette || activeVisualization?.getMainPalette?.(visualizationState);
 
           return getVisualizationSuggestions(
             visualization,
@@ -162,7 +158,6 @@ export function getSuggestions({
         });
     })
     .sort((a, b) => b.score - a.score);
-  return sug;
 }
 
 export function getVisualizeFieldSuggestions({
@@ -263,20 +258,19 @@ export function getTopSuggestionForField(
     (datasourceLayer) => datasourceLayer.getTableSpec().length > 0
   );
 
-  const mainPalette =
-    visualization.activeId && visualizationMap[visualization.activeId]?.getMainPalette
-      ? visualizationMap[visualization.activeId].getMainPalette?.(visualization.state)
-      : undefined;
+  const activeVisualization = visualization.activeId
+    ? visualizationMap[visualization.activeId]
+    : undefined;
+
+  const mainPalette = activeVisualization?.getMainPalette?.(visualization.state);
   const suggestions = getSuggestions({
     datasourceMap: { [datasource.id]: datasource },
     datasourceStates,
     visualizationMap:
       hasData && visualization.activeId
-        ? { [visualization.activeId]: visualizationMap[visualization.activeId] }
+        ? { [visualization.activeId]: activeVisualization! }
         : visualizationMap,
-    activeVisualization: visualization.activeId
-      ? visualizationMap?.[visualization.activeId]
-      : undefined,
+    activeVisualization,
     visualizationState: visualization.state,
     field,
     mainPalette,
