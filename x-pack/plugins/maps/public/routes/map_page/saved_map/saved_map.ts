@@ -177,7 +177,7 @@ export class SavedMap {
 
   hasUnsavedChanges = () => {
     if (!this._attributes) {
-      throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
+      return false;
     }
 
     const savedLayerList = this._attributes.layerListJSON
