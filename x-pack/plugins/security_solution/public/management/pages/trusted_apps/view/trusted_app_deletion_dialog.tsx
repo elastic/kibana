@@ -42,7 +42,7 @@ import {
 const CANCEL_SUBJ = 'trustedAppDeletionCancel';
 const CONFIRM_SUBJ = 'trustedAppDeletionConfirm';
 const isTrustedAppByPolicy = (
-  trustedApp: ImmutableObject<GlobalEffectScope> | ImmutableObject<PolicyEffectScope>
+  trustedApp: ImmutableObject<GlobalEffectScope | PolicyEffectScope>
 ): trustedApp is ImmutableObject<PolicyEffectScope> => {
   return (trustedApp as ImmutableObject<PolicyEffectScope>).policies !== undefined;
 };
