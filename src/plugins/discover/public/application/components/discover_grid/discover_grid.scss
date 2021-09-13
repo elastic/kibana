@@ -86,6 +86,10 @@
 
 .dscDiscoverGrid__descriptionListDescription {
   word-break: normal !important;
+
+  img {
+    vertical-align: middle;
+  }
 }
 
 @include euiBreakpoint('xs', 's', 'm') {
