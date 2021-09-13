@@ -166,7 +166,6 @@ export class MapApp extends React.Component<Props, State> {
     this._updateIndexPatterns();
     if (prevProps.savedMap.getSavedObjectId() !== this.props.savedMap.getSavedObjectId()) {
       this._closeMapOperations();
-      this.setState({ initialized: false });
       this._openMapOperations();
     }
   }
