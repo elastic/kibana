@@ -215,10 +215,6 @@ export class Server {
 
     const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
 
-    const deprecationsSetup = this.deprecations.setup({
-      http: httpSetup,
-    });
-
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
       executionContext: executionContextSetup,
