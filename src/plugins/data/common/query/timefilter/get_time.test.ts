@@ -10,7 +10,7 @@ import { RangeFilter } from '@kbn/es-query';
 import type { IIndexPattern } from '../..';
 import moment from 'moment';
 import sinon from 'sinon';
-import { getTime, getAbsoluteTimeRange } from './get_time';
+import { getTime, getRelativeTime, getAbsoluteTimeRange } from './get_time';
 
 describe('get_time', () => {
   describe('getTime', () => {
@@ -80,9 +80,10 @@ describe('get_time', () => {
       });
       clock.restore();
     });
-
+  });
+  describe('getRelativeTime', () => {
     test('do not coerce relative time to absolute time when given flag', () => {
-      const filter = getTime(
+      const filter = getRelativeTime(
         ({
           id: 'test',
           title: 'test',
@@ -107,7 +108,7 @@ describe('get_time', () => {
           ],
         } as unknown) as IIndexPattern,
         { from: 'now-60y', to: 'now' },
-        { fieldName: 'myCustomDate', coerceRelativeTimeToAbsoluteTime: false }
+        { fieldName: 'myCustomDate' }
       ) as RangeFilter;
 
       expect(filter.range.myCustomDate).toEqual({
@@ -116,10 +117,9 @@ describe('get_time', () => {
         format: 'strict_date_optional_time',
       });
     });
-
     test('do not coerce relative time to absolute time when given flag - with mixed from and to times', () => {
       const clock = sinon.useFakeTimers(moment.utc().valueOf());
-      const filter = getTime(
+      const filter = getRelativeTime(
         ({
           id: 'test',
           title: 'test',
@@ -147,7 +147,7 @@ describe('get_time', () => {
           from: '2020-09-01T08:30:00.000Z',
           to: 'now',
         },
-        { fieldName: 'myCustomDate', coerceRelativeTimeToAbsoluteTime: false }
+        { fieldName: 'myCustomDate' }
       ) as RangeFilter;
 
       expect(filter.range.myCustomDate).toEqual({
