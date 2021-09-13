@@ -101,6 +101,13 @@ export const AVAILABLE_SOURCE_CUSTOM_SOURCE_BUTTON = i18n.translate(
   }
 );
 
+export const CONFIG_COMPLETED_PRIVATE_SOURCES_DISABLED_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.privateDisabled.link',
+  {
+    defaultMessage: 'enable private source connection',
+  }
+);
+
 export const CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.privateDisabled.button',
   {
