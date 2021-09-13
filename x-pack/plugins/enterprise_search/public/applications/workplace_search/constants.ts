@@ -734,6 +734,10 @@ export const FIELD_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearc
   defaultMessage: 'Field',
 });
 
+export const LABEL_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.label.label', {
+  defaultMessage: 'Label',
+});
+
 export const DESCRIPTION_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.description.label',
   {
