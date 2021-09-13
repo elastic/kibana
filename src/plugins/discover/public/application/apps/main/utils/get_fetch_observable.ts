@@ -21,14 +21,14 @@ import { DiscoverSearchSessionManager } from '../services/discover_search_sessio
  * This function returns an observable that's used to trigger data fetching
  */
 export function getFetch$({
-  autoRefreshDoneCb,
+  setAutoRefreshDoneCb,
   data,
   main$,
   refetch$,
   searchSessionManager,
   searchSource,
 }: {
-  autoRefreshDoneCb: AutoRefreshDoneFn | undefined;
+  setAutoRefreshDoneCb: (val: AutoRefreshDoneFn | undefined) => void;
   data: DataPublicPluginStart;
   main$: DataMain$;
   refetch$: DataRefetch$;
@@ -43,7 +43,7 @@ export function getFetch$({
     timefilter.getFetch$(),
     timefilter.getAutoRefreshFetch$().pipe(
       tap((done) => {
-        autoRefreshDoneCb = done;
+        setAutoRefreshDoneCb(done);
       }),
       filter(() => {
         const currentFetchStatus = main$.getValue().fetchStatus;

@@ -129,6 +129,7 @@ export const useSavedSearch = ({
    */
   const refs = useRef<{
     abortController?: AbortController;
+    autoRefreshDoneCb?: AutoRefreshDoneFn;
   }>({});
 
   /**
@@ -140,9 +141,11 @@ export const useSavedSearch = ({
      * handler emitted by `timefilter.getAutoRefreshFetch$()`
      * to notify when data completed loading and to start a new autorefresh loop
      */
-    let autoRefreshDoneCb: AutoRefreshDoneFn | undefined;
+    const setAutoRefreshDoneCb = (fn: AutoRefreshDoneFn | undefined) => {
+      refs.current.autoRefreshDoneCb = fn;
+    };
     const fetch$ = getFetch$({
-      autoRefreshDoneCb,
+      setAutoRefreshDoneCb,
       data,
       main$,
       refetch$,
@@ -171,8 +174,8 @@ export const useSavedSearch = ({
         }).subscribe({
           complete: () => {
             // if this function was set and is executed, another refresh fetch can be triggered
-            autoRefreshDoneCb?.();
-            autoRefreshDoneCb = undefined;
+            refs.current.autoRefreshDoneCb?.();
+            refs.current.autoRefreshDoneCb = undefined;
           },
         });
       } catch (error) {

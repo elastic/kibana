@@ -52,7 +52,7 @@ describe('getFetchObservable', () => {
     const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
     const refetch$: DataRefetch$ = new Subject();
     const fetch$ = getFetch$({
-      autoRefreshDoneCb: undefined,
+      setAutoRefreshDoneCb: jest.fn(),
       main$,
       refetch$,
       data: createDataMock(new Subject(), new Subject(), new Subject(), new Subject()),
@@ -73,8 +73,9 @@ describe('getFetchObservable', () => {
     const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
     const refetch$: DataRefetch$ = new Subject();
     const dataMock = createDataMock(new Subject(), new Subject(), new Subject(), autoRefreshFetch$);
+    const setAutoRefreshDoneCb = jest.fn();
     const fetch$ = getFetch$({
-      autoRefreshDoneCb: undefined,
+      setAutoRefreshDoneCb,
       main$,
       refetch$,
       data: dataMock,
@@ -86,9 +87,10 @@ describe('getFetchObservable', () => {
     fetch$.subscribe(() => {
       fetchfnMock();
     });
-    autoRefreshFetch$.next();
+    autoRefreshFetch$.next(jest.fn());
     jest.runAllTimers();
     expect(fetchfnMock).toHaveBeenCalledTimes(1);
+    expect(setAutoRefreshDoneCb).toHaveBeenCalled();
   });
 
   test('getAutoRefreshFetch$ should not trigger fetch$.next when index pattern has no timefield', async () => {
@@ -100,7 +102,7 @@ describe('getFetchObservable', () => {
     const refetch$: DataRefetch$ = new Subject();
     const dataMock = createDataMock(new Subject(), new Subject(), new Subject(), autoRefreshFetch$);
     const fetch$ = getFetch$({
-      autoRefreshDoneCb: undefined,
+      setAutoRefreshDoneCb: jest.fn(),
       main$,
       refetch$,
       data: dataMock,
