@@ -9,10 +9,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObject } from 'kibana/server';
+import { SavedObject, SavedObjectsResolveResponse } from 'kibana/server';
 import {
   CaseResponseRt,
   CaseResponse,
+  CaseResolveResponseRt,
+  CaseResolveResponse,
   User,
   UsersRt,
   AllTagsFindRequest,
@@ -229,6 +231,96 @@ export const get = async (
     );
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
+  }
+};
+
+/**
+ * Retrieves a case resolving its ID and optionally loading its comments and sub case comments.
+ *
+ * @experimental
+ */
+export const resolve = async (
+  { id, includeComments, includeSubCaseComments }: GetParams,
+  clientArgs: CasesClientArgs
+): Promise<CaseResolveResponse> => {
+  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+
+  try {
+    if (!ENABLE_CASE_CONNECTOR && includeSubCaseComments) {
+      throw Boom.badRequest(
+        'The `includeSubCaseComments` is not supported when the case connector feature is disabled'
+      );
+    }
+
+    const theResolvedCase: SavedObjectsResolveResponse<CaseAttributes> = await caseService.getResolveCase(
+      {
+        unsecuredSavedObjectsClient,
+        id,
+      }
+    );
+
+    if (theResolvedCase.outcome !== 'exactMatch') {
+      // If it is not an exact match the UI will ignore the `saved_object` data and redirect to the `alias_target_id`.
+      // We can return and omit the rest of the parameters since they will be requested again using the exactMatch ID.
+      return CaseResolveResponseRt.encode({
+        ...theResolvedCase,
+        saved_object: flattenCaseSavedObject({
+          savedObject: theResolvedCase.saved_object,
+        }),
+      });
+    }
+
+    let subCaseIds: string[] = [];
+    if (ENABLE_CASE_CONNECTOR) {
+      const subCasesForCaseId = await caseService.findSubCasesByCaseId({
+        unsecuredSavedObjectsClient,
+        ids: [id],
+      });
+      subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
+    }
+
+    await authorization.ensureAuthorized({
+      operation: Operations.getCase,
+      entities: [
+        {
+          id,
+          owner: theResolvedCase.saved_object.attributes.owner,
+        },
+      ],
+    });
+
+    if (!includeComments) {
+      return CaseResolveResponseRt.encode({
+        ...theResolvedCase,
+        saved_object: flattenCaseSavedObject({
+          savedObject: theResolvedCase.saved_object,
+          subCaseIds,
+        }),
+      });
+    }
+
+    const theComments = await caseService.getAllCaseComments({
+      unsecuredSavedObjectsClient,
+      id,
+      options: {
+        sortField: 'created_at',
+        sortOrder: 'asc',
+      },
+      includeSubCaseComments: ENABLE_CASE_CONNECTOR && includeSubCaseComments,
+    });
+
+    return CaseResolveResponseRt.encode({
+      ...theResolvedCase,
+      saved_object: flattenCaseSavedObject({
+        savedObject: theResolvedCase.saved_object,
+        subCaseIds,
+        comments: theComments.saved_objects,
+        totalComment: theComments.total,
+        totalAlerts: countAlertsForID({ comments: theComments, id }),
+      }),
+    });
+  } catch (error) {
+    throw createCaseError({ message: `Failed to resolve case id: ${id}: ${error}`, error, logger });
   }
 };
 

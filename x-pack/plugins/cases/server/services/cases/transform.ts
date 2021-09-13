@@ -13,6 +13,7 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
+  SavedObjectsResolveResponse,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
@@ -185,6 +186,35 @@ export function transformSavedObjectToExternalModel(
       ...caseSavedObject.attributes,
       connector,
       external_service: externalService,
+    },
+  };
+}
+
+export function transformResolveSavedObjectToExternalModel({
+  saved_object: caseSavedObject,
+  ...caseResolveResult
+}: SavedObjectsResolveResponse<ESCaseAttributes>): SavedObjectsResolveResponse<CaseAttributes> {
+  const connector = transformESConnectorOrUseDefault({
+    // if the saved object had an error the attributes field will not exist
+    connector: caseSavedObject.attributes?.connector,
+    references: caseSavedObject.references,
+    referenceName: CONNECTOR_ID_REFERENCE_NAME,
+  });
+
+  const externalService = transformESExternalService(
+    caseSavedObject.attributes?.external_service,
+    caseSavedObject.references
+  );
+
+  return {
+    ...caseResolveResult,
+    saved_object: {
+      ...caseSavedObject,
+      attributes: {
+        ...caseSavedObject.attributes,
+        connector,
+        external_service: externalService,
+      },
     },
   };
 }
