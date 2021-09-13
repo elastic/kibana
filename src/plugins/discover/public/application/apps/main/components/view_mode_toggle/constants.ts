@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const DISCOVER_VIEW_MODES = {
-  DOCUMENT_LEVEL: 'discoverViewOptionDocument',
-  FIELD_LEVEL: 'discoverViewOptionAggregated',
-};
+export enum DISCOVER_VIEW_MODE {
+  DOCUMENT_LEVEL = 'discoverViewOptionDocument',
+  FIELD_LEVEL = 'discoverViewOptionAggregated',
+}

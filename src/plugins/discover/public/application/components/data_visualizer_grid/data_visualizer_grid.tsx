@@ -41,10 +41,6 @@ export interface DiscoverDataVisualizerGridProps {
    */
   indexPattern: DataView;
   /**
-   * The max size of the documents returned by Elasticsearch
-   */
-  sampleSize: number;
-  /**
    * Saved search description
    */
   searchDescription?: string;
@@ -104,9 +100,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   useEffect(() => {
     return () => {
       // Clean up embeddable upon unmounting
-      if (embeddable) {
-        embeddable.destroy();
-      }
+      embeddable?.destroy();
     };
   }, [embeddable]);
 

@@ -7,4 +7,4 @@
  */
 
 export { DocumentViewModeToggle } from './view_mode_toggle';
-export { DISCOVER_VIEW_MODES } from './constants';
+export { DISCOVER_VIEW_MODE } from './constants';

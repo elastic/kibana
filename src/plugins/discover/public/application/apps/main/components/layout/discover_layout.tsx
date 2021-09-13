@@ -44,7 +44,7 @@ import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../../types';
 import { useDataState } from '../../utils/use_data_state';
 import { DiscoverDataVisualizerGrid } from '../../../../components/data_visualizer_grid';
-import { DISCOVER_VIEW_MODES } from '../view_mode_toggle';
+import { DISCOVER_VIEW_MODE } from '../view_mode_toggle';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -72,16 +72,11 @@ export function DiscoverLayout({
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
-  const [discoverViewMode, setDiscoverViewMode] = useState(DISCOVER_VIEW_MODES.DOCUMENT_LEVEL);
-
-  useEffect(() => {
-    const userSetViewMode = uiSettings?.get(AGGREGATED_VIEW_SETTING);
-    if (userSetViewMode) {
-      setDiscoverViewMode(DISCOVER_VIEW_MODES.FIELD_LEVEL);
-    } else {
-      setDiscoverViewMode(DISCOVER_VIEW_MODES.DOCUMENT_LEVEL);
-    }
-  }, [uiSettings]);
+  const [discoverViewMode, setDiscoverViewMode] = useState(() =>
+    uiSettings?.get(AGGREGATED_VIEW_SETTING)
+      ? DISCOVER_VIEW_MODE.FIELD_LEVEL
+      : DISCOVER_VIEW_MODE.DOCUMENT_LEVEL
+  );
 
   const fetchCounter = useRef<number>(0);
   const dataState: DataMainMsg = useDataState(main$);
@@ -271,7 +266,7 @@ export function DiscoverLayout({
                     />
                   </EuiFlexItem>
                   <EuiHorizontalRule margin="none" />
-                  {discoverViewMode === DISCOVER_VIEW_MODES.DOCUMENT_LEVEL ? (
+                  {discoverViewMode === DISCOVER_VIEW_MODE.DOCUMENT_LEVEL ? (
                     <DiscoverDocuments
                       documents$={savedSearchData$.documents$}
                       expandedDoc={expandedDoc}
@@ -291,7 +286,6 @@ export function DiscoverLayout({
                       indexPattern={indexPattern}
                       searchDescription={savedSearch.description}
                       searchTitle={savedSearch.lastSavedTitle}
-                      sampleSize={5000}
                       query={state.query}
                       filters={state.filters}
                       columns={columns}

@@ -9,15 +9,15 @@
 import { EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { DISCOVER_VIEW_MODES } from './constants';
+import { DISCOVER_VIEW_MODE } from './constants';
 
 const toggleButtons = [
   {
-    id: DISCOVER_VIEW_MODES.DOCUMENT_LEVEL,
+    id: DISCOVER_VIEW_MODE.DOCUMENT_LEVEL,
     label: 'Document view',
   },
   {
-    id: DISCOVER_VIEW_MODES.FIELD_LEVEL,
+    id: DISCOVER_VIEW_MODE.FIELD_LEVEL,
     label: 'Aggregated view',
   },
 ];
