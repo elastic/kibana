@@ -26,7 +26,6 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
-  AGGREGATED_VIEW_PREVIEW,
 } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
@@ -170,21 +169,6 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     metric: {
       type: METRIC_TYPE.CLICK,
       name: 'discover:useLegacyDataGrid',
-    },
-  },
-  [AGGREGATED_VIEW_PREVIEW]: {
-    name: i18n.translate('discover.advancedSettings.showAggregatedPreviewName', {
-      defaultMessage: 'Show aggregated preview',
-    }),
-    value: false,
-    description: i18n.translate('discover.advancedSettings.showAggregatedPreviewDescription', {
-      defaultMessage: 'Turn on this option to show the preview in the aggregated view by default.',
-    }),
-    category: ['discover'],
-    schema: schema.boolean(),
-    metric: {
-      type: METRIC_TYPE.CLICK,
-      name: 'dataVisualizerTable:showPreview',
     },
   },
 

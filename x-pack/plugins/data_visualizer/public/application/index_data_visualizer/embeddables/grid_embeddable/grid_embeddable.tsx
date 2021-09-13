@@ -632,7 +632,13 @@ const useDataVisualizerGridData = (
   };
 };
 
-export const DiscoverWrapper = ({ input }: { input: DataVisualizerGridEmbeddableInput }) => {
+export const DiscoverWrapper = ({
+  input,
+  onOutputChange,
+}: {
+  input: DataVisualizerGridEmbeddableInput;
+  onOutputChange?: (ouput: any) => void;
+}) => {
   const [dataVisualizerListState, setDataVisualizerListState] = useState<
     Required<DataVisualizerIndexBasedAppState>
   >(restorableDefaults);
@@ -640,8 +646,11 @@ export const DiscoverWrapper = ({ input }: { input: DataVisualizerGridEmbeddable
   const onTableChange = useCallback(
     (update: DataVisualizerTableState) => {
       setDataVisualizerListState({ ...dataVisualizerListState, ...update });
+      if (onOutputChange) {
+        onOutputChange(update);
+      }
     },
-    [dataVisualizerListState]
+    [dataVisualizerListState, onOutputChange]
   );
   const { configs, searchQueryLanguage, searchString, extendedColumns } = useDataVisualizerGridData(
     input,
@@ -676,6 +685,7 @@ export const DiscoverWrapper = ({ input }: { input: DataVisualizerGridEmbeddable
       extendedColumns={extendedColumns}
       showPreviewByDefault={input?.showPreviewByDefault}
       width={windowWidth - 300}
+      onChange={onOutputChange}
     />
   );
 
@@ -686,12 +696,13 @@ export const IndexDataVisualizerViewWrapper = (props: {
   id: string;
   embeddableContext: InstanceType<IDataVisualizerGridEmbeddable>;
   embeddableInput: Readonly<Observable<DataVisualizerGridEmbeddableInput>>;
+  onOutputChange?: (output: any) => void;
 }) => {
-  const { embeddableInput } = props;
+  const { embeddableInput, onOutputChange } = props;
 
   const input = useObservable(embeddableInput);
   if (input && input.indexPattern) {
-    return <DiscoverWrapper input={input} />;
+    return <DiscoverWrapper input={input} onOutputChange={onOutputChange} />;
   } else {
     return <div />;
   }
@@ -726,6 +737,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
               id={this.input.id}
               embeddableContext={this}
               embeddableInput={this.getInput$()}
+              onOutputChange={(output) => this.updateOutput(output)}
             />
           </Suspense>
         </KibanaContextProvider>

@@ -55,6 +55,10 @@ export async function persistSavedSearch(
     savedSearch.discoverViewMode = state.discoverViewMode;
   }
 
+  if (state.hideAggregatedPreview) {
+    savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
+  }
+
   try {
     const id = await savedSearch.save(saveOptions);
     onSuccess(id);

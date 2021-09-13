@@ -54,6 +54,7 @@ interface DataVisualizerTableProps<T> {
   showPreviewByDefault?: boolean;
   /** Table width used to calculate the appropriate column widths **/
   width: number;
+  onChange: (update: Partial<DataVisualizerTableState>) => void;
 }
 
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -64,6 +65,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   extendedColumns,
   showPreviewByDefault,
   width,
+  onChange,
 }: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, toggleExpandAll] = useState<boolean>(false);
@@ -94,6 +96,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
   const toggleShowDistribution = () => {
     setShowDistributions(!showDistributions);
+    onChange({ showDistributions: !showDistributions });
   };
 
   function toggleDetails(item: DataVisualizerTableItem) {

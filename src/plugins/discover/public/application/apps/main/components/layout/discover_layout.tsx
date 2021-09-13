@@ -292,6 +292,7 @@ export function DiscoverLayout({
                       query={state.query}
                       filters={state.filters}
                       columns={columns}
+                      stateContainer={stateContainer}
                     />
                   )}
                 </EuiFlexGroup>

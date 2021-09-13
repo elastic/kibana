@@ -48,7 +48,8 @@ export function getStateDefaults({
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')),
     hideChart: undefined,
-    discoverViewMode: DISCOVER_VIEW_MODE.DOCUMENT_LEVEL,
+    discoverViewMode: undefined,
+    hideAggregatedPreview: undefined,
   } as AppState;
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
@@ -58,6 +59,12 @@ export function getStateDefaults({
   }
   if (savedSearch.discoverViewMode) {
     defaultState.discoverViewMode = savedSearch.discoverViewMode;
+  } else {
+    defaultState.discoverViewMode = DISCOVER_VIEW_MODE.DOCUMENT_LEVEL;
+  }
+
+  if (savedSearch.hideAggregatedPreview) {
+    defaultState.hideAggregatedPreview = savedSearch.hideAggregatedPreview;
   }
 
   return defaultState;

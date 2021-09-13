@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { DataView, Query } from '../../../../../data/common';
@@ -19,7 +19,7 @@ import {
   isErrorEmbeddable,
 } from '../../../../../embeddable/public';
 import { SavedSearch } from '../../../saved_searches';
-import { AGGREGATED_VIEW_PREVIEW } from '../../../../common';
+import { GetStateReturn } from '../../apps/main/services/discover_state';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   indexPattern: DataView;
@@ -29,7 +29,9 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   showPreviewByDefault?: boolean;
 }
-export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
+export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
+  showDistributions?: boolean;
+}
 
 export interface DiscoverDataVisualizerGridProps {
   /**
@@ -55,6 +57,7 @@ export interface DiscoverDataVisualizerGridProps {
   savedSearch?: SavedSearch;
   query?: Query;
   filters?: Filter[];
+  stateContainer: GetStateReturn;
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -62,7 +65,7 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
 });
 
 export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProps) => {
-  const { services, indexPattern, savedSearch, query, columns, filters } = props;
+  const { services, indexPattern, savedSearch, query, columns, filters, stateContainer } = props;
   const { uiSettings } = services;
 
   const [embeddable, setEmbeddable] = useState<
@@ -71,6 +74,19 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
     | undefined
   >();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
+
+  const showPreviewByDefault = useMemo(
+    () => !stateContainer.appStateContainer.getState().hideAggregatedPreview,
+    [stateContainer.appStateContainer]
+  );
+
+  useEffect(() => {
+    embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
+      if (output.showDistributions !== undefined) {
+        stateContainer.setAppState({ hideAggregatedPreview: !output.showDistributions });
+      }
+    });
+  }, [embeddable, stateContainer]);
 
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
@@ -87,7 +103,6 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   }, [embeddable, indexPattern, savedSearch, query, columns, filters]);
 
   useEffect(() => {
-    const showPreviewByDefault = uiSettings?.get(AGGREGATED_VIEW_PREVIEW);
     if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
@@ -95,7 +110,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
       });
       embeddable.reload();
     }
-  }, [uiSettings, embeddable]);
+  }, [showPreviewByDefault, uiSettings, embeddable]);
 
   useEffect(() => {
     return () => {
@@ -107,8 +122,6 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   useEffect(() => {
     let unmounted = false;
     const loadEmbeddable = async () => {
-      const showPreviewByDefault = uiSettings?.get(AGGREGATED_VIEW_PREVIEW);
-
       if (services?.embeddable) {
         const factory = services.embeddable.getEmbeddableFactory<
           DataVisualizerGridEmbeddableInput,
@@ -134,7 +147,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
       unmounted = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [services?.embeddable]);
+  }, [services?.embeddable, showPreviewByDefault]);
 
   // We can only render after embeddable has already initialized
   useEffect(() => {

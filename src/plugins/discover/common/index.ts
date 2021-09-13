@@ -21,4 +21,3 @@ export const SEARCH_FIELDS_FROM_SOURCE = 'discover:searchFieldsFromSource';
 export const MAX_DOC_FIELDS_DISPLAYED = 'discover:maxDocFieldsDisplayed';
 export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
 export const SEARCH_EMBEDDABLE_TYPE = 'search';
-export const AGGREGATED_VIEW_PREVIEW = 'dataVisualizerTable:showPreview';

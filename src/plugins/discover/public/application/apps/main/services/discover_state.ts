@@ -78,6 +78,10 @@ export interface AppState {
    * Table view: Document view or Aggregated view
    */
   discoverViewMode?: DISCOVER_VIEW_MODE;
+  /**
+   * Hide mini distribution/preview charts when in Aggregated view
+   */
+  hideAggregatedPreview?: boolean;
 }
 
 interface GetStateParams {

@@ -25,7 +25,8 @@ export interface SavedSearch {
   lastSavedTitle?: string;
   copyOnSave?: boolean;
   hideChart?: boolean;
-  discoverViewMode: DISCOVER_VIEW_MODE;
+  discoverViewMode?: DISCOVER_VIEW_MODE;
+  hideAggregatedPreview?: boolean;
 }
 export interface SavedSearchLoader {
   get: (id: string) => Promise<SavedSearch>;
