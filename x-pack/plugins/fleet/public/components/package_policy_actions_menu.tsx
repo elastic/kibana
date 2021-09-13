@@ -69,8 +69,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     <EuiContextMenuItem
       disabled={!hasWriteCapabilities}
       icon="pencil"
-      href={getHref('edit_integration', {
-        policyId: agentPolicy.id,
+      href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
       })}
       key="packagePolicyEdit"
@@ -108,7 +107,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
               disabled={!hasWriteCapabilities}
               icon="trash"
               onClick={() => {
-                deletePackagePoliciesPrompt([packagePolicy.id], refreshAgentPolicy);
+                deletePackagePoliciesPrompt([packagePolicy.id], () => {
+                  setIsActionsMenuOpen(false);
+                  refreshAgentPolicy();
+                });
               }}
             >
               <FormattedMessage
