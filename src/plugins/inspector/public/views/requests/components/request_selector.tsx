@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiComboBox,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiFlexGroup,
@@ -98,33 +99,50 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
   };
 
   renderRequestDropdown() {
-    const button = (
-      <EuiButtonEmpty
-        iconType="arrowDown"
-        iconSide="right"
-        size="s"
-        onClick={this.togglePopover}
-        data-test-subj="inspectorRequestChooser"
-      >
-        {this.props.selectedRequest.name}
-      </EuiButtonEmpty>
-    );
+    // const button = (
+    //   <EuiButtonEmpty
+    //     iconType="arrowDown"
+    //     iconSide="right"
+    //     size="s"
+    //     onClick={this.togglePopover}
+    //     data-test-subj="inspectorRequestChooser"
+    //   >
+    //     {this.props.selectedRequest.name}
+    //   </EuiButtonEmpty>
+    // );
+
+    const options = this.props.requests.map(item => {
+      return {
+        label: item.name
+      }
+    });
 
     return (
-      <EuiPopover
-        id="inspectorRequestChooser"
-        button={button}
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this.closePopover}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-        repositionOnScroll
-      >
-        <EuiContextMenuPanel
-          items={this.props.requests.map(this.renderRequestDropdownItem)}
-          data-test-subj="inspectorRequestChooserMenuPanel"
+      <>
+        {/* <EuiPopover
+          id="inspectorRequestChooser"
+          button={button}
+          isOpen={this.state.isPopoverOpen}
+          closePopover={this.closePopover}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+          repositionOnScroll
+        >
+          <EuiContextMenuPanel
+            items={this.props.requests.map(this.renderRequestDropdownItem)}
+            data-test-subj="inspectorRequestChooserMenuPanel"
+          />
+        </EuiPopover> */}
+
+        <EuiComboBox
+          id="inspectorRequestChooser"
+          isClearable={false}
+          options={options}
+          prepend="Request:"
+          selectedOptions={[options[0]]}
+          singleSelection={{ asPlainText: true }}
         />
-      </EuiPopover>
+      </>
     );
   }
 
@@ -133,21 +151,20 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <strong>
-            <FormattedMessage id="inspector.requests.requestLabel" defaultMessage="Request:" />
-          </strong>
-        </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          {requests.length <= 1 && (
+          {/* {requests.length <= 1 && (
             <div
               className="insRequestSelector__singleRequest"
               data-test-subj="inspectorRequestName"
             >
+              <strong>
+                <FormattedMessage id="inspector.requests.requestLabel" defaultMessage="Request:" />{" "}
+              </strong>
               {selectedRequest.name}
             </div>
           )}
-          {requests.length > 1 && this.renderRequestDropdown()}
+          {requests.length > 1 && this.renderRequestDropdown()} */}
+          {requests.length && this.renderRequestDropdown()}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {selectedRequest.status !== RequestStatus.PENDING && (
