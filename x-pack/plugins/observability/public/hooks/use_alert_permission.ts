@@ -12,7 +12,7 @@ import { Capabilities } from '../../../../../src/core/types';
 export interface UseGetUserAlertsPermissionsProps {
   crud: boolean;
   read: boolean;
-  loading: boolean;
+  loading?: boolean;
   featureId: string | null;
 }
 
@@ -30,9 +30,12 @@ export const getAlertsPermissions = (
   }
 
   return {
-    crud: uiCapabilities[featureId].save as boolean,
-    read: uiCapabilities[featureId].show as boolean,
-    loading: false,
+    crud: (featureId === 'apm'
+      ? uiCapabilities[featureId]['alerting:save']
+      : uiCapabilities[featureId].save) as boolean,
+    read: (featureId === 'apm'
+      ? uiCapabilities[featureId]['alerting:show']
+      : uiCapabilities[featureId].show) as boolean,
     featureId,
   };
 };

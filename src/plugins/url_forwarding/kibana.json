@@ -4,8 +4,7 @@
   "server": false,
   "ui": true,
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
-  },
-  "requiredPlugins": ["kibanaLegacy"]
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  }
 }

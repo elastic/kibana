@@ -47,11 +47,7 @@ export async function getHasAggregatedTransactions({
     }
   );
 
-  if (response.hits.total.value > 0) {
-    return true;
-  }
-
-  return false;
+  return response.hits.total.value > 0;
 }
 
 export async function getSearchAggregatedTransactions({

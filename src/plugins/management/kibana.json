@@ -6,7 +6,7 @@
   "optionalPlugins": ["home", "share"],
   "requiredBundles": ["kibanaReact", "kibanaUtils", "home"],
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
   }
 }

@@ -20,6 +20,7 @@ jest.mock('../app_navigation_handler', () => {
 
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
+    share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
     trackUiMetric: jest.fn(),
   }),
 }));

@@ -14,7 +14,7 @@ import {
 } from './oauth';
 
 describe('oauth routes', () => {
-  describe('GET /api/workplace_search/oauth/authorize', () => {
+  describe('GET /internal/workplace_search/oauth/authorize', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -22,7 +22,7 @@ describe('oauth routes', () => {
 
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/oauth/authorize',
+        path: '/internal/workplace_search/oauth/authorize',
       });
 
       registerOAuthAuthorizeRoute({
@@ -59,7 +59,7 @@ describe('oauth routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/oauth/authorize', () => {
+  describe('POST /internal/workplace_search/oauth/authorize', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -67,7 +67,7 @@ describe('oauth routes', () => {
 
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/oauth/authorize',
+        path: '/internal/workplace_search/oauth/authorize',
       });
 
       registerOAuthAuthorizeAcceptRoute({
@@ -100,7 +100,7 @@ describe('oauth routes', () => {
     });
   });
 
-  describe('DELETE /api/workplace_search/oauth/authorize', () => {
+  describe('DELETE /internal/workplace_search/oauth/authorize', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -108,7 +108,7 @@ describe('oauth routes', () => {
 
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/workplace_search/oauth/authorize',
+        path: '/internal/workplace_search/oauth/authorize',
       });
 
       registerOAuthAuthorizeDenyRoute({

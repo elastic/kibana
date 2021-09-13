@@ -15,8 +15,6 @@ import { FieldIcon, FieldIconProps } from '../../../../../kibana_react/public';
 import { getFieldTypeName } from './field_type_name';
 import { IndexPatternField } from '../../../../../data/public';
 
-// properties fieldType and fieldName are provided in kbn_doc_view
-// this should be changed when both components are deangularized
 interface Props {
   fieldName: string;
   fieldType?: string;

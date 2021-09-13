@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -37,6 +38,8 @@ import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
 import { useHtmlId } from './use_html_id';
 import { useHttp } from './use_http';
+import { useVerification } from './use_verification';
+import { useVisibility } from './use_visibility';
 
 export interface ClusterConfigurationFormValues {
   username: string;
@@ -66,10 +69,10 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
   onSuccess,
 }) => {
   const http = useHttp();
-
+  const { status, getCode } = useVerification();
   const [form, eventHandlers] = useForm({
     defaultValues,
-    validate: async (values) => {
+    validate: (values) => {
       const errors: ValidationErrors<ClusterConfigurationFormValues> = {};
 
       if (authRequired) {
@@ -93,7 +96,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
           errors.password = i18n.translate(
             'interactiveSetup.clusterConfigurationForm.passwordRequiredError',
             {
-              defaultMessage: `Enter a password.`,
+              defaultMessage: 'Enter a password.',
             }
           );
         }
@@ -117,17 +120,24 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
           username: values.username,
           password: values.password,
           caCert: values.caCert,
+          code: getCode(),
         }),
       });
       onSuccess?.();
     },
   });
-
+  const [isVisible, buttonRef] = useVisibility<HTMLButtonElement>();
   const trustCaCertId = useHtmlId('clusterConfigurationForm', 'trustCaCert');
+
+  useUpdateEffect(() => {
+    if (status === 'verified' && isVisible) {
+      form.submit();
+    }
+  }, [status]);
 
   return (
     <EuiForm component="form" noValidate {...eventHandlers}>
-      {form.submitError && (
+      {status !== 'unverified' && !form.isSubmitting && !form.isValidating && form.submitError && (
         <>
           <EuiCallOut
             color="danger"
@@ -140,7 +150,6 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
           <EuiSpacer />
         </>
       )}
-
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false} className="eui-textNoWrap">
           <FormattedMessage
@@ -155,7 +164,6 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-
       {authRequired ? (
         <>
           <EuiFormRow
@@ -221,7 +229,6 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
           <EuiSpacer />
         </>
       )}
-
       {certificateChain && certificateChain.length > 0 && (
         <>
           <EuiFormRow
@@ -242,8 +249,8 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
               checked={!!form.values.caCert}
               onChange={() => {
                 const intermediateCa = certificateChain[Math.min(1, certificateChain.length - 1)];
-                form.setValue('caCert', form.values.caCert ? '' : intermediateCa.raw);
                 form.setTouched('caCert');
+                form.setValue('caCert', form.values.caCert ? '' : intermediateCa.raw);
               }}
             >
               <CertificatePanel certificate={certificateChain[0]} />
@@ -252,7 +259,6 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
           <EuiSpacer />
         </>
       )}
-
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty flush="right" iconType="arrowLeft" onClick={onCancel}>
@@ -264,6 +270,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            buttonRef={buttonRef}
             type="submit"
             isLoading={form.isSubmitting}
             isDisabled={form.isSubmitted && form.isInvalid}

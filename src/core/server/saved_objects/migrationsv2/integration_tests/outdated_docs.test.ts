@@ -14,7 +14,7 @@ import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { ElasticsearchClient } from '../../../elasticsearch';
 import { Root } from '../../../root';
 
-const logFilePath = Path.join(__dirname, 'migration_test_kibana.log');
+const logFilePath = Path.join(__dirname, 'outdated_docs.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 async function removeLogFile() {

@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IFieldType } from 'src/plugins/data/public';
+import { IndexPatternField } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DEFAULT_MAX_BUCKETS_LIMIT } from '../../../../../common/constants';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
@@ -54,7 +54,7 @@ interface Props {
   // Right field props
   rightValue: string;
   rightSize?: number;
-  rightFields: IFieldType[];
+  rightFields: IndexPatternField[];
   onRightFieldChange: (term?: string) => void;
   onRightSizeChange: (size: number) => void;
 }

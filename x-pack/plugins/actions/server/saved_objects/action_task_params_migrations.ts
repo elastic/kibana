@@ -48,8 +48,17 @@ export function getActionTaskParamsMigrations(
     pipeMigrations(getUseSavedObjectReferencesFn(preconfiguredActions))
   );
 
+  const migrationActionsTaskParams800 = createEsoMigration(
+    encryptedSavedObjects,
+    (
+      doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
+    ): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> => true,
+    (doc) => doc // no-op
+  );
+
   return {
     '7.16.0': executeMigrationWithErrorHandling(migrationActionTaskParamsSixteen, '7.16.0'),
+    '8.0.0': executeMigrationWithErrorHandling(migrationActionsTaskParams800, '8.0.0'),
   };
 }
 

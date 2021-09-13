@@ -30,13 +30,13 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//@mapbox/mapbox-gl-rtl-text",
   "@npm//file-loader",
-  "@npm//mapbox-gl",
+  "@npm//maplibre-gl",
 ]
 
 TYPES_DEPS = [
   "@npm//@mapbox/mapbox-gl-rtl-text",
   "@npm//file-loader",
-  "@npm//@types/mapbox-gl",
+  "@npm//maplibre-gl",
 ]
 
 jsts_transpiler(

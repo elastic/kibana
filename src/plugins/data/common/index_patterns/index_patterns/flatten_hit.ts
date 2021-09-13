@@ -7,12 +7,12 @@
  */
 
 import _ from 'lodash';
-import { IndexPattern } from './index_pattern';
+import { DataView } from './index_pattern';
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version
 
-function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: boolean) {
+function flattenHit(indexPattern: DataView, hit: Record<string, any>, deep: boolean) {
   const flat = {} as Record<string, any>;
 
   // recursively merge _source
@@ -66,7 +66,6 @@ function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<s
 
     // unwrap computed fields
     _.forOwn(hit.fields, function (val, key: any) {
-      if (key[0] === '_' && !_.includes(metaFields, key)) return;
       // Flatten an array with 0 or 1 elements to a single value.
       if (Array.isArray(val) && val.length <= 1) {
         flattened[key] = val[0];
@@ -104,11 +103,7 @@ function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<s
  *
  * @internal
  */
-export function flattenHitWrapper(
-  indexPattern: IndexPattern,
-  metaFields = {},
-  cache = new WeakMap()
-) {
+export function flattenHitWrapper(indexPattern: DataView, metaFields = {}, cache = new WeakMap()) {
   return function cachedFlatten(hit: Record<string, any>, deep = false) {
     const decorateFlattened = decorateFlattenedWrapper(hit, metaFields);
     const cached = cache.get(hit);

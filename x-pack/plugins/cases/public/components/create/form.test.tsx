@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -118,5 +118,15 @@ describe('CreateCaseForm', () => {
         ).toBeTruthy();
       });
     });
+  });
+
+  it('hides the sync alerts toggle', () => {
+    const { queryByText } = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm disableAlerts />
+      </MockHookWrapperComponent>
+    );
+
+    expect(queryByText('Sync alert')).not.toBeInTheDocument();
   });
 });

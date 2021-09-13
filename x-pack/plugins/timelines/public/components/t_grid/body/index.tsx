@@ -32,7 +32,7 @@ import React, {
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
-import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import {
   TGridCellAction,
   BulkActionsProp,
@@ -105,7 +105,13 @@ interface OwnProps {
   trailingControlColumns?: ControlColumnProps[];
   unit?: (total: number) => React.ReactNode;
   hasAlertsCrud?: boolean;
-  hasAlertsCrudPermissions?: (featureId: string) => boolean;
+  hasAlertsCrudPermissions?: ({
+    ruleConsumer,
+    ruleProducer,
+  }: {
+    ruleConsumer: string;
+    ruleProducer?: string;
+  }) => boolean;
   totalSelectAllAlerts?: number;
 }
 
@@ -180,7 +186,13 @@ const transformControlColumns = ({
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
-  hasAlertsCrudPermissions?: (featureId: string) => boolean;
+  hasAlertsCrudPermissions?: ({
+    ruleConsumer,
+    ruleProducer,
+  }: {
+    ruleConsumer: string;
+    ruleProducer?: string;
+  }) => boolean;
 }): EuiDataGridControlColumn[] =>
   controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
@@ -208,7 +220,6 @@ const transformControlColumns = ({
           </>
         );
       },
-
       // eslint-disable-next-line react/display-name
       rowCellRender: ({
         isDetails,
@@ -224,9 +235,15 @@ const transformControlColumns = ({
         if (rowData) {
           addBuildingBlockStyle(rowData.ecs, theme, setCellProps);
           if (columnId === 'checkbox-control-column' && hasAlertsCrudPermissions != null) {
-            const alertConsumers =
+            // FUTURE ENGINEER, the assumption here is you can only have one producer and consumer at this time
+            const ruleConsumers =
               rowData.data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ?? [];
-            disabled = alertConsumers.some((consumer) => !hasAlertsCrudPermissions(consumer));
+            const ruleProducers =
+              rowData.data.find((d) => d.field === ALERT_RULE_PRODUCER)?.value ?? [];
+            disabled = !hasAlertsCrudPermissions({
+              ruleConsumer: ruleConsumers.length > 0 ? ruleConsumers[0] : '',
+              ruleProducer: ruleProducers.length > 0 ? ruleProducers[0] : undefined,
+            });
           }
         } else {
           // disable the cell when it has no data
@@ -766,7 +783,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               pageSize={pageSize}
               pageSizeOptions={itemsPerPageOptions}
               rowRenderers={rowRenderers}
-              timelineId={id}
               totalItemCount={totalItems}
             />
           )}

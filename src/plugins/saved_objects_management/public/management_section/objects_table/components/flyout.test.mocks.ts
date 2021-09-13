@@ -15,19 +15,3 @@ export const resolveImportErrorsMock = jest.fn();
 jest.doMock('../../../lib/resolve_import_errors', () => ({
   resolveImportErrors: resolveImportErrorsMock,
 }));
-
-export const importLegacyFileMock = jest.fn();
-jest.doMock('../../../lib/import_legacy_file', () => ({
-  importLegacyFile: importLegacyFileMock,
-}));
-
-export const resolveSavedObjectsMock = jest.fn();
-export const resolveSavedSearchesMock = jest.fn();
-export const resolveIndexPatternConflictsMock = jest.fn();
-export const saveObjectsMock = jest.fn();
-jest.doMock('../../../lib/resolve_saved_objects', () => ({
-  resolveSavedObjects: resolveSavedObjectsMock,
-  resolveSavedSearches: resolveSavedSearchesMock,
-  resolveIndexPatternConflicts: resolveIndexPatternConflictsMock,
-  saveObjects: saveObjectsMock,
-}));

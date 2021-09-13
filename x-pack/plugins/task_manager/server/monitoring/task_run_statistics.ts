@@ -38,6 +38,7 @@ import {
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
+import { Logger } from '../../../../../src/core/server';
 
 interface FillPoolStat extends JsonObject {
   duration: number[];
@@ -337,6 +338,7 @@ const DEFAULT_POLLING_FREQUENCIES = {
 };
 
 export function summarizeTaskRunStat(
+  logger: Logger,
   {
     polling: {
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -403,6 +405,7 @@ export function summarizeTaskRunStat(
           executionResultFrequency,
           (typedResultFrequencies, taskType) =>
             summarizeTaskExecutionResultFrequencyStat(
+              logger,
               {
                 ...DEFAULT_TASK_RUN_FREQUENCIES,
                 ...calculateFrequency<TaskRunResult>(typedResultFrequencies),
@@ -418,16 +421,35 @@ export function summarizeTaskRunStat(
 }
 
 function summarizeTaskExecutionResultFrequencyStat(
+  logger: Logger,
   resultFrequencySummary: ResultFrequency,
   executionErrorThreshold: TaskExecutionFailureThreshold
 ): ResultFrequencySummary {
+  const status = getHealthStatus(logger, resultFrequencySummary, executionErrorThreshold);
   return {
     ...resultFrequencySummary,
-    status:
-      resultFrequencySummary.Failed > executionErrorThreshold.warn_threshold
-        ? resultFrequencySummary.Failed > executionErrorThreshold.error_threshold
-          ? HealthStatus.Error
-          : HealthStatus.Warning
-        : HealthStatus.OK,
+    status,
   };
+}
+
+function getHealthStatus(
+  logger: Logger,
+  resultFrequencySummary: ResultFrequency,
+  executionErrorThreshold: TaskExecutionFailureThreshold
+): HealthStatus {
+  if (resultFrequencySummary.Failed > executionErrorThreshold.warn_threshold) {
+    if (resultFrequencySummary.Failed > executionErrorThreshold.error_threshold) {
+      logger.debug(
+        `setting HealthStatus.Error because resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) > error_threshold (${executionErrorThreshold.error_threshold})`
+      );
+      return HealthStatus.Error;
+    } else {
+      logger.debug(
+        `setting HealthStatus.Warning because resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) > warn_threshold (${executionErrorThreshold.warn_threshold})`
+      );
+      return HealthStatus.Warning;
+    }
+  }
+
+  return HealthStatus.OK;
 }

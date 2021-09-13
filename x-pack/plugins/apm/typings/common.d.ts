@@ -6,6 +6,7 @@
  */
 
 import type { UnwrapPromise } from '@kbn/utility-types';
+import type { Request } from '../../../../src/plugins/inspector/common';
 import '../../../typings/rison_node';
 import '../../infra/types/eui';
 // EUIBasicTable
@@ -27,3 +28,5 @@ type AllowUnknownObjectProperties<T> = T extends object
 export type PromiseValueType<T extends Promise<any>> = UnwrapPromise<T>;
 
 export type Maybe<T> = T | null | undefined;
+
+export type InspectResponse = Request[];

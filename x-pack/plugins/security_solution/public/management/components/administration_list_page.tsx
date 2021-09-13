@@ -9,6 +9,8 @@ import React, { FC, memo, useMemo } from 'react';
 import {
   CommonProps,
   EuiPageHeader,
+  EuiPageContent,
+  EuiPageContentBody,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
@@ -20,13 +22,24 @@ import { useTestIdGenerator } from './hooks/use_test_id_generator';
 
 interface AdministrationListPageProps {
   title: React.ReactNode;
-  subtitle: React.ReactNode;
+  subtitle?: React.ReactNode;
   actions?: React.ReactNode;
+  restrictWidth?: boolean | number;
+  hasBottomBorder?: boolean;
   headerBackComponent?: React.ReactNode;
 }
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
-  ({ title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
+  ({
+    title,
+    subtitle,
+    actions,
+    children,
+    restrictWidth = false,
+    hasBottomBorder = true,
+    headerBackComponent,
+    ...otherProps
+  }) => {
     const header = useMemo(() => {
       return (
         <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
@@ -43,7 +56,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     }, [headerBackComponent, title]);
 
     const description = useMemo(() => {
-      return <span data-test-subj="header-panel-subtitle">{subtitle}</span>;
+      return subtitle ? <span data-test-subj="header-panel-subtitle">{subtitle}</span> : undefined;
     }, [subtitle]);
 
     const getTestId = useTestIdGenerator(otherProps['data-test-subj']);
@@ -53,13 +66,21 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
         <EuiPageHeader
           pageTitle={header}
           description={description}
-          bottomBorder={true}
+          bottomBorder={hasBottomBorder}
           rightSideItems={[actions]}
-          restrictWidth={false}
+          restrictWidth={restrictWidth}
           data-test-subj={getTestId('header')}
         />
         <EuiSpacer size="l" />
-        {children}
+        <EuiPageContent
+          hasBorder={false}
+          hasShadow={false}
+          paddingSize="none"
+          color="transparent"
+          borderRadius="none"
+        >
+          <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
+        </EuiPageContent>
 
         <SpyRoute pageName={SecurityPageName.administration} />
       </div>

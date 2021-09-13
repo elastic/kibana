@@ -61,7 +61,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
       return;
     }
 
-    onChange(parsedContent?.queries, packName.current);
+    onChange(parsedContent, packName.current);
     // @ts-expect-error update types
     filePickerRef.current?.removeFiles(new Event('fake'));
   };

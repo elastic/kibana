@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const SEARCH_EMBEDDABLE_TYPE = 'search';
+export { SEARCH_EMBEDDABLE_TYPE } from '../../../common/index';

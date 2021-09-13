@@ -22,11 +22,13 @@ import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
+  isSingleColumn?: boolean;
   link?: ReactNode;
 }
 
 export function ServiceOverviewDependenciesTable({
   fixedHeight,
+  isSingleColumn = true,
   link,
 }: ServiceOverviewDependenciesTableProps) {
   const {
@@ -35,7 +37,7 @@ export function ServiceOverviewDependenciesTable({
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/*');
+  } = useApmParams('/services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -122,16 +124,17 @@ export function ServiceOverviewDependenciesTable({
     <DependenciesTable
       dependencies={dependencies}
       fixedHeight={fixedHeight}
+      isSingleColumn={isSingleColumn}
       title={i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableTitle',
         {
-          defaultMessage: 'Downstream services and backends',
+          defaultMessage: 'Dependencies',
         }
       )}
       nameColumnTitle={i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableColumnBackend',
+        'xpack.apm.serviceOverview.dependenciesTableColumn',
         {
-          defaultMessage: 'Backend',
+          defaultMessage: 'Dependency',
         }
       )}
       status={status}

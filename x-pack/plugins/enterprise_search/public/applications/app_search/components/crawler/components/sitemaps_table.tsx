@@ -54,9 +54,9 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, engineName
     },
   ];
 
-  const sitemapsRoute = `/api/app_search/engines/${engineName}/crawler/domains/${domain.id}/sitemaps`;
+  const sitemapsRoute = `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}/sitemaps`;
   const getSitemapRoute = (sitemap: Sitemap) =>
-    `/api/app_search/engines/${engineName}/crawler/domains/${domain.id}/sitemaps/${sitemap.id}`;
+    `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}/sitemaps/${sitemap.id}`;
 
   return (
     <GenericEndpointInlineEditableTable

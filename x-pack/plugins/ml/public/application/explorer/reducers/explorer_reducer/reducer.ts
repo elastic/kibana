@@ -158,6 +158,13 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       };
       break;
 
+    case EXPLORER_ACTION.SET_SHOW_CHARTS:
+      nextState = {
+        ...state,
+        showCharts: payload,
+      };
+      break;
+
     default:
       nextState = state;
   }

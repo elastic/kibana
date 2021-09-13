@@ -14,12 +14,11 @@ import {
   EuiButton,
   EuiDescribedFormGroup,
   EuiSpacer,
-  EuiAccordion,
   EuiBottomBar,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 import { produce } from 'immer';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -64,6 +63,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
   packageInfo,
   editMode = false,
 }) => {
+  const queryClient = useQueryClient();
   const {
     application: { navigateToApp },
     http,
@@ -88,7 +88,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     `scheduled_query_groups/${editMode ? defaultValue?.id : ''}`
   );
 
-  const { isLoading, mutateAsync } = useMutation(
+  const { mutateAsync } = useMutation(
     (payload: Record<string, unknown>) =>
       editMode && defaultValue?.id
         ? http.put(packagePolicyRouteService.getUpdatePath(defaultValue.id), {
@@ -112,6 +112,10 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
           return;
         }
 
+        queryClient.invalidateQueries([
+          'scheduledQueryGroup',
+          { scheduledQueryGroupId: data.item.id },
+        ]);
         setErrorToast();
         navigateToApp(PLUGIN_ID, { path: `scheduled_query_groups/${data.item.id}` });
         toasts.addSuccess(
@@ -244,7 +248,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     ),
   });
 
-  const { setFieldValue, submit } = form;
+  const { setFieldValue, submit, isSubmitting } = form;
 
   const policyIdEuiFieldProps = useMemo(
     () => ({ isDisabled: !!defaultValue, options: agentPolicyOptions }),
@@ -328,16 +332,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
             agentPoliciesById={agentPoliciesById}
           />
 
-          <EuiSpacer />
-          <EuiAccordion
-            id="accordion1"
-            buttonContent={i18n.translate(
-              'xpack.osquery.scheduledQueryGroup.form.advancedSectionToggleButtonLabel',
-              { defaultMessage: 'Advanced' }
-            )}
-          >
-            <CommonUseField path="namespace" />
-          </EuiAccordion>
+          <CommonUseField path="namespace" component={GhostFormField} />
         </EuiDescribedFormGroup>
 
         <EuiHorizontalRule />
@@ -373,7 +368,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  isLoading={isLoading}
+                  isLoading={isSubmitting}
                   color="primary"
                   fill
                   size="m"

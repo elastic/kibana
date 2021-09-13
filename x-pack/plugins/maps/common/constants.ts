@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 
 export const EMS_APP_NAME = 'kibana';
-export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
 export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
 export const EMS_FILES_API_PATH = 'ems/files';
@@ -92,7 +91,6 @@ export enum SOURCE_TYPES {
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
-  REGIONMAP_FILE = 'REGIONMAP_FILE',
   GEOJSON_FILE = 'GEOJSON_FILE',
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
   TABLE_SOURCE = 'TABLE_SOURCE',
@@ -131,7 +129,7 @@ export enum ES_GEO_FIELD_TYPE {
   GEO_SHAPE = 'geo_shape',
 }
 
-// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IFieldType.type is compared to value
+// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IndexPatternField.type is compared to value
 export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
 
 export enum ES_SPATIAL_RELATIONS {

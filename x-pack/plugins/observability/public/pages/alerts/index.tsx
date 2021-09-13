@@ -8,7 +8,6 @@
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import React, { useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
@@ -43,12 +42,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const history = useHistory();
   const refetch = useRef<() => void>();
   const {
-    query: {
-      rangeFrom = 'now-15m',
-      rangeTo = 'now',
-      kuery = `${ALERT_STATUS}: "${ALERT_STATUS_ACTIVE}"`,
-      workflowStatus = 'open',
-    },
+    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', workflowStatus = 'open' },
   } = routeParams;
 
   useBreadcrumbs([
