@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
+import { ALERT_NAMESPACE, ALERT_RULE_NAMESPACE } from '@kbn/rule-data-utils';
 
 export const ALERT_ANCESTORS = `${ALERT_NAMESPACE}.ancestors`;
 export const ALERT_DEPTH = `${ALERT_NAMESPACE}.depth`;
 export const ALERT_ORIGINAL_EVENT = `${ALERT_NAMESPACE}.original_event`;
 export const ALERT_ORIGINAL_TIME = `${ALERT_NAMESPACE}.original_time`;
+
+const ALERT_RULE_THRESHOLD = `${ALERT_RULE_NAMESPACE}.threshold`;
+export const ALERT_RULE_THRESHOLD_FIELD = `${ALERT_RULE_THRESHOLD}.field`;

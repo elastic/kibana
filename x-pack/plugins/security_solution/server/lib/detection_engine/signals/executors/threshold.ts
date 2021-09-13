@@ -195,7 +195,7 @@ export const thresholdExecutor = async ({
     } as SearchHit<unknown>;
   });
 
-  const newSignalHistory = await buildThresholdSignalHistory({
+  const newSignalHistory = buildThresholdSignalHistory({
     alerts: createdAlerts,
   });
 

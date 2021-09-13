@@ -56,7 +56,7 @@ export const getThresholdSignalHistory = async ({
   });
 
   return {
-    signalHistory: await buildThresholdSignalHistory({
+    signalHistory: buildThresholdSignalHistory({
       alerts: searchResult.hits.hits,
     }),
     searchErrors,
