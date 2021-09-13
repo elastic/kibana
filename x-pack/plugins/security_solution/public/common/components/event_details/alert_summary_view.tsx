@@ -40,7 +40,7 @@ import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { getEmptyValue } from '../empty_value';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
-import { TimelineEventsDetailsItem, TimelineId } from '../../../../common';
+import { TimelineEventsDetailsItem } from '../../../../common';
 import { EventCode } from '../../../../common/ecs/event';
 
 export const Indent = styled.div`
