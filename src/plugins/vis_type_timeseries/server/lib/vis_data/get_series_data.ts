@@ -29,13 +29,16 @@ export async function getSeriesData(
   panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
+  const {
+    cachedIndexPatternFetcher,
+    searchStrategyRegistry,
+    indexPatternsService,
+    fieldFormatService,
+  } = services;
 
-  const strategy = await services.searchStrategyRegistry.getViableStrategy(
-    requestContext,
-    req,
-    panelIndex
-  );
+  const panelIndex = await cachedIndexPatternFetcher(panel.index_pattern);
+
+  const strategy = await searchStrategyRegistry.getViableStrategy(requestContext, req, panelIndex);
 
   if (!strategy) {
     throw new Error(
@@ -62,15 +65,22 @@ export async function getSeriesData(
       return getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services);
     });
 
-    const searches = await Promise.all(bodiesPromises);
-    const data = await searchStrategy.search(requestContext, req, searches);
-
-    const handleResponseBodyFn = handleResponseBody(panel, req, {
-      indexPatternsService: services.indexPatternsService,
-      cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
+    const fieldFetchServices = {
+      indexPatternsService,
+      cachedIndexPatternFetcher,
       searchStrategy,
       capabilities,
-    });
+    };
+
+    const handleResponseBodyFn = handleResponseBody(
+      panel,
+      req,
+      fieldFetchServices,
+      fieldFormatService
+    );
+
+    const searches = await Promise.all(bodiesPromises);
+    const data = await searchStrategy.search(requestContext, req, searches);
 
     const series = await Promise.all(
       data.map(
