@@ -16,7 +16,7 @@ import {
 
 import type { SearchStrategyServerParams } from '../../../../common/search_strategies/types';
 import type {
-  LatencyCorrelationsParams,
+  LatencyCorrelationsRequestParams,
   LatencyCorrelationsRawResponse,
 } from '../../../../common/search_strategies/latency_correlations/types';
 
@@ -38,19 +38,19 @@ import type { SearchServiceProvider } from '../search_strategy_provider';
 import { latencyCorrelationsSearchServiceStateProvider } from './latency_correlations_search_service_state';
 
 export type LatencyCorrelationsSearchServiceProvider = SearchServiceProvider<
-  LatencyCorrelationsParams,
+  LatencyCorrelationsRequestParams,
   LatencyCorrelationsRawResponse
 >;
 
 export type LatencyCorrelationsSearchStrategy = ISearchStrategy<
-  IKibanaSearchRequest<LatencyCorrelationsParams>,
+  IKibanaSearchRequest<LatencyCorrelationsRequestParams>,
   IKibanaSearchResponse<LatencyCorrelationsRawResponse>
 >;
 
 export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearchServiceProvider = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
-  searchServiceParams: LatencyCorrelationsParams,
+  searchServiceParams: LatencyCorrelationsRequestParams,
   includeFrozen: boolean
 ) => {
   const { addLogMessage, getLogMessages } = searchServiceLogProvider();
@@ -59,7 +59,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
 
   async function fetchCorrelations() {
     let params:
-      | (LatencyCorrelationsParams & SearchStrategyServerParams)
+      | (LatencyCorrelationsRequestParams & SearchStrategyServerParams)
       | undefined;
 
     try {
