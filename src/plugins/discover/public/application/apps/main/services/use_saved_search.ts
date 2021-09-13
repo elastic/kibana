@@ -162,7 +162,7 @@ export const useSavedSearch = ({
       ),
       data.query.queryString.getUpdates$(),
       searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
-    ).pipe(debounceTime(100));
+    );
 
     const subscription = fetch$.subscribe((val) => {
       if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
