@@ -129,6 +129,7 @@ export async function mountApp({
       core.notifications.toasts,
       activeSpaceId || 'default'
     ),
+    spacesService: spacesApi,
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>

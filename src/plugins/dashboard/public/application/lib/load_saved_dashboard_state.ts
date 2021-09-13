@@ -54,7 +54,10 @@ export const loadSavedDashboardState = async ({
   await indexPatterns.ensureDefaultDataView();
   let savedDashboard: DashboardSavedObject | undefined;
   try {
-    savedDashboard = (await savedDashboards.get(savedDashboardId)) as DashboardSavedObject;
+    savedDashboard = (await savedDashboards.get({
+      id: savedDashboardId,
+      useResolve: true,
+    })) as DashboardSavedObject;
   } catch (error) {
     // E.g. a corrupt or deleted dashboard
     notifications.toasts.addDanger(error.message);

@@ -92,6 +92,7 @@ export const useDashboardAppState = ({
     dashboardCapabilities,
     dashboardSessionStorage,
     scopedHistory,
+    spacesService,
   } = services;
   const { docTitle } = chrome;
   const { notifications } = core;
@@ -148,6 +149,11 @@ export const useDashboardAppState = ({
       });
       if (canceled || !loadSavedDashboardResult) return;
       const { savedDashboard, savedDashboardState } = loadSavedDashboardResult;
+
+      // If the saved dashboard is an alias match, then we will redirect
+      if (savedDashboard.outcome === 'aliasMatch') {
+        spacesService?.ui.redirectLegacyUrl(savedDashboard.getFullPath());
+      }
 
       /**
        * Combine initial state from the saved object, session storage, and URL, then dispatch it to Redux.
@@ -340,6 +346,7 @@ export const useDashboardAppState = ({
     search,
     query,
     data,
+    spacesService?.ui,
   ]);
 
   /**

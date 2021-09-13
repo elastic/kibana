@@ -35,6 +35,7 @@ import { IKbnUrlStateStorage } from './services/kibana_utils';
 import { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
+import { SpacesPluginStart } from './services/spaces';
 
 export { SavedDashboardPanel };
 
@@ -203,4 +204,5 @@ export interface DashboardAppServices {
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
+  spacesService?: SpacesPluginStart;
 }
