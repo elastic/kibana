@@ -281,7 +281,7 @@ export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<Signa
 
 export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCreateResponse<T>>;
 
-export type SimpleHit = BaseHit<{ '@timestamp': string }>;
+export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 
 export type WrapHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
