@@ -22,7 +22,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiTitle,
-  EuiPanel,
+  EuiSplitPanel,
 } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 
@@ -200,21 +200,22 @@ class InstructionSetUi extends React.Component {
       steps.push(this.renderStatusCheck());
     }
 
-    return <EuiSteps steps={steps} firstStepNumber={this.props.offset} />;
+    return (
+      <>
+        <EuiSpacer />
+        <EuiSteps steps={steps} firstStepNumber={this.props.offset} />
+      </>
+    );
   };
 
   renderHeader = () => {
     let paramsVisibilityToggle;
     if (this.props.params) {
-      const ariaLabel = this.props.intl.formatMessage({
-        id: 'home.tutorial.instructionSet.toggleAriaLabel',
-        defaultMessage: 'toggle command parameters visibility',
-      });
       paramsVisibilityToggle = (
         <EuiButton
           size="s"
           iconType={this.state.isParamFormVisible ? 'arrowDown' : 'arrowRight'}
-          aria-label={ariaLabel}
+          aria-pressed={this.state.isParamFormVisible}
           onClick={this.handleToggleVisibility}
         >
           <FormattedMessage
@@ -259,28 +260,29 @@ class InstructionSetUi extends React.Component {
     let paramsForm;
     if (this.props.params && this.state.isParamFormVisible) {
       paramsForm = (
-        <ParameterForm
-          params={this.props.params}
-          paramValues={this.props.paramValues}
-          setParameter={this.props.setParameter}
-        />
+        <>
+          <EuiSpacer />
+          <ParameterForm
+            params={this.props.params}
+            paramValues={this.props.paramValues}
+            setParameter={this.props.setParameter}
+          />
+        </>
       );
     }
 
     return (
-      <EuiPanel paddingSize="l">
-        {this.renderHeader()}
-
-        {this.renderCallOut()}
-
-        {paramsForm}
-
-        <EuiSpacer />
-        <EuiTabs>{this.renderTabs()}</EuiTabs>
-
-        <EuiSpacer />
-        {this.renderInstructions()}
-      </EuiPanel>
+      <EuiSplitPanel.Outer>
+        <EuiSplitPanel.Inner paddingSize="none">
+          <EuiTabs>{this.renderTabs()}</EuiTabs>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner paddingSize="l">
+          {this.renderHeader()}
+          {paramsForm}
+          {this.renderCallOut()}
+          {this.renderInstructions()}
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
     );
   }
 }
