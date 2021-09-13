@@ -36,7 +36,7 @@ describe('render helpers', () => {
       ).toEqual(-100);
     });
 
-    it('returns epsilon when metric is 0 without fallback', () => {
+    it('returns 0 when metric is 0', () => {
       expect(
         getSliceValue(
           { a: 'Cat', b: 'Home', c: 0 },
@@ -46,7 +46,7 @@ describe('render helpers', () => {
             meta: { type: 'number' },
           }
         )
-      ).toEqual(Number.EPSILON);
+      ).toEqual(0);
     });
   });
 

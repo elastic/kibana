@@ -48,6 +48,7 @@ import {
   getSplitDimensionAccessor,
 } from './utils';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './components/chart_split';
+import { VisualizationNoResults } from './components/visualization_noresults';
 
 import './chart.scss';
 
@@ -186,10 +187,10 @@ const PieComponent = (props: PieComponentProps) => {
   const { visData, visParams, services, syncColors } = props;
 
   function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
-    if (typeof d[metricColumn.id] === 'number' && d[metricColumn.id] !== 0) {
+    if (typeof d[metricColumn.id] === 'number') {
       return d[metricColumn.id];
     }
-    return Number.EPSILON;
+    return 0;
   }
 
   // formatters
@@ -285,82 +286,98 @@ const PieComponent = (props: PieComponentProps) => {
     ? visData.columns[visParams.dimensions.splitRow[0].accessor]
     : undefined;
 
+  /**
+   * Checks whether data have all zero values.
+   * If so, the no data container is loaded.
+   */
+  const isAllZeros = useMemo(
+    () =>
+      visData.rows.every((row) => {
+        const metricColumnId = metricColumn.id;
+        return row[metricColumnId] === 0;
+      }),
+    [visData.rows, metricColumn]
+  );
+
   return (
     <div className="pieChart__container" data-test-subj="visTypePieChart">
-      <div className="pieChart__wrapper" ref={parentRef}>
-        <LegendToggle
-          onClick={toggleLegend}
-          showLegend={showLegend}
-          legendPosition={legendPosition}
-        />
-        <Chart size="100%">
-          <ChartSplit
-            splitColumnAccessor={splitChartColumnAccessor}
-            splitRowAccessor={splitChartRowAccessor}
-            splitDimension={splitChartDimension}
-          />
-          <Settings
-            debugState={window._echDebugStateFlag ?? false}
+      {isAllZeros && <VisualizationNoResults />}
+      {!isAllZeros && (
+        <div className="pieChart__wrapper" ref={parentRef}>
+          <LegendToggle
+            onClick={toggleLegend}
             showLegend={showLegend}
             legendPosition={legendPosition}
-            legendMaxDepth={visParams.nestedLegend ? undefined : 1}
-            legendColorPicker={legendColorPicker}
-            flatLegend={Boolean(splitChartDimension)}
-            tooltip={tooltip}
-            onElementClick={(args) => {
-              handleSliceClick(
-                args[0][0] as LayerValue[],
-                bucketColumns,
-                visData,
-                splitChartDimension,
-                splitChartFormatter
-              );
-            }}
-            legendAction={getLegendActions(
-              canFilter,
-              getLegendActionEventData(visData),
-              handleLegendAction,
-              visParams,
-              services.actions,
-              services.fieldFormats
-            )}
-            theme={[
-              chartTheme,
-              {
-                legend: {
-                  labelOptions: {
-                    maxLines: visParams.truncateLegend ? visParams.maxLegendLines ?? 1 : 0,
+          />
+          <Chart size="100%">
+            <ChartSplit
+              splitColumnAccessor={splitChartColumnAccessor}
+              splitRowAccessor={splitChartRowAccessor}
+              splitDimension={splitChartDimension}
+            />
+            <Settings
+              debugState={window._echDebugStateFlag ?? false}
+              showLegend={showLegend}
+              legendPosition={legendPosition}
+              legendMaxDepth={visParams.nestedLegend ? undefined : 1}
+              legendColorPicker={legendColorPicker}
+              flatLegend={Boolean(splitChartDimension)}
+              tooltip={tooltip}
+              onElementClick={(args) => {
+                handleSliceClick(
+                  args[0][0] as LayerValue[],
+                  bucketColumns,
+                  visData,
+                  splitChartDimension,
+                  splitChartFormatter
+                );
+              }}
+              legendAction={getLegendActions(
+                canFilter,
+                getLegendActionEventData(visData),
+                handleLegendAction,
+                visParams,
+                services.actions,
+                services.fieldFormats
+              )}
+              theme={[
+                chartTheme,
+                {
+                  legend: {
+                    labelOptions: {
+                      maxLines: visParams.truncateLegend ? visParams.maxLegendLines ?? 1 : 0,
+                    },
                   },
                 },
-              },
-            ]}
-            baseTheme={chartBaseTheme}
-            onRenderChange={onRenderChange}
-          />
-          <Partition
-            id="pie"
-            smallMultiples={SMALL_MULTIPLES_ID}
-            data={visData.rows}
-            valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
-            percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
-            valueGetter={
-              !visParams.labels.show ||
-              visParams.labels.valuesFormat === ValueFormats.VALUE ||
-              !visParams.labels.values
-                ? undefined
-                : 'percent'
-            }
-            valueFormatter={(d: number) =>
-              !visParams.labels.show || !visParams.labels.values
-                ? ''
-                : metricFieldFormatter.convert(d)
-            }
-            layers={layers}
-            config={config}
-            topGroove={!visParams.labels.show ? 0 : undefined}
-          />
-        </Chart>
-      </div>
+              ]}
+              baseTheme={chartBaseTheme}
+              onRenderChange={onRenderChange}
+            />
+            <Partition
+              id="pie"
+              smallMultiples={SMALL_MULTIPLES_ID}
+              data={visData.rows}
+              valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
+              percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
+              valueGetter={
+                !visParams.labels.show ||
+                visParams.labels.valuesFormat === ValueFormats.VALUE ||
+                !visParams.labels.values
+                  ? undefined
+                  : 'percent'
+              }
+              valueFormatter={(d: number) =>
+                !visParams.labels.show || !visParams.labels.values
+                  ? ''
+                  : metricFieldFormatter.convert(d)
+              }
+              layers={layers}
+              config={config}
+              topGroove={!visParams.labels.show ? 0 : undefined}
+            />
+          </Chart>
+        </div>
+      )}
     </div>
   );
 };
