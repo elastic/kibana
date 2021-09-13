@@ -56,7 +56,7 @@ export const getDynamicIndexPattern = ({
       const notExists = e.output?.statusCode === 404;
       if (notExists) {
         logger.error(
-          `Could not get dynamic index pattern because indices "${indexPatternTitle}" don't exist`
+          `Could not get dynamic data view because indices "${indexPatternTitle}" don't exist`
         );
         return;
       }
