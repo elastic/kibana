@@ -103,9 +103,14 @@ const shouldEnableHistogramMode = (
     return acc;
   }, {});
 
-  const groupIds = Object.keys(groupsCount)
-    .filter((groupId) => groupsCount[groupId] > 1)
-    .map((groupId) => groupsCount[groupId]);
+  const groupIds = Object.keys(groupsCount);
+
+  const singleBarGroupIds = groupIds.filter((groupId) => groupsCount[groupId] === 1);
+  const stackedGroupIds = groupIds.filter((groupId) => groupsCount[groupId] > 1);
+
+  if (!stackedGroupIds.length && singleBarGroupIds.length === 1) {
+    return true;
+  }
 
   if (groupIds.length > 1) {
     return false;
