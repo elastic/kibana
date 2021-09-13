@@ -7,65 +7,63 @@
 import axios from 'axios';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { actionsConfigMock } from '../../actions_config.mock';
+import { CustomHostSettings } from '../../config';
+import { ProxySettings } from '../../types';
+import { sendEmailGraphApi } from './send_email_graph_api';
 jest.mock('axios');
 const axiosMock = (axios as unknown) as jest.Mock;
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 describe('sendEmailGraphApi', () => {
   test('email contains the proper message', () => {
-    const nodeOption = getNodeSSLOptions(logger, 'full');
+    const configurationUtilities = actionsConfigMock.create();
+    const nodeOption = sendEmailGraphApi(getSendEmailOptions(), logger, configurationUtilities);
     expect(nodeOption).toMatchObject({
       rejectUnauthorized: true,
     });
   });
 
   test('email was sent on behalf of the user "from" mailbox', () => {
-    const nodeOption = getNodeSSLOptions(logger, 'certificate');
-    expect(nodeOption.checkServerIdentity).not.toBeNull();
-    expect(nodeOption.rejectUnauthorized).toBeTruthy();
+    const configurationUtilities = actionsConfigMock.create();
+    const result = sendEmailGraphApi(getSendEmailOptions(), logger, configurationUtilities);
+    expect(result).not.toBeNull();
+    expect(result).toBeTruthy();
   });
 
-  test('get node.js SSL options: rejectUnauthorized eql false for the verification mode "none"', () => {
-    const nodeOption = getNodeSSLOptions(logger, 'none');
-    expect(nodeOption).toMatchObject({
-      rejectUnauthorized: false,
-    });
-  });
-
-  test('get node.js SSL options: rejectUnauthorized eql true for the verification mode value which does not exist, the logger called with the proper warning message', () => {
-    const nodeOption = getNodeSSLOptions(logger, 'notexist');
-    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        "Unknown ssl verificationMode: notexist",
-      ],
-    ]
-  `);
-    expect(nodeOption).toMatchObject({
-      rejectUnauthorized: true,
-    });
-  });
 });
 
-describe('getSSLSettingsFromConfig', () => {
-  test('get verificationMode eql "none" if legacy rejectUnauthorized eql false', () => {
-    const nodeOption = getSSLSettingsFromConfig(undefined, false);
-    expect(nodeOption).toMatchObject({
-      verificationMode: 'none',
-    });
-  });
-
-  test('get verificationMode eql "none" if legacy rejectUnauthorized eql true', () => {
-    const nodeOption = getSSLSettingsFromConfig(undefined, true);
-    expect(nodeOption).toMatchObject({
-      verificationMode: 'full',
-    });
-  });
-
-  test('get verificationMode eql "certificate", ignore rejectUnauthorized', () => {
-    const nodeOption = getSSLSettingsFromConfig('certificate', false);
-    expect(nodeOption).toMatchObject({
-      verificationMode: 'certificate',
-    });
-  });
-});
+function getSendEmailOptions(
+  { content = {}, routing = {}, transport = {} } = {},
+  proxySettings?: ProxySettings,
+  customHostSettings?: CustomHostSettings
+) {
+  const configurationUtilities = actionsConfigMock.create();
+  if (proxySettings) {
+    configurationUtilities.getProxySettings.mockReturnValue(proxySettings);
+  }
+  if (customHostSettings) {
+    configurationUtilities.getCustomHostSettings.mockReturnValue(customHostSettings);
+  }
+  return {
+    content: {
+      ...content,
+      message: 'a message',
+      subject: 'a subject',
+    },
+    routing: {
+      ...routing,
+      from: 'fred@example.com',
+      to: ['jim@example.com'],
+      cc: ['bob@example.com', 'robert@example.com'],
+      bcc: [],
+    },
+    transport: {
+      ...transport,
+      service: 'exchange_server',
+      clienySecret: 'gfhfh',
+    },
+    hasAuth: true,
+    configurationUtilities,
+  };
+}

@@ -11,16 +11,8 @@ jest.mock('axios', () => ({
 import axios from 'axios';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { duration as momentDuration } from 'moment';
-import { schema } from '@kbn/config-schema';
-
-import { ByteSizeValue } from '@kbn/config-schema';
-import { ActionsConfig } from '../../config';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
-import {
-  ActionsConfigurationUtilities,
-  getActionsConfigurationUtilities,
-} from '../../actions_config';
+import { actionsConfigMock } from '../../actions_config.mock';
 
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = jest.fn();
@@ -33,7 +25,7 @@ describe('requestOAuthClientCredentialsToken', () => {
   });
 
   test('making a token request with the required options', async () => {
-    const configurationUtilities = getACUfromConfig();
+    const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
       data: {
@@ -103,7 +95,7 @@ describe('requestOAuthClientCredentialsToken', () => {
   });
 
   test('throw the exception and log the proper error if token was not get successfuly', async () => {
-    const configurationUtilities = getACUfromConfig();
+    const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockRejectedValueOnce({
       status: 400,
       data: {
@@ -133,37 +125,3 @@ describe('requestOAuthClientCredentialsToken', () => {
     `);
   });
 });
-
-const BaseActionsConfig: ActionsConfig = {
-  enabled: true,
-  allowedHosts: ['*'],
-  enabledActionTypes: ['*'],
-  preconfiguredAlertHistoryEsIndex: false,
-  preconfigured: {},
-  proxyUrl: undefined,
-  proxyHeaders: undefined,
-  proxyRejectUnauthorizedCertificates: true,
-  ssl: {
-    proxyVerificationMode: 'full',
-    verificationMode: 'full',
-  },
-  proxyBypassHosts: undefined,
-  proxyOnlyHosts: undefined,
-  rejectUnauthorized: true,
-  maxResponseContentLength: ByteSizeValue.parse('1mb'),
-  responseTimeout: momentDuration(1000 * 30),
-  customHostSettings: undefined,
-  cleanupFailedExecutionsTask: {
-    enabled: true,
-    cleanupInterval: schema.duration().validate('5m'),
-    idleInterval: schema.duration().validate('1h'),
-    pageSize: 100,
-  },
-};
-
-function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {
-  return getActionsConfigurationUtilities({
-    ...BaseActionsConfig,
-    ...config,
-  });
-}
