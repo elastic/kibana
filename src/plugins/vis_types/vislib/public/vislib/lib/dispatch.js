@@ -380,13 +380,12 @@ export class Dispatch {
     return function highlight(element) {
       const label = this.getAttribute('data-label');
       if (!label) return;
-      const dimming = 0.5;
       $(element)
         .parent()
         .find('[data-label]')
         .css('opacity', 1) //Opacity 1 is needed to avoid the css application
         .not((els, el) => String($(el).data('label')) === label)
-        .css('opacity', justifyOpacity(dimming));
+        .css('opacity', justifyOpacity(0.5));
     };
   }
 

@@ -28,7 +28,6 @@ export class Vis extends EventEmitter {
     super();
     this.element = element.get ? element.get(0) : element;
     this.visConfigArgs = _.cloneDeep(visConfigArgs);
-    this.visConfigArgs.dimmingOpacity = 0.5;
     this.visConfigArgs.heatmapMaxBuckets = core.uiSettings.get(HEATMAP_MAX_BUCKETS_SETTING);
     this.charts = charts;
     this.uiSettings = core.uiSettings;
