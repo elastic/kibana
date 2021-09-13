@@ -13,8 +13,10 @@ export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 
 # A few things, such as Chrome, respect this variable
 # For many agent types, the workspace is mounted on a local ssd, so will be faster than the default tmp dir location
-export TMPDIR="$WORKSPACE/tmp"
-mkdir -p "$TMPDIR"
+if [[ -d /opt/local-ssd/buildkite ]]; then
+  export TMPDIR="/opt/local-ssd/buildkite/tmp"
+  mkdir -p "$TMPDIR"
+fi
 
 KIBANA_PKG_BRANCH="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH
