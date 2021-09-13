@@ -75,7 +75,10 @@ export const eqlExecutor = async ({
       services.scopedClusterClient.asCurrentUser,
       ruleParams.outputIndex
     );
-    if (isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })) {
+    if (
+      !experimentalFeatures.ruleRegistryEnabled &&
+      isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })
+    ) {
       throw new Error(
         `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
       );
@@ -95,6 +98,7 @@ export const eqlExecutor = async ({
     version,
     index: ruleParams.index,
   });
+
   const request = buildEqlSearchRequest(
     ruleParams.query,
     inputIndex,
@@ -105,19 +109,23 @@ export const eqlExecutor = async ({
     exceptionItems,
     ruleParams.eventCategoryOverride
   );
+
   const eqlSignalSearchStart = performance.now();
   logger.debug(
     `EQL query request path: ${request.path}, method: ${request.method}, body: ${JSON.stringify(
       request.body
     )}`
   );
+
   // TODO: fix this later
   const { body: response } = (await services.scopedClusterClient.asCurrentUser.transport.request(
     request
   )) as ApiResponse<EqlSignalSearchResponse>;
+
   const eqlSignalSearchEnd = performance.now();
   const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
   result.searchAfterTimes = [eqlSearchDuration];
+
   let newSignals: SimpleHit[] | undefined;
   if (response.hits.sequences !== undefined) {
     newSignals = wrapSequences(response.hits.sequences, buildReasonMessageForEqlAlert);
@@ -135,6 +143,7 @@ export const eqlExecutor = async ({
     result.createdSignalsCount += insertResult.createdItemsCount;
     result.createdSignals = insertResult.createdItems;
   }
+
   result.success = true;
   return result;
 };

@@ -27,6 +27,7 @@ export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   getKibanaVersion: () => 'kibanaVersion',
   getHasWriteAccess: () => true,
   getUISetting,
+  hasHeaderBanner$: noop,
   setBreadcrumbs: noop,
   setRecentlyAccessed: noop,
   getSavedObjects: noop,
