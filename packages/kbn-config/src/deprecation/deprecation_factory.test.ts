@@ -10,12 +10,146 @@ import { DeprecatedConfigDetails } from './types';
 import { configDeprecationFactory } from './deprecation_factory';
 
 describe('DeprecationFactory', () => {
-  const { rename, unused, renameFromRoot, unusedFromRoot } = configDeprecationFactory;
+  const { deprecate, deprecateFromRoot, rename, renameFromRoot, unused, unusedFromRoot } =
+    configDeprecationFactory;
 
   const addDeprecation = jest.fn<void, [DeprecatedConfigDetails]>();
 
   beforeEach(() => {
     addDeprecation.mockClear();
+  });
+
+  describe('deprecate', () => {
+    it('logs a warning when property is present', () => {
+      const rawConfig = {
+        myplugin: {
+          deprecated: 'deprecated',
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const commands = deprecate('deprecated', '8.0.0')(rawConfig, 'myplugin', addDeprecation);
+      expect(commands).toBeUndefined();
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.",
+                ],
+              },
+              "message": "Configuring \\"myplugin.deprecated\\" is deprecated and will be removed in 8.0.0.",
+              "title": "Setting \\"myplugin.deprecated\\" is deprecated",
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('handles deeply nested keys', () => {
+      const rawConfig = {
+        myplugin: {
+          section: {
+            deprecated: 'deprecated',
+          },
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const commands = deprecate('section.deprecated', '8.0.0')(
+        rawConfig,
+        'myplugin',
+        addDeprecation
+      );
+      expect(commands).toBeUndefined();
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Remove \\"myplugin.section.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.",
+                ],
+              },
+              "message": "Configuring \\"myplugin.section.deprecated\\" is deprecated and will be removed in 8.0.0.",
+              "title": "Setting \\"myplugin.section.deprecated\\" is deprecated",
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('does not log if unused property is not present', () => {
+      const rawConfig = {
+        myplugin: {
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const commands = deprecate('deprecated', '8.0.0')(rawConfig, 'myplugin', addDeprecation);
+      expect(commands).toBeUndefined();
+      expect(addDeprecation).toBeCalledTimes(0);
+    });
+  });
+
+  describe('deprecateFromRoot', () => {
+    it('logs a warning when property is present', () => {
+      const rawConfig = {
+        myplugin: {
+          deprecated: 'deprecated',
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const commands = deprecateFromRoot('myplugin.deprecated', '8.0.0')(
+        rawConfig,
+        'does-not-matter',
+        addDeprecation
+      );
+      expect(commands).toBeUndefined();
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.",
+                ],
+              },
+              "message": "Configuring \\"myplugin.deprecated\\" is deprecated and will be removed in 8.0.0.",
+              "title": "Setting \\"myplugin.deprecated\\" is deprecated",
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('does not log if unused property is not present', () => {
+      const rawConfig = {
+        myplugin: {
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const commands = deprecateFromRoot('myplugin.deprecated', '8.0.0')(
+        rawConfig,
+        'does-not-matter',
+        addDeprecation
+      );
+      expect(commands).toBeUndefined();
+      expect(addDeprecation).toBeCalledTimes(0);
+    });
   });
 
   describe('rename', () => {
