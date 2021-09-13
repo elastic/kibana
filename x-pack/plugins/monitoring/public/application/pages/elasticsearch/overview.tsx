@@ -7,10 +7,10 @@
 import React, { useContext, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import { PageTemplate } from '../page_template';
+import { ElasticsearchTemplate } from './elasticsearch_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../global_state_context';
-import { TabMenuItem } from '../page_template';
+
 import { ElasticsearchOverview } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
@@ -49,19 +49,6 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
   const pageTitle = i18n.translate('xpack.monitoring.elasticsearch.overview.pageTitle', {
     defaultMessage: 'Elasticsearch overview',
   });
-
-  // if (loaded) {
-  //   tabs = [
-  //     {
-  //       id: 'clusterName',
-  //       label: clusters[0].cluster_name,
-  //       disabled: false,
-  //       description: clusters[0].cluster_name,
-  //       onClick: () => {},
-  //       testSubj: 'clusterName',
-  //     },
-  //   ];
-  // }
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
@@ -104,13 +91,13 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
   };
 
   return (
-    <PageTemplate
+    <ElasticsearchTemplate
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
       data-test-subj="elasticsearchOverviewPage"
     >
       {renderOverview(data)}
-    </PageTemplate>
+    </ElasticsearchTemplate>
   );
 };

@@ -7,6 +7,7 @@
 
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useContext, useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { MonitoringTimeContainer } from './use_monitoring_time';
@@ -15,10 +16,9 @@ import { PageLoading } from '../../components';
 export interface TabMenuItem {
   id: string;
   label: string;
-  description: string;
   disabled: boolean;
-  onClick: () => void;
-  testSubj: string;
+  testSubj?: string;
+  route: string;
 }
 interface PageTemplateProps {
   title: string;
@@ -38,6 +38,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 
   const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
   const [loaded, setLoaded] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
     getPageData?.()
@@ -55,6 +56,10 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
     });
   };
 
+  const createHref = (route: string) => history.createHref({ pathname: route });
+
+  const isTabSelected = (route: string) => history.location.pathname === route;
+
   return (
     <div className="app-container">
       <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
@@ -65,9 +70,10 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
               <EuiTab
                 key={idx}
                 disabled={item.disabled}
-                onClick={item.onClick}
                 title={item.label}
                 data-test-subj={item.testSubj}
+                href={createHref(item.route)}
+                isSelected={isTabSelected(item.route)}
               >
                 {item.label}
               </EuiTab>
