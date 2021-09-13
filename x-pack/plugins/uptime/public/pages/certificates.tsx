@@ -54,7 +54,7 @@ export const CertificatesPage: React.FC = () => {
 
   useEffect(() => {
     dispatch(setCertificatesTotalAction({ total: certificates.total }));
-  }, [certificates.total]);
+  }, [certificates.total, dispatch]);
 
   return (
     <>
