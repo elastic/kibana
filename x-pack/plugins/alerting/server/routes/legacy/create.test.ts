@@ -477,6 +477,7 @@ describe('createAlertRoute', () => {
     createAlertRoute({
       router,
       licenseState,
+      logger,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
     });
