@@ -25,6 +25,8 @@ import { useShowTimeline } from '../../../common/utils/timeline/use_show_timelin
 import { gutterTimeline } from '../../../common/lib/helpers';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
+import { ENDPOINT_METADATA_INDEX } from '../../../../common/constants';
+import { useFetchIndex } from '../../../common/containers/source';
 
 /* eslint-disable react/display-name */
 
@@ -76,13 +78,17 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
-
+    const endpointMetadataIndex = useMemo<string[]>(() => {
+      return [ENDPOINT_METADATA_INDEX];
+    }, []);
+    const [, { indexExists: metadataIndexExists }] = useFetchIndex(endpointMetadataIndex, true);
     const { indicesExist } = useSourcererScope();
+    const securityIndicesExist = indicesExist || metadataIndexExists;
 
     /* StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop, which may account for any style discrepancies, such as the bottom border not extending the full width of the page, between EuiPageTemplate and the security solution pages.
      */
 
-    return indicesExist ? (
+    return securityIndicesExist ? (
       <StyledKibanaPageTemplate
         $isTimelineBottomBarVisible={isTimelineBottomBarVisible}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
