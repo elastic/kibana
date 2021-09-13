@@ -58,7 +58,7 @@ export const renderApp = ({
   setReadonlyBadge(coreStart);
   createCallApmApi(coreStart);
 
-  // Automatically creates static index pattern and stores as saved object
+  // Automatically creates static data view and stores as saved object
   createStaticIndexPattern().catch((e) => {
     // eslint-disable-next-line no-console
     console.log('Error creating static data view', e);
