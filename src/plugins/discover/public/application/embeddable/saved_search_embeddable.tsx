@@ -292,10 +292,7 @@ export class SavedSearchEmbeddable
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
       if (!this.searchProps || !this.input.timeRange) return;
-      return this.services.timefilter.createFilter(indexPattern, {
-        timeRange: this.input.timeRange,
-        coerceRelativeTimeToAbsoluteTime: false,
-      });
+      return this.services.timefilter.createFilter(indexPattern, this.input.timeRange);
     });
 
     this.filtersSearchSource = searchSource.create();

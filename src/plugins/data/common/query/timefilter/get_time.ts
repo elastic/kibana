@@ -48,14 +48,28 @@ export function getAbsoluteTimeRange(
 export function getTime(
   indexPattern: IIndexPattern | undefined,
   timeRange: TimeRange,
-  options?: { forceNow?: Date; fieldName?: string; coerceRelativeTimeToAbsoluteTime?: boolean }
+  options?: { forceNow?: Date; fieldName?: string }
 ) {
   return createTimeRangeFilter(
     indexPattern,
     timeRange,
     options?.fieldName || indexPattern?.timeFieldName,
     options?.forceNow,
-    options?.coerceRelativeTimeToAbsoluteTime
+    true
+  );
+}
+
+export function getRelativeTime(
+  indexPattern: IIndexPattern | undefined,
+  timeRange: TimeRange,
+  options?: { forceNow?: Date; fieldName?: string }
+) {
+  return createTimeRangeFilter(
+    indexPattern,
+    timeRange,
+    options?.fieldName || indexPattern?.timeFieldName,
+    options?.forceNow,
+    false
   );
 }
 

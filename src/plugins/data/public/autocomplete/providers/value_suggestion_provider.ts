@@ -37,7 +37,7 @@ const getAutocompleteTimefilter = (
     from: dateMath.parse(timeRange.from)!.startOf('minute').toISOString(),
     to: dateMath.parse(timeRange.to)!.endOf('minute').toISOString(),
   };
-  return timefilter.createFilter(indexPattern, { timeRange: roundedTimerange });
+  return timefilter.createFilter(indexPattern, roundedTimerange);
 };
 
 export const getEmptyValueSuggestions = (() => Promise.resolve([])) as ValueSuggestionsGetFn;

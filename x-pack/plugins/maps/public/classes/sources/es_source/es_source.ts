@@ -227,7 +227,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
             mode: 'absolute' as 'absolute',
           }
         : searchFilters.timeFilters;
-      const filter = getTimeFilter().createFilter(indexPattern, { timeRange });
+      const filter = getTimeFilter().createFilter(indexPattern, timeRange);
       if (filter) {
         allFilters.push(filter);
       }
@@ -450,7 +450,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       searchSource.setField('query', sourceQuery);
     }
     if (style.isTimeAware() && (await this.isTimeAware())) {
-      const timeFilter = getTimeFilter().createFilter(indexPattern, { timeRange: timeFilters });
+      const timeFilter = getTimeFilter().createFilter(indexPattern, timeFilters);
       if (timeFilter) {
         searchSource.setField('filter', [timeFilter]);
       }

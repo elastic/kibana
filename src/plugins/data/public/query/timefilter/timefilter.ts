@@ -17,6 +17,7 @@ import {
   calculateBounds,
   getAbsoluteTimeRange,
   getTime,
+  getRelativeTime,
   IIndexPattern,
   RefreshInterval,
   TimeRange,
@@ -27,23 +28,6 @@ import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loo
 export { AutoRefreshDoneFn };
 
 // TODO: remove!
-
-interface CreateFilterOptions {
-  /**
-   * The time range values to use.
-   *
-   * @default TimeRange read from `timepicker:timeDefaults`
-   */
-  timeRange?: TimeRange;
-
-  /**
-   * Whether to coerce relative time values (like `now-1s`) to an absolute ISO time.
-   *
-   * @default true
-   */
-  coerceRelativeTimeToAbsoluteTime?: boolean;
-}
-
 export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
   private enabledUpdated$ = new BehaviorSubject(false);
@@ -194,13 +178,31 @@ export class Timefilter {
     }
   };
 
-  public createFilter = (
-    indexPattern: IIndexPattern,
-    { timeRange, coerceRelativeTimeToAbsoluteTime }: CreateFilterOptions = {}
-  ) => {
+  /**
+   * Create a time filter that coerces all time values to absolute time.
+   *
+   * This is useful for creating a filter that ensures all ES queries will fetch the exact same data
+   * and leverages ES query cache for performance improvement.
+   *
+   * One use case is keeping different elements embedded in the same UI in sync.
+   */
+  public createFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, {
       forceNow: this.nowProvider.get(),
-      coerceRelativeTimeToAbsoluteTime,
+    });
+  };
+
+  /**
+   * Create a time filter that converts only absolute time to ISO strings, it leaves relative time
+   * values unchanged (e.g. "now-1").
+   *
+   * This is useful for sending datemath values to ES endpoints to generate reports over time.
+   *
+   * @note Consumers of this function need to ensure that the ES endpoint supports datemath.
+   */
+  public createRelativeFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
+    return getRelativeTime(indexPattern, timeRange ? timeRange : this._time, {
+      forceNow: this.nowProvider.get(),
     });
   };
 

@@ -82,7 +82,7 @@ export class QueryService {
       state$: this.state$,
       timefilter: this.timefilter,
       getEsQuery: (indexPattern: IndexPattern, timeRange?: TimeRange) => {
-        const timeFilter = this.timefilter.timefilter.createFilter(indexPattern, { timeRange });
+        const timeFilter = this.timefilter.timefilter.createFilter(indexPattern, timeRange);
 
         return buildEsQuery(
           indexPattern,
