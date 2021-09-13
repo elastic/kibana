@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { useSelector } from 'react-redux';
+import { useContext } from 'react';
 import { useEsSearch, createEsParams } from '../../../../observability/public';
 
 import { CertResult, GetCertsParams, Ping } from '../../../common/runtime_types';
-import { useSelector } from 'react-redux';
+
 import { selectDynamicSettings } from '../../state/selectors';
 import {
   DEFAULT_DIRECTION,
@@ -19,7 +21,6 @@ import {
   getCertsRequestBody,
   processCertsResult,
 } from '../../../common/requests/get_certs_request_body';
-import { useContext } from 'react';
 import { UptimeRefreshContext } from '../../contexts';
 
 export const useCertSearch = ({
