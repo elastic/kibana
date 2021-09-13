@@ -1,7 +1,7 @@
 [[index-patterns]]
 === Create {a-data-source}
 
-{kib} requires {a-data-source} to access the {es} data that you want to explore.
+{kib} requires {a-data-source} to access the {es} data that you want to explore. 
 {A-data-source} selects the data to use and allows you to define properties of the fields.
 
 {A-data-source} can point to one or more indices, {ref}/data-streams.html[data stream], or {ref}/alias.html[index aliases].
@@ -13,7 +13,7 @@ or all indices that contain your data.
 === Required permissions
 
 * Access to *{Data-Sources}* requires the <<xpack-kibana-role-management, {kib} privilege>>
-`{Data-Sources} Management`.
+`Index Pattern Management`.
 
 * To create {a-data-source}, you must have the <<xpack-kibana-role-management,{es} privilege>>
 `view_index_metadata`.
@@ -71,7 +71,7 @@ move between {kib} apps.
 . Select this {data-source} when you search and visualize your data.
 
 [float]
-[[rollup-{data-source}]]
+[[rollup-index-pattern]]
 ==== Create {a-data-source} for rolled up data
 
 {A-data-source} can match one rollup index.  For a combination rollup
@@ -137,7 +137,7 @@ aggregations using that {data-source} in {kib} take advantage of {ccs}.
 === Delete {data-sources}
 
 When you delete {a-data-source}, you cannot recover the associated field formatters, runtime fields, source filters,
-and field popularity data. Deleting {a-data-view} does not remove any indices or data documents from {es}.
+and field popularity data. Deleting {a-data-source} does not remove any indices or data documents from {es}.
 
 WARNING: Deleting {a-data-source} breaks all visualizations, saved searches, and other saved objects that reference the {data-source}.
 
