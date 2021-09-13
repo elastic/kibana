@@ -2,12 +2,12 @@ title: Test stream
 type: logs
 streams:
   - input: test_input
-    vars:
-    - name: test_var_2
-      type: text
-      title: Test Var 2
-      required: true
-      show_user: true
-      default: Test Value
+    # vars:
+    # - name: test_var_2
+    #   type: text
+    #   title: Test Var 2
+    #   required: true
+    #   show_user: true
+    #   default: Test Value
 
 
