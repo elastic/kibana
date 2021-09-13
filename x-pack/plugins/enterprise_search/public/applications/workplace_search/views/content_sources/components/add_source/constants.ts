@@ -349,31 +349,80 @@ export const INCLUDED_FEATURES_TITLE = i18n.translate(
   }
 );
 
-export const SOURCE_FEATURES_SEARCHABLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.searchable.text',
+export const SOURCE_FEATURES_SYNC_FREQUENCY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.syncFrequency.title',
+  {
+    defaultMessage: 'Syncs every 2 hours',
+  }
+);
+
+export const SOURCE_FEATURES_SYNC_FREQUENCY_TIME = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.syncFrequency.time',
+  {
+    defaultMessage: '2 hours',
+  }
+);
+
+export const SOURCE_FEATURES_SYNCED_ITEMS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.syncedItems.title',
+  {
+    defaultMessage: 'Synced items',
+  }
+);
+
+export const SOURCE_FEATURES_SEARCHABLE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.searchable.title',
+  {
+    defaultMessage: 'Searchable content',
+  }
+);
+
+export const SOURCE_FEATURES_SEARCHABLE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.searchable.description',
   {
     defaultMessage: 'The following items are searchable:',
   }
 );
 
-export const SOURCE_FEATURES_REMOTE_FEATURE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.remote.text',
+export const SOURCE_FEATURES_REMOTE_FEATURE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.remote.title',
+  {
+    defaultMessage: 'Always up-to-date',
+  }
+);
+
+export const SOURCE_FEATURES_REMOTE_FEATURE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.remote.description',
   {
     defaultMessage:
       'Message data and other information is searchable in real-time from the Workplace Search experience.',
   }
 );
 
-export const SOURCE_FEATURES_PRIVATE_FEATURE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.private.text',
+export const SOURCE_FEATURES_PRIVATE_FEATURE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.private.title',
+  {
+    defaultMessage: 'Always private',
+  }
+);
+
+export const SOURCE_FEATURES_PRIVATE_FEATURE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.private.description',
   {
     defaultMessage:
       'Results returned are specific and relevant to you. Connecting this source does not expose your personal data to other search users - only you.',
   }
 );
 
-export const SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.globalAccessPermissions.text',
+export const SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.globalAccessPermissions.title',
+  {
+    defaultMessage: 'Global access permissions',
+  }
+);
+
+export const SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.globalAccessPermissions.description',
   {
     defaultMessage:
       'All documents accessible to the connecting service user will be synchronized and made available to the organization’s users, or group’s users. Documents are immediately available for search',
