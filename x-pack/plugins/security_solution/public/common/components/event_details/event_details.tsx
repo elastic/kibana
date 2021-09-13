@@ -146,6 +146,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     data,
                     eventId: id,
                     browserFields,
+                    isDraggable,
                     timelineId,
                     title: i18n.DUCOMENT_SUMMARY,
                   }}
@@ -170,13 +171,14 @@ const EventDetailsComponent: React.FC<Props> = ({
         : undefined,
     [
       isAlert,
-      data,
       id,
+      data,
       browserFields,
+      isDraggable,
       timelineId,
-      isEnrichmentsLoading,
       enrichmentCount,
       allEnrichments,
+      isEnrichmentsLoading,
     ]
   );
 
