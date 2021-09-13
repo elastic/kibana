@@ -11,8 +11,8 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getDynamicDataView } from '../lib/data_view/get_dynamic_data_view';
 import { createApmServerRoute } from './create_apm_server_route';
 
-const staticIndexPatternRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/index_pattern/static',
+const staticDataViewRoute = createApmServerRoute({
+  endpoint: 'POST /api/apm/data_view/static',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const {
@@ -42,8 +42,8 @@ const staticIndexPatternRoute = createApmServerRoute({
   },
 });
 
-const dynamicIndexPatternRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/index_pattern/dynamic',
+const dynamicDataViewRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/data_view/dynamic',
   options: { tags: ['access:apm'] },
   handler: async ({ context, config, logger }) => {
     const dynamicIndexPattern = await getDynamicDataView({
@@ -55,6 +55,6 @@ const dynamicIndexPatternRoute = createApmServerRoute({
   },
 });
 
-export const indexPatternRouteRepository = createApmServerRouteRepository()
-  .add(staticIndexPatternRoute)
-  .add(dynamicIndexPatternRoute);
+export const dataViewRouteRepository = createApmServerRouteRepository()
+  .add(staticDataViewRoute)
+  .add(dynamicDataViewRoute);
