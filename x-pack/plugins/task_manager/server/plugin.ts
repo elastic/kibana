@@ -123,7 +123,7 @@ export class TaskManagerPlugin
     }
 
     if (this.config.unsafe.exclude_task_types.length) {
-      this.logger.debug(
+      this.logger.warn(
         `Excluding task types from execution: ${this.config.unsafe.exclude_task_types.join(', ')}`
       );
     }
