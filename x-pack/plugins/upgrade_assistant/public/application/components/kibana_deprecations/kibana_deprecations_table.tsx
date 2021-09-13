@@ -95,7 +95,6 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
   toggleFlyout,
   deprecationResolutionState,
 }) => {
-  // console.log(deprecations?.length);
   const columns: Array<EuiBasicTableColumn<KibanaDeprecationDetails>> = [
     {
       field: 'level',
@@ -106,13 +105,6 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       render: (level: KibanaDeprecationDetails['level'], deprecation) => {
         const isCurrent = deprecationResolutionState?.id === deprecation.id;
         const isResolved = deprecationResolutionState?.resolveDeprecationStatus === 'ok';
-
-        // console.log({
-        // stateId: deprecationResolutionState?.id,
-        // id: deprecation.id,
-        // isCurrent,
-        // isResolved,
-        // });
 
         return (
           <DeprecationBadge

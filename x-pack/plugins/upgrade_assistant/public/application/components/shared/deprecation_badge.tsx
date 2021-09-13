@@ -10,24 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
 
 const i18nTexts = {
-  criticalBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.criticalBadgeLabel',
-    {
-      defaultMessage: 'Critical',
-    }
-  ),
-  resolvedBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.resolvedBadgeLabel',
-    {
-      defaultMessage: 'Resolved',
-    }
-  ),
-  warningBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.warningBadgeLabel',
-    {
-      defaultMessage: 'Warning',
-    }
-  ),
+  criticalBadgeLabel: i18n.translate('xpack.upgradeAssistant.deprecationBadge.criticalBadgeLabel', {
+    defaultMessage: 'Critical',
+  }),
+  resolvedBadgeLabel: i18n.translate('xpack.upgradeAssistant.deprecationBadge.resolvedBadgeLabel', {
+    defaultMessage: 'Resolved',
+  }),
+  warningBadgeLabel: i18n.translate('xpack.upgradeAssistant.deprecationBadge.warningBadgeLabel', {
+    defaultMessage: 'Warning',
+  }),
 };
 
 interface Props {

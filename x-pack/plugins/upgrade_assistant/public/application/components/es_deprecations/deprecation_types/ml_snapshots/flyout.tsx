@@ -140,6 +140,8 @@ export const FixSnapshotsFlyout = ({
   upgradeSnapshot,
   deleteSnapshot,
 }: FixSnapshotsFlyoutProps) => {
+  const isResolved = snapshotState.status === 'complete';
+
   const onUpgradeSnapshot = () => {
     upgradeSnapshot();
     closeFlyout();
@@ -153,16 +155,13 @@ export const FixSnapshotsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge
-          isCritical={deprecation.isCritical}
-          isResolved={snapshotState.status === 'complete'}
-        />
+        <DeprecationBadge isCritical={deprecation.isCritical} isResolved={isResolved} />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2>{i18nTexts.flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {snapshotState.error && snapshotState.status !== 'complete' && (
+        {snapshotState.error && !isResolved && (
           <>
             <EuiCallOut
               title={
@@ -196,7 +195,7 @@ export const FixSnapshotsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          {snapshotState.status !== 'complete' && (
+          {!isResolved && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
                 <EuiFlexItem>
