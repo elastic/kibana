@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import { FILTERS } from '@kbn/es-query';
+import type {
   Filter,
-  FILTERS,
   FilterStateStore,
   IndexPatternBase,
   IndexPatternFieldBase,

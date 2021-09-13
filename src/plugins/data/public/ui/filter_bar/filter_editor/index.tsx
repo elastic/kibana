@@ -344,7 +344,7 @@ class FilterEditorUI extends Component<Props, State> {
         </div>
       ) : null;
 
-    // Do not show field and operator select for multi-index filters. 
+    // Do not show field and operator select for multi-index filters.
     // Multi-index filters operate on many fields and cannot transition to different operator types
     const fieldAndOperatorSelect = !this.props.filter.meta.isMultiIndex ? (
       <>
