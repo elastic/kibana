@@ -13,11 +13,6 @@ import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 
 import { savedObjectsAdapter, UMSavedObjectsAdapter } from '../saved_objects';
-import {
-  DEFAULT_FROM,
-  DEFAULT_SIZE,
-  DEFAULT_TO,
-} from '../../../common/requests/get_certs_request_body';
 
 /**
  * This function aims to provide an easy way to give mock props that will
@@ -127,10 +122,8 @@ describe('tls alert', () => {
       });
       expect(mockGetter).toBeCalledWith(
         expect.objectContaining({
-          from: DEFAULT_FROM,
-          to: DEFAULT_TO,
-          index: 0,
-          size: DEFAULT_SIZE,
+          pageIndex: 0,
+          size: 1000,
           notValidAfter: `now+${DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}d`,
           notValidBefore: `now-${DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold}d`,
           sortBy: 'common_name',
