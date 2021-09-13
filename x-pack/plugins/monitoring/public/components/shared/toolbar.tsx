@@ -13,7 +13,7 @@ import {
   OnRefreshChangeProps,
 } from '@elastic/eui';
 import React, { useContext, useCallback } from 'react';
-import { MonitoringTimeContainer } from '../../application/pages/use_monitoring_time';
+import { MonitoringTimeContainer } from '../../application/hooks/use_monitoring_time';
 import { GlobalStateContext } from '../../application/global_state_context';
 import { Legacy } from '../../legacy_shims';
 
@@ -30,6 +30,7 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
     refreshInterval,
     setIsPaused,
     isPaused,
+    isDisabled,
   } = useContext(MonitoringTimeContainer.Context);
   const state = useContext(GlobalStateContext);
 
@@ -85,6 +86,7 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
       <EuiFlexItem grow={false}>
         <div style={{ padding: 8 }}>
           <EuiSuperDatePicker
+            isDisabled={isDisabled}
             start={currentTimerange.from}
             end={currentTimerange.to}
             onTimeChange={onTimeChange}
