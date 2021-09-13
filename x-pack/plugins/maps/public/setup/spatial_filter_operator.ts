@@ -6,8 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FILTERS, getFilterParams } from '@kbn/es-query';
-import { ReactElement } from 'react';
+import {
+  Filter,
+  FILTERS,
+  FilterStateStore,
+  IndexPatternBase,
+  IndexPatternFieldBase,
+} from '@kbn/es-query';
+import type { IFieldType, IIndexPattern } from 'src/plugins/data/public';
 
 export const spatialFilterOperator = {
   message: i18n.translate('xpack.maps.filterOperator.spatialFilterLabel', {
@@ -18,11 +24,11 @@ export const spatialFilterOperator = {
   fieldTypes: ['geo_point', 'geo_shape'],
   editor: null,
   buildFilter: (
-    indexPattern: IndexPatternBase,
-    field: IndexPatternFieldBase,
     disabled: boolean,
-    params: Serializable,
     alias: string | null,
+    indexPattern?: IndexPatternBase,
+    field?: IndexPatternFieldBase,
+    params?: any,
     store?: FilterStateStore
   ) => {
     const filter: Filter = {
@@ -33,7 +39,7 @@ export const spatialFilterOperator = {
         isMultiIndex: true,
         type: FILTERS.SPATIAL_FILTER,
       },
-      query: params.query
+      query: params.query,
     };
     if (store) {
       filter.$state = { store };
@@ -43,11 +49,7 @@ export const spatialFilterOperator = {
   getFilterParams: (filter: Filter) => {
     return { query: filter.query };
   },
-  isFilterValid: (
-    indexPattern?: IIndexPattern,
-    field?: IFieldType,
-    params?: any,
-  ) => {
+  isFilterValid: (indexPattern?: IIndexPattern, field?: IFieldType, params?: any) => {
     if (indexPattern && field) {
       return true;
     }

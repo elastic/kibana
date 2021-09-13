@@ -10,11 +10,7 @@ import { Filter, FILTERS } from '@kbn/es-query';
 
 // Use mapSpatialFilter mapper to avoid bloated meta with value and params for spatial filters.
 export const mapSpatialFilter = (filter: Filter) => {
-  if (
-    filter.meta &&
-    filter.meta.key &&
-    filter.meta.type === FILTERS.SPATIAL_FILTER
-  ) {
+  if (filter.meta && filter.meta.key && filter.meta.type === FILTERS.SPATIAL_FILTER) {
     return {
       key: filter.meta.key,
       type: filter.meta.type,
@@ -22,11 +18,7 @@ export const mapSpatialFilter = (filter: Filter) => {
     };
   }
 
-  if (
-    filter.meta &&
-    filter.meta.type === FILTERS.SPATIAL_FILTER &&
-    filter.meta.isMultiIndex
-  ) {
+  if (filter.meta && filter.meta.type === FILTERS.SPATIAL_FILTER && filter.meta.isMultiIndex) {
     return {
       key: 'query',
       type: filter.meta.type,

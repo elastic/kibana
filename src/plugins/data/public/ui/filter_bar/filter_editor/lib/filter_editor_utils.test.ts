@@ -150,6 +150,18 @@ describe('Filter editor utils', () => {
     });
   });
 
+  describe('isPhraseFilterValid', () => {
+    it('should return false for phrase filter invalid params', () => {
+      const isValid = isPhraseFilterValid(stubIndexPattern, stubFields[4], 'foo');
+      expect(isValid).toBe(false);
+    });
+
+    it('should return true for phrases filter valid params', () => {
+      const isValid = isPhraseFilterValid(stubIndexPattern, stubFields[4], 'now');
+      expect(isValid).toBe(true);
+    });
+  });
+
   describe('isPhrasesFilterValid', () => {
     it('should return false for phrases filter without phrases', () => {
       const isValid = isPhrasesFilterValid(stubIndexPattern, stubFields[0], []);

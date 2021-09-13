@@ -12,6 +12,7 @@ import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
 import { createNowProviderMock } from './now_provider/mocks';
+import { FilterEditorSetup } from './ui/filter_bar/filter_editor/filter_editor_service';
 
 export type Setup = jest.Mocked<ReturnType<DataPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataPlugin['start']>>;
@@ -27,12 +28,17 @@ const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
   hasQuerySuggestions: jest.fn(),
 };
 
+const filterEditorSetupMock: jest.Mocked<FilterEditorSetup> = {
+  registerFilterOperator: jest.fn(),
+};
+
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
   return {
     autocomplete: autocompleteSetupMock,
     search: searchServiceMock.createSetupContract(),
     query: querySetupMock,
+    filterEditor: filterEditorSetupMock,
   };
 };
 

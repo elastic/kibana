@@ -22,7 +22,7 @@ export class FilterEditorService {
        * @param {Operator} newOperator - operator definition
        */
       registerFilterOperator: filterOperatorRegistry.add,
-    }
+    };
   }
 
   public start() {

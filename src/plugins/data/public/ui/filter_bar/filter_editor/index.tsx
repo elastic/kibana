@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import {
   Filter,
+  FILTERS,
   FieldFilter,
   buildCustomFilter,
   cleanFilter,
@@ -39,7 +40,6 @@ import {
   getOperatorFromFilter,
   getOperatorOptions,
   getOperatorTypes,
-  isFilterValid,
 } from './lib/filter_editor_utils';
 import { Operator } from './filter_operator_registry';
 import { getIndexPatternFromFilter } from '../../../query';
@@ -73,7 +73,9 @@ class FilterEditorUI extends Component<Props, State> {
       selectedIndexPattern: this.getIndexPatternFromFilter(),
       selectedField: this.getFieldFromFilter(),
       selectedOperator,
-      params: selectedOperator ? selectedOperator.getFilterParams(props.filter) : getFilterParams(props.filter),
+      params: selectedOperator
+        ? selectedOperator.getFilterParams(props.filter)
+        : getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
       customLabel: props.filter.meta.alias || '',
       queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
@@ -328,8 +330,9 @@ class FilterEditorUI extends Component<Props, State> {
       );
     }
 
-    const operatorEditor = this.state.selectedOperator && this.state.selectedOperator.editor !== null
-      ? <div data-test-subj="filterParams">
+    const operatorEditor =
+      this.state.selectedOperator && this.state.selectedOperator.editor !== null ? (
+        <div data-test-subj="filterParams">
           <this.state.selectedOperator.editor
             indexPattern={this.state.selectedIndexPattern}
             field={this.state.selectedField}
@@ -339,22 +342,22 @@ class FilterEditorUI extends Component<Props, State> {
             fullWidth
           />
         </div>
-      : null;
+      ) : null;
 
-    // Do not show operator select for multi-index filters since they operate on many fields 
+    // Do not show operator select for multi-index filters since they operate on many fields
     // and cannot transition to different operator types
-    const operatorSelect = !this.props.filter.meta.isMultiIndex
-      ? <>
-          <EuiFlexGroup responsive={true} gutterSize="s">
-            <EuiFlexItem grow={2}>{this.renderFieldInput()}</EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ flexBasis: 160 }}>
-              {this.renderOperatorInput()}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </>
-      : null;
-      
+    const operatorSelect = !this.props.filter.meta.isMultiIndex ? (
+      <>
+        <EuiFlexGroup responsive={true} gutterSize="s">
+          <EuiFlexItem grow={2}>{this.renderFieldInput()}</EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ flexBasis: 160 }}>
+            {this.renderOperatorInput()}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+      </>
+    ) : null;
+
     return (
       <div>
         {operatorSelect}
@@ -370,7 +373,7 @@ class FilterEditorUI extends Component<Props, State> {
 
   private isUnknownFilterType() {
     const { type } = this.props.filter.meta;
-    return !!type && !getOperatorTypes().includes(type);
+    return !!type && !getOperatorTypes().includes(type as FILTERS);
   }
 
   private getIndexPatternFromFilter() {
@@ -474,12 +477,13 @@ class FilterEditorUI extends Component<Props, State> {
       const body = JSON.parse(queryDsl);
       filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
     } else if (operator) {
+      const disabled = this.props.filter.meta.disabled ?? false;
       filter = operator.buildFilter(
+        disabled,
+        alias,
         indexPattern,
         field,
-        this.props.filter.meta.disabled ?? false,
         params ?? '',
-        alias,
         $state.store
       );
     }

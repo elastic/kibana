@@ -23,6 +23,10 @@ interface Props extends PhraseSuggestorProps {
 
 class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
   public render() {
+    if (!this.props.indexPattern) {
+      return null;
+    }
+
     const { suggestions } = this.state;
     const { values, intl, onChange, fullWidth } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;

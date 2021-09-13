@@ -24,6 +24,10 @@ interface Props extends PhraseSuggestorProps {
 
 class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
   public render() {
+    if (!this.props.indexPattern) {
+      return null;
+    }
+
     return (
       <EuiFormRow
         fullWidth={this.props.fullWidth}

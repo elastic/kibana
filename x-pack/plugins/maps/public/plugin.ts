@@ -56,7 +56,10 @@ import {
 } from './api';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/public';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../src/plugins/data/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import type { FileUploadPluginStart } from '../../file_upload/public';
 import type { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';

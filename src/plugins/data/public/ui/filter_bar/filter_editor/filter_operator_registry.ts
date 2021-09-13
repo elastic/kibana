@@ -7,34 +7,53 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { buildFilter as esQueryBuildFilter, FILTERS, getFilterParams } from '@kbn/es-query';
-import { ReactElement } from 'react';
+import {
+  buildFilter as esQueryBuildFilter,
+  Filter,
+  FILTERS,
+  getFilterParams,
+  IndexPatternBase,
+  IndexPatternFieldBase,
+} from '@kbn/es-query';
+import { ComponentType } from 'react';
+import { FilterStateStore } from '../../../../common';
+import { IIndexPattern, IFieldType } from '../../..';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { EXISTS_LABEL, PHRASES_LABEL } from './lib/filter_label';
-import { isExistsFilterValid, isPhraseFilterValid, isPhrasesFilterValid, isRangeFilterValid } from './lib/filter_editor_utils';
+import {
+  isExistsFilterValid,
+  isPhraseFilterValid,
+  isPhrasesFilterValid,
+  isRangeFilterValid,
+} from './lib/filter_editor_utils';
+
+interface EditorProps {
+  indexPattern?: IIndexPattern;
+  field?: IFieldType;
+  value?: any;
+  onChange: (params: any) => void;
+  timeRangeForSuggestionsOverride?: boolean;
+  fullWidth?: boolean;
+}
 
 export interface Operator {
   message: string;
   type: FILTERS;
   negate: boolean;
   fieldTypes?: string[];
-  editor: ReactElement | null;
+  editor: ComponentType<EditorProps> | null;
   buildFilter: (
+    disabled: boolean,
+    alias: string | null,
     indexPattern?: IndexPatternBase,
     field?: IndexPatternFieldBase,
-    disabled: boolean,
-    params?: Serializable,
-    alias: string | null,
+    params?: any,
     store?: FilterStateStore
   ) => Filter | undefined;
   getFilterParams: (filter: Filter) => any;
-  isFilterValid: (
-    indexPattern?: IIndexPattern,
-    field?: IFieldType,
-    params?: any,
-  ) => boolean;
+  isFilterValid: (indexPattern?: IIndexPattern, field?: IFieldType, params?: any) => boolean;
 }
 
 const registry: Operator[] = [
@@ -45,25 +64,18 @@ const registry: Operator[] = [
     type: FILTERS.PHRASE,
     negate: false,
     editor: PhraseValueInput,
-    buildFilter: (
-      indexPattern,
-      field,
-      disabled,
-      params,
-      alias,
-      store,
-    ) => {
+    buildFilter: (disabled, alias, indexPattern, field, params, store) => {
       return indexPattern && field
         ? esQueryBuildFilter(
-          indexPattern,
-          field,
-          FILTERS.PHRASE,
-          false,
-          disabled,
-          params,
-          alias,
-          store
-        )
+            indexPattern,
+            field,
+            FILTERS.PHRASE,
+            false,
+            disabled,
+            params,
+            alias,
+            store
+          )
         : undefined;
     },
     getFilterParams,
@@ -76,25 +88,18 @@ const registry: Operator[] = [
     type: FILTERS.PHRASE,
     negate: true,
     editor: PhraseValueInput,
-    buildFilter: (
-      indexPattern,
-      field,
-      disabled,
-      params,
-      alias,
-      store,
-    ) => {
+    buildFilter: (disabled, alias, indexPattern, field, params, store) => {
       return indexPattern && field
         ? esQueryBuildFilter(
-          indexPattern,
-          field,
-          FILTERS.PHRASE,
-          true,
-          disabled,
-          params,
-          alias,
-          store
-        )
+            indexPattern,
+            field,
+            FILTERS.PHRASE,
+            true,
+            disabled,
+            params,
+            alias,
+            store
+          )
         : undefined;
     },
     getFilterParams,
@@ -106,25 +111,18 @@ const registry: Operator[] = [
     negate: false,
     fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
     editor: PhrasesValuesInput,
-    buildFilter: (
-      indexPattern,
-      field,
-      disabled,
-      params,
-      alias,
-      store,
-    ) => {
+    buildFilter: (disabled, alias, indexPattern, field, params, store) => {
       return indexPattern && field
         ? esQueryBuildFilter(
-          indexPattern,
-          field,
-          FILTERS.PHRASES,
-          false,
-          disabled,
-          params,
-          alias,
-          store
-        )
+            indexPattern,
+            field,
+            FILTERS.PHRASES,
+            false,
+            disabled,
+            params,
+            alias,
+            store
+          )
         : undefined;
     },
     getFilterParams,
@@ -138,25 +136,18 @@ const registry: Operator[] = [
     negate: true,
     fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
     editor: PhrasesValuesInput,
-    buildFilter: (
-      indexPattern,
-      field,
-      disabled,
-      params,
-      alias,
-      store,
-    ) => {
+    buildFilter: (disabled, alias, indexPattern, field, params, store) => {
       return indexPattern && field
         ? esQueryBuildFilter(
-          indexPattern,
-          field,
-          FILTERS.PHRASES,
-          true,
-          disabled,
-          params,
-          alias,
-          store
-        )
+            indexPattern,
+            field,
+            FILTERS.PHRASES,
+            true,
+            disabled,
+            params,
+            alias,
+            store
+          )
         : undefined;
     },
     getFilterParams,
@@ -170,25 +161,18 @@ const registry: Operator[] = [
     negate: false,
     fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
     editor: RangeValueInput,
-    buildFilter: (
-      indexPattern,
-      field,
-      disabled,
-      params,
-      alias,
-      store,
-    ) => {
+    buildFilter: (disabled, alias, indexPattern, field, params, store) => {
       return indexPattern && field
         ? esQueryBuildFilter(
-          indexPattern,
-          field,
-          FILTERS.RANGE,
-          false,
-          disabled,
-          params,
-          alias,
-          store
-        )
+            indexPattern,
+            field,
+            FILTERS.RANGE,
+            false,
+            disabled,
+            params,
+            alias,
+            store
+          )
         : undefined;
     },
     getFilterParams,
@@ -202,25 +186,18 @@ const registry: Operator[] = [
     negate: true,
     fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
     editor: RangeValueInput,
-    buildFilter: (
-      indexPattern,
-      field,
-      disabled,
-      params,
-      alias,
-      store,
-    ) => {
+    buildFilter: (disabled, alias, indexPattern, field, params, store) => {
       return indexPattern && field
         ? esQueryBuildFilter(
-          indexPattern,
-          field,
-          FILTERS.RANGE,
-          true,
-          disabled,
-          params,
-          alias,
-          store
-        )
+            indexPattern,
+            field,
+            FILTERS.RANGE,
+            true,
+            disabled,
+            params,
+            alias,
+            store
+          )
         : undefined;
     },
     getFilterParams,
@@ -231,25 +208,18 @@ const registry: Operator[] = [
     type: FILTERS.EXISTS,
     negate: false,
     editor: null,
-    buildFilter: (
-      indexPattern,
-      field,
-      disabled,
-      params,
-      alias,
-      store,
-    ) => {
+    buildFilter: (disabled, alias, indexPattern, field, params, store) => {
       return indexPattern && field
         ? esQueryBuildFilter(
-          indexPattern,
-          field,
-          FILTERS.EXISTS,
-          false,
-          disabled,
-          params,
-          alias,
-          store
-        )
+            indexPattern,
+            field,
+            FILTERS.EXISTS,
+            false,
+            disabled,
+            params,
+            alias,
+            store
+          )
         : undefined;
     },
     getFilterParams,
@@ -262,30 +232,23 @@ const registry: Operator[] = [
     type: FILTERS.EXISTS,
     negate: true,
     editor: null,
-    buildFilter: (
-      indexPattern,
-      field,
-      disabled,
-      params,
-      alias,
-      store,
-    ) => {
+    buildFilter: (disabled, alias, indexPattern, field, params, store) => {
       return indexPattern && field
         ? esQueryBuildFilter(
-          indexPattern,
-          field,
-          FILTERS.EXISTS,
-          true,
-          disabled,
-          params,
-          alias,
-          store
-        )
+            indexPattern,
+            field,
+            FILTERS.EXISTS,
+            true,
+            disabled,
+            params,
+            alias,
+            store
+          )
         : undefined;
     },
     getFilterParams,
     isFilterValid: isExistsFilterValid,
-  }
+  },
 ];
 
 interface FilterOperatorRegistry {
@@ -296,8 +259,14 @@ interface FilterOperatorRegistry {
 export const filterOperatorRegistry: FilterOperatorRegistry = {
   get: () => [...registry],
   add: (newOperator: Operator) => {
-    if (registry.find((operator) => operator.type === newOperator.type && operator.negate === newOperator.negate)) {
-      throw new Error(`Filter operator already registered for type: ${newOperator.type}, negate: ${newOperator.negate}`);
+    if (
+      registry.find(
+        (operator) => operator.type === newOperator.type && operator.negate === newOperator.negate
+      )
+    ) {
+      throw new Error(
+        `Filter operator already registered for type: ${newOperator.type}, negate: ${newOperator.negate}`
+      );
     }
     registry.push(newOperator);
   },

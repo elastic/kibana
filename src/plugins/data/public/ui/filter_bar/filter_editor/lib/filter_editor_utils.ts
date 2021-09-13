@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import dateMath from '@elastic/datemath';
 import { Filter, FieldFilter } from '@kbn/es-query';
-import { filterOperatorRegistry, Operator } from '../filter_operator_registry';
+import { filterOperatorRegistry } from '../filter_operator_registry';
 import { isFilterable, IIndexPattern, IFieldType, IpAddress } from '../../../../../common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {
@@ -58,7 +58,7 @@ export function validateParams(params: any, type: string) {
 export function isPhraseFilterValid(
   indexPattern?: IIndexPattern,
   field?: IFieldType,
-  params?: any,
+  params?: any
 ) {
   if (!indexPattern || !field) {
     return false;
@@ -69,7 +69,7 @@ export function isPhraseFilterValid(
 export function isPhrasesFilterValid(
   indexPattern?: IIndexPattern,
   field?: IFieldType,
-  params?: any,
+  params?: any
 ) {
   if (!indexPattern || !field) {
     return false;
@@ -80,11 +80,7 @@ export function isPhrasesFilterValid(
   return params.every((phrase) => validateParams(phrase, field.type));
 }
 
-export function isRangeFilterValid(
-  indexPattern?: IIndexPattern,
-  field?: IFieldType,
-  params?: any,
-) {
+export function isRangeFilterValid(indexPattern?: IIndexPattern, field?: IFieldType, params?: any) {
   if (!indexPattern || !field) {
     return false;
   }
@@ -97,9 +93,6 @@ export function isRangeFilterValid(
   );
 }
 
-export function isExistsFilterValid(
-  indexPattern?: IIndexPattern,
-  field?: IFieldType,
-) {
+export function isExistsFilterValid(indexPattern?: IIndexPattern, field?: IFieldType) {
   return indexPattern !== undefined && field !== undefined;
 }

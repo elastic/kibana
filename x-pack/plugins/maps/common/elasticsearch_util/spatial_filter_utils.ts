@@ -30,7 +30,7 @@ function createMultiGeoFieldFilter(
     throw new Error('Unable to create filter, geo fields not provided');
   }
 
-  // Regardless of whether there is a single geo field or multile geo fields, 
+  // Regardless of whether there is a single geo field or multile geo fields,
   // the filter is considered "isMultiIndex" because the geo field(s) is not couple to a single index pattern
   const spatialFilterMeta = {
     ...meta,
@@ -203,7 +203,6 @@ export function extractFeaturesFromFilters(filters: GeoFilter[]): Feature[] {
       return filter.meta.type === SPATIAL_FILTER_TYPE;
     })
     .forEach((filter) => {
-      
       let geoFieldName: string | undefined;
       let spatialClause: GeoFilter | undefined;
       if (filter?.query?.bool?.must) {
