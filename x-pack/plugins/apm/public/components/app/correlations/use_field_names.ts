@@ -9,7 +9,7 @@ import { memoize } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
+import { useDynamicDataViewFetcher } from '../../../hooks/use_dynamic_data_view';
 
 interface IndexPattern {
   fields: Array<{ name: string; esTypes: string[] }>;
@@ -18,35 +18,35 @@ interface IndexPattern {
 export function useFieldNames() {
   const { agentName } = useApmServiceContext();
   const isRumAgent = isRumAgentName(agentName);
-  const { indexPattern } = useDynamicIndexPatternFetcher();
+  const { dataView } = useDynamicDataViewFetcher();
 
   const [defaultFieldNames, setDefaultFieldNames] = useState(
-    getDefaultFieldNames(indexPattern, isRumAgent)
+    getDefaultFieldNames(dataView, isRumAgent)
   );
 
   const getSuggestions = useMemo(
     () =>
       memoize((searchValue: string) =>
-        getMatchingFieldNames(indexPattern, searchValue)
+        getMatchingFieldNames(dataView, searchValue)
       ),
-    [indexPattern]
+    [dataView]
   );
 
   useEffect(() => {
-    setDefaultFieldNames(getDefaultFieldNames(indexPattern, isRumAgent));
-  }, [indexPattern, isRumAgent]);
+    setDefaultFieldNames(getDefaultFieldNames(dataView, isRumAgent));
+  }, [dataView, isRumAgent]);
 
   return { defaultFieldNames, getSuggestions };
 }
 
 function getMatchingFieldNames(
-  indexPattern: IndexPattern | undefined,
+  dataView: IndexPattern | undefined,
   inputValue: string
 ) {
-  if (!indexPattern) {
+  if (!dataView) {
     return [];
   }
-  return indexPattern.fields
+  return dataView.fields
     .filter(
       ({ name, esTypes }) =>
         name.startsWith(inputValue) && esTypes[0] === 'keyword' // only show fields of type 'keyword'
@@ -55,20 +55,17 @@ function getMatchingFieldNames(
 }
 
 function getDefaultFieldNames(
-  indexPattern: IndexPattern | undefined,
+  dataView: IndexPattern | undefined,
   isRumAgent: boolean
 ) {
-  const labelFields = getMatchingFieldNames(indexPattern, 'labels.').slice(
-    0,
-    6
-  );
+  const labelFields = getMatchingFieldNames(dataView, 'labels.').slice(0, 6);
   return isRumAgent
     ? [
         ...labelFields,
         'user_agent.name',
         'user_agent.os.name',
         'url.original',
-        ...getMatchingFieldNames(indexPattern, 'user.').slice(0, 6),
+        ...getMatchingFieldNames(dataView, 'user.').slice(0, 6),
       ]
     : [...labelFields, 'service.version', 'service.node.name', 'host.ip'];
 }
