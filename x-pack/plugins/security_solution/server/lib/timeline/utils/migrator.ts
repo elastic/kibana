@@ -15,6 +15,14 @@ interface Field {
   name: string;
 }
 
+/**
+ * This class handles remove fields from an object and moving them into the saved object reference fields. It also
+ * handles going the opposite direction to add fields back into an object by setting them to null or if a reference is
+ * found setting them to the value defined in the reference.
+ *
+ * This population of the field is to avoid having to change the UI to look in the references field of saved objects
+ * to find these values.
+ */
 export class FieldMigrator {
   constructor(private readonly fieldsToMigrate: Field[]) {}
 
