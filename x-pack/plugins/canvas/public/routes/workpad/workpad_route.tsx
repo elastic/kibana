@@ -21,7 +21,7 @@ import { useRestoreHistory } from './hooks/use_restore_history';
 import { useWorkpadHistory } from './hooks/use_workpad_history';
 import { usePageSync } from './hooks/use_page_sync';
 import { useWorkpadPersist } from './hooks/use_workpad_persist';
-import { WorkpadPageRouteProps, WorkpadRouteProps, WorkpadPageRouteParams } from '.';
+import { WorkpadRouteProps, WorkpadPageRouteParams } from '.';
 import { WorkpadRoutingContextComponent } from './workpad_routing_context';
 import { WorkpadPresentationHelper } from './workpad_presentation_helper';
 
