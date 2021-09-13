@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useRef, useCallback } from 'react';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { Ast } from '@kbn/interpreter/common';
 import { RenderToDom } from '../components/render_to_dom';
 import { BaseForm, BaseFormProps } from './base_form';
@@ -64,16 +65,9 @@ const DatasourceWrapper: React.FunctionComponent<DatasourceWrapperProps> = (prop
     callRenderFn();
   }, [callRenderFn, props]);
 
-  useEffect(
-    () => () => {
-      handlers.destroy();
-    },
-    // newly created handlers are coming from the component, which is rendering
-    // and returned function from 'useEffect' is calling for cleanup, not on unmount,
-    // but 'destroy' need to be called on unmount of the component
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  useEffectOnce(() => () => {
+    handlers.destroy();
+  });
 
   return (
     <RenderToDom
