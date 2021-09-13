@@ -100,20 +100,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'timelion:default_rows': {
-    type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'timelion:default_columns': {
-    type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'timelion:es.default_index': {
     type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'timelion:showTutorial': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:timeDefaults': {
