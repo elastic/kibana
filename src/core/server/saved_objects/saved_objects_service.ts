@@ -306,7 +306,7 @@ export class SavedObjectsService
       .pipe(first())
       .toPromise();
 
-    deprecations.getRegistry('core').registerDeprecations(
+    deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
         kibanaConfig,
         savedObjectsConfig: this.config,

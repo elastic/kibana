@@ -102,7 +102,7 @@ describe('SavedObjectsService', () => {
       await soService.setup(createSetupDeps());
 
       expect(deprecationsSetup.getRegistry).toHaveBeenCalledTimes(1);
-      expect(deprecationsSetup.getRegistry).toHaveBeenCalledWith('core');
+      expect(deprecationsSetup.getRegistry).toHaveBeenCalledWith('savedObjects');
       expect(mockRegistry.registerDeprecations).toHaveBeenCalledTimes(1);
       expect(mockRegistry.registerDeprecations).toHaveBeenCalledWith(deprecations);
     });
