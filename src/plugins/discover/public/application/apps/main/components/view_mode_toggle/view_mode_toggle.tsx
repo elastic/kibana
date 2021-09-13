@@ -26,8 +26,8 @@ export const DocumentViewModeToggle = ({
   discoverViewMode,
   setDiscoverViewMode,
 }: {
-  discoverViewMode: string;
-  setDiscoverViewMode: (id: string) => void;
+  discoverViewMode: DISCOVER_VIEW_MODE;
+  setDiscoverViewMode: (discoverViewMode: DISCOVER_VIEW_MODE) => void;
 }) => {
   return (
     <EuiButtonGroup
@@ -36,7 +36,7 @@ export const DocumentViewModeToggle = ({
       buttonSize={'compressed'}
       options={toggleButtons}
       idSelected={discoverViewMode}
-      onChange={(id: string) => setDiscoverViewMode(id)}
+      onChange={(id: string) => setDiscoverViewMode(id as DISCOVER_VIEW_MODE)}
     />
   );
 };

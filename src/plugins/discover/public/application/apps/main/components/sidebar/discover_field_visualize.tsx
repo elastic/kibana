@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiPopoverFooter } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
@@ -46,21 +46,19 @@ export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
     };
 
     return (
-      <EuiPopoverFooter>
-        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-        <EuiButton
-          fullWidth
-          size="s"
-          href={visualizeInfo.href}
-          onClick={handleVisualizeLinkClick}
-          data-test-subj={`fieldVisualize-${field.name}`}
-        >
-          <FormattedMessage
-            id="discover.fieldChooser.visualizeButton.label"
-            defaultMessage="Visualize"
-          />
-        </EuiButton>
-      </EuiPopoverFooter>
+      // eslint-disable-next-line @elastic/eui/href-or-on-click
+      <EuiButton
+        fullWidth
+        size="s"
+        href={visualizeInfo.href}
+        onClick={handleVisualizeLinkClick}
+        data-test-subj={`fieldVisualize-${field.name}`}
+      >
+        <FormattedMessage
+          id="discover.fieldChooser.visualizeButton.label"
+          defaultMessage="Visualize"
+        />
+      </EuiButton>
     );
   }
 );

@@ -195,6 +195,7 @@ export function DiscoverLayout({
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onEditRuntimeField={onEditRuntimeField}
+              discoverViewMode={discoverViewMode}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>

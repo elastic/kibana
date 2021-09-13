@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { each, cloneDeep } from 'lodash';
+import { cloneDeep, each } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
@@ -14,14 +14,14 @@ import realHits from '../../../../../__fixtures__/real_hits.js';
 
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { DiscoverSidebarProps } from './discover_sidebar';
+import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { IndexPatternAttributes } from '../../../../../../../data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
-import { DiscoverSidebar } from './discover_sidebar';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../../__mocks__/services';
 import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
+import { DISCOVER_VIEW_MODE } from '../view_mode_toggle';
 
 jest.mock('../../../../../kibana_services', () => ({
   getServices: () => mockDiscoverServices,
@@ -65,6 +65,7 @@ function getCompProps(): DiscoverSidebarProps {
     setFieldFilter: jest.fn(),
     onEditRuntimeField: jest.fn(),
     editField: jest.fn(),
+    discoverViewMode: DISCOVER_VIEW_MODE.DOCUMENT_LEVEL,
   };
 }
 
