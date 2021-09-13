@@ -9,7 +9,7 @@ import { EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useContext, useState, useEffect } from 'react';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
-import { MonitoringTimeContainer } from './use_monitoring_time';
+import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
 import { PageLoading } from '../../components';
 
 export interface TabMenuItem {
