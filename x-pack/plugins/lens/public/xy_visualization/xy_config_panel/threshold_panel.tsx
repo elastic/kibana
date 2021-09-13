@@ -278,7 +278,8 @@ const LineThicknessSlider = ({
       value={inputValue}
       showInput
       min={1}
-      max={50}
+      max={10}
+      step={1}
       compressed
       onChange={(e) => {
         handleInputChange(Number(e.currentTarget.value));
