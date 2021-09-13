@@ -11,17 +11,16 @@ import { CertResult, GetCertsParams, Ping } from '../../../common/runtime_types'
 import { useSelector } from 'react-redux';
 import { selectDynamicSettings } from '../../state/selectors';
 import {
+  DEFAULT_DIRECTION,
+  DEFAULT_FROM,
+  DEFAULT_SIZE,
+  DEFAULT_SORT,
+  DEFAULT_TO,
   getCertsRequestBody,
   processCertsResult,
 } from '../../../common/requests/get_certs_request_body';
 import { useContext } from 'react';
 import { UptimeRefreshContext } from '../../contexts';
-
-export const DEFAULT_FROM = 'now-5m';
-export const DEFAULT_TO = 'now';
-const DEFAULT_SIZE = 25;
-const DEFAULT_SORT = 'not_after';
-const DEFAULT_DIRECTION = 'asc';
 
 export const useCertSearch = ({
   pageIndex,

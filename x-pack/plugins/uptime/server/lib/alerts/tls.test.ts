@@ -6,13 +6,18 @@
  */
 import moment from 'moment';
 import { ALERT_SEVERITY_WARNING, ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import { tlsAlertFactory, getCertSummary, DEFAULT_SIZE, DEFAULT_TO, DEFAULT_FROM } from './tls';
+import { tlsAlertFactory, getCertSummary } from './tls';
 import { TLS } from '../../../common/constants/alerts';
 import { CertResult, DynamicSettings } from '../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 
 import { savedObjectsAdapter, UMSavedObjectsAdapter } from '../saved_objects';
+import {
+  DEFAULT_FROM,
+  DEFAULT_SIZE,
+  DEFAULT_TO,
+} from '../../../common/requests/get_certs_request_body';
 
 /**
  * This function aims to provide an easy way to give mock props that will

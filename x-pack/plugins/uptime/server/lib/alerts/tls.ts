@@ -22,10 +22,6 @@ import { createUptimeESClient } from '../lib';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 
-export const DEFAULT_SIZE = 20;
-export const DEFAULT_FROM = 'now-5m';
-export const DEFAULT_TO = 'now';
-
 interface TlsAlertState {
   commonName: string;
   issuer: string;
@@ -131,10 +127,8 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
 
     const { certs, total }: CertResult = await libs.requests.getCerts({
       uptimeEsClient,
-      from: DEFAULT_FROM,
-      to: DEFAULT_TO,
       pageIndex: 0,
-      size: DEFAULT_SIZE,
+      size: 1000,
       notValidAfter: `now+${
         dynamicSettings?.certExpirationThreshold ??
         DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold

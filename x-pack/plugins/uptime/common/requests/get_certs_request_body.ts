@@ -17,16 +17,22 @@ enum SortFields {
   'common_name' = 'tls.server.x509.subject.common_name',
 }
 
+export const DEFAULT_SORT = 'not_after';
+export const DEFAULT_DIRECTION = 'asc';
+export const DEFAULT_SIZE = 20;
+export const DEFAULT_FROM = 'now-5m';
+export const DEFAULT_TO = 'now';
+
 export const getCertsRequestBody = ({
   pageIndex,
-  from,
-  to,
-  size,
   search,
   notValidBefore,
   notValidAfter,
-  sortBy,
-  direction,
+  size = DEFAULT_SIZE,
+  to = DEFAULT_TO,
+  from = DEFAULT_FROM,
+  sortBy = DEFAULT_SORT,
+  direction = DEFAULT_DIRECTION,
 }: GetCertsParams) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
 

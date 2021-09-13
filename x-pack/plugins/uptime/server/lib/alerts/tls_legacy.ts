@@ -20,14 +20,15 @@ import { AlertInstance } from '../../../../alerting/server';
 
 import { savedObjectsAdapter } from '../saved_objects';
 import { createUptimeESClient } from '../lib';
+import {
+  DEFAULT_FROM,
+  DEFAULT_SIZE,
+  DEFAULT_TO,
+} from '../../../common/requests/get_certs_request_body';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_LEGACY>;
 
 type TLSAlertInstance = AlertInstance<Record<string, any>, AlertInstanceContext, ActionGroupIds>;
-
-const DEFAULT_SIZE = 20;
-const DEFAULT_FROM = 'now-5m';
-const DEFAULT_TO = 'now';
 
 interface TlsAlertState {
   count: number;
