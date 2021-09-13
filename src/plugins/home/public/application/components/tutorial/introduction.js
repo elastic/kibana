@@ -9,7 +9,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Content } from './content';
-import { EuiImage, EuiButton, EuiBetaBadge, EuiPageHeader } from '@elastic/eui';
+import { EuiImage, EuiLink, EuiBetaBadge, EuiPageHeader } from '@elastic/eui';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
@@ -41,19 +41,12 @@ function IntroductionUI({
   let exportedFields;
   if (exportedFieldsUrl) {
     exportedFields = (
-      <EuiButton
-        href={exportedFieldsUrl}
-        size="s"
-        iconType="popout"
-        iconSide="right"
-        target="_blank"
-        rel="noopener"
-      >
+      <EuiLink href={exportedFieldsUrl} target="_blank" rel="noopener">
         <FormattedMessage
           id="home.tutorial.introduction.viewButtonLabel"
           defaultMessage="View exported fields"
         />
-      </EuiButton>
+      </EuiLink>
     );
   }
   let betaBadge;
