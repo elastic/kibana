@@ -11,7 +11,7 @@ import { isRumAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useDynamicDataViewFetcher } from '../../../hooks/use_dynamic_data_view';
 
-interface IndexPattern {
+interface DataView {
   fields: Array<{ name: string; esTypes: string[] }>;
 }
 
@@ -40,7 +40,7 @@ export function useFieldNames() {
 }
 
 function getMatchingFieldNames(
-  dataView: IndexPattern | undefined,
+  dataView: DataView | undefined,
   inputValue: string
 ) {
   if (!dataView) {
@@ -55,7 +55,7 @@ function getMatchingFieldNames(
 }
 
 function getDefaultFieldNames(
-  dataView: IndexPattern | undefined,
+  dataView: DataView | undefined,
   isRumAgent: boolean
 ) {
   const labelFields = getMatchingFieldNames(dataView, 'labels.').slice(0, 6);

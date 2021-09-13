@@ -63,7 +63,7 @@ function getStats({
         kibanaRequest.route.path
       }`,
     },
-    indexPattern: {
+    dataView: {
       label: i18n.translate('xpack.apm.inspector.stats.dataViewLabel', {
         defaultMessage: 'Data view',
       }),

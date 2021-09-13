@@ -18,7 +18,7 @@ import { getApmDataViewTitle } from '../lib/data_view/get_apm_data_view_title';
 import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
-import apmIndexPattern from './index_pattern.json';
+import apmDataView from './index_pattern.json';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
@@ -37,15 +37,15 @@ export const tutorialProvider = ({
   cloud?: CloudSetup;
   isFleetPluginEnabled: boolean;
 }) => () => {
-  const indexPatternTitle = getApmDataViewTitle(apmIndices);
+  const dataViewTitle = getApmDataViewTitle(apmIndices);
 
   const savedObjects = [
     {
-      ...apmIndexPattern,
+      ...apmDataView,
       id: APM_STATIC_INDEX_PATTERN_ID,
       attributes: {
-        ...apmIndexPattern.attributes,
-        title: indexPatternTitle,
+        ...apmDataView.attributes,
+        title: dataViewTitle,
       },
     },
   ];

@@ -12,11 +12,11 @@ import * as HistoricalAgentData from '../../routes/historical_data/has_historica
 import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { APMConfig } from '../..';
 
-function getMockSavedObjectsClient(existingIndexPatternTitle: string) {
+function getMockSavedObjectsClient(existingDataViewTitle: string) {
   return ({
     get: jest.fn(() => ({
       attributes: {
-        title: existingIndexPatternTitle,
+        title: existingDataViewTitle,
       },
     })),
     create: jest.fn(),
@@ -86,7 +86,7 @@ describe('createStaticDataView', () => {
       .mockResolvedValue(true);
 
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
-    const expectedIndexPatternTitle =
+    const expectedDataViewTitle =
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*';
 
     await createStaticDataView({
@@ -102,7 +102,7 @@ describe('createStaticDataView', () => {
     expect(savedObjectsClient.create).toHaveBeenCalled();
     // @ts-ignore
     expect(savedObjectsClient.create.mock.calls[0][1].title).toBe(
-      expectedIndexPatternTitle
+      expectedDataViewTitle
     );
     // @ts-ignore
     expect(savedObjectsClient.create.mock.calls[0][2].overwrite).toBe(true);
