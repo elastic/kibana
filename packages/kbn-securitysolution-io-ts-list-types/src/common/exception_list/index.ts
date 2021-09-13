@@ -12,7 +12,7 @@ export const exceptionListType = t.keyof({
   detection: null,
   endpoint: null,
   endpoint_events: null,
-  isolation_ips_whitelist: null,
+  host_isolation_exceptions: null,
 });
 export const exceptionListTypeOrUndefined = t.union([exceptionListType, t.undefined]);
 export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
@@ -21,5 +21,5 @@ export enum ExceptionListTypeEnum {
   DETECTION = 'detection',
   ENDPOINT = 'endpoint',
   ENDPOINT_EVENTS = 'endpoint_events',
-  ISOLATION_IPS_WHITELIST = 'isolation_ips_whitelist',
+  HOST_ISOLATION_EXCEPTIONS = 'host_isolation_exceptions',
 }
