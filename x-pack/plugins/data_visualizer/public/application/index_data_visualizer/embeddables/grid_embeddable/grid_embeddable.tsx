@@ -14,7 +14,6 @@ import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_tab
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Filter } from '@kbn/es-query';
 import { Required } from 'utility-types';
-import useWindowSize from 'react-use/lib/useWindowSize';
 import {
   Embeddable,
   EmbeddableInput,
@@ -76,7 +75,6 @@ export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
 const restorableDefaults = getDefaultDataVisualizerListState();
 const defaults = getDefaultPageState();
 
-// @todo: consolidate this hook with main view
 const useDataVisualizerGridData = (
   input: DataVisualizerGridEmbeddableInput,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>
@@ -84,7 +82,6 @@ const useDataVisualizerGridData = (
   const { services } = useDataVisualizerKibana();
   const { notifications, uiSettings } = services;
   const { toasts } = notifications;
-  // @todo: consolidate dataVisualizerListState and input
   const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
   const [lastRefresh, setLastRefresh] = useState(0);
@@ -674,7 +671,6 @@ export const DiscoverWrapper = ({
     },
     [input, searchQueryLanguage, searchString]
   );
-  const { width: windowWidth } = useWindowSize();
 
   return (
     <DataVisualizerTable<FieldVisConfig>
@@ -684,7 +680,6 @@ export const DiscoverWrapper = ({
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
       showPreviewByDefault={input?.showPreviewByDefault}
-      width={windowWidth - 300}
       onChange={onOutputChange}
     />
   );

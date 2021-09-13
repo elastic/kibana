@@ -38,7 +38,7 @@ export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
   };
 };
 
-export const calculateTableColumnsDimensions = (width: number, showDistributions: boolean) => {
+export const calculateTableColumnsDimensions = (width: number) => {
   const breakPoint = getBreakpoint(width);
   switch (breakPoint) {
     case 'xs':
@@ -48,7 +48,7 @@ export const calculateTableColumnsDimensions = (width: number, showDistributions
         type: '40px',
         docCount: '110px',
         distinctValues: '75px',
-        distributions: showDistributions ? '120px' : '50px',
+        distributions: '150px',
         showIcons: false,
         breakPoint,
       };
@@ -60,7 +60,7 @@ export const calculateTableColumnsDimensions = (width: number, showDistributions
         type: '40px',
         docCount: '110px',
         distinctValues: '75px',
-        distributions: showDistributions ? '120px' : '50px',
+        distributions: '150px',
         showIcons: false,
         breakPoint,
       };

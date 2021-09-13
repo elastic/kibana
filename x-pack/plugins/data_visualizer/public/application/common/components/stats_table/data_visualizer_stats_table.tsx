@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   CENTER_ALIGNMENT,
   EuiBasicTableColumn,
   EuiButtonIcon,
-  EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
@@ -19,10 +18,11 @@ import {
   HorizontalAlignment,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
+  EuiResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
-import useDebounce from 'react-use/lib/useDebounce';
+import { throttle } from 'lodash';
 import { JOB_FIELD_TYPES, JobFieldType, DataVisualizerTableState } from '../../../../../common';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { DistinctValues } from './components/field_data_row/distinct_values';
@@ -52,9 +52,8 @@ interface DataVisualizerTableProps<T> {
   getItemIdToExpandedRowMap: (itemIds: string[], items: T[]) => ItemIdToExpandedRowMap;
   extendedColumns?: Array<EuiBasicTableColumn<T>>;
   showPreviewByDefault?: boolean;
-  /** Table width used to calculate the appropriate column widths **/
-  width: number;
-  onChange: (update: Partial<DataVisualizerTableState>) => void;
+  /** Callback to receive any updates when table or page state is changed **/
+  onChange?: (update: Partial<DataVisualizerTableState>) => void;
 }
 
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -64,7 +63,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   getItemIdToExpandedRowMap,
   extendedColumns,
   showPreviewByDefault,
-  width,
   onChange,
 }: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
@@ -86,18 +84,25 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     breakPoint: 'xl',
   });
 
-  useDebounce(
-    () => {
-      setDimensions(calculateTableColumnsDimensions(width, showDistributions));
-    },
-    100,
-    [width, showDistributions]
+  const [tableWidth, setTableWidth] = useState<number>(1400);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const resizeHandler = useCallback(
+    throttle((e: { width: number; height: number }) => {
+      // When window or table is resized,
+      // update the column widths and other settings accordingly
+      setTableWidth(e.width);
+      setDimensions(calculateTableColumnsDimensions(e.width));
+    }, 500),
+    [tableWidth]
   );
 
-  const toggleShowDistribution = () => {
+  const toggleShowDistribution = useCallback(() => {
     setShowDistributions(!showDistributions);
-    onChange({ showDistributions: !showDistributions });
-  };
+    if (onChange) {
+      onChange({ showDistributions: !showDistributions });
+    }
+  }, [onChange, showDistributions]);
 
   function toggleDetails(item: DataVisualizerTableItem) {
     if (item.fieldName === undefined) return;
@@ -331,23 +336,27 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   }, [expandAll, items, expandedRowItemIds]);
 
   return (
-    <EuiFlexItem data-test-subj="dataVisualizerTableContainer">
-      <EuiInMemoryTable<T>
-        className={'dataVisualizer'}
-        items={items}
-        itemId={FIELD_NAME}
-        columns={columns}
-        pagination={pagination}
-        sorting={sorting}
-        isExpandable={true}
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        isSelectable={false}
-        onTableChange={onTableChange}
-        data-test-subj={'dataVisualizerTable'}
-        rowProps={(item) => ({
-          'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
-        })}
-      />
-    </EuiFlexItem>
+    <EuiResizeObserver onResize={resizeHandler}>
+      {(resizeRef) => (
+        <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
+          <EuiInMemoryTable<T>
+            className={'dataVisualizer'}
+            items={items}
+            itemId={FIELD_NAME}
+            columns={columns}
+            pagination={pagination}
+            sorting={sorting}
+            isExpandable={true}
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            isSelectable={false}
+            onTableChange={onTableChange}
+            data-test-subj={'dataVisualizerTable'}
+            rowProps={(item) => ({
+              'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
+            })}
+          />
+        </div>
+      )}
+    </EuiResizeObserver>
   );
 };

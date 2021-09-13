@@ -75,7 +75,7 @@ export const MetricDistributionChart: FC<Props> = ({
     return (
       <MetricDistributionChartTooltipHeader
         chartPoint={chartPoint}
-        maxWidth={width / 2}
+        maxWidth={width}
         fieldFormat={fieldFormat}
       />
     );

@@ -7,7 +7,6 @@
 
 import React, { useMemo, FC, useState } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import useWindowSize from 'react-use/lib/useWindowSize';
 import type { FindFileStructureResponse } from '../../../../../../file_upload/common';
 import type { DataVisualizerTableState } from '../../../../../common';
 import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
@@ -78,8 +77,6 @@ export const FieldsStatsGrid: FC<Props> = ({ results }) => {
   const fieldsCountStats = { visibleFieldsCount, totalFieldsCount };
   const metricsStats = { visibleMetricsCount, totalMetricFieldsCount };
 
-  const { width } = useWindowSize();
-
   return (
     <div>
       <EuiSpacer size="m" />
@@ -116,7 +113,6 @@ export const FieldsStatsGrid: FC<Props> = ({ results }) => {
         pageState={dataVisualizerListState}
         updatePageState={setDataVisualizerListState}
         getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
-        width={width}
       />
     </div>
   );
