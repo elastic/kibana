@@ -19,18 +19,13 @@ import { defaultRowRenderers } from '../body/renderers';
 import { Sort } from '../body/sort';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import {
-  TimelineId,
-  TimelineStatus,
-  TimelineTabs,
-  TimelineType,
-} from '../../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
-import { appActions } from '../../../../common/store/app';
+import * as helpers from '../helpers';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -81,17 +76,6 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../helpers', () => {
-  const actual = jest.requireActual('../helpers');
-  return {
-    ...actual,
-    combineQueries: jest.fn().mockReturnValue({
-      filterQuery: undefined,
-      kqlError: { message: 'error' },
-    }),
-  };
-});
-
 describe('Timeline', () => {
   let props = {} as QueryTabContentComponentProps;
   const sort: Sort[] = [
@@ -133,7 +117,7 @@ describe('Timeline', () => {
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
-      kqlQueryExpression: '',
+      kqlQueryExpression: ' ',
       onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
@@ -143,58 +127,34 @@ describe('Timeline', () => {
       start: startDate,
       status: TimelineStatus.active,
       timerangeKind: 'absolute',
-      timelineType: TimelineType.default,
       updateEventTypeAndIndexesName: jest.fn(),
       activeTab: TimelineTabs.query,
       show: true,
     };
   });
 
-  describe('addErrorHash', () => {
-    let spyAddErrorHash: jest.SpyInstance;
+  describe('rendering', () => {
+    let spyCombineQueries: jest.SpyInstance;
 
     beforeEach(() => {
-      spyAddErrorHash = jest.spyOn(appActions, 'addErrorHash');
+      spyCombineQueries = jest.spyOn(helpers, 'combineQueries');
     });
     afterEach(() => {
-      spyAddErrorHash.mockClear();
-    });
-    afterAll(() => {
-      jest.unmock('../helpers');
+      spyCombineQueries.mockClear();
     });
 
-    it('should call addErrorHash if error exists', () => {
-      const testProps = {
-        ...props,
-        timelineType: TimelineType.default,
-      };
-
+    test('should trim kqlQueryExpression', () => {
       mount(
         <TestProviders>
-          <QueryTabContentComponent {...testProps} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 
-      expect(spyAddErrorHash).toHaveBeenCalled();
-    });
-
-    it('should not call addErrorHash if it is timeline template', () => {
-      const testProps = {
-        ...props,
-        timelineType: TimelineType.template,
-      };
-
-      mount(
-        <TestProviders>
-          <QueryTabContentComponent {...testProps} />
-        </TestProviders>
+      expect(spyCombineQueries.mock.calls[0][0].kqlQuery.query).toEqual(
+        props.kqlQueryExpression.trim()
       );
-
-      expect(spyAddErrorHash).not.toHaveBeenCalled();
     });
-  });
 
-  describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>

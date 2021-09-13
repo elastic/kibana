@@ -8,7 +8,6 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Query } from 'src/plugins/data/public';
-import { TimelineType } from '../../../common/types';
 import { appSelectors } from '../store';
 import { appActions } from '../store/app';
 import { useAppToasts } from './use_app_toasts';
@@ -24,7 +23,6 @@ export const useInvalidFilterQuery = ({
   query,
   startDate,
   endDate,
-  timelineType,
 }: {
   id: string;
   filterQuery?: string;
@@ -32,7 +30,6 @@ export const useInvalidFilterQuery = ({
   query: Query;
   startDate: string;
   endDate: string;
-  timelineType?: TimelineType;
 }) => {
   const { addError } = useAppToasts();
   const dispatch = useDispatch();
@@ -40,7 +37,7 @@ export const useInvalidFilterQuery = ({
   const errors = useDeepEqualSelector(getErrorsSelector);
 
   useEffect(() => {
-    if (filterQuery === undefined && kqlError != null && timelineType !== TimelineType.template) {
+    if (filterQuery === undefined && kqlError != null) {
       // Local util for creating an replicatable error hash
       const hashCode = kqlError.message
         .split('')
@@ -58,7 +55,7 @@ export const useInvalidFilterQuery = ({
     }
     // This disable is required to only trigger the toast once per render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, filterQuery, addError, query, startDate, endDate, timelineType]);
+  }, [id, filterQuery, addError, query, startDate, endDate]);
 
   useEffect(() => {
     const myError = errors.find((e) => e.id === id);

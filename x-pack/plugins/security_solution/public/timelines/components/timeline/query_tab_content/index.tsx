@@ -179,7 +179,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   status,
   sort,
   timerangeKind,
-  timelineType,
   updateEventTypeAndIndexesName,
 }) => {
   const dispatch = useDispatch();
@@ -199,7 +198,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const kqlQuery: {
     query: string;
     language: KueryFilterQueryKind;
-  } = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [kqlQueryExpression]);
+  } = useMemo(() => ({ query: kqlQueryExpression.trim(), language: 'kuery' }), [
+    kqlQueryExpression,
+  ]);
 
   const combinedQueries = combineQueries({
     config: esQueryConfig,
@@ -217,7 +218,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     kqlError: combinedQueries?.kqlError,
     query: kqlQuery,
     startDate: start,
-    timelineType,
     endDate: end,
   });
 
@@ -485,7 +485,6 @@ const makeMapStateToProps = () => {
       sort,
       start: input.timerange.from,
       status,
-      timelineType,
       timerangeKind: input.timerange.kind,
     };
   };
