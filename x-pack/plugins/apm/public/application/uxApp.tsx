@@ -163,7 +163,7 @@ export const renderApp = ({
   // Automatically creates static index pattern and stores as saved object
   createStaticIndexPattern().catch((e) => {
     // eslint-disable-next-line no-console
-    console.log('Error creating static index pattern', e);
+    console.log('Error creating static data view', e);
   });
 
   ReactDOM.render(
