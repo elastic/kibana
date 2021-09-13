@@ -22,7 +22,6 @@ import { ProxySettings } from '../../types';
 export const JSON_TRANSPORT_SERVICE = '__json';
 // The value is the resource identifier (Application ID URI) of the resource you want, affixed with the .default suffix. For Microsoft Graph, the value is https://graph.microsoft.com/.default. This value informs the Microsoft identity platform endpoint that of all the application permissions you have configured for your app in the app registration portal, it should issue a token for the ones associated with the resource you want to use.
 export const GRAPH_API_OAUTH_SCOPE = 'https://graph.microsoft.com/.default';
-export const OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE = 'client_credentials';
 export const EXCHANGE_ONLINE_SERVER_HOST = 'login.microsoftonline.com';
 
 export interface SendEmailOptions {
@@ -75,7 +74,6 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       logger,
       {
         scope: GRAPH_API_OAUTH_SCOPE,
-        grantType: OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,
         clientId: transport.clientId,
         clientSecret: transport.clientSecret,
       },

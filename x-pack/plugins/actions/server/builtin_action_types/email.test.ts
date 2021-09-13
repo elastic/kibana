@@ -279,7 +279,7 @@ describe('secrets validation', () => {
     const secrets: Record<string, unknown> = {
       user: null,
       password: null,
-      clientSecret: null
+      clientSecret: null,
     };
     expect(validateSecrets(actionType, {})).toEqual(secrets);
     expect(validateSecrets(actionType, { user: null })).toEqual(secrets);
@@ -288,9 +288,13 @@ describe('secrets validation', () => {
 
   test('secrets validation succeeds when secrets is valid for OAuth 2.0 Client Credentials', () => {
     const secrets: Record<string, unknown> = {
-      clientSecret: '12345678'
+      clientSecret: '12345678',
     };
-    expect(validateSecrets(actionType, secrets)).toEqual({ ...secrets, user: null, password: null });
+    expect(validateSecrets(actionType, secrets)).toEqual({
+      ...secrets,
+      user: null,
+      password: null,
+    });
   });
 });
 

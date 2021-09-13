@@ -11,11 +11,12 @@ import { Logger } from '../../../../../../src/core/server';
 import { request } from './axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
+export const OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE = 'client_credentials';
+
 interface ClientCredentialsRequestParams {
   scope?: string;
   clientId?: string;
   clientSecret?: string;
-  grantType?: string;
 }
 
 interface ClientCredentialsResponse {
@@ -29,34 +30,32 @@ export async function requestOAuthClientCredentialsToken(
   logger: Logger,
   params: ClientCredentialsRequestParams,
   configurationUtilities: ActionsConfigurationUtilities
-): Promise<ClientCredentialsResponse> {
+): Promise<ClientCredentialsResponse | unknown> {
   const axiosInstance = axios.create();
-  const { clientId, clientSecret, grantType, scope } = params;
-  try {
-    const res = await request({
-      axios: axiosInstance,
-      url: tokenUrl,
-      method: 'post',
-      logger,
-      data: qs.stringify({
-        scope,
-        client_id: clientId,
-        client_secret: clientSecret,
-        grant_type: grantType,
-      }),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      },
-      configurationUtilities,
-      validateStatus: () => true,
-    });
-    if (res.status === 200) {
-      return res.data;
-    } else {
-      throw res.data;
-    }
-  } catch (err) {
-    logger.warn(`error thrown requesting access token: ${err.message}`);
-    throw err;
+  const { clientId, clientSecret, scope } = params;
+  const res = await request({
+    axios: axiosInstance,
+    url: tokenUrl,
+    method: 'post',
+    logger,
+    data: qs.stringify({
+      scope,
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,
+    }),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    },
+    configurationUtilities,
+    validateStatus: () => true,
+  });
+  if (res.status === 200) {
+    return {
+      tokenType: res.data.token_type,
+      accessToken: res.data.access_token,
+      expiresIn: res.data.expires_in,
+    };
   }
+  return res.data;
 }

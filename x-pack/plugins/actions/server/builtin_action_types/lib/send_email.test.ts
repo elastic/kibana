@@ -20,6 +20,15 @@ import { CustomHostSettings } from '../../config';
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
 const sendMailMock = jest.fn();
+const sendEmailGraphApiMock = jest.fn();
+
+jest.mock('./send_email_graph_api', () => ({
+  sendEmailGraphApi: jest.fn(),
+}));
+
+jest.mock('./request_oauth_client_credentials_token', () => ({
+  requestOAuthClientCredentialsToken: jest.fn(),
+}));
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -35,6 +44,48 @@ describe('send_email module', () => {
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "auth": Object {
+            "pass": "changeme",
+            "user": "elastic",
+          },
+          "host": undefined,
+          "port": undefined,
+          "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": true,
+          },
+        },
+      ]
+    `);
+    expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "bcc": Array [],
+          "cc": Array [
+            "bob@example.com",
+            "robert@example.com",
+          ],
+          "from": "fred@example.com",
+          "html": "<p>a message</p>
+      ",
+          "subject": "a subject",
+          "text": "a message",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+      ]
+    `);
+  });
+
+
+  test('uses OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
+    const sendEmailOptions = getSendEmailOptions({ transport: {service: 'exchange_server'} });
+    const result = await sendEmail(mockLogger, sendEmailOptions);
+    expect(result).toBe(sendMailMockResult);
+    expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "auth": Object {
