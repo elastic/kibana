@@ -35,8 +35,6 @@ export function ApmMainTemplate({
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
 } & KibanaPageTemplateProps) {
-  const { http, docLinks } = useKibana().services;
-  const basePath = http?.basePath.get();
   const { services } = useKibana<ApmPluginStartDeps>();
   const { http, docLinks } = services;
   const basePath = http?.basePath.get();
