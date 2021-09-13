@@ -197,6 +197,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       }
     }
     handleOnEventClosed={[Function]}
+    isDraggable={false}
     isFlyoutView={false}
     tabType="query"
     timelineId="test"
@@ -435,6 +436,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
         }
       }
       isAlert={false}
+      isDraggable={false}
       loading={true}
       timelineId="test"
       timelineTabType="query"
@@ -737,6 +739,7 @@ Array [
           }
         }
         handleOnEventClosed={[Function]}
+        isDraggable={false}
         isFlyoutView={true}
         tabType="query"
         timelineId="test"
@@ -952,6 +955,7 @@ Array [
                       }
                     }
                     isAlert={false}
+                    isDraggable={false}
                     loading={true}
                     timelineId="test"
                     timelineTabType="flyout"
@@ -1596,6 +1600,7 @@ Array [
         }
       }
       handleOnEventClosed={[Function]}
+      isDraggable={false}
       isFlyoutView={true}
       tabType="query"
       timelineId="test"
@@ -1811,6 +1816,7 @@ Array [
                     }
                   }
                   isAlert={false}
+                  isDraggable={false}
                   loading={true}
                   timelineId="test"
                   timelineTabType="flyout"
