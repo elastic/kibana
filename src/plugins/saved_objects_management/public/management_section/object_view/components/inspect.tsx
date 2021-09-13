@@ -27,12 +27,6 @@ const codeEditorAriaLabel = (title: string) =>
 const copyToClipboardLabel = i18n.translate('savedObjectsManagement.view.copyToClipboardLabel', {
   defaultMessage: 'Copy to clipboard',
 });
-const copyToClipboardAriaLabel = i18n.translate(
-  'savedObjectsManagement.view.copyToClipboardAriaLabel',
-  {
-    defaultMessage: 'Copy to clipboard',
-  }
-);
 export const Inspect: FC<InspectProps> = ({ object }) => {
   const title = object.meta.title || 'saved object';
   const objectAsJsonString = JSON.stringify(omit(object, 'meta'), null, 2);
@@ -43,7 +37,7 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
           <EuiCopy textToCopy={objectAsJsonString}>
             {(copy) => (
               <EuiButtonEmpty
-                aria-label={copyToClipboardAriaLabel}
+                aria-label={copyToClipboardLabel}
                 size="s"
                 flush="right"
                 iconType="copyClipboard"

@@ -19,6 +19,7 @@ import {
   ScopedHistory,
   HttpSetup,
   IUiSettingsClient,
+  DocLinksStart,
 } from '../../../../../core/public';
 import { Header, Inspect, NotFoundErrors } from './components';
 import { bulkGetObjects } from '../../lib/bulk_get_objects';
@@ -35,6 +36,7 @@ export interface SavedObjectEditionProps {
   savedObjectsClient: SavedObjectsClientContract;
   history: ScopedHistory;
   uiSettings: IUiSettingsClient;
+  docLinks: DocLinksStart['links'];
 }
 export interface SavedObjectEditionState {
   type: string;
@@ -91,7 +93,7 @@ export class SavedObjectEdition extends Component<
   };
 
   render() {
-    const { capabilities, notFoundType, http, uiSettings } = this.props;
+    const { capabilities, notFoundType, http, uiSettings, docLinks } = this.props;
     const { object } = this.state;
     const { delete: canDelete } = capabilities.savedObjectsManagement as Record<string, boolean>;
     const canView = this.canViewInApp(capabilities, object);
@@ -112,7 +114,7 @@ export class SavedObjectEdition extends Component<
           </EuiFlexItem>
           {notFoundType && (
             <EuiFlexItem grow={false}>
-              <NotFoundErrors type={notFoundType} />
+              <NotFoundErrors type={notFoundType} docLinks={docLinks} />
             </EuiFlexItem>
           )}
           {object && (

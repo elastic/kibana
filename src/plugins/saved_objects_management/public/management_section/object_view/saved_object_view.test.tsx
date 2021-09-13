@@ -22,6 +22,7 @@ import {
   applicationServiceMock,
   uiSettingsServiceMock,
   scopedHistoryMock,
+  docLinksServiceMock,
 } from '../../../../../core/public/mocks';
 
 import {
@@ -39,6 +40,7 @@ describe('SavedObjectEdition', () => {
   let uiSettings: ReturnType<typeof uiSettingsServiceMock.createStartContract>;
   let history: ReturnType<typeof scopedHistoryMock.create>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
+  let docLinks: ReturnType<typeof docLinksServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectEditionProps> = {}) => {
     return (shallowWithI18nProvider(
@@ -57,6 +59,7 @@ describe('SavedObjectEdition', () => {
     savedObjects = savedObjectsServiceMock.createStartContract();
     uiSettings = uiSettingsServiceMock.createStartContract();
     history = scopedHistoryMock.create();
+    docLinks = docLinksServiceMock.createStartContract();
     applications = applicationServiceMock.createStartContract();
     applications.capabilities = {
       navLinks: {},
@@ -81,6 +84,7 @@ describe('SavedObjectEdition', () => {
       savedObjectsClient: savedObjects.client,
       history,
       uiSettings,
+      docLinks: docLinks.links,
     };
 
     bulkGetObjectsMock.mockImplementation(() => [{}]);
