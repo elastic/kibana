@@ -17,7 +17,7 @@ import {
 } from '../../../../../src/core/public';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
-import { createStaticIndexPattern } from '../services/rest/index_pattern';
+import { createStaticDataView } from '../services/rest/data_view';
 import { setHelpExtension } from '../setHelpExtension';
 import { setReadonlyBadge } from '../updateBadge';
 import { ApmAppRoot } from '../components/routing/app_root';
@@ -59,7 +59,7 @@ export const renderApp = ({
   createCallApmApi(coreStart);
 
   // Automatically creates static data view and stores as saved object
-  createStaticIndexPattern().catch((e) => {
+  createStaticDataView().catch((e) => {
     // eslint-disable-next-line no-console
     console.log('Error creating static data view', e);
   });

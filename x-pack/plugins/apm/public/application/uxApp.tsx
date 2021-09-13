@@ -28,7 +28,7 @@ import { UrlParamsProvider } from '../context/url_params_context/url_params_cont
 import { ConfigSchema } from '../index';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
-import { createStaticIndexPattern } from '../services/rest/index_pattern';
+import { createStaticDataView } from '../services/rest/data_view';
 import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
 import { redirectTo } from '../components/routing/redirect_to';
 import { useBreadcrumbs } from '../../../observability/public';
@@ -161,7 +161,7 @@ export const renderApp = ({
   createCallApmApi(core);
 
   // Automatically creates static data view and stores as saved object
-  createStaticIndexPattern().catch((e) => {
+  createStaticDataView().catch((e) => {
     // eslint-disable-next-line no-console
     console.log('Error creating static data view', e);
   });
