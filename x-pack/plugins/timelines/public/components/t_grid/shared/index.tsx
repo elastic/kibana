@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { createContext } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -23,6 +23,8 @@ const heights = {
   tall: 490,
   short: 250,
 };
+
+export const TimelineContext = createContext<{ timelineId: string | null }>({ timelineId: null });
 
 export const TGridLoading: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
   return (
@@ -49,7 +51,7 @@ export const TGridEmpty: React.FC<{ height?: keyof typeof heights }> = ({ height
   const { http } = useKibana<CoreStart>().services;
 
   return (
-    <EuiPanel color="subdued">
+    <EuiPanel color="subdued" data-test-subj="tGridEmptyState">
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={true} style={panelStyle}>

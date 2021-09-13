@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../plugins/maps/common/constants';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../plugins/maps/common';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../src/plugins/visualizations/common/constants';
 import { LENS_EMBEDDABLE_TYPE } from '../../../../plugins/lens/common/constants';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../src/plugins/discover/common';
