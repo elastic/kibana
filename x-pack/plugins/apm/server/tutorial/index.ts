@@ -14,7 +14,7 @@ import {
 } from '../../../../../src/plugins/home/server';
 import { CloudSetup } from '../../../cloud/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
-import { getApmDataViewTitle } from '../lib/index_pattern/get_apm_data_view_title';
+import { getApmDataViewTitle } from '../lib/data_view/get_apm_data_view_title';
 import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';

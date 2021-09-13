@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createStaticDataView } from '../lib/index_pattern/create_static_data_view';
+import { createStaticDataView } from '../lib/data_view/create_static_data_view';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getDynamicDataView } from '../lib/index_pattern/get_dynamic_data_view';
+import { getDynamicDataView } from '../lib/data_view/get_dynamic_data_view';
 import { createApmServerRoute } from './create_apm_server_route';
 
 const staticIndexPatternRoute = createApmServerRoute({
