@@ -14,6 +14,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 export { caseMigrations } from './cases';
 export { configureMigrations } from './configuration';
 export { userActionsMigrations } from './user_actions';
+export { createCommentsMigrations, CreateCommentsMigrationsDeps } from './comments';
 
 export interface SanitizedCaseOwner {
   owner: string;
