@@ -7,8 +7,8 @@
  */
 
 import { get, omit } from 'lodash';
-import { promisify } from 'util';
-import { CloudService, Request } from './cloud_service';
+import fetch from 'node-fetch';
+import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 
 // 2017-04-02 is the first GA release of this API
@@ -25,6 +25,9 @@ interface AzureResponse {
  * @internal
  */
 export class AzureCloudService extends CloudService {
+  constructor() {
+    super('azure');
+  }
   /**
    * Parse the Azure response, if possible.
    *
@@ -51,7 +54,8 @@ export class AzureCloudService extends CloudService {
    *   }
    * }
    */
-  static parseBody(name: string, body: AzureResponse): CloudServiceResponse | null {
+  private parseBody = (body: AzureResponse): CloudServiceResponse | null => {
+    const name = this.getName();
     const compute: Record<string, string> | undefined = get(body, 'compute');
     const id = get<Record<string, string>, string>(compute, 'vmId');
     const vmType = get<Record<string, string>, string>(compute, 'vmSize');
@@ -72,32 +76,22 @@ export class AzureCloudService extends CloudService {
     }
 
     return null;
-  }
+  };
 
-  constructor(options = {}) {
-    super('azure', options);
-  }
-
-  async _checkIfService(request: Request) {
-    const req = {
+  protected _checkIfService = async () => {
+    const response = await fetch(SERVICE_ENDPOINT, {
       method: 'GET',
-      uri: SERVICE_ENDPOINT,
       headers: {
         // Azure requires this header
         Metadata: 'true',
       },
-      json: true,
-    };
+    });
 
-    const response = await promisify(request)(req);
-
-    // Note: there is no fallback option for Azure
-    if (!response || response.statusCode === 404) {
+    if (!response.ok || response.status === 404) {
       throw new Error('Azure request failed');
     }
 
-    return this._parseResponse(response.body, (body) =>
-      AzureCloudService.parseBody(this.getName(), body)
-    );
-  }
+    const jsonBody: AzureResponse = await response.json();
+    return this._parseResponse(jsonBody, this.parseBody);
+  };
 }

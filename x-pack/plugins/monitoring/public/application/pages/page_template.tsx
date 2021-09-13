@@ -10,7 +10,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
-import { MonitoringTimeContainer } from './use_monitoring_time';
+import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
 import { PageLoading } from '../../components';
 import { getSetupModeState, isSetupModeFeatureEnabled } from '../setup_mode/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';

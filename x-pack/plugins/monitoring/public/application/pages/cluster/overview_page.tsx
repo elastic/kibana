@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CODE_PATH_ALL } from '../../../../common/constants';
 import { PageTemplate } from '../page_template';
@@ -17,6 +17,7 @@ import { ExternalConfigContext } from '../../external_config_context';
 import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 interface SetupModeProps {
@@ -33,6 +34,7 @@ export const ClusterOverview: React.FC<{}> = () => {
   const ccs = state.ccs;
   const [clusters, setClusters] = useState([] as any);
   const [loaded, setLoaded] = useState<boolean | null>(false);
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
 
   let tabs: TabMenuItem[] = [];
 
@@ -83,6 +85,12 @@ export const ClusterOverview: React.FC<{}> = () => {
       setLoaded(true);
     }
   }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
+
+  useEffect(() => {
+    if (clusters && clusters.length) {
+      generateBreadcrumbs(clusters[0].cluster_name);
+    }
+  }, [clusters, generateBreadcrumbs]);
 
   return (
     <PageTemplate title={title} pageTitle={pageTitle} tabs={tabs} getPageData={getPageData}>
