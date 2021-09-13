@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniqueId } from 'lodash';
+import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { asyncForEach } from '@kbn/std';
@@ -32,7 +32,7 @@ export type HasDataMap = Record<
 
 export interface HasDataContextValue {
   hasDataMap: Partial<HasDataMap>;
-  hasAnyData: boolean;
+  hasAnyData?: boolean;
   isAllRequestsComplete: boolean;
   onRefreshTimeRange: () => void;
   forceUpdate: string;
@@ -154,7 +154,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
     <HasDataContext.Provider
       value={{
         hasDataMap,
-        hasAnyData,
+        hasAnyData: isEmpty(hasDataMap) ? undefined : hasAnyData,
         isAllRequestsComplete,
         forceUpdate,
         onRefreshTimeRange: () => {
