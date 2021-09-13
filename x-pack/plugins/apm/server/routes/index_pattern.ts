@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
+import { createStaticDataView } from '../lib/index_pattern/create_static_data_view';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getDynamicIndexPattern } from '../lib/index_pattern/get_dynamic_index_pattern';
@@ -31,7 +31,7 @@ const staticIndexPatternRoute = createApmServerRoute({
 
     const spaceId = spaces?.setup.spacesService.getSpaceId(request);
 
-    const didCreateIndexPattern = await createStaticIndexPattern({
+    const didCreateIndexPattern = await createStaticDataView({
       setup,
       config,
       savedObjectsClient,
