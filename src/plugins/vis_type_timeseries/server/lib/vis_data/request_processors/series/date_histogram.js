@@ -12,6 +12,7 @@ import { offsetTime } from '../../offset_time';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 import { AGG_TYPE, getAggsByType } from '../../../../../common/agg_utils';
+import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 
 const { dateHistogramInterval } = search.aggs;
 
@@ -59,8 +60,12 @@ export function dateHistogram(
     const overwriteDateHistogramForEntireTimerangeMode = () => {
       const metricAggs = getAggsByType((agg) => agg.id)[AGG_TYPE.METRIC];
 
-      // we should use auto_date_histogram only for metric aggregations
-      if (series.metrics.every((metric) => metricAggs.includes(metric.type))) {
+      // we should use auto_date_histogram only for metric aggregations and math
+      if (
+        series.metrics.every(
+          (metric) => metricAggs.includes(metric.type) || metric.type === TSVB_METRIC_TYPES.MATH
+        )
+      ) {
         overwrite(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
           field: timeField,
           buckets: 1,

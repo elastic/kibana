@@ -10,6 +10,7 @@ import { overwrite, getBucketSize, isLastValueTimerangeMode, getTimerange } from
 import { calculateAggRoot } from './calculate_agg_root';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 import { AGG_TYPE, getAggsByType } from '../../../../../common/agg_utils';
+import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 
 import type { TableRequestProcessorsFunction, TableSearchRequestMeta } from './types';
 
@@ -65,8 +66,12 @@ export const dateHistogram: TableRequestProcessorsFunction = ({
     panel.series.forEach((column) => {
       const aggRoot = calculateAggRoot(doc, column);
 
-      // we should use auto_date_histogram only for metric aggregations
-      if (column.metrics.every((metric) => metricAggs.includes(metric.type))) {
+      // we should use auto_date_histogram only for metric aggregations and math
+      if (
+        column.metrics.every(
+          (metric) => metricAggs.includes(metric.type) || metric.type === TSVB_METRIC_TYPES.MATH
+        )
+      ) {
         overwrite(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
           field: timeField,
           buckets: 1,
