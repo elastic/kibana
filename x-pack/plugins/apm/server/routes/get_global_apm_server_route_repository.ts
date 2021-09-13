@@ -17,7 +17,7 @@ import { createApmServerRouteRepository } from './create_apm_server_route_reposi
 import { environmentsRouteRepository } from './environments';
 import { errorsRouteRepository } from './errors';
 import { apmFleetRouteRepository } from './fleet';
-import { indexPatternRouteRepository } from './index_pattern';
+import { dataViewRouteRepository } from './data_view';
 import { metricsRouteRepository } from './metrics';
 import { observabilityOverviewRouteRepository } from './observability_overview';
 import { rumRouteRepository } from './rum_client';
@@ -37,7 +37,7 @@ import { historicalDataRouteRepository } from './historical_data';
 
 const getTypedGlobalApmServerRouteRepository = () => {
   const repository = createApmServerRouteRepository()
-    .merge(indexPatternRouteRepository)
+    .merge(dataViewRouteRepository)
     .merge(environmentsRouteRepository)
     .merge(errorsRouteRepository)
     .merge(metricsRouteRepository)
