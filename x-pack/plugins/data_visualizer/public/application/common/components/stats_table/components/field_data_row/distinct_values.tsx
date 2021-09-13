@@ -23,9 +23,7 @@ export const DistinctValues = ({ cardinality, showIcons }: Props) => {
           <EuiIcon type="database" size={'s'} />
         </EuiFlexItem>
       ) : null}
-      <EuiText size={'s'}>
-        <b>{cardinality}</b>
-      </EuiText>
+      <EuiText size={'s'}>{cardinality}</EuiText>
     </EuiFlexGroup>
   );
 };

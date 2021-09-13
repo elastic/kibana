@@ -231,35 +231,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {dimensions.showIcons ? (
               <EuiIcon type={'visBarVertical'} style={{ paddingRight: 4 }} />
-            ) : (
-              <EuiToolTip
-                content={
-                  !showDistributions
-                    ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsTooltip', {
-                        defaultMessage: 'Show distributions',
-                      })
-                    : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsTooltip', {
-                        defaultMessage: 'Hide distributions',
-                      })
-                }
-              >
-                <EuiButtonIcon
-                  style={{ marginLeft: 4 }}
-                  size={'s'}
-                  iconType={showDistributions ? 'eye' : 'eyeClosed'}
-                  onClick={() => toggleShowDistribution()}
-                  aria-label={
-                    showDistributions
-                      ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel', {
-                          defaultMessage: 'Show distributions',
-                        })
-                      : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsAriaLabel', {
-                          defaultMessage: 'Hide distributions',
-                        })
-                  }
-                />
-              </EuiToolTip>
-            )}
+            ) : null}
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',
             })}
@@ -278,7 +250,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
                 <EuiButtonIcon
                   style={{ marginLeft: 4 }}
                   size={'s'}
-                  iconType={showDistributions ? 'eye' : 'eyeClosed'}
+                  iconType={!showDistributions ? 'eye' : 'eyeClosed'}
                   onClick={() => toggleShowDistribution()}
                   aria-label={
                     showDistributions

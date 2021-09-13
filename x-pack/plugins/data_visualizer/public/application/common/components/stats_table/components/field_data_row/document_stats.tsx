@@ -31,7 +31,7 @@ export const DocumentStat = ({ config, showIcons }: Props) => {
         </EuiFlexItem>
       ) : null}
       <EuiText size={'s'}>
-        <b>{count}</b> ({docsPercent}%)
+        {count} ({docsPercent}%)
       </EuiText>
     </EuiFlexGroup>
   );
