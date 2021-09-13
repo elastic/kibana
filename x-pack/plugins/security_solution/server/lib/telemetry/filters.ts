@@ -111,6 +111,8 @@ export const allowlistEventFields: AllowlistFields = {
   events: allowlistBaseEventFields,
   // behavioral protection re-nests some field sets under Events.* (>=7.15)
   Events: allowlistBaseEventFields,
+  // behavioral protection response data under Response.* (>=7.15)
+  Responses: true,
   rule: {
     id: true,
     name: true,
