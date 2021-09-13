@@ -36,7 +36,7 @@ function getParams(params: CategoryParams, search: string) {
   return { selectedCategory, searchParam };
 }
 
-function categoryExists(category: string, categories: Array<{ id: string }>) {
+function categoryExists(category: string, categories: CategorySummaryItem[]) {
   return categories.some((c) => c.id === category);
 }
 
@@ -154,10 +154,17 @@ const InstalledPackages: React.FC = memo(() => {
     [allInstalledPackages.length, updatablePackages.length]
   );
 
+  if (!categoryExists(selectedCategory, categories)) {
+    history.replace(
+      pagePathGetters.integrations_installed({ category: '', query: searchParam })[1]
+    );
+    return null;
+  }
+
   const controls = (
     <CategoryFacets
       categories={categories}
-      selectedCategory={categoryExists(selectedCategory, categories) ? selectedCategory : ''}
+      selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
     />
   );
@@ -233,11 +240,16 @@ const AvailablePackages: React.FC = memo(() => {
     [allPackages?.length, categoriesRes]
   );
 
+  if (!categoryExists(selectedCategory, categories)) {
+    history.replace(pagePathGetters.integrations_all({ category: '', query: searchParam })[1]);
+    return null;
+  }
+
   const controls = categories ? (
     <CategoryFacets
       isLoading={isLoadingCategories || isLoadingAllPackages}
       categories={categories}
-      selectedCategory={categoryExists(selectedCategory, categories) ? selectedCategory : ''}
+      selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategorySummaryItem) => {
         setSelectedCategory(id);
       }}
