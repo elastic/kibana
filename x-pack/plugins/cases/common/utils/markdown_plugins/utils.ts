@@ -23,6 +23,9 @@ export interface LensMarkdownNode extends Node {
   id: string;
 }
 
+/**
+ * A node that has children of other nodes describing the markdown elements or a specific lens visualization.
+ */
 export interface MarkdownNode extends Node {
   children: Array<LensMarkdownNode | Node>;
 }
@@ -30,6 +33,10 @@ export interface MarkdownNode extends Node {
 export const getLensVisualizations = (parsedComment?: Array<LensMarkdownNode | Node>) =>
   (parsedComment?.length ? filter(parsedComment, { type: LENS_ID }) : []) as LensMarkdownNode[];
 
+/**
+ * Converts a text comment into a series of markdown nodes that represent a lens visualization, a timeline link, or just
+ * plain markdown.
+ */
 export const parseCommentString = (comment: string) => {
   const processor = unified().use([[markdown, {}], LensParser, TimelineParser]);
   return processor.parse(comment) as MarkdownNode;
@@ -61,7 +68,6 @@ export const isLensMarkdownNode = (node?: unknown): node is LensMarkdownNode => 
     unsafeNode != null &&
     unsafeNode.timeRange != null &&
     unsafeNode.attributes != null &&
-    unsafeNode != null &&
     unsafeNode.type === 'lens'
   );
 };
