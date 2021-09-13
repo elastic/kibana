@@ -551,7 +551,6 @@ Array [
           "index-pattern",
           "search",
           "visualization",
-          "timelion-sheet",
           "canvas-workpad",
           "lens",
           "map",
@@ -584,7 +583,6 @@ Array [
           "index-pattern",
           "search",
           "visualization",
-          "timelion-sheet",
           "canvas-workpad",
           "lens",
           "map",
@@ -857,54 +855,6 @@ Array [
 ]
 `;
 
-exports[`buildOSSFeatures with a basic license returns the timelion feature augmented with appropriate sub feature privileges 1`] = `
-Array [
-  Object {
-    "privilege": Object {
-      "app": Array [
-        "timelion",
-        "kibana",
-      ],
-      "catalogue": Array [
-        "timelion",
-      ],
-      "savedObject": Object {
-        "all": Array [
-          "timelion-sheet",
-        ],
-        "read": Array [
-          "index-pattern",
-        ],
-      },
-      "ui": Array [
-        "save",
-      ],
-    },
-    "privilegeId": "all",
-  },
-  Object {
-    "privilege": Object {
-      "app": Array [
-        "timelion",
-        "kibana",
-      ],
-      "catalogue": Array [
-        "timelion",
-      ],
-      "savedObject": Object {
-        "all": Array [],
-        "read": Array [
-          "index-pattern",
-          "timelion-sheet",
-        ],
-      },
-      "ui": Array [],
-    },
-    "privilegeId": "read",
-  },
-]
-`;
-
 exports[`buildOSSFeatures with a basic license returns the visualize feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
@@ -1081,7 +1031,6 @@ Array [
           "index-pattern",
           "search",
           "visualization",
-          "timelion-sheet",
           "canvas-workpad",
           "lens",
           "map",
@@ -1114,7 +1063,6 @@ Array [
           "index-pattern",
           "search",
           "visualization",
-          "timelion-sheet",
           "canvas-workpad",
           "lens",
           "map",
@@ -1381,54 +1329,6 @@ Array [
       "ui": Array [
         "read",
       ],
-    },
-    "privilegeId": "read",
-  },
-]
-`;
-
-exports[`buildOSSFeatures with a enterprise license returns the timelion feature augmented with appropriate sub feature privileges 1`] = `
-Array [
-  Object {
-    "privilege": Object {
-      "app": Array [
-        "timelion",
-        "kibana",
-      ],
-      "catalogue": Array [
-        "timelion",
-      ],
-      "savedObject": Object {
-        "all": Array [
-          "timelion-sheet",
-        ],
-        "read": Array [
-          "index-pattern",
-        ],
-      },
-      "ui": Array [
-        "save",
-      ],
-    },
-    "privilegeId": "all",
-  },
-  Object {
-    "privilege": Object {
-      "app": Array [
-        "timelion",
-        "kibana",
-      ],
-      "catalogue": Array [
-        "timelion",
-      ],
-      "savedObject": Object {
-        "all": Array [],
-        "read": Array [
-          "index-pattern",
-          "timelion-sheet",
-        ],
-      },
-      "ui": Array [],
     },
     "privilegeId": "read",
   },
