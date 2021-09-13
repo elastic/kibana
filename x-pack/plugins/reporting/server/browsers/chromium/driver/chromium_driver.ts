@@ -119,7 +119,7 @@ export class HeadlessChromiumDriver {
     await this.page.evaluateOnNewDocument(this.core.getEnableScreenshotMode());
 
     if (layout) {
-      await this.page.evaluateOnNewDocument(this.core.getSetScreenshotLayout(), [layout.id]);
+      await this.page.evaluateOnNewDocument(this.core.getSetScreenshotLayout(), layout.id);
     }
 
     if (locator) {

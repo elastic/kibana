@@ -46,11 +46,13 @@ export interface UseDashboardStateProps {
   redirectTo: DashboardRedirect;
   isEmbeddedExternally: boolean;
   kbnUrlStateStorage: IKbnUrlStateStorage;
+  initialViewMode?: ViewMode;
 }
 
 export const useDashboardAppState = ({
   history,
   redirectTo,
+  initialViewMode,
   savedDashboardId,
   kbnUrlStateStorage,
   isEmbeddedExternally,
@@ -171,6 +173,9 @@ export const useDashboardAppState = ({
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
       };
+      if (initialViewMode) {
+        initialDashboardState.viewMode = initialViewMode;
+      }
       dispatchDashboardStateChange(setDashboardState(initialDashboardState));
 
       /**
@@ -326,6 +331,7 @@ export const useDashboardAppState = ({
     savedDashboardId,
     getStateTransfer,
     savedDashboards,
+    initialViewMode,
     usageCollection,
     scopedHistory,
     notifications,

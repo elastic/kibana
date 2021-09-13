@@ -17,7 +17,7 @@ import {
   getDashboardTitle,
   leaveConfirmStrings,
 } from '../dashboard_strings';
-import { EmbeddableRenderer } from '../services/embeddable';
+import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
@@ -45,6 +45,8 @@ export function DashboardApp({
   } = useKibana<DashboardAppServices>().services;
 
   const isScreenshotMode = screenshotMode.isScreenshotMode();
+  const screenshotLayout = screenshotMode.getScreenshotLayout();
+  const legacyPrintLayoutDetected = isScreenshotMode && screenshotLayout === 'print';
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -63,6 +65,7 @@ export function DashboardApp({
     savedDashboardId,
     kbnUrlStateStorage,
     isEmbeddedExternally: Boolean(embedSettings),
+    initialViewMode: legacyPrintLayoutDetected ? ViewMode.PRINT : undefined,
   });
 
   // Build app leave handler whenever hasUnsavedChanges changes

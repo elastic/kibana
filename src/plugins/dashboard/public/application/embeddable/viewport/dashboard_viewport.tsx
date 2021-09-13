@@ -89,7 +89,8 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
 
   public render() {
     const { container } = this.props;
-    const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
+    const viewMode = container.getInput().viewMode;
+    const isEditMode = viewMode !== ViewMode.VIEW && viewMode !== ViewMode.PRINT;
     const {
       isEmbeddedExternally,
       isFullScreenMode,
