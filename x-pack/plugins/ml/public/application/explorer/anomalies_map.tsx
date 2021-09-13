@@ -16,13 +16,13 @@ import {
   EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { VectorLayerDescriptor } from '../../../../maps/common/descriptor_types';
 import {
   FIELD_ORIGIN,
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
-} from '../../../../maps/common/constants';
+  VectorLayerDescriptor,
+} from '../../../../maps/common';
 import { useMlKibana } from '../contexts/kibana';
 import { isDefined } from '../../../common/types/guards';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
