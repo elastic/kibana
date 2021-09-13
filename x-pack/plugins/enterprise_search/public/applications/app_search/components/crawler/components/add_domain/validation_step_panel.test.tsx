@@ -44,7 +44,7 @@ describe('ValidationStepPanel', () => {
           action={action}
         />
       );
-      expect(wrapper.find('[data-test-subj="errorMessage"]').dive().text()).toContain(
+      expect(wrapper.find('[data-test-subj="errorMessage"]').childAt(0).text()).toContain(
         'Error message'
       );
       expect(wrapper.find('[data-test-subj="action"]')).toHaveLength(1);
@@ -58,7 +58,7 @@ describe('ValidationStepPanel', () => {
           action={action}
         />
       );
-      expect(wrapper.find('[data-test-subj="errorMessage"]').dive().text()).toContain(
+      expect(wrapper.find('[data-test-subj="errorMessage"]').childAt(0).text()).toContain(
         'Error message'
       );
       expect(wrapper.find('[data-test-subj="action"]')).toHaveLength(1);

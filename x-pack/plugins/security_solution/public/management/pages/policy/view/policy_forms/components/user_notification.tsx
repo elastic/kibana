@@ -94,6 +94,38 @@ export const UserNotification = React.memo(
       [policyDetailsConfig, dispatch, protection, osList]
     );
 
+    const tooltipProtectionText = (protectionType: PolicyProtection) => {
+      if (protectionType === 'memory_protection') {
+        return i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetail.memoryProtectionTooltip',
+          {
+            defaultMessage: 'memory threat',
+          }
+        );
+      } else if (protectionType === 'behavior_protection') {
+        return i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetail.behaviorProtectionTooltip',
+          {
+            defaultMessage: 'malicious behavior',
+          }
+        );
+      } else {
+        return protectionType;
+      }
+    };
+
+    const tooltipBracketText = (protectionType: PolicyProtection) => {
+      if (protectionType === 'memory_protection' || protection === 'behavior_protection') {
+        return i18n.translate('xpack.securitySolution.endpoint.policyDetail.rule', {
+          defaultMessage: 'rule',
+        });
+      } else {
+        return i18n.translate('xpack.securitySolution.endpoint.policyDetail.filename', {
+          defaultMessage: 'filename',
+        });
+      }
+    };
+
     return (
       <>
         <EuiSpacer size="m" />
@@ -139,14 +171,17 @@ export const UserNotification = React.memo(
                         id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.a"
                         defaultMessage="Selecting the user notification option will display a notification to the host user when { protectionName } is prevented or detected."
                         values={{
-                          protectionName: protection,
+                          protectionName: tooltipProtectionText(protection),
                         }}
                       />
                       <EuiSpacer size="m" />
                       <FormattedMessage
-                        id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.b"
+                        id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.c"
                         defaultMessage="
-                    The user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the filename."
+                    The user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the { bracketText }."
+                        values={{
+                          bracketText: tooltipBracketText(protection),
+                        }}
                       />
                     </>
                   }
