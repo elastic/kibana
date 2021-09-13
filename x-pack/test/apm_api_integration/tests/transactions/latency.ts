@@ -17,7 +17,7 @@ import { registry } from '../../common/registry';
 type LatencyChartReturnType = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
 

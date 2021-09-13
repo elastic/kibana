@@ -118,18 +118,23 @@ describe('migration v2', () => {
       .getTypeRegistry()
       .getAllTypes()
       .reduce((versionMap, type) => {
-        if (type.migrations) {
-          const migrationsMap =
-            typeof type.migrations === 'function' ? type.migrations() : type.migrations;
-          const highestVersion = Object.keys(migrationsMap).sort(Semver.compare).reverse()[0];
+        const { name, migrations, convertToMultiNamespaceTypeVersion } = type;
+        if (migrations || convertToMultiNamespaceTypeVersion) {
+          const migrationsMap = typeof migrations === 'function' ? migrations() : migrations;
+          const migrationsKeys = migrationsMap ? Object.keys(migrationsMap) : [];
+          if (convertToMultiNamespaceTypeVersion) {
+            // Setting this option registers a conversion migration that is reflected in the object's `migrationVersions` field
+            migrationsKeys.push(convertToMultiNamespaceTypeVersion);
+          }
+          const highestVersion = migrationsKeys.sort(Semver.compare).reverse()[0];
           return {
             ...versionMap,
-            [type.name]: highestVersion,
+            [name]: highestVersion,
           };
         } else {
           return {
             ...versionMap,
-            [type.name]: undefined,
+            [name]: undefined,
           };
         }
       }, {} as Record<string, string | undefined>);
