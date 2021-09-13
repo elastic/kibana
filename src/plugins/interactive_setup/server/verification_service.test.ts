@@ -14,29 +14,32 @@ import { VerificationCode } from './verification_code';
 import { VerificationService } from './verification_service';
 
 jest.mock('fs');
+jest.mock('@kbn/utils', () => ({
+  getConfigDirectory: jest.fn().mockReturnValue('/config/'),
+}));
 
 const loggerMock = loggingSystemMock.createLogger();
 
 describe('VerificationService', () => {
   describe('setup()', () => {
     it('should generate verification code', () => {
-      const service = new VerificationService('/path/to/kibana.yml', loggerMock);
+      const service = new VerificationService(loggerMock);
       const setup = service.setup();
       expect(setup).toBeInstanceOf(VerificationCode);
     });
 
     it('should write verification code to disk', () => {
-      const service = new VerificationService('/path/to/kibana.yml', loggerMock);
+      const service = new VerificationService(loggerMock);
       const setup = service.setup();
-      expect(fs.writeFileSync).toHaveBeenCalledWith('/path/to/.code', setup.code);
+      expect(fs.writeFileSync).toHaveBeenCalledWith('/config/.code', setup.code);
     });
   });
 
   describe('stop()', () => {
     it('should remove verification code from disk', () => {
-      const service = new VerificationService('/path/to/kibana.yml', loggerMock);
+      const service = new VerificationService(loggerMock);
       service.stop();
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/path/to/.code');
+      expect(fs.unlinkSync).toHaveBeenCalledWith('/config/.code');
     });
   });
 });

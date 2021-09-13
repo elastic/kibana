@@ -30,7 +30,6 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
   readonly #logger: Logger;
   readonly #elasticsearch: ElasticsearchService;
   readonly #verification: VerificationService;
-  readonly #configPath: string;
 
   #elasticsearchConnectionStatusSubscription?: Subscription;
 
@@ -44,18 +43,11 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
   };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    // If possible, try to use `*.dev.yml` config when Kibana is run in development mode.
-    this.#configPath = this.initializerContext.env.mode.dev
-      ? this.initializerContext.env.configs.find((config) => config.endsWith('.dev.yml')) ??
-        this.initializerContext.env.configs[0]
-      : this.initializerContext.env.configs[0];
-
     this.#logger = this.initializerContext.logger.get();
     this.#elasticsearch = new ElasticsearchService(
       this.initializerContext.logger.get('elasticsearch')
     );
     this.#verification = new VerificationService(
-      this.#configPath,
       this.initializerContext.logger.get('verification')
     );
   }
@@ -81,6 +73,14 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
       return;
     }
 
+    const verificationCode = this.#verification.setup();
+    if (!verificationCode) {
+      this.#logger.error(
+        'Interactive setup mode could not be activated. Ensure Kibana has permission to write to its config folder.'
+      );
+      return;
+    }
+
     let completeSetup: (result: { shouldReloadConfig: boolean }) => void;
     core.preboot.holdSetupUntilResolved(
       'Validating Elasticsearch connection configuration…',
@@ -101,8 +101,6 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
       elasticsearch: core.elasticsearch,
       connectionCheckInterval: this.#getConfig().connectionCheck.interval,
     });
-
-    const verificationCode = this.#verification.setup();
 
     this.#elasticsearchConnectionStatusSubscription = elasticsearch.connectionStatus$.subscribe(
       (status) => {
@@ -131,16 +129,19 @@ Go to ${chalk.cyanBright.underline(url)} to get started.
       }
     );
 
+    // If possible, try to use `*.dev.yml` config when Kibana is run in development mode.
+    const configPath = this.initializerContext.env.mode.dev
+      ? this.initializerContext.env.configs.find((config) => config.endsWith('.dev.yml')) ??
+        this.initializerContext.env.configs[0]
+      : this.initializerContext.env.configs[0];
+
     core.http.registerRoutes('', (router) => {
       defineRoutes({
         router,
         basePath: core.http.basePath,
         logger: this.#logger.get('routes'),
         preboot: { ...core.preboot, completeSetup },
-        kibanaConfigWriter: new KibanaConfigWriter(
-          this.#configPath,
-          this.#logger.get('kibana-config')
-        ),
+        kibanaConfigWriter: new KibanaConfigWriter(configPath, this.#logger.get('kibana-config')),
         elasticsearch,
         verificationCode,
         getConfig: this.#getConfig.bind(this),

@@ -9,40 +9,40 @@
 import fs from 'fs';
 import path from 'path';
 
+import { getConfigDirectory } from '@kbn/utils';
 import type { Logger } from 'src/core/server';
 
 import { getDetailedErrorMessage } from './errors';
 import { VerificationCode } from './verification_code';
 
 export class VerificationService {
-  private fname: string;
+  private fileName: string;
 
-  constructor(configPath: string, private readonly logger: Logger) {
-    this.fname = path.join(path.dirname(configPath), '.code');
+  constructor(private readonly logger: Logger) {
+    this.fileName = path.join(getConfigDirectory(), '.code');
   }
 
   public setup() {
     const verificationCode = new VerificationCode(this.logger);
 
     try {
-      fs.writeFileSync(this.fname, verificationCode.code);
-      this.logger.debug(`Successfully wrote verification code to ${this.fname}`);
+      fs.writeFileSync(this.fileName, verificationCode.code);
+      this.logger.debug(`Successfully wrote verification code to ${this.fileName}`);
+      return verificationCode;
     } catch (error) {
       this.logger.error(
-        `Failed to write verification code to ${this.fname}: ${getDetailedErrorMessage(error)}.`
+        `Failed to write verification code to ${this.fileName}: ${getDetailedErrorMessage(error)}.`
       );
     }
-
-    return verificationCode;
   }
 
   public stop() {
     try {
-      fs.unlinkSync(this.fname);
-      this.logger.debug(`Successfully removed ${this.fname}`);
+      fs.unlinkSync(this.fileName);
+      this.logger.debug(`Successfully removed ${this.fileName}`);
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-        this.logger.error(`Failed to remove ${this.fname}: ${getDetailedErrorMessage(error)}.`);
+        this.logger.error(`Failed to remove ${this.fileName}: ${getDetailedErrorMessage(error)}.`);
       }
     }
   }
