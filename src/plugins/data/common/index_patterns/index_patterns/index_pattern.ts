@@ -79,7 +79,7 @@ export class DataView implements IIndexPattern {
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
   private fieldAttrs: FieldAttrs;
-  runtimeFieldMap: Record<string, RuntimeField>;
+  private runtimeFieldMap: Record<string, RuntimeField>;
 
   /**
    * prevents errors when index pattern exists before indices

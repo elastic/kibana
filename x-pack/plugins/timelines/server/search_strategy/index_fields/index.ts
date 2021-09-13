@@ -96,7 +96,7 @@ export const requestIndexFieldSearch = async (
     if (!request.onlyCheckIfIndicesExist) {
       // type cast because index pattern type is FieldSpec and timeline type is FieldDescriptor, same diff
       const fieldDescriptor = [Object.values(dataView.fields.toSpec()) as FieldDescriptor[]];
-      runtimeMappings = dataView.runtimeFieldMap;
+      runtimeMappings = dataView.toSpec().runtimeFieldMap ?? {};
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
   } else if ('indices' in request) {
