@@ -8,7 +8,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Provider } from 'react-redux';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from '../../../../../src/plugins/saved_objects/public';
 import { Workspace } from '../types';
@@ -40,6 +40,7 @@ export const WorkspaceRoute = ({
     getBasePath,
     addBasePath,
     setHeaderActionMenu,
+    spaces,
     indexPatterns: getIndexPatternProvider,
   },
 }: WorkspaceRouteProps) => {
@@ -56,7 +57,6 @@ export const WorkspaceRoute = ({
    */
   const [renderCounter, setRenderCounter] = useState(0);
   const history = useHistory();
-  const urlQuery = new URLSearchParams(useLocation().search).get('query');
 
   const indexPatternProvider = useMemo(
     () => createCachedIndexPatternProvider(getIndexPatternProvider.get),
@@ -114,22 +114,27 @@ export const WorkspaceRoute = ({
     })
   );
 
-  const { savedWorkspace, indexPatterns } = useWorkspaceLoader({
+  const loaded = useWorkspaceLoader({
     workspaceRef,
     store,
     savedObjectsClient,
-    toastNotifications,
+    spaces,
+    coreStart,
   });
 
-  if (!savedWorkspace || !indexPatterns) {
+  if (!loaded) {
     return null;
   }
+
+  const { savedWorkspace, indexPatterns, sharingSavedObjectProps } = loaded;
 
   return (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <Provider store={store}>
           <WorkspaceLayout
+            spaces={spaces}
+            sharingSavedObjectProps={sharingSavedObjectProps}
             renderCounter={renderCounter}
             workspace={workspaceRef.current}
             loading={loading}
@@ -143,7 +148,6 @@ export const WorkspaceRoute = ({
             indexPatterns={indexPatterns}
             savedWorkspace={savedWorkspace}
             indexPatternProvider={indexPatternProvider}
-            urlQuery={urlQuery}
           />
         </Provider>
       </KibanaContextProvider>
