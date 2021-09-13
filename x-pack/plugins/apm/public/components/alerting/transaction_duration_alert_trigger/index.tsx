@@ -29,7 +29,13 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
+import {
+  AlertMetadata,
+  getIntervalAndTimeRange,
+  isNewApmRuleFromStackManagement,
+  TimeUnit,
+} from '../helper';
+import { NewAlertEmptyPrompt } from '../new_alert_empty_prompt';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 
@@ -155,6 +161,10 @@ export function TransactionDurationAlertTrigger(props: Props) {
       yTickFormat={yTickFormat}
     />
   );
+
+  if (isNewApmRuleFromStackManagement(alertParams, metadata)) {
+    return <NewAlertEmptyPrompt />;
+  }
 
   if (!params.serviceName) {
     return null;

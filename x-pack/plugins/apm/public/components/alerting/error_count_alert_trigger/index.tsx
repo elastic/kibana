@@ -8,14 +8,20 @@
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
 import React, { useEffect } from 'react';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asInteger } from '../../../../common/utils/formatters';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
+import {
+  AlertMetadata,
+  getIntervalAndTimeRange,
+  isNewApmRuleFromStackManagement,
+  TimeUnit,
+} from '../helper';
+import { NewAlertEmptyPrompt } from '../new_alert_empty_prompt';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { createCallApmApi } from '../../../services/rest/createCallApmApi';
@@ -88,6 +94,10 @@ export function ErrorCountAlertTrigger(props: Props) {
       params.serviceName,
     ]
   );
+
+  if (isNewApmRuleFromStackManagement(alertParams, metadata)) {
+    return <NewAlertEmptyPrompt />;
+  }
 
   const fields = [
     <ServiceField value={params.serviceName} />,
