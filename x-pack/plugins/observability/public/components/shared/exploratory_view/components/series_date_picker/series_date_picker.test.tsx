@@ -26,7 +26,7 @@ describe('SeriesDatePicker', function () {
       initSeries,
     });
 
-    getByText('Last 30 Minutes');
+    getByText('Last 30 minutes');
   });
 
   it('should set series data', async function () {

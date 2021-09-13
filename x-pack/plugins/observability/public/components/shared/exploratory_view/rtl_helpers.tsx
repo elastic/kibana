@@ -159,7 +159,7 @@ export function MockRouter<ExtraCore>({
 }: MockRouterProps<ExtraCore>) {
   return (
     <Router history={history}>
-      <Route path={'/app/observability/exploratory-view/:mode'}>
+      <Route path={'/app/observability/exploratory-view/'}>
         <MockKibanaProvider core={core} kibanaProps={kibanaProps} history={history}>
           {children}
         </MockKibanaProvider>
@@ -176,7 +176,7 @@ export function render<ExtraCore>(
     core: customCore,
     kibanaProps,
     renderOptions,
-    url = '/app/observability/exploratory-view/configure#?autoApply=!t',
+    url = '/app/observability/exploratory-view/',
     initSeries = {},
   }: RenderRouterOptions<ExtraCore> = {}
 ) {
@@ -299,7 +299,7 @@ function mockSeriesStorageContext({
     firstSeries: mockDataSeries[0],
     allSeries: mockDataSeries,
     setReportType: jest.fn(),
-    storage: { get: jest.fn() } as any,
+    storage: { get: jest.fn().mockReturnValue(mockDataSeries) } as any,
   } as SeriesContextValue;
 }
 
