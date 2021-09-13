@@ -60,7 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
   tabsClassName,
   'data-test-subj': dataTestSubj,
 }) => (
-  <Container data-test-subj={dataTestSubj}>
+  <Container data-test-subj={dataTestSubj} className="header_container">
     <Wrapper maxWidth={maxWidth}>
       <HeaderColumns
         leftColumn={leftColumn}
