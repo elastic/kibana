@@ -153,5 +153,23 @@ describe('credentialStore', () => {
 
       expect(securityStartMock.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalled();
     });
+
+    it('falls back to user credentials when error granting API key', async () => {
+      const credStore = credentialStoreFactory(logMock);
+
+      securityStartMock.authc.apiKeys.grantAsInternalUser.mockRejectedValue(
+        new Error('Error granting API key')
+      );
+
+      await credStore.set({
+        request: requestMock,
+        reindexOp: reindexOpMock,
+        security: securityStartMock,
+      });
+
+      expect(credStore.get(reindexOpMock)).toEqual({
+        authorization: basicAuthHeader,
+      });
+    });
   });
 });

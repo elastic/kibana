@@ -56,18 +56,28 @@ export const credentialStoreFactory = (logger: Logger): CredentialStore => {
     security?: SecurityPluginStart;
     reindexOpId: string;
   }): Promise<string | undefined> => {
-    const apiKeyResult = await security?.authc.apiKeys.grantAsInternalUser(request, {
-      name: `ua_reindex_${reindexOpId}`,
-      role_descriptors: {},
-    });
+    try {
+      const apiKeyResult = await security?.authc.apiKeys.grantAsInternalUser(request, {
+        name: `ua_reindex_${reindexOpId}`,
+        role_descriptors: {},
+        metadata: {
+          description:
+            'Created by the Upgrade Assistant for a reindex operation; this can be safely deleted after Kibana is upgraded.',
+        },
+      });
 
-    if (apiKeyResult) {
-      const { api_key: apiKey, id } = apiKeyResult;
-      // Store each API key per reindex operation so that we can later invalidate it when the reindex operation is complete
-      apiKeysMap.set(reindexOpId, id);
-      // Returns the base64 encoding of `id:api_key`
-      // This can be used when sending a request with an "Authorization: ApiKey xxx" header
-      return Buffer.from(`${id}:${apiKey}`).toString('base64');
+      if (apiKeyResult) {
+        const { api_key: apiKey, id } = apiKeyResult;
+        // Store each API key per reindex operation so that we can later invalidate it when the reindex operation is complete
+        apiKeysMap.set(reindexOpId, id);
+        // Returns the base64 encoding of `id:api_key`
+        // This can be used when sending a request with an "Authorization: ApiKey xxx" header
+        return Buffer.from(`${id}:${apiKey}`).toString('base64');
+      }
+    } catch (error) {
+      // There are a few edge cases were granting an API key could fail,
+      // in which case we fall back to using the requestor's credentials in memory
+      return undefined;
     }
   };
 
