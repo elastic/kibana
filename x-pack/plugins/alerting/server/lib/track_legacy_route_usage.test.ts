@@ -14,8 +14,8 @@ describe('trackLegacyRouteUsage', () => {
 
     trackLegacyRouteUsage('test', mockUsageCounter);
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-      counterName: `legacy_route_test`,
-      counterType: 'legacy_api_usage',
+      counterName: `legacyRoute_test`,
+      counterType: 'legacyApiUsage',
       incrementBy: 1,
     });
   });
