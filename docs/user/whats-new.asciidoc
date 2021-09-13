@@ -1,27 +1,99 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-This section summarizes the most important changes in this release. For previous
-releases, refer to:
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check out the <<release-notes, release notes>>.
 
-* {kibana-ref-all}/7.11/whats-new.html[7.11]
-* {kibana-ref-all}/7.10/whats-new.html[7.10]
-* {kibana-ref-all}/7.9/whats-new.html[7.9]
-* {kibana-ref-all}/7.8/whats-new.html[7.8]
-* {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7]
-* {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6]
-* {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5]
-* {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4]
-* {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3]
-* {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
-* {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1]
-* {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
-
-For the full list of changes in {minor-version}, refer to the <<release-notes>>.
+Other versions: {kibana-ref-all}/7.14/whats-new.html[7.14] | {kibana-ref-all}/7.13/whats-new.html[7.13] | {kibana-ref-all}/7.12/whats-new.html[7.12] | {kibana-ref-all}/7.11/whats-new.html[7.11] | 
+{kibana-ref-all}/7.10/whats-new.html[7.10] | {kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] | 
+{kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] | {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | 
+{kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2] | {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | 
+{kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+[float]
+[[alerting-7-15]]
+=== Alerting
+
+TBD
+
+[float]
+[[home-page-7.15]]
+=== Simplified home page
+
+Check out our simplified home page, which has a new design that helps you get to the solutions and your data faster.  
+
+[role="screenshot"]
+image:images/whats-new_home-page.png[Home page]
+
+[float]
+[[maps-7-15]]
+=== Maps
+
+TBD
+
+[float]
+[[discover-7-15]]
+=== Discover
+
+*Discover* now includes an improved *No results match your search criteria* screen with clear next steps and guidance on how you can get relevant results faster.
+
+[role="screenshot"]
+image:images/whats-new_discover-no-results.png[No results message in Discover]
+
+[float]
+[[visualizations-7-15]]
+=== Visualizations
+
+[float]
+[[heatmap-color-options]]
+==== Heatmap color options
+
+In the drag-and-drop visualization editor, you can now apply color pallettes and custom colors to heatmaps, and fine tune the opacity of individual colors.
+
+[role="screenshot"]
+image:images/whats-new_heatmap-colors.png[Heatmap color options]
+
+[float]
+[[flexible-legend-options]]
+==== Flexible legend options
+
+We've added more options to customize the legends in the drag-and-drop visualization editor, *TSVB*, and the *Aggregation Based* area, line, bar, and pie charts. 
+
+You can choose to view, or not to view, the full name of your data series by enabling legend text truncation. When enabled, you can control the exact number of lines before truncation to make sure your legend isn't cutting off the important part of your data labels.  
+
+[role="screenshot"]
+image:images/whats-new_viz-legend-options.png[Legend menu options for truncating text]
+
+In the drag-and-drop visualization editor, you can save panel space by choosing to embed the legend in the visualization. 
+
+[role="screenshot"]
+image:images/whats-new_embed-legend.png[Drag-and-drop editor visualization with embedded legend]
+
+[float]
+[[more-axes-configuration-options]]
+==== More axis configuration options
+
+In the drag-and-drop visualization editor, you can now orient your axis. While it's better to rotate your visualization to improve readability, axis orientation can help when you need the extra space on the horizontal axis.
+
+[float]
+[[more-axes-configuration-options]]
+==== Percentile aggregation series and colors
+
+In *TSVB*, you can now visualize multiple percentiles as their own sereies, and apply a color to each series to easily distinguish between them.
+
+[float]
+[[dashboard-7-15]]
+=== Dashboard
+
+[float]
+[[synchronized-cursor-hover]]
+==== Synchronized cursor hover
+
 
 // end::notable-highlights[]
