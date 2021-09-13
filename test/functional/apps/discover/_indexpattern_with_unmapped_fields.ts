@@ -20,8 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/unmapped_fields');
       await security.testUser.setRoles(['kibana_admin', 'test-index-unmapped-fields']);
-      const fromTime = 'Jan 10, 2021 @ 00:00:00.000';
-      const toTime = 'Jan 30, 2021 @ 00:00:00.000';
+      const fromTime = 'Jan 20, 2021 @ 00:00:00.000';
+      const toTime = 'Jan 25, 2021 @ 00:00:00.000';
 
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'test-index-unmapped-fields',
