@@ -25,8 +25,8 @@ jest.mock('../settings/apm_indices/get_apm_indices', () => ({
   }),
 }));
 
-jest.mock('../index_pattern/get_dynamic_index_pattern', () => ({
-  getDynamicIndexPattern: async () => {
+jest.mock('../index_pattern/get_dynamic_data_view', () => ({
+  getDynamicDataView: async () => {
     return;
   },
 }));
