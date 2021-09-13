@@ -8,11 +8,6 @@
 
 import { omit, isObject } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  CORE_USAGE_STATS_TYPE,
-  CORE_USAGE_STATS_ID,
-  REPOSITORY_RESOLVE_OUTCOME_STATS,
-} from '../../../core_usage_data';
 import type { ElasticsearchClient } from '../../../elasticsearch/';
 import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import type { Logger } from '../../../logging';
@@ -65,8 +60,8 @@ import {
   SavedObjectsMigrationVersion,
   MutatingOperationRefreshSetting,
 } from '../../types';
-import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';
 import {
@@ -1127,148 +1122,21 @@ export class SavedObjectsRepository {
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
-    if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
+      registry: this._registry,
+      allowedTypes: this._allowedTypes,
+      client: this.client,
+      serializer: this._serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      incrementCounterInternal: this.incrementCounterInternal.bind(this),
+      objects: [{ type, id }],
+      options,
+    });
+    const [result] = bulkResults;
+    if ((result as InternalBulkResolveError).error) {
+      throw (result as InternalBulkResolveError).error;
     }
-
-    const namespace = normalizeNamespace(options.namespace);
-    if (namespace === undefined) {
-      // legacy URL aliases cannot exist for the default namespace; just attempt to get the object
-      return this.resolveExactMatch(type, id, options);
-    }
-
-    const rawAliasId = this._serializer.generateRawLegacyUrlAliasId(namespace, type, id);
-    const time = getCurrentTime();
-
-    // retrieve the alias, and if it is not disabled, update it
-    const aliasResponse = await this.client.update<{ [LEGACY_URL_ALIAS_TYPE]: LegacyUrlAlias }>(
-      {
-        id: rawAliasId,
-        index: this.getIndexForType(LEGACY_URL_ALIAS_TYPE),
-        refresh: false,
-        _source: 'true',
-        body: {
-          script: {
-            source: `
-              if (ctx._source[params.type].disabled != true) {
-                if (ctx._source[params.type].resolveCounter == null) {
-                  ctx._source[params.type].resolveCounter = 1;
-                }
-                else {
-                  ctx._source[params.type].resolveCounter += 1;
-                }
-                ctx._source[params.type].lastResolved = params.time;
-                ctx._source.updated_at = params.time;
-              }
-            `,
-            lang: 'painless',
-            params: {
-              type: LEGACY_URL_ALIAS_TYPE,
-              time,
-            },
-          },
-        },
-      },
-      { ignore: [404] }
-    );
-    if (
-      isNotFoundFromUnsupportedServer({
-        statusCode: aliasResponse.statusCode,
-        headers: aliasResponse.headers,
-      })
-    ) {
-      // throw if we cannot verify the response is from Elasticsearch
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
-        LEGACY_URL_ALIAS_TYPE,
-        rawAliasId
-      );
-    }
-    if (
-      aliasResponse.statusCode === 404 ||
-      aliasResponse.body.get?.found === false ||
-      aliasResponse.body.get?._source[LEGACY_URL_ALIAS_TYPE]?.disabled === true
-    ) {
-      // no legacy URL alias exists, or one exists but it's disabled; just attempt to get the object
-      return this.resolveExactMatch(type, id, options);
-    }
-
-    const legacyUrlAlias: LegacyUrlAlias = aliasResponse.body.get!._source[LEGACY_URL_ALIAS_TYPE];
-    const objectIndex = this.getIndexForType(type);
-    const bulkGetResponse = await this.client.mget<SavedObjectsRawDocSource>(
-      {
-        body: {
-          docs: [
-            {
-              // attempt to find an exact match for the given ID
-              _id: this._serializer.generateRawId(namespace, type, id),
-              _index: objectIndex,
-            },
-            {
-              // also attempt to find a match for the legacy URL alias target ID
-              _id: this._serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
-              _index: objectIndex,
-            },
-          ],
-        },
-      },
-      { ignore: [404] }
-    );
-    // exit early if a 404 isn't from elasticsearch
-    if (
-      isNotFoundFromUnsupportedServer({
-        statusCode: bulkGetResponse.statusCode,
-        headers: bulkGetResponse.headers,
-      })
-    ) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-    }
-    const exactMatchDoc = bulkGetResponse?.body.docs[0];
-    const aliasMatchDoc = bulkGetResponse?.body.docs[1];
-    const foundExactMatch =
-      // @ts-expect-error MultiGetHit._source is optional
-      exactMatchDoc.found && this.rawDocExistsInNamespace(exactMatchDoc, namespace);
-    const foundAliasMatch =
-      // @ts-expect-error MultiGetHit._source is optional
-      aliasMatchDoc.found && this.rawDocExistsInNamespace(aliasMatchDoc, namespace);
-
-    let result: SavedObjectsResolveResponse<T> | null = null;
-    let outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND;
-    if (foundExactMatch && foundAliasMatch) {
-      result = {
-        // @ts-expect-error MultiGetHit._source is optional
-        saved_object: getSavedObjectFromSource(this._registry, type, id, exactMatchDoc),
-        outcome: 'conflict',
-        alias_target_id: legacyUrlAlias.targetId,
-      };
-      outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT;
-    } else if (foundExactMatch) {
-      result = {
-        // @ts-expect-error MultiGetHit._source is optional
-        saved_object: getSavedObjectFromSource(this._registry, type, id, exactMatchDoc),
-        outcome: 'exactMatch',
-      };
-      outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH;
-    } else if (foundAliasMatch) {
-      result = {
-        saved_object: getSavedObjectFromSource(
-          this._registry,
-          type,
-          legacyUrlAlias.targetId,
-          // @ts-expect-error MultiGetHit._source is optional
-          aliasMatchDoc
-        ),
-        outcome: 'aliasMatch',
-        alias_target_id: legacyUrlAlias.targetId,
-      };
-      outcomeStatString = REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH;
-    }
-
-    await this.incrementResolveOutcomeStats(outcomeStatString);
-
-    if (result !== null) {
-      return result;
-    }
-    throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    return result as SavedObjectsResolveResponse<T>;
   }
 
   /**
@@ -2226,33 +2094,6 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
     return body;
-  }
-
-  private async resolveExactMatch<T>(
-    type: string,
-    id: string,
-    options: SavedObjectsBaseOptions
-  ): Promise<SavedObjectsResolveResponse<T>> {
-    try {
-      const object = await this.get<T>(type, id, options);
-      await this.incrementResolveOutcomeStats(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-      return { saved_object: object, outcome: 'exactMatch' };
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        // 404 responses already confirmed to be valid Elasticsearch responses
-        await this.incrementResolveOutcomeStats(REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
-      }
-      throw err;
-    }
-  }
-
-  private async incrementResolveOutcomeStats(outcomeStatString: string) {
-    await this.incrementCounterInternal(
-      CORE_USAGE_STATS_TYPE,
-      CORE_USAGE_STATS_ID,
-      [outcomeStatString, REPOSITORY_RESOLVE_OUTCOME_STATS.TOTAL],
-      { refresh: false }
-    ).catch(() => {}); // if the call fails for some reason, intentionally swallow the error
   }
 
   /** The `initialNamespaces` field (create, bulkCreate) is used to create an object in an initial set of spaces. */

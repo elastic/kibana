@@ -321,6 +321,15 @@ export interface SavedObjectsUpdateResponse<T = unknown>
  *
  * @public
  */
+export interface SavedObjectsBulkResolveObject {
+  id: string;
+  type: string;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsResolveResponse<T = unknown> {
   /**
    * The saved object that was found.
