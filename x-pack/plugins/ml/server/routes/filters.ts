@@ -47,9 +47,9 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup Filters
    *
-   * @api {get} /api/ml/filters Gets filters - size limit has been explicitly set to 1000
+   * @api {get} /api/ml/filters Get filters
    * @apiName GetFilters
-   * @apiDescription Retrieves the list of filters which are used for custom rules in anomaly detection.
+   * @apiDescription Retrieves the list of filters which are used for custom rules in anomaly detection. Sets the size limit explicitly to return a maximum of 1000.
    *
    * @apiSuccess {Boolean} success
    * @apiSuccess {Object[]} filters list of filters

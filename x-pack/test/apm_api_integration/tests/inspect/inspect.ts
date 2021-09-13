@@ -8,11 +8,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import { createApmApiSupertest } from '../../common/apm_api_supertest';
+
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
-  const supertestRead = createApmApiSupertest(getService('supertest'));
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
@@ -20,7 +20,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   registry.when('Inspect feature', { config: 'trial', archives: [archiveName] }, () => {
     describe('when omitting `_inspect` query param', () => {
       it('returns response without `_inspect`', async () => {
-        const { status, body } = await supertestRead({
+        const { status, body } = await apmApiClient.readUser({
           endpoint: 'GET /api/apm/environments',
           params: {
             query: {
@@ -38,7 +38,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
     describe('when passing `_inspect` as query param', () => {
       describe('elasticsearch calls made with end-user auth are returned', () => {
         it('for environments', async () => {
-          const { status, body } = await supertestRead({
+          const { status, body } = await apmApiClient.readUser({
             endpoint: 'GET /api/apm/environments',
             params: {
               query: {
@@ -66,7 +66,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
 
       describe('elasticsearch calls made with internal user are not return', () => {
         it('for custom links', async () => {
-          const { status, body } = await supertestRead({
+          const { status, body } = await apmApiClient.readUser({
             endpoint: 'GET /api/apm/settings/custom_links',
             params: {
               query: {
@@ -82,7 +82,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
         });
 
         it('for agent configs', async () => {
-          const { status, body } = await supertestRead({
+          const { status, body } = await apmApiClient.readUser({
             endpoint: 'GET /api/apm/settings/agent-configuration',
             params: {
               query: {

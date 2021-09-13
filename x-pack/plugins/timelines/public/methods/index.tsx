@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { EuiLoadingContent, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import type { Store } from 'redux';
 import { Provider } from 'react-redux';
@@ -17,6 +17,7 @@ import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from '.
 import type { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
 import { initialTGridState } from '../store/t_grid/reducer';
 import { createStore } from '../store/t_grid';
+import { TGridLoading } from '../components/t_grid/shared';
 
 const initializeStore = ({
   store,
@@ -51,13 +52,7 @@ export const getTGridLazy = (
 ) => {
   initializeStore({ store, storage, setStore });
   return (
-    <Suspense
-      fallback={
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
-          <EuiLoadingContent />
-        </EuiPanel>
-      }
-    >
+    <Suspense fallback={<TGridLoading height={props.type === 'standalone' ? 'tall' : 'short'} />}>
       <TimelineLazy {...props} store={store} storage={storage} data={data} setStore={setStore} />
     </Suspense>
   );

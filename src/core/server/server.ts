@@ -206,6 +206,10 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
+    const deprecationsSetup = this.deprecations.setup({
+      http: httpSetup,
+    });
+
     // setup i18n prior to any other service, to have translations ready
     const i18nServiceSetup = await this.i18n.setup({ http: httpSetup, pluginPaths });
 
@@ -214,6 +218,7 @@ export class Server {
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
       executionContext: executionContextSetup,
+      deprecations: deprecationsSetup,
     });
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
@@ -243,6 +248,7 @@ export class Server {
       environment: environmentSetup,
       http: httpSetup,
       metrics: metricsSetup,
+      coreUsageData: coreUsageDataSetup,
     });
 
     const renderingSetup = await this.rendering.setup({
@@ -257,10 +263,6 @@ export class Server {
     });
 
     const loggingSetup = this.logging.setup();
-
-    const deprecationsSetup = this.deprecations.setup({
-      http: httpSetup,
-    });
 
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
@@ -278,6 +280,7 @@ export class Server {
       logging: loggingSetup,
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
+      coreUsageData: coreUsageDataSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);

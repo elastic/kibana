@@ -269,11 +269,10 @@ export function getColorStops(
   palettes: PaletteRegistry,
   colorStops: Required<CustomPaletteParams>['stops'],
   activePalette: PaletteOutput<CustomPaletteParams>,
-  dataBounds: { min: number; max: number },
-  defaultPalette?: string
+  dataBounds: { min: number; max: number }
 ) {
   // just forward the current stops if custom
-  if (activePalette?.name === CUSTOM_PALETTE) {
+  if (activePalette?.name === CUSTOM_PALETTE && colorStops?.length) {
     return colorStops;
   }
   // for predefined palettes create some stops, then drop the last one.

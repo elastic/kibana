@@ -12,6 +12,7 @@ import { PersistableStateService } from '../../kibana_utils/common';
 
 export enum ViewMode {
   EDIT = 'edit',
+  PREVIEW = 'preview',
   VIEW = 'view',
 }
 

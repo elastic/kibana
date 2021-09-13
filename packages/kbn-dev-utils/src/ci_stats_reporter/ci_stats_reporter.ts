@@ -221,11 +221,12 @@ export class CiStatsReporter {
           ? `${error.response.status} response`
           : 'no response';
 
+        const seconds = attempt * 10;
         this.log.warning(
-          `failed to reach ci-stats service [reason=${reason}], retrying in ${attempt} seconds`
+          `failed to reach ci-stats service, retrying in ${seconds} seconds, [reason=${reason}], [error=${error.message}]`
         );
 
-        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
       }
     }
   }

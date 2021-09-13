@@ -9,26 +9,8 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { TimelionVisPlugin as Plugin } from './plugin';
 
-import { tickFormatters } from './legacy/tick_formatters';
-import { getTimezone } from './helpers/get_timezone';
-import { xaxisFormatterProvider } from './helpers/xaxis_formatter';
-import { generateTicksProvider } from './helpers/tick_generator';
-import { DEFAULT_TIME_FORMAT, calculateInterval } from '../common/lib';
-import { parseTimelionExpressionAsync } from '../common/parser_async';
-
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }
 
-// This export should be removed on removing Timeline APP
-export const _LEGACY_ = {
-  DEFAULT_TIME_FORMAT,
-  calculateInterval,
-  parseTimelionExpressionAsync,
-  tickFormatters,
-  getTimezone,
-  xaxisFormatterProvider,
-  generateTicksProvider,
-};
-
-export { VisTypeTimelionPluginStart, VisTypeTimelionPluginSetup } from './plugin';
+export { VisTypeTimelionPluginStart } from './plugin';
