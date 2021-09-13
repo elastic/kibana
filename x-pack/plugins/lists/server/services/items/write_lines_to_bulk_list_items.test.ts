@@ -67,7 +67,7 @@ describe('write_lines_to_bulk_list_items', () => {
       );
     });
 
-    test('It creates a list by calling "createListIfItDoesNotExist" with a correctly decoded file name', async () => {
+    it('creates a list with a decoded file name', async () => {
       const options = getImportListItemsToStreamOptionsMock();
       const promise = importListItemsToStream({ ...options, listId: undefined });
       options.stream.push(`--\nContent-Disposition: attachment; filename="%22Filename%22.txt"`);
