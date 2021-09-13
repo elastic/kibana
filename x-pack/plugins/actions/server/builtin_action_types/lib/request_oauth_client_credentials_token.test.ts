@@ -84,10 +84,10 @@ describe('requestOAuthClientCredentialsToken', () => {
             "totalSocketCount": 0,
             Symbol(kCapture): false,
           },
-          "maxContentLength": 1048576,
+          "maxContentLength": 1000000,
           "method": "post",
           "proxy": false,
-          "timeout": 30000,
+          "timeout": 360000,
           "validateStatus": [Function],
         },
       ]
@@ -116,7 +116,7 @@ describe('requestOAuthClientCredentialsToken', () => {
         },
         configurationUtilities
       )
-    ).rejects.toThrow(`
+    ).toThrowErrorMatchingInlineSnapshot(`
       error: 'invalid_scope',
       error_description:
         "AADSTS70011: The provided value for the input parameter 'scope' is not valid.",

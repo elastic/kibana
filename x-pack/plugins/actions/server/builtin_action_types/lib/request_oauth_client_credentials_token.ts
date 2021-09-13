@@ -30,7 +30,7 @@ export async function requestOAuthClientCredentialsToken(
   logger: Logger,
   params: ClientCredentialsRequestParams,
   configurationUtilities: ActionsConfigurationUtilities
-): Promise<ClientCredentialsResponse | unknown> {
+): Promise<ClientCredentialsResponse> {
   const axiosInstance = axios.create();
   const { clientId, clientSecret, scope } = params;
   const res = await request({
@@ -58,6 +58,6 @@ export async function requestOAuthClientCredentialsToken(
     };
   } else {
     logger.warn(`error thrown getting the access token from ${tokenUrl} for clientID: ${clientId}: ${res.data}`);
+    throw new Error(JSON.stringify(res.data));
   }
-  return res.data;
 }

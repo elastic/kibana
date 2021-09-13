@@ -20,7 +20,6 @@ import { CustomHostSettings } from '../../config';
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
 const sendMailMock = jest.fn();
-const sendEmailGraphApiMock = jest.fn();
 
 jest.mock('./send_email_graph_api', () => ({
   sendEmailGraphApi: jest.fn(),
@@ -40,7 +39,7 @@ describe('send_email module', () => {
   });
 
   test('handles authenticated email using service', async () => {
-    const sendEmailOptions = getSendEmailOptions({ transport: {service: '__json'} });
+    const sendEmailOptions = getSendEmailOptions({ transport: { service: '__json' } });
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -80,9 +79,8 @@ describe('send_email module', () => {
     `);
   });
 
-
   test('uses OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
-    const sendEmailOptions = getSendEmailOptions({ transport: {service: 'exchange_server'} });
+    const sendEmailOptions = getSendEmailOptions({ transport: { service: 'exchange_server' } });
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
