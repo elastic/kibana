@@ -9,8 +9,6 @@
 import './timeseries_visualization.scss';
 
 import React, { useCallback, useEffect } from 'react';
-
-import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from 'src/core/public';
@@ -19,11 +17,9 @@ import { PersistedState } from 'src/plugins/visualizations/public';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 
 import { TimeseriesVisTypes } from './vis_types';
-import type { TimeseriesVisData, PanelData } from '../../../common/types';
-import { isVisSeriesData } from '../../../common/vis_data_utils';
-import { fetchIndexPattern } from '../../../common/index_patterns_utils';
+import type { PanelData, TimeseriesVisData } from '../../../common/types';
+import { isVisTableData } from '../../../common/vis_data_utils';
 import { TimeseriesVisParams } from '../../types';
-import { getDataStart } from '../../services';
 import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
 import { getClickFilterData } from './lib/get_click_filter_data';
 import { X_ACCESSOR_INDEX } from '../visualizations/constants';
@@ -31,6 +27,7 @@ import { LastValueModeIndicator } from './last_value_mode_indicator';
 import { getInterval } from './lib/get_interval';
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { TIME_RANGE_DATA_MODES, PANEL_TYPES } from '../../../common/enums';
+import type { IndexPattern } from '../../../../data/common';
 
 interface TimeseriesVisualizationProps {
   className?: string;
@@ -41,6 +38,7 @@ interface TimeseriesVisualizationProps {
   uiState: PersistedState;
   syncColors: boolean;
   palettesService: PaletteRegistry;
+  indexPattern?: IndexPattern | null;
 }
 
 function TimeseriesVisualization({
@@ -52,12 +50,10 @@ function TimeseriesVisualization({
   getConfig,
   syncColors,
   palettesService,
+  indexPattern,
 }: TimeseriesVisualizationProps) {
   const onBrush = useCallback(
     async (gte: string, lte: string, series: PanelData[]) => {
-      const indexPatternValue = model.index_pattern || '';
-      const { indexPatterns } = getDataStart();
-      const { indexPattern } = await fetchIndexPattern(indexPatternValue, indexPatterns);
       let event;
       // trigger applyFilter if no index pattern found, url drilldowns are supported only
       // for the index pattern mode
@@ -98,15 +94,11 @@ function TimeseriesVisualization({
 
       handlers.event(event);
     },
-    [handlers, model]
+    [handlers, indexPattern, model]
   );
 
   const handleFilterClick = useCallback(
     async (series: PanelData[], points: Array<[GeometryValue, XYChartSeriesIdentifier]>) => {
-      const indexPatternValue = model.index_pattern || '';
-      const { indexPatterns } = getDataStart();
-      const { indexPattern } = await fetchIndexPattern(indexPatternValue, indexPatterns);
-
       // it should work only if index pattern is found
       if (!indexPattern) return;
 
@@ -129,7 +121,7 @@ function TimeseriesVisualization({
 
       handlers.event(event);
     },
-    [handlers, model]
+    [handlers, indexPattern, model]
   );
 
   const handleUiState = useCallback(
@@ -152,17 +144,16 @@ function TimeseriesVisualization({
   const shouldDisplayLastValueIndicator =
     isLastValueMode && !model.hide_last_value_indicator && model.type !== PANEL_TYPES.TIMESERIES;
 
+  const [firstSeries] =
+    (isVisTableData(visData) ? visData.series : visData[model.id]?.series) ?? [];
+
   if (VisComponent) {
     return (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         {shouldDisplayLastValueIndicator && (
           <EuiFlexItem className="tvbLastValueIndicator" grow={false}>
             <LastValueModeIndicator
-              seriesData={get(
-                visData,
-                `${isVisSeriesData(visData) ? model.id : 'series[0]'}.series[0].data`,
-                undefined
-              )}
+              seriesData={firstSeries?.data}
               ignoreDaylightTime={model.ignore_daylight_time}
               panelInterval={getInterval(visData, model)}
               modelInterval={model.interval ?? AUTO_INTERVAL}
@@ -180,6 +171,7 @@ function TimeseriesVisualization({
             onUiState={handleUiState}
             syncColors={syncColors}
             palettesService={palettesService}
+            fieldFormatMap={indexPattern?.fieldFormatMap}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
