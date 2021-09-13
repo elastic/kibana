@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const list = (size: number) =>
-  ' '
-    .repeat(size)
-    .split('')
-    .filter(Boolean)
-    .map((_, i) => i);
+export const list = (size: number) => Array.from({ length: size }, (_, i) => i);
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
