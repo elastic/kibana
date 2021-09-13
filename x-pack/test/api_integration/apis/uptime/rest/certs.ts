@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
         const result = processCertsResult(apiResponse.body.rawResponse);
-        expect(JSON.stringify(result)).to.eql('{"certs":[],"total":0}');
+        expect(JSON.stringify(result)).to.eql('{"total":0}');
       });
     });
 
