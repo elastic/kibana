@@ -117,7 +117,7 @@ When you upgrade, remove `xpack.task_manager.index` from your kibana.yml file.
 The legacy dashboard-only mode has been removed. For more information, refer to {kibana-pull}108103[#108103].
 
 *Impact* +
-When you upgrade, the legacy dashboard-only mode will no longer be available.
+To grant users access to only dashboards, create a new role, then assign only the *Dashboard* feature privilege. For more information, refer to <<kibana-feature-privileges,{kib} privileges>>.
 ====
      
 [discrete]
