@@ -9,7 +9,7 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
-import { CoreStart } from 'src/core/public';
+import { CoreStart, DocLinksStart, HttpStart } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { renderApp } from './';
@@ -85,6 +85,20 @@ describe('renderApp', () => {
         getEditAlertFlyout: jest.fn(),
       },
       usageCollection: { reportUiCounter: () => {} },
+      http: {
+        basePath: {
+          prepend: (path: string) => `/basepath${path}`,
+          get: () => `/basepath`,
+        },
+      } as HttpStart,
+      docLinks: ({
+        DOC_LINK_VERSION: '0',
+        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        links: {
+          apm: {},
+          observability: { guide: '' },
+        },
+      } as unknown) as DocLinksStart,
     } as unknown) as ApmPluginStartDeps;
 
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
