@@ -30,8 +30,18 @@ describe('VerificationService', () => {
 
     it('should write verification code to disk', () => {
       const service = new VerificationService(loggerMock);
-      const setup = service.setup();
+      const setup = service.setup()!;
       expect(fs.writeFileSync).toHaveBeenCalledWith('/config/.code', setup.code);
+    });
+
+    it('should not return verification code if cannot write to disk', () => {
+      const service = new VerificationService(loggerMock);
+      (fs.writeFileSync as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('Write error');
+      });
+      const setup = service.setup();
+      expect(fs.writeFileSync).toHaveBeenCalledWith('/config/.code', expect.anything());
+      expect(setup).toBeUndefined();
     });
   });
 
