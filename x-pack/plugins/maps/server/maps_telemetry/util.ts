@@ -11,7 +11,13 @@ import {
   ESSearchSourceDescriptor,
   LayerDescriptor,
 } from '../../common/descriptor_types';
-import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS, SCALING_TYPES, SOURCE_TYPES } from '../../common';
+import {
+  GRID_RESOLUTION,
+  LAYER_TYPE,
+  RENDER_AS,
+  SCALING_TYPES,
+  SOURCE_TYPES,
+} from '../../common/constants';
 import {
   DEFAULT_EMS_DARKMAP_ID,
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
