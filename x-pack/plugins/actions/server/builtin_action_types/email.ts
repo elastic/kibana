@@ -63,6 +63,7 @@ const ConfigSchemaProps = {
   hasAuth: schema.boolean({ defaultValue: true }),
   tenantId: schema.nullable(schema.string()),
   clientId: schema.nullable(schema.string()),
+  oauthTokenUrl: schema.nullable(schema.string()),
 };
 
 const ConfigSchema = schema.object(ConfigSchemaProps);

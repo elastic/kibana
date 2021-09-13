@@ -65,6 +65,7 @@ describe('config validation', () => {
       secure: null,
       clientId: null,
       tenantId: null,
+      oauthTokenUrl: null,
     });
   });
 
@@ -81,6 +82,7 @@ describe('config validation', () => {
       secure: null,
       clientId: null,
       tenantId: null,
+      oauthTokenUrl: null,
     });
   });
 
@@ -97,6 +99,7 @@ describe('config validation', () => {
       secure: null,
       clientId: null,
       tenantId: null,
+      oauthTokenUrl: null,
     });
   });
 
@@ -113,6 +116,7 @@ describe('config validation', () => {
       secure: null,
       host: null,
       port: null,
+      oauthTokenUrl: null,
     });
   });
 
@@ -129,6 +133,7 @@ describe('config validation', () => {
       secure: null,
       clientId: null,
       tenantId: null,
+      oauthTokenUrl: null,
     });
   });
 
@@ -342,6 +347,7 @@ describe('execute()', () => {
     hasAuth: true,
     clientId: null,
     tenantId: null,
+    oauthTokenUrl: null,
   };
   const secrets: ActionTypeSecretsType = {
     user: 'bob',

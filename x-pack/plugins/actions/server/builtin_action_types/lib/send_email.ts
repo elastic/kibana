@@ -44,6 +44,7 @@ export interface Transport {
   clientId?: string;
   clientSecret?: string;
   tenantId?: string;
+  oauthTokenUrl?: string;
 }
 
 export interface Routing {
@@ -61,7 +62,7 @@ export interface Content {
 // send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
-  const { service } = transport;
+  const { service, clientId, clientSecret } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
 
@@ -70,12 +71,12 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
   if (service === AdditionalEmailServices.EXCHANGE) {
     // request access token for microsoft exchange online server with Graph API scope
     const tokenResult = await requestOAuthClientCredentialsToken(
-      `https://login.microsoftonline.com/${transport.tenantId}/oauth2/v2.0/token`,
+      (transport.oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${transport.tenantId}/oauth2/v2.0/token`),
       logger,
       {
         scope: GRAPH_API_OAUTH_SCOPE,
-        clientId: transport.clientId,
-        clientSecret: transport.clientSecret,
+        clientId,
+        clientSecret,
       },
       configurationUtilities
     ) as ClientCredentialsResponse;
