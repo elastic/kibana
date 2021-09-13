@@ -15,7 +15,7 @@ export const VisualizationNoResults = () => {
     <EuiEmptyPrompt
       iconType="visualizeApp"
       iconColor="default"
-      data-test-subj="visualization-error"
+      data-test-subj="pieVisualizationError"
       body={
         <EuiText size="xs">
           {i18n.translate('visTypePie.noResultsFoundTitle', {
