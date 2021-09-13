@@ -59,6 +59,8 @@ The index pattern mode unlocks many new features, such as:
 
 * Interactive filters for time series visualizations
 
+* Custom field formats
+
 * Better performance
 
 [float]
