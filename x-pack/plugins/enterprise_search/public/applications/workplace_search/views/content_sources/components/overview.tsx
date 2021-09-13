@@ -13,6 +13,8 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiListGroup,
+  EuiListGroupItem,
   EuiIcon,
   EuiLink,
   EuiPanel,
@@ -101,7 +103,7 @@ export const Overview: React.FC = () => {
 
   const DocumentSummary = () => {
     let totalDocuments = 0;
-    const tableContent = summary?.map((item, index) => {
+    const tableContent = summary ?.map((item, index) => {
       totalDocuments += item.count;
       return (
         item.count > 0 && (
@@ -142,24 +144,24 @@ export const Overview: React.FC = () => {
           (totalDocuments === 0 ? (
             emptyState
           ) : (
-            <EuiTable>
-              <EuiTableHeader>
-                <EuiTableHeaderCell>{CONTENT_TYPE_HEADER}</EuiTableHeaderCell>
-                <EuiTableHeaderCell>{ITEMS_HEADER}</EuiTableHeaderCell>
-              </EuiTableHeader>
-              <EuiTableBody>
-                {tableContent}
-                <EuiTableRow>
-                  <EuiTableRowCell>
-                    <strong>{TOTAL_DOCUMENTS_LABEL}</strong>
-                  </EuiTableRowCell>
-                  <EuiTableRowCell>
-                    <strong>{totalDocuments.toLocaleString('en-US')}</strong>
-                  </EuiTableRowCell>
-                </EuiTableRow>
-              </EuiTableBody>
-            </EuiTable>
-          ))}
+              <EuiTable>
+                <EuiTableHeader>
+                  <EuiTableHeaderCell>{CONTENT_TYPE_HEADER}</EuiTableHeaderCell>
+                  <EuiTableHeaderCell>{ITEMS_HEADER}</EuiTableHeaderCell>
+                </EuiTableHeader>
+                <EuiTableBody>
+                  {tableContent}
+                  <EuiTableRow>
+                    <EuiTableRowCell>
+                      <strong>{TOTAL_DOCUMENTS_LABEL}</strong>
+                    </EuiTableRowCell>
+                    <EuiTableRowCell>
+                      <strong>{totalDocuments.toLocaleString('en-US')}</strong>
+                    </EuiTableRowCell>
+                  </EuiTableRow>
+                </EuiTableBody>
+              </EuiTable>
+            ))}
       </>
     );
   };
@@ -233,22 +235,19 @@ export const Overview: React.FC = () => {
         <h5>{GROUP_ACCESS_TITLE}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="GroupsSummary">
-        {groups.map((group, index) => (
-          <EuiFlexItem key={index}>
-            <EuiPanelTo
-              hasShadow={false}
-              color="subdued"
-              to={getGroupPath(group.id)}
+      <EuiPanel color="subdued">
+        <EuiListGroup flush={true} color="ghost" maxWidth={false} data-test-subj="GroupsSummary">
+          {groups.map((group, index) => (
+            <EuiListGroupItem
+              label={group.name}
+              key={index}
+              href={getGroupPath(group.id)}
               data-test-subj="SourceGroupLink"
             >
-              <EuiText size="s" className="eui-textTruncate">
-                <strong>{group.name}</strong>
-              </EuiText>
-            </EuiPanelTo>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+            </EuiListGroupItem>
+          ))}
+        </EuiListGroup>
+      </EuiPanel>
     </>
   );
 
