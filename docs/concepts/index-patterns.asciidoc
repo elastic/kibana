@@ -1,4 +1,4 @@
-[[{data-sources}]]
+[[index-patterns]]
 === Create a {a-data-source}
 
 {kib} requires {a-data-source} to access the {es} data that you want to explore.
