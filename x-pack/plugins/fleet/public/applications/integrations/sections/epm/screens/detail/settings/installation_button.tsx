@@ -163,7 +163,7 @@ export function InstallationButton(props: InstallationButtonProps) {
   const handleClickUpgradePolicies = useCallback(async () => {
     setIsUpgradingPackagePolicies(true);
 
-    await installPackage({ name, version, title, suppressToasts: true });
+    await installPackage({ name, version, title });
 
     await sendUpgradePackagePolicy(
       // Only upgrade policies that don't have conflicts
