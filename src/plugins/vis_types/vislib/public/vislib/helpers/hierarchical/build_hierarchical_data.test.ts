@@ -8,6 +8,7 @@
 import type { Dimensions, Dimension } from '../../../../../pie/public';
 import { buildHierarchicalData } from './build_hierarchical_data';
 import { Table, TableParent } from '../../types';
+import { getColumnByAccessor } from '../accessor';
 
 function tableVisResponseHandler(table: Table, dimensions: Dimensions) {
   const converted: {
@@ -19,8 +20,8 @@ function tableVisResponseHandler(table: Table, dimensions: Dimensions) {
   const split = dimensions.splitColumn || dimensions.splitRow;
 
   if (split) {
-    const splitColumnIndex = split[0].accessor;
-    const splitColumn = table.columns[splitColumnIndex];
+    const splitAccessor = split[0].accessor;
+    const splitColumn = getColumnByAccessor(table.columns, splitAccessor);
     const splitMap: { [key: string]: number } = {};
     let splitIndex = 0;
 
@@ -34,7 +35,7 @@ function tableVisResponseHandler(table: Table, dimensions: Dimensions) {
           title: `splitValue: ${splitColumn.name}`,
           name: splitColumn.name,
           key: splitValue,
-          column: splitColumnIndex,
+          column: splitAccessor,
           row: rowIndex,
           table,
           tables: [] as Table[],

@@ -15,7 +15,7 @@ import {
   VisParams,
 } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import type { Dimensions } from '../../xy/public';
+import type { Dimensions } from './types';
 import type { DateHistogramParams, HistogramParams } from '../../../visualizations/public';
 
 import { BUCKET_TYPES } from '../../../data/public';
@@ -23,6 +23,7 @@ import { BUCKET_TYPES } from '../../../data/public';
 import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
 import { BasicVislibParams, VislibChartType } from './types';
 import { getEsaggsFn } from './to_ast_esaggs';
+import { getColumnByAccessor } from './vislib/helpers';
 
 export const toExpressionAst = async <TVisParams extends VisParams>(
   vis: Vis<TVisParams>,
@@ -42,7 +43,8 @@ export const toExpressionAst = async <TVisParams extends VisParams>(
   const responseAggs = vis.data.aggs?.getResponseAggs() ?? [];
 
   if (dimensions.x) {
-    const xAgg = responseAggs[dimensions.x.accessor] as any;
+    const xAgg = getColumnByAccessor(responseAggs, dimensions.x?.accessor) as any;
+
     if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
       (dimensions.x.params as DateHistogramParams).date = true;
       const { esUnit, esValue } = xAgg.buckets.getInterval();
@@ -67,7 +69,9 @@ export const toExpressionAst = async <TVisParams extends VisParams>(
   const visConfig = { ...vis.params };
 
   (dimensions.y || []).forEach((yDimension) => {
-    const yAgg = responseAggs.filter(({ enabled }) => enabled)[yDimension.accessor];
+    const enabledAggs = responseAggs.filter(({ enabled }) => enabled);
+    const yAgg = getColumnByAccessor(enabledAggs, yDimension.accessor);
+
     const seriesParam = ((visConfig.seriesParams as BasicVislibParams['seriesParams']) || []).find(
       (param) => param.data.id === yAgg.id
     );

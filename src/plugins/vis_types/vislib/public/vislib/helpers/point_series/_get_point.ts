@@ -9,6 +9,7 @@
 import { getFormatService } from '../../../services';
 import { Aspect } from './point_series';
 import { Table, Row } from '../../types';
+import { getValueByAccessor } from '../accessor';
 
 type RowValue = number | string | object | 'NaN';
 interface Raw {
@@ -46,9 +47,9 @@ export function getPoint(
   y: Aspect,
   z?: Aspect
 ): Point | undefined {
-  const xRow = x.accessor === -1 ? '_all' : row[x.accessor];
-  const yRow = row[y.accessor];
-  const zRow = z && row[z.accessor];
+  const xRow = x.accessor === -1 || !x.accessor ? '_all' : getValueByAccessor(row, x.accessor);
+  const yRow = getValueByAccessor(row, y.accessor);
+  const zRow = z && getValueByAccessor(row, z.accessor);
 
   const point: Point = {
     x: xRow,
@@ -59,7 +60,7 @@ export function getPoint(
       table,
       column: series[0].column,
       row: rowIndex,
-      value: row[series[0].accessor],
+      value: getValueByAccessor(row, series[0].accessor),
     },
     xRaw: {
       table,
@@ -99,7 +100,7 @@ export function getPoint(
     point.series = series
       .map((s) => {
         const fieldFormatter = getFormatService().deserialize(s.format);
-        return fieldFormatter.convert(row[s.accessor]);
+        return fieldFormatter.convert(getValueByAccessor(row, s.accessor));
       })
       .join(' - ');
   } else if (y) {

@@ -16,6 +16,7 @@ const { isDateHistogramBucketAggConfig } = search.aggs;
 interface SchemaConfigParams {
   precision?: number;
   useGeocentroid?: boolean;
+  integersOnly?: boolean;
 }
 
 export interface SchemaConfig {

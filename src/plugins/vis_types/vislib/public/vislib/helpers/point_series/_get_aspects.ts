@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { Dimensions } from '../../../../../xy/public';
+import type { Dimensions } from '../../../types';
 
 import { makeFakeXAspect } from './_fake_x_aspect';
 import { Aspects } from './point_series';
 import { Table } from '../../types';
+import { getColumnByAccessor } from '../accessor';
 
 /**
  * Identify and group the columns based on the aspect of the pointSeries
@@ -28,7 +29,7 @@ export function getAspects(table: Table, dimensions: Dimensions) {
       if (!d) {
         return;
       }
-      const column = table.columns[d.accessor];
+      const column = getColumnByAccessor(table.columns, d.accessor);
       if (!column) {
         return;
       }

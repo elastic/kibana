@@ -19,15 +19,20 @@ import type {
 
 export interface DateHistogramParams {
   date: boolean;
+  interval?: number;
+  intervalESValue?: number;
+  intervalESUnit?: string;
   format: string;
   bounds?: {
     min: string | number;
     max: string | number;
   };
+  integersOnly?: boolean;
 }
 
 export interface HistogramParams {
   interval: number;
+  integersOnly?: boolean;
 }
 
 export interface FakeParams {
@@ -47,11 +52,11 @@ export type ExpressionValueXYDimension = ExpressionValueBoxed<
   {
     label: string;
     aggType?: string;
-    params: DateHistogramParams | HistogramParams | FakeParams | {};
+    params: (DateHistogramParams | HistogramParams | FakeParams | {}) & { integersOnly?: boolean };
     accessor: number | DatatableColumn;
     format: SerializedFieldFormat;
     id?: number | string;
-  } & { params: { integersOnly?: boolean } }
+  }
 >;
 
 export const xyDimension = (): ExpressionFunctionDefinition<
@@ -105,7 +110,7 @@ export const xyDimension = (): ExpressionFunctionDefinition<
       label: args.label,
       aggType: args.aggType,
       params: JSON.parse(args.params!),
-      accessor: args.visDimension.accessor as number,
+      accessor: args.visDimension.accessor,
       format: args.visDimension.format,
       id: args.id,
     };

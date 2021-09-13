@@ -8,3 +8,4 @@
 
 export { buildPointSeriesData } from './point_series';
 export { buildHierarchicalData } from './hierarchical/build_hierarchical_data';
+export { getColumnByAccessor, getValueByAccessor } from './accessor';

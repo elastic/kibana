@@ -7,9 +7,11 @@
  */
 
 import { toArray } from 'lodash';
+import { ExpressionValueVisDimension } from '../../../../../../visualizations/common';
 import { getFormatService } from '../../../services';
 import { Table } from '../../types';
 import type { Dimensions } from '../../../../../pie/public';
+import { getColumnByAccessor } from '../accessor';
 
 interface Slice {
   name: string;
@@ -24,10 +26,21 @@ interface Slice {
   };
 }
 
+const getNextToAccessorColumn = (
+  columns: Table['columns'],
+  accessor: ExpressionValueVisDimension['accessor']
+) => {
+  if (typeof accessor === 'number') {
+    return columns[accessor + 1];
+  }
+  const colIndex = columns.findIndex((column) => column.id === accessor.id);
+  return columns[colIndex + 1];
+};
+
 export const buildHierarchicalData = (table: Table, { metric, buckets = [] }: Dimensions) => {
   let slices: Slice[];
   const names: { [key: string]: string } = {};
-  const metricColumn = table.columns[metric.accessor];
+  const metricColumn = getColumnByAccessor(table.columns, metric.accessor);
   const metricFieldFormatter = metric.format;
 
   if (!buckets.length) {
@@ -45,8 +58,8 @@ export const buildHierarchicalData = (table: Table, { metric, buckets = [] }: Di
       let dataLevel = slices;
 
       buckets.forEach((bucket) => {
-        const bucketColumn = table.columns[bucket.accessor];
-        const bucketValueColumn = table.columns[bucket.accessor + 1];
+        const bucketColumn = getColumnByAccessor(table.columns, bucket.accessor);
+        const bucketValueColumn = getNextToAccessorColumn(table.columns, bucket.accessor);
         const bucketFormatter = getFormatService().deserialize(bucket.format);
         const name = bucketFormatter.convert(row[bucketColumn.id]);
         const size = row[bucketValueColumn.id] as number;

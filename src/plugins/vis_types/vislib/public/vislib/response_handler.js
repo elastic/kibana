@@ -7,7 +7,7 @@
  */
 
 import { getFormatService } from '../services';
-import { buildHierarchicalData, buildPointSeriesData } from './helpers';
+import { buildHierarchicalData, buildPointSeriesData, getColumnByAccessor } from './helpers';
 
 function tableResponseHandler(table, dimensions) {
   const converted = { tables: [] };
@@ -15,9 +15,9 @@ function tableResponseHandler(table, dimensions) {
 
   if (split) {
     converted.direction = dimensions.splitRow ? 'row' : 'column';
-    const splitColumnIndex = split[0].accessor;
+    const splitAccessor = split[0].accessor;
     const splitColumnFormatter = getFormatService().deserialize(split[0].format);
-    const splitColumn = table.columns[splitColumnIndex];
+    const splitColumn = getColumnByAccessor(table.columns, splitAccessor);
     const splitMap = {};
     let splitIndex = 0;
 
@@ -33,7 +33,7 @@ function tableResponseHandler(table, dimensions) {
           name: splitColumn.name,
           key: splitValue,
           formattedKey: formattedValue,
-          column: splitColumnIndex,
+          column: splitAccessor,
           row: rowIndex,
           table,
           tables: [],
