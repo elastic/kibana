@@ -75,7 +75,7 @@
         enabled: true,
       },
       {
-        groupName: 'platforms security modules',
+        groupName: 'platform security modules',
         packageNames: [
           'broadcast-channel', 
           'jsonwebtoken', '@types/jsonwebtoken', 
