@@ -37,12 +37,7 @@ export const GaugeType = Object.freeze({
 export type GaugeType = $Values<typeof GaugeType>;
 
 export const VislibChartType = Object.freeze({
-  Histogram: 'histogram' as const,
-  HorizontalBar: 'horizontal_bar' as const,
-  Line: 'line' as const,
   Pie: 'pie' as const,
-  Area: 'area' as const,
-  PointSeries: 'point_series' as const,
   Heatmap: 'heatmap' as const,
   Gauge: 'gauge' as const,
   Goal: 'goal' as const,

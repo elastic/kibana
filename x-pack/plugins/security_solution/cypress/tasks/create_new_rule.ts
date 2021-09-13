@@ -92,6 +92,7 @@ import {
   EMAIL_CONNECTOR_PORT_INPUT,
   EMAIL_CONNECTOR_USER_INPUT,
   EMAIL_CONNECTOR_PASSWORD_INPUT,
+  EMAIL_CONNECTOR_SERVICE_SELECTOR,
 } from '../screens/create_new_rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
 import { TOAST_ERROR } from '../screens/shared';
@@ -402,6 +403,7 @@ export const fillIndexAndIndicatorIndexPattern = (
 
 export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConnector()) => {
   cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
+  cy.get(EMAIL_CONNECTOR_SERVICE_SELECTOR).select(connector.service);
   cy.get(EMAIL_CONNECTOR_FROM_INPUT).type(connector.from);
   cy.get(EMAIL_CONNECTOR_HOST_INPUT).type(connector.host);
   cy.get(EMAIL_CONNECTOR_PORT_INPUT).type(connector.port);

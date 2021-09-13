@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './rename_columns';
+export { renameColumns } from './rename_columns';
