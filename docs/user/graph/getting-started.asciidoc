@@ -3,7 +3,7 @@
 == Create a graph
 
 You must index data into {es} before you can create a graph.
-<<data-views, Learn how>> or get started with a <<add-sample-data, sample data set>>.
+<<index-patterns, Learn how>> or get started with a <<add-sample-data, sample data set>>.
 
 [float]
 [[exploring-connections]]
