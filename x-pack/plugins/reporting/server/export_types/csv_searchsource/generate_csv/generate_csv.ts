@@ -184,7 +184,7 @@ export class CsvGenerator {
       data: dataTableCell,
     }: {
       column: string;
-      data: any;
+      data: unknown;
     }): string => {
       let cell: string[] | string | object;
       // check truthiness to guard against _score, _type, etc

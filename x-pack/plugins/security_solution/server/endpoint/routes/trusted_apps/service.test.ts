@@ -274,7 +274,20 @@ describe('service', () => {
     });
 
     it('should return summary of trusted app items', async () => {
-      expect(await getTrustedAppsSummary(exceptionsListClient)).toEqual({
+      expect(await getTrustedAppsSummary(exceptionsListClient, {})).toEqual({
+        linux: 45,
+        windows: 55,
+        macos: 30,
+        total: 130,
+      });
+    });
+
+    it('should return summary of trusted app items when filtering by policyId', async () => {
+      expect(
+        await getTrustedAppsSummary(exceptionsListClient, {
+          kuery: `exception-list-agnostic.attributes.tags:"policy:caf1a334-53f3-4be9-814d-a32245f43d34" OR exception-list-agnostic.attributes.tags:"policy:all"`,
+        })
+      ).toEqual({
         linux: 45,
         windows: 55,
         macos: 30,
