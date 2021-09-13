@@ -6,7 +6,6 @@
  */
 
 import { TIMELINE_ID_REF_NAME } from '../../constants';
-import { timelineSavedObjectType } from '../timelines';
 import { migrateNoteTimelineIdToReferences, TimelineId } from './notes';
 
 describe('notes migrations', () => {
@@ -20,7 +19,8 @@ describe('notes migrations', () => {
 
       expect(migratedDoc.attributes).toEqual({});
       expect(migratedDoc.references).toEqual([
-        { id: '123', name: TIMELINE_ID_REF_NAME, type: timelineSavedObjectType },
+        // importing the timeline saved objec type from the timeline saved object causes a circular import and causes the jest tests to fail
+        { id: '123', name: TIMELINE_ID_REF_NAME, type: 'siem-ui-timeline' },
       ]);
     });
 
@@ -33,7 +33,7 @@ describe('notes migrations', () => {
 
       expect(migratedDoc.attributes).toEqual({ awesome: 'yes' });
       expect(migratedDoc.references).toEqual([
-        { id: '123', name: TIMELINE_ID_REF_NAME, type: timelineSavedObjectType },
+        { id: '123', name: TIMELINE_ID_REF_NAME, type: 'siem-ui-timeline' },
       ]);
     });
   });
