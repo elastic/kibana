@@ -116,6 +116,7 @@ describe('task', () => {
       const manifestManager = buildManifestManagerMock();
 
       manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(null);
+      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -125,6 +126,7 @@ describe('task', () => {
       expect(manifestManager.commit).not.toHaveBeenCalled();
       expect(manifestManager.tryDispatch).not.toHaveBeenCalled();
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
+      expect(manifestManager.cleanup).not.toHaveBeenCalled();
     });
 
     test('Should stop the process when no building new manifest throws error', async () => {
@@ -133,6 +135,7 @@ describe('task', () => {
 
       manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
       manifestManager.buildNewManifest = jest.fn().mockRejectedValue(new Error());
+      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -142,6 +145,7 @@ describe('task', () => {
       expect(manifestManager.commit).not.toHaveBeenCalled();
       expect(manifestManager.tryDispatch).not.toHaveBeenCalled();
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
+      expect(manifestManager.cleanup).not.toHaveBeenCalled();
     });
 
     test('Should not bump version and commit manifest when no diff in the manifest', async () => {
@@ -160,6 +164,7 @@ describe('task', () => {
       manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
       manifestManager.tryDispatch = jest.fn().mockResolvedValue([]);
       manifestManager.deleteArtifacts = jest.fn().mockResolvedValue([]);
+      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -171,6 +176,7 @@ describe('task', () => {
       expect(manifestManager.commit).not.toHaveBeenCalled();
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).toHaveBeenCalledWith([]);
+      expect(manifestManager.cleanup).toHaveBeenCalledWith(newManifest);
     });
 
     test('Should stop the process when there are errors pushing new artifacts', async () => {
@@ -185,6 +191,7 @@ describe('task', () => {
       manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
       manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
       manifestManager.pushArtifacts = jest.fn().mockResolvedValue([new Error()]);
+      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -199,6 +206,7 @@ describe('task', () => {
       expect(manifestManager.commit).not.toHaveBeenCalled();
       expect(manifestManager.tryDispatch).not.toHaveBeenCalled();
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
+      expect(manifestManager.cleanup).not.toHaveBeenCalled();
     });
 
     test('Should stop the process when there are errors committing manifest', async () => {
@@ -214,6 +222,7 @@ describe('task', () => {
       manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
       manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
       manifestManager.commit = jest.fn().mockRejectedValue(new Error());
+      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -228,6 +237,7 @@ describe('task', () => {
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).not.toHaveBeenCalled();
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
+      expect(manifestManager.cleanup).not.toHaveBeenCalled();
     });
 
     test('Should stop the process when there are errors dispatching manifest', async () => {
@@ -244,6 +254,7 @@ describe('task', () => {
       manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
       manifestManager.commit = jest.fn().mockResolvedValue(null);
       manifestManager.tryDispatch = jest.fn().mockResolvedValue([new Error()]);
+      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -258,6 +269,7 @@ describe('task', () => {
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
+      expect(manifestManager.cleanup).not.toHaveBeenCalled();
     });
 
     test('Should succeed the process and delete old artifacts', async () => {
@@ -277,6 +289,7 @@ describe('task', () => {
       manifestManager.commit = jest.fn().mockResolvedValue(null);
       manifestManager.tryDispatch = jest.fn().mockResolvedValue([]);
       manifestManager.deleteArtifacts = jest.fn().mockResolvedValue([]);
+      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -291,6 +304,7 @@ describe('task', () => {
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).toHaveBeenCalledWith([ARTIFACT_ID_1]);
+      expect(manifestManager.cleanup).toHaveBeenCalledWith(newManifest);
     });
 
     test('Should succeed the process but not add or delete artifacts when there are only transitions', async () => {
@@ -310,6 +324,7 @@ describe('task', () => {
       manifestManager.commit = jest.fn().mockResolvedValue(null);
       manifestManager.tryDispatch = jest.fn().mockResolvedValue([]);
       manifestManager.deleteArtifacts = jest.fn().mockResolvedValue([]);
+      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -321,6 +336,7 @@ describe('task', () => {
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).toHaveBeenCalledWith([]);
+      expect(manifestManager.cleanup).toHaveBeenCalledWith(newManifest);
     });
   });
 });
