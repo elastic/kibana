@@ -40,6 +40,7 @@ import {
   INDICATOR_INDEX_PATTERNS,
   INDICATOR_INDEX_QUERY,
   INDICATOR_MAPPING,
+  INDICATOR_INDEX_QUERY_DEFAULT_VALUE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -180,8 +181,8 @@ describe('indicator match', () => {
       });
 
       describe('custom indicator query input', () => {
-        it('Has a default set of *:*', () => {
-          getCustomIndicatorQueryInput().should('have.text', '*:*');
+        it(`Has a default set of ${INDICATOR_INDEX_QUERY_DEFAULT_VALUE}`, () => {
+          getCustomIndicatorQueryInput().should('have.text', INDICATOR_INDEX_QUERY_DEFAULT_VALUE);
         });
 
         it('Shows invalidation text if text is removed', () => {

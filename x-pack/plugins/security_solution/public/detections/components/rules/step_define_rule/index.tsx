@@ -72,7 +72,7 @@ const stepDefineDefaultValue: DefineStepRule = {
     saved_id: undefined,
   },
   threatQueryBar: {
-    query: { query: '*:*', language: 'kuery' },
+    query: { query: `@timestamp >= "now-30d"`, language: 'kuery' },
     filters: [],
     saved_id: undefined,
   },

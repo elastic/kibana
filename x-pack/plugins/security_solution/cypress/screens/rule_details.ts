@@ -43,6 +43,8 @@ export const INDICATOR_INDEX_QUERY = 'Indicator index query';
 
 export const INDICATOR_MAPPING = 'Indicator mapping';
 
+export const INDICATOR_INDEX_QUERY_DEFAULT_VALUE = `@timestamp >= "now-30d"`;
+
 export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
 export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-notes"]';
