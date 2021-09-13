@@ -14,6 +14,7 @@ import { DataPublicPluginStart } from '../../../../../../data/public';
 
 import { AppState } from '../services/discover_state';
 import { getDefaultSort, getSortArray } from '../components/doc_table';
+import { DISCOVER_VIEW_MODE } from '../components/view_mode_toggle';
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -47,12 +48,16 @@ export function getStateDefaults({
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')),
     hideChart: undefined,
+    discoverViewMode: DISCOVER_VIEW_MODE.DOCUMENT_LEVEL,
   } as AppState;
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
   }
   if (savedSearch.hideChart) {
     defaultState.hideChart = savedSearch.hideChart;
+  }
+  if (savedSearch.discoverViewMode) {
+    defaultState.discoverViewMode = savedSearch.discoverViewMode;
   }
 
   return defaultState;

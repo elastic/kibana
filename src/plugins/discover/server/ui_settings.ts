@@ -26,7 +26,6 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
-  AGGREGATED_VIEW_SETTING,
   AGGREGATED_VIEW_PREVIEW,
 } from '../common';
 
@@ -171,22 +170,6 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     metric: {
       type: METRIC_TYPE.CLICK,
       name: 'discover:useLegacyDataGrid',
-    },
-  },
-  [AGGREGATED_VIEW_SETTING]: {
-    name: i18n.translate('discover.advancedSettings.aggregatedViewName', {
-      defaultMessage: 'Aggregated view',
-    }),
-    value: false,
-    description: i18n.translate('discover.advancedSettings.aggregatedViewDescription', {
-      defaultMessage:
-        'Turn on this option to show the aggregated view by default. Turn off to show the document view.',
-    }),
-    category: ['discover'],
-    schema: schema.boolean(),
-    metric: {
-      type: METRIC_TYPE.CLICK,
-      name: 'discover:aggregatedView',
     },
   },
   [AGGREGATED_VIEW_PREVIEW]: {

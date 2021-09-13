@@ -35,6 +35,7 @@ import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../../../url_generator';
 import { SavedSearch } from '../../../../saved_searches';
 import { handleSourceColumnState } from '../../../helpers/state_helpers';
+import { DISCOVER_VIEW_MODE } from '../components/view_mode_toggle';
 
 export interface AppState {
   /**
@@ -73,6 +74,10 @@ export interface AppState {
    * id of the used saved query
    */
   savedQuery?: string;
+  /**
+   * Table view: Document view or Aggregated view
+   */
+  discoverViewMode?: DISCOVER_VIEW_MODE;
 }
 
 interface GetStateParams {

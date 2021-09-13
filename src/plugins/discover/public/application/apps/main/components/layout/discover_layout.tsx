@@ -30,7 +30,7 @@ import {
 } from '../../../../../../../data/public';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
-import { AGGREGATED_VIEW_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
 import { popularizeField } from '../../../../helpers/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
@@ -72,10 +72,12 @@ export function DiscoverLayout({
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
-  const [discoverViewMode, setDiscoverViewMode] = useState(() =>
-    uiSettings?.get(AGGREGATED_VIEW_SETTING)
-      ? DISCOVER_VIEW_MODE.FIELD_LEVEL
-      : DISCOVER_VIEW_MODE.DOCUMENT_LEVEL
+
+  const setDiscoverViewMode = useCallback(
+    (mode: DISCOVER_VIEW_MODE) => {
+      stateContainer.setAppState({ discoverViewMode: mode });
+    },
+    [stateContainer]
   );
 
   const fetchCounter = useRef<number>(0);
@@ -195,7 +197,7 @@ export function DiscoverLayout({
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onEditRuntimeField={onEditRuntimeField}
-              discoverViewMode={discoverViewMode}
+              discoverViewMode={state.discoverViewMode}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
@@ -262,12 +264,12 @@ export function DiscoverLayout({
                       services={services}
                       stateContainer={stateContainer}
                       timefield={timeField}
-                      discoverViewMode={discoverViewMode}
+                      discoverViewMode={state.discoverViewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
                     />
                   </EuiFlexItem>
                   <EuiHorizontalRule margin="none" />
-                  {discoverViewMode === DISCOVER_VIEW_MODE.DOCUMENT_LEVEL ? (
+                  {state.discoverViewMode === DISCOVER_VIEW_MODE.DOCUMENT_LEVEL ? (
                     <DiscoverDocuments
                       documents$={savedSearchData$.documents$}
                       expandedDoc={expandedDoc}

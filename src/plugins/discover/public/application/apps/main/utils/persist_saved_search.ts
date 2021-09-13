@@ -51,6 +51,10 @@ export async function persistSavedSearch(
     savedSearch.hideChart = state.hideChart;
   }
 
+  if (state.discoverViewMode) {
+    savedSearch.discoverViewMode = state.discoverViewMode;
+  }
+
   try {
     const id = await savedSearch.save(saveOptions);
     onSuccess(id);

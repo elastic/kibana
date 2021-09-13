@@ -9,6 +9,7 @@
 import { SearchSource } from '../../../data/public';
 import { SavedObjectSaveOpts } from '../../../saved_objects/public';
 import { DiscoverGridSettings } from '../application/components/discover_grid/types';
+import { DISCOVER_VIEW_MODE } from '../application/apps/main/components/view_mode_toggle';
 
 export type SortOrder = [string, string];
 export interface SavedSearch {
@@ -24,6 +25,7 @@ export interface SavedSearch {
   lastSavedTitle?: string;
   copyOnSave?: boolean;
   hideChart?: boolean;
+  discoverViewMode: DISCOVER_VIEW_MODE;
 }
 export interface SavedSearchLoader {
   get: (id: string) => Promise<SavedSearch>;
