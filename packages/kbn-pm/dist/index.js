@@ -59643,7 +59643,7 @@ class CiStatsReporter {
           throw error;
         }
 
-        if (error !== null && error !== void 0 && error.response && error.response.status < 502) {
+        if (error !== null && error !== void 0 && error.response && error.response.status < 500) {
           // error response from service was received so warn the user and move on
           this.log.warning(`error reporting ${bodyDesc} [status=${error.response.status}] [resp=${(0, _util.inspect)(error.response.data)}]`);
           return;
