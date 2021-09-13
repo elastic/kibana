@@ -20,6 +20,7 @@ interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
+  savedMapId?: string;
 }
 
 interface State {

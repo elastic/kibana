@@ -98,6 +98,7 @@ export async function renderApp(
         setHeaderActionMenu={setHeaderActionMenu}
         stateTransfer={stateTransfer}
         originatingApp={originatingApp}
+        savedMapId={routeProps.match.params.savedMapId}
       />
     );
   }

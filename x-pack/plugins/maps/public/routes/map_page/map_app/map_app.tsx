@@ -114,9 +114,7 @@ export class MapApp extends React.Component<Props, State> {
     };
   }
 
-  componentDidMount() {
-    this._isMounted = true;
-
+  _openMapOperations() {
     this._autoRefreshSubscription = getTimeFilter()
       .getAutoRefreshFetch$()
       .pipe(
@@ -151,13 +149,21 @@ export class MapApp extends React.Component<Props, State> {
     });
   }
 
-  componentDidUpdate() {
-    this._updateIndexPatterns();
+  componentDidMount() {
+    this._isMounted = true;
+    this._openMapOperations();
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
+  componentDidUpdate(prevProps: Props) {
+    this._updateIndexPatterns();
+    if (prevProps.savedMap.getSavedObjectId() !== this.props.savedMap.getSavedObjectId()) {
+      this._closeMapOperations();
+      this.setState({ initialized: false });
+      this._openMapOperations();
+    }
+  }
 
+  _closeMapOperations() {
     if (this._autoRefreshSubscription) {
       this._autoRefreshSubscription.unsubscribe();
     }
@@ -174,6 +180,11 @@ export class MapApp extends React.Component<Props, State> {
     this.props.onAppLeave((actions) => {
       return actions.default();
     });
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    this._closeMapOperations();
   }
 
   _updateFromGlobalState = ({
