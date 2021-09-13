@@ -15,7 +15,7 @@ import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { getNoDataConfig } from './no_data_config';
 
 // Paths that must skip the no data screen
-const byPassNoDataScreenPaths = ['/settings/*'];
+const bypassNoDataScreenPaths = ['/settings'];
 
 /*
  * This template contains:
@@ -55,14 +55,13 @@ export function ApmMainTemplate({
     hasData: data?.hasData,
   });
 
-  const byPassNoDataScreen = byPassNoDataScreenPaths.some((byPassPath) => {
-    const regex = new RegExp(byPassPath);
-    return regex.test(location.pathname);
-  });
+  const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
+    location.pathname.includes(path)
+  );
 
   return (
     <ObservabilityPageTemplate
-      noDataConfig={byPassNoDataScreen ? undefined : noDataConfig}
+      noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
       pageHeader={{
         pageTitle,
         rightSideItems: [<ApmEnvironmentFilter />],
