@@ -10,6 +10,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
+import { last } from 'lodash';
 
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
@@ -31,7 +32,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
+import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { QueryBarWrapper } from '../../query_bar_wrapper';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
 
 export class TableSeriesConfig extends Component {
   UNSAFE_componentWillMount() {
@@ -43,8 +46,10 @@ export class TableSeriesConfig extends Component {
     }
   }
 
+  changeModelFormatter = (formatter) => this.props.onChange({ formatter });
+
   render() {
-    const defaults = { offset_time: '', value_template: '' };
+    const defaults = { offset_time: '', value_template: '{{value}}' };
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
@@ -110,13 +115,24 @@ export class TableSeriesConfig extends Component {
       return model.aggregate_function === option.value;
     });
 
+    const isNumericMetric = checkIfNumericMetric(
+      last(model.metrics),
+      this.props.fields,
+      this.props.indexPatternForQuery
+    );
+    const isKibanaIndexPattern =
+      this.props.panel.use_kibana_indexes || this.props.indexPatternForQuery === '';
+
     return (
       <div className="tvbAggRow">
         <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
-          </EuiFlexItem>
-          <EuiFlexItem>
+          <DataFormatPicker
+            formatterValue={model.formatter}
+            changeModelFormatter={this.changeModelFormatter}
+            shouldIncludeDefaultOption={isKibanaIndexPattern}
+            shouldIncludeNumberOptions={isNumericMetric}
+          />
+          <EuiFlexItem grow={3}>
             <EuiFormRow
               id={htmlId('template')}
               label={
@@ -139,6 +155,7 @@ export class TableSeriesConfig extends Component {
               <EuiFieldText
                 onChange={handleTextChange('value_template')}
                 value={model.value_template}
+                disabled={model.formatter === DATA_FORMATTERS.DEFAULT}
                 fullWidth
               />
             </EuiFormRow>
