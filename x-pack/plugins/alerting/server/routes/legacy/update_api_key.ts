@@ -37,7 +37,7 @@ export const updateApiKeyRoute = (
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
-        trackLegacyRouteUsage('update_api_key', usageCounter);
+        trackLegacyRouteUsage('updateApiKey', usageCounter);
         const rulesClient = context.alerting.getRulesClient();
         const { id } = req.params;
         try {

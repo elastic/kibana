@@ -36,7 +36,7 @@ export const unmuteAlertInstanceRoute = (
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
-      trackLegacyRouteUsage('unmute', usageCounter);
+      trackLegacyRouteUsage('unmuteInstance', usageCounter);
       const rulesClient = context.alerting.getRulesClient();
       const { alertId, alertInstanceId } = req.params;
       try {

@@ -102,6 +102,6 @@ describe('unmuteAlertInstanceRoute', () => {
       'ok',
     ]);
     await handler(context, req, res);
-    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('unmute', mockUsageCounter);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('unmuteInstance', mockUsageCounter);
   });
 });

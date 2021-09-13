@@ -96,6 +96,6 @@ describe('muteAllAlertRoute', () => {
       'ok',
     ]);
     await handler(context, req, res);
-    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('mute_all', mockUsageCounter);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('muteAll', mockUsageCounter);
   });
 });

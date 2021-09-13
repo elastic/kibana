@@ -26,7 +26,7 @@ export const listAlertTypesRoute = (
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
-      trackLegacyRouteUsage('list_alert_types', usageCounter);
+      trackLegacyRouteUsage('listAlertTypes', usageCounter);
       return res.ok({
         body: Array.from(await context.alerting.getRulesClient().listAlertTypes()),
       });

@@ -98,6 +98,6 @@ describe('updateApiKeyRoute', () => {
       'ok',
     ]);
     await handler(context, req, res);
-    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('update_api_key', mockUsageCounter);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('updateApiKey', mockUsageCounter);
   });
 });

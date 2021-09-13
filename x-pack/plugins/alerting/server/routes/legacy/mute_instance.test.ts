@@ -102,6 +102,6 @@ describe('muteAlertInstanceRoute', () => {
       'ok',
     ]);
     await handler(context, req, res);
-    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('mute_instance', mockUsageCounter);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('muteInstance', mockUsageCounter);
   });
 });

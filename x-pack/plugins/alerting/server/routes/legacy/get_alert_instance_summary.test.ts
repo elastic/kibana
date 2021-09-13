@@ -123,6 +123,6 @@ describe('getAlertInstanceSummaryRoute', () => {
       ['ok']
     );
     await handler(context, req, res);
-    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('instance_summary', mockUsageCounter);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('instanceSummary', mockUsageCounter);
   });
 });

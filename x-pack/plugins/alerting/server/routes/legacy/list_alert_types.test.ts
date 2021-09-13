@@ -224,6 +224,6 @@ describe('listAlertTypesRoute', () => {
       ['ok']
     );
     await handler(context, req, res);
-    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('list_alert_types', mockUsageCounter);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('listAlertTypes', mockUsageCounter);
   });
 });
