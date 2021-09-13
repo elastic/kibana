@@ -36,7 +36,8 @@
     "usageCollection",
     "lens",
     "lists",
-    "home"
+    "home",
+    "telemetry"
   ],
   "server": true,
   "ui": true,
