@@ -47,6 +47,7 @@ describe('Kibana deprecation details flyout', () => {
       await actions.table.clickDeprecationAt(1);
 
       expect(exists('kibanaDeprecationDetails')).toBe(true);
+      expect(exists('kibanaDeprecationDetails.warningDeprecationBadge')).toBe(true);
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(manualDeprecation.title);
       expect(find('manualStepsList').find('li').length).toEqual(
         manualDeprecation.correctiveActions.manualSteps.length
@@ -60,12 +61,13 @@ describe('Kibana deprecation details flyout', () => {
 
   describe('Deprecation with automatic resolution', () => {
     test('resolves deprecation successfully', async () => {
-      const { find, exists, actions } = testBed;
+      const { find, exists, actions, table } = testBed;
       const quickResolveDeprecation = mockedKibanaDeprecations[0];
 
       await actions.table.clickDeprecationAt(0);
 
       expect(exists('kibanaDeprecationDetails')).toBe(true);
+      expect(exists('kibanaDeprecationDetails.criticalDeprecationBadge')).toBe(true);
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(
         quickResolveDeprecation.title
       );
@@ -87,8 +89,11 @@ describe('Kibana deprecation details flyout', () => {
 
       // Resolve information should not display and Quick resolve button should be disabled
       expect(exists('resolveSection')).toBe(false);
-      expect(find('resolveButton').props().disabled).toBe(true);
-      expect(find('resolveButton').text()).toContain('Resolved');
+      expect(exists('resolveButton')).toBe(false);
+      expect(exists('kibanaDeprecationDetails.resolvedDeprecationBadge')).toBe(true);
+      // Table row badge should also reflect the resolved state
+      const { rows } = table.getMetaData('kibanaDeprecationsTable');
+      expect(find('resolvedDeprecationBadge', rows[0].reactWrapper).text()).toBe('Resolved');
     });
 
     test('handles resolve failure', async () => {
@@ -103,6 +108,7 @@ describe('Kibana deprecation details flyout', () => {
       await actions.table.clickDeprecationAt(0);
 
       expect(exists('kibanaDeprecationDetails')).toBe(true);
+      expect(exists('kibanaDeprecationDetails.criticalDeprecationBadge')).toBe(true);
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(
         quickResolveDeprecation.title
       );
@@ -123,6 +129,8 @@ describe('Kibana deprecation details flyout', () => {
       expect(exists('quickResolveError')).toBe(true);
       // Resolve information should display and Quick resolve button should be enabled
       expect(exists('resolveSection')).toBe(true);
+      // Badge should remain the same
+      expect(exists('kibanaDeprecationDetails.criticalDeprecationBadge')).toBe(true);
       expect(find('resolveButton').props().disabled).toBe(false);
       expect(find('resolveButton').text()).toContain('Try again');
     });
