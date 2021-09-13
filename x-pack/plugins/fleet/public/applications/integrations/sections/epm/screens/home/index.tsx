@@ -98,15 +98,16 @@ const InstalledPackages: React.FC = memo(() => {
   function setSelectedCategory(categoryId: string) {
     const url = pagePathGetters.integrations_installed({
       category: categoryId,
-      query: searchParam,
+      searchTerm: searchParam,
     })[1];
     history.push(url);
   }
   function setSearchTerm(search: string) {
+    // Use .replace so the browser's back button is tied to single keystroke
     history.replace(
       pagePathGetters.integrations_installed({
         category: selectedCategory,
-        query: search,
+        searchTerm: search,
       })[1]
     );
   }
@@ -156,7 +157,7 @@ const InstalledPackages: React.FC = memo(() => {
 
   if (!categoryExists(selectedCategory, categories)) {
     history.replace(
-      pagePathGetters.integrations_installed({ category: '', query: searchParam })[1]
+      pagePathGetters.integrations_installed({ category: '', searchTerm: searchParam })[1]
     );
     return null;
   }
@@ -190,12 +191,16 @@ const AvailablePackages: React.FC = memo(() => {
   );
   const history = useHistory();
   function setSelectedCategory(categoryId: string) {
-    const url = pagePathGetters.integrations_all({ category: categoryId, query: searchParam })[1];
+    const url = pagePathGetters.integrations_all({
+      category: categoryId,
+      searchTerm: searchParam,
+    })[1];
     history.push(url);
   }
   function setSearchTerm(search: string) {
+    // Use .replace so the browser's back button is tied to single keystroke
     history.replace(
-      pagePathGetters.integrations_all({ category: selectedCategory, query: search })[1]
+      pagePathGetters.integrations_all({ category: selectedCategory, searchTerm: search })[1]
     );
   }
 
@@ -241,7 +246,7 @@ const AvailablePackages: React.FC = memo(() => {
   );
 
   if (!categoryExists(selectedCategory, categories)) {
-    history.replace(pagePathGetters.integrations_all({ category: '', query: searchParam })[1]);
+    history.replace(pagePathGetters.integrations_all({ category: '', searchTerm: searchParam })[1]);
     return null;
   }
 

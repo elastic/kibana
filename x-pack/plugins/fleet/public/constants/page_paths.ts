@@ -88,9 +88,9 @@ export const pagePathGetters: {
   base: () => [FLEET_BASE_PATH, '/'],
   overview: () => [FLEET_BASE_PATH, '/'],
   integrations: () => [INTEGRATIONS_BASE_PATH, '/'],
-  integrations_all: ({ query, category }: { query?: string; category?: string }) => {
+  integrations_all: ({ searchTerm, category }: { searchTerm?: string; category?: string }) => {
     const categoryPath = category ? `/${category}` : ``;
-    const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
+    const queryParams = searchTerm ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchTerm}` : ``;
     return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${queryParams}`];
   },
   integrations_installed: ({ query, category }: { query?: string; category?: string }) => {
