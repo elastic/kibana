@@ -8,7 +8,7 @@
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
 import apmIndexPattern from '../../tutorial/index_pattern.json';
-import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
+import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 import { Setup } from '../helpers/setup_request';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client.js';
