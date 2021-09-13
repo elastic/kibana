@@ -7,29 +7,29 @@
 
 import { useDynamicDataViewFetcher } from '../../../../hooks/use_dynamic_data_view';
 import {
-  IndexPattern,
-  IndexPatternSpec,
+  DataView,
+  DataViewSpec,
 } from '../../../../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 
-export function useIndexPattern() {
+export function useDataView() {
   const { dataView } = useDynamicDataViewFetcher();
 
   const {
     services: {
-      data: { indexPatterns },
+      data: { dataViews },
     },
   } = useKibana<{ data: DataPublicPluginStart }>();
 
-  const { data } = useFetcher<Promise<IndexPattern | undefined>>(async () => {
+  const { data } = useFetcher<Promise<DataView | undefined>>(async () => {
     if (dataView?.title) {
-      return indexPatterns.create({
+      return dataViews.create({
         pattern: dataView?.title,
-      } as IndexPatternSpec);
+      } as DataViewSpec);
     }
-  }, [dataView?.title, indexPatterns]);
+  }, [dataView?.title, dataViews]);
 
-  return { indexPatternTitle: dataView?.title, indexPattern: data };
+  return { dataViewTitle: dataView?.title, dataView: data };
 }
