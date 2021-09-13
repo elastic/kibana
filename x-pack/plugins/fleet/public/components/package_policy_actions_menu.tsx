@@ -24,7 +24,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   packagePolicy: InMemoryPackagePolicy;
   viewDataStep?: EuiStepProps;
   showAddAgent?: boolean;
-  isOpen?: boolean;
+  defaultIsOpen?: boolean;
   upgradePackagePolicyHref: string;
 }> = ({
   agentPolicy,
@@ -32,13 +32,13 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   viewDataStep,
   showAddAgent,
   upgradePackagePolicyHref,
-  isOpen = false,
+  defaultIsOpen = false,
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
   const refreshAgentPolicy = useAgentPolicyRefresh();
-  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(isOpen);
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);

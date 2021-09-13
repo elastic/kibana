@@ -18,12 +18,12 @@ function renderMenu({
   agentPolicy,
   packagePolicy,
   showAddAgent = false,
-  isOpen = true,
+  defaultIsOpen = true,
 }: {
   agentPolicy: AgentPolicy;
   packagePolicy: InMemoryPackagePolicy;
   showAddAgent?: boolean;
-  isOpen?: boolean;
+  defaultIsOpen?: boolean;
 }) {
   const renderer = createIntegrationsTestRendererMock();
 
@@ -33,7 +33,7 @@ function renderMenu({
       packagePolicy={packagePolicy}
       showAddAgent={showAddAgent}
       upgradePackagePolicyHref=""
-      isOpen={isOpen}
+      defaultIsOpen={defaultIsOpen}
       key="test1"
     />
   );
@@ -87,17 +87,17 @@ test('Should disable upgrade button if package does not have upgrade', async () 
   const packagePolicy = createMockPackagePolicy({ hasUpgrade: false });
   const { utils } = renderMenu({ agentPolicy, packagePolicy });
   await act(async () => {
-    const upgradeButton = utils.getByText('Upgrade package policy').closest('button');
+    const upgradeButton = utils.getByText('Upgrade integration policy').closest('button');
     expect(upgradeButton).toBeDisabled();
   });
 });
 
-test('Should enable upgrade button if package does has upgrade', async () => {
+test('Should enable upgrade button if package has upgrade', async () => {
   const agentPolicy = createMockAgentPolicy();
   const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
   const { utils } = renderMenu({ agentPolicy, packagePolicy });
   await act(async () => {
-    const upgradeButton = utils.getByText('Upgrade package policy').closest('button');
+    const upgradeButton = utils.getByText('Upgrade integration policy').closest('button');
     expect(upgradeButton).not.toBeDisabled();
   });
 });
