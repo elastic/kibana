@@ -18,6 +18,7 @@ get:
                     enum:
                       - installed
                       - installing
+                      - install_failed
                       - not_installed
                   savedObject:
                     type: string

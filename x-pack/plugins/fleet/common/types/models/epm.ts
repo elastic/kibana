@@ -43,7 +43,7 @@ export interface DefaultPackagesInstallationError {
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
 export type InstallSource = 'registry' | 'upload';
 
-export type EpmPackageInstallStatus = 'installed' | 'installing';
+export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
 
 export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
@@ -398,6 +398,10 @@ export type Installing<T = {}> = T & {
 
 export type NotInstalled<T = {}> = T & {
   status: InstallationStatus['NotInstalled'];
+};
+
+export type InstallFailed<T = {}> = T & {
+  status: InstallationStatus['InstallFailed'];
 };
 
 export type AssetReference = KibanaAssetReference | EsAssetReference;

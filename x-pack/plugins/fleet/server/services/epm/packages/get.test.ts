@@ -256,6 +256,28 @@ describe('When using EPM `get` services', () => {
           status: 'installed',
         });
       });
+
+      it('should be install_failed when package SO install_status is install_failed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            install_status: 'install_failed',
+          },
+        });
+
+        expect(
+          await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).toMatchObject({
+          status: 'install_failed',
+        });
+      });
     });
   });
 });

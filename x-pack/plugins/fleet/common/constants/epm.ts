@@ -54,5 +54,6 @@ export const monitoringTypes = Object.values(dataTypes);
 export const installationStatuses = {
   Installed: 'installed',
   Installing: 'installing',
+  InstallFailed: 'install_failed',
   NotInstalled: 'not_installed',
 } as const;

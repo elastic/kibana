@@ -58,6 +58,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
+        `--no-optimizer`,
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
