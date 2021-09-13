@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export * from './fleet_agent_status_to_endpoint_host_status';
-export * from './wrap_errors';
+import { EndpointError } from '../../errors';
+
+/**
+ * Indicates that the internal manifest that is managed by ManifestManager is invalid or contains
+ * invalid data
+ */
+export class InvalidInternalManifestError extends EndpointError {}
