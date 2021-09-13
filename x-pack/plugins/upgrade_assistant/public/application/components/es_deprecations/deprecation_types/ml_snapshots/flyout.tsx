@@ -155,10 +155,16 @@ export const FixSnapshotsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge isCritical={deprecation.isCritical} isResolved={isResolved} />
-        <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2>{i18nTexts.flyoutTitle}</h2>
-        </EuiTitle>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <DeprecationBadge isCritical={deprecation.isCritical} isResolved={isResolved} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="s" data-test-subj="flyoutTitle">
+              <h2>{i18nTexts.flyoutTitle}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {snapshotState.error && !isResolved && (
