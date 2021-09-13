@@ -51,7 +51,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
   return (
     <EuiFlexItem
       data-test-subj={'dataVisualizerFieldDataTopValues'}
-      className={'dataVisualizerPanelWrapper'}
+      className={'dataVisualizerPanelWrapper dataVisualizerTopValuesWrapper'}
     >
       <ExpandedRowFieldHeader>
         <FormattedMessage

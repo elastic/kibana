@@ -31,8 +31,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
     examplesContent = examples.map((example, i) => {
       return (
         <EuiListGroupItem
-          className="fieldDataCard__codeContent"
-          size="s"
+          size="xs"
           key={`example_${i}`}
           label={typeof example === 'string' ? example : JSON.stringify(example)}
         />

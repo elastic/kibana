@@ -25,7 +25,6 @@ import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_ta
 import { throttle } from 'lodash';
 import { JOB_FIELD_TYPES, JobFieldType, DataVisualizerTableState } from '../../../../../common';
 import { DocumentStat } from './components/field_data_row/document_stats';
-import { DistinctValues } from './components/field_data_row/distinct_values';
 import { IndexBasedNumberContentPreview } from './components/field_data_row/number_content_preview';
 
 import { useTableSettings } from './use_table_settings';
@@ -39,6 +38,7 @@ import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
 import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
 import { calculateTableColumnsDimensions, getKibanaFieldType } from './utils';
+import { DistinctValues } from './components/field_data_row/distinct_values';
 
 const FIELD_NAME = 'fieldName';
 
@@ -74,15 +74,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     updatePageState
   );
   const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
-  const [dimensions, setDimensions] = useState({
-    expander: '40px',
-    type: '75px',
-    docCount: '175px',
-    distinctValues: '175px',
-    distributions: '150px',
-    showIcons: true,
-    breakPoint: 'xl',
-  });
+  const [dimensions, setDimensions] = useState(calculateTableColumnsDimensions());
 
   const [tableWidth, setTableWidth] = useState<number>(1400);
 
@@ -192,7 +184,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           const displayName = item.displayName ?? item.fieldName;
 
           return (
-            <EuiText size="s" data-test-subj={`dataVisualizerDisplayName-${item.fieldName}`}>
+            <EuiText size="xs" data-test-subj={`dataVisualizerDisplayName-${item.fieldName}`}>
               {displayName}
             </EuiText>
           );
@@ -202,11 +194,19 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       {
         field: 'docCount',
-        name: i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
-          defaultMessage: 'Documents (%)',
-        }),
+        name: (
+          <div className={'columnHeaderTitle'}>
+            {dimensions.showIcons ? (
+              <EuiIcon type="document" className={'columnHeaderIcon'} />
+            ) : null}
+            {i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
+              defaultMessage: 'Documents (%)',
+            })}
+          </div>
+        ),
+
         render: (value: number | undefined, item: DataVisualizerTableItem) => (
-          <DocumentStat config={item} showIcons={dimensions.showIcons} />
+          <DocumentStat config={item} />
         ),
         sortable: (item: DataVisualizerTableItem) => item?.stats?.count,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
@@ -215,12 +215,20 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       {
         field: 'stats.cardinality',
-        name: i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
-          defaultMessage: 'Distinct values',
-        }),
-        render: (cardinality?: number) => (
-          <DistinctValues cardinality={cardinality} showIcons={dimensions.showIcons} />
+        name: (
+          <div className={'columnHeaderTitle'}>
+            {dimensions.showIcons ? (
+              <EuiIcon type="database" className={'columnHeaderIcon'} />
+            ) : null}
+            {i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
+              defaultMessage: 'Distinct values',
+            })}
+          </div>
         ),
+        render: (cardinality: number | undefined, item: DataVisualizerTableItem) => (
+          <DistinctValues cardinality={cardinality} />
+        ),
+
         sortable: true,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistinctValues',
@@ -228,14 +236,14 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       {
         name: (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className={'columnHeaderTitle'}>
             {dimensions.showIcons ? (
-              <EuiIcon type={'visBarVertical'} style={{ paddingRight: 4 }} />
+              <EuiIcon type={'visBarVertical'} className={'columnHeaderIcon'} />
             ) : null}
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',
             })}
-            {dimensions.showIcons ? (
+            {
               <EuiToolTip
                 content={
                   !showDistributions
@@ -263,7 +271,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
                   }
                 />
               </EuiToolTip>
-            ) : null}
+            }
           </div>
         ),
         render: (item: DataVisualizerTableItem) => {

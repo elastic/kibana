@@ -612,7 +612,7 @@ const useDataVisualizerGridData = (
         />
       ),
       actions,
-      width: '75px',
+      width: '70px',
     };
 
     return [actionColumn];

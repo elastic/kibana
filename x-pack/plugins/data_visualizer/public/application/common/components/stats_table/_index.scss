@@ -15,12 +15,21 @@
   }
 
   .fieldDataCard__codeContent {
-    @include euiCodeFont;
     padding-left: 4px;
   }
 }
 
 .dataVisualizer {
+
+  .columnHeaderTitle {
+    display: flex;
+    align-items: center;
+  }
+
+  .columnHeaderIcon {
+    padding-right: $euiSizeXS;
+  }
+
   .euiTableRow > .euiTableRowCell {
     border-bottom: 0;
     border-top: $euiBorderThin;
@@ -60,6 +69,10 @@
     min-height: 300px;
     min-width: 600px;
   }
+  .dataVisualizerTopValuesWrapper {
+    min-width: 400px;
+    max-width: 600px;
+  }
 
   .dataVisualizerPanelWrapper {
     border-radius: $euiBorderRadius;
@@ -70,9 +83,6 @@
 
   .dataVisualizerTextContent {
     min-width: 500px;
-    .euiListGroupItem__text {
-      padding: 0;
-    }
   }
 
 }
