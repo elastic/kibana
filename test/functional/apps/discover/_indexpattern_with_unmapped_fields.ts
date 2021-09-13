@@ -14,14 +14,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'header']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
 
   describe('index pattern with unmapped fields', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/unmapped_fields');
       await security.testUser.setRoles(['kibana_admin', 'test-index-unmapped-fields']);
-      const fromTime = 'Jan 20, 2021 @ 00:00:00.000';
-      const toTime = 'Jan 25, 2021 @ 00:00:00.000';
+      const fromTime = 'Jan 10, 2021 @ 00:00:00.000';
+      const toTime = 'Jan 30, 2021 @ 00:00:00.000';
 
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'test-index-unmapped-fields',
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.awaitKibanaChrome();
+      await PageObjects.discover.selectIndexPattern('test-index-unmapped-fields');
     });
 
     after(async () => {
