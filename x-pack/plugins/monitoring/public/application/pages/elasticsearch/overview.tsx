@@ -60,7 +60,7 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
     setData(response);
   }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
 
-  const renderOverview = (overviewData) => {
+  const renderOverview = (overviewData: any) => {
     if (overviewData === null) {
       return null;
     }
