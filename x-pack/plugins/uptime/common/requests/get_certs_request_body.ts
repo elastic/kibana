@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CertResult, GetCertsParams } from '../runtime_types';
+import { estypes } from '@elastic/elasticsearch';
+import { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -84,7 +85,29 @@ export const getCertsRequestBody = ({
                 },
               },
             },
-          ],
+            ...(notValidBefore
+              ? [
+                  {
+                    range: {
+                      'tls.certificate_not_valid_before': {
+                        lte: notValidBefore,
+                      },
+                    },
+                  },
+                ]
+              : []),
+            ...(notValidAfter
+              ? [
+                  {
+                    range: {
+                      'tls.certificate_not_valid_after': {
+                        lte: notValidAfter,
+                      },
+                    },
+                  },
+                ]
+              : []),
+          ] as estypes.QueryDslQueryContainer,
         },
       },
       _source: [
@@ -120,34 +143,6 @@ export const getCertsRequestBody = ({
     },
   });
 
-  if (notValidBefore || notValidAfter) {
-    const validityFilters: any = {
-      bool: {
-        should: [],
-      },
-    };
-    if (notValidBefore) {
-      validityFilters.bool.should.push({
-        range: {
-          'tls.certificate_not_valid_before': {
-            lte: notValidBefore,
-          },
-        },
-      });
-    }
-    if (notValidAfter) {
-      validityFilters.bool.should.push({
-        range: {
-          'tls.certificate_not_valid_after': {
-            lte: notValidAfter,
-          },
-        },
-      });
-    }
-
-    searchRequest.body.query.bool.filter.push(validityFilters);
-  }
-
   return searchRequest.body;
 };
 
@@ -163,11 +158,15 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
     const sha1 = server?.hash?.sha1;
     const sha256 = server?.hash?.sha256;
 
-    const monitors = hit.inner_hits!.monitors.hits.hits.map((monitor: any) => ({
-      name: monitor._source?.monitor.name,
-      id: monitor._source?.monitor.id,
-      url: monitor._source?.url?.full,
-    }));
+    const monitors = hit.inner_hits!.monitors.hits.hits.map((monitor) => {
+      const monitorPing = monitor._source as Ping;
+
+      return {
+        name: monitorPing?.monitor.name,
+        id: monitorPing?.monitor.id,
+        url: monitorPing?.url?.full,
+      };
+    });
 
     return {
       monitors,
