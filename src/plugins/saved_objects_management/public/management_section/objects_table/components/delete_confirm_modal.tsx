@@ -86,7 +86,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               title={
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.title"
-                  defaultMessage="Some objects cannot deleted"
+                  defaultMessage="Some objects cannot be deleted"
                 />
               }
               iconType="alert"
@@ -95,7 +95,8 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               <p>
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.deleteConfirmModal.cannotDeleteCallout.content"
-                  defaultMessage="Some of the selected objects cannot be deleted, and are not listed in the table summary"
+                  defaultMessage="{objectCount, plural, one {# object is} other {# objects are}} hidden and cannot be deleted. {objectCount, plural, one {It was} other {They were}} excluded from the table summary."
+                  values={{ objectCount: undeletableObjects.length }}
                 />
               </p>
             </EuiCallOut>
@@ -186,6 +187,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
                   fill
                   color="danger"
                   onClick={onConfirm}
+                  disabled={deletableObjects.length === 0}
                   data-test-subj="confirmModalConfirmButton"
                 >
                   <FormattedMessage
