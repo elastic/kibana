@@ -434,7 +434,6 @@ const createTimeline = async ({
 }: {
   timelineId: string | null;
   timeline: SavedTimeline;
-  isImmutable?: boolean;
   savedObjectsClient: SavedObjectsClientContract;
   userInfo: AuthenticatedUser | null;
 }) => {
@@ -477,7 +476,6 @@ const updateTimeline = async ({
   request: FrameworkRequest;
   timelineId: string;
   timeline: SavedTimeline;
-  isImmutable?: boolean;
   savedObjectsClient: SavedObjectsClientContract;
   userInfo: AuthenticatedUser | null;
   version: string | null;
