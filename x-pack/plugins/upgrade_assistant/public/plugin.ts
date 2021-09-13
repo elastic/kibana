@@ -42,7 +42,7 @@ export class UpgradeAssistantUIPlugin
       title: pluginName,
       order: 1,
       async mount(params) {
-        const [coreStart, { data }] = await coreSetup.getStartServices();
+        const [coreStart, { data, ...plugins }] = await coreSetup.getStartServices();
 
         const {
           chrome: { docTitle },
@@ -53,6 +53,10 @@ export class UpgradeAssistantUIPlugin
         const appDependencies: AppDependencies = {
           kibanaVersionInfo,
           isReadOnlyMode: readonly,
+          // Infra plugin doesnt export anything as a public interface. So the only
+          // way we have at this stage for checking if the plugin is available or not
+          // is by checking if the startServices has the `infra` key.
+          isInfraPluginAvailable: plugins.hasOwnProperty('infra'),
           plugins: {
             cloud,
             share,

@@ -34,6 +34,7 @@ export interface StartDependencies {
 
 export interface AppDependencies {
   isReadOnlyMode: boolean;
+  isInfraPluginAvailable: boolean;
   kibanaVersionInfo: KibanaVersionContext;
   plugins: {
     cloud?: CloudSetup;

@@ -211,6 +211,20 @@ describe('Overview - Fix deprecation logs step', () => {
       );
     });
 
+    test(`Doesn't show observability app link if infra app is not available`, async () => {
+      await act(async () => {
+        testBed = await setupOverviewPage({
+          isInfraPluginAvailable: false,
+        });
+      });
+
+      const { component, exists } = testBed;
+
+      component.update();
+
+      expect(exists('viewObserveLogs')).toBe(false);
+    });
+
     test('Has a link to see logs in discover app', async () => {
       await act(async () => {
         testBed = await setupOverviewPage();
