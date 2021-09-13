@@ -288,14 +288,10 @@ const PieComponent = (props: PieComponentProps) => {
    * Checks whether data have all zero values.
    * If so, the no data container is loaded.
    */
-  const isAllZeros = useMemo(
-    () =>
-      visData.rows.every((row) => {
-        const metricColumnId = metricColumn.id;
-        return row[metricColumnId] === 0;
-      }),
-    [visData.rows, metricColumn]
-  );
+  const isAllZeros = useMemo(() => visData.rows.every((row) => row[metricColumn.id] === 0), [
+    visData.rows,
+    metricColumn,
+  ]);
 
   /**
    * Checks whether data have negative values.
