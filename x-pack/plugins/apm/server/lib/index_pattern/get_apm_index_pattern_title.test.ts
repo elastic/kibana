@@ -11,7 +11,7 @@ import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
 
 describe('getApmIndexPatternTitle', () => {
-  it('returns an index pattern title by combining existing indicies', () => {
+  it('returns an data view title by combining existing indicies', () => {
     const title = getApmIndexPatternTitle({
       'apm_oss.transactionIndices': 'apm-*-transaction-*',
       'apm_oss.spanIndices': 'apm-*-span-*',

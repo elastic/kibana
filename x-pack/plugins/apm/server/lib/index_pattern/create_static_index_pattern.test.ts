@@ -33,7 +33,7 @@ const setup = ({
 } as unknown) as Setup;
 
 describe('createStaticIndexPattern', () => {
-  it(`should not create index pattern if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
+  it(`should not create data view if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
     await createStaticIndexPattern({
       setup,
@@ -44,7 +44,7 @@ describe('createStaticIndexPattern', () => {
     expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
-  it(`should not create index pattern if no APM data is found`, async () => {
+  it(`should not create data view if no APM data is found`, async () => {
     // does not have APM data
     jest
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
@@ -61,7 +61,7 @@ describe('createStaticIndexPattern', () => {
     expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
-  it(`should create index pattern`, async () => {
+  it(`should create data view`, async () => {
     // does have APM data
     jest
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
@@ -79,7 +79,7 @@ describe('createStaticIndexPattern', () => {
     expect(savedObjectsClient.create).toHaveBeenCalled();
   });
 
-  it(`should overwrite the index pattern if the new index pattern title does not match the old index pattern title`, async () => {
+  it(`should overwrite the data view if the new data view title does not match the old data view title`, async () => {
     // does have APM data
     jest
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
@@ -108,7 +108,7 @@ describe('createStaticIndexPattern', () => {
     expect(savedObjectsClient.create.mock.calls[0][2].overwrite).toBe(true);
   });
 
-  it(`should not overwrite an index pattern if the new index pattern title matches the old index pattern title`, async () => {
+  it(`should not overwrite an data view if the new data view title matches the old data view title`, async () => {
     // does have APM data
     jest
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
