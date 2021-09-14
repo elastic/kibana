@@ -9,13 +9,22 @@
 import { inspect } from 'util';
 import { createFlagError, ToolingLog } from '@kbn/dev-utils';
 
-export const format = (obj: unknown) =>
-  inspect(obj, {
-    compact: false,
-    depth: 99,
-    breakLength: 80,
-    sorted: true,
-  });
+interface ResolvedPayload {
+  xs: any;
+  count: number;
+}
+
+export const format = (obj: any): ResolvedPayload => {
+  return {
+    xs: inspect(obj, {
+      compact: false,
+      depth: 99,
+      breakLength: 80,
+      sorted: true,
+    }),
+    count: obj.length,
+  };
+};
 
 export const noop = () => {};
 
@@ -27,10 +36,7 @@ export const areValid = (flags: any) => {
 export const print = (log: ToolingLog) => (msg: string | null = null) => ({
   xs,
   count,
-}: {
-  xs: any;
-  count: number;
-}) => log.write(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);
+}: ResolvedPayload) => log.write(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);
 
 export const expectedFlags = () => ({
   string: ['esUrl'],
@@ -42,7 +48,7 @@ export const expectedFlags = () => ({
         `,
 });
 
-export const payload = (xs: any) => ({
+export const payload = ({ xs, count }: ResolvedPayload) => ({
   xs,
-  count: xs.length,
+  count,
 });
