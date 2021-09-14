@@ -14,17 +14,46 @@ import {
 } from './lib/tutorials_registry_types';
 import { tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
+import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
+
+const emptyContext = {};
+function registerBeatsTutorialsWithCustomIntegrations() {
+
+}
+
+function registerTutorialWithCustomIntegrations(
+  customIntegrations: CustomIntegrationsPluginSetup,
+  provider: TutorialProvider
+) {
+  const tutorial = provider(emptyContext);
+  console.log('REGISTER TUTORIAl', tutorial);
+
+  customIntegrations.registerCustomIntegration({
+    name: tutorial.id,
+    title: tutorial.name,
+    categories: [tutorial.category],
+    type: 'ui_link',
+    uiInternalPath: `/app/home#/tutorial/${tutorial.id}`,
+    isBeats: false,
+    description: tutorial.shortDescription,
+    euiIconType: tutorial.euiIconType || `logo${name}`,
+  });
+}
 
 export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, customIntegrations: CustomIntegrationsPluginSetup) {
     const router = core.http.createRouter();
     router.get(
       { path: '/api/kibana/home/tutorials', validate: false },
       async (context, req, res) => {
         const initialContext = {};
+
+        console.log('get tutorials!');
+        console.log(this.scopedTutorialContextFactories);
+
         const scopedContext = this.scopedTutorialContextFactories.reduce(
           (accumulatedContext, contextFactory) => {
             return { ...accumulatedContext, ...contextFactory(req) };
@@ -32,8 +61,11 @@ export class TutorialsRegistry {
           initialContext
         );
 
+        console.log('scoped context', scopedContext);
+
         return res.ok({
           body: this.tutorialProviders.map((tutorialProvider) => {
+            console.log('map utotrial', tutorialProvider);
             return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
           }),
         });
@@ -41,8 +73,9 @@ export class TutorialsRegistry {
     );
     return {
       registerTutorial: (specProvider: TutorialProvider) => {
+        console.log('REGISTER TUTORIAl', specProvider);
+        registerTutorialWithCustomIntegrations(customIntegrations, specProvider);
         try {
-          const emptyContext = {};
           tutorialSchema.validate(specProvider(emptyContext));
         } catch (error) {
           throw new Error(`Unable to register tutorial spec because its invalid. ${error}`);
@@ -73,6 +106,7 @@ export class TutorialsRegistry {
 
   public start() {
     // pre-populate with built in tutorials
+    console.log('ADD ALL THE BUILT IN TUTORIALS!', builtInTutorials);
     this.tutorialProviders.push(...builtInTutorials);
     return {};
   }

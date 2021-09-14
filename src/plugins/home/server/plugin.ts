@@ -19,9 +19,11 @@ import { UsageCollectionSetup } from '../../usage_collection/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { sampleDataTelemetry } from './saved_objects';
 import { registerRoutes } from './routes';
+import { CustomIntegrationsPluginSetup } from '../../custom_integrations/server';
 
 interface HomeServerPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
+  customIntegrations: CustomIntegrationsPluginSetup;
 }
 
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
@@ -36,8 +38,10 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     const router = core.http.createRouter();
     registerRoutes(router);
 
+    console.log('HOME SET?UP');
+    console.log(plugins.customIntegrations);
     return {
-      tutorials: { ...this.tutorialsRegistry.setup(core) },
+      tutorials: { ...this.tutorialsRegistry.setup(core, plugins.customIntegrations) },
       sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usageCollection) },
     };
   }

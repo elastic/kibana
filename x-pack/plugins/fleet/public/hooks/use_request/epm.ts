@@ -21,6 +21,7 @@ import type { GetStatsResponse } from '../../../common';
 import { useRequest, sendRequest } from './use_request';
 
 export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
+  console.log('get categories', epmRouteService.getCategoriesPath());
   return useRequest<GetCategoriesResponse>({
     path: epmRouteService.getCategoriesPath(),
     method: 'get',

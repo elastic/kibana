@@ -20,6 +20,10 @@ import {
   GetStatsRequestSchema,
 } from '../../types';
 
+import type { CustomIntegrationsPluginSetup } from '../../../../../../src/plugins/custom_integrations/server';
+
+import type { CategoryCount } from '../../../../../../src/plugins/custom_integrations/server/custom_integration_registry';
+
 import {
   getCategoriesHandler,
   getListHandler,
@@ -35,14 +39,21 @@ import {
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
-export const registerRoutes = (router: IRouter) => {
+function mergeCategoryCounts(countsFromEpm: CategoryCount[], countsFromCustom: CategoryCount[]) {}
+
+export const registerRoutes = (
+  router: IRouter,
+  customIntegrations: CustomIntegrationsPluginSetup
+) => {
   router.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       validate: GetCategoriesRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getCategoriesHandler
+    async (context, request, response) => {
+      return await getCategoriesHandler(customIntegrations, context, request, response);
+    }
   );
 
   router.get(
@@ -51,7 +62,9 @@ export const registerRoutes = (router: IRouter) => {
       validate: GetPackagesRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getListHandler
+    async (context, request, response) => {
+      return await getListHandler(customIntegrations, context, request, response);
+    }
   );
 
   router.get(

@@ -22,6 +22,7 @@ import type {
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
+  RegistrySearchResult,
 } from '../../../common';
 import type {
   GetCategoriesRequestSchema,
@@ -53,15 +54,52 @@ import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
+import type { CustomIntegrationsPluginSetup } from '../../../../../../src/plugins/custom_integrations/server';
+import type { CategoryCount } from '../../../../../../src/plugins/custom_integrations/server/custom_integration_registry';
+import { merge } from '../../../../../../packages/kbn-std/src/merge';
+import type { CustomIntegration } from '../../../../../../src/plugins/custom_integrations/server';
+import { PackageListItem } from '../../../common';
+import type { PackageList } from '../../../common';
+
+interface EPMCategoryCount {
+  id: string;
+  title: string;
+  count: number;
+}
+
+function mergeCounts(accumulator: CategoryCount[], item: CategoryCount): CategoryCount[] {
+  const match = accumulator.find((c) => {
+    return c.id === item.id;
+  });
+  if (match) {
+    match.count += item.count;
+  } else {
+    accumulator.push(item);
+  }
+  return accumulator;
+}
+
+function mergeCategoryCounts(
+  categoriesFromEpm: CategoryCount[],
+  categoriesFromCustom: CategoryCount[]
+) {
+  let result: EPMCategoryCount[] = [];
+  result = categoriesFromEpm.reduce(mergeCounts, result);
+  result = categoriesFromCustom.reduce(mergeCounts, result);
+  return result;
+}
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetCategoriesRequestSchema.query>
-> = async (context, request, response) => {
+> = async (customIntegrations: CustomIntegrationsPluginSetup, context, request, response) => {
   try {
-    const res = await getCategories(request.query);
+    const categoriesFromEpm = await getCategories(request.query);
+    const categoriesFromCustom = customIntegrations.getNonBeatsCategories();
+    const mergedCategories = mergeCategoryCounts(categoriesFromEpm, categoriesFromCustom);
+    console.log('cats after merging', mergedCategories);
     const body: GetCategoriesResponse = {
-      response: res,
+      response: mergedCategories,
     };
     return response.ok({ body });
   } catch (error) {
@@ -72,15 +110,21 @@ export const getCategoriesHandler: RequestHandler<
 export const getListHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetPackagesRequestSchema.query>
-> = async (context, request, response) => {
+> = async (customIntegrations: CustomIntegrationsPluginSetup, context, request, response) => {
   try {
+    console.log('get all the packages', request.query);
     const savedObjectsClient = context.core.savedObjects.client;
     const res = await getPackages({
       savedObjectsClient,
       ...request.query,
     });
+    console.log('all pacjkages', res);
+
+    const integrations = customIntegrations.getNonBeatsCustomIntegrations();
+    const merged: PackageList = res.concat(integrations);
+
     const body: GetPackagesResponse = {
-      response: res,
+      response: merged,
     };
     return response.ok({
       body,

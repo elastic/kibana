@@ -19,6 +19,9 @@ import type {
 } from '../../constants';
 import type { ValueOf } from '../../types';
 
+import type { CustomIntegration } from '../../../../../../src/plugins/custom_integrations/server';
+import type { Omit } from '../../../../../../src/plugins/data/server/search/strategies/es_search/elasticsearch';
+
 import type {
   PackageSpecManifest,
   PackageSpecIcon,
@@ -357,10 +360,12 @@ type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, key
 
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
-export type PackageListItem = Installable<RegistrySearchResult> & {
-  integration?: string;
-  id: string;
-};
+export type PackageListItem =
+  | (Installable<RegistrySearchResult> & {
+      integration?: string;
+      id: string;
+    })
+  | CustomIntegration;
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =

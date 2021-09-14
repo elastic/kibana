@@ -22,6 +22,11 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
+  CustomIntegrationsPluginSetup,
+  CustomIntegration,
+} from '../../../../src/plugins/custom_integrations/server';
+
+import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
 } from '../../encrypted_saved_objects/server';
@@ -90,6 +95,7 @@ export interface FleetSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
+  customIntegrations: CustomIntegrationsPluginSetup;
 }
 
 export interface FleetStartDeps {
@@ -188,6 +194,9 @@ export class FleetPlugin
     this.cloud = deps.cloud;
     const config = this.configInitialValue;
 
+    console.log('INTEGRATIOPNS DEP');
+    console.log(deps.customIntegrations);
+
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
@@ -242,7 +251,7 @@ export class FleetPlugin
       registerOutputRoutes(routerSuperuserOnly);
       registerSettingsRoutes(routerSuperuserOnly);
       registerDataStreamRoutes(routerSuperuserOnly);
-      registerEPMRoutes(routerSuperuserOnly);
+      registerEPMRoutes(routerSuperuserOnly, deps.customIntegrations);
       registerPreconfigurationRoutes(routerSuperuserOnly);
 
       // Conditional config routes

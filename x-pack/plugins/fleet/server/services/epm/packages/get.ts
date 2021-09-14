@@ -37,6 +37,7 @@ function nameAsTitle(name: string) {
 }
 
 export async function getCategories(options: GetCategoriesRequest['query']) {
+
   return Registry.fetchCategories(options);
 }
 
