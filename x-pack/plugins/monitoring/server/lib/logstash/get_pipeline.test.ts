@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { ElasticsearchSourceLogstashPipelineVertex } from '../../../common/types/es';
 import { _vertexStats, _enrichStateWithStatsAggregation } from './get_pipeline';
 
 describe('get_pipeline', () => {
   describe('_vertexStats function', () => {
-    let vertex;
-    let vertexStatsBucket;
-    let totalProcessorsDurationInMillis;
-    let timeseriesIntervalInSeconds;
+    let vertex: ElasticsearchSourceLogstashPipelineVertex;
+    let vertexStatsBucket: any;
+    let totalProcessorsDurationInMillis: number;
+    let timeseriesIntervalInSeconds: number;
 
     beforeEach(() => {
       vertex = {
+        id: 'test',
         plugin_type: 'input',
       };
 
@@ -47,6 +49,7 @@ describe('get_pipeline', () => {
     describe('vertex represents filter plugin', () => {
       beforeEach(() => {
         vertex = {
+          id: 'test',
           plugin_type: 'filter',
         };
       });
@@ -70,6 +73,7 @@ describe('get_pipeline', () => {
     describe('vertex represents output plugin', () => {
       beforeEach(() => {
         vertex = {
+          id: 'test',
           plugin_type: 'output',
         };
       });
@@ -92,9 +96,9 @@ describe('get_pipeline', () => {
   });
 
   describe('_enrichStateWithStatsAggregation function', () => {
-    let stateDocument;
-    let statsAggregation;
-    let timeseriesInterval;
+    let stateDocument: any;
+    let statsAggregation: object;
+    let timeseriesInterval: number;
 
     beforeEach(() => {
       stateDocument = {
