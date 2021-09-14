@@ -34,7 +34,7 @@ Below, I will leave out the so types call, which is:
 ```
 
 ### Show the keys only  
-`| jq '.[] | (.key)'` || `| jq '.[] | .key'`
+`jq '.[] | (.key)'` || `jq '.[] | .key'`
 
 ```
 "canvas-workpad-template"
@@ -47,7 +47,7 @@ Below, I will leave out the so types call, which is:
 
 ### Show the count of a specific Saved Object type  
 Eg. Count of spaces  
-`| jq '.[] | select(.key =="space")'`  
+`jq '.[] | select(.key =="space")'`  
 
 ```
 {
@@ -57,13 +57,20 @@ Eg. Count of spaces
 ```  
 
 ### Show the saved objects with a count greater than 2
-`| jq '.[] | select(.doc_count > 2)'`
+`jq '.[] | select(.doc_count > 2)'`
 
 ```
 {
   "key": "canvas-workpad-template",
   "doc_count": 5
 }
+```  
+
+### Show the TOTAL count of ALL Saved Object types
+`jq 'reduce .[].doc_count as $item (0; . + $item)'`
+
+```
+9
 ```  
 
 #### Diffing
