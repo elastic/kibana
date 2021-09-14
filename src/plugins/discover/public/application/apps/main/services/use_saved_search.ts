@@ -8,7 +8,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { debounceTime, filter, skip, startWith, tap } from 'rxjs/operators';
-import { isEqual } from 'lodash';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { SearchSource } from '../../../../../../data/common';
