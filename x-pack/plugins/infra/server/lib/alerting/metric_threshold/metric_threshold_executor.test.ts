@@ -427,7 +427,7 @@ describe('The metric threshold alert type', () => {
         },
         state: state ?? mockOptions.state.wrapped,
       });
-    let resultState: any[] = [];
+    const resultState: any[] = [];
     test('first sends a No Data alert with the * group, but then reports groups when data is available', async () => {
       resultState.push(await execute('test.metric.3'));
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
