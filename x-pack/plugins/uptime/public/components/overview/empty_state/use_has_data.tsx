@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { indexStatusAction } from '../../../state/actions';
 import { indexStatusSelector, selectDynamicSettings } from '../../../state/selectors';
-import { EmptyStateComponent } from './index';
 import { UptimeRefreshContext } from '../../../contexts';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 
-export const EmptyState: React.FC = ({ children }) => {
+export const useHasData = () => {
   const { data, loading, error } = useSelector(indexStatusSelector);
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
@@ -42,13 +41,10 @@ export const EmptyState: React.FC = ({ children }) => {
     dispatch(getDynamicSettings());
   }, [dispatch]);
 
-  return (
-    <EmptyStateComponent
-      statesIndexStatus={data}
-      loading={loading}
-      errors={error ? [error] : undefined}
-      children={children as React.ReactElement}
-      settings={settings}
-    />
-  );
+  return {
+    loading,
+    settings,
+    statesIndexStatus: data,
+    errors: error ? [error] : undefined,
+  };
 };

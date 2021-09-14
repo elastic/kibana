@@ -6,4 +6,3 @@
  */
 
 export { EmptyStateComponent } from './empty_state';
-export { EmptyState } from './empty_state_container';

@@ -41,6 +41,9 @@ import {
   StepDetailPageRightSideItem,
 } from './pages/synthetics/step_detail_page';
 
+import { useNoDataConfig } from './apps/use_no_data_config';
+import { useHasData } from './components/overview/empty_state/use_has_data';
+
 interface RouteProps {
   path: string;
   component: React.FC;
@@ -170,6 +173,10 @@ export const PageRouter: FC = () => {
     }
   `;
 
+  const { loading } = useHasData();
+
+  const noDataConfig = useNoDataConfig();
+
   return (
     <Switch>
       {Routes.map(
@@ -178,7 +185,10 @@ export const PageRouter: FC = () => {
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              <StyledPageTemplateComponent pageHeader={pageHeader}>
+              <StyledPageTemplateComponent
+                pageHeader={pageHeader}
+                noDataConfig={path === OVERVIEW_ROUTE ? noDataConfig : undefined}
+              >
                 <RouteComponent />
               </StyledPageTemplateComponent>
             </div>
