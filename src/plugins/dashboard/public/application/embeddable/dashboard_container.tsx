@@ -231,13 +231,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public render(dom: HTMLElement) {
-    const isPrintView = this.input.viewMode === ViewMode.PRINT;
-
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
           <this.services.presentationUtil.ContextProvider>
-            {isPrintView ? (
+            {this.input.viewMode === ViewMode.PRINT ? (
               <PrintDashboardViewport container={this} />
             ) : (
               <DashboardViewport container={this} />

@@ -231,6 +231,7 @@ export async function mountApp({
                   path={[
                     DashboardConstants.CREATE_NEW_DASHBOARD_URL,
                     `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                    `${DashboardConstants.PRINT_DASHBOARD_URL}/:id?`,
                   ]}
                   render={renderDashboard}
                 />

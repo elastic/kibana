@@ -128,7 +128,14 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       ...restParams
     } = params;
     const useHash = paramsUseHash ?? this.deps.useHashedUrl;
-    const hash = dashboardId ? `view/${dashboardId}` : `create`;
+
+    let hash = '';
+
+    if (params.viewMode === ViewMode.PRINT) {
+      hash = dashboardId ? `print/${dashboardId}` : `print`;
+    } else {
+      hash = dashboardId ? `view/${dashboardId}` : `create`;
+    }
 
     const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
       if (preserveSavedFilters === false) return [];

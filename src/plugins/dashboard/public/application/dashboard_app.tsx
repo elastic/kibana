@@ -8,6 +8,7 @@
 
 import { History } from 'history';
 import React, { useEffect, useMemo } from 'react';
+import { useRouteMatch } from 'react-router-dom';
 
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
@@ -21,6 +22,7 @@ import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
+import { DashboardConstants } from '../dashboard_constants';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -45,8 +47,15 @@ export function DashboardApp({
   } = useKibana<DashboardAppServices>().services;
 
   const isScreenshotMode = screenshotMode.isScreenshotMode();
-  const screenshotLayout = screenshotMode.getScreenshotLayout();
-  const legacyPrintLayoutDetected = isScreenshotMode && screenshotLayout === 'print';
+
+  // Print layout detected by current route
+  const isOnPrintRoute = !!useRouteMatch(DashboardConstants.PRINT_DASHBOARD_URL);
+
+  // Backwards compatible way of detecting that we are taking a screenshot
+  const legacyPrintLayoutDetected =
+    isScreenshotMode && screenshotMode.getScreenshotLayout() === 'print';
+
+  const printLayoutDetected = isOnPrintRoute || legacyPrintLayoutDetected;
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -65,7 +74,7 @@ export function DashboardApp({
     savedDashboardId,
     kbnUrlStateStorage,
     isEmbeddedExternally: Boolean(embedSettings),
-    initialViewMode: legacyPrintLayoutDetected ? ViewMode.PRINT : undefined,
+    printLayoutDetected,
   });
 
   // Build app leave handler whenever hasUnsavedChanges changes
@@ -113,16 +122,14 @@ export function DashboardApp({
   }, [data.search.session]);
 
   useEffect(() => {
-    if (isScreenshotMode) {
-      chrome.setIsVisible(false);
-    }
-  }, [chrome, isScreenshotMode]);
+    chrome.setIsVisible(!printLayoutDetected);
+  }, [chrome, printLayoutDetected]);
 
   return (
     <>
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          {!isScreenshotMode && (
+          {!printLayoutDetected && (
             <DashboardTopNav
               redirectTo={redirectTo}
               embedSettings={embedSettings}

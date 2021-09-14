@@ -46,16 +46,16 @@ export interface UseDashboardStateProps {
   redirectTo: DashboardRedirect;
   isEmbeddedExternally: boolean;
   kbnUrlStateStorage: IKbnUrlStateStorage;
-  initialViewMode?: ViewMode;
+  printLayoutDetected?: boolean;
 }
 
 export const useDashboardAppState = ({
   history,
   redirectTo,
-  initialViewMode,
   savedDashboardId,
   kbnUrlStateStorage,
   isEmbeddedExternally,
+  printLayoutDetected,
 }: UseDashboardStateProps) => {
   const dispatchDashboardStateChange = useDashboardDispatch();
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
@@ -173,8 +173,10 @@ export const useDashboardAppState = ({
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
       };
-      if (initialViewMode) {
-        initialDashboardState.viewMode = initialViewMode;
+      if (!printLayoutDetected && initialDashboardState.viewMode === ViewMode.PRINT) {
+        initialDashboardState.viewMode = ViewMode.VIEW;
+      } else if (printLayoutDetected && initialDashboardState.viewMode !== ViewMode.PRINT) {
+        initialDashboardState.viewMode = ViewMode.PRINT;
       }
       dispatchDashboardStateChange(setDashboardState(initialDashboardState));
 
@@ -331,8 +333,8 @@ export const useDashboardAppState = ({
     savedDashboardId,
     getStateTransfer,
     savedDashboards,
-    initialViewMode,
     usageCollection,
+    printLayoutDetected,
     scopedHistory,
     notifications,
     indexPatterns,
