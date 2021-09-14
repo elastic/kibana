@@ -408,13 +408,13 @@ Specifying the color for a single data point, such as a single bar or line, is u
 .*Is it possible to inspect the Elasticsearch queries in Lens?*
 [%collapsible]
 ====
-Using the Inspector within the editor or in the dashboard it is possible to select the specific request sent by the visualization to Elasticsearch.
+You can inspect the requests sent by the visualization to Elasticsearch by using the Inspector. It can be accessed within the editor or in the dashboard.
 ====
 
 [discrete]
-[[is-it-possible-to-isolate-a-single-series-in-a-chart]]
-.*Is it possible to isolate a single series in a chart?*
+[[how-to-isolate-a-single-series-in-a-chart]]
+.*How to isolate a single series in a chart?*
 [%collapsible]
 ====
-Using the `shift` keyboard key and clicking on the item to isolate in the chart legend will unselect all the other series.
+Press the `shift` key and click on the item in the chart legend to unselect all the other series.
 ====
