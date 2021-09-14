@@ -8,8 +8,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-
 import type { MetricsService } from './metrics_service';
+import { collectorMock } from './collectors/mocks';
+import { mocked as eventLoopDelaysMonitorMock } from './event_loop_delays/event_loop_delays_monitor.mocks';
 import {
   InternalMetricsServiceSetup,
   InternalMetricsServiceStart,
@@ -22,18 +23,14 @@ const createInternalSetupContractMock = () => {
     collectionInterval: 30000,
     getOpsMetrics$: jest.fn(),
   };
+
+  const processMock = collectorMock.createOpsProcessMetrics();
+
   setupContract.getOpsMetrics$.mockReturnValue(
     new BehaviorSubject({
       collected_at: new Date('2020-01-01 01:00:00'),
-      process: {
-        memory: {
-          heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
-          resident_set_size_in_bytes: 1,
-        },
-        event_loop_delay: 1,
-        pid: 1,
-        uptime_in_millis: 1,
-      },
+      process: processMock,
+      processes: [processMock],
       os: {
         platform: 'darwin' as const,
         platformRelease: 'test',
@@ -81,4 +78,5 @@ export const metricsServiceMock = {
   createStartContract: createStartContractMock,
   createInternalSetupContract: createInternalSetupContractMock,
   createInternalStartContract: createInternalStartContractMock,
+  createEventLoopDelaysMonitor: eventLoopDelaysMonitorMock.createEventLoopDelaysMonitor,
 };
