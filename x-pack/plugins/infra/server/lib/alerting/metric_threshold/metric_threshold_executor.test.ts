@@ -38,6 +38,7 @@ let persistAlertInstances = false; // eslint-disable-line prefer-const
 type TestRuleState = Record<string, unknown> & {
   aRuleStateKey: string;
   groups: string[];
+  groupBy?: string | string[];
 };
 
 const initialRuleState: TestRuleState = {
@@ -92,6 +93,7 @@ const mockOptions = {
 
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
@@ -159,20 +161,29 @@ describe('The metric threshold alert type', () => {
   });
 
   describe('querying with a groupBy parameter', () => {
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+    afterAll(() => clearInstances());
+    const execute = (
+      comparator: Comparator,
+      threshold: number[],
+      groupBy: string = 'something',
+      metric?: string,
+      state?: any
+    ) =>
       executor({
         ...mockOptions,
         services,
         params: {
-          groupBy: 'something',
+          groupBy,
           criteria: [
             {
               ...baseNonCountCriterion,
               comparator,
               threshold,
+              metric: metric ?? baseNonCountCriterion.metric,
             },
           ],
         },
+        state: state ?? mockOptions.state.wrapped,
       });
     const instanceIdA = 'a';
     const instanceIdB = 'b';
@@ -196,9 +207,35 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceIdA).action.group).toBe('a');
       expect(mostRecentAction(instanceIdB).action.group).toBe('b');
     });
+    test('reports previous groups and the groupBy parameter in its state', async () => {
+      const stateResult = await execute(Comparator.GT, [0.75]);
+      expect(stateResult.groups).toEqual(expect.arrayContaining(['a', 'b']));
+      expect(stateResult.groupBy).toBe('something');
+    });
+    test('persists previous groups that go missing, until the groupBy param changes', async () => {
+      const stateResult1 = await execute(Comparator.GT, [0.75], 'something', 'test.metric.2');
+      expect(stateResult1.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      const stateResult2 = await execute(
+        Comparator.GT,
+        [0.75],
+        'something',
+        'test.metric.1',
+        stateResult1
+      );
+      expect(stateResult2.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      const stateResult3 = await execute(
+        Comparator.GT,
+        [0.75],
+        'something-else',
+        'test.metric.1',
+        stateResult2
+      );
+      expect(stateResult3.groups).toEqual(expect.arrayContaining(['a', 'b']));
+    });
   });
 
   describe('querying with multiple criteria', () => {
+    afterAll(() => clearInstances());
     const execute = (
       comparator: Comparator,
       thresholdA: number[],
@@ -259,6 +296,7 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe('querying with the count aggregator', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
@@ -363,6 +401,7 @@ describe('The metric threshold alert type', () => {
   });
 
   describe("querying a rate-aggregated metric that hasn't reported data", () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (sourceId: string = 'default') =>
       executor({
@@ -441,6 +480,7 @@ describe('The metric threshold alert type', () => {
   */
 
   describe('querying a metric with a percentage metric', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = () =>
       executor({
@@ -563,7 +603,13 @@ services.alertInstanceFactory.mockImplementation((instanceID: string) => {
 });
 
 function mostRecentAction(id: string) {
-  return alertInstances.get(id)!.actionQueue.pop();
+  const instance = alertInstances.get(id);
+  if (!instance) return undefined;
+  return instance.actionQueue.pop();
+}
+
+function clearInstances() {
+  alertInstances.clear();
 }
 
 const baseNonCountCriterion: Pick<

@@ -199,12 +199,20 @@ export const alternateCompositeResponse = (from: number) => ({
             buckets: bucketsA(from),
           },
         },
+        {
+          key: {
+            groupBy0: 'c',
+          },
+          aggregatedIntervals: {
+            buckets: bucketsA(from),
+          },
+        },
       ],
     },
   },
   hits: {
     total: {
-      value: 2,
+      value: 3,
     },
   },
 });

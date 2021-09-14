@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first, last } from 'lodash';
+import { first, last, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
@@ -29,7 +29,10 @@ import { AlertStates, Comparator } from './types';
 import { evaluateAlert, EvaluatedAlertParams } from './lib/evaluate_alert';
 
 export type MetricThresholdAlertTypeParams = Record<string, any>;
-export type MetricThresholdAlertTypeState = AlertTypeState & { groups: string[] }; // no specific state used
+export type MetricThresholdAlertTypeState = AlertTypeState & {
+  groups: string[];
+  groupBy?: string | string[];
+};
 export type MetricThresholdAlertInstanceState = AlertInstanceState; // no specific instace state used
 export type MetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instace state used
 
@@ -81,7 +84,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     );
     const config = source.configuration;
 
-    const prevGroups = state.groups ?? [];
+    const previousGroupBy = state.groupBy;
+    const prevGroups = isEqual(previousGroupBy, params.groupBy) ? state.groups ?? [] : [];
 
     const alertResults = await evaluateAlert(
       services.scopedClusterClient.asCurrentUser,
@@ -178,7 +182,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       }
     }
 
-    return { groups };
+    return { groups, groupBy: params.groupBy };
   });
 
 export const FIRED_ACTIONS = {
