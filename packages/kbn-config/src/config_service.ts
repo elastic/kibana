@@ -183,9 +183,11 @@ export class ConfigService {
       const deprecationPath = pathToString(enabledPath);
       const deprecatedConfigDetails: DeprecatedConfigDetails = {
         title: `Setting "${deprecationPath}" is deprecated`,
-        message: `"${deprecationPath}" has been deprecated and will be removed in 8.0.`,
+        message: `Configuring "${deprecationPath}" is deprecated and will be removed in 8.0.0.`,
         correctiveActions: {
-          manualSteps: [`Remove ${deprecationPath} from your Kibana config.`],
+          manualSteps: [
+            `Remove "${deprecationPath}" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.`,
+          ],
         },
       };
       this.addDeprecationProvider(namespace, () => [

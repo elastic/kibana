@@ -383,10 +383,10 @@ test('logs deprecation if schema is not present and "enabled" is used', async ()
           Object {
             "correctiveActions": Object {
               "manualSteps": Array [
-                "Remove foo.enabled from your Kibana config.",
+                "Remove \\"foo.enabled\\" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to 8.0.0.",
               ],
             },
-            "message": "\\"foo.enabled\\" has been deprecated and will be removed in 8.0.",
+            "message": "Configuring \\"foo.enabled\\" is deprecated and will be removed in 8.0.0.",
             "title": "Setting \\"foo.enabled\\" is deprecated",
           },
         ],
