@@ -72,39 +72,47 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
 }
 
 // send an email using MS Exchange Graph API
-async function sendEmailWithExchange(logger: Logger, options: SendEmailOptions, messageHTML: string): Promise<unknown> {
+async function sendEmailWithExchange(
+  logger: Logger,
+  options: SendEmailOptions,
+  messageHTML: string
+): Promise<unknown> {
   const { transport, configurationUtilities } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
-    // request access token for microsoft exchange online server with Graph API scope
+  // request access token for microsoft exchange online server with Graph API scope
 
-    const tokenResult = await requestOAuthClientCredentialsToken(
-      oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
+  const tokenResult = await requestOAuthClientCredentialsToken(
+    oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
+    logger,
+    {
+      scope: GRAPH_API_OAUTH_SCOPE,
+      clientId,
+      clientSecret,
+    },
+    configurationUtilities
+  );
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `${tokenResult.tokenType} ${tokenResult.accessToken}`,
+  };
+  try {
+    return await sendEmailGraphApi(
+      { options, headers, messageHTML },
       logger,
-      {
-        scope: GRAPH_API_OAUTH_SCOPE,
-        clientId,
-        clientSecret,
-      },
       configurationUtilities
     );
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `${tokenResult.tokenType} ${tokenResult.accessToken}`,
-    };
-    try {
-      return await sendEmailGraphApi(
-        { options, headers, messageHTML },
-        logger,
-        configurationUtilities
-      );
-    } catch (err) {
-      logger.warn(`error thrown sending Microsoft Exchange email: ${err.message}`);
-      throw err;
-    }
+  } catch (err) {
+    logger.warn(`error thrown sending Microsoft Exchange email: ${err.message}`);
+    throw err;
+  }
 }
 
 // send an email using nodemailer
-async function sendEmailWithNodemailer(logger: Logger, options: SendEmailOptions, messageHTML: string): Promise<unknown> {
+async function sendEmailWithNodemailer(
+  logger: Logger,
+  options: SendEmailOptions,
+  messageHTML: string
+): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;
   const { from, to, cc, bcc } = routing;

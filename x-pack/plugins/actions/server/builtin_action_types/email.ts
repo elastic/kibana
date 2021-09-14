@@ -41,9 +41,7 @@ export enum AdditionalEmailServices {
 }
 
 // these values for `service` require users to fill in host/port/secure
-export const CUSTOM_HOST_PORT_SERVICES: string[] = [
-  AdditionalEmailServices.OTHER,
-];
+export const CUSTOM_HOST_PORT_SERVICES: string[] = [AdditionalEmailServices.OTHER];
 
 export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
   host: 'dockerhost',
