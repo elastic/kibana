@@ -11,48 +11,25 @@ const Path = require('path');
 /**
  * Absolute path to the distributable directory
  */
-exports.distDir = Path.resolve(__dirname, '..', 'shared_built_assets');
-
-/**
- * Filename of files that must be loaded before the jsFilename
- */
-exports.jsDepFilenames = ['kbn-ui-shared-deps.@elastic.js'];
+exports.distDir = Path.resolve(__dirname, '../shared_built_assets');
 
 /**
  * Filename of the main bundle file in the distributable directory
  */
-exports.jsFilename = 'kbn-ui-shared-deps.js';
+exports.jsFilename = 'kbn-ui-shared-deps-src.js';
 
 /**
- * Filename of the unthemed css file in the distributable directory
+ * Filename of the main bundle file in the distributable directory
  */
-exports.baseCssDistFilename = 'kbn-ui-shared-deps.css';
-
-/**
- * Filename of the light-theme css file in the distributable directory
- */
-exports.lightCssDistFilename = 'kbn-ui-shared-deps.v7.light.css';
-
-/**
- * Filename of the light-theme css file in the distributable directory
- */
-exports.lightV8CssDistFilename = 'kbn-ui-shared-deps.v8.light.css';
-
-/**
- * Filename of the dark-theme css file in the distributable directory
- */
-exports.darkCssDistFilename = 'kbn-ui-shared-deps.v7.dark.css';
-
-/**
- * Filename of the dark-theme css file in the distributable directory
- */
-exports.darkV8CssDistFilename = 'kbn-ui-shared-deps.v8.dark.css';
+exports.cssDistFilename = 'kbn-ui-shared-deps-src.css';
 
 /**
  * Externals mapping inteded to be used in a webpack config
  */
 exports.externals = {
-  // stateful deps
+  /**
+   * stateful deps
+   */
   angular: '__kbnSharedDeps__.Angular',
   '@kbn/i18n': '__kbnSharedDeps__.KbnI18n',
   '@kbn/i18n/angular': '__kbnSharedDeps__.KbnI18nAngular',
@@ -68,7 +45,7 @@ exports.externals = {
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
-  '@kbn/ui-shared-deps/theme': '__kbnSharedDeps__.Theme',
+  '@kbn/ui-shared-deps-src/theme': '__kbnSharedDeps__.Theme',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
 
@@ -103,8 +80,3 @@ exports.externals = {
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
 };
-
-/**
- * Webpack loader for configuring the public path lookup from `window.__kbnPublicPath__`.
- */
-exports.publicPathLoader = require.resolve('./public_path_loader');
