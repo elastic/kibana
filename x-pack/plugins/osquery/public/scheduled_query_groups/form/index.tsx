@@ -248,7 +248,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     ),
   });
 
-  const { setFieldValue, submit, isSubmitting } = form;
+  const { setFieldValue, submit, isSubmitting, getFields } = form;
 
   const policyIdEuiFieldProps = useMemo(
     () => ({ isDisabled: !!defaultValue, options: agentPolicyOptions }),
@@ -280,7 +280,11 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     };
   }, [agentPoliciesById, policyId]);
 
-  const handleNameChange = useCallback((newName: string) => setFieldValue('name', newName), [
+  const handleNameChange = useCallback((newName: string) => {
+    if (getFields().name.value === '') {
+      setFieldValue('name', newName)
+    }
+  }, [
     setFieldValue,
   ]);
 
