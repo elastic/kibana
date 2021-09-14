@@ -15,6 +15,7 @@ import { addBasePath } from '../helpers';
 const querySchema = schema.object({
   sortField: schema.oneOf([
     schema.literal('snapshot'),
+    schema.literal('repository'),
     schema.literal('indices'),
     schema.literal('durationInMillis'),
     schema.literal('startTimeInMillis'),

@@ -9,6 +9,7 @@ import { Direction } from '@elastic/eui';
 
 export type SortField =
   | 'snapshot'
+  | 'repository'
   | 'indices'
   | 'startTimeInMillis'
   | 'durationInMillis'
@@ -31,6 +32,7 @@ export const SNAPSHOT_DEFAULT_TABLE_OPTIONS: SnapshotTableOptions = {
 };
 const sortFieldToESParams = {
   snapshot: 'name',
+  repository: 'repository',
   indices: 'index_count',
   startTimeInMillis: 'start_time',
   durationInMillis: 'duration',

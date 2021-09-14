@@ -106,7 +106,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Repository',
       }),
       truncateText: true,
-      sortable: false,
+      sortable: true,
       render: (repositoryName: string) => (
         <EuiLink
           {...reactRouterNavigate(history, linkToRepository(repositoryName))}
