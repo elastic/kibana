@@ -28,11 +28,13 @@ import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService } from './elasticsearch_service';
+import { ElasticsearchService, SetupDeps } from './elasticsearch_service';
 import { elasticsearchClientMock } from './client/mocks';
+import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
 import { duration } from 'moment';
 import { isValidConnection as isValidConnectionMock } from './is_valid_connection';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';
+
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
   './version_check/ensure_es_version'
 );
@@ -40,20 +42,25 @@ const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
 const delay = async (durationMs: number) =>
   await new Promise((resolve) => setTimeout(resolve, durationMs));
 
-let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
-const setupDeps = {
-  http: httpServiceMock.createInternalSetupContract(),
-  executionContext: executionContextServiceMock.createInternalSetupContract(),
-};
 
+let elasticsearchService: ElasticsearchService;
 let env: Env;
 let coreContext: CoreContext;
-
 let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
-
 let mockConfig$: BehaviorSubject<any>;
+let setupDeps: SetupDeps;
+let deprecationsSetup: ReturnType<typeof deprecationsServiceMock.createInternalSetupContract>;
+
 beforeEach(() => {
+  deprecationsSetup = deprecationsServiceMock.createInternalSetupContract();
+
+  setupDeps = {
+    http: httpServiceMock.createInternalSetupContract(),
+    executionContext: executionContextServiceMock.createInternalSetupContract(),
+    deprecations: deprecationsSetup,
+  };
+
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
   mockConfig$ = new BehaviorSubject({
@@ -172,6 +179,22 @@ describe('#setup', () => {
     await expect(setupContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
       ElasticsearchConfig
     );
+  });
+
+  it('registers its deprecation provider', async () => {
+    const registry = deprecationsServiceMock.createSetupContract();
+
+    deprecationsSetup.getRegistry.mockReturnValue(registry);
+
+    await elasticsearchService.setup(setupDeps);
+
+    expect(deprecationsSetup.getRegistry).toHaveBeenCalledTimes(1);
+    expect(deprecationsSetup.getRegistry).toHaveBeenCalledWith('elasticsearch');
+
+    expect(registry.registerDeprecations).toHaveBeenCalledTimes(1);
+    expect(registry.registerDeprecations).toHaveBeenCalledWith({
+      getDeprecations: expect.any(Function),
+    });
   });
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async (done) => {

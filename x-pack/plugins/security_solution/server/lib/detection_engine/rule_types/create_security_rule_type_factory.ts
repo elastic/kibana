@@ -8,9 +8,12 @@
 import { isEmpty } from 'lodash';
 import { flow } from 'fp-ts/lib/function';
 import { Either, chain, fold, tryCatch } from 'fp-ts/lib/Either';
+
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { toError } from '@kbn/securitysolution-list-api';
+
 import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
 import {
@@ -30,7 +33,7 @@ import {
 } from '../notifications/schedule_notification_actions';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { createResultObject } from './utils';
-import { bulkCreateFactory, wrapHitsFactory } from './factories';
+import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
 import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
@@ -108,9 +111,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
             checkPrivilegesFromEsClient(esClient, inputIndices),
             esClient.fieldCaps({
               index: index ?? ['*'],
-              fields: hasTimestampOverride
-                ? ['@timestamp', timestampOverride as string]
-                : ['@timestamp'],
+              fields: hasTimestampOverride ? [TIMESTAMP, timestampOverride as string] : [TIMESTAMP],
               include_unmapped: true,
             }),
           ]);
@@ -215,6 +216,14 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           spaceId,
         });
 
+        const wrapSequences = wrapSequencesFactory({
+          logger,
+          ignoreFields,
+          mergeStrategy,
+          ruleSO,
+          spaceId,
+        });
+
         for (const tuple of tuples) {
           const runResult = await type.executor({
             ...options,
@@ -229,6 +238,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
               searchAfterSize,
               tuple,
               wrapHits,
+              wrapSequences,
             },
           });
 
