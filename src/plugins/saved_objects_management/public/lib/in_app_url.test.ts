@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// TINA TODO: modify to test whatever I replace the contents of `in_app_url` with
+
 import { Capabilities } from '../../../../core/public';
 import { canViewInApp } from './in_app_url';
 

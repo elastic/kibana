@@ -7,7 +7,7 @@
  */
 
 import { Capabilities } from 'src/core/public';
-// TODO: Modify/change or add something new if we need to to replace this method's use in saved_object_view.
+
 export function canViewInApp(uiCapabilities: Capabilities, type: string): boolean {
   switch (type) {
     case 'search':

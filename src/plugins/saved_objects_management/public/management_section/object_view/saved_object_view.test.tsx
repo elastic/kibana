@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// TODO: Add test using CodeEditor mock. Do a search for how the editor is mocked out elsewhere in the code.
-// See https://github.com/elastic/kibana/pull/101392/files as example setup with extra benefit of 'copy-to-clickboard' action.
-// also see src/plugins/discover/public/application/components/source_viewer/source_viewer.test.tsx as example for full mount with the editor
+
 import { bulkGetObjectsMock } from './saved_object_view.test.mocks';
 
 import React from 'react';
