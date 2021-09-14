@@ -63,6 +63,7 @@ import { WrappedRACAlert } from '../rule_types/types';
 import { SearchTypes } from '../../../../common/detection_engine/types';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 import {
+  EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
@@ -1014,7 +1015,7 @@ export const getField = <T extends SearchTypes>(event: SimpleHit, field: string)
  * Maps legacy rule types to RAC rule type IDs.
  */
 export const ruleTypeMappings = {
-  eql: SIGNALS_ID,
+  eql: EQL_RULE_TYPE_ID,
   machine_learning: ML_RULE_TYPE_ID,
   query: QUERY_RULE_TYPE_ID,
   saved_query: SIGNALS_ID,
