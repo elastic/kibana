@@ -271,8 +271,6 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                       indicesExist: patternList.length > 0,
                       loading: false,
                       runtimeMappings: response.runtimeMappings,
-                      // selectedPatterns: newSelectedPatterns,
-                      // selectedDataViewId,
                     },
                   })
                 );
