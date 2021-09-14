@@ -154,7 +154,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
             }),
             i18n.translate('xpack.security.deprecations.enabled.manualStepTwoMessage', {
               defaultMessage:
-                'To turn security features on or off, set "xpack.security.enabled" accordingly in Elasticsearch instead.',
+                'Set "xpack.security.enabled" accordingly in elasticsearch.yml instead.',
             }),
           ],
         },
