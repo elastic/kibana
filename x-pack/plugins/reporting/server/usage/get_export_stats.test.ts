@@ -100,6 +100,11 @@ test('Model of jobTypes', () => {
         "preserve_layout": 0,
         "print": 0,
       },
+      "output_size": Object {
+        "avg": 666,
+        "max": 999,
+        "min": 333,
+      },
       "total": 3,
     }
   `);
@@ -117,6 +122,11 @@ test('Model of jobTypes', () => {
         "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
+      },
+      "output_size": Object {
+        "avg": null,
+        "max": null,
+        "min": null,
       },
       "total": 0,
     }
@@ -136,6 +146,11 @@ test('Model of jobTypes', () => {
         "preserve_layout": 0,
         "print": 0,
       },
+      "output_size": Object {
+        "avg": 666,
+        "max": 999,
+        "min": 333,
+      },
       "total": 3,
     }
   `);
@@ -153,6 +168,11 @@ test('Model of jobTypes', () => {
         "canvas": 0,
         "preserve_layout": 3,
         "print": 0,
+      },
+      "output_size": Object {
+        "avg": 666,
+        "max": 999,
+        "min": 333,
       },
       "total": 3,
     }
@@ -187,6 +207,11 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         "preserve_layout": 0,
         "print": 0,
       },
+      "output_size": Object {
+        "avg": 222,
+        "max": 333,
+        "min": 111,
+      },
       "total": 15,
     }
   `);
@@ -219,6 +244,11 @@ test('CSV counts, provides all jobs implicitly deprecated due to jobtype', () =>
         "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
+      },
+      "output_size": Object {
+        "avg": 222,
+        "max": 333,
+        "min": 111,
       },
       "total": 15,
     }
