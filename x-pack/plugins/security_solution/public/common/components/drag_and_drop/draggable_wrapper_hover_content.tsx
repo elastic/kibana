@@ -36,7 +36,6 @@ import { stopPropagationAndPreventDefault } from '../../../../../timelines/publi
 import { TooltipWithKeyboardShortcut } from '../accessibility';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
-
 export const AdditionalContent = styled.div`
   padding: 2px;
 `;
