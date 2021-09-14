@@ -14,6 +14,7 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana';
 import { inputsActions } from '../../../common/store/actions';
 import { LinkPanelListItem } from '../../components/link_panel';
+import { RISKY_HOSTS_INDEX } from '../../../../common/constants';
 
 export const QUERY_ID = 'risky_hosts';
 const noop = () => {};
@@ -98,7 +99,7 @@ export const useRiskyHostLinks = ({ to, from }: { to: string; from: string }) =>
     start({
       data,
       timerange: { to, from, interval: '' },
-      defaultIndex: ['ml_host_risk_score_latest'],
+      defaultIndex: [RISKY_HOSTS_INDEX],
       filterQuery: '',
     });
   }, [start, data, to, from]);

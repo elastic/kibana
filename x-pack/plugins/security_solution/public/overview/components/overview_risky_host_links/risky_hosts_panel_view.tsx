@@ -17,28 +17,28 @@ import { VIEW_DASHBOARD } from '../overview_cti_links/translations';
 import { QUERY_ID as RiskyHostsQueryId } from '../../containers/overview_risky_host_links/use_risky_host_links';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
-  { name: 'Host Name', field: 'title', sortable: true, truncateText: true, width: '100%' },
+  { name: 'Host Name', field: 'title', sortable: true, truncateText: true, width: '55%' },
   {
     align: 'right',
     field: 'count',
     name: 'Risk Score',
     sortable: true,
     truncateText: true,
-    width: '120px',
+    width: '15%',
   },
   {
     field: 'copy',
     name: 'Current Risk',
     sortable: true,
     truncateText: true,
-    width: '120px',
+    width: '15%',
   },
   {
     field: 'path',
     name: '',
     render: (path: string) => (<Link path={path} copy={i18n.LINK_COPY} />) as JSX.Element,
     truncateText: true,
-    width: '120px',
+    width: '15%',
   },
 ];
 

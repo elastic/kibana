@@ -36,6 +36,7 @@ import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { RiskyHostLinks } from '../components/overview_risky_host_links';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
@@ -77,6 +78,8 @@ const OverviewComponent = () => {
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
   const isThreatIntelModuleEnabled = useIsThreatIntelModuleEnabled();
+
+  const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   return (
     <>
@@ -159,12 +162,14 @@ const OverviewComponent = () => {
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={1}>
-                        <RiskyHostLinks
-                          deleteQuery={deleteQuery}
-                          from={from}
-                          setQuery={setQuery}
-                          to={to}
-                        />
+                        {riskyHostsEnabled && (
+                          <RiskyHostLinks
+                            deleteQuery={deleteQuery}
+                            from={from}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                        )}
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>

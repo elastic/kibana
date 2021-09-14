@@ -312,3 +312,5 @@ export const showAllOthersBucket: string[] = [
 export const ELASTIC_NAME = 'estc';
 
 export const TRANSFORM_STATS_URL = `/api/transform/transforms/${metadataTransformPattern}-*/_stats`;
+
+export const RISKY_HOSTS_INDEX = 'ml_host_risk_score_latest';
