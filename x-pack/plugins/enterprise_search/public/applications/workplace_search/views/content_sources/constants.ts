@@ -229,6 +229,20 @@ export const SOURCE_CONTENT_TITLE = i18n.translate(
   }
 );
 
+export const SEARCH_CONTENT_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.searchBar.search.placeholder',
+  {
+    defaultMessage: 'Search content...',
+  }
+);
+
+export const FILTER_CONTENT_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.searchBar.filter.placeholder',
+  {
+    defaultMessage: 'Filter content...',
+  }
+);
+
 export const CONTENT_LOADING_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.contentLoading.text',
   {
