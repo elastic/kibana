@@ -6,7 +6,6 @@
  */
 import { get } from 'lodash';
 import { ElasticsearchClient } from 'kibana/server';
-import { asyncForEach } from '@kbn/std';
 
 // elasticsearch index.max_result_window default value
 const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
@@ -169,7 +168,7 @@ export async function fetchRollupVisualizations(
     const visualizations = get(savedVisualizationsList, 'hits.hits', []);
     const sort =
       savedVisualizationsList.hits.hits[savedVisualizationsList.hits.hits.length - 1].sort;
-    await asyncForEach(visualizations, async (visualization: any) => {
+    visualizations.forEach((visualization: any) => {
       const references: Array<{ name: string; id: string; type: string }> | undefined = get(
         visualization,
         '_source.references'
