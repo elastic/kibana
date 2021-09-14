@@ -17,7 +17,7 @@ import { SetupModeFeature } from '../../common/enums';
 import { ISetupModeContext } from '../components/setup_mode/setup_mode_context';
 import * as setupModeReact from '../application/setup_mode/setup_mode';
 import { isReactMigrationEnabled } from '../external_config';
-import { toggleSetupMode as toggleReactSetupMode } from '../application/setup_mode/setup_mode';
+// import { toggleSetupMode as toggleReactSetupMode } from '../application/setup_mode/setup_mode';
 
 function isOnPage(hash: string) {
   return includes(window.location.hash, hash);
