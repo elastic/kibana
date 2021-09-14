@@ -54,7 +54,7 @@ describe('credentialStore', () => {
 
     reindexOpMock.attributes.lastCompletedStep = 0;
 
-    expect(credStore.get(reindexOpMock)).not.toBeDefined();
+    expect(credStore.get(reindexOpMock)).toBeUndefined();
   });
 
   it('retrieves credentials after update', async () => {
