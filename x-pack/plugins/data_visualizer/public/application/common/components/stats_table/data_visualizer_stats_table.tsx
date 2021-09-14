@@ -194,19 +194,11 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       {
         field: 'docCount',
-        name: (
-          <div className={'columnHeaderTitle'}>
-            {dimensions.showIcons ? (
-              <EuiIcon type="document" className={'columnHeaderIcon'} />
-            ) : null}
-            {i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
-              defaultMessage: 'Documents (%)',
-            })}
-          </div>
-        ),
-
+        name: i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
+          defaultMessage: 'Documents (%)',
+        }),
         render: (value: number | undefined, item: DataVisualizerTableItem) => (
-          <DocumentStat config={item} />
+          <DocumentStat config={item} showIcon={dimensions.showIcon} />
         ),
         sortable: (item: DataVisualizerTableItem) => item?.stats?.count,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
@@ -215,18 +207,11 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       {
         field: 'stats.cardinality',
-        name: (
-          <div className={'columnHeaderTitle'}>
-            {dimensions.showIcons ? (
-              <EuiIcon type="database" className={'columnHeaderIcon'} />
-            ) : null}
-            {i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
-              defaultMessage: 'Distinct values',
-            })}
-          </div>
-        ),
-        render: (cardinality: number | undefined, item: DataVisualizerTableItem) => (
-          <DistinctValues cardinality={cardinality} />
+        name: i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
+          defaultMessage: 'Distinct values',
+        }),
+        render: (cardinality: number | undefined) => (
+          <DistinctValues cardinality={cardinality} showIcon={dimensions.showIcon} />
         ),
 
         sortable: true,
@@ -237,7 +222,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       {
         name: (
           <div className={'columnHeaderTitle'}>
-            {dimensions.showIcons ? (
+            {dimensions.showIcon ? (
               <EuiIcon type={'visBarVertical'} className={'columnHeaderIcon'} />
             ) : null}
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {

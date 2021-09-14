@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiIcon, EuiText } from '@elastic/eui';
 
 import React from 'react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { roundToDecimalPlace } from '../../../utils';
 
-type Props = FieldDataRowProps;
-export const DocumentStat = ({ config }: Props) => {
+interface Props extends FieldDataRowProps {
+  showIcon?: boolean;
+}
+export const DocumentStat = ({ config, showIcon }: Props) => {
   const { stats } = config;
   if (stats === undefined) return null;
 
@@ -22,8 +24,11 @@ export const DocumentStat = ({ config }: Props) => {
   const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
 
   return (
-    <EuiText size={'xs'}>
-      {count} ({docsPercent}%)
-    </EuiText>
+    <>
+      {showIcon ? <EuiIcon type="document" size={'m'} className={'columnHeaderIcon'} /> : null}
+      <EuiText size={'xs'}>
+        {count} ({docsPercent}%)
+      </EuiText>
+    </>
   );
 };

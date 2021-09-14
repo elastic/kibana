@@ -42,10 +42,10 @@ export const calculateTableColumnsDimensions = (width?: number) => {
   const defaultSettings = {
     expander: '40px',
     type: '75px',
-    docCount: '200px',
-    distinctValues: '200px',
+    docCount: '225px',
+    distinctValues: '225px',
     distributions: '150px',
-    showIcons: true,
+    showIcon: true,
     breakPoint: 'xl',
   };
   if (width === undefined) return defaultSettings;
@@ -59,7 +59,7 @@ export const calculateTableColumnsDimensions = (width?: number) => {
         docCount: 'auto',
         distinctValues: 'auto',
         distributions: 'auto',
-        showIcons: false,
+        showIcon: false,
         breakPoint,
       };
 
@@ -71,7 +71,7 @@ export const calculateTableColumnsDimensions = (width?: number) => {
         docCount: 'auto',
         distinctValues: 'auto',
         distributions: 'auto',
-        showIcons: false,
+        showIcon: false,
         breakPoint,
       };
 

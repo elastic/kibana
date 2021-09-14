@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiIcon, EuiText } from '@elastic/eui';
 
 import React from 'react';
 
 interface Props {
   cardinality?: number;
+  showIcon?: boolean;
 }
 
-export const DistinctValues = ({ cardinality }: Props) => {
+export const DistinctValues = ({ cardinality, showIcon }: Props) => {
   if (cardinality === undefined) return null;
-  return <EuiText size={'xs'}>{cardinality}</EuiText>;
+  return (
+    <>
+      {showIcon ? <EuiIcon type="database" size={'m'} className={'columnHeaderIcon'} /> : null}
+      <EuiText size={'xs'}>{cardinality}</EuiText>
+    </>
+  );
 };
