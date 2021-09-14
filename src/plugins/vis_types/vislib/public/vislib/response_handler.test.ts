@@ -11,6 +11,16 @@ import { setFormatService } from '../services';
 jest.mock('./helpers', () => ({
   buildHierarchicalData: jest.fn(() => ({})),
   buildPointSeriesData: jest.fn(() => ({})),
+  getColumnByAccessor: jest.fn((columns, accessor) => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getColumnByAccessor } = require('./helpers/accessor');
+    return getColumnByAccessor(columns, accessor);
+  }),
+  getValueByAccessor: jest.fn((data, accessor) => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getValueByAccessor } = require('./helpers/accessor');
+    return getValueByAccessor(data, accessor);
+  }),
 }));
 
 // @ts-ignore

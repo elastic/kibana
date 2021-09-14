@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionValueVisDimension } from '../../../../../visualizations/public';
+import { ExpressionValueVisDimension } from '../../../../../../visualizations/public';
 
 export const getValueByAccessor = <T extends Record<string, any>>(
   data: T,
@@ -21,11 +21,11 @@ export const getValueByAccessor = <T extends Record<string, any>>(
 
 export const getColumnByAccessor = <T extends { id: string | number }>(
   columns: T[],
-  accessor: ExpressionValueVisDimension['accessor']
+  accessor: ExpressionValueVisDimension['accessor'] | null
 ) => {
   if (typeof accessor === 'number') {
     return columns[accessor];
   }
 
-  return columns.filter((col) => col.id === accessor.id)[0];
+  return columns.filter((col) => col.id === accessor?.id)[0];
 };
