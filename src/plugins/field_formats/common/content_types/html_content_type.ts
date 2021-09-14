@@ -43,7 +43,7 @@ export const setup = (
       return convert.call(format, value, options);
     }
 
-    const subValues = value.map((v: any) => recurse(v, options));
+    const subValues = value.map((v: unknown) => recurse(v, options));
     const useMultiLine = subValues.some((sub: string) => sub.indexOf('\n') > -1);
 
     return subValues.join(',' + (useMultiLine ? '\n' : ' '));

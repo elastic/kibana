@@ -36,7 +36,7 @@ describe('dateHistogram(req, panel, series)', () => {
       interval: '10s',
       id: 'panelId',
     };
-    series = { id: 'test' };
+    series = { id: 'test', metrics: [{ type: 'avg' }] };
     config = {
       allowLeadingWildcards: true,
       queryStringOptions: {},
