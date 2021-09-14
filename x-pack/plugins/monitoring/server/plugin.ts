@@ -206,7 +206,7 @@ export class MonitoringPlugin
     }
   }
 
-  async start(coreStart: CoreStart, { licensing }: PluginsStart) {
+  start(coreStart: CoreStart, { licensing }: PluginsStart) {
     const config = this.config!;
     this.cluster = instantiateClient(
       config.ui.elasticsearch,

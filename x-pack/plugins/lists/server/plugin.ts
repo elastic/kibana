@@ -39,7 +39,7 @@ export class ListPlugin
     this.config = this.initializerContext.config.get<ConfigType>();
   }
 
-  public async setup(core: CoreSetup): Promise<ListPluginSetup> {
+  public setup(core: CoreSetup): Promise<ListPluginSetup> {
     const { config } = this;
 
     initSavedObjects(core.savedObjects);
