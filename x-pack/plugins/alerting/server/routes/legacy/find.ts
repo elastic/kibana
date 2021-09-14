@@ -82,6 +82,14 @@ export const findAlertRoute = (
           : [query.search_fields];
       }
 
+      if (query.fields) {
+        usageCounter?.incrementCounter({
+          counterName: `legacyAlertingFieldsUsage`,
+          counterType: 'alertingFieldsUsage',
+          incrementBy: 1,
+        });
+      }
+
       const findResult = await rulesClient.find({ options });
       return res.ok({
         body: findResult,

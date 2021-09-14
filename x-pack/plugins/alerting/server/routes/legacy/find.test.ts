@@ -160,4 +160,30 @@ describe('findAlertRoute', () => {
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('find', mockUsageCounter);
   });
+
+  it('should track calls to deprecated functionality', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    findAlertRoute(router, licenseState, mockUsageCounter);
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: {},
+        query: {
+          fields: ['foo', 'bar'],
+        },
+      },
+      ['ok']
+    );
+    await handler(context, req, res);
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: `legacyAlertingFieldsUsage`,
+      counterType: 'alertingFieldsUsage',
+      incrementBy: 1,
+    });
+  });
 });

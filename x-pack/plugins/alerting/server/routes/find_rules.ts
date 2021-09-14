@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash';
 import { IRouter } from 'kibana/server';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { FindOptions, FindResult } from '../rules_client';
@@ -107,7 +108,8 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
 
 export const findRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
 ) => {
   router.get(
     {
@@ -125,6 +127,14 @@ export const findRulesRoute = (
           has_reference: req.query.has_reference || undefined,
           search_fields: searchFieldsAsArray(req.query.search_fields),
         });
+
+        if (req.query.fields) {
+          usageCounter?.incrementCounter({
+            counterName: `alertingFieldsUsage`,
+            counterType: 'alertingFieldsUsage',
+            incrementBy: 1,
+          });
+        }
 
         const findResult = await rulesClient.find({ options });
         return res.ok({
