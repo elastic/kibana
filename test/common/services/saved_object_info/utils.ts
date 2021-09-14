@@ -30,7 +30,7 @@ export const print = (log: ToolingLog) => (msg: string | null = null) => ({
 }: {
   xs: any;
   count: number;
-}) => log.success(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);
+}) => log.write(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);
 
 export const expectedFlags = () => ({
   string: ['esUrl'],
