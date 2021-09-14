@@ -93,6 +93,7 @@ export const useDashboardAppState = ({
     dashboardSessionStorage,
     scopedHistory,
     spacesService,
+    screenshotModeService,
   } = services;
   const { docTitle } = chrome;
   const { notifications } = core;
@@ -152,7 +153,11 @@ export const useDashboardAppState = ({
 
       // If the saved dashboard is an alias match, then we will redirect
       if (savedDashboard.outcome === 'aliasMatch') {
-        spacesService?.ui.redirectLegacyUrl(savedDashboard.getFullPath());
+        if (screenshotModeService?.isScreenshotMode()) {
+          scopedHistory().replace(savedDashboard.getFullPath());
+        } else {
+          spacesService?.ui.redirectLegacyUrl(savedDashboard.getFullPath());
+        }
       }
 
       /**
@@ -347,6 +352,7 @@ export const useDashboardAppState = ({
     query,
     data,
     spacesService?.ui,
+    screenshotModeService,
   ]);
 
   /**

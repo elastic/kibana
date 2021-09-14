@@ -84,6 +84,7 @@ export async function mountApp({
     savedObjectsTaggingOss,
     visualizations,
     presentationUtil,
+    screenshotMode,
   } = pluginsStart;
 
   const activeSpaceId =
@@ -130,6 +131,7 @@ export async function mountApp({
       activeSpaceId || 'default'
     ),
     spacesService: spacesApi,
+    screenshotModeService: screenshotMode,
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>

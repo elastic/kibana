@@ -19,6 +19,7 @@ import type {
 import { History } from 'history';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { ScreenshotModePluginStart } from 'src/plugins/screenshot_mode/public';
 import { Query, Filter, IndexPattern, RefreshInterval, TimeRange } from './services/data';
 import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
 import { SharePluginStart } from './services/share';
@@ -205,4 +206,5 @@ export interface DashboardAppServices {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   spacesService?: SpacesPluginStart;
+  screenshotModeService?: ScreenshotModePluginStart;
 }
