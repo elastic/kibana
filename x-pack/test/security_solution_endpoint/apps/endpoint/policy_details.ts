@@ -8,8 +8,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
+import {
+  deleteMetadataStream,
+  deleteAllDocsFromMetadataCurrentIndex,
+} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
   const pageObjects = getPageObjects([
     'common',
     'endpoint',
@@ -22,6 +28,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
 
   describe('When on the Endpoint Policy Details Page', function () {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
+        useCreate: true,
+      });
+      await browser.refresh();
+    });
+    after(async () => {
+      await deleteMetadataStream(getService);
+      await deleteAllDocsFromMetadataCurrentIndex(getService);
+    });
     describe('with an invalid policy id', () => {
       it('should display an error', async () => {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');

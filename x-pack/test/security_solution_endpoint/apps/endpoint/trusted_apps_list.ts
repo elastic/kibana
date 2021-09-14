@@ -7,14 +7,28 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  deleteMetadataStream,
+  deleteAllDocsFromMetadataCurrentIndex,
+} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'trustedApps']);
   const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
 
   describe('When on the Trusted Apps list', function () {
     before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
+        useCreate: true,
+      });
+      await browser.refresh();
       await pageObjects.trustedApps.navigateToTrustedAppsList();
+    });
+    after(async () => {
+      await deleteMetadataStream(getService);
+      await deleteAllDocsFromMetadataCurrentIndex(getService);
     });
 
     it('should show page title', async () => {
