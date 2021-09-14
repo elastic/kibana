@@ -75,7 +75,6 @@ export const DEFAULT_MAP_STATE: MapState = {
     timeslice: undefined,
     query: undefined,
     filters: [],
-    refreshTimerLastTriggeredAt: undefined,
     drawState: undefined,
     editState: undefined,
   },
@@ -218,13 +217,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
     case MAP_DESTROYED:
       return { ...state, ready: false };
     case MAP_EXTENT_CHANGED:
-      const newMapState = {
-        center: action.mapState.center,
-        zoom: action.mapState.zoom,
-        extent: action.mapState.extent,
-        buffer: action.mapState.buffer,
-      };
-      return { ...state, mapState: { ...state.mapState, ...newMapState } };
+      return { ...state, mapState: { ...state.mapState, ...action.mapViewContext } };
     case SET_QUERY:
       const {
         query,

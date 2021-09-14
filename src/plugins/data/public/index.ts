@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/109904
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
 
@@ -62,7 +65,13 @@ export const indexPatterns = {
   flattenHitWrapper,
 };
 
-export { IndexPatternsContract, IndexPattern, IndexPatternField, TypeMeta } from './index_patterns';
+export {
+  IndexPatternsContract,
+  DataViewsContract,
+  IndexPattern,
+  IndexPatternField,
+  TypeMeta,
+} from './index_patterns';
 
 export {
   IIndexPattern,
@@ -82,7 +91,7 @@ export {
   IndexPatternListItem,
 } from '../common';
 
-export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
+export { DuplicateDataViewError } from '../common/index_patterns/errors';
 
 /*
  * Autocomplete query suggestions:

@@ -70,15 +70,13 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
   };
 }
 
+export type { FormatColumnArgs, TimeScaleArgs, CounterRateArgs } from '../../common/expressions';
+
 export {
-  CounterRateArgs,
-  ExpressionFunctionCounterRate,
-  counterRate,
-} from '../../common/expressions';
-export { FormatColumnArgs, supportedFormats, formatColumn } from '../../common/expressions';
-export { getSuffixFormatter, unitSuffixesLong } from '../../common/suffix_formatter';
-export { getTimeScale, TimeScaleArgs } from '../../common/expressions';
-export { renameColumns } from '../../common/expressions';
+  getSuffixFormatter,
+  unitSuffixesLong,
+  suffixFormatterId,
+} from '../../common/suffix_formatter';
 
 export function getIndexPatternDatasource({
   core,

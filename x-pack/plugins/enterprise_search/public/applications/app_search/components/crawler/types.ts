@@ -135,7 +135,7 @@ export interface CrawlerDomainValidationResultFromServer {
   }>;
 }
 
-export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'invalid';
+export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'warning' | 'invalid';
 
 export interface CrawlerDomainValidationStep {
   state: CrawlerDomainValidationStepState;

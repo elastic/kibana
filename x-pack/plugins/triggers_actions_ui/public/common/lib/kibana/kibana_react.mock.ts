@@ -40,6 +40,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       list: jest.fn(),
     } as ActionTypeRegistryContract,
     charts: chartPluginMock.createStartContract(),
+    isCloud: false,
     kibanaFeatures: [],
     element: ({
       style: { cursor: 'pointer' },

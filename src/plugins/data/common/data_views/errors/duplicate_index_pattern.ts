@@ -6,16 +6,9 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable max-classes-per-file */
-
 export class DuplicateDataViewError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'DuplicateIndexPatternError';
   }
 }
-
-/**
- * @deprecated Use DuplicateDataViewError. All index pattern interfaces were renamed.
- */
-export class DuplicateIndexPatternError extends DuplicateDataViewError {}

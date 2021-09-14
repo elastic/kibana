@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110905
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
 import { lazy } from 'react';
 import {

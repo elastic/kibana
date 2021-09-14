@@ -8,8 +8,8 @@
   "optionalPlugins": ["usageCollection"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "fieldFormats"],
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
   },
   "description": "Registers the TSVB visualization. TSVB has its one editor, works with index patterns and index strings and contains 6 types of charts: timeseries, topN, table. markdown, metric and gauge."
 }

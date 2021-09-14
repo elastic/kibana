@@ -99,7 +99,7 @@ export function crawlDomainValidationToResult(
 
   if (warningResult) {
     return {
-      state: 'invalid',
+      state: 'warning',
       blockingFailure: !data.valid,
       message: warningResult.comment,
     };

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
 import { getStats } from './get_stats';
+import type { SavedObjectsClientContract } from '../../../../core/server';
 
 const mockVisualizations = {
   saved_objects: [
@@ -42,15 +42,23 @@ const mockVisualizations = {
 
 describe('vis_type_table getStats', () => {
   const mockSoClient = ({
-    find: jest.fn().mockResolvedValue(mockVisualizations),
+    createPointInTimeFinder: jest.fn().mockResolvedValue({
+      close: jest.fn(),
+      find: function* asyncGenerator() {
+        yield mockVisualizations;
+      },
+    }),
   } as unknown) as SavedObjectsClientContract;
 
   test('Returns stats from saved objects for table vis only', async () => {
     const result = await getStats(mockSoClient);
-    expect(mockSoClient.find).toHaveBeenCalledWith({
+
+    expect(mockSoClient.createPointInTimeFinder).toHaveBeenCalledWith({
       type: 'visualization',
-      perPage: 10000,
+      perPage: 1000,
+      namespaces: ['*'],
     });
+
     expect(result).toEqual({
       total: 4,
       total_split: 3,

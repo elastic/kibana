@@ -20,6 +20,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/api_integration/config.js'),
   require.resolve('../test/interpreter_functional/config.ts'),
   require.resolve('../test/examples/config.js'),
+  require.resolve('../test/functional_execution_context/config.ts'),
 ];
 
 require('../src/setup_node_env');

@@ -10,7 +10,7 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerSecurityRoute, registerSecuritySourceRestrictionsRoute } from './security';
 
 describe('security routes', () => {
-  describe('GET /api/workplace_search/org/security', () => {
+  describe('GET /internal/workplace_search/org/security', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -18,7 +18,7 @@ describe('security routes', () => {
 
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/security',
+        path: '/internal/workplace_search/org/security',
       });
 
       registerSecurityRoute({
@@ -36,7 +36,7 @@ describe('security routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/security/source_restrictions', () => {
+  describe('GET /internal/workplace_search/org/security/source_restrictions', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -44,7 +44,7 @@ describe('security routes', () => {
 
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/security/source_restrictions',
+        path: '/internal/workplace_search/org/security/source_restrictions',
       });
 
       registerSecuritySourceRestrictionsRoute({
@@ -62,7 +62,7 @@ describe('security routes', () => {
     });
   });
 
-  describe('PATCH /api/workplace_search/org/security/source_restrictions', () => {
+  describe('PATCH /internal/workplace_search/org/security/source_restrictions', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -70,7 +70,7 @@ describe('security routes', () => {
 
       mockRouter = new MockRouter({
         method: 'patch',
-        path: '/api/workplace_search/org/security/source_restrictions',
+        path: '/internal/workplace_search/org/security/source_restrictions',
       });
 
       registerSecuritySourceRestrictionsRoute({

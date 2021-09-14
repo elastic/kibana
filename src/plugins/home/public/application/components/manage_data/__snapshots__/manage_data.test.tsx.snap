@@ -151,7 +151,7 @@ exports[`ManageData render 1`] = `
                 className="kbnOverviewPageHeader__actionButton"
                 data-test-subj="homeDevTools"
                 flush="both"
-                href="/app/dev_tools#/console"
+                href=""
                 iconType="wrench"
               >
                 <FormattedMessage
@@ -181,7 +181,7 @@ exports[`ManageData render 1`] = `
                 className="kbnOverviewPageHeader__actionButton"
                 data-test-subj="homeManage"
                 flush="both"
-                href="/app/management"
+                href=""
                 iconType="gear"
               >
                 <FormattedMessage

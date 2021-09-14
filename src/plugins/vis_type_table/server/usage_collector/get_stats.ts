@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
-import {
-  SavedVisState,
-  VisualizationSavedObjectAttributes,
-} from 'src/plugins/visualizations/common';
-import { TableVisParams, VIS_TYPE_TABLE } from '../../common';
+import { VIS_TYPE_TABLE } from '../../common';
+
+import type {
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '../../../../core/server';
+import type { SavedVisState } from '../../../visualizations/common';
 
 export interface VisTypeTableUsage {
   /**
@@ -44,17 +46,14 @@ export interface VisTypeTableUsage {
 export async function getStats(
   soClient: SavedObjectsClientContract | ISavedObjectsRepository
 ): Promise<VisTypeTableUsage | undefined> {
-  const visualizations = await soClient.find<VisualizationSavedObjectAttributes>({
+  const finder = await soClient.createPointInTimeFinder({
     type: 'visualization',
-    perPage: 10000,
+    perPage: 1000,
+    namespaces: ['*'],
   });
 
-  const tableVisualizations = visualizations.saved_objects
-    .map<SavedVisState<TableVisParams>>(({ attributes }) => JSON.parse(attributes.visState))
-    .filter(({ type }) => type === VIS_TYPE_TABLE);
-
-  const defaultStats = {
-    total: tableVisualizations.length,
+  const stats: VisTypeTableUsage = {
+    total: 0,
     total_split: 0,
     split_columns: {
       total: 0,
@@ -66,20 +65,39 @@ export async function getStats(
     },
   };
 
-  return tableVisualizations.reduce((acc, { aggs, params }) => {
+  const doTelemetry = ({ aggs, params }: SavedVisState) => {
+    stats.total += 1;
+
     const hasSplitAgg = aggs.find((agg) => agg.schema === 'split');
 
     if (hasSplitAgg) {
-      acc.total_split += 1;
+      stats.total_split += 1;
 
       const isSplitRow = params.row;
       const isSplitEnabled = hasSplitAgg.enabled;
+      const container = isSplitRow ? stats.split_rows : stats.split_columns;
 
-      const container = isSplitRow ? acc.split_rows : acc.split_columns;
       container.total += 1;
       container.enabled = isSplitEnabled ? container.enabled + 1 : container.enabled;
     }
+  };
 
-    return acc;
-  }, defaultStats);
+  for await (const response of finder.find()) {
+    (response.saved_objects || []).forEach(({ attributes }: SavedObjectsFindResult<any>) => {
+      if (attributes?.visState) {
+        try {
+          const visState: SavedVisState = JSON.parse(attributes.visState);
+
+          if (visState.type === VIS_TYPE_TABLE) {
+            doTelemetry(visState);
+          }
+        } catch {
+          // nothing to be here, "so" not valid
+        }
+      }
+    });
+  }
+  await finder.close();
+
+  return stats;
 }

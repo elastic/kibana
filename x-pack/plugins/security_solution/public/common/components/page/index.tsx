@@ -32,6 +32,15 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
   }
 
   /*
+    overrides the default styling of EuiDataGrid expand popover footer to
+    make it a column of actions instead of the default actions row
+  */
+  .euiDataGridRowCell__popover .euiPopoverFooter .euiFlexGroup {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /*
     overrides the default styling of euiComboBoxOptionsList because it's implemented
     as a popover, so it's not selectable as a child of the styled component
   */

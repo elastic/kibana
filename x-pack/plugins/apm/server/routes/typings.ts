@@ -26,15 +26,6 @@ export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   rac: RacApiRequestHandlerContext;
 }
 
-export type InspectResponse = Array<{
-  response: any;
-  duration: number;
-  requestType: string;
-  requestParams: Record<string, unknown>;
-  esError: Error;
-  operationName: string;
-}>;
-
 export interface APMRouteCreateOptions {
   options: {
     tags: Array<

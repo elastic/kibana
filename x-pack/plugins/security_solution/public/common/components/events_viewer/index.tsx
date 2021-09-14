@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import React, { useCallback, useMemo, useEffect } from 'react';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
@@ -78,6 +78,7 @@ type Props = OwnProps & PropsFromRedux;
 const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
   columns,
+  defaultColumns,
   dataProviders,
   defaultCellActions,
   deletedEventIds,
@@ -108,6 +109,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   hasAlertsCrud = false,
   unit,
 }) => {
+  const dispatch = useDispatch();
   const { timelines: timelinesUi } = useKibana().services;
   const {
     browserFields,
@@ -127,6 +129,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       createTimeline({
         id,
         columns,
+        defaultColumns,
         excludedRowRendererIds,
         indexNames: selectedPatterns,
         sort,
@@ -144,11 +147,16 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
   const graphOverlay = useMemo(
     () =>
-      graphEventId != null && graphEventId.length > 0 ? (
-        <GraphOverlay isEventViewer={true} timelineId={id} />
-      ) : null,
+      graphEventId != null && graphEventId.length > 0 ? <GraphOverlay timelineId={id} /> : null,
     [graphEventId, id]
   );
+  const setQuery = useCallback(
+    (inspect, loading, refetch) => {
+      dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
+    },
+    [dispatch, id]
+  );
+
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -180,6 +188,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               onRuleChange,
               renderCellValue,
               rowRenderers,
+              setQuery,
               start,
               sort,
               additionalFilters,
@@ -241,6 +250,7 @@ const makeMapStateToProps = () => {
     const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
     const {
       columns,
+      defaultColumns,
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
@@ -254,6 +264,7 @@ const makeMapStateToProps = () => {
 
     return {
       columns,
+      defaultColumns,
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
