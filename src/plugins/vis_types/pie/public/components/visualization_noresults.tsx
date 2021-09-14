@@ -21,7 +21,7 @@ export const VisualizationNoResults = ({ hasNegativeValues = false }) => {
           {hasNegativeValues
             ? i18n.translate('visTypePie.negativeValuesFound', {
                 defaultMessage:
-                  "Partition charts can't render with negative values. Try a different visualization type.",
+                  "Pie/donut charts can't render with negative values. Try a different visualization type.",
               })
             : i18n.translate('visTypePie.noResultsFoundTitle', {
                 defaultMessage: 'No results found',

@@ -306,10 +306,13 @@ const PieComponent = (props: PieComponentProps) => {
     [visData.rows, metricColumn]
   );
 
+  const canShowPieChart = !isAllZeros && !hasNegative;
+
   return (
     <div className="pieChart__container" data-test-subj="visTypePieChart">
-      {(isAllZeros || hasNegative) && <VisualizationNoResults hasNegativeValues={hasNegative} />}
-      {!isAllZeros && !hasNegative && (
+      {!canShowPieChart ? (
+        <VisualizationNoResults hasNegativeValues={hasNegative} />
+      ) : (
         <div className="pieChart__wrapper" ref={parentRef}>
           <LegendToggle
             onClick={toggleLegend}
