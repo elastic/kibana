@@ -13,11 +13,10 @@ import { TimelionPlugin } from './plugin';
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot, unused }) => [
-    renameFromRoot('table_vis.enabled', 'vis_type_table.enabled'),
-    // Unused properties which should be removed after releasing Kibana v8.0:
     renameFromRoot('timelion_vis.enabled', 'vis_type_timelion.enabled'),
     renameFromRoot('timelion.enabled', 'vis_type_timelion.enabled'),
     renameFromRoot('timelion.graphiteUrls', 'vis_type_timelion.graphiteUrls'),
+    // Unused properties which should be removed after releasing Kibana v8.0:
     renameFromRoot('timelion.ui.enabled', 'vis_type_timelion.ui.enabled', { silent: true }),
     unused('ui.enabled'),
   ],
