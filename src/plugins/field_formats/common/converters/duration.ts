@@ -235,7 +235,7 @@ export class DurationFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val) => {
+  textConvert: TextContextTypeConvert = (val: number) => {
     const inputFormat = this.param('inputFormat');
     const outputFormat = this.param('outputFormat') as keyof Duration;
     const outputPrecision = this.param('outputPrecision');
