@@ -27,12 +27,10 @@ describe('AppLogic', () => {
 
   const expectedLogicValues = {
     account: {
-      canCreateInvitations: true,
       canCreatePersonalSources: true,
       groups: ['Default', 'Cats'],
       id: 'some-id-string',
       isAdmin: true,
-      isCurated: false,
       viewedOnboardingPage: true,
     },
     hasInitialized: true,

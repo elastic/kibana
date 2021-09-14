@@ -111,4 +111,9 @@ export const mockState: AppState = {
   },
   journeys: {},
   networkEvents: {},
+  synthetics: {
+    blocks: {},
+    cacheSize: 0,
+    hitCount: [],
+  },
 };

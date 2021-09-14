@@ -5,11 +5,60 @@
  * 2.0.
  */
 
-// Sec Sol Kbn telemetry instrumentation specific
+import { schema, TypeOf } from '@kbn/config-schema';
+import { TrustedApp } from '../../../common/endpoint/types';
 
-export interface FleetAgentCacheItem {
-  policy_id: string | undefined;
-  policy_version: number | undefined | null;
+type BaseSearchTypes = string | number | boolean | object;
+export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
+
+// For getting cluster info. Copied from telemetry_collection/get_cluster_info.ts
+export interface ESClusterInfo {
+  cluster_uuid: string;
+  cluster_name: string;
+  version?: {
+    number: string;
+    build_flavor: string;
+    build_type: string;
+    build_hash: string;
+    build_date: string;
+    build_snapshot?: boolean;
+    lucene_version: string;
+    minimum_wire_compatibility_version: string;
+    minimum_index_compatibility_version: string;
+  };
+}
+
+// From https://www.elastic.co/guide/en/elasticsearch/reference/current/get-license.html
+export interface ESLicense {
+  status: string;
+  uid: string;
+  type: string;
+  issue_date?: string;
+  issue_date_in_millis?: number;
+  expiry_date?: string;
+  expirty_date_in_millis?: number;
+  max_nodes?: number;
+  issued_to?: string;
+  issuer?: string;
+  start_date_in_millis?: number;
+}
+
+export interface TelemetryEvent {
+  [key: string]: SearchTypes;
+  '@timestamp'?: string;
+  data_stream?: {
+    [key: string]: SearchTypes;
+    dataset?: string;
+  };
+  cluster_name?: string;
+  cluster_uuid?: string;
+  file?: {
+    [key: string]: SearchTypes;
+    Ext?: {
+      [key: string]: SearchTypes;
+    };
+  };
+  license?: ESLicense;
 }
 
 // EP Policy Response
@@ -45,7 +94,23 @@ export interface EndpointPolicyResponseDocument {
     event: {
       agent_id_status: string;
     };
-    Endpoint: {};
+    Endpoint: {
+      policy: {
+        applied: {
+          actions: Array<{
+            name: string;
+            message: string;
+            status: string;
+          }>;
+          artifacts: {
+            global: {
+              version: string;
+            };
+          };
+          status: string;
+        };
+      };
+    };
   };
 }
 
@@ -74,6 +139,7 @@ interface EndpointMetricDocument {
     '@timestamp': string;
     agent: {
       id: string;
+      version: string;
     };
     Endpoint: {
       metrics: EndpointMetrics;
@@ -127,4 +193,44 @@ interface EndpointMetricOS {
   version: string;
   platform: string;
   full: string;
+}
+
+// List HTTP Types
+
+export const GetTrustedAppsRequestSchema = {
+  query: schema.object({
+    page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
+    per_page: schema.maybe(schema.number({ defaultValue: 20, min: 1 })),
+    kuery: schema.maybe(schema.string()),
+  }),
+};
+
+export type GetEndpointListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
+
+export interface GetEndpointListResponse {
+  per_page: number;
+  page: number;
+  total: number;
+  data: EndpointExceptionListItem[];
+}
+
+// Telemetry List types
+
+export interface EndpointExceptionListItem {
+  id: string;
+  version: string;
+  name: string;
+  description: string;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+  entries: object;
+  os_types: object;
+}
+
+export interface ListTemplate {
+  trusted_application: TrustedApp[];
+  endpoint_exception: EndpointExceptionListItem[];
+  endpoint_event_filter: EndpointExceptionListItem[];
 }

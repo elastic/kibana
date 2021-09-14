@@ -9,6 +9,7 @@
 import React, { Fragment, useContext, useEffect } from 'react';
 import themeLight from '@elastic/eui/dist/eui_theme_light.json';
 import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
+import type { IndexPattern } from 'src/plugins/data/common';
 
 import {
   EuiDataGridCellValueElementProps,
@@ -16,18 +17,18 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { IndexPattern } from '../../../kibana_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
-import { EsHitRecord } from '../../angular/context/api/context';
+import { EsHitRecord } from '../../types';
 
 export const getRenderCellValueFn = (
   indexPattern: IndexPattern,
   rows: ElasticSearchHit[] | undefined,
   rowsFlattened: Array<Record<string, unknown>>,
   useNewFieldsApi: boolean,
+  fieldsToShow: string[],
   maxDocFieldsDisplayed: number
 ) => ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
   const row = rows ? rows[rowIndex] : undefined;
@@ -88,7 +89,7 @@ export const getRenderCellValueFn = (
         : undefined;
       const formatter = subField
         ? indexPattern.getFormatterForField(subField)
-        : { convert: (v: string, ...rest: unknown[]) => String(v) };
+        : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
       const formatted = (values as unknown[])
         .map((val: unknown) =>
           formatter.convert(val, 'html', {
@@ -99,7 +100,13 @@ export const getRenderCellValueFn = (
         )
         .join(', ');
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
-      pairs.push([displayKey ? displayKey : key, formatted]);
+      if (displayKey) {
+        if (fieldsToShow.includes(displayKey)) {
+          pairs.push([displayKey, formatted]);
+        }
+      } else {
+        pairs.push([key, formatted]);
+      }
     });
 
     return (
@@ -137,13 +144,18 @@ export const getRenderCellValueFn = (
     const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
     const highlightPairs: Array<[string, string]> = [];
     const sourcePairs: Array<[string, string]> = [];
-
     Object.entries(formatted).forEach(([key, val]) => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
       const displayKey = indexPattern.fields.getByName
         ? indexPattern.fields.getByName(key)?.displayName
         : undefined;
-      pairs.push([displayKey ? displayKey : key, val as string]);
+      if (displayKey) {
+        if (fieldsToShow.includes(displayKey)) {
+          pairs.push([displayKey, val as string]);
+        }
+      } else {
+        pairs.push([key, val as string]);
+      }
     });
 
     return (

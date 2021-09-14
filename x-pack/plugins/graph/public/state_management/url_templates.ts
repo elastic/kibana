@@ -10,7 +10,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { i18n } from '@kbn/i18n';
 import { modifyUrl } from '@kbn/std';
 import rison from 'rison-node';
-import { takeEvery, select } from 'redux-saga/effects';
+import { takeEvery } from 'redux-saga/effects';
 import { format, parse } from 'url';
 import { GraphState, GraphStoreDependencies } from './store';
 import { UrlTemplate } from '../types';
@@ -102,11 +102,9 @@ export const templatesSelector = (state: GraphState) => state.urlTemplates;
  *
  * Won't be necessary once the side bar is moved to redux
  */
-export const syncTemplatesSaga = ({ setUrlTemplates, notifyAngular }: GraphStoreDependencies) => {
+export const syncTemplatesSaga = ({ notifyReact }: GraphStoreDependencies) => {
   function* syncTemplates() {
-    const templates = templatesSelector(yield select());
-    setUrlTemplates(templates);
-    notifyAngular();
+    notifyReact();
   }
 
   return function* () {

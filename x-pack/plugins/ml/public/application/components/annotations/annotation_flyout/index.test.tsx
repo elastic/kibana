@@ -66,7 +66,7 @@ describe('AnnotationFlyout', () => {
         <ObservableComponent annotationUpdatesService={annotationUpdatesService!} />
       </MlAnnotationUpdatesContextProvider>
     );
-    const updateBtn = getByTestId('annotationFlyoutUpdateButton');
+    const updateBtn = getByTestId('annotationFlyoutUpdateOrCreateButton');
     expect(updateBtn).toBeDisabled();
   });
 
@@ -79,7 +79,7 @@ describe('AnnotationFlyout', () => {
         <ObservableComponent annotationUpdatesService={annotationUpdatesService!} />
       </MlAnnotationUpdatesContextProvider>
     );
-    const updateBtn = getByTestId('annotationFlyoutUpdateButton');
+    const updateBtn = getByTestId('annotationFlyoutUpdateOrCreateButton');
     expect(updateBtn).toBeDisabled();
     await waitFor(() => {
       const errorText = screen.queryByText(/characters above maximum length/);
@@ -97,7 +97,7 @@ describe('AnnotationFlyout', () => {
         <ObservableComponent annotationUpdatesService={annotationUpdatesService!} />
       </MlAnnotationUpdatesContextProvider>
     );
-    const updateBtn = getByTestId('annotationFlyoutUpdateButton');
+    const updateBtn = getByTestId('annotationFlyoutUpdateOrCreateButton');
     expect(updateBtn).not.toBeDisabled();
     expect(screen.queryByTestId('mlAnnotationFlyout')).toBeInTheDocument();
 

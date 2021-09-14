@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint react/no-did-mount-set-state: 0, react/forbid-elements: 0 */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';

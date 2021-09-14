@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { CommonEmbeddableStartContract } from '../types';
 import { baseEmbeddableMigrations } from './migrate_base_input';
-import { SerializableState } from '../../../kibana_utils/common/persistable_state';
 
-export type MigrateFunction = (state: SerializableState, version: string) => SerializableState;
+export type MigrateFunction = (state: SerializableRecord, version: string) => SerializableRecord;
 
 export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) => {
-  const migrateFn: MigrateFunction = (state: SerializableState, version: string) => {
-    const enhancements = (state.enhancements as SerializableState) || {};
+  const migrateFn: MigrateFunction = (state: SerializableRecord, version: string) => {
+    const enhancements = (state.enhancements as SerializableRecord) || {};
     const factory = embeddables.getEmbeddableFactory(state.type as string);
 
     let updatedInput = baseEmbeddableMigrations[version]
@@ -26,7 +26,7 @@ export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) =
     }
 
     if (factory?.isContainerType) {
-      updatedInput.panels = ((state.panels as SerializableState[]) || []).map((panel) => {
+      updatedInput.panels = ((state.panels as SerializableRecord[]) || []).map((panel) => {
         return migrateFn(panel, version);
       });
     }
@@ -36,7 +36,7 @@ export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) =
       if (!enhancements[key]) return;
       const enhancementDefinition = embeddables.getEnhancement(key);
       const migratedEnhancement = enhancementDefinition?.migrations?.[version]
-        ? enhancementDefinition.migrations[version](enhancements[key] as SerializableState)
+        ? enhancementDefinition.migrations[version](enhancements[key] as SerializableRecord)
         : enhancements[key];
       (updatedInput.enhancements! as Record<string, any>)[key] = migratedEnhancement;
     });

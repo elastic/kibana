@@ -7,17 +7,24 @@
 
 import { createAlertRoute } from './create';
 import { httpServiceMock } from 'src/core/server/mocks';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { alertsClientMock } from '../../alerts_client.mock';
+import { rulesClientMock } from '../../rules_client.mock';
 import { Alert } from '../../../common/alert';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
-const alertsClient = alertsClientMock.create();
+const rulesClient = rulesClientMock.create();
 
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
+}));
+
+jest.mock('../../lib/track_legacy_route_usage', () => ({
+  trackLegacyRouteUsage: jest.fn(),
 }));
 
 beforeEach(() => {
@@ -78,17 +85,25 @@ describe('createAlertRoute', () => {
   it('creates an alert with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+    });
 
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
 
-    alertsClient.create.mockResolvedValueOnce(createResult);
+    rulesClient.create.mockResolvedValueOnce(createResult);
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         body: mockedAlert,
       },
@@ -97,8 +112,9 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: createResult });
 
-    expect(alertsClient.create).toHaveBeenCalledTimes(1);
-    expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    expect(rulesClient.create).toHaveBeenCalledTimes(1);
+    expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {
@@ -138,24 +154,32 @@ describe('createAlertRoute', () => {
     });
   });
 
-  it('allows providing a custom id', async () => {
+  it('allows providing a custom id when space is undefined', async () => {
     const expectedResult = {
       ...createResult,
       id: 'custom-id',
     };
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+    });
 
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
 
-    alertsClient.create.mockResolvedValueOnce(expectedResult);
+    rulesClient.create.mockResolvedValueOnce(expectedResult);
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: { id: 'custom-id' },
         body: mockedAlert,
@@ -165,8 +189,165 @@ describe('createAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: expectedResult });
 
-    expect(alertsClient.create).toHaveBeenCalledTimes(1);
-    expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    expect(rulesClient.create).toHaveBeenCalledTimes(1);
+    expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "2",
+                "params": Object {
+                  "foo": true,
+                },
+              },
+            ],
+            "alertTypeId": "1",
+            "consumer": "bar",
+            "name": "abc",
+            "notifyWhen": "onActionGroupChange",
+            "params": Object {
+              "bar": true,
+            },
+            "schedule": Object {
+              "interval": "10s",
+            },
+            "tags": Array [
+              "foo",
+            ],
+            "throttle": "30s",
+          },
+          "options": Object {
+            "id": "custom-id",
+          },
+        },
+      ]
+    `);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expectedResult,
+    });
+  });
+
+  it('allows providing a custom id in default space', async () => {
+    const expectedResult = {
+      ...createResult,
+      id: 'custom-id',
+    };
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+    });
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
+
+    rulesClient.create.mockResolvedValueOnce(expectedResult);
+    rulesClient.getSpaceId.mockReturnValueOnce('default');
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: { id: 'custom-id' },
+        body: mockedAlert,
+      },
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toEqual({ body: expectedResult });
+
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    expect(rulesClient.create).toHaveBeenCalledTimes(1);
+    expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "2",
+                "params": Object {
+                  "foo": true,
+                },
+              },
+            ],
+            "alertTypeId": "1",
+            "consumer": "bar",
+            "name": "abc",
+            "notifyWhen": "onActionGroupChange",
+            "params": Object {
+              "bar": true,
+            },
+            "schedule": Object {
+              "interval": "10s",
+            },
+            "tags": Array [
+              "foo",
+            ],
+            "throttle": "30s",
+          },
+          "options": Object {
+            "id": "custom-id",
+          },
+        },
+      ]
+    `);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expectedResult,
+    });
+  });
+
+  it('allows providing a custom id in non-default space', async () => {
+    const expectedResult = {
+      ...createResult,
+      id: 'custom-id',
+    };
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+    });
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
+
+    rulesClient.create.mockResolvedValueOnce(expectedResult);
+    rulesClient.getSpaceId.mockReturnValueOnce('another-space');
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: { id: 'custom-id' },
+        body: mockedAlert,
+      },
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toEqual({ body: expectedResult });
+
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);
+    expect(rulesClient.create).toHaveBeenCalledTimes(1);
+    expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {
@@ -209,14 +390,15 @@ describe('createAlertRoute', () => {
   it('ensures the license allows creating alerts', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute({ router, licenseState, encryptedSavedObjects });
 
     const [, handler] = router.post.mock.calls[0];
 
-    alertsClient.create.mockResolvedValueOnce(createResult);
+    rulesClient.create.mockResolvedValueOnce(createResult);
 
-    const [context, req, res] = mockHandlerArguments({ alertsClient }, {});
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, {});
 
     await handler(context, req, res);
 
@@ -226,18 +408,19 @@ describe('createAlertRoute', () => {
   it('ensures the license check prevents creating alerts', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
     });
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute({ router, licenseState, encryptedSavedObjects });
 
     const [, handler] = router.post.mock.calls[0];
 
-    alertsClient.create.mockResolvedValueOnce(createResult);
+    rulesClient.create.mockResolvedValueOnce(createResult);
 
-    const [context, req, res] = mockHandlerArguments({ alertsClient }, {});
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, {});
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
@@ -247,17 +430,37 @@ describe('createAlertRoute', () => {
   it('ensures the alert type gets validated for the license', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createAlertRoute(router, licenseState);
+    createAlertRoute({ router, licenseState, encryptedSavedObjects });
 
     const [, handler] = router.post.mock.calls[0];
 
-    alertsClient.create.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.create.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ alertsClient }, {}, ['ok', 'forbidden']);
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok', 'forbidden']);
 
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  it('should track every call', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+    });
+    const [, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
+    await handler(context, req, res);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('create', mockUsageCounter);
   });
 });

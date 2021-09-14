@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import {
   ActivityLog,
   HostInfo,
@@ -13,7 +14,6 @@ import {
   HostPolicyResponse,
   AppLocation,
   PolicyData,
-  MetadataQueryStrategyVersions,
   HostStatus,
   HostIsolationResponse,
   EndpointPendingActions,
@@ -37,12 +37,19 @@ export interface EndpointState {
   /** api error from retrieving host list */
   error?: ServerApiError;
   endpointDetails: {
-    flyoutView: EndpointIndexUIQueryParams['show'];
     activityLog: {
       paging: {
-        disabled: boolean;
+        disabled?: boolean;
         page: number;
         pageSize: number;
+        startDate: string;
+        endDate: string;
+        isInvalidDateRange: boolean;
+        autoRefreshOptions: {
+          enabled: boolean;
+          duration: number;
+        };
+        recentlyUsedDateRanges: EuiSuperDatePickerRecentRange[];
       };
       logData: AsyncResourceState<ActivityLog>;
     };
@@ -93,8 +100,6 @@ export interface EndpointState {
   endpointsTotal: number;
   /** api error for total, actual Endpoints */
   endpointsTotalError?: ServerApiError;
-  /** The query strategy version that informs whether the transform for KQL is enabled or not */
-  queryStrategyVersion?: MetadataQueryStrategyVersions;
   /** The policy IDs and revision number of the corresponding agent, and endpoint. May be more recent than what's running */
   policyVersionInfo?: HostInfo['policy_info'];
   /** The status of the host, which is mapped to the Elastic Agent status in Fleet */
@@ -107,6 +112,8 @@ export interface EndpointState {
    * states other than Loaded
    */
   endpointPendingActions: AsyncResourceState<AgentIdsPendingActions>;
+  // Metadata transform stats to checking transform state
+  metadataTransformStats: AsyncResourceState<TransformStats[]>;
 }
 
 export type AgentIdsPendingActions = Map<string, EndpointPendingActions['pending_actions']>;
@@ -134,4 +141,76 @@ export interface EndpointIndexUIQueryParams {
   show?: 'policy_response' | 'activity_log' | 'details' | 'isolate' | 'unisolate';
   /** Query text from search bar*/
   admin_query?: string;
+}
+
+export const TRANSFORM_STATE = {
+  ABORTING: 'aborting',
+  FAILED: 'failed',
+  INDEXING: 'indexing',
+  STARTED: 'started',
+  STOPPED: 'stopped',
+  STOPPING: 'stopping',
+  WAITING: 'waiting',
+};
+
+export const WARNING_TRANSFORM_STATES = new Set([
+  TRANSFORM_STATE.ABORTING,
+  TRANSFORM_STATE.FAILED,
+  TRANSFORM_STATE.STOPPED,
+  TRANSFORM_STATE.STOPPING,
+]);
+
+const transformStates = Object.values(TRANSFORM_STATE);
+export type TransformState = typeof transformStates[number];
+
+export interface TransformStats {
+  id: string;
+  checkpointing: {
+    last: {
+      checkpoint: number;
+      timestamp_millis?: number;
+    };
+    next?: {
+      checkpoint: number;
+      checkpoint_progress?: {
+        total_docs: number;
+        docs_remaining: number;
+        percent_complete: number;
+      };
+    };
+    operations_behind: number;
+  };
+  node?: {
+    id: string;
+    name: string;
+    ephemeral_id: string;
+    transport_address: string;
+    attributes: Record<string, unknown>;
+  };
+  stats: {
+    delete_time_in_ms: number;
+    documents_deleted: number;
+    documents_indexed: number;
+    documents_processed: number;
+    index_failures: number;
+    index_time_in_ms: number;
+    index_total: number;
+    pages_processed: number;
+    search_failures: number;
+    search_time_in_ms: number;
+    search_total: number;
+    trigger_count: number;
+    processing_time_in_ms: number;
+    processing_total: number;
+    exponential_avg_checkpoint_duration_ms: number;
+    exponential_avg_documents_indexed: number;
+    exponential_avg_documents_processed: number;
+  };
+  reason?: string;
+  state: TransformState;
+}
+
+export interface TransformStatsResponse {
+  count: number;
+  transforms: TransformStats[];
 }

@@ -19,12 +19,12 @@ import { useInternalApiClient } from '../../lib/reporting_api_client';
 
 const i18nTexts = {
   title: i18n.translate('xpack.reporting.listing.ilmPolicyCallout.migrationNeededTitle', {
-    defaultMessage: 'Migrate reporting indices',
+    defaultMessage: 'Apply new lifecycle policy for reports',
   }),
   description: (
     <FormattedMessage
       id="xpack.reporting.listing.ilmPolicyCallout.migrationNeededDescription"
-      defaultMessage="Reporting indices are not managed by the same ILM policy. This can lead to unexpected results for the lifecycle of reports stored in Elasticsearch indices. Reporting indices should all be managed by the {ilmPolicyName} policy."
+      defaultMessage="To ensure your reports are managed consistently, all reporting indices should use the {ilmPolicyName} policy."
       values={{
         ilmPolicyName: <EuiCode>{ILM_POLICY_NAME}</EuiCode>,
       }}
@@ -33,7 +33,10 @@ const i18nTexts = {
   buttonLabel: i18n.translate(
     'xpack.reporting.listing.ilmPolicyCallout.migrateIndicesButtonLabel',
     {
-      defaultMessage: 'Migrate indices',
+      defaultMessage: 'Apply {ilmPolicyName} policy',
+      values: {
+        ilmPolicyName: ILM_POLICY_NAME,
+      },
     }
   ),
   migrateErrorTitle: i18n.translate(
@@ -45,7 +48,7 @@ const i18nTexts = {
   migrateSuccessTitle: i18n.translate(
     'xpack.reporting.listing.ilmPolicyCallout.migrateIndicesSuccessTitle',
     {
-      defaultMessage: 'Successfully migrated reporting indices',
+      defaultMessage: 'Reporting policy active for all reporting indices',
     }
   ),
 };

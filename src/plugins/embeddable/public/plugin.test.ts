@@ -165,6 +165,19 @@ describe('embeddable factory', () => {
     start.getAllMigrations!()['7.11.0']!(containerState);
     expect(embeddableFactory.migrations['7.11.0']).toBeCalledWith(embeddableState);
   });
+
+  test('migrateToLatest returns list of all migrations', () => {
+    const migrations = start.getAllMigrations();
+    expect(migrations).toMatchSnapshot();
+  });
+
+  test('migrateToLatest calls correct migrate functions', () => {
+    start.migrateToLatest!({
+      state: embeddableState,
+      version: '7.11.0',
+    });
+    expect(embeddableFactory.migrations['7.11.0']).toBeCalledWith(embeddableState);
+  });
 });
 
 describe('embeddable enhancements', () => {

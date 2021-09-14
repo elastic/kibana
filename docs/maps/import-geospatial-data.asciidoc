@@ -6,6 +6,9 @@ To import geospatical data into the Elastic Stack, the data must be indexed as {
 Geospatial data comes in many formats.
 Choose an import tool based on the format of your geospatial data.
 
+TIP: When you upload GeoJSON or delimited files in {kib}, there is a file size
+limit, which is configurable in <<fileupload-maxfilesize,Advanced Settings>>.
+
 [discrete]
 [[import-geospatial-privileges]]
 === Security privileges
@@ -18,37 +21,36 @@ spaces in **{stack-manage-app}** in {kib}. For more information, see
 
 To upload GeoJSON files in {kib} with *Maps*, you must have:
 
-* The `all` {kib} privilege for *Maps*.
-* The `all` {kib} privilege for *Index Pattern Management*.
-* The `create` and `create_index` index privileges for destination indices.
-* To use the index in *Maps*, you must also have the `read` and `view_index_metadata` index privileges for destination indices.
+* The `all` {kib} privilege for *Maps*
+* The `all` {kib} privilege for *{ipm-app}*
+* The `create` and `create_index` index privileges for destination indices
+* To use the index in *Maps*, you must also have the `read` and `view_index_metadata` index privileges for destination indices
 
-To upload CSV files in {kib} with the *{file-data-viz}*, you must have privileges to upload GeoJSON files and:
+To upload delimited files (such as CSV, TSV, or JSON files) on the {kib} home page, you must also have:
 
-* The `manage_pipeline` cluster privilege.
-* The `read` {kib} privilege for *Machine Learning*.
-* The `machine_learning_admin` or `machine_learning_user` role.
+* The `all` {kib} privilege for *Discover*
+* The `manage_pipeline` or `manage_ingest_pipelines` cluster privilege
+* The `manage` index privilege for destination indices
 
 
 [discrete]
-=== Upload CSV with latitude and longitude columns
+=== Upload delimited files with latitude and longitude columns
 
-*File Data Visualizer* indexes CSV files with latitude and longitude columns as a geo_point.
+On the {kib} home page, you can upload a file and import it into an {es} index with latitude and longitude columns combined into a `geo_point` field.
 
-. Open the main menu, then click *Machine Learning*.
-. Select the *Data Visualizer* tab, then click *Upload file*.
-. Use the file chooser to select a CSV file.
+. Go to the {kib} home page and click *Upload a file*.
+. Select a file in one of the supported file formats.
 . Click *Import*.
 . Select the *Advanced* tab.
 . Set *Index name*.
-. Click *Add combined field*, then click *Add geo point field*.
+. If a combined `geo_point` field is not created automatically, click *Add combined field*, then click *Add geo point field*.
 . Fill out the form and click *Add*.
 . Click *Import*.
 
 [discrete]
 === Upload a GeoJSON file
 
-*Upload GeoJSON* indexes GeoJSON features as a geo_point or geo_shape.
+*Upload GeoJSON* indexes GeoJSON features as a `geo_point` or `geo_shape`.
 
 . <<maps-create, Create a new map>>.
 . Click *Add layer*.

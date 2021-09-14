@@ -14,11 +14,8 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import {
-  environmentQuery,
-  kqlQuery,
-  rangeQuery,
-} from '../../../../server/utils/queries';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -46,8 +43,8 @@ function searchLatency({
   start,
   end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -130,8 +127,8 @@ export async function getLatencyTimeseries({
   start,
   end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -195,8 +192,8 @@ export async function getLatencyPeriods({
   latencyAggregationType: LatencyAggregationType;
   comparisonStart?: number;
   comparisonEnd?: number;
-  kuery?: string;
-  environment?: string;
+  kuery: string;
+  environment: string;
 }) {
   const { start, end } = setup;
   const options = {

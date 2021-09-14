@@ -70,7 +70,7 @@ export function ChangeIndexPattern({
         <div>
           <EuiPopoverTitle>
             {i18n.translate('xpack.lens.indexPattern.changeIndexPatternTitle', {
-              defaultMessage: 'Change index pattern',
+              defaultMessage: 'Index pattern',
             })}
           </EuiPopoverTitle>
           <EuiSelectable<{

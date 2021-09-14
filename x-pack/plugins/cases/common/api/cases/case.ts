@@ -11,7 +11,7 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
-import { CaseConnectorRt, ESCaseConnector } from '../connectors';
+import { CaseConnectorRt } from '../connectors';
 import { SubCaseResponseRt } from './sub_case';
 
 const BucketsAggs = rt.array(
@@ -87,24 +87,17 @@ const CaseBasicRt = rt.type({
   owner: rt.string,
 });
 
-const CaseExternalServiceBasicRt = rt.type({
-  connector_id: rt.string,
+export const CaseExternalServiceBasicRt = rt.type({
+  connector_id: rt.union([rt.string, rt.null]),
   connector_name: rt.string,
   external_id: rt.string,
   external_title: rt.string,
   external_url: rt.string,
+  pushed_at: rt.string,
+  pushed_by: UserRT,
 });
 
-const CaseFullExternalServiceRt = rt.union([
-  rt.intersection([
-    CaseExternalServiceBasicRt,
-    rt.type({
-      pushed_at: rt.string,
-      pushed_by: UserRT,
-    }),
-  ]),
-  rt.null,
-]);
+const CaseFullExternalServiceRt = rt.union([CaseExternalServiceBasicRt, rt.null]);
 
 export const CaseAttributesRt = rt.intersection([
   CaseBasicRt,
@@ -325,11 +318,6 @@ export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
 export type CaseSettings = rt.TypeOf<typeof SettingsRt>;
 export type ExternalServiceResponse = rt.TypeOf<typeof ExternalServiceResponseRt>;
-
-export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };
-export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
-  connector?: ESCaseConnector;
-};
 
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;

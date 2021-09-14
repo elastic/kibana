@@ -69,7 +69,7 @@ export function URLSearch({
 
   const { searchTerm, percentile } = urlParams;
 
-  const [popoverIsOpen, setPopoverIsOpen] = useState<boolean | undefined>();
+  const [popoverIsOpen, setPopoverIsOpen] = useState<boolean>(false);
 
   const [searchValue, setSearchValue] = useState(searchTerm ?? '');
 

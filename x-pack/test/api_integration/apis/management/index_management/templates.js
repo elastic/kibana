@@ -193,8 +193,8 @@ export default function ({ getService }) {
       });
 
       it('should parse the ES error and return the cause', async () => {
-        const templateName = `template-${getRandomString()}`;
-        const payload = getTemplatePayload(templateName, [getRandomString()]);
+        const templateName = `template-create-parse-es-error}`;
+        const payload = getTemplatePayload(templateName, ['create-parse-es-error']);
         const runtime = {
           myRuntimeField: {
             type: 'boolean',
@@ -207,9 +207,9 @@ export default function ({ getService }) {
         const { body } = await createTemplate(payload).expect(400);
 
         expect(body.attributes).an('object');
-        expect(body.attributes.message).contain('template after composition is invalid');
+        expect(body.attributes.error.reason).contain('template after composition is invalid');
         // one of the item of the cause array should point to our script
-        expect(body.attributes.cause.join(',')).contain('"hello with error');
+        expect(body.attributes.causes.join(',')).contain('"hello with error');
       });
     });
 
@@ -220,7 +220,7 @@ export default function ({ getService }) {
 
         await createTemplate(indexTemplate).expect(200);
 
-        let catTemplateResponse = await catTemplate(templateName);
+        let { body: catTemplateResponse } = await catTemplate(templateName);
 
         const { name, version } = indexTemplate;
 
@@ -234,7 +234,7 @@ export default function ({ getService }) {
           200
         );
 
-        catTemplateResponse = await catTemplate(templateName);
+        ({ body: catTemplateResponse } = await catTemplate(templateName));
 
         expect(
           catTemplateResponse.find(({ name: templateName }) => templateName === name).version
@@ -247,7 +247,7 @@ export default function ({ getService }) {
 
         await createTemplate(legacyIndexTemplate).expect(200);
 
-        let catTemplateResponse = await catTemplate(templateName);
+        let { body: catTemplateResponse } = await catTemplate(templateName);
 
         const { name, version } = legacyIndexTemplate;
 
@@ -262,7 +262,7 @@ export default function ({ getService }) {
           templateName
         ).expect(200);
 
-        catTemplateResponse = await catTemplate(templateName);
+        ({ body: catTemplateResponse } = await catTemplate(templateName));
 
         expect(
           catTemplateResponse.find(({ name: templateName }) => templateName === name).version
@@ -270,8 +270,8 @@ export default function ({ getService }) {
       });
 
       it('should parse the ES error and return the cause', async () => {
-        const templateName = `template-${getRandomString()}`;
-        const payload = getTemplatePayload(templateName, [getRandomString()]);
+        const templateName = `template-update-parse-es-error}`;
+        const payload = getTemplatePayload(templateName, ['update-parse-es-error']);
         const runtime = {
           myRuntimeField: {
             type: 'keyword',
@@ -292,7 +292,7 @@ export default function ({ getService }) {
 
         expect(body.attributes).an('object');
         // one of the item of the cause array should point to our script
-        expect(body.attributes.cause.join(',')).contain('"hello with error');
+        expect(body.attributes.causes.join(',')).contain('"hello with error');
       });
     });
 
@@ -306,7 +306,7 @@ export default function ({ getService }) {
           throw new Error(`Error creating template: ${createStatus} ${createBody.message}`);
         }
 
-        let catTemplateResponse = await catTemplate(templateName);
+        let { body: catTemplateResponse } = await catTemplate(templateName);
 
         expect(
           catTemplateResponse.find((template) => template.name === payload.name).name
@@ -322,7 +322,7 @@ export default function ({ getService }) {
         expect(deleteBody.errors).to.be.empty;
         expect(deleteBody.templatesDeleted[0]).to.equal(templateName);
 
-        catTemplateResponse = await catTemplate(templateName);
+        ({ body: catTemplateResponse } = await catTemplate(templateName));
 
         expect(catTemplateResponse.find((template) => template.name === payload.name)).to.equal(
           undefined
@@ -335,7 +335,7 @@ export default function ({ getService }) {
 
         await createTemplate(payload).expect(200);
 
-        let catTemplateResponse = await catTemplate(templateName);
+        let { body: catTemplateResponse } = await catTemplate(templateName);
 
         expect(
           catTemplateResponse.find((template) => template.name === payload.name).name
@@ -348,7 +348,7 @@ export default function ({ getService }) {
         expect(body.errors).to.be.empty;
         expect(body.templatesDeleted[0]).to.equal(templateName);
 
-        catTemplateResponse = await catTemplate(templateName);
+        ({ body: catTemplateResponse } = await catTemplate(templateName));
 
         expect(catTemplateResponse.find((template) => template.name === payload.name)).to.equal(
           undefined

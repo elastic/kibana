@@ -1,0 +1,14 @@
+.controlFrame--formControlLayout {
+  width: 100%;
+  min-width: $euiSize * 12.5;
+}
+
+.controlFrame--control {
+  &.optionsList--filterBtnSingle {
+    height: 100%;
+  }
+}
+
+.optionsList--filterBtnTwoLine {
+  width: 100%;
+}

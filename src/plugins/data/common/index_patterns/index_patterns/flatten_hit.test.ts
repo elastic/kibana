@@ -8,12 +8,9 @@
 
 import { IndexPattern } from './index_pattern';
 
-// @ts-expect-error
-import mockLogStashFields from './fixtures/logstash_fields';
-import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
-
-import { fieldFormatsMock } from '../../field_formats/mocks';
+import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 import { flattenHitWrapper } from './flatten_hit';
+import { stubbedSavedObjectIndexPattern } from '../index_pattern.stub';
 
 class MockFieldFormatter {}
 
@@ -33,7 +30,7 @@ function create(id: string) {
       type,
       version,
       timeFieldName,
-      fields,
+      fields: JSON.parse(fields),
       title,
       runtimeFieldMap: {},
     },
@@ -60,9 +57,10 @@ describe('flattenHit', () => {
       fields: {
         date: ['1'],
         zzz: ['z'],
+        _abc: ['a'],
       },
     });
-    const expectedOrder = ['date', 'name', 'zzz', '_id', '_routing', '_score', '_type'];
+    const expectedOrder = ['_abc', 'date', 'name', 'zzz', '_id', '_routing', '_score', '_type'];
     expect(Object.keys(response)).toEqual(expectedOrder);
     expect(Object.entries(response).map(([key]) => key)).toEqual(expectedOrder);
   });

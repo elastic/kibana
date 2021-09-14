@@ -16,6 +16,7 @@ import { unknownColumnRenderer } from './unknown_column_renderer';
 import { zeekRowRenderer } from './zeek/zeek_row_renderer';
 import { systemRowRenderers } from './system/generic_row_renderer';
 import { threatMatchRowRenderer } from './cti/threat_match_row_renderer';
+import { reasonColumnRenderer } from './reason_column_renderer';
 
 // The row renderers are order dependent and will return the first renderer
 // which returns true from its isInstance call. The bottom renderers which
@@ -34,6 +35,7 @@ export const defaultRowRenderers: RowRenderer[] = [
 ];
 
 export const columnRenderers: ColumnRenderer[] = [
+  reasonColumnRenderer,
   plainColumnRenderer,
   emptyColumnRenderer,
   unknownColumnRenderer,

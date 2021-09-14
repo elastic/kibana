@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   AlertType,
@@ -14,6 +13,12 @@ import {
 } from '../../../../common/alert_types';
 import { getInitialAlertValues } from '../get_initial_alert_values';
 import { ApmPluginStartDeps } from '../../../plugin';
+import { useServiceName } from '../../../hooks/use_service_name';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { AlertMetadata } from '../helper';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { useTimeRange } from '../../../hooks/use_time_range';
+
 interface Props {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,7 +27,20 @@ interface Props {
 
 export function AlertingFlyout(props: Props) {
   const { addFlyoutVisible, setAddFlyoutVisibility, alertType } = props;
-  const { serviceName } = useParams<{ serviceName?: string }>();
+
+  const serviceName = useServiceName();
+  const { query } = useApmParams('/*');
+
+  const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
+  const rangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
+
+  const environment =
+    'environment' in query ? query.environment : ENVIRONMENT_ALL.value;
+  const transactionType =
+    'transactionType' in query ? query.transactionType : undefined;
+
   const { services } = useKibana<ApmPluginStartDeps>();
   const initialValues = getInitialAlertValues(alertType, serviceName);
 
@@ -39,9 +57,26 @@ export function AlertingFlyout(props: Props) {
         alertTypeId: alertType,
         canChangeTrigger: false,
         initialValues,
+        metadata: {
+          environment,
+          serviceName,
+          ...(alertType === AlertType.ErrorCount ? {} : { transactionType }),
+          start,
+          end,
+        } as AlertMetadata,
       }),
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [alertType, onCloseAddFlyout, services.triggersActionsUi]
+    [
+      alertType,
+      environment,
+      onCloseAddFlyout,
+      services.triggersActionsUi,
+      serviceName,
+      transactionType,
+      environment,
+      start,
+      end,
+    ]
   );
   return <>{addFlyoutVisible && addAlertFlyout}</>;
 }

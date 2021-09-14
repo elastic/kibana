@@ -64,7 +64,7 @@ const RecomposedScreenshotImage: React.FC<
   }
 > = ({ captionContent, imageCaption, imageData, imgRef, setImageData }) => {
   // initially an undefined URL value is passed to the image display, and a loading spinner is rendered.
-  // `useCompositeImage` will call `setUrl` when the image is composited, and the updated `url` will display.
+  // `useCompositeImage` will call `setImageData` when the image is composited, and the updated `imageData` will display.
   useCompositeImage(imgRef, setImageData, imageData);
 
   return (

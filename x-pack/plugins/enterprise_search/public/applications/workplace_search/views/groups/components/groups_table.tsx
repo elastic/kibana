@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { ACTIONS_HEADER } from '../../../../shared/constants';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 import { GroupsLogic } from '../groups_logic';
 
@@ -34,12 +35,6 @@ const SOURCES_TABLE_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.sourcesTableHeader',
   {
     defaultMessage: 'Content sources',
-  }
-);
-const USERS_TABLE_HEADER = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.usersTableHeader',
-  {
-    defaultMessage: 'Users',
   }
 );
 
@@ -77,8 +72,7 @@ export const GroupsTable: React.FC<{}> = () => {
         <EuiTableHeader>
           <EuiTableHeaderCell>{GROUP_TABLE_HEADER}</EuiTableHeaderCell>
           <EuiTableHeaderCell>{SOURCES_TABLE_HEADER}</EuiTableHeaderCell>
-          <EuiTableHeaderCell>{USERS_TABLE_HEADER}</EuiTableHeaderCell>
-          <EuiTableHeaderCell />
+          <EuiTableHeaderCell align="right">{ACTIONS_HEADER}</EuiTableHeaderCell>
         </EuiTableHeader>
         <EuiTableBody>
           {groups.map((group, index) => (

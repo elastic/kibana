@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/run_ensure_all_tests_in_ci_group');
+require('../src/dev/ensure_all_tests_in_ci_group').runEnsureAllTestsInCiGroupsCli();

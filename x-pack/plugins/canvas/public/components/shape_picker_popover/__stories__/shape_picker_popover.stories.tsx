@@ -9,18 +9,20 @@ import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ShapePickerPopover } from '../shape_picker_popover';
-
-import { shapes } from '../../../../canvas_plugin_src/renderers/shape/shapes';
+import {
+  getAvailableShapes,
+  Shape,
+} from '../../../../../../../src/plugins/expression_shape/common';
 
 class Interactive extends React.Component<{}, { value: string }> {
   public state = {
-    value: 'square',
+    value: Shape.SQUARE,
   };
 
   public render() {
     return (
       <ShapePickerPopover
-        shapes={shapes}
+        shapes={getAvailableShapes()}
         onChange={(value) => this.setState({ value })}
         value={this.state.value}
       />
@@ -29,9 +31,15 @@ class Interactive extends React.Component<{}, { value: string }> {
 }
 
 storiesOf('components/Shapes/ShapePickerPopover', module)
-  .add('default', () => <ShapePickerPopover shapes={shapes} onChange={action('onChange')} />)
+  .add('default', () => (
+    <ShapePickerPopover shapes={getAvailableShapes()} onChange={action('onChange')} />
+  ))
   .add('shape selected', () => (
-    <ShapePickerPopover shapes={shapes} onChange={action('onChange')} value="square" />
+    <ShapePickerPopover
+      shapes={getAvailableShapes()}
+      onChange={action('onChange')}
+      value={Shape.SQUARE}
+    />
   ))
   .add('interactive', () => <Interactive />, {
     info: {

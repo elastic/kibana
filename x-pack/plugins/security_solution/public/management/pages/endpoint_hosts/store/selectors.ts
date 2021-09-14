@@ -15,7 +15,6 @@ import {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
-  MetadataQueryStrategyVersions,
   HostStatus,
   ActivityLog,
   HostMetadata,
@@ -39,6 +38,7 @@ import {
 import { ServerApiError } from '../../../../common/types';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
 import { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
+import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -90,15 +90,9 @@ export const agentsWithEndpointsTotalError = (state: Immutable<EndpointState>) =
   state.agentsWithEndpointsTotalError;
 
 export const endpointsTotalError = (state: Immutable<EndpointState>) => state.endpointsTotalError;
-const queryStrategyVersion = (state: Immutable<EndpointState>) => state.queryStrategyVersion;
 
 export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
   isLoadedResourceState(info) ? info.data.version : undefined
-);
-
-export const isTransformEnabled = createSelector(
-  queryStrategyVersion,
-  (version) => version !== MetadataQueryStrategyVersions.VERSION_1
 );
 
 /**
@@ -369,9 +363,11 @@ export const getIsolationRequestError: (
   }
 });
 
-export const getEndpointDetailsFlyoutView = (
+export const getIsOnEndpointDetailsActivityLog: (
   state: Immutable<EndpointState>
-): EndpointIndexUIQueryParams['show'] => state.endpointDetails.flyoutView;
+) => boolean = createSelector(uiQueryParams, (searchParams) => {
+  return searchParams.show === EndpointDetailsTabsTypes.activityLog;
+});
 
 export const getActivityLogDataPaging = (
   state: Immutable<EndpointState>
@@ -389,6 +385,12 @@ export const getLastLoadedActivityLogData: (
 ) => Immutable<ActivityLog> | undefined = createSelector(getActivityLogData, (activityLog) => {
   return getLastLoadedResourceState(activityLog)?.data;
 });
+
+export const getActivityLogUninitialized: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getActivityLogData, (activityLog) =>
+  isUninitialisedResourceState(activityLog)
+);
 
 export const getActivityLogRequestLoading: (
   state: Immutable<EndpointState>
@@ -416,6 +418,19 @@ export const getActivityLogError: (
     return activityLog.error;
   }
 });
+
+// returns a true if either lgo is uninitialised
+// or if it has failed an api call after having fetched a non empty log list earlier
+export const getActivityLogIsUninitializedOrHasSubsequentAPIError: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(
+  getActivityLogUninitialized,
+  getLastLoadedActivityLogData,
+  getActivityLogError,
+  (isUninitialized, lastLoadedLogData, isAPIError) => {
+    return isUninitialized || (!isAPIError && !!lastLoadedLogData?.data.length);
+  }
+);
 
 export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
   return (details && isEndpointHostIsolated(details)) || false;
@@ -457,3 +472,12 @@ export const getEndpointHostIsolationStatusPropsCallback: (
     };
   }
 );
+
+export const getMetadataTransformStats = (state: Immutable<EndpointState>) =>
+  state.metadataTransformStats;
+
+export const metadataTransformStats = (state: Immutable<EndpointState>) =>
+  isLoadedResourceState(state.metadataTransformStats) ? state.metadataTransformStats.data : [];
+
+export const isMetadataTransformStatsLoading = (state: Immutable<EndpointState>) =>
+  isLoadingResourceState(state.metadataTransformStats);

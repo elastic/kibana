@@ -13,11 +13,8 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import {
-  environmentQuery,
-  kqlQuery,
-  rangeQuery,
-} from '../../../server/utils/queries';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -26,9 +23,9 @@ import {
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
-  calculateTransactionErrorPercentage,
+  calculateFailedTransactionRate,
   getOutcomeAggregation,
-  getTransactionErrorRateTimeSeries,
+  getFailedTransactionRateTimeSeries,
 } from '../helpers/transaction_error_rate';
 
 export async function getErrorRate({
@@ -42,8 +39,8 @@ export async function getErrorRate({
   start,
   end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
@@ -127,13 +124,11 @@ export async function getErrorRate({
     return { noHits, transactionErrorRate: [], average: null };
   }
 
-  const transactionErrorRate = getTransactionErrorRateTimeSeries(
+  const transactionErrorRate = getFailedTransactionRateTimeSeries(
     resp.aggregations.timeseries.buckets
   );
 
-  const average = calculateTransactionErrorPercentage(
-    resp.aggregations.outcomes
-  );
+  const average = calculateFailedTransactionRate(resp.aggregations.outcomes);
 
   return { noHits, transactionErrorRate, average };
 }
@@ -149,8 +144,8 @@ export async function getErrorRatePeriods({
   comparisonStart,
   comparisonEnd,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
@@ -186,16 +181,14 @@ export async function getErrorRatePeriods({
     previousPeriodPromise,
   ]);
 
-  const firtCurrentPeriod = currentPeriod.transactionErrorRate.length
-    ? currentPeriod.transactionErrorRate
-    : undefined;
+  const firstCurrentPeriod = currentPeriod.transactionErrorRate;
 
   return {
     currentPeriod,
     previousPeriod: {
       ...previousPeriod,
       transactionErrorRate: offsetPreviousPeriodCoordinates({
-        currentPeriodTimeseries: firtCurrentPeriod,
+        currentPeriodTimeseries: firstCurrentPeriod,
         previousPeriodTimeseries: previousPeriod.transactionErrorRate,
       }),
     },

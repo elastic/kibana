@@ -10,12 +10,14 @@ import { ReactWrapper, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import { EuiDataGrid } from '@elastic/eui';
-import { IAggType, IFieldFormat } from 'src/plugins/data/public';
+import { IAggType } from 'src/plugins/data/public';
+import { IFieldFormat } from 'src/plugins/field_formats/common';
+import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
-import { LensMultiTable } from '../../types';
-import { DatatableProps } from '../expression';
+import { LensMultiTable } from '../../../common';
+import { DatatableProps } from '../../../common/expressions';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { IUiSettingsClient } from 'kibana/public';
 
@@ -149,7 +151,7 @@ describe('DatatableComponent', () => {
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           rowHasRowClickTriggerActions={[false, false, false]}
-          renderMode="display"
+          renderMode="view"
           paletteService={chartPluginMock.createPaletteRegistry()}
           uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
         />
@@ -357,6 +359,7 @@ describe('DatatableComponent', () => {
         uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
     );
+    expect(component.find(VisualizationContainer)).toHaveLength(1);
     expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDatatable);
   });
 
@@ -424,7 +427,7 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
@@ -454,7 +457,7 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
@@ -482,7 +485,7 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
@@ -543,7 +546,7 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
@@ -578,7 +581,7 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
@@ -613,7 +616,7 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
@@ -647,7 +650,7 @@ describe('DatatableComponent', () => {
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
-        renderMode="display"
+        renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />

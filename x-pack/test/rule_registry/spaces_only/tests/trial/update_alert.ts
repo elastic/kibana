@@ -21,7 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
   const SPACE1 = 'space1';
   const SPACE2 = 'space2';
   const APM_ALERT_ID = 'NoxgpHkBqbdrfX07MqXV';
-  const APM_ALERT_INDEX = '.alerts-observability-apm';
+  const APM_ALERT_INDEX = '.alerts-observability.apm.alerts';
   const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
   const ALERT_VERSION = Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'); // required for optimistic concurrency control
 
@@ -45,10 +45,10 @@ export default ({ getService }: FtrProviderContext) => {
       .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
       .set('kbn-xsrf', 'true')
       .expect(200);
-    const securitySolution = indexNames?.index_name?.find(
-      (indexName) => indexName === SECURITY_SOLUTION_ALERT_INDEX
+    const securitySolution = indexNames?.index_name?.find((indexName) =>
+      indexName.startsWith(SECURITY_SOLUTION_ALERT_INDEX)
     );
-    expect(securitySolution).to.eql(SECURITY_SOLUTION_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
+    expect(securitySolution).to.eql(`${SECURITY_SOLUTION_ALERT_INDEX}-${SPACE1}`); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
   describe('Alert - Update - RBAC - spaces', () => {

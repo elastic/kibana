@@ -52,7 +52,6 @@ export interface HeaderProps {
   kibanaVersion: string;
   application: InternalApplicationStart;
   headerBanner$: Observable<ChromeUserBanner | undefined>;
-  appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsAppendExtension$: Observable<ChromeBreadcrumbsAppendExtension | undefined>;
@@ -102,9 +101,7 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
-  const Breadcrumbs = (
-    <HeaderBreadcrumbs appTitle$={observables.appTitle$} breadcrumbs$={observables.breadcrumbs$} />
-  );
+  const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />;
 
   return (
     <>

@@ -129,8 +129,8 @@ export function ServiceProfilingFlamegraph({
   end,
 }: {
   serviceName: string;
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   valueType?: ProfilingValueType;
   start?: string;
   end?: string;

@@ -20,7 +20,7 @@ def label(size) {
     case 'xl-highmem':
       return 'docker && tests-xl-highmem'
     case 'xxl':
-      return 'docker && tests-xxl && gobld/machineType:custom-64-270336'
+      return 'docker && tests-xxl && gobld/machineType:custom-64-327680'
     case 'n2-standard-16':
       return 'docker && linux && immutable && gobld/machineType:n2-standard-16'
   }
@@ -99,8 +99,10 @@ def base(Map params, Closure closure) {
     withEnv([
       "CI=true",
       "HOME=${env.JENKINS_HOME}",
+      "PR_NUMBER=${env.ghprbPullId ?: ''}",
       "PR_SOURCE_BRANCH=${env.ghprbSourceBranch ?: ''}",
       "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
+      "PR_MERGE_BASE=${checkoutInfo.mergeBase ?: ''}",
       "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
       "TEST_BROWSER_HEADLESS=1",
       "GIT_COMMIT=${checkoutInfo.commit}",

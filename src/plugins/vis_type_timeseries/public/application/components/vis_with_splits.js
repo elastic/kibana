@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback } from 'react';
+import classNames from 'classnames';
 import { getDisplayName } from './lib/get_display_name';
 import { labelDateFormatter } from './lib/label_date_formatter';
 import { findIndex, first } from 'lodash';
@@ -15,7 +16,7 @@ import { getSplitByTermsColor } from '../lib/get_split_by_terms_color';
 
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
-    const { model, visData, syncColors, palettesService } = props;
+    const { model, visData, syncColors, palettesService, fieldFormatMap } = props;
 
     const getSeriesColor = useCallback(
       (seriesName, seriesId, baseColor) => {
@@ -34,10 +35,11 @@ export function visWithSplits(WrappedComponent) {
           seriesPalette: palette,
           palettesRegistry: palettesService,
           syncColors,
+          fieldFormatMap,
         };
         return getSplitByTermsColor(props) || null;
       },
-      [model, palettesService, syncColors, visData]
+      [fieldFormatMap, model.id, model.series, palettesService, syncColors, visData]
     );
 
     if (!model || !visData || !visData[model.id]) return <WrappedComponent {...props} />;
@@ -113,12 +115,17 @@ export function visWithSplits(WrappedComponent) {
             additionalLabel={getValueOrEmpty(additionalLabel)}
             backgroundColor={props.backgroundColor}
             getConfig={props.getConfig}
+            fieldFormatMap={props.fieldFormatMap}
           />
         </div>
       );
     });
 
-    return <div className="tvbSplitVis">{rows}</div>;
+    const hasOneVis = visData[model.id].series.length === 1;
+
+    return (
+      <div className={classNames('tvbSplitVis', { 'tvbSplitVis--one': hasOneVis })}>{rows}</div>
+    );
   }
 
   SplitVisComponent.displayName = `SplitVisComponent(${getDisplayName(WrappedComponent)})`;

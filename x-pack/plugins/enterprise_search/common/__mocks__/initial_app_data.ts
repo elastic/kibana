@@ -56,8 +56,6 @@ export const DEFAULT_INITIAL_APP_DATA = {
       groups: ['Default', 'Cats'],
       isAdmin: true,
       canCreatePersonalSources: true,
-      canCreateInvitations: true,
-      isCurated: false,
       viewedOnboardingPage: true,
     },
   },

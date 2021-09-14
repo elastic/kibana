@@ -40,6 +40,7 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
+  'packages/kbn-test/jest_integration/jest-preset.js',
   'test/package/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
@@ -68,7 +69,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/BUILD.bazel',
 
   // Buildkite
-  '.buildkite/hooks/*',
+  '.buildkite/*',
 ];
 
 /**

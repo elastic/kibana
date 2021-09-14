@@ -26,17 +26,17 @@ import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { SavedObjectReferenceWithContext, ToastsStart } from 'src/core/public';
-import type {
-  ShareToSpaceFlyoutProps,
-  ShareToSpaceSavedObjectTarget,
-} from 'src/plugins/spaces_oss/public';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { getCopyToSpaceFlyoutComponent } from '../../copy_saved_objects_to_space';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesManager } from '../../spaces_manager';
-import type { ShareToSpaceTarget } from '../../types';
-import type { ShareOptions } from '../types';
+import type { SpacesDataEntry } from '../../types';
+import type {
+  ShareOptions,
+  ShareToSpaceFlyoutProps,
+  ShareToSpaceSavedObjectTarget,
+} from '../types';
 import { AliasTable } from './alias_table';
 import { DEFAULT_OBJECT_NOUN } from './constants';
 import { RelativesFooter } from './relatives_footer';
@@ -124,7 +124,7 @@ function createDefaultChangeSpacesHandler(
 }
 
 export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
-  const { spacesManager, shareToSpacesDataPromise, services } = useSpaces();
+  const { spacesManager, spacesDataPromise, services } = useSpaces();
   const { notifications } = services;
   const toastNotifications = notifications!.toasts;
 
@@ -168,7 +168,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
 
   const [{ isLoading, spaces, referenceGraph, aliasTargets }, setSpacesState] = useState<{
     isLoading: boolean;
-    spaces: ShareToSpaceTarget[];
+    spaces: SpacesDataEntry[];
     referenceGraph: SavedObjectReferenceWithContext[];
     aliasTargets: InternalLegacyUrlAliasTarget[];
   }>({ isLoading: true, spaces: [], referenceGraph: [], aliasTargets: [] });
@@ -176,9 +176,9 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     const { type, id } = savedObjectTarget;
     const getShareableReferences = spacesManager.getShareableReferences([{ type, id }]);
     const getPermissions = spacesManager.getShareSavedObjectPermissions(type);
-    Promise.all([shareToSpacesDataPromise, getShareableReferences, getPermissions])
-      .then(([shareToSpacesData, shareableReferences, permissions]) => {
-        const activeSpaceId = !enableSpaceAgnosticBehavior && shareToSpacesData.activeSpaceId;
+    Promise.all([spacesDataPromise, getShareableReferences, getPermissions])
+      .then(([spacesData, shareableReferences, permissions]) => {
+        const activeSpaceId = !enableSpaceAgnosticBehavior && spacesData.activeSpaceId;
         const selectedSpaceIds = savedObjectTarget.namespaces.filter(
           (spaceId) => spaceId !== activeSpaceId
         );
@@ -189,13 +189,13 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
         setCanShareToAllSpaces(permissions.shareToAllSpaces);
         setSpacesState({
           isLoading: false,
-          spaces: [...shareToSpacesData.spacesMap].map(([, spaceTarget]) => spaceTarget),
+          spaces: [...spacesData.spacesMap].map(([, spaceTarget]) => spaceTarget),
           referenceGraph: shareableReferences.objects,
           aliasTargets: shareableReferences.objects.reduce<InternalLegacyUrlAliasTarget[]>(
             (acc, x) => {
               for (const space of x.spacesWithMatchingAliases ?? []) {
                 if (space !== '?') {
-                  const spaceExists = shareToSpacesData.spacesMap.has(space);
+                  const spaceExists = spacesData.spacesMap.has(space);
                   // If the user does not have privileges to view all spaces, they will be redacted; we cannot attempt to disable aliases for redacted spaces.
                   acc.push({ targetSpace: space, targetType: x.type, sourceId: x.id, spaceExists });
                 }
@@ -216,7 +216,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   }, [
     savedObjectTarget,
     spacesManager,
-    shareToSpacesDataPromise,
+    spacesDataPromise,
     toastNotifications,
     enableSpaceAgnosticBehavior,
   ]);

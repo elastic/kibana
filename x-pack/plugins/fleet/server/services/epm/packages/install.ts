@@ -153,7 +153,7 @@ export async function handleInstallPackageFailure({
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
     if (installType === 'install' || installType === 'reinstall') {
-      logger.error(`uninstalling ${pkgkey} after error installing`);
+      logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
       await removeInstallation({ savedObjectsClient, pkgkey, esClient });
     }
 
@@ -271,6 +271,7 @@ async function installPackageFromRegistry({
         return { assets, status: 'installed', installType };
       })
       .catch(async (err: Error) => {
+        logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`);
         await handleInstallPackageFailure({
           savedObjectsClient,
           error: err,

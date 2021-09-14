@@ -8,11 +8,11 @@
 import React, { useContext, useEffect } from 'react';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { IUiSettingsClient } from 'kibana/public';
-import type { FormatFactory } from '../../types';
+import type { FormatFactory } from '../../../common';
+import { getOriginalId } from '../../../common/expressions';
+import type { ColumnConfig } from '../../../common/expressions';
 import type { DataContextType } from './types';
-import { ColumnConfig } from './table_basic';
 import { getContrastColor, getNumericValue } from '../../shared_components/coloring/utils';
-import { getOriginalId } from '../transpose_helpers';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,

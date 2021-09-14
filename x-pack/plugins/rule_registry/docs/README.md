@@ -19,7 +19,7 @@ yarn global add typedoc typedoc-plugin-markdown
 
 ```bash
 cd x-pack/plugins/rule_registry/docs
-npx typedoc --options alerts_client_typedoc.json
+npx typedoc --gitRemote upstream --options alerts_client_typedoc.json
 ```
 
 After running the above commands the files in the `server` directory will be updated to match the new tsdocs.

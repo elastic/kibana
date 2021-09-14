@@ -9,20 +9,13 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
   TRACE_ID,
-  PARENT_ID,
   TRANSACTION_DURATION,
   SPAN_DURATION,
-  TRANSACTION_ID,
+  PARENT_ID,
   ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
-import { APMError } from '../../../typings/es_schemas/ui/apm_error';
-import { rangeQuery } from '../../../server/utils/queries';
+import { rangeQuery } from '../../../../observability/server';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { PromiseValueType } from '../../../typings/common';
-
-export interface ErrorsPerTransaction {
-  [transactionId: string]: number;
-}
 
 export async function getTraceItems(
   traceId: string,
@@ -32,7 +25,7 @@ export async function getTraceItems(
   const maxTraceItems = config['xpack.apm.ui.maxTraceItems'];
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
-  const errorResponsePromise = apmEventClient.search('get_trace_items', {
+  const errorResponsePromise = apmEventClient.search('get_errors_docs', {
     apm: {
       events: [ProcessorEvent.error],
     },
@@ -47,20 +40,10 @@ export async function getTraceItems(
           must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
         },
       },
-      aggs: {
-        by_transaction_id: {
-          terms: {
-            field: TRANSACTION_ID,
-            size: maxTraceItems,
-            // high cardinality
-            execution_hint: 'map' as const,
-          },
-        },
-      },
     },
   });
 
-  const traceResponsePromise = apmEventClient.search('get_trace_span_items', {
+  const traceResponsePromise = apmEventClient.search('get_trace_docs', {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
@@ -86,36 +69,18 @@ export async function getTraceItems(
     },
   });
 
-  const [errorResponse, traceResponse]: [
-    // explicit intermediary types to avoid TS "excessively deep" error
-    PromiseValueType<typeof errorResponsePromise>,
-    PromiseValueType<typeof traceResponsePromise>
-  ] = (await Promise.all([errorResponsePromise, traceResponsePromise])) as any;
+  const [errorResponse, traceResponse] = await Promise.all([
+    errorResponsePromise,
+    traceResponsePromise,
+  ]);
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
-
-  const items = traceResponse.hits.hits.map((hit) => hit._source);
-
-  const errorFrequencies: {
-    errorsPerTransaction: ErrorsPerTransaction;
-    errorDocs: APMError[];
-  } = {
-    errorDocs: errorResponse.hits.hits.map(({ _source }) => _source),
-    errorsPerTransaction:
-      errorResponse.aggregations?.by_transaction_id.buckets.reduce(
-        (acc, current) => {
-          return {
-            ...acc,
-            [current.key]: current.doc_count,
-          };
-        },
-        {} as ErrorsPerTransaction
-      ) ?? {},
-  };
+  const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
+  const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
 
   return {
-    items,
     exceedsMax,
-    ...errorFrequencies,
+    traceDocs,
+    errorDocs,
   };
 }

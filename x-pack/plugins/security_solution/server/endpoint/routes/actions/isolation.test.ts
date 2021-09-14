@@ -274,6 +274,14 @@ describe('Host Isolation', () => {
         actionID
       );
     });
+    it('records the timeout in the action payload', async () => {
+      const ctx = await callRoute(ISOLATE_HOST_ROUTE, {
+        body: { endpoint_ids: ['XYZ'] },
+      });
+      const actionDoc: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
+        .index as jest.Mock).mock.calls[0][0].body;
+      expect(actionDoc.timeout).toEqual(300);
+    });
 
     it('succeeds when just an endpoint ID is provided', async () => {
       await callRoute(ISOLATE_HOST_ROUTE, { body: { endpoint_ids: ['XYZ'] } });

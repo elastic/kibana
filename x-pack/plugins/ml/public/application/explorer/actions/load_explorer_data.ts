@@ -223,7 +223,9 @@ const loadExplorerDataProvider = (
               swimlaneLimit,
               viewByPerPage,
               viewByFromPage,
-              swimlaneContainerWidth
+              swimlaneContainerWidth,
+              selectionInfluencers,
+              influencersFilterQuery
             )
           : Promise.resolve([]),
     }).pipe(

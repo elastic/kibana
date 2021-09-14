@@ -25,6 +25,7 @@ import {
 } from '../../../common/search_strategy/index_fields';
 
 const apmIndexPattern = 'apm-*-transaction*';
+const apmDataStreamsPattern = 'traces-apm*';
 
 export const indexFieldsProvider = (): ISearchStrategy<
   IndexFieldsStrategyRequest,
@@ -45,13 +46,18 @@ export const requestIndexFieldSearch = async (
   { esClient }: SearchStrategyDependencies,
   beatFields: BeatFields
 ): Promise<IndexFieldsStrategyResponse> => {
-  const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
+  const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
+  const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
+
   const dedupeIndices = dedupeIndexName(request.indices);
 
   const responsesIndexFields = await Promise.all(
     dedupeIndices
       .map(async (index) => {
-        if (request.onlyCheckIfIndicesExist && index.includes(apmIndexPattern)) {
+        if (
+          request.onlyCheckIfIndicesExist &&
+          (index.includes(apmIndexPattern) || index.includes(apmDataStreamsPattern))
+        ) {
           // for apm index pattern check also if there's data https://github.com/elastic/kibana/issues/90661
           const searchResponse = await esClient.asCurrentUser.search({
             index,
@@ -59,9 +65,15 @@ export const requestIndexFieldSearch = async (
           });
           return get(searchResponse, 'body.hits.total.value', 0) > 0;
         } else {
-          return indexPatternsFetcher.getFieldsForWildcard({
-            pattern: index,
-          });
+          if (index.startsWith('.alerts-observability')) {
+            return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+              pattern: index,
+            });
+          } else {
+            return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
+              pattern: index,
+            });
+          }
         }
       })
       .map((p) => p.catch((e) => false))

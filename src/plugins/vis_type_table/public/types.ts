@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IFieldFormat } from 'src/plugins/data/public';
+import type { IFieldFormat } from 'src/plugins/field_formats/common';
 import { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
 import { ExpressionValueVisDimension } from 'src/plugins/visualizations/public';
 import { TableVisParams } from '../common';

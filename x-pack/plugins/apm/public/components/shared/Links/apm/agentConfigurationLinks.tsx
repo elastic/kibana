@@ -26,14 +26,3 @@ export function editAgentConfigurationHref(
     },
   });
 }
-
-export function createAgentConfigurationHref(
-  search: string,
-  basePath: IBasePath
-) {
-  return getAPMHref({
-    basePath,
-    path: '/settings/agent-configuration/create',
-    search,
-  });
-}

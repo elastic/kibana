@@ -52,6 +52,7 @@ export function SeriesConfigQueryBarWithIgnoreGlobalFilter({
             }}
             onChange={(filter) => onChange({ filter })}
             indexPatterns={[indexPatternForQuery]}
+            data-test-subj="seriesConfigQueryBar"
           />
         </EuiFormRow>
       </EuiFlexItem>

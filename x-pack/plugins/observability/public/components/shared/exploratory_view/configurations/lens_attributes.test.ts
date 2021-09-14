@@ -380,6 +380,7 @@ describe('Lens Attribute', () => {
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
+          layerType: 'data',
           palette: undefined,
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
@@ -418,6 +419,7 @@ describe('Lens Attribute', () => {
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
+          layerType: 'data',
           palette: undefined,
           seriesType: 'line',
           splitAccessor: 'breakdown-column-layer0',

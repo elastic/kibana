@@ -49,9 +49,11 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
 
     //  add the beat
     const rateOptions = {
-      hitTimestamp: stats?.timestamp ?? hit._source['@timestamp'],
+      hitTimestamp: stats?.timestamp ?? hit._source['@timestamp'] ?? null,
       earliestHitTimestamp:
-        earliestStats?.timestamp ?? hit.inner_hits?.earliest.hits?.hits[0]._source['@timestamp'],
+        earliestStats?.timestamp ??
+        hit.inner_hits?.earliest.hits?.hits[0]._source['@timestamp'] ??
+        null,
       timeWindowMin: start,
       timeWindowMax: end,
     };

@@ -12,11 +12,16 @@ import {
   FailedStepsApiResponseType,
   JourneyStep,
   JourneyStepType,
+  ScreenshotBlockDoc,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
-} from '../../../common/runtime_types';
+} from '../../../common/runtime_types/ping/synthetics';
+
+export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
+  return apiService.post('/api/uptime/journey/screenshot/block', { hashes: params });
+}
 
 export async function fetchJourneySteps(
   params: FetchJourneyStepsParams

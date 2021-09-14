@@ -21,7 +21,7 @@ export const LOADING_EVENTS = i18n.translate(
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.timelines.tGrid.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
+    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
   });
 
 export const TOTAL_COUNT_OF_EVENTS = i18n.translate(

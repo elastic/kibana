@@ -76,7 +76,6 @@ export const findListItem = async ({
 
     const { body: respose } = await esClient.count({
       body: {
-        // @ts-expect-error GetQueryFilterReturn is not assignable to QueryDslQueryContainer
         query,
       },
       ignore_unavailable: true,
@@ -89,7 +88,6 @@ export const findListItem = async ({
       // to explicitly define the type <T>.
       const { body: response } = await esClient.search<SearchEsListItemSchema>({
         body: {
-          // @ts-expect-error GetQueryFilterReturn is not assignable to QueryDslQueryContainer
           query,
           search_after: scroll.searchAfter,
           sort: getSortWithTieBreaker({ sortField, sortOrder }),

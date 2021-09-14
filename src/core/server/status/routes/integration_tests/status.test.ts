@@ -21,6 +21,7 @@ import { registerStatusRoute } from '../status';
 import { ServiceStatus, ServiceStatusLevels } from '../../types';
 import { statusServiceMock } from '../../status_service.mock';
 import { executionContextServiceMock } from '../../../execution_context/execution_context_service.mock';
+import { contextServiceMock } from '../../../context/context_service.mock';
 
 const coreId = Symbol('core');
 
@@ -28,12 +29,14 @@ describe('GET /api/status', () => {
   let server: HttpService;
   let httpSetup: InternalHttpServiceSetup;
   let metrics: jest.Mocked<MetricsServiceSetup>;
+  let incrementUsageCounter: jest.Mock;
 
   const setupServer = async ({ allowAnonymous = true }: { allowAnonymous?: boolean } = {}) => {
     const coreContext = createCoreContext({ coreId });
     const contextService = new ContextService(coreContext);
 
     server = createHttpServer(coreContext);
+    await server.preboot({ context: contextServiceMock.createPrebootContract() });
     httpSetup = await server.setup({
       context: contextService.setup({ pluginDependencies: new Map() }),
       executionContext: executionContextServiceMock.createInternalSetupContract(),
@@ -47,6 +50,8 @@ describe('GET /api/status', () => {
       c: { level: ServiceStatusLevels.unavailable, summary: 'c is unavailable' },
       d: { level: ServiceStatusLevels.critical, summary: 'd is critical' },
     });
+
+    incrementUsageCounter = jest.fn();
 
     const router = httpSetup.createRouter('');
     registerStatusRoute({
@@ -69,6 +74,7 @@ describe('GET /api/status', () => {
         core$: status.core$,
         plugins$: pluginsStatus$,
       },
+      incrementUsageCounter,
     });
 
     // Register dummy auth provider for testing auth
@@ -135,69 +141,75 @@ describe('GET /api/status', () => {
   });
 
   describe('legacy status format', () => {
-    it('returns legacy status format when no query params provided', async () => {
-      await setupServer();
-      const result = await supertest(httpSetup.server.listener).get('/api/status').expect(200);
-      expect(result.body.status).toEqual({
-        overall: {
+    const legacyFormat = {
+      overall: {
+        icon: 'success',
+        nickname: 'Looking good',
+        since: expect.any(String),
+        state: 'green',
+        title: 'Green',
+        uiColor: 'secondary',
+      },
+      statuses: [
+        {
           icon: 'success',
-          nickname: 'Looking good',
+          id: 'core:elasticsearch@9.9.9',
+          message: 'Service is working',
           since: expect.any(String),
           state: 'green',
-          title: 'Green',
           uiColor: 'secondary',
         },
-        statuses: [
-          {
-            icon: 'success',
-            id: 'core:elasticsearch@9.9.9',
-            message: 'Service is working',
-            since: expect.any(String),
-            state: 'green',
-            uiColor: 'secondary',
-          },
-          {
-            icon: 'success',
-            id: 'core:savedObjects@9.9.9',
-            message: 'Service is working',
-            since: expect.any(String),
-            state: 'green',
-            uiColor: 'secondary',
-          },
-          {
-            icon: 'success',
-            id: 'plugin:a@9.9.9',
-            message: 'a is available',
-            since: expect.any(String),
-            state: 'green',
-            uiColor: 'secondary',
-          },
-          {
-            icon: 'warning',
-            id: 'plugin:b@9.9.9',
-            message: 'b is degraded',
-            since: expect.any(String),
-            state: 'yellow',
-            uiColor: 'warning',
-          },
-          {
-            icon: 'danger',
-            id: 'plugin:c@9.9.9',
-            message: 'c is unavailable',
-            since: expect.any(String),
-            state: 'red',
-            uiColor: 'danger',
-          },
-          {
-            icon: 'danger',
-            id: 'plugin:d@9.9.9',
-            message: 'd is critical',
-            since: expect.any(String),
-            state: 'red',
-            uiColor: 'danger',
-          },
-        ],
-      });
+        {
+          icon: 'success',
+          id: 'core:savedObjects@9.9.9',
+          message: 'Service is working',
+          since: expect.any(String),
+          state: 'green',
+          uiColor: 'secondary',
+        },
+        {
+          icon: 'success',
+          id: 'plugin:a@9.9.9',
+          message: 'a is available',
+          since: expect.any(String),
+          state: 'green',
+          uiColor: 'secondary',
+        },
+        {
+          icon: 'warning',
+          id: 'plugin:b@9.9.9',
+          message: 'b is degraded',
+          since: expect.any(String),
+          state: 'yellow',
+          uiColor: 'warning',
+        },
+        {
+          icon: 'danger',
+          id: 'plugin:c@9.9.9',
+          message: 'c is unavailable',
+          since: expect.any(String),
+          state: 'red',
+          uiColor: 'danger',
+        },
+        {
+          icon: 'danger',
+          id: 'plugin:d@9.9.9',
+          message: 'd is critical',
+          since: expect.any(String),
+          state: 'red',
+          uiColor: 'danger',
+        },
+      ],
+    };
+
+    it('returns legacy status format when v7format=true is provided', async () => {
+      await setupServer();
+      const result = await supertest(httpSetup.server.listener)
+        .get('/api/status?v7format=true')
+        .expect(200);
+      expect(result.body.status).toEqual(legacyFormat);
+      expect(incrementUsageCounter).toHaveBeenCalledTimes(1);
+      expect(incrementUsageCounter).toHaveBeenCalledWith({ counterName: 'status_v7format' });
     });
 
     it('returns legacy status format when v8format=false is provided', async () => {
@@ -205,109 +217,105 @@ describe('GET /api/status', () => {
       const result = await supertest(httpSetup.server.listener)
         .get('/api/status?v8format=false')
         .expect(200);
-      expect(result.body.status).toEqual({
-        overall: {
-          icon: 'success',
-          nickname: 'Looking good',
-          since: expect.any(String),
-          state: 'green',
-          title: 'Green',
-          uiColor: 'secondary',
-        },
-        statuses: [
-          {
-            icon: 'success',
-            id: 'core:elasticsearch@9.9.9',
-            message: 'Service is working',
-            since: expect.any(String),
-            state: 'green',
-            uiColor: 'secondary',
-          },
-          {
-            icon: 'success',
-            id: 'core:savedObjects@9.9.9',
-            message: 'Service is working',
-            since: expect.any(String),
-            state: 'green',
-            uiColor: 'secondary',
-          },
-          {
-            icon: 'success',
-            id: 'plugin:a@9.9.9',
-            message: 'a is available',
-            since: expect.any(String),
-            state: 'green',
-            uiColor: 'secondary',
-          },
-          {
-            icon: 'warning',
-            id: 'plugin:b@9.9.9',
-            message: 'b is degraded',
-            since: expect.any(String),
-            state: 'yellow',
-            uiColor: 'warning',
-          },
-          {
-            icon: 'danger',
-            id: 'plugin:c@9.9.9',
-            message: 'c is unavailable',
-            since: expect.any(String),
-            state: 'red',
-            uiColor: 'danger',
-          },
-          {
-            icon: 'danger',
-            id: 'plugin:d@9.9.9',
-            message: 'd is critical',
-            since: expect.any(String),
-            state: 'red',
-            uiColor: 'danger',
-          },
-        ],
-      });
+      expect(result.body.status).toEqual(legacyFormat);
+      expect(incrementUsageCounter).toHaveBeenCalledTimes(1);
+      expect(incrementUsageCounter).toHaveBeenCalledWith({ counterName: 'status_v7format' });
     });
   });
 
   describe('v8format', () => {
+    const newFormat = {
+      core: {
+        elasticsearch: {
+          level: 'available',
+          summary: 'Service is working',
+        },
+        savedObjects: {
+          level: 'available',
+          summary: 'Service is working',
+        },
+      },
+      overall: {
+        level: 'available',
+        summary: 'Service is working',
+      },
+      plugins: {
+        a: {
+          level: 'available',
+          summary: 'a is available',
+        },
+        b: {
+          level: 'degraded',
+          summary: 'b is degraded',
+        },
+        c: {
+          level: 'unavailable',
+          summary: 'c is unavailable',
+        },
+        d: {
+          level: 'critical',
+          summary: 'd is critical',
+        },
+      },
+    };
+
+    it('returns new status format when no query params are provided', async () => {
+      await setupServer();
+      const result = await supertest(httpSetup.server.listener).get('/api/status').expect(200);
+      expect(result.body.status).toEqual(newFormat);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
+    });
+
     it('returns new status format when v8format=true is provided', async () => {
       await setupServer();
       const result = await supertest(httpSetup.server.listener)
         .get('/api/status?v8format=true')
         .expect(200);
-      expect(result.body.status).toEqual({
-        core: {
-          elasticsearch: {
-            level: 'available',
-            summary: 'Service is working',
-          },
-          savedObjects: {
-            level: 'available',
-            summary: 'Service is working',
-          },
-        },
-        overall: {
-          level: 'available',
-          summary: 'Service is working',
-        },
-        plugins: {
-          a: {
-            level: 'available',
-            summary: 'a is available',
-          },
-          b: {
-            level: 'degraded',
-            summary: 'b is degraded',
-          },
-          c: {
-            level: 'unavailable',
-            summary: 'c is unavailable',
-          },
-          d: {
-            level: 'critical',
-            summary: 'd is critical',
-          },
-        },
-      });
+      expect(result.body.status).toEqual(newFormat);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
+    });
+
+    it('returns new status format when v7format=false is provided', async () => {
+      await setupServer();
+      const result = await supertest(httpSetup.server.listener)
+        .get('/api/status?v7format=false')
+        .expect(200);
+      expect(result.body.status).toEqual(newFormat);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('invalid query parameters', () => {
+    it('v8format=true and v7format=true', async () => {
+      await setupServer();
+      await supertest(httpSetup.server.listener)
+        .get('/api/status?v8format=true&v7format=true')
+        .expect(400);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
+    });
+
+    it('v8format=true and v7format=false', async () => {
+      await setupServer();
+      await supertest(httpSetup.server.listener)
+        .get('/api/status?v8format=true&v7format=false')
+        .expect(400);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
+    });
+
+    it('v8format=false and v7format=false', async () => {
+      await setupServer();
+      await supertest(httpSetup.server.listener)
+        .get('/api/status?v8format=false&v7format=false')
+        .expect(400);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
+    });
+
+    it('v8format=false and v7format=true', async () => {
+      await setupServer();
+      await supertest(httpSetup.server.listener)
+        .get('/api/status?v8format=false&v7format=true')
+        .expect(400);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
     });
   });
 });

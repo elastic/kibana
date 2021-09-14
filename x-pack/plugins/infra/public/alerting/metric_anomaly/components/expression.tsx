@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiText, EuiLoadingContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
 import { SubscriptionSplashPrompt } from '../../../components/subscription_splash_content';
-import { AlertPreview } from '../../common';
-import {
-  METRIC_ANOMALY_ALERT_TYPE_ID,
-  MetricAnomalyParams,
-} from '../../../../common/alerting/metrics';
+import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { euiStyled, EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   WhenExpression,
@@ -35,7 +30,6 @@ import { SeverityThresholdExpression } from './severity_threshold';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 
-import { validateMetricAnomaly } from './validation';
 import { InfluencerFilter } from './influencer_filter';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
@@ -65,14 +59,7 @@ export const Expression: React.FC<Props> = (props) => {
   const { http, notifications } = useKibanaContextForPlugin().services;
   const { space } = useActiveKibanaSpace();
 
-  const {
-    setAlertParams,
-    alertParams,
-    alertInterval,
-    alertThrottle,
-    alertNotifyWhen,
-    metadata,
-  } = props;
+  const { setAlertParams, alertParams, alertInterval, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     fetch: http.fetch,
@@ -256,23 +243,6 @@ export const Expression: React.FC<Props> = (props) => {
         fieldValue={alertParams.influencerFilter?.fieldValue ?? ''}
         onChangeFieldName={updateInfluencerFieldName}
         onChangeFieldValue={updateInfluencerFieldValue}
-      />
-      <EuiSpacer size={'m'} />
-      <AlertPreview
-        alertInterval={alertInterval}
-        alertThrottle={alertThrottle}
-        alertNotifyWhen={alertNotifyWhen}
-        alertType={METRIC_ANOMALY_ALERT_TYPE_ID}
-        alertParams={pick(
-          alertParams,
-          'metric',
-          'threshold',
-          'nodeType',
-          'sourceId',
-          'spaceId',
-          'influencerFilter'
-        )}
-        validate={validateMetricAnomaly}
       />
       <EuiSpacer size={'m'} />
     </EuiThemeProvider>

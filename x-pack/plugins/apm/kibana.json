@@ -1,5 +1,9 @@
 {
   "id": "apm",
+  "owner": {
+    "name": "APM UI",
+    "githubTeam": "apm-ui"
+  },
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": [
@@ -7,8 +11,8 @@
     "data",
     "embeddable",
     "features",
-    "fleet",
     "infra",
+    "inspector",
     "licensing",
     "observability",
     "ruleRegistry",
@@ -24,7 +28,8 @@
     "security",
     "spaces",
     "taskManager",
-    "usageCollection"
+    "usageCollection",
+    "fleet"
   ],
   "server": true,
   "ui": true,

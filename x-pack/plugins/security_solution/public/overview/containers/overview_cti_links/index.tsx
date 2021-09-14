@@ -74,8 +74,8 @@ export const useCtiDashboardLinks = (
                   })
                 )
               );
-              const items = DashboardsSO.savedObjects?.reduce(
-                (acc: CtiListItem[], dashboardSO, i) => {
+              const items = DashboardsSO.savedObjects
+                ?.reduce((acc: CtiListItem[], dashboardSO, i) => {
                   const item = createLinkFromDashboardSO(
                     dashboardSO,
                     eventCountsByDataset,
@@ -87,9 +87,8 @@ export const useCtiDashboardLinks = (
                     acc.push(item);
                   }
                   return acc;
-                },
-                []
-              );
+                }, [])
+                .sort((a, b) => (a.title > b.title ? 1 : -1));
               setListItems(items);
             } else {
               handleDisabledPlugin();

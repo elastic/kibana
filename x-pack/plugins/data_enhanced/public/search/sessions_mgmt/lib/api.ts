@@ -91,6 +91,7 @@ const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) 
     initialState,
     restoreState,
     idMapping,
+    version,
   } = savedObject.attributes;
 
   const status = getUIStatus(savedObject.attributes);
@@ -115,6 +116,7 @@ const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) 
     initialState,
     restoreState,
     numSearches: Object.keys(idMapping).length,
+    version,
   };
 };
 

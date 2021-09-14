@@ -11,6 +11,7 @@ import type {
 } from '@kbn/server-route-repository';
 import { PickByValue } from 'utility-types';
 import { alertsChartPreviewRouteRepository } from './alerts/chart_preview';
+import { backendsRouteRepository } from './backends';
 import { correlationsRouteRepository } from './correlations';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { environmentsRouteRepository } from './environments';
@@ -20,6 +21,7 @@ import { indexPatternRouteRepository } from './index_pattern';
 import { metricsRouteRepository } from './metrics';
 import { observabilityOverviewRouteRepository } from './observability_overview';
 import { rumRouteRepository } from './rum_client';
+import { fallbackToTransactionsRouteRepository } from './fallback_to_transactions';
 import { serviceRouteRepository } from './services';
 import { serviceMapRouteRepository } from './service_map';
 import { serviceNodeRouteRepository } from './service_nodes';
@@ -31,6 +33,7 @@ import { sourceMapsRouteRepository } from './source_maps';
 import { traceRouteRepository } from './traces';
 import { transactionRouteRepository } from './transactions';
 import { APMRouteHandlerResources } from './typings';
+import { historicalDataRouteRepository } from './historical_data';
 
 const getTypedGlobalApmServerRouteRepository = () => {
   const repository = createApmServerRouteRepository()
@@ -52,7 +55,10 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(apmIndicesRouteRepository)
     .merge(customLinkRouteRepository)
     .merge(sourceMapsRouteRepository)
-    .merge(apmFleetRouteRepository);
+    .merge(apmFleetRouteRepository)
+    .merge(backendsRouteRepository)
+    .merge(fallbackToTransactionsRouteRepository)
+    .merge(historicalDataRouteRepository);
 
   return repository;
 };
@@ -68,10 +74,10 @@ export type APMServerRouteRepository = ReturnType<
 // Ensure no APIs return arrays (or, by proxy, the any type),
 // to guarantee compatibility with _inspect.
 
-type CompositeEndpoint = EndpointOf<APMServerRouteRepository>;
+export type APIEndpoint = EndpointOf<APMServerRouteRepository>;
 
 type EndpointReturnTypes = {
-  [Endpoint in CompositeEndpoint]: ReturnOf<APMServerRouteRepository, Endpoint>;
+  [Endpoint in APIEndpoint]: ReturnOf<APMServerRouteRepository, Endpoint>;
 };
 
 type ArrayLikeReturnTypes = PickByValue<EndpointReturnTypes, any[]>;

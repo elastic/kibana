@@ -22,7 +22,9 @@ export interface CanvasApi {
   addArgumentUIs: AddToRegistry<any>;
   addDatasourceUIs: AddToRegistry<any>;
   addElements: AddToRegistry<ElementFactory>;
-  addFunctions: AddSpecsToRegistry<() => AnyExpressionFunctionDefinition>;
+  addFunctions: AddSpecsToRegistry<
+    (() => AnyExpressionFunctionDefinition) | AnyExpressionFunctionDefinition
+  >;
   addModelUIs: AddToRegistry<any>;
   addRenderers: AddSpecsToRegistry<AnyRendererFactory>;
   addTagUIs: AddToRegistry<any>;

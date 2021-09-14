@@ -50,10 +50,10 @@ import {
   FormulaIndexPatternColumn,
 } from './formula';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
-import { FramePublicAPI, OperationMetadata } from '../../../types';
+import { FrameDatasourceAPI, OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
-import { DateRange } from '../../../../common';
+import { DateRange, LayerType } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { RangeIndexPatternColumn, rangeOperation } from './ranges';
@@ -259,7 +259,11 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * but disable it from usage, this function returns the string describing
    * the status. Otherwise it returns undefined
    */
-  getDisabledStatus?: (indexPattern: IndexPattern, layer: IndexPatternLayer) => string | undefined;
+  getDisabledStatus?: (
+    indexPattern: IndexPattern,
+    layer: IndexPatternLayer,
+    layerType?: LayerType
+  ) => string | undefined;
   /**
    * Validate that the operation has the right preconditions in the state. For example:
    *
@@ -280,7 +284,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
               label: string;
               newState: (
                 core: CoreStart,
-                frame: FramePublicAPI,
+                frame: FrameDatasourceAPI,
                 layerId: string
               ) => Promise<IndexPatternLayer>;
             };
@@ -437,7 +441,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
               label: string;
               newState: (
                 core: CoreStart,
-                frame: FramePublicAPI,
+                frame: FrameDatasourceAPI,
                 layerId: string
               ) => Promise<IndexPatternLayer>;
             };

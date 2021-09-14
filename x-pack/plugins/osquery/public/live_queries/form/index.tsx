@@ -16,7 +16,7 @@ import {
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
 import deepMerge from 'deepmerge';
 
@@ -37,16 +37,17 @@ export const MAX_QUERY_LENGTH = 2000;
 const GhostFormField = () => <></>;
 
 interface LiveQueryFormProps {
-  agentId?: string | undefined;
   defaultValue?: Partial<FormData> | undefined;
   onSuccess?: () => void;
+  singleAgentMode?: boolean;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
-  agentId,
   defaultValue,
   onSuccess,
+  singleAgentMode,
 }) => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   const { http } = useKibana().services;
   const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
   const setErrorToast = useErrorToast();
@@ -54,14 +55,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const handleShowSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(true), []);
   const handleCloseSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(false), []);
 
-  const {
-    data,
-    isLoading,
-    mutateAsync,
-    isError,
-    isSuccess,
-    // error
-  } = useMutation(
+  const { data, isLoading, mutateAsync, isError, isSuccess } = useMutation(
     (payload: Record<string, unknown>) =>
       http.post('/internal/osquery/action', {
         body: JSON.stringify(payload),
@@ -120,7 +114,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     ),
   });
 
-  const { submit } = form;
+  const { setFieldValue, submit, isSubmitting } = form;
 
   const actionId = useMemo(() => data?.actions[0].action_id, [data?.actions]);
   const agentIds = useMemo(() => data?.actions[0].agents, [data?.actions]);
@@ -172,10 +166,15 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         />
         <EuiSpacer />
         <EuiFlexGroup justifyContent="flexEnd">
-          {!agentId && (
+          {!singleAgentMode && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                disabled={!agentSelected || !queryValueProvided || resultsStatus === 'disabled'}
+                disabled={
+                  !permissions.writeSavedQueries ||
+                  !agentSelected ||
+                  !queryValueProvided ||
+                  resultsStatus === 'disabled'
+                }
                 onClick={handleShowSaveQueryFlout}
               >
                 <FormattedMessage
@@ -186,7 +185,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiButton disabled={!agentSelected || !queryValueProvided} onClick={submit}>
+            <EuiButton
+              disabled={!agentSelected || !queryValueProvided || isSubmitting}
+              onClick={submit}
+            >
               <FormattedMessage
                 id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
                 defaultMessage="Submit"
@@ -197,12 +199,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       </>
     ),
     [
-      agentId,
-      agentSelected,
-      handleShowSaveQueryFlout,
       queryComponentProps,
+      singleAgentMode,
+      permissions.writeSavedQueries,
+      agentSelected,
       queryValueProvided,
       resultsStatus,
+      handleShowSaveQueryFlout,
+      isSubmitting,
       submit,
     ]
   );
@@ -253,9 +257,18 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [queryFieldStepContent, resultsStepContent]
   );
 
+  useEffect(() => {
+    if (defaultValue?.agentSelection) {
+      setFieldValue('agentSelection', defaultValue?.agentSelection);
+    }
+    if (defaultValue?.query) {
+      setFieldValue('query', defaultValue?.query);
+    }
+  }, [defaultValue, setFieldValue]);
+
   return (
     <>
-      <Form form={form}>{agentId ? singleAgentForm : <EuiSteps steps={formSteps} />}</Form>
+      <Form form={form}>{singleAgentMode ? singleAgentForm : <EuiSteps steps={formSteps} />}</Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
           onClose={handleCloseSaveQueryFlout}

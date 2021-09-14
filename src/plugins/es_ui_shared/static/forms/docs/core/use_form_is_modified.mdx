@@ -1,0 +1,51 @@
+---
+id: formLibCoreUseFormIsModified
+slug: /form-lib/core/use-form-is-modified
+title: useFormIsModified()
+summary: Know when your form has been modified by the user
+tags: ['forms', 'kibana', 'dev']
+date: 2021-06-15
+---
+
+**Returns:** `boolean`
+
+There might be cases where you need to know if the form has been modified by the user. For example: the user is about to leave the form after making some changes, you might want to show a modal indicating that the changes will be lost.
+
+For that you can use the `useFormIsModified` hook which will update each time any of the field value changes. If the user makes a change and then undoes the change and puts the initial value back, the form **won't be marked** as modified.
+
+**Important:** If you form dynamically adds and removes fields, the `isModified` state will be set to `true` when a field is removed from the DOM **only** if it was declared in the form initial `defaultValue` object.
+
+## Options
+
+### form
+
+**Type:** `FormHook`  
+
+The form hook object. It is only required to provide the form hook object in your **root form component**. 
+
+```js
+const RootFormComponent = () => {
+  // root form component, where the form object is declared
+  const { form } = useForm();
+  const isModified = useFormIsModified({ form });
+
+  return (
+    <Form form={form}>
+      <ChildComponent />
+    </Form>
+  );
+};
+
+const ChildComponent = () => {
+  const isModified = useFormIsModified(); // no need to provide the form object
+  return (
+    <div>...</div>
+  );
+};
+```
+
+### discard
+
+**Type:** `string[]`  
+
+If there are certain fields that you want to discard when checking if the form has been modified you can provide an array of field paths to the `discard` option.

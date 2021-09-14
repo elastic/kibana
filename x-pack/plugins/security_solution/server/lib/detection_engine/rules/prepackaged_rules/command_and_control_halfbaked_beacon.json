@@ -6,8 +6,12 @@
   "false_positives": [
     "This rule should be tailored to exclude systems, either as sources or destinations, in which this behavior is expected."
   ],
+  "from": "now-9m",
   "index": [
-    "packetbeat-*"
+    "auditbeat-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "lucene",
   "license": "Elastic License v2",
@@ -25,7 +29,8 @@
     "Elastic",
     "Network",
     "Threat Detection",
-    "Command and Control"
+    "Command and Control",
+    "Host"
   ],
   "threat": [
     {
@@ -58,5 +63,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

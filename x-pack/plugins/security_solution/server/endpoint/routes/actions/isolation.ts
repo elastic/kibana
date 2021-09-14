@@ -83,7 +83,7 @@ export const isolationRequestHandler = function (
 
     // fetch the Agent IDs to send the commands to
     const endpointIDs = [...new Set(req.body.endpoint_ids)]; // dedupe
-    const endpointData = await getMetadataForEndpoints(endpointIDs, context, endpointContext);
+    const endpointData = await getMetadataForEndpoints(endpointIDs, context);
 
     const casesClient = await endpointContext.service.getCasesClient(req);
 
@@ -120,6 +120,7 @@ export const isolationRequestHandler = function (
           input_type: 'endpoint',
           agents: endpointData.map((endpt: HostMetadata) => endpt.elastic.agent.id),
           user_id: user!.username,
+          timeout: 300, // 5 minutes
           data: {
             command: isolate ? 'isolate' : 'unisolate',
             comment: req.body.comment ?? undefined,

@@ -30,6 +30,7 @@ function enforceMaxLength(header: string): string {
  */
 export interface IExecutionContextContainer {
   toHeader: () => Record<string, string>;
+  toJSON: () => Readonly<KibanaExecutionContext>;
 }
 
 export class ExecutionContextContainer implements IExecutionContextContainer {
@@ -42,7 +43,12 @@ export class ExecutionContextContainer implements IExecutionContextContainer {
     // escape content as the description property might contain non-ASCII symbols
     return enforceMaxLength(encodeURIComponent(value));
   }
+
   toHeader() {
     return { [BAGGAGE_HEADER]: this.toString() };
+  }
+
+  toJSON() {
+    return this.#context;
   }
 }

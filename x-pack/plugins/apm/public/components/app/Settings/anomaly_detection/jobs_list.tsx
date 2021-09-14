@@ -12,6 +12,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -38,12 +39,12 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
   },
   {
     field: 'job_id',
-    align: 'right',
+    align: RIGHT_ALIGNMENT,
     name: i18n.translate(
       'xpack.apm.settings.anomalyDetection.jobList.actionColumnLabel',
       { defaultMessage: 'Action' }
     ),
-    render: (jobId: string) => (
+    render: (_, { job_id: jobId }) => (
       <MLExplorerLink jobId={jobId}>
         {i18n.translate(
           'xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText',

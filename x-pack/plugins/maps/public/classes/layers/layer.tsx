@@ -106,6 +106,7 @@ export interface ILayer {
   getDescriptor(): LayerDescriptor;
   getGeoFieldNames(): string[];
   getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null>;
+  isBasemap(order: number): boolean;
 }
 
 export type CustomIconAndTooltipContent = {
@@ -526,5 +527,9 @@ export class AbstractLayer implements ILayer {
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
     return null;
+  }
+
+  isBasemap(): boolean {
+    return false;
   }
 }

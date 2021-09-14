@@ -19,13 +19,13 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 import { getScopeFieldDefaults } from './utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ML_PAGES } from '../../../../common/constants/locator';
-import { useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 
 function NoFilterListsCallOut() {
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
   const redirectToFilterManagementPage = async () => {
-    const path = await mlUrlGenerator.createUrl({
+    const path = await mlLocator.getUrl({
       page: ML_PAGES.FILTER_LISTS_MANAGE,
     });
     await navigateToPath(path, true);

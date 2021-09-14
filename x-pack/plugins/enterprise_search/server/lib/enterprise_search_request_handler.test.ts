@@ -403,7 +403,7 @@ describe('EnterpriseSearchRequestHandler', () => {
         expect(responseMock.customError).toHaveBeenCalledWith({
           statusCode: 502,
           body: 'Cannot authenticate Enterprise Search user',
-          headers: mockExpectedResponseHeaders,
+          headers: { ...mockExpectedResponseHeaders, [ERROR_CONNECTING_HEADER]: 'true' },
         });
         expect(mockLogger.error).toHaveBeenCalled();
       });

@@ -11,12 +11,12 @@ import { ElasticsearchClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function createPolicy(client: ElasticsearchClient, name: string, phases: any): Promise<any> {
-  const body = {
-    policy: {
-      phases,
-    },
-  };
+async function createPolicy(
+  client: ElasticsearchClient,
+  name: string,
+  policy: Omit<typeof bodySchema.type, 'name'>
+): Promise<any> {
+  const body = { policy };
   const options = {
     ignore: [404],
   };
@@ -40,6 +40,7 @@ const bodySchema = schema.object({
     frozen: schema.maybe(schema.any()),
     delete: schema.maybe(schema.any()),
   }),
+  _meta: schema.maybe(schema.any()),
 });
 
 export function registerCreateRoute({
@@ -51,10 +52,10 @@ export function registerCreateRoute({
     { path: addBasePath('/policies'), validate: { body: bodySchema } },
     license.guardApiRoute(async (context, request, response) => {
       const body = request.body as typeof bodySchema.type;
-      const { name, phases } = body;
+      const { name, ...rest } = body;
 
       try {
-        await createPolicy(context.core.elasticsearch.client.asCurrentUser, name, phases);
+        await createPolicy(context.core.elasticsearch.client.asCurrentUser, name, rest);
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
@@ -40,18 +32,11 @@ const getPageTitle = (monitorId: string, selectedMonitor: Ping | null) => {
   return monitorId;
 };
 
-export const MonitorPageTitle: React.FC = () => {
+export const MonitorPageTitleContent: React.FC = () => {
   const monitorId = useMonitorId();
-
   const selectedMonitor = useSelector(monitorStatusSelector);
-
-  const nameOrId = selectedMonitor?.monitor?.name || getPageTitle(monitorId, selectedMonitor);
-
   const type = selectedMonitor?.monitor?.type;
   const isBrowser = type === 'browser';
-
-  useBreadcrumbs([{ text: nameOrId }]);
-
   const renderMonitorType = (monitorType: string) => {
     switch (monitorType) {
       case 'http':
@@ -86,12 +71,13 @@ export const MonitorPageTitle: React.FC = () => {
         return '';
     }
   };
-
   return (
     <>
-      <EuiTitle>
-        <h1 className="eui-textNoWrap">{nameOrId}</h1>
-      </EuiTitle>
+      <EuiFlexGroup wrap={false} data-test-subj="monitorTitle">
+        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+          <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor!} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiFlexGroup wrap={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -118,7 +104,18 @@ export const MonitorPageTitle: React.FC = () => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor!} />
     </>
   );
+};
+
+export const MonitorPageTitle: React.FC = () => {
+  const monitorId = useMonitorId();
+
+  const selectedMonitor = useSelector(monitorStatusSelector);
+
+  const nameOrId = selectedMonitor?.monitor?.name || getPageTitle(monitorId, selectedMonitor);
+
+  useBreadcrumbs([{ text: nameOrId }]);
+
+  return <span className="eui-textNoWrap">{nameOrId}</span>;
 };

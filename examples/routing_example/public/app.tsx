@@ -63,7 +63,8 @@ function RoutingExplorer({
                 },
                 {
                   label: 'Conventions',
-                  href: 'https://github.com/elastic/kibana/tree/master/STYLEGUIDE.md#api-endpoints',
+                  href:
+                    'https://github.com/elastic/kibana/tree/master/STYLEGUIDE.mdx#api-endpoints',
                   iconType: 'logoGithub',
                   target: '_blank',
                   size: 's',

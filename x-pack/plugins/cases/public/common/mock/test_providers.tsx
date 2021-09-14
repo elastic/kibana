@@ -45,6 +45,8 @@ export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook
   type: 'type',
   value: ('mockedValue' as unknown) as T,
   isPristine: false,
+  isDirty: false,
+  isModified: false,
   isValidating: false,
   isValidated: false,
   isChangingValue: false,

@@ -67,6 +67,7 @@ export const runtimeMappingsSchema = schema.maybe(
         schema.literal('date'),
         schema.literal('ip'),
         schema.literal('boolean'),
+        schema.literal('geo_point'),
       ]),
       script: schema.maybe(
         schema.oneOf([

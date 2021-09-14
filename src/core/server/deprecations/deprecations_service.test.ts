@@ -10,20 +10,21 @@
 import { DeprecationsService } from './deprecations_service';
 import { httpServiceMock } from '../http/http_service.mock';
 import { mockRouter } from '../http/router/router.mock';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '../mocks';
 import { mockCoreContext } from '../core_context.mock';
 import { mockDeprecationsFactory } from './deprecations_factory.mock';
 import { mockDeprecationsRegistry } from './deprecations_registry.mock';
 
 describe('DeprecationsService', () => {
   const coreContext = mockCoreContext.create();
+  const http = httpServiceMock.createInternalSetupContract();
+  const router = mockRouter.create();
+  http.createRouter.mockReturnValue(router);
+  const deprecationsCoreSetupDeps = { http };
+
   beforeEach(() => jest.clearAllMocks());
 
   describe('#setup', () => {
-    const http = httpServiceMock.createInternalSetupContract();
-    const router = mockRouter.create();
-    http.createRouter.mockReturnValue(router);
-    const deprecationsCoreSetupDeps = { http };
-
     it('registers routes', () => {
       const deprecationsService = new DeprecationsService(coreContext);
       deprecationsService.setup(deprecationsCoreSetupDeps);
@@ -43,12 +44,29 @@ describe('DeprecationsService', () => {
     });
   });
 
+  describe('#start', () => {
+    describe('#asScopedToClient', () => {
+      it('returns client with #getAllDeprecations method', async () => {
+        const esClient = elasticsearchServiceMock.createScopedClusterClient();
+        const savedObjectsClient = savedObjectsClientMock.create();
+        const deprecationsService = new DeprecationsService(coreContext);
+
+        deprecationsService.setup(deprecationsCoreSetupDeps);
+
+        const start = deprecationsService.start();
+        const deprecationsClient = start.asScopedToClient(esClient, savedObjectsClient);
+
+        expect(deprecationsClient.getAllDeprecations).toBeDefined();
+      });
+    });
+  });
+
   describe('#registerConfigDeprecationsInfo', () => {
     const deprecationsFactory = mockDeprecationsFactory.create();
     const deprecationsRegistry = mockDeprecationsRegistry.create();
     const getDeprecationsContext = mockDeprecationsRegistry.createGetDeprecationsContext();
 
-    it('registers config deprecations', () => {
+    it('registers config deprecations', async () => {
       const deprecationsService = new DeprecationsService(coreContext);
       coreContext.configService.getHandledDeprecatedConfigs.mockReturnValue([
         [
@@ -75,7 +93,7 @@ describe('DeprecationsService', () => {
       expect(deprecationsFactory.getRegistry).toBeCalledTimes(1);
       expect(deprecationsFactory.getRegistry).toBeCalledWith('testDomain');
       expect(deprecationsRegistry.registerDeprecations).toBeCalledTimes(1);
-      const configDeprecations = deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
+      const configDeprecations = await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
         getDeprecationsContext
       );
       expect(configDeprecations).toMatchInlineSnapshot(`
@@ -91,9 +109,37 @@ describe('DeprecationsService', () => {
             "documentationUrl": "testDocUrl",
             "level": "critical",
             "message": "testMessage",
+            "requireRestart": true,
+            "title": "testDomain has a deprecated setting",
           },
         ]
       `);
+    });
+
+    it('accepts `level` field overrides', async () => {
+      const deprecationsService = new DeprecationsService(coreContext);
+      coreContext.configService.getHandledDeprecatedConfigs.mockReturnValue([
+        [
+          'testDomain',
+          [
+            {
+              message: 'testMessage',
+              level: 'warning',
+              correctiveActions: {
+                manualSteps: ['step a'],
+              },
+            },
+          ],
+        ],
+      ]);
+
+      deprecationsFactory.getRegistry.mockReturnValue(deprecationsRegistry);
+      deprecationsService['registerConfigDeprecationsInfo'](deprecationsFactory);
+
+      const configDeprecations = await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
+        getDeprecationsContext
+      );
+      expect(configDeprecations[0].level).toBe('warning');
     });
   });
 });

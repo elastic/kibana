@@ -12,11 +12,8 @@ import {
   TRANSACTION_SAMPLED,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
@@ -27,8 +24,8 @@ export async function getErrorGroupSample({
   groupId,
   setup,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   groupId: string;
   setup: Setup & SetupTimeRange;

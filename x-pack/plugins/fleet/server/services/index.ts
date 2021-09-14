@@ -10,6 +10,8 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/ser
 
 import type { AgentStatus, Agent } from '../types';
 
+import type { GetAgentStatusResponse } from '../../common';
+
 import type { getAgentById, getAgentsByKuery } from './agents';
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
@@ -56,6 +58,14 @@ export interface AgentService {
    * Return the status by the Agent's id
    */
   getAgentStatusById(esClient: ElasticsearchClient, agentId: string): Promise<AgentStatus>;
+  /**
+   * Return the status by the Agent's Policy id
+   */
+  getAgentStatusForAgentPolicy(
+    esClient: ElasticsearchClient,
+    agentPolicyId?: string,
+    filterKuery?: string
+  ): Promise<GetAgentStatusResponse['results']>;
   /**
    * List agents
    */

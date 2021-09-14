@@ -107,7 +107,7 @@ export const SourceConfigurationSettings = ({
             : undefined
         }
       />
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
         <NameConfigurationPanel
           isLoading={isLoading}
           nameFieldProps={indicesConfigurationProps.name}
@@ -115,7 +115,7 @@ export const SourceConfigurationSettings = ({
         />
       </EuiPanel>
       <EuiSpacer />
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
         <IndicesConfigurationPanel
           isLoading={isLoading}
           metricAliasFieldProps={indicesConfigurationProps.metricAlias}
@@ -123,7 +123,7 @@ export const SourceConfigurationSettings = ({
         />
       </EuiPanel>
       <EuiSpacer />
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
         <FieldsConfigurationPanel
           containerFieldProps={indicesConfigurationProps.containerField}
           hostFieldProps={indicesConfigurationProps.hostField}
@@ -136,7 +136,7 @@ export const SourceConfigurationSettings = ({
       <EuiSpacer />
       {hasInfraMLCapabilities && (
         <>
-          <EuiPanel paddingSize="l">
+          <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
             <MLConfigurationPanel
               isLoading={isLoading}
               readOnly={!isWriteable}

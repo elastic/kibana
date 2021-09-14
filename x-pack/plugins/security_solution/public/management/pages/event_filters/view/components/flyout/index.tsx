@@ -70,6 +70,15 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           payload: { entry: getInitialExceptionFromEvent() },
         });
       }
+
+      return () => {
+        dispatch({
+          type: 'eventFiltersFormStateChanged',
+          payload: {
+            type: 'UninitialisedResourceState',
+          },
+        });
+      };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

@@ -24,6 +24,7 @@ import {
   getThresholdAggregationParts,
   getThresholdTermsHash,
 } from '../utils';
+import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type {
   MultiAggBucket,
   SignalSource,
@@ -248,5 +249,7 @@ export const bulkCreateThresholdSignals = async (
     params.thresholdSignalHistory
   );
 
-  return params.bulkCreate(params.wrapHits(ecsResults.hits.hits));
+  return params.bulkCreate(
+    params.wrapHits(ecsResults.hits.hits, buildReasonMessageForThresholdAlert)
+  );
 };

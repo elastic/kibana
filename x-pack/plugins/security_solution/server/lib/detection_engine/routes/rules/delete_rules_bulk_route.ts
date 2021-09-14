@@ -6,6 +6,7 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import {
@@ -23,7 +24,6 @@ import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { deleteRules } from '../../rules/delete_rules';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
 
 type Config = RouteConfig<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
@@ -35,7 +35,10 @@ type Handler = RequestHandler<
   'delete' | 'post'
 >;
 
-export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
+export const deleteRulesBulkRoute = (
+  router: SecuritySolutionPluginRouter,
+  isRuleRegistryEnabled: boolean
+) => {
   const config: Config = {
     validate: {
       body: buildRouteValidation<typeof queryRulesBulkSchema, QueryRulesBulkSchemaDecoded>(
@@ -50,14 +53,13 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
   const handler: Handler = async (context, request, response) => {
     const siemResponse = buildSiemResponse(response);
 
-    const alertsClient = context.alerting?.getAlertsClient();
-    const savedObjectsClient = context.core.savedObjects.client;
+    const rulesClient = context.alerting?.getRulesClient();
 
-    if (!alertsClient) {
+    if (!rulesClient) {
       return siemResponse.error({ statusCode: 404 });
     }
 
-    const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+    const ruleStatusClient = context.securitySolution.getExecutionLogClient();
 
     const rules = await Promise.all(
       request.body.map(async (payloadRule) => {
@@ -73,24 +75,28 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
         }
 
         try {
-          const rule = await readRules({ alertsClient, id, ruleId });
+          const rule = await readRules({ rulesClient, id, ruleId, isRuleRegistryEnabled });
           if (!rule) {
             return getIdBulkError({ id, ruleId });
           }
 
           const ruleStatuses = await ruleStatusClient.find({
-            perPage: 6,
-            search: rule.id,
-            searchFields: ['alertId'],
+            logsCount: 6,
+            ruleId: rule.id,
+            spaceId: context.securitySolution.getSpaceId(),
           });
           await deleteRules({
-            alertsClient,
-            savedObjectsClient,
+            rulesClient,
             ruleStatusClient,
             ruleStatuses,
             id: rule.id,
           });
-          return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
+          return transformValidateBulkError(
+            idOrRuleIdOrUnknown,
+            rule,
+            ruleStatuses,
+            isRuleRegistryEnabled
+          );
         } catch (err) {
           return transformBulkError(idOrRuleIdOrUnknown, err);
         }

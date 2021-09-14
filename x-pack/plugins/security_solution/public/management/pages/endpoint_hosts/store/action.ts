@@ -6,6 +6,7 @@
  */
 
 import { Action } from 'redux';
+import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import {
   HostResultList,
   HostInfo,
@@ -15,7 +16,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
-import { EndpointIndexUIQueryParams, EndpointState } from '../types';
+import { EndpointState } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface ServerReturnedEndpointList {
@@ -146,13 +147,6 @@ export type EndpointIsolationRequestStateChange = Action<'endpointIsolationReque
   payload: EndpointState['isolationRequestState'];
 };
 
-export interface AppRequestedEndpointActivityLog {
-  type: 'appRequestedEndpointActivityLog';
-  payload: {
-    page: number;
-    pageSize: number;
-  };
-}
 export type EndpointDetailsActivityLogChanged = Action<'endpointDetailsActivityLogChanged'> & {
   payload: EndpointState['endpointDetails']['activityLog']['logData'];
 };
@@ -165,26 +159,57 @@ export interface EndpointDetailsActivityLogUpdatePaging {
   type: 'endpointDetailsActivityLogUpdatePaging';
   payload: {
     // disable paging when no more data after paging
-    disabled: boolean;
+    disabled?: boolean;
     page: number;
     pageSize: number;
+    startDate: string;
+    endDate: string;
   };
 }
 
-export interface EndpointDetailsFlyoutTabChanged {
-  type: 'endpointDetailsFlyoutTabChanged';
-  payload: { flyoutView: EndpointIndexUIQueryParams['show'] };
+export interface UserUpdatedActivityLogRefreshOptions {
+  type: 'userUpdatedActivityLogRefreshOptions';
+  payload: {
+    autoRefreshOptions: { enabled: boolean; duration: number };
+  };
 }
+
+export interface UserUpdatedActivityLogRecentlyUsedDateRanges {
+  type: 'userUpdatedActivityLogRecentlyUsedDateRanges';
+  payload: EuiSuperDatePickerRecentRange[];
+}
+
+export interface EndpointDetailsLoad {
+  type: 'endpointDetailsLoad';
+  payload: {
+    endpointId: string;
+  };
+}
+
+export interface EndpointDetailsActivityLogUpdateIsInvalidDateRange {
+  type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange';
+  payload: {
+    isInvalidDateRange?: boolean;
+  };
+}
+
+export type LoadMetadataTransformStats = Action<'loadMetadataTransformStats'>;
+
+export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChanged'> & {
+  payload: EndpointState['metadataTransformStats'];
+};
 
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
-  | AppRequestedEndpointActivityLog
   | EndpointDetailsActivityLogUpdatePaging
-  | EndpointDetailsFlyoutTabChanged
+  | EndpointDetailsActivityLogUpdateIsInvalidDateRange
   | EndpointDetailsActivityLogChanged
+  | UserUpdatedActivityLogRefreshOptions
+  | UserUpdatedActivityLogRecentlyUsedDateRanges
+  | EndpointDetailsLoad
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
@@ -206,4 +231,6 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointsTotal
   | EndpointIsolationRequest
   | EndpointIsolationRequestStateChange
-  | EndpointPendingActionsStateChanged;
+  | EndpointPendingActionsStateChanged
+  | LoadMetadataTransformStats
+  | MetadataTransformStatsChanged;

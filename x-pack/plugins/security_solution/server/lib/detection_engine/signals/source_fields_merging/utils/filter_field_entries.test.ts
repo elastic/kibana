@@ -27,7 +27,9 @@ describe('filter_field_entries', () => {
 
   test('returns a single valid fieldEntries as expected', () => {
     const fieldEntries: Array<[string, FieldsType]> = [['foo.bar', dummyValue]];
-    expect(filterFieldEntries(fieldEntries)).toEqual<ReturnTypeFilterFieldEntries>(fieldEntries);
+    expect(filterFieldEntries(fieldEntries, [])).toEqual<ReturnTypeFilterFieldEntries>(
+      fieldEntries
+    );
   });
 
   test('removes invalid dotted entries', () => {
@@ -37,7 +39,7 @@ describe('filter_field_entries', () => {
       ['..', dummyValue],
       ['foo..bar', dummyValue],
     ];
-    expect(filterFieldEntries(fieldEntries)).toEqual<ReturnTypeFilterFieldEntries>([
+    expect(filterFieldEntries(fieldEntries, [])).toEqual<ReturnTypeFilterFieldEntries>([
       ['foo.bar', dummyValue],
     ]);
   });
@@ -49,7 +51,7 @@ describe('filter_field_entries', () => {
       ['bar.keyword', dummyValue], // <-- "bar.keyword" multi-field should be removed
       ['bar', dummyValue],
     ];
-    expect(filterFieldEntries(fieldEntries)).toEqual<ReturnTypeFilterFieldEntries>([
+    expect(filterFieldEntries(fieldEntries, [])).toEqual<ReturnTypeFilterFieldEntries>([
       ['foo', dummyValue],
       ['bar', dummyValue],
     ]);
@@ -62,7 +64,7 @@ describe('filter_field_entries', () => {
       ['host.hostname', dummyValue],
       ['host.hostname.keyword', dummyValue], // <-- multi-field should be removed
     ];
-    expect(filterFieldEntries(fieldEntries)).toEqual<ReturnTypeFilterFieldEntries>([
+    expect(filterFieldEntries(fieldEntries, [])).toEqual<ReturnTypeFilterFieldEntries>([
       ['host.name', dummyValue],
       ['host.hostname', dummyValue],
     ]);
@@ -75,9 +77,34 @@ describe('filter_field_entries', () => {
       ['foo.host.hostname', dummyValue],
       ['foo.host.hostname.keyword', dummyValue], // <-- multi-field should be removed
     ];
-    expect(filterFieldEntries(fieldEntries)).toEqual<ReturnTypeFilterFieldEntries>([
+    expect(filterFieldEntries(fieldEntries, [])).toEqual<ReturnTypeFilterFieldEntries>([
       ['foo.host.name', dummyValue],
       ['foo.host.hostname', dummyValue],
+    ]);
+  });
+
+  test('ignores fields of "_ignore", for eql bug https://github.com/elastic/elasticsearch/issues/77152', () => {
+    const fieldEntries: Array<[string, FieldsType]> = [
+      ['_ignored', dummyValue],
+      ['foo.host.hostname', dummyValue],
+    ];
+    expect(filterFieldEntries(fieldEntries, [])).toEqual<ReturnTypeFilterFieldEntries>([
+      ['foo.host.hostname', dummyValue],
+    ]);
+  });
+
+  test('ignores fields given strings and regular expressions in the ignoreFields list', () => {
+    const fieldEntries: Array<[string, FieldsType]> = [
+      ['host.name', dummyValue],
+      ['user.name', dummyValue], // <-- string from ignoreFields should ignore this
+      ['host.hostname', dummyValue],
+      ['_odd.value', dummyValue], // <-- regular expression from ignoreFields should ignore this
+    ];
+    expect(
+      filterFieldEntries(fieldEntries, ['user.name', '/[_]+/'])
+    ).toEqual<ReturnTypeFilterFieldEntries>([
+      ['host.name', dummyValue],
+      ['host.hostname', dummyValue],
     ]);
   });
 });

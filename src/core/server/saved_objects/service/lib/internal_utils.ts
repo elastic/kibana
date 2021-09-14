@@ -141,3 +141,41 @@ export function rawDocExistsInNamespace(
     namespaces?.includes(ALL_NAMESPACES_STRING);
   return existsInNamespace ?? false;
 }
+
+/**
+ * Check to ensure that a raw document exists in at least one of the given namespaces. If the document is not a multi-namespace type, then
+ * this returns `true` as we rely on the guarantees of the document ID format. If the document is a multi-namespace type, this checks to
+ * ensure that the document's `namespaces` value includes the string representation of at least one of the given namespaces.
+ *
+ * WARNING: This should only be used for documents that were retrieved from Elasticsearch. Otherwise, the guarantees of the document ID
+ * format mentioned above do not apply.
+ *
+ * @param registry
+ * @param raw
+ * @param namespaces
+ */
+export function rawDocExistsInNamespaces(
+  registry: ISavedObjectTypeRegistry,
+  raw: SavedObjectsRawDoc,
+  namespaces: string[]
+) {
+  const rawDocType = raw._source.type;
+
+  // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
+  // of the document ID format and don't need to check this
+  if (!registry.isMultiNamespace(rawDocType)) {
+    return true;
+  }
+
+  const namespacesToCheck = new Set(namespaces);
+  const existingNamespaces = raw._source.namespaces ?? [];
+
+  if (namespacesToCheck.size === 0 || existingNamespaces.length === 0) {
+    return false;
+  }
+  if (namespacesToCheck.has(ALL_NAMESPACES_STRING)) {
+    return true;
+  }
+
+  return existingNamespaces.some((x) => x === ALL_NAMESPACES_STRING || namespacesToCheck.has(x));
+}

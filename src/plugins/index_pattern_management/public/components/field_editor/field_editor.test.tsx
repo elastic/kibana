@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  IndexPattern,
-  IndexPatternField,
-  FieldFormatInstanceType,
-  IndexPatternsService,
-} from 'src/plugins/data/public';
+import { IndexPattern, IndexPatternField, IndexPatternsService } from 'src/plugins/data/public';
+import { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 jest.mock('brace/mode/groovy', () => ({}));

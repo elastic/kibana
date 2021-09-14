@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
@@ -14,40 +15,37 @@ const paramsSchema = schema.object({
   indexName: schema.string(),
 });
 
-function formatHit(hit: { _shards: any; indices: { [key: string]: any } }, indexName: string) {
+interface Hit {
+  _shards: unknown;
+  indices?: Record<string, estypes.IndicesStatsIndicesStats>;
+}
+
+function formatHit(hit: Hit, indexName: string) {
   const { _shards, indices } = hit;
-  const stats = indices[indexName];
+  const stats = indices![indexName];
   return {
     _shards,
     stats,
   };
 }
 
-export function registerStatsRoute({ router, lib }: RouteDependencies) {
+export function registerStatsRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/stats/{indexName}'), validate: { params: paramsSchema } },
-    async (ctx, req, res) => {
-      const { indexName } = req.params as typeof paramsSchema.type;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+      const { indexName } = request.params as typeof paramsSchema.type;
       const params = {
         expand_wildcards: 'none',
         index: indexName,
       };
 
       try {
-        const hit = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
-          'indices.stats',
-          params
-        );
-        return res.ok({ body: formatHit(hit, indexName) });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+        const { body: hit } = await client.asCurrentUser.indices.stats(params);
+
+        return response.ok({ body: formatHit(hit, indexName) });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     }
   );

@@ -13,7 +13,10 @@ import { startsWith, get, cloneDeep, map } from 'lodash';
 import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
 
+import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public';
 import { replaceVars } from '../../lib/replace_vars';
@@ -21,6 +24,7 @@ import { getInterval } from '../../lib/get_interval';
 import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 import { getCoreStart } from '../../../../services';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
 
 class TimeseriesVisualization extends Component {
   static propTypes = {
@@ -51,6 +55,16 @@ class TimeseriesVisualization extends Component {
   };
 
   applyDocTo = (template) => (doc) => {
+    const { fieldFormatMap } = this.props;
+
+    // formatting each doc value with custom field formatter if fieldFormatMap contains that doc field name
+    Object.keys(doc).forEach((fieldName) => {
+      if (fieldFormatMap?.[fieldName]) {
+        const valueFieldFormatter = createFieldFormatter(fieldName, fieldFormatMap);
+        doc[fieldName] = valueFieldFormatter(doc[fieldName]);
+      }
+    });
+
     const vars = replaceVars(template, null, doc, {
       noEscape: true,
     });
@@ -139,7 +153,16 @@ class TimeseriesVisualization extends Component {
   };
 
   render() {
-    const { model, visData, onBrush, onFilterClick, syncColors, palettesService } = this.props;
+    const {
+      model,
+      visData,
+      onBrush,
+      onFilterClick,
+      syncColors,
+      palettesService,
+      fieldFormatMap,
+      getConfig,
+    } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
@@ -152,10 +175,6 @@ class TimeseriesVisualization extends Component {
     const yAxis = [];
     let mainDomainAdded = false;
 
-    const allSeriesHaveSameFormatters = seriesModel.every(
-      (seriesGroup) => seriesGroup.formatter === seriesModel[0].formatter
-    );
-
     this.showToastNotification = null;
 
     seriesModel.forEach((seriesGroup) => {
@@ -166,10 +185,12 @@ class TimeseriesVisualization extends Component {
         ? TimeseriesVisualization.getYAxisDomain(seriesGroup)
         : undefined;
       const isCustomDomain = groupId !== mainAxisGroupId;
-      const seriesGroupTickFormatter = TimeseriesVisualization.getTickFormatter(
-        seriesGroup,
-        this.props.getConfig
-      );
+
+      const seriesGroupTickFormatter =
+        seriesGroup.formatter === DATA_FORMATTERS.DEFAULT
+          ? createFieldFormatter(getMetricsField(seriesGroup.metrics), fieldFormatMap)
+          : TimeseriesVisualization.getTickFormatter(seriesGroup, getConfig);
+
       const palette = {
         ...seriesGroup.palette,
         name:
@@ -214,8 +235,12 @@ class TimeseriesVisualization extends Component {
               : seriesGroupTickFormatter,
         });
       } else if (!mainDomainAdded) {
+        const tickFormatter = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)
+          ? seriesGroupTickFormatter
+          : (val) => val;
+
         TimeseriesVisualization.addYAxis(yAxis, {
-          tickFormatter: allSeriesHaveSameFormatters ? seriesGroupTickFormatter : (val) => val,
+          tickFormatter,
           id: yAxisIdGenerator('main'),
           groupId: mainAxisGroupId,
           position: model.axis_position,
@@ -238,6 +263,8 @@ class TimeseriesVisualization extends Component {
             showGrid={Boolean(model.show_grid)}
             legend={Boolean(model.show_legend)}
             legendPosition={model.legend_position}
+            truncateLegend={Boolean(model.truncate_legend)}
+            maxLegendLines={model.max_lines_legend}
             tooltipMode={model.tooltip_mode}
             xAxisFormatter={this.xAxisFormatter(interval)}
             annotations={this.prepareAnnotations()}

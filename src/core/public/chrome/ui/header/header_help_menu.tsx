@@ -211,7 +211,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="xs" flush="left">
+        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="s" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
             defaultMessage="Kibana documentation"
@@ -220,7 +220,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="xs" flush="left">
+        <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="s" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
             defaultMessage="Ask Elastic"
@@ -229,7 +229,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty href={KIBANA_FEEDBACK_LINK} target="_blank" size="xs" flush="left">
+        <EuiButtonEmpty href={KIBANA_FEEDBACK_LINK} target="_blank" size="s" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
             defaultMessage="Give feedback"
@@ -241,7 +241,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         <EuiButtonEmpty
           href={GITHUB_CREATE_ISSUE_LINK}
           target="_blank"
-          size="xs"
+          size="s"
           iconType="logoGithub"
           flush="left"
         >
@@ -330,7 +330,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         {customLinks}
         {content && (
           <>
-            {customLinks && <EuiSpacer size="s" />}
+            {customLinks && <EuiSpacer size="xs" />}
             <HeaderExtension extension={content} />
           </>
         )}
@@ -383,7 +383,7 @@ const createCustomLink = (
 ) => {
   return (
     <Fragment key={`helpButton${index}`}>
-      <EuiButtonEmpty {...buttonProps} size="xs" flush="left">
+      <EuiButtonEmpty {...buttonProps} size="s" flush="left">
         {text}
       </EuiButtonEmpty>
       {addSpacer && <EuiSpacer size="xs" />}

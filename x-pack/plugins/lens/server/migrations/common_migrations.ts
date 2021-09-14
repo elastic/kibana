@@ -6,13 +6,19 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { PaletteOutput } from 'src/plugins/charts/common';
 import {
   LensDocShapePre712,
   OperationTypePre712,
   LensDocShapePost712,
   LensDocShape713,
   LensDocShape714,
+  LensDocShape715,
+  VisStatePost715,
+  VisStatePre715,
+  VisState716,
 } from './types';
+import { CustomPaletteParams, layerTypes } from '../../common';
 
 export const commonRenameOperationsForFormula = (
   attributes: LensDocShapePre712
@@ -77,4 +83,73 @@ export const commonRemoveTimezoneDateHistogramParam = (
     })
   );
   return newAttributes as LensDocShapePost712;
+};
+
+export const commonUpdateVisLayerType = (
+  attributes: LensDocShape715<VisStatePre715>
+): LensDocShape715<VisStatePost715> => {
+  const newAttributes = cloneDeep(attributes);
+  const visState = (newAttributes as LensDocShape715<VisStatePost715>).state.visualization;
+  if ('layerId' in visState) {
+    visState.layerType = layerTypes.DATA;
+  }
+  if ('layers' in visState) {
+    for (const layer of visState.layers) {
+      layer.layerType = layerTypes.DATA;
+    }
+  }
+  return newAttributes as LensDocShape715<VisStatePost715>;
+};
+
+function moveDefaultPaletteToPercentCustomInPlace(palette?: PaletteOutput<CustomPaletteParams>) {
+  if (palette?.params?.reverse && palette.params.name !== 'custom' && palette.params.stops) {
+    // change to palette type to custom and migrate to a percentage type of mode
+    palette.name = 'custom';
+    palette.params.name = 'custom';
+    // we can make strong assumptions here:
+    // because it was a default palette reversed it means that stops were the default ones
+    // so when migrating, because there's no access to active data, we could leverage the
+    // percent rangeType to define colorStops in percent.
+    //
+    // Stops should be defined, but reversed, as the previous code was rewriting them on reverse.
+    //
+    // The only change the user should notice should be the mode changing from number to percent
+    // but the final result *must* be identical
+    palette.params.rangeType = 'percent';
+    const steps = palette.params.stops.length;
+    palette.params.rangeMin = 0;
+    palette.params.rangeMax = 80;
+    palette.params.steps = steps;
+    palette.params.colorStops = palette.params.stops.map(({ color }, index) => ({
+      color,
+      stop: (index * 100) / steps,
+    }));
+    palette.params.stops = palette.params.stops.map(({ color }, index) => ({
+      color,
+      stop: ((1 + index) * 100) / steps,
+    }));
+  }
+}
+
+export const commonMakeReversePaletteAsCustom = (
+  attributes: LensDocShape715<VisState716>
+): LensDocShape715<VisState716> => {
+  const newAttributes = cloneDeep(attributes);
+  const vizState = (newAttributes as LensDocShape715<VisState716>).state.visualization;
+  if (
+    attributes.visualizationType !== 'lnsDatatable' &&
+    attributes.visualizationType !== 'lnsHeatmap'
+  ) {
+    return newAttributes;
+  }
+  if ('columns' in vizState) {
+    for (const column of vizState.columns) {
+      if (column.colorMode && column.colorMode !== 'none') {
+        moveDefaultPaletteToPercentCustomInPlace(column.palette);
+      }
+    }
+  } else {
+    moveDefaultPaletteToPercentCustomInPlace(vizState.palette);
+  }
+  return newAttributes;
 };

@@ -9,15 +9,14 @@
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-// not typed yet
-// @ts-expect-error
-import { buildRequestBody } from './table/build_request_body';
+import { buildTableRequest } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
-// @ts-expect-error
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
 import { extractFieldLabel } from '../../../common/fields_utils';
+import { isAggSupported } from './helpers/check_aggs';
+import { isEntireTimeRangeMode } from './helpers/get_timerange_mode';
 
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -74,15 +73,22 @@ export async function getTableData(
   const handleError = handleErrorResponse(panel);
 
   try {
-    const body = await buildRequestBody(
+    if (isEntireTimeRangeMode(panel)) {
+      panel.series.forEach((column) => {
+        isAggSupported(column.metrics);
+      });
+    }
+
+    const body = await buildTableRequest({
       req,
       panel,
-      services.esQueryConfig,
-      panelIndex,
+      esQueryConfig: services.esQueryConfig,
+      seriesIndex: panelIndex,
       capabilities,
-      services.uiSettings,
-      () => services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes))
-    );
+      uiSettings: services.uiSettings,
+      buildSeriesMetaParams: () =>
+        services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes)),
+    });
 
     const [resp] = await searchStrategy.search(requestContext, req, [
       {
@@ -100,9 +106,7 @@ export async function getTableData(
       []
     );
 
-    const series = await Promise.all(
-      buckets.map(processBucket(panel, req, searchStrategy, capabilities, extractFields))
-    );
+    const series = await Promise.all(buckets.map(processBucket({ panel, extractFields })));
 
     return {
       ...meta,

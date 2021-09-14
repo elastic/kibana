@@ -8,7 +8,7 @@
 
 import { format as formatUrl } from 'url';
 
-import supertestAsPromised from 'supertest-as-promised';
+import supertest from 'supertest';
 
 export function createKibanaSupertestProvider({ certificateAuthorities, kibanaUrl } = {}) {
   return function ({ getService }) {
@@ -16,8 +16,8 @@ export function createKibanaSupertestProvider({ certificateAuthorities, kibanaUr
     kibanaUrl = kibanaUrl ?? formatUrl(config.get('servers.kibana'));
 
     return certificateAuthorities
-      ? supertestAsPromised.agent(kibanaUrl, { ca: certificateAuthorities })
-      : supertestAsPromised(kibanaUrl);
+      ? supertest.agent(kibanaUrl, { ca: certificateAuthorities })
+      : supertest(kibanaUrl);
   };
 }
 
@@ -25,7 +25,7 @@ export function KibanaSupertestWithoutAuthProvider({ getService }) {
   const config = getService('config');
   const kibanaServerConfig = config.get('servers.kibana');
 
-  return supertestAsPromised(
+  return supertest(
     formatUrl({
       ...kibanaServerConfig,
       auth: false,
@@ -36,5 +36,5 @@ export function KibanaSupertestWithoutAuthProvider({ getService }) {
 export function ElasticsearchSupertestProvider({ getService }) {
   const config = getService('config');
   const elasticSearchServerUrl = formatUrl(config.get('servers.elasticsearch'));
-  return supertestAsPromised(elasticSearchServerUrl);
+  return supertest(elasticSearchServerUrl);
 }

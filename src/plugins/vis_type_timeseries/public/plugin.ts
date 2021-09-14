@@ -20,23 +20,23 @@ import {
   setFieldFormats,
   setCoreStart,
   setDataStart,
-  setChartsSetup,
+  setCharts,
 } from './services';
 import { DataPublicPluginStart } from '../../data/public';
-import { ChartsPluginSetup } from '../../charts/public';
+import { ChartsPluginStart } from '../../charts/public';
 import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
 
 /** @internal */
 export interface MetricsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  charts: ChartsPluginSetup;
   visualize: VisualizePluginSetup;
 }
 
 /** @internal */
 export interface MetricsPluginStartDependencies {
   data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
 }
 
 /** @internal */
@@ -49,7 +49,7 @@ export class MetricsPlugin implements Plugin<void, void> {
 
   public setup(
     core: CoreSetup,
-    { expressions, visualizations, charts, visualize }: MetricsPluginSetupDependencies
+    { expressions, visualizations, visualize }: MetricsPluginSetupDependencies
   ) {
     visualize.visEditorsRegistry.register(TSVB_EDITOR_NAME, EditorController);
     expressions.registerFunction(createMetricsFn);
@@ -59,11 +59,11 @@ export class MetricsPlugin implements Plugin<void, void> {
       })
     );
     setUISettings(core.uiSettings);
-    setChartsSetup(charts);
     visualizations.createBaseVisualization(metricsVisDefinition);
   }
 
-  public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {
+  public start(core: CoreStart, { data, charts }: MetricsPluginStartDependencies) {
+    setCharts(charts);
     setI18n(core.i18n);
     setFieldFormats(data.fieldFormats);
     setDataStart(data);

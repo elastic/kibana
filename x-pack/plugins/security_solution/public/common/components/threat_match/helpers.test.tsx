@@ -10,7 +10,7 @@ import {
   getField,
 } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { FieldSpec, IndexPattern } from '../../../../../../../src/plugins/data/common';
 import moment from 'moment-timezone';
 
 import {
@@ -19,6 +19,7 @@ import {
   getFormattedEntries,
   getFormattedEntry,
   getUpdatedEntriesOnDelete,
+  customValidators,
 } from './helpers';
 import { ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 
@@ -87,7 +88,7 @@ describe('Helpers', () => {
           searchable: false,
           aggregatable: false,
           readFromDocValues: true,
-        },
+        } as FieldSpec,
         type: 'mapping',
         value: undefined,
       };
@@ -129,7 +130,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           value: undefined,
           type: 'mapping',
         },
@@ -155,7 +156,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           value: {
             name: 'machine.os',
             type: 'string',
@@ -165,7 +166,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           type: 'mapping',
         },
       ];
@@ -191,7 +192,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           type: 'mapping',
           value: {
             name: 'machine.os',
@@ -202,7 +203,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           entryIndex: 0,
         },
         {
@@ -292,6 +293,21 @@ describe('Helpers', () => {
         },
       ]);
       expect(items).toEqual([{ entries: [entry] }]);
+    });
+  });
+
+  describe('customValidators.forbiddenField', () => {
+    const FORBIDDEN = '*';
+
+    test('it returns expected value when a forbidden value is passed in', () => {
+      expect(customValidators.forbiddenField('*', FORBIDDEN)).toEqual({
+        code: 'ERR_FIELD_FORMAT',
+        message: 'The index pattern cannot be *. Please choose a more specific index pattern.',
+      });
+    });
+
+    test('it returns undefined when a non-forbidden value is passed in', () => {
+      expect(customValidators.forbiddenField('.test-index', FORBIDDEN)).not.toBeDefined();
     });
   });
 });

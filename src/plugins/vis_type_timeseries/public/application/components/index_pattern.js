@@ -28,13 +28,11 @@ import { YesNo } from './yes_no';
 import { LastValueModePopover } from './last_value_mode_popover';
 import { KBN_FIELD_TYPES } from '../../../../data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
-import { DefaultIndexPatternContext } from '../contexts/default_index_context';
-import { PanelModelContext } from '../contexts/panel_model_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
-import { AUTO_INTERVAL, USE_KIBANA_INDEXES_KEY } from '../../../common/constants';
+import { AUTO_INTERVAL } from '../../../common/constants';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
 import { getDataStart, getUISettings } from '../../services';
@@ -78,14 +76,11 @@ export const IndexPattern = ({
   const maxBarsName = `${prefix}max_bars`;
   const dropBucketName = `${prefix}drop_last_bucket`;
   const updateControlValidity = useContext(FormValidationContext);
-  const defaultIndex = useContext(DefaultIndexPatternContext);
-  const panelModel = useContext(PanelModelContext);
 
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
   const maxBarsUiSettings = config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
-  const useKibanaIndices = Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY]);
 
-  const [fetchedIndex, setFetchedIndex] = useState();
+  const [fetchedIndex, setFetchedIndex] = useState(null);
 
   const handleMaxBarsChange = useCallback(
     ({ target }) => {
@@ -144,17 +139,25 @@ export const IndexPattern = ({
   useEffect(() => {
     async function fetchIndex() {
       const { indexPatterns } = getDataStart();
+      let fetchedIndexPattern = {
+        indexPattern: undefined,
+        indexPatternString: undefined,
+      };
 
-      setFetchedIndex(
-        index
+      try {
+        fetchedIndexPattern = index
           ? await fetchIndexPattern(index, indexPatterns, {
               fetchKibanaIndexForStringIndexes: true,
             })
           : {
-              indexPattern: undefined,
-              indexPatternString: undefined,
-            }
-      );
+              ...fetchedIndexPattern,
+              defaultIndex: await indexPatterns.getDefault(),
+            };
+      } catch {
+        // nothing to be here
+      }
+
+      setFetchedIndex(fetchedIndexPattern);
     }
 
     fetchIndex();
@@ -164,16 +167,6 @@ export const IndexPattern = ({
     () => onChange({ [HIDE_LAST_VALUE_INDICATOR]: !model.hide_last_value_indicator }),
     [model.hide_last_value_indicator, onChange]
   );
-
-  const getTimefieldPlaceholder = () => {
-    if (!model[indexPatternName]) {
-      return defaultIndex?.timeFieldName;
-    }
-
-    if (useKibanaIndices) {
-      return fetchedIndex?.indexPattern?.timeFieldName ?? undefined;
-    }
-  };
 
   return (
     <div className="index-pattern">
@@ -245,7 +238,6 @@ export const IndexPattern = ({
         <EuiFlexItem>
           <IndexPatternSelect
             fetchedIndex={fetchedIndex}
-            value={model[indexPatternName]}
             indexPatternName={indexPatternName}
             onChange={onChange}
             disabled={disabled}
@@ -263,7 +255,9 @@ export const IndexPattern = ({
             onChange={handleSelectChange(timeFieldName)}
             indexPattern={model[indexPatternName]}
             fields={fields}
-            placeholder={getTimefieldPlaceholder()}
+            placeholder={
+              fetchedIndex?.indexPattern?.timeFieldName ?? fetchedIndex?.defaultIndex?.timeFieldName
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -323,7 +317,7 @@ export const IndexPattern = ({
                     content={
                       <FormattedMessage
                         id="visTypeTimeseries.indexPattern.detailLevelHelpText"
-                        defaultMessage="Controls the auto interval based on the time range. The default interval is affected by the advanced settings {histogramTargetBars} and {histogramMaxBars}."
+                        defaultMessage="Controls the auto and gte intervals based on the time range. The default interval is affected by the advanced settings {histogramTargetBars} and {histogramMaxBars}."
                         values={{
                           histogramTargetBars: UI_SETTINGS.HISTOGRAM_MAX_BARS,
                           histogramMaxBars: UI_SETTINGS.HISTOGRAM_BAR_TARGET,
@@ -352,7 +346,7 @@ export const IndexPattern = ({
                     disabled={
                       disabled ||
                       isEntireTimeRangeActive(model, isTimeSeries) ||
-                      !(model[intervalName] === AUTO_INTERVAL || !model[intervalName])
+                      !(isAutoInterval(model[intervalName]) || isGteInterval(model[intervalName]))
                     }
                     min={0}
                     max={maxBarsUiSettings}

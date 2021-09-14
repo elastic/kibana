@@ -72,14 +72,6 @@ export interface PolicyDetailsState {
   license?: ILicense;
 }
 
-/**
- * The URL search params that are supported by the Policy List page view
- */
-export interface PolicyListUrlSearchParams {
-  page_index: number;
-  page_size: number;
-}
-
 export enum OS {
   windows = 'windows',
   mac = 'mac',
@@ -114,6 +106,18 @@ export type MalwareProtectionOSes = KeysByValueCriteria<
   { malware: ProtectionFields }
 >;
 
+/** Returns an array of the policy OSes that have a memory protection field */
+export type MemoryProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { memory_protection: ProtectionFields }
+>;
+
+/** Returns an array of the policy OSes that have a behavior protection field */
+export type BehaviorProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { behavior_protection: ProtectionFields }
+>;
+
 /** Returns an array of the policy OSes that have a ransomware protection field */
 export type RansomwareProtectionOSes = KeysByValueCriteria<
   UIPolicyConfig,
@@ -121,9 +125,12 @@ export type RansomwareProtectionOSes = KeysByValueCriteria<
 >;
 
 export type PolicyProtection =
-  | keyof Pick<UIPolicyConfig['windows'], 'malware' | 'ransomware'>
-  | keyof Pick<UIPolicyConfig['mac'], 'malware'>
-  | keyof Pick<UIPolicyConfig['linux'], 'malware'>;
+  | keyof Pick<
+      UIPolicyConfig['windows'],
+      'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection'
+    >
+  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection'>
+  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection'>;
 
 export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
 

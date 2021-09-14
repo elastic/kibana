@@ -11,14 +11,14 @@ export type StaticPage =
   | 'base'
   | 'overview'
   | 'integrations'
-  | 'integrations_all'
-  | 'integrations_installed'
   | 'policies'
   | 'policies_list'
   | 'enrollment_tokens'
   | 'data_streams';
 
 export type DynamicPage =
+  | 'integrations_all'
+  | 'integrations_installed'
   | 'integration_details_overview'
   | 'integration_details_policies'
   | 'integration_details_assets'
@@ -29,6 +29,7 @@ export type DynamicPage =
   | 'add_integration_from_policy'
   | 'add_integration_to_policy'
   | 'edit_integration'
+  | 'upgrade_package_policy'
   | 'agent_list'
   | 'agent_details'
   | 'agent_details_logs';
@@ -54,6 +55,7 @@ export const FLEET_ROUTING_PATHS = {
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
+  upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
   // TODO: Review uses and remove if it is no longer used or linked to in any UX flows
   add_integration_from_policy: '/policies/:policyId/add-integration',
   enrollment_tokens: '/enrollment-tokens',
@@ -63,10 +65,11 @@ export const FLEET_ROUTING_PATHS = {
   add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
 };
 
+export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
-  integrations_all: '/browse',
-  integrations_installed: '/installed',
+  integrations_all: '/browse/:category?',
+  integrations_installed: '/installed/:category?',
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
@@ -85,8 +88,16 @@ export const pagePathGetters: {
   base: () => [FLEET_BASE_PATH, '/'],
   overview: () => [FLEET_BASE_PATH, '/'],
   integrations: () => [INTEGRATIONS_BASE_PATH, '/'],
-  integrations_all: () => [INTEGRATIONS_BASE_PATH, '/browse'],
-  integrations_installed: () => [INTEGRATIONS_BASE_PATH, '/installed'],
+  integrations_all: ({ searchTerm, category }: { searchTerm?: string; category?: string }) => {
+    const categoryPath = category ? `/${category}` : ``;
+    const queryParams = searchTerm ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchTerm}` : ``;
+    return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${queryParams}`];
+  },
+  integrations_installed: ({ query, category }: { query?: string; category?: string }) => {
+    const categoryPath = category ? `/${category}` : ``;
+    const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
+    return [INTEGRATIONS_BASE_PATH, `/installed${categoryPath}${queryParams}`];
+  },
   integration_details_overview: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
     `/detail/${pkgkey}/overview${integration ? `?integration=${integration}` : ''}`,
@@ -130,6 +141,10 @@ export const pagePathGetters: {
   edit_integration: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
+  ],
+  upgrade_package_policy: ({ policyId, packagePolicyId }) => [
+    FLEET_BASE_PATH,
+    `/policies/${policyId}/upgrade-package-policy/${packagePolicyId}`,
   ],
   agent_list: ({ kuery }) => [FLEET_BASE_PATH, `/agents${kuery ? `?kuery=${kuery}` : ''}`],
   agent_details: ({ agentId, tabId, logQuery }) => [

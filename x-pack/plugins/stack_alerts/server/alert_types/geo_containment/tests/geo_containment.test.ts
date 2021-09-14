@@ -22,7 +22,6 @@ import {
   GeoContainmentInstanceState,
   GeoContainmentParams,
 } from '../alert_type';
-import { SearchResponse } from 'elasticsearch';
 
 const alertInstanceFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => (
   instanceId: string
@@ -53,7 +52,7 @@ describe('geo_containment', () => {
     it('should correctly transform expected results', async () => {
       const transformedResults = transformResults(
         // @ts-ignore
-        (sampleAggsJsonResponse.body as unknown) as SearchResponse<unknown>,
+        sampleAggsJsonResponse.body,
         dateField,
         geoField
       );
@@ -113,7 +112,7 @@ describe('geo_containment', () => {
     it('should correctly transform expected results if fields are nested', async () => {
       const transformedResults = transformResults(
         // @ts-ignore
-        (sampleAggsJsonResponseWithNesting.body as unknown) as SearchResponse<unknown>,
+        sampleAggsJsonResponseWithNesting.body,
         nestedDateField,
         nestedGeoField
       );

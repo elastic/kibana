@@ -9,7 +9,7 @@
 import { HttpSetup } from 'kibana/public';
 import React, { createContext, useContext } from 'react';
 
-import { useRequest } from '../../../public';
+import { useRequest } from '../../../public/request';
 
 import { Privileges, Error as CustomError } from '../types';
 

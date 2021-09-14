@@ -7,21 +7,20 @@
 
 import React, { useState, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFormRow,
   EuiSwitch,
   EuiFieldText,
   EuiText,
-  EuiCodeEditor,
-  EuiTextArea,
   EuiFieldPassword,
+  EuiCodeBlock,
 } from '@elastic/eui';
 
 import type { RegistryVarsEntry } from '../../../../types';
+import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
-import 'brace/mode/yaml';
-import 'brace/theme/textmate';
 import { MultiTextInput } from './multi_text_input';
 
 export const PackagePolicyInputVarField: React.FunctionComponent<{
@@ -52,26 +51,34 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     switch (type) {
       case 'yaml':
         return frozen ? (
-          <EuiTextArea
-            className="ace_editor"
-            disabled
-            value={value}
-            style={{ height: '175px', padding: '4px', whiteSpace: 'pre', resize: 'none' }}
-          />
+          <EuiCodeBlock language="yaml" isCopyable={false} paddingSize="s">
+            <pre>{value}</pre>
+          </EuiCodeBlock>
         ) : (
-          <EuiCodeEditor
+          <CodeEditor
+            languageId="yaml"
             width="100%"
-            mode="yaml"
-            theme="textmate"
-            setOptions={{
-              minLines: 10,
-              maxLines: 30,
-              tabSize: 2,
-              showGutter: false,
-            }}
+            height="300px"
             value={value}
-            onChange={(newVal) => onChange(newVal)}
-            onBlur={() => setIsDirty(true)}
+            onChange={onChange}
+            options={{
+              minimap: {
+                enabled: false,
+              },
+              ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlCodeEditor', {
+                defaultMessage: 'YAML Code Editor',
+              }),
+              scrollBeyondLastLine: false,
+              wordWrap: 'off',
+              wrappingIndent: 'indent',
+              tabSize: 2,
+              // To avoid left margin
+              lineNumbers: 'off',
+              lineNumbersMinChars: 0,
+              glyphMargin: false,
+              folding: false,
+              lineDecorationsWidth: 0,
+            }}
           />
         );
       case 'bool':

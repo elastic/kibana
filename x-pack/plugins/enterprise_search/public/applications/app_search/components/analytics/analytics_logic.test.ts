@@ -163,7 +163,7 @@ describe('AnalyticsLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/analytics/queries',
+          '/internal/app_search/engines/test-engine/analytics/queries',
           {
             query: {
               start: DEFAULT_START_DATE,
@@ -185,7 +185,7 @@ describe('AnalyticsLogic', () => {
         AnalyticsLogic.actions.loadAnalyticsData();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/analytics/queries',
+          '/internal/app_search/engines/test-engine/analytics/queries',
           {
             query: {
               start: '1970-01-01',
@@ -229,7 +229,7 @@ describe('AnalyticsLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/analytics/queries/some-query',
+          '/internal/app_search/engines/test-engine/analytics/queries/some-query',
           {
             query: {
               start: DEFAULT_START_DATE,
@@ -248,7 +248,7 @@ describe('AnalyticsLogic', () => {
         AnalyticsLogic.actions.loadQueryData('some-query');
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/analytics/queries/some-query',
+          '/internal/app_search/engines/test-engine/analytics/queries/some-query',
           {
             query: {
               start: '1970-12-30',

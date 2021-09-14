@@ -22,12 +22,14 @@ import {
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
+import { EntityType } from '../../../../../timelines/common';
 
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
 
 export interface UseTimelineEventsDetailsProps {
+  entityType?: EntityType;
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
@@ -35,6 +37,7 @@ export interface UseTimelineEventsDetailsProps {
 }
 
 export const useTimelineEventsDetails = ({
+  entityType = EntityType.EVENTS,
   docValueFields,
   indexName,
   eventId,
@@ -105,6 +108,7 @@ export const useTimelineEventsDetails = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         docValueFields,
+        entityType,
         indexName,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
@@ -114,7 +118,7 @@ export const useTimelineEventsDetails = ({
       }
       return prevRequest;
     });
-  }, [docValueFields, eventId, indexName]);
+  }, [docValueFields, entityType, eventId, indexName]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);

@@ -9,13 +9,14 @@
 import { share } from 'rxjs/operators';
 import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { buildEsQuery } from '@kbn/es-query';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
 import { createQueryStateObservable } from './state_sync/create_global_query_observable';
 import { QueryStringManager, QueryStringContract } from './query_string';
-import { buildEsQuery, getEsQueryConfig, TimeRange } from '../../common';
+import { getEsQueryConfig, TimeRange } from '../../common';
 import { getUiSettings } from '../services';
 import { NowProviderInternalContract } from '../now_provider';
 import { IndexPattern } from '..';

@@ -571,15 +571,18 @@ export function copyToSpaceTestSuiteFactory(
               expectNewCopyResponse(response, ambiguousConflictId, title);
             } else {
               // It doesn't matter if overwrite is enabled or not, the object will not be copied because there are two matches in the destination space
-              const updatedAt = '2017-09-21T18:59:16.270Z';
               const destinations = [
-                // response should be sorted by updatedAt in descending order
+                // response destinations should be sorted by updatedAt in descending order, then ID in ascending order
+                {
+                  id: 'conflict_2_all',
+                  title: 'A shared saved-object in all spaces',
+                  updatedAt: '2017-09-21T18:59:16.270Z',
+                },
                 {
                   id: 'conflict_2_space_2',
                   title: 'A shared saved-object in one space',
-                  updatedAt,
+                  updatedAt: '2017-09-21T18:59:16.270Z',
                 },
-                { id: 'conflict_2_all', title: 'A shared saved-object in all spaces', updatedAt },
               ];
               expect(success).to.eql(false);
               expect(successCount).to.eql(0);

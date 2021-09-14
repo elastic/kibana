@@ -9,6 +9,7 @@ import { services as kibanaFunctionalServices } from '../../../../test/functiona
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
+import { ReportingFunctionalProvider } from '../../reporting_functional/services';
 
 import {
   MonitoringNoDataProvider,
@@ -59,6 +60,7 @@ import {
   DashboardPanelTimeRangeProvider,
 } from './dashboard';
 import { SearchSessionsService } from './search_sessions';
+import { ObservabilityProvider } from './observability';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -107,5 +109,7 @@ export const services = {
   dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
   dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
+  reporting: ReportingFunctionalProvider,
   searchSessions: SearchSessionsService,
+  observability: ObservabilityProvider,
 };

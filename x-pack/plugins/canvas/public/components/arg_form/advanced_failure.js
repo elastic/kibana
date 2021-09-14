@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { compose, withProps, withPropsOnChange } from 'recompose';
 import { EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
-
-import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 
 const strings = {
   getApplyButtonLabel: () =>
@@ -29,22 +26,30 @@ const strings = {
     }),
 };
 
-export const AdvancedFailureComponent = (props) => {
-  const {
-    onValueChange,
-    defaultValue,
-    argExpression,
-    updateArgExpression,
-    resetErrorState,
-    valid,
-    argId,
-  } = props;
+const isValid = (argExpression) => {
+  try {
+    fromExpression(argExpression, 'argument');
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+export const AdvancedFailure = (props) => {
+  const { onValueChange, defaultValue, argValue, resetErrorState, argId } = props;
+
+  const [argExpression, setArgExpression] = useState(toExpression(argValue, 'argument'));
+  const [valid, setValid] = useState(isValid(argExpression));
+
+  useEffect(() => {
+    const argExpr = toExpression(argValue, 'argument');
+    setArgExpression(argExpr);
+    setValid(isValid(argExpr));
+  }, [argValue]);
 
   const valueChange = (ev) => {
     ev.preventDefault();
-
     resetErrorState(); // when setting a new value, attempt to reset the error state
-
     if (valid) {
       return onValueChange(fromExpression(argExpression.trim(), 'argument'));
     }
@@ -69,7 +74,7 @@ export const AdvancedFailureComponent = (props) => {
           isInvalid={!valid}
           value={argExpression}
           compressed
-          onChange={updateArgExpression}
+          onChange={(ev) => setArgExpression(ev.target.value)}
           rows={3}
         />
       </EuiFormRow>
@@ -89,33 +94,10 @@ export const AdvancedFailureComponent = (props) => {
   );
 };
 
-AdvancedFailureComponent.propTypes = {
+AdvancedFailure.propTypes = {
   defaultValue: PropTypes.string,
   onValueChange: PropTypes.func.isRequired,
-  argExpression: PropTypes.string.isRequired,
-  updateArgExpression: PropTypes.func.isRequired,
   resetErrorState: PropTypes.func.isRequired,
-  valid: PropTypes.bool.isRequired,
   argId: PropTypes.string.isRequired,
-};
-
-export const AdvancedFailure = compose(
-  withProps(({ argValue }) => ({
-    argExpression: toExpression(argValue, 'argument'),
-  })),
-  createStatefulPropHoc('argExpression', 'updateArgExpression'),
-  withPropsOnChange(['argExpression'], ({ argExpression }) => ({
-    valid: (function () {
-      try {
-        fromExpression(argExpression, 'argument');
-        return true;
-      } catch (e) {
-        return false;
-      }
-    })(),
-  }))
-)(AdvancedFailureComponent);
-
-AdvancedFailure.propTypes = {
   argValue: PropTypes.any.isRequired,
 };

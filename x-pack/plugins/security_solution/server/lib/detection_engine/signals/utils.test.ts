@@ -36,11 +36,12 @@ import {
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
-  createTotalHitsFromSearchResult,
   lastValidDate,
   calculateThresholdSignalUuid,
   buildChunkedOrFilter,
   getValidDateFromDoc,
+  calculateTotal,
+  getTotalHitsValue,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -53,11 +54,11 @@ import {
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
   sampleDocSearchResultsNoSortIdNoHits,
-  repeatedSearchResultsWithSortId,
   sampleDocSearchResultsNoSortId,
   sampleDocNoSortId,
 } from './__mocks__/es_results';
 import { ShardError } from '../../types';
+import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -66,13 +67,7 @@ const buildRuleMessage = buildRuleMessageFactory({
   name: 'fake name',
 });
 
-const ruleStatusServiceMock = {
-  success: jest.fn(),
-  find: jest.fn(),
-  goingToRun: jest.fn(),
-  error: jest.fn(),
-  partialFailure: jest.fn(),
-};
+const ruleStatusClient = ruleExecutionLogClientMock.create();
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -785,17 +780,19 @@ describe('utils', () => {
         },
       };
       mockLogger.error.mockClear();
-      const res = await hasTimestampFields(
-        false,
+      const res = await hasTimestampFields({
+        wroteStatus: false,
         timestampField,
-        'myfakerulename',
+        ruleName: 'myfakerulename',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
-        ['myfa*'],
-        ruleStatusServiceMock,
-        mockLogger,
-        buildRuleMessage
-      );
+        timestampFieldCapsResponse: timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        inputIndices: ['myfa*'],
+        ruleStatusClient,
+        ruleId: 'ruleId',
+        spaceId: 'default',
+        logger: mockLogger,
+        buildRuleMessage,
+      });
       expect(mockLogger.error).toHaveBeenCalledWith(
         'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
@@ -826,17 +823,19 @@ describe('utils', () => {
         },
       };
       mockLogger.error.mockClear();
-      const res = await hasTimestampFields(
-        false,
+      const res = await hasTimestampFields({
+        wroteStatus: false,
         timestampField,
-        'myfakerulename',
+        ruleName: 'myfakerulename',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
-        ['myfa*'],
-        ruleStatusServiceMock,
-        mockLogger,
-        buildRuleMessage
-      );
+        timestampFieldCapsResponse: timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        inputIndices: ['myfa*'],
+        ruleStatusClient,
+        ruleId: 'ruleId',
+        spaceId: 'default',
+        logger: mockLogger,
+        buildRuleMessage,
+      });
       expect(mockLogger.error).toHaveBeenCalledWith(
         'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
@@ -853,17 +852,19 @@ describe('utils', () => {
         },
       };
       mockLogger.error.mockClear();
-      const res = await hasTimestampFields(
-        false,
+      const res = await hasTimestampFields({
+        wroteStatus: false,
         timestampField,
-        'Endpoint Security',
+        ruleName: 'Endpoint Security',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
-        ['logs-endpoint.alerts-*'],
-        ruleStatusServiceMock,
-        mockLogger,
-        buildRuleMessage
-      );
+        timestampFieldCapsResponse: timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        inputIndices: ['logs-endpoint.alerts-*'],
+        ruleStatusClient,
+        ruleId: 'ruleId',
+        spaceId: 'default',
+        logger: mockLogger,
+        buildRuleMessage,
+      });
       expect(mockLogger.error).toHaveBeenCalledWith(
         'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
@@ -880,17 +881,19 @@ describe('utils', () => {
         },
       };
       mockLogger.error.mockClear();
-      const res = await hasTimestampFields(
-        false,
+      const res = await hasTimestampFields({
+        wroteStatus: false,
         timestampField,
-        'NOT Endpoint Security',
+        ruleName: 'NOT Endpoint Security',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
-        ['logs-endpoint.alerts-*'],
-        ruleStatusServiceMock,
-        mockLogger,
-        buildRuleMessage
-      );
+        timestampFieldCapsResponse: timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        inputIndices: ['logs-endpoint.alerts-*'],
+        ruleStatusClient,
+        ruleId: 'ruleId',
+        spaceId: 'default',
+        logger: mockLogger,
+        buildRuleMessage,
+      });
       expect(mockLogger.error).toHaveBeenCalledWith(
         'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
@@ -1569,22 +1572,6 @@ describe('utils', () => {
     });
   });
 
-  describe('createTotalHitsFromSearchResult', () => {
-    test('it should return 0 for empty results', () => {
-      const result = createTotalHitsFromSearchResult({
-        searchResult: sampleEmptyDocSearchResults(),
-      });
-      expect(result).toEqual(0);
-    });
-
-    test('it should return 4 for 4 result sets', () => {
-      const result = createTotalHitsFromSearchResult({
-        searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
-      });
-      expect(result).toEqual(4);
-    });
-  });
-
   describe('calculateThresholdSignalUuid', () => {
     it('should generate a uuid without key', () => {
       const startedAt = new Date('2020-12-17T16:27:00Z');
@@ -1618,6 +1605,30 @@ describe('utils', () => {
     test('should return a filter with a multiple values chunked', () => {
       const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2', 'id-3'], 2);
       expect(filter).toEqual('field.name: ("id-1" OR "id-2") OR field.name: ("id-3")');
+    });
+  });
+
+  describe('getTotalHitsValue', () => {
+    test('returns value if present as number', () => {
+      expect(getTotalHitsValue(sampleDocSearchResultsWithSortId().hits.total)).toBe(1);
+    });
+
+    test('returns value if present as value object', () => {
+      expect(getTotalHitsValue({ value: 1 })).toBe(1);
+    });
+
+    test('returns -1 if not present', () => {
+      expect(getTotalHitsValue(undefined)).toBe(-1);
+    });
+  });
+
+  describe('calculateTotal', () => {
+    test('should add totalHits if both totalHits values are numbers', () => {
+      expect(calculateTotal(1, 2)).toBe(3);
+    });
+
+    test('should return -1 if totalHits is undefined', () => {
+      expect(calculateTotal(undefined, 2)).toBe(-1);
     });
   });
 });

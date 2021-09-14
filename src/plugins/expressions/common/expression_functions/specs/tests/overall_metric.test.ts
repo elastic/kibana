@@ -16,12 +16,12 @@ describe('interpreter/functions#overall_metric', () => {
   const runFn = (input: Datatable, args: OverallMetricArgs) =>
     fn(input, args, {} as ExecutionContext) as Datatable;
 
-  it('calculates overall sum', () => {
+  it('ignores null or undefined with sum', () => {
     const result = runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
-        rows: [{ val: 5 }, { val: 7 }, { val: 3 }, { val: 2 }],
+        rows: [{ val: undefined }, { val: 7 }, { val: 3 }, { val: 2 }],
       },
       { inputColumnId: 'val', outputColumnId: 'output', metric: 'sum' }
     );
@@ -30,10 +30,10 @@ describe('interpreter/functions#overall_metric', () => {
       name: 'output',
       meta: { type: 'number' },
     });
-    expect(result.rows.map((row) => row.output)).toEqual([17, 17, 17, 17]);
+    expect(result.rows.map((row) => row.output)).toEqual([12, 12, 12, 12]);
   });
 
-  it('ignores null or undefined', () => {
+  it('ignores null or undefined with average', () => {
     const result = runFn(
       {
         type: 'datatable',
@@ -48,6 +48,40 @@ describe('interpreter/functions#overall_metric', () => {
       meta: { type: 'number' },
     });
     expect(result.rows.map((row) => row.output)).toEqual([3, 3, 3, 3, 3]);
+  });
+
+  it('ignores null or undefined with min', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{}, { val: null }, { val: undefined }, { val: 1 }, { val: 5 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', metric: 'min' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'output',
+      meta: { type: 'number' },
+    });
+    expect(result.rows.map((row) => row.output)).toEqual([1, 1, 1, 1, 1]);
+  });
+
+  it('ignores null or undefined with max', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{}, { val: null }, { val: undefined }, { val: -1 }, { val: -5 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output', metric: 'max' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'output',
+      meta: { type: 'number' },
+    });
+    expect(result.rows.map((row) => row.output)).toEqual([-1, -1, -1, -1, -1]);
   });
 
   it('calculates overall sum for multiple series', () => {
@@ -103,18 +137,9 @@ describe('interpreter/functions#overall_metric', () => {
           { val: 8, split: 'B' },
         ],
       },
-      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'], metric: 'sum' }
+      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'], metric: 'min' }
     );
-    expect(result.rows.map((row) => row.output)).toEqual([
-      1 + 4 + 6,
-      2 + 7 + 8,
-      3 + 5,
-      1 + 4 + 6,
-      3 + 5,
-      1 + 4 + 6,
-      2 + 7 + 8,
-      2 + 7 + 8,
-    ]);
+    expect(result.rows.map((row) => row.output)).toEqual([1, 2, 3, 1, 3, 1, 2, 2]);
   });
 
   it('treats null like undefined and empty string for split columns', () => {
@@ -162,6 +187,24 @@ describe('interpreter/functions#overall_metric', () => {
       metric: 'max',
     });
     expect(result2.rows.map((row) => row.output)).toEqual([6, 8, 9, 6, 9, 6, 9, 8, 9]);
+
+    const result3 = runFn(table, {
+      inputColumnId: 'val',
+      outputColumnId: 'output',
+      by: ['split'],
+      metric: 'average',
+    });
+    expect(result3.rows.map((row) => row.output)).toEqual([
+      (1 + 4 + 6) / 3,
+      (2 + 8) / 2,
+      (3 + 5 + 7 + 9) / 4,
+      (1 + 4 + 6) / 3,
+      (3 + 5 + 7 + 9) / 4,
+      (1 + 4 + 6) / 3,
+      (3 + 5 + 7 + 9) / 4,
+      (2 + 8) / 2,
+      (3 + 5 + 7 + 9) / 4,
+    ]);
   });
 
   it('handles array values', () => {

@@ -4,18 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import { findAlertRoute } from './find';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { alertsClientMock } from '../../alerts_client.mock';
+import { rulesClientMock } from '../../rules_client.mock';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
-const alertsClient = alertsClientMock.create();
+const rulesClient = rulesClientMock.create();
 
 jest.mock('../../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
+}));
+
+jest.mock('../../lib/track_legacy_route_usage', () => ({
+  trackLegacyRouteUsage: jest.fn(),
 }));
 
 beforeEach(() => {
@@ -39,10 +44,10 @@ describe('findAlertRoute', () => {
       total: 0,
       data: [],
     };
-    alertsClient.find.mockResolvedValueOnce(findResult);
+    rulesClient.find.mockResolvedValueOnce(findResult);
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         query: {
           per_page: 1,
@@ -64,8 +69,8 @@ describe('findAlertRoute', () => {
       }
     `);
 
-    expect(alertsClient.find).toHaveBeenCalledTimes(1);
-    expect(alertsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.find).toHaveBeenCalledTimes(1);
+    expect(rulesClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "options": Object {
@@ -90,7 +95,7 @@ describe('findAlertRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    alertsClient.find.mockResolvedValueOnce({
+    rulesClient.find.mockResolvedValueOnce({
       page: 1,
       perPage: 1,
       total: 0,
@@ -98,7 +103,7 @@ describe('findAlertRoute', () => {
     });
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         query: {
           per_page: 1,
@@ -139,5 +144,20 @@ describe('findAlertRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('should track every call', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    findAlertRoute(router, licenseState, mockUsageCounter);
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, query: {} }, [
+      'ok',
+    ]);
+    await handler(context, req, res);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('find', mockUsageCounter);
   });
 });

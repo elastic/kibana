@@ -6,8 +6,9 @@
  */
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import React, { useRef, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { useState, useCallback, ReactNode } from 'react';
 import styled from 'styled-components';
+import { useIsOverflow } from '../../hooks/use_is_overflow';
 import * as i18n from './translations';
 
 const LINE_CLAMP = 3;
@@ -39,27 +40,11 @@ const LineClampComponent: React.FC<{
   children: ReactNode;
   lineClampHeight?: number;
 }> = ({ children, lineClampHeight = LINE_CLAMP_HEIGHT }) => {
-  const [isOverflow, setIsOverflow] = useState<boolean | null>(null);
   const [isExpanded, setIsExpanded] = useState<boolean | null>(null);
-  const descriptionRef = useRef<HTMLDivElement>(null);
+  const [isOverflow, descriptionRef] = useIsOverflow(children);
+
   const toggleReadMore = useCallback(() => {
     setIsExpanded((prevState) => !prevState);
-  }, []);
-
-  useEffect(() => {
-    if (descriptionRef?.current?.clientHeight != null) {
-      if (
-        (descriptionRef?.current?.scrollHeight ?? 0) > (descriptionRef?.current?.clientHeight ?? 0)
-      ) {
-        setIsOverflow(true);
-      }
-
-      if (
-        (descriptionRef?.current?.scrollHeight ?? 0) <= (descriptionRef?.current?.clientHeight ?? 0)
-      ) {
-        setIsOverflow(false);
-      }
-    }
   }, []);
 
   if (isExpanded) {

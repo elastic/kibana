@@ -169,6 +169,7 @@ exports[`Storyshots arguments/AxisConfig/components extended disabled 1`] = `
   >
     <div
       className="euiTextColor euiTextColor--subdued"
+      style={Object {}}
     >
       <p>
         Switch on to view axis settings

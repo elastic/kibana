@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { RowRendererId } from '../../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type { RowRenderer } from '../../../../../common/types/timeline';
 
 const PlainRowRenderer = () => <></>;

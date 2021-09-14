@@ -21,9 +21,17 @@ import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
+
 import type { SecurityPluginStart } from '../../../security/server';
 import type { FleetConfigType } from '../../common';
-import type { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
+import type {
+  ExternalCallback,
+  ExternalCallbacksStorage,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyDeleteCallback,
+  PutPackagePolicyUpdateCallback,
+} from '../types';
+import type { FleetAppContext } from '../plugin';
 import type { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
@@ -165,9 +173,25 @@ class AppContextService {
     this.externalCallbacks.get(type)!.add(callback);
   }
 
-  public getExternalCallbacks(type: ExternalCallback[0]) {
+  public getExternalCallbacks<T extends ExternalCallback[0]>(
+    type: T
+  ):
+    | Set<
+        T extends 'packagePolicyCreate'
+          ? PostPackagePolicyCreateCallback
+          : T extends 'postPackagePolicyDelete'
+          ? PostPackagePolicyDeleteCallback
+          : PutPackagePolicyUpdateCallback
+      >
+    | undefined {
     if (this.externalCallbacks) {
-      return this.externalCallbacks.get(type);
+      return this.externalCallbacks.get(type) as Set<
+        T extends 'packagePolicyCreate'
+          ? PostPackagePolicyCreateCallback
+          : T extends 'postPackagePolicyDelete'
+          ? PostPackagePolicyDeleteCallback
+          : PutPackagePolicyUpdateCallback
+      >;
     }
   }
 }

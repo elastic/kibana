@@ -611,114 +611,115 @@ describe('build_exceptions_filter', () => {
           getEntryExistsExcludedMock(),
         ],
       });
-
-      expect(exceptionItemFilter).toEqual({
-        bool: {
-          filter: [
-            {
-              nested: {
-                path: 'parent.field',
-                query: {
-                  bool: {
-                    filter: [
-                      {
-                        bool: {
-                          minimum_should_match: 1,
-                          should: [
-                            {
-                              match_phrase: {
-                                'parent.field.host.name': 'some host name',
+      expect(exceptionItemFilter).toEqual([
+        {
+          bool: {
+            filter: [
+              {
+                nested: {
+                  path: 'parent.field',
+                  query: {
+                    bool: {
+                      filter: [
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match_phrase: {
+                                  'parent.field.host.name': 'some host name',
+                                },
                               },
-                            },
-                          ],
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          must_not: {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [
-                                {
-                                  bool: {
-                                    minimum_should_match: 1,
-                                    should: [
-                                      {
-                                        match_phrase: {
-                                          'parent.field.host.name': 'some host name',
+                        {
+                          bool: {
+                            must_not: {
+                              bool: {
+                                minimum_should_match: 1,
+                                should: [
+                                  {
+                                    bool: {
+                                      minimum_should_match: 1,
+                                      should: [
+                                        {
+                                          match_phrase: {
+                                            'parent.field.host.name': 'some host name',
+                                          },
                                         },
-                                      },
-                                    ],
+                                      ],
+                                    },
                                   },
-                                },
-                                {
-                                  bool: {
-                                    minimum_should_match: 1,
-                                    should: [
-                                      {
-                                        match_phrase: {
-                                          'parent.field.host.name': 'some other host name',
+                                  {
+                                    bool: {
+                                      minimum_should_match: 1,
+                                      should: [
+                                        {
+                                          match_phrase: {
+                                            'parent.field.host.name': 'some other host name',
+                                          },
                                         },
-                                      },
-                                    ],
+                                      ],
+                                    },
                                   },
-                                },
-                              ],
+                                ],
+                              },
                             },
                           },
                         },
-                      },
-                      {
-                        bool: {
-                          minimum_should_match: 1,
-                          should: [{ exists: { field: 'parent.field.host.name' } }],
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [{ exists: { field: 'parent.field.host.name' } }],
+                          },
                         },
+                      ],
+                    },
+                  },
+                  score_mode: 'none',
+                },
+              },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
                       },
-                    ],
-                  },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [{ match_phrase: { 'host.name': 'some other host name' } }],
+                      },
+                    },
+                  ],
                 },
-                score_mode: 'none',
               },
-            },
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [
-                  {
+              {
+                bool: {
+                  must_not: {
                     bool: {
                       minimum_should_match: 1,
-                      should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
+                      should: [{ match_phrase: { 'host.name': 'some host name' } }],
                     },
-                  },
-                  {
-                    bool: {
-                      minimum_should_match: 1,
-                      should: [{ match_phrase: { 'host.name': 'some other host name' } }],
-                    },
-                  },
-                ],
-              },
-            },
-            {
-              bool: {
-                must_not: {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [{ match_phrase: { 'host.name': 'some host name' } }],
                   },
                 },
               },
-            },
-            {
-              bool: {
-                must_not: {
-                  bool: { minimum_should_match: 1, should: [{ exists: { field: 'host.name' } }] },
+              {
+                bool: {
+                  must_not: {
+                    bool: { minimum_should_match: 1, should: [{ exists: { field: 'host.name' } }] },
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
-      });
+      ]);
     });
   });
 

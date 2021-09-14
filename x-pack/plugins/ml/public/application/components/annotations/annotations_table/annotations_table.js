@@ -18,13 +18,13 @@ import React, { Component, Fragment, useContext } from 'react';
 import memoizeOne from 'memoize-one';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -51,6 +51,19 @@ import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locato
 import { timeFormatter } from '../../../../../common/util/date_utils';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import { DatafeedChartFlyout } from '../../../jobs/jobs_list/components/datafeed_chart_flyout';
+
+const editAnnotationsText = (
+  <FormattedMessage
+    id="xpack.ml.annotationsTable.editAnnotationsTooltip"
+    defaultMessage="Edit annotation"
+  />
+);
+const viewDataFeedText = (
+  <FormattedMessage
+    id="xpack.ml.annotationsTable.datafeedChartTooltip"
+    defaultMessage="Datafeed chart"
+  />
+);
 
 const CURRENT_SERIES = 'current_series';
 /**
@@ -390,6 +403,7 @@ class AnnotationsTableUI extends Component {
         sortable: true,
         width: '40%',
         scope: 'row',
+        'data-test-subj': `mlAnnotationsColumnAnnotation`,
       },
       {
         field: 'timestamp',
@@ -399,6 +413,7 @@ class AnnotationsTableUI extends Component {
         dataType: 'date',
         render: timeFormatter,
         sortable: true,
+        'data-test-subj': `mlAnnotationsColumnFrom`,
       },
       {
         field: 'end_timestamp',
@@ -408,6 +423,7 @@ class AnnotationsTableUI extends Component {
         dataType: 'date',
         render: timeFormatter,
         sortable: true,
+        'data-test-subj': `mlAnnotationsColumnTo`,
       },
       {
         field: 'modified_time',
@@ -417,6 +433,7 @@ class AnnotationsTableUI extends Component {
         dataType: 'date',
         render: timeFormatter,
         sortable: true,
+        'data-test-subj': `mlAnnotationsColumnModifiedDate`,
       },
       {
         field: 'modified_username',
@@ -424,6 +441,7 @@ class AnnotationsTableUI extends Component {
           defaultMessage: 'Last modified by',
         }),
         sortable: true,
+        'data-test-subj': `mlAnnotationsColumnModifiedBy`,
       },
       {
         field: 'event',
@@ -432,6 +450,7 @@ class AnnotationsTableUI extends Component {
         }),
         sortable: true,
         width: '10%',
+        'data-test-subj': `mlAnnotationsColumnEvent`,
       },
     ];
 
@@ -443,6 +462,7 @@ class AnnotationsTableUI extends Component {
           defaultMessage: 'job ID',
         }),
         sortable: true,
+        'data-test-subj': `mlAnnotationsColumnJobId`,
       });
     }
 
@@ -457,88 +477,76 @@ class AnnotationsTableUI extends Component {
         render: (key) => {
           return <EuiBadge color="default">{key}</EuiBadge>;
         },
+        'data-test-subj': `mlAnnotationsColumnLabel`,
       });
     }
 
     const actions = [];
 
     actions.push({
-      render: (annotation) => {
-        // find the original annotation because the table might not show everything
+      name: editAnnotationsText,
+      description: editAnnotationsText,
+      icon: 'pencil',
+      type: 'icon',
+      onClick: (annotation) => {
         const annotationId = annotation._id;
         const originalAnnotation = annotations.find((d) => d._id === annotationId);
-        const editAnnotationsText = (
-          <FormattedMessage
-            id="xpack.ml.annotationsTable.editAnnotationsTooltip"
-            defaultMessage="Edit annotation"
-          />
-        );
-        const editAnnotationsAriaLabelText = i18n.translate(
-          'xpack.ml.annotationsTable.editAnnotationsTooltipAriaLabel',
-          { defaultMessage: 'Edit annotation' }
-        );
-        return (
-          <EuiButtonEmpty
-            size="xs"
-            aria-label={editAnnotationsAriaLabelText}
-            iconType="pencil"
-            onClick={() => annotationUpdatesService.setValue(originalAnnotation ?? annotation)}
-          >
-            {editAnnotationsText}
-          </EuiButtonEmpty>
-        );
+
+        annotationUpdatesService.setValue(originalAnnotation ?? annotation);
       },
+      'data-test-subj': `mlAnnotationsActionEdit`,
     });
 
     if (this.state.jobId && this.props.jobs[0].analysis_config.bucket_span) {
       // add datafeed modal action
       actions.push({
-        render: (annotation) => {
-          const viewDataFeedText = (
-            <FormattedMessage
-              id="xpack.ml.annotationsTable.datafeedChartTooltip"
-              defaultMessage="Datafeed chart"
-            />
-          );
-          const viewDataFeedTooltipAriaLabelText = i18n.translate(
-            'xpack.ml.annotationsTable.datafeedChartTooltipAriaLabel',
-            { defaultMessage: 'Datafeed chart' }
-          );
-          return (
-            <EuiButtonEmpty
-              size="xs"
-              aria-label={viewDataFeedTooltipAriaLabelText}
-              iconType="visAreaStacked"
-              onClick={() =>
-                this.setState({
-                  datafeedFlyoutVisible: true,
-                  datafeedEnd: annotation.end_timestamp,
-                })
-              }
-            >
-              {viewDataFeedText}
-            </EuiButtonEmpty>
-          );
+        name: viewDataFeedText,
+        description: viewDataFeedText,
+        icon: 'visAreaStacked',
+        type: 'icon',
+        onClick: (annotation) => {
+          this.setState({
+            datafeedFlyoutVisible: true,
+            datafeedEnd: annotation.end_timestamp,
+          });
         },
+        'data-test-subj': `mlAnnotationsActionViewDatafeed`,
       });
     }
 
     if (isSingleMetricViewerLinkVisible) {
       actions.push({
-        render: (annotation) => {
+        name: (annotation) => {
           const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
-          const openInSingleMetricViewerTooltipText = isDrillDownAvailable ? (
-            <FormattedMessage
-              id="xpack.ml.annotationsTable.openInSingleMetricViewerTooltip"
-              defaultMessage="Open in Single Metric Viewer"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerTooltip"
-              defaultMessage="Job configuration not supported in Single Metric Viewer"
-            />
+
+          if (isDrillDownAvailable) {
+            return (
+              <FormattedMessage
+                id="xpack.ml.annotationsTable.openInSingleMetricViewerTooltip"
+                defaultMessage="Open in Single Metric Viewer"
+              />
+            );
+          }
+          return (
+            <EuiToolTip
+              content={
+                <FormattedMessage
+                  id="xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerTooltip"
+                  defaultMessage="Job configuration not supported in Single Metric Viewer"
+                />
+              }
+            >
+              <FormattedMessage
+                id="xpack.ml.annotationsTable.openInSingleMetricViewerTooltip"
+                defaultMessage="Open in Single Metric Viewer"
+              />
+            </EuiToolTip>
           );
-          const openInSingleMetricViewerAriaLabelText = isDrillDownAvailable
+        },
+        description: (annotation) => {
+          const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
+
+          return isDrillDownAvailable
             ? i18n.translate('xpack.ml.annotationsTable.openInSingleMetricViewerAriaLabel', {
                 defaultMessage: 'Open in Single Metric Viewer',
               })
@@ -546,24 +554,18 @@ class AnnotationsTableUI extends Component {
                 'xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerAriaLabel',
                 { defaultMessage: 'Job configuration not supported in Single Metric Viewer' }
               );
-
-          return (
-            <EuiButtonEmpty
-              size="xs"
-              disabled={!isDrillDownAvailable}
-              aria-label={openInSingleMetricViewerAriaLabelText}
-              iconType="visLine"
-              onClick={() => this.openSingleMetricView(annotation)}
-            >
-              {openInSingleMetricViewerTooltipText}
-            </EuiButtonEmpty>
-          );
         },
+        enabled: (annotation) => isTimeSeriesViewJob(this.getJob(annotation.job_id)),
+        icon: 'visLine',
+        type: 'icon',
+        onClick: (annotation) => this.openSingleMetricView(annotation),
+        'data-test-subj': `mlAnnotationsActionOpenInSingleMetricViewer`,
       });
     }
 
     const getRowProps = (item) => {
       return {
+        'data-test-subj': `mlAnnotationsTableRow row-${item._id}`,
         onMouseOver: () => this.onMouseOverRow(item),
         onMouseLeave: () => this.onMouseLeaveRow(),
       };
@@ -604,6 +606,7 @@ class AnnotationsTableUI extends Component {
           name: field.key,
           view: `${field.key} (${field.doc_count})`,
         })),
+        'data-test-subj': 'mlAnnotationTableEventFilter',
       },
     ];
 
@@ -702,6 +705,7 @@ class AnnotationsTableUI extends Component {
           defaultMessage: 'Actions',
         }),
         actions,
+        'data-test-subj': `mlAnnotationsColumnActions`,
       },
       {
         // hidden column, for search only
@@ -717,6 +721,7 @@ class AnnotationsTableUI extends Component {
     return (
       <Fragment>
         <EuiInMemoryTable
+          data-test-subj={'mlAnnotationsTable'}
           error={searchError}
           className="eui-textOverflowWrap"
           compressed={true}

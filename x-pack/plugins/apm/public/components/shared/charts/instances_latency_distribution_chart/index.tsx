@@ -61,6 +61,7 @@ export function InstancesLatencyDistributionChart({
   const latencyFormatter = getDurationFormatter(maxLatency);
 
   const tooltip: TooltipProps = {
+    stickTo: 'center',
     type: TooltipType.Follow,
     snap: false,
     customTooltip: (props: TooltipInfo) => (

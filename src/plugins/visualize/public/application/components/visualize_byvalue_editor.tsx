@@ -33,14 +33,27 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [valueInput, setValueInput] = useState<VisualizeInput>();
 
   useEffect(() => {
-    const { originatingApp: value, embeddableId: embeddableIdValue, valueInput: valueInputValue } =
-      services.stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
+    const { stateTransferService, history, data } = services;
+    const {
+      originatingApp: value,
+      embeddableId: embeddableIdValue,
+      valueInput: valueInputValue,
+      searchSessionId,
+    } = stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
+
     setOriginatingApp(value);
     setValueInput(valueInputValue);
     setEmbeddableId(embeddableIdValue);
+
     if (!valueInputValue) {
       // if there is no value input to load, redirect to the visualize listing page.
-      services.history.replace(VisualizeConstants.LANDING_PAGE_PATH);
+      history.replace(VisualizeConstants.LANDING_PAGE_PATH);
+    }
+
+    if (searchSessionId) {
+      data.search.session.continue(searchSessionId);
+    } else {
+      data.search.session.start();
     }
   }, [services]);
 

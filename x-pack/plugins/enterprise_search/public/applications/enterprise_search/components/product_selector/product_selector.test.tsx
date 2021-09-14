@@ -11,8 +11,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiPage } from '@elastic/eui';
-
 import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
@@ -25,7 +23,6 @@ describe('ProductSelector', () => {
     setMockValues({ config: { host: '' } });
     const wrapper = shallow(<ProductSelector access={{}} />);
 
-    expect(wrapper.find(EuiPage).hasClass('enterpriseSearchOverview')).toBe(true);
     expect(wrapper.find(ProductCard)).toHaveLength(2);
     expect(wrapper.find(SetupGuideCta)).toHaveLength(1);
     expect(wrapper.find(LicenseCallout)).toHaveLength(0);

@@ -13,7 +13,7 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 
-import { buildEmbeddableFilters } from '../../../public/lib/build_embeddable_filters';
+import { buildEmbeddableFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 import { SavedObjectReference } from '../../../../../../src/core/types';

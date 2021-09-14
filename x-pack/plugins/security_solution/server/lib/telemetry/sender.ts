@@ -7,91 +7,80 @@
 
 import { cloneDeep } from 'lodash';
 import axios from 'axios';
-import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
 import { URL } from 'url';
-import { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
+import { Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { TelemetryDiagTask } from './diagnostic_task';
-import { TelemetryEndpointTask } from './endpoint_task';
-import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
-import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
+import { TelemetryReceiver } from './receiver';
+import { AllowlistFields, allowlistEventFields } from './filters';
+import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
+import { createUsageCounterLabel } from './helpers';
+import { TelemetryEvent } from './types';
+import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 
-type BaseSearchTypes = string | number | boolean | object;
-export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
-
-export interface TelemetryEvent {
-  [key: string]: SearchTypes;
-  '@timestamp'?: string;
-  data_stream?: {
-    [key: string]: SearchTypes;
-    dataset?: string;
-  };
-  cluster_name?: string;
-  cluster_uuid?: string;
-  file?: {
-    [key: string]: SearchTypes;
-    Ext?: {
-      [key: string]: SearchTypes;
-    };
-  };
-  license?: ESLicense;
-}
+const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
 export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 60 * 1000;
-  private readonly max_records = 10_000;
   private readonly logger: Logger;
-  private core?: CoreStart;
-  private maxQueueSize = 100;
+  private maxQueueSize = TELEMETRY_MAX_BUFFER_SIZE;
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
   private intervalId?: NodeJS.Timeout;
   private isSending = false;
+  private receiver: TelemetryReceiver | undefined;
   private queue: TelemetryEvent[] = [];
   private isOptedIn?: boolean = true; // Assume true until the first check
-  private diagTask?: TelemetryDiagTask;
-  private epMetricsTask?: TelemetryEndpointTask;
-  private agentService?: AgentService;
-  private agentPolicyService?: AgentPolicyServiceInterface;
-  private esClient?: ElasticsearchClient;
-  private savedObjectClient?: SavedObjectsClientContract;
+
+  private telemetryUsageCounter?: UsageCounter;
+  private diagnosticTask?: DiagnosticTask;
+  private endpointTask?: EndpointTask;
+  private exceptionListsTask?: ExceptionListsTask;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
   }
 
-  public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract) {
+  public setup(
+    telemetryReceiver: TelemetryReceiver,
+    telemetrySetup?: TelemetryPluginSetup,
+    taskManager?: TaskManagerSetupContract,
+    telemetryUsageCounter?: UsageCounter
+  ) {
     this.telemetrySetup = telemetrySetup;
+    this.telemetryUsageCounter = telemetryUsageCounter;
 
     if (taskManager) {
-      this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
-      this.epMetricsTask = new TelemetryEndpointTask(this.logger, taskManager, this);
+      this.diagnosticTask = new DiagnosticTask(this.logger, taskManager, this, telemetryReceiver);
+      this.endpointTask = new EndpointTask(this.logger, taskManager, this, telemetryReceiver);
+      this.exceptionListsTask = new ExceptionListsTask(
+        this.logger,
+        taskManager,
+        this,
+        telemetryReceiver
+      );
     }
   }
 
   public start(
-    core?: CoreStart,
     telemetryStart?: TelemetryPluginStart,
     taskManager?: TaskManagerStartContract,
-    endpointContextService?: EndpointAppContextService
+    receiver?: TelemetryReceiver
   ) {
     this.telemetryStart = telemetryStart;
-    this.core = core;
-    this.esClient = core?.elasticsearch.client.asInternalUser;
-    this.agentService = endpointContextService?.getAgentService();
-    this.agentPolicyService = endpointContextService?.getAgentPolicyService();
-    this.savedObjectClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
+    this.receiver = receiver;
 
-    if (taskManager && this.diagTask && this.epMetricsTask) {
-      this.logger.debug(`Starting diagnostic and endpoint telemetry tasks`);
-      this.diagTask.start(taskManager);
-      this.epMetricsTask.start(taskManager);
+    if (taskManager && this.diagnosticTask && this.endpointTask && this.exceptionListsTask) {
+      this.logger.debug(`starting security telemetry tasks`);
+      this.diagnosticTask.start(taskManager);
+      this.endpointTask.start(taskManager);
+      this.exceptionListsTask?.start(taskManager);
     }
 
     this.logger.debug(`Starting local task`);
@@ -105,144 +94,6 @@ export class TelemetryEventsSender {
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
-  }
-
-  public async fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
-    const query = {
-      expand_wildcards: 'open,hidden',
-      index: '.logs-endpoint.diagnostic.collection-*',
-      ignore_unavailable: true,
-      size: this.maxQueueSize,
-      body: {
-        query: {
-          range: {
-            'event.ingested': {
-              gte: executeFrom,
-              lt: executeTo,
-            },
-          },
-        },
-        sort: [
-          {
-            'event.ingested': {
-              order: 'desc',
-            },
-          },
-        ],
-      },
-    };
-
-    if (!this.core) {
-      throw Error('could not fetch diagnostic alerts. core is not available');
-    }
-    const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
-    return callCluster('search', query);
-  }
-
-  public async fetchEndpointMetrics() {
-    if (this.esClient === undefined) {
-      throw Error('could not fetch policy responses. es client is not available');
-    }
-
-    const query = {
-      expand_wildcards: 'open,hidden',
-      index: `.ds-metrics-endpoint.metrics*`,
-      ignore_unavailable: false,
-      size: 0, // no query results required - only aggregation quantity
-      body: {
-        aggs: {
-          endpoint_agents: {
-            terms: {
-              size: this.max_records,
-              field: 'agent.id.keyword',
-            },
-            aggs: {
-              latest_metrics: {
-                top_hits: {
-                  size: 1,
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    // @ts-expect-error The types of 'body.aggs' are incompatible between these types.
-    return this.esClient.search(query);
-  }
-
-  public async fetchFleetAgents() {
-    if (this.esClient === undefined) {
-      throw Error('could not fetch policy responses. es client is not available');
-    }
-
-    return this.agentService?.listAgents(this.esClient, {
-      perPage: this.max_records,
-      showInactive: true,
-      sortField: 'enrolled_at',
-      sortOrder: 'desc',
-    });
-  }
-
-  public async fetchEndpointPolicyConfigs(id: string) {
-    if (this.savedObjectClient === undefined) {
-      throw Error('could not fetch endpoint policy configs. saved object client is not available');
-    }
-
-    return this.agentPolicyService?.getFullAgentPolicy(this.savedObjectClient, id);
-  }
-
-  public async fetchFailedEndpointPolicyResponses() {
-    if (this.esClient === undefined) {
-      throw Error('could not fetch policy responses. es client is not available');
-    }
-
-    const query = {
-      expand_wildcards: 'open,hidden',
-      index: `.ds-metrics-endpoint.policy*`,
-      ignore_unavailable: false,
-      size: 0, // no query results required - only aggregation quantity
-      body: {
-        query: {
-          match: {
-            'Endpoint.policy.applied.status': 'failure',
-          },
-        },
-        aggs: {
-          policy_responses: {
-            terms: {
-              size: this.max_records,
-              field: 'Endpoint.policy.applied.id.keyword',
-            },
-            aggs: {
-              latest_response: {
-                top_hits: {
-                  size: 1,
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    // @ts-expect-error The types of 'body.aggs' are incompatible between these types.
-    return this.esClient.search(query);
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
@@ -260,16 +111,20 @@ export class TelemetryEventsSender {
     }
 
     if (events.length > this.maxQueueSize - qlength) {
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['queue_stats'])),
+        counterType: 'docs_lost',
+        incrementBy: events.length,
+      });
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['queue_stats'])),
+        counterType: 'num_capacity_exceeded',
+        incrementBy: 1,
+      });
       this.queue.push(...this.processEvents(events.slice(0, this.maxQueueSize - qlength)));
     } else {
       this.queue.push(...this.processEvents(events));
     }
-  }
-
-  public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
-    return events.map(function (obj: TelemetryEvent): TelemetryEvent {
-      return copyAllowlistedFields(allowlistEventFields, obj);
-    });
   }
 
   public async isTelemetryOptedIn() {
@@ -299,8 +154,8 @@ export class TelemetryEventsSender {
 
       const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl('alerts-endpoint'),
-        this.fetchClusterInfo(),
-        this.fetchLicenseInfo(),
+        this.receiver?.fetchClusterInfo(),
+        this.receiver?.fetchLicenseInfo(),
       ]);
 
       this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
@@ -310,17 +165,18 @@ export class TelemetryEventsSender {
 
       const toSend: TelemetryEvent[] = cloneDeep(this.queue).map((event) => ({
         ...event,
-        ...(licenseInfo ? { license: this.copyLicenseFields(licenseInfo) } : {}),
-        cluster_uuid: clusterInfo.cluster_uuid,
-        cluster_name: clusterInfo.cluster_name,
+        ...(licenseInfo ? { license: this.receiver?.copyLicenseFields(licenseInfo) } : {}),
+        cluster_uuid: clusterInfo?.cluster_uuid,
+        cluster_name: clusterInfo?.cluster_name,
       }));
       this.queue = [];
 
       await this.sendEvents(
         toSend,
         telemetryUrl,
-        clusterInfo.cluster_uuid,
-        clusterInfo.version?.number,
+        'alerts-endpoint',
+        clusterInfo?.cluster_uuid,
+        clusterInfo?.version?.number,
         licenseInfo?.uid
       );
     } catch (err) {
@@ -328,6 +184,12 @@ export class TelemetryEventsSender {
       this.queue = [];
     }
     this.isSending = false;
+  }
+
+  public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
+    return events.map(function (obj: TelemetryEvent): TelemetryEvent {
+      return copyAllowlistedFields(allowlistEventFields, obj);
+    });
   }
 
   /**
@@ -342,8 +204,8 @@ export class TelemetryEventsSender {
     try {
       const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl(channel),
-        this.fetchClusterInfo(),
-        this.fetchLicenseInfo(),
+        this.receiver?.fetchClusterInfo(),
+        this.receiver?.fetchLicenseInfo(),
       ]);
 
       this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
@@ -354,8 +216,9 @@ export class TelemetryEventsSender {
       await this.sendEvents(
         toSend,
         telemetryUrl,
-        clusterInfo.cluster_uuid,
-        clusterInfo.version?.number,
+        channel,
+        clusterInfo?.cluster_uuid,
+        clusterInfo?.version?.number,
         licenseInfo?.uid
       );
     } catch (err) {
@@ -363,55 +226,36 @@ export class TelemetryEventsSender {
     }
   }
 
-  private async fetchClusterInfo(): Promise<ESClusterInfo> {
-    if (!this.core) {
-      throw Error("Couldn't fetch cluster info because core is not available");
-    }
-    const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
-    return getClusterInfo(callCluster);
-  }
-
   private async fetchTelemetryUrl(channel: string): Promise<string> {
     const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
     }
-    return getV3UrlFromV2(telemetryUrl.toString(), channel);
+    return this.getV3UrlFromV2(telemetryUrl.toString(), channel);
   }
 
-  private async fetchLicenseInfo(): Promise<ESLicense | undefined> {
-    if (!this.core) {
-      return undefined;
+  // Forms URLs like:
+  // https://telemetry.elastic.co/v3/send/my-channel-name or
+  // https://telemetry-staging.elastic.co/v3-dev/send/my-channel-name
+  public getV3UrlFromV2(v2url: string, channel: string): string {
+    const url = new URL(v2url);
+    if (!url.hostname.includes('staging')) {
+      url.pathname = `/v3/send/${channel}`;
+    } else {
+      url.pathname = `/v3-dev/send/${channel}`;
     }
-    try {
-      const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
-      const ret = await getLicense(callCluster, true);
-      return ret.license;
-    } catch (err) {
-      this.logger.warn(`Error retrieving license: ${err}`);
-      return undefined;
-    }
-  }
-
-  private copyLicenseFields(lic: ESLicense) {
-    return {
-      uid: lic.uid,
-      status: lic.status,
-      type: lic.type,
-      ...(lic.issued_to ? { issued_to: lic.issued_to } : {}),
-      ...(lic.issuer ? { issuer: lic.issuer } : {}),
-    };
+    return url.toString();
   }
 
   private async sendEvents(
     events: unknown[],
     telemetryUrl: string,
-    clusterUuid: string,
+    channel: string,
+    clusterUuid: string | undefined,
     clusterVersionNumber: string | undefined,
     licenseId: string | undefined
   ) {
     const ndjson = transformDataToNdjson(events);
-    // this.logger.debug(`NDJSON: ${ndjson}`);
 
     try {
       const resp = await axios.post(telemetryUrl, ndjson, {
@@ -422,129 +266,34 @@ export class TelemetryEventsSender {
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
       });
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterType: resp.status.toString(),
+        incrementBy: 1,
+      });
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterType: 'docs_sent',
+        incrementBy: events.length,
+      });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
       this.logger.warn(
         `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
       );
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterType: 'docs_lost',
+        incrementBy: events.length,
+      });
+      this.telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+        counterType: 'num_exceptions',
+        incrementBy: 1,
+      });
     }
   }
 }
-
-// For the Allowlist definition.
-interface AllowlistFields {
-  [key: string]: boolean | AllowlistFields;
-}
-
-// Allow list process fields within events.  This includes "process" and "Target.process".'
-const allowlistProcessFields: AllowlistFields = {
-  args: true,
-  name: true,
-  executable: true,
-  command_line: true,
-  hash: true,
-  pid: true,
-  pe: {
-    original_file_name: true,
-  },
-  uptime: true,
-  Ext: {
-    architecture: true,
-    code_signature: true,
-    dll: true,
-    malware_signature: true,
-    token: {
-      integrity_level_name: true,
-    },
-  },
-  thread: true,
-  working_directory: true,
-};
-
-// Allow list for event-related fields, which can also be nested under events[]
-const allowlistBaseEventFields: AllowlistFields = {
-  dll: {
-    name: true,
-    path: true,
-    code_signature: true,
-    malware_signature: true,
-    pe: {
-      original_file_name: true,
-    },
-  },
-  event: true,
-  file: {
-    extension: true,
-    name: true,
-    path: true,
-    size: true,
-    created: true,
-    accessed: true,
-    mtime: true,
-    directory: true,
-    hash: true,
-    Ext: {
-      code_signature: true,
-      header_data: true,
-      malware_classification: true,
-      malware_signature: true,
-      quarantine_result: true,
-      quarantine_message: true,
-    },
-  },
-  process: {
-    parent: allowlistProcessFields,
-    ...allowlistProcessFields,
-  },
-  network: {
-    direction: true,
-  },
-  registry: {
-    data: {
-      strings: true,
-    },
-    hive: true,
-    key: true,
-    path: true,
-    value: true,
-  },
-  Target: {
-    process: {
-      parent: allowlistProcessFields,
-      ...allowlistProcessFields,
-    },
-  },
-  user: {
-    id: true,
-  },
-};
-
-// Allow list for the data we include in the events. True means that it is deep-cloned
-// blindly. Object contents means that we only copy the fields that appear explicitly in
-// the sub-object.
-const allowlistEventFields: AllowlistFields = {
-  '@timestamp': true,
-  agent: true,
-  Endpoint: true,
-  /* eslint-disable @typescript-eslint/naming-convention */
-  Memory_protection: true,
-  Ransomware: true,
-  data_stream: true,
-  ecs: true,
-  elastic: true,
-  // behavioral protection re-nests some field sets under events.*
-  events: allowlistBaseEventFields,
-  rule: {
-    id: true,
-    name: true,
-    ruleset: true,
-    version: true,
-  },
-  host: {
-    os: true,
-  },
-  ...allowlistBaseEventFields,
-};
 
 export function copyAllowlistedFields(
   allowlist: AllowlistFields,
@@ -571,72 +320,4 @@ export function copyAllowlistedFields(
     }
     return newEvent;
   }, {});
-}
-
-// Forms URLs like:
-// https://telemetry.elastic.co/v3/send/my-channel-name or
-// https://telemetry-staging.elastic.co/v3-dev/send/my-channel-name
-export function getV3UrlFromV2(v2url: string, channel: string): string {
-  const url = new URL(v2url);
-  if (!url.hostname.includes('staging')) {
-    url.pathname = `/v3/send/${channel}`;
-  } else {
-    url.pathname = `/v3-dev/send/${channel}`;
-  }
-  return url.toString();
-}
-
-// For getting cluster info. Copied from telemetry_collection/get_cluster_info.ts
-export interface ESClusterInfo {
-  cluster_uuid: string;
-  cluster_name: string;
-  version?: {
-    number: string;
-    build_flavor: string;
-    build_type: string;
-    build_hash: string;
-    build_date: string;
-    build_snapshot?: boolean;
-    lucene_version: string;
-    minimum_wire_compatibility_version: string;
-    minimum_index_compatibility_version: string;
-  };
-}
-
-/**
- * Get the cluster info from the connected cluster.
- *
- * This is the equivalent to GET /
- *
- * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
- */
-function getClusterInfo(callCluster: LegacyAPICaller) {
-  return callCluster<ESClusterInfo>('info');
-}
-
-// From https://www.elastic.co/guide/en/elasticsearch/reference/current/get-license.html
-export interface ESLicense {
-  status: string;
-  uid: string;
-  type: string;
-  issue_date?: string;
-  issue_date_in_millis?: number;
-  expiry_date?: string;
-  expirty_date_in_millis?: number;
-  max_nodes?: number;
-  issued_to?: string;
-  issuer?: string;
-  start_date_in_millis?: number;
-}
-
-function getLicense(callCluster: LegacyAPICaller, local: boolean) {
-  return callCluster<{ license: ESLicense }>('transport.request', {
-    method: 'GET',
-    path: '/_license',
-    query: {
-      local,
-      // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
-      accept_enterprise: 'true',
-    },
-  });
 }

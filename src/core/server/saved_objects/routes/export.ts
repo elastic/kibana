@@ -11,7 +11,7 @@ import stringify from 'json-stable-stringify';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
 import { IRouter, KibanaRequest } from '../../http';
-import { CoreUsageDataSetup } from '../../core_usage_data';
+import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import {
   SavedObjectsExportByTypeOptions,
@@ -22,7 +22,7 @@ import { validateTypes, validateObjects, catchAndReturnBoomErrors } from './util
 
 interface RouteDependencies {
   config: SavedObjectConfig;
-  coreUsageData: CoreUsageDataSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
 }
 
 type EitherExportOptions = SavedObjectsExportByTypeOptions | SavedObjectsExportByObjectOptions;

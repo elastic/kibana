@@ -16,8 +16,8 @@ import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
 interface CheckAccess {
   request: KibanaRequest;
-  security?: SecurityPluginSetup;
-  spaces?: SpacesPluginStart;
+  security: SecurityPluginSetup;
+  spaces: SpacesPluginStart;
   config: ConfigType;
   log: Logger;
 }
@@ -43,21 +43,18 @@ export const checkAccess = async ({
   request,
   log,
 }: CheckAccess): Promise<ProductAccess> => {
-  const isRbacEnabled = security?.authz.mode.useRbacForRequest(request) ?? false;
+  const isRbacEnabled = security.authz.mode.useRbacForRequest(request);
 
-  // We can only retrieve the active space when either:
-  // 1) security is enabled, and the request has already been authenticated
-  // 2) security is disabled
-  const attemptSpaceRetrieval = !isRbacEnabled || request.auth.isAuthenticated;
-
-  // If we can't retrieve the current space, then assume the feature is available
-  let allowedAtSpace = false;
-
-  if (!spaces) {
-    allowedAtSpace = true;
+  // If security has been disabled, always hide the plugin
+  if (!isRbacEnabled) {
+    return DENY_ALL_PLUGINS;
   }
 
-  if (spaces && attemptSpaceRetrieval) {
+  // We can only retrieve the active space when security is enabled and the request has already been authenticated
+  const attemptSpaceRetrieval = request.auth.isAuthenticated;
+  let allowedAtSpace = false;
+
+  if (attemptSpaceRetrieval) {
     try {
       const space = await spaces.spacesService.getActiveSpace(request);
       allowedAtSpace = !space.disabledFeatures?.includes('enterpriseSearch');
@@ -75,17 +72,12 @@ export const checkAccess = async ({
     return DENY_ALL_PLUGINS;
   }
 
-  // If security has been disabled, always show the plugin
-  if (!isRbacEnabled) {
-    return ALLOW_ALL_PLUGINS;
-  }
-
   // If the user is a "superuser" or has the base Kibana all privilege globally, always show the plugin
   const isSuperUser = async (): Promise<boolean> => {
     try {
-      const { hasAllRequested } = await security!.authz
+      const { hasAllRequested } = await security.authz
         .checkPrivilegesWithRequest(request)
-        .globally({ kibana: security!.authz.actions.ui.get('enterpriseSearch', 'all') });
+        .globally({ kibana: security.authz.actions.ui.get('enterpriseSearch', 'all') });
       return hasAllRequested;
     } catch (err) {
       if (err.statusCode === 401 || err.statusCode === 403) {

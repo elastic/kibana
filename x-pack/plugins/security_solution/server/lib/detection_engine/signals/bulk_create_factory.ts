@@ -7,6 +7,7 @@
 
 import { performance } from 'perf_hooks';
 import { countBy, isEmpty, get } from 'lodash';
+
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { BuildRuleMessage } from './rule_messages';
 import { RefreshTypes } from '../types';

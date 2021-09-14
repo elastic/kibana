@@ -67,6 +67,25 @@ describe('event filters reducer', () => {
       });
     });
 
+    it('change form values without entry', () => {
+      const newComment = 'new comment';
+      const result = eventFiltersPageReducer(initialState, {
+        type: 'eventFiltersChangeForm',
+        payload: { newComment },
+      });
+
+      expect(result).toStrictEqual({
+        ...initialState,
+        form: {
+          ...initialState.form,
+          newComment,
+          submissionResourceState: {
+            type: 'UninitialisedResourceState',
+          },
+        },
+      });
+    });
+
     it('change form status', () => {
       const result = eventFiltersPageReducer(initialState, {
         type: 'eventFiltersFormStateChanged',

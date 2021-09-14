@@ -135,11 +135,12 @@ export class TopN extends Component {
           </td>
           <td width="100%" className="tvbVisTopN__bar">
             <div className="tvbVisTopN__innerBar" style={styles.innerBar}>
-              <div style={styles.innerBarValue} />
+              <div style={styles.innerBarValue} data-test-subj="topNInnerBar" />
             </div>
           </td>
           <td className="tvbVisTopN__value" data-test-subj="tsvbTopNValue">
-            {formatter(lastValue)}
+            {/* eslint-disable-next-line react/no-danger */}
+            <span dangerouslySetInnerHTML={{ __html: formatter(lastValue) }} />
           </td>
         </tr>
       );

@@ -23,7 +23,7 @@ import {
   createJavaAgentInstructions,
   createDotNetAgentInstructions,
   createPhpAgentInstructions,
-} from '../instructions/apm_agent_instructions';
+} from '../../../common/tutorial/instructions/apm_agent_instructions';
 import { CloudSetup } from '../../../../cloud/server';
 
 export function createElasticCloudInstructions(

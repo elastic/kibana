@@ -7,6 +7,7 @@
 
 import rison from 'rison-node';
 import type { TimeRange } from '../../../../src/plugins/data/common/query';
+import { LayerType } from './types';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = 'lens';
@@ -15,6 +16,8 @@ export const DOC_TYPE = 'lens';
 export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const BASE_API_URL = '/api/lens';
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';
+
+export const layerTypes: Record<string, LayerType> = { DATA: 'data', THRESHOLD: 'threshold' };
 
 export function getBasePath() {
   return `#/`;

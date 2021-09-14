@@ -12,8 +12,11 @@ export class FieldEditorService extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
-  public async setName(name: string) {
-    await this.testSubjects.setValue('nameField > input', name);
+  public async setName(name: string, clearFirst = false, typeCharByChar = false) {
+    await this.testSubjects.setValue('nameField > input', name, {
+      clearWithKeyboard: clearFirst,
+      typeCharByChar,
+    });
   }
   public async enableCustomLabel() {
     await this.testSubjects.setEuiSwitch('customLabelRow > toggle', 'check');

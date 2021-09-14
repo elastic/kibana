@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./target",
+    "skipLibCheck": true
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../typings/**/*"
+  ],
+  "exclude": [],
+  "references": [
+    { "path": "../../src/core/tsconfig.json" },
+    { "path": "../developer_examples/tsconfig.json" },
+    { "path": "../../src/plugins/field_formats/tsconfig.json" },
+    { "path": "../../src/plugins/data/tsconfig.json" },
+    { "path": "../../src/plugins/index_pattern_field_editor/tsconfig.json" }
+  ]
+}

@@ -13,11 +13,8 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../server/utils/queries';
+import { rangeQuery, kqlQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -29,7 +26,7 @@ import {
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { calculateTransactionErrorPercentage } from '../helpers/transaction_error_rate';
+import { calculateFailedTransactionRate } from '../helpers/transaction_error_rate';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -47,15 +44,16 @@ export async function getServiceTransactionGroups({
   transactionType,
   latencyAggregationType,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient, start, end, config } = setup;
+  const bucketSize = config['xpack.apm.ui.transactionGroupBucketSize'];
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
@@ -92,7 +90,7 @@ export async function getServiceTransactionGroups({
           transaction_groups: {
             terms: {
               field: TRANSACTION_NAME,
-              size: 500,
+              size: bucketSize,
               order: { _count: 'desc' },
             },
             aggs: {
@@ -117,9 +115,7 @@ export async function getServiceTransactionGroups({
 
   const transactionGroups =
     response.aggregations?.transaction_groups.buckets.map((bucket) => {
-      const errorRate = calculateTransactionErrorPercentage(
-        bucket[EVENT_OUTCOME]
-      );
+      const errorRate = calculateFailedTransactionRate(bucket[EVENT_OUTCOME]);
 
       const transactionGroupTotalDuration =
         bucket.transaction_group_total_duration.value || 0;
@@ -150,5 +146,6 @@ export async function getServiceTransactionGroups({
     isAggregationAccurate:
       (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) ===
       0,
+    bucketSize,
   };
 }

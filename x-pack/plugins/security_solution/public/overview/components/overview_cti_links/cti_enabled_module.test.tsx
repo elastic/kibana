@@ -22,12 +22,17 @@ import {
 import { mockTheme, mockProps, mockCtiEventCountsResponse, mockCtiLinksResponse } from './mock';
 import { useCtiEventCounts } from '../../containers/overview_cti_links/use_cti_event_counts';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
+import { useRequestEventCounts } from '../../containers/overview_cti_links/use_request_event_counts';
 
 jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../containers/overview_cti_links/use_cti_event_counts');
 const useCTIEventCountsMock = useCtiEventCounts as jest.Mock;
 useCTIEventCountsMock.mockReturnValue(mockCtiEventCountsResponse);
+
+jest.mock('../../containers/overview_cti_links/use_request_event_counts');
+const useRequestEventCountsMock = useRequestEventCounts as jest.Mock;
+useRequestEventCountsMock.mockReturnValue([true, {}]);
 
 jest.mock('../../containers/overview_cti_links');
 const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;

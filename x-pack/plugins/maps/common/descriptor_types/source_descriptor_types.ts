@@ -42,6 +42,7 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   geoField?: string;
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
+  applyForceRefresh: boolean;
 };
 
 type AbstractAggDescriptor = {
@@ -110,10 +111,6 @@ export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   whereQuery?: Query;
   size?: number;
   type: SOURCE_TYPES.ES_TERM_SOURCE;
-};
-
-export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {
-  name: string;
 };
 
 // This is for symmetry with other sources only.

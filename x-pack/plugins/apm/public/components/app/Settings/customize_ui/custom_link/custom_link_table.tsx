@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -18,7 +19,7 @@ import React, { useState } from 'react';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
-import { ManagedTable } from '../../../../shared/managed_table';
+import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 
 interface Props {
@@ -31,7 +32,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
   const { core } = useApmPluginContext();
   const canSave = core.application.capabilities.apm.save;
 
-  const columns = [
+  const columns: Array<ITableColumn<CustomLink>> = [
     {
       field: 'label',
       name: i18n.translate(
@@ -49,8 +50,8 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
       truncateText: true,
     },
     {
-      width: 160,
-      align: 'right',
+      width: '160px',
+      align: RIGHT_ALIGNMENT,
       field: '@timestamp',
       name: i18n.translate(
         'xpack.apm.settings.customizeUI.customLink.table.lastUpdated',
@@ -79,6 +80,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
                 icon: 'pencil',
                 color: 'primary',
                 type: 'icon',
+                'data-test-subj': 'editCustomLink',
                 onClick: (customLink: CustomLink) => {
                   onCustomLinkSelected(customLink);
                 },

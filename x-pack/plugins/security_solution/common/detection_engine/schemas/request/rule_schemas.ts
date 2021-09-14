@@ -62,12 +62,13 @@ import {
   updated_by,
   created_at,
   created_by,
-  job_status,
+  ruleExecutionStatus,
   status_date,
   last_success_at,
   last_success_message,
   last_failure_at,
   last_failure_message,
+  namespace,
 } from '../common/schemas';
 
 export const createSchema = <
@@ -155,6 +156,7 @@ const baseParams = {
     meta,
     rule_name_override,
     timestamp_override,
+    namespace,
   },
   defaultable: {
     tags,
@@ -405,7 +407,7 @@ const responseRequiredFields = {
   created_by,
 };
 const responseOptionalFields = {
-  status: job_status,
+  status: ruleExecutionStatus,
   status_date,
   last_success_at,
   last_success_message,

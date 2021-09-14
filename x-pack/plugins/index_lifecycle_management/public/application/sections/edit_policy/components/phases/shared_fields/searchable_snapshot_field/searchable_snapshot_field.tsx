@@ -85,9 +85,9 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
   canBeDisabled = true,
 }) => {
   const {
-    services: { cloud },
+    services: { cloud, getUrlForApp },
   } = useKibana();
-  const { getUrlForApp, policy, license, isNewPolicy } = useEditPolicyContext();
+  const { policy, license, isNewPolicy } = useEditPolicyContext();
   const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
   const searchableSnapshotRepoPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;

@@ -79,6 +79,7 @@ describe.skip('onRequestInterceptor', () => {
   }
 
   async function setup(opts: SetupOpts = { basePath: '/', routes: 'legacy' }) {
+    await root.preboot();
     const { http, elasticsearch } = await root.setup();
     // Mock esNodesCompatibility$ to prevent `root.start()` from blocking on ES version check
     elasticsearch.esNodesCompatibility$ = elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;

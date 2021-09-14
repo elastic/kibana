@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 
 import type { IUiSettingsClient } from '../../../core/public';

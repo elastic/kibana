@@ -37,7 +37,10 @@ export function getLastSeriesTimestamp(seriesGroup: Array<PanelSeries['series']>
 
       if (lastValue) {
         const [dataLastTimestamp] = lastValue;
-        lastTimestamp = Math.max(dataLastTimestamp, lastTimestamp ?? dataLastTimestamp);
+
+        if (typeof dataLastTimestamp === 'number') {
+          lastTimestamp = Math.max(dataLastTimestamp, lastTimestamp ?? dataLastTimestamp);
+        }
       }
     });
   });

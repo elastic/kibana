@@ -80,7 +80,9 @@ export function hitsToGeoJson(
   const tmpGeometriesAccumulator: Geometry[] = [];
 
   for (let i = 0; i < hits.length; i++) {
-    const properties = flattenHit(hits[i]);
+    // flattenHit returns value from cache. Create new object to avoid modifying flattenHit cache.
+    // not doing deep copy because copying coordinates can be very expensive for complex geometries.
+    const properties = { ...flattenHit(hits[i]) };
 
     tmpGeometriesAccumulator.length = 0; // truncate accumulator
 

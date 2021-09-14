@@ -47,7 +47,11 @@ export const actionStatusRequestHandler = function (
       ? [...new Set(req.query.agent_ids)]
       : [req.query.agent_ids];
 
-    const response = await getPendingActionCounts(esClient, agentIDs);
+    const response = await getPendingActionCounts(
+      esClient,
+      endpointContext.service.getEndpointMetadataService(),
+      agentIDs
+    );
 
     return res.ok({
       body: {

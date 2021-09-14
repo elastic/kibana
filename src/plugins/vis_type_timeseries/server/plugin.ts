@@ -13,6 +13,7 @@ import {
   Plugin,
   Logger,
   KibanaRequest,
+  IUiSettingsClient,
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
@@ -29,6 +30,7 @@ import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from './types';
+import type { FieldFormatsRegistry } from '../../field_formats/common';
 
 import {
   SearchStrategyRegistry,
@@ -70,6 +72,7 @@ export interface Framework {
   getIndexPatternsService: (
     requestContext: VisTypeTimeseriesRequestHandlerContext
   ) => Promise<IndexPatternsService>;
+  getFieldFormatsService: (uiSettings: IUiSettingsClient) => Promise<FieldFormatsRegistry>;
   getEsShardTimeout: () => Promise<number>;
 }
 
@@ -111,6 +114,11 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
           requestContext.core.elasticsearch.client.asCurrentUser
         );
       },
+      getFieldFormatsService: async (uiSettings) => {
+        const [, { data }] = await core.getStartServices();
+
+        return data.fieldFormats.fieldFormatServiceFactory(uiSettings);
+      },
     };
 
     searchStrategyRegistry.addStrategy(new DefaultSearchStrategy());
@@ -120,7 +128,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     fieldsRoutes(router, framework);
 
     if (plugins.usageCollection) {
-      registerTimeseriesUsageCollector(plugins.usageCollection, globalConfig$);
+      registerTimeseriesUsageCollector(plugins.usageCollection);
     }
 
     return {

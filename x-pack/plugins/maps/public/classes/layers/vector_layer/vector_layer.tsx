@@ -11,6 +11,7 @@ import type {
   AnyLayer as MbLayer,
   GeoJSONSource as MbGeoJSONSource,
 } from '@kbn/mapbox-gl';
+import type { Query } from 'src/plugins/data/common';
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
@@ -48,14 +49,13 @@ import {
 } from '../../util/mb_filter_expressions';
 import {
   DynamicStylePropertyOptions,
-  MapFilters,
-  MapQuery,
+  DataFilters,
   StyleMetaDescriptor,
   Timeslice,
-  VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
+  VectorJoinSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { ISource } from '../../sources/source';
 import { IVectorSource } from '../../sources/vector_source';
@@ -69,17 +69,8 @@ import { IESSource } from '../../sources/es_source';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITermJoinSource } from '../../sources/term_join_source';
 import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
-
-interface SourceResult {
-  refreshed: boolean;
-  featureCollection?: FeatureCollection;
-}
-
-interface JoinState {
-  dataHasChanged: boolean;
-  join: InnerJoin;
-  propertiesMap?: PropertiesMap;
-}
+import { JoinState, performInnerJoins } from './perform_inner_joins';
+import { buildVectorRequestMeta } from '../build_vector_request_meta';
 
 export interface VectorLayerArguments {
   source: IVectorSource;
@@ -194,7 +185,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   supportsFeatureEditing(): boolean {
     const dataRequest = this.getDataRequest(SUPPORTS_FEATURE_EDITING_REQUEST_ID);
     const data = dataRequest?.getData() as { supportsFeatureEditing: boolean } | undefined;
-
     return data ? data.supportsFeatureEditing : false;
   }
 
@@ -277,7 +267,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
           layerId: this.getId(),
           syncContext,
           source: this.getSource(),
-          sourceQuery: this.getQuery() as MapQuery,
+          sourceQuery: this.getQuery(),
         });
   }
 
@@ -343,29 +333,31 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     onLoadError,
     registerCancelCallback,
     dataFilters,
+    isForceRefresh,
   }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
-    const searchFilters: VectorJoinSourceRequestMeta = {
-      ...dataFilters,
-      fieldNames: joinSource.getFieldNames(),
-      sourceQuery: joinSource.getWhereQuery(),
-      applyGlobalQuery: joinSource.getApplyGlobalQuery(),
-      applyGlobalTime: joinSource.getApplyGlobalTime(),
-      sourceMeta: joinSource.getSyncMeta(),
-    };
-    const prevDataRequest = this.getDataRequest(sourceDataId);
 
+    const joinRequestMeta: VectorJoinSourceRequestMeta = buildVectorRequestMeta(
+      joinSource,
+      joinSource.getFieldNames(),
+      dataFilters,
+      joinSource.getWhereQuery(),
+      isForceRefresh
+    ) as VectorJoinSourceRequestMeta;
+
+    const prevDataRequest = this.getDataRequest(sourceDataId);
     const canSkipFetch = await canSkipSourceUpdate({
       source: joinSource,
       prevDataRequest,
-      nextMeta: searchFilters,
+      nextRequestMeta: joinRequestMeta,
       extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
       getUpdateDueToTimeslice: () => {
         return true;
       },
     });
+
     if (canSkipFetch) {
       return {
         dataHasChanged: false,
@@ -375,10 +367,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     try {
-      startLoading(sourceDataId, requestToken, searchFilters);
+      startLoading(sourceDataId, requestToken, joinRequestMeta);
       const leftSourceName = await this._source.getDisplayName();
       const propertiesMap = await joinSource.getPropertiesMap(
-        searchFilters,
+        joinRequestMeta,
         leftSourceName,
         join.getLeftField().getName(),
         registerCancelCallback.bind(null, requestToken)
@@ -407,8 +399,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return await Promise.all(joinSyncs);
   }
 
-  async _getSearchFilters(
-    dataFilters: MapFilters,
+  async _getVectorSourceRequestMeta(
+    isForceRefresh: boolean,
+    dataFilters: DataFilters,
     source: IVectorSource,
     style: IVectorStyle
   ): Promise<VectorSourceRequestMeta> {
@@ -422,62 +415,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     if (timesliceMaskFieldName) {
       fieldNames.push(timesliceMaskFieldName);
     }
-
-    const sourceQuery = this.getQuery() as MapQuery;
-    return {
-      ...dataFilters,
-      fieldNames: _.uniq(fieldNames).sort(),
-      geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
-      sourceQuery: sourceQuery ? sourceQuery : undefined,
-      applyGlobalQuery: source.getApplyGlobalQuery(),
-      applyGlobalTime: source.getApplyGlobalTime(),
-      sourceMeta: source.getSyncMeta(),
-    };
-  }
-
-  _performInnerJoins(
-    sourceResult: SourceResult,
-    joinStates: JoinState[],
-    updateSourceData: DataRequestContext['updateSourceData']
-  ) {
-    // should update the store if
-    // -- source result was refreshed
-    // -- any of the join configurations changed (joinState changed)
-    // -- visibility of any of the features has changed
-
-    let shouldUpdateStore =
-      sourceResult.refreshed || joinStates.some((joinState) => joinState.dataHasChanged);
-
-    if (!shouldUpdateStore) {
-      return;
-    }
-
-    for (let i = 0; i < sourceResult.featureCollection!.features.length; i++) {
-      const feature = sourceResult.featureCollection!.features[i];
-      if (!feature.properties) {
-        feature.properties = {};
-      }
-      const oldVisbility = feature.properties[FEATURE_VISIBLE_PROPERTY_NAME];
-      let isFeatureVisible = true;
-      for (let j = 0; j < joinStates.length; j++) {
-        const joinState = joinStates[j];
-        const innerJoin = joinState.join;
-        const canJoinOnCurrent = joinState.propertiesMap
-          ? innerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap)
-          : false;
-        isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
-      }
-
-      if (oldVisbility !== isFeatureVisible) {
-        shouldUpdateStore = true;
-      }
-
-      feature.properties[FEATURE_VISIBLE_PROPERTY_NAME] = isFeatureVisible;
-    }
-
-    if (shouldUpdateStore) {
-      updateSourceData({ ...sourceResult.featureCollection });
-    }
+    return buildVectorRequestMeta(source, fieldNames, dataFilters, this.getQuery(), isForceRefresh);
   }
 
   async _syncSourceStyleMeta(
@@ -485,7 +423,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     source: IVectorSource,
     style: IVectorStyle
   ) {
-    const sourceQuery = this.getQuery() as MapQuery;
+    const sourceQuery = this.getQuery();
     return this._syncStyleMeta({
       source,
       style,
@@ -537,7 +475,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     dataRequestId: string;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
     source: IVectorSource | ITermJoinSource;
-    sourceQuery?: MapQuery;
+    sourceQuery?: Query;
     style: IVectorStyle;
   } & DataRequestContext) {
     if (!source.isESSource() || dynamicStyleProps.length === 0) {
@@ -697,7 +635,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         layerId: this.getId(),
         layerName: await this.getDisplayName(source),
         prevDataRequest: this.getSourceDataRequest(),
-        requestMeta: await this._getSearchFilters(syncContext.dataFilters, source, style),
+        requestMeta: await this._getVectorSourceRequestMeta(
+          syncContext.isForceRefresh,
+          syncContext.dataFilters,
+          source,
+          style
+        ),
         syncContext,
         source,
         getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
@@ -714,7 +657,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       }
 
       const joinStates = await this._syncJoins(syncContext, style);
-      this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
+      performInnerJoins(
+        sourceResult,
+        joinStates,
+        syncContext.updateSourceData,
+        syncContext.onJoinError
+      );
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
         throw error;
@@ -1046,9 +994,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const prevMeta = this.getSourceDataRequest()?.getMeta();
-    return prevMeta !== undefined && prevMeta.timesiceMaskField !== undefined
+    return prevMeta !== undefined && prevMeta.timesliceMaskField !== undefined
       ? {
-          timesiceMaskField: prevMeta.timesiceMaskField,
+          timesliceMaskField: prevMeta.timesliceMaskField,
           timeslice,
         }
       : undefined;
@@ -1166,7 +1114,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   async addFeature(geometry: Geometry | Position[]) {
     const layerSource = this.getSource();
-    await layerSource.addFeature(geometry);
+    const defaultFields = await layerSource.getDefaultFields();
+    await layerSource.addFeature(geometry, defaultFields);
   }
 
   async deleteFeature(featureId: string) {

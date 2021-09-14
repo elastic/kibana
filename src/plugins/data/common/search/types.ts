@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { KibanaExecutionContext } from 'src/core/public';
 import { Observable } from 'rxjs';
 import { IEsSearchRequest, IEsSearchResponse, IndexPattern } from '..';
 import type { RequestAdapter } from '../../../inspector/common';
@@ -71,6 +71,11 @@ export interface IKibanaSearchResponse<RawResponse = any> {
   isRestored?: boolean;
 
   /**
+   * Optional warnings that should be surfaced to the end user
+   */
+  warning?: string;
+
+  /**
    * The raw response returned by the internal search method (usually the raw ES response)
    */
   rawResponse: RawResponse;
@@ -134,6 +139,8 @@ export interface ISearchOptions {
    * Inspector integration options
    */
   inspector?: IInspectorInfo;
+
+  executionContext?: KibanaExecutionContext;
 }
 
 /**
@@ -142,5 +149,5 @@ export interface ISearchOptions {
  */
 export type ISearchOptionsSerializable = Pick<
   ISearchOptions,
-  'strategy' | 'legacyHitsTotal' | 'sessionId' | 'isStored' | 'isRestore'
+  'strategy' | 'legacyHitsTotal' | 'sessionId' | 'isStored' | 'isRestore' | 'executionContext'
 >;

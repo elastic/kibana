@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectAttributes,
 } from '../../../../../../../src/core/server';
-import { IRuleActionsAttributesSavedObjectAttributes, RuleAlertAction } from './types';
+import { IRuleActionsAttributesSavedObjectAttributes } from './types';
 
+/**
+ * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
+ * do not use it anymore within the code base. Once we feel comfortable that users are upgrade far enough and this is no longer
+ * needed then it will be safe to remove this saved object and all its migrations
+ * @deprecated Remove this once we no longer need legacy migrations for rule actions (8.0.0)
+ */
 function isEmptyObject(obj: {}) {
   for (const attr in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, attr)) {
@@ -21,6 +28,12 @@ function isEmptyObject(obj: {}) {
   return true;
 }
 
+/**
+ * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
+ * do not use it anymore within the code base. Once we feel comfortable that users are upgrade far enough and this is no longer
+ * needed then it will be safe to remove this saved object and all its migrations
+ * @deprecated Remove this once we no longer need legacy migrations for rule actions (8.0.0)
+ */
 export const ruleActionsSavedObjectMigration = {
   '7.11.2': (
     doc: SavedObjectUnsanitizedDoc<IRuleActionsAttributesSavedObjectAttributes>

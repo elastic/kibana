@@ -22,7 +22,7 @@ import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
-import { FramePublicAPI } from '../../../../types';
+import { FrameDatasourceAPI } from '../../../../types';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -1110,7 +1110,7 @@ describe('terms', () => {
               fromDate: '2020',
               toDate: '2021',
             },
-          } as unknown) as FramePublicAPI,
+          } as unknown) as FrameDatasourceAPI,
           'first'
         );
         expect(newLayer.columns.col1).toEqual(

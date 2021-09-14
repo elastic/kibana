@@ -51,7 +51,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(30);
+      expect(count).toBe(31);
     });
   });
 
@@ -88,6 +88,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteJob).toBe(false);
       expect(capabilities.canOpenJob).toBe(false);
       expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
@@ -137,6 +138,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteJob).toBe(true);
       expect(capabilities.canOpenJob).toBe(true);
       expect(capabilities.canCloseJob).toBe(true);
+      expect(capabilities.canResetJob).toBe(true);
       expect(capabilities.canForecastJob).toBe(true);
       expect(capabilities.canStartStopDatafeed).toBe(true);
       expect(capabilities.canUpdateJob).toBe(true);
@@ -185,6 +187,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteJob).toBe(false);
       expect(capabilities.canOpenJob).toBe(false);
       expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
@@ -233,6 +236,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteJob).toBe(false);
       expect(capabilities.canOpenJob).toBe(false);
       expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
@@ -281,6 +285,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteJob).toBe(false);
       expect(capabilities.canOpenJob).toBe(false);
       expect(capabilities.canCloseJob).toBe(false);
+      expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
@@ -331,6 +336,7 @@ describe('check_capabilities', () => {
     expect(capabilities.canDeleteJob).toBe(false);
     expect(capabilities.canOpenJob).toBe(false);
     expect(capabilities.canCloseJob).toBe(false);
+    expect(capabilities.canResetJob).toBe(false);
     expect(capabilities.canForecastJob).toBe(false);
     expect(capabilities.canStartStopDatafeed).toBe(false);
     expect(capabilities.canUpdateJob).toBe(false);

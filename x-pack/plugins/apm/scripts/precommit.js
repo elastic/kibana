@@ -71,6 +71,8 @@ const tasks = new Listr(
             resolve(__dirname, '../../../../node_modules/jest-silent-reporter'),
             '--collect-coverage',
             'false',
+            '--maxWorkers',
+            4,
           ],
           execaOpts
         ),

@@ -8,31 +8,42 @@
 import { FindResult } from '../../../../../alerting/server';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleParams } from '../schemas/rule_schemas';
+import { ruleTypeMappings } from '../signals/utils';
 import { FindRuleOptions } from './types';
 
-export const getFilter = (filter: string | null | undefined) => {
+export const getFilter = (
+  filter: string | null | undefined,
+  isRuleRegistryEnabled: boolean = false
+) => {
+  const alertTypeFilter = isRuleRegistryEnabled
+    ? `(${Object.values(ruleTypeMappings)
+        .map((type) => (type !== SIGNALS_ID ? `alert.attributes.alertTypeId: ${type}` : undefined))
+        .filter((type) => type != null)
+        .join(' OR ')})`
+    : `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
   if (filter == null) {
-    return `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
+    return alertTypeFilter;
   } else {
-    return `alert.attributes.alertTypeId: ${SIGNALS_ID} AND ${filter}`;
+    return `${alertTypeFilter} AND ${filter}`;
   }
 };
 
 export const findRules = ({
-  alertsClient,
+  rulesClient,
   perPage,
   page,
   fields,
   filter,
   sortField,
   sortOrder,
+  isRuleRegistryEnabled,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
-  return alertsClient.find({
+  return rulesClient.find({
     options: {
       fields,
       page,
       perPage,
-      filter: getFilter(filter),
+      filter: getFilter(filter, isRuleRegistryEnabled),
       sortOrder,
       sortField,
     },

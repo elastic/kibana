@@ -15,7 +15,7 @@ import { waitFor } from '@testing-library/dom';
 jest.mock('../context_menu');
 
 const executeFn = jest.fn();
-const openContextMenuSpy = (openContextMenu as any) as jest.SpyInstance;
+const openContextMenuSpy = (openContextMenu as unknown) as jest.SpyInstance;
 
 const CONTACT_USER_TRIGGER = 'CONTACT_USER_TRIGGER';
 

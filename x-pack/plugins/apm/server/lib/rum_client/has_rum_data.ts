@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../server/utils/queries';
+import { rangeQuery } from '../../../../observability/server';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 export async function hasRumData({
   setup,
 }: {
-  setup: Setup & Partial<SetupTimeRange>;
+  setup: SetupUX & Partial<SetupTimeRange>;
 }) {
   try {
     const { start, end } = setup;

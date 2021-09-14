@@ -7,8 +7,10 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { parse } from 'query-string';
 
 import { Capabilities } from 'src/core/public';
 import { TopNavMenuData } from 'src/plugins/navigation/public';
@@ -33,6 +35,7 @@ import {
 import { APP_NAME, VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
+import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
@@ -81,6 +84,7 @@ export const getTopNavConfig = (
     embeddableId,
   }: TopNavConfigParams,
   {
+    data,
     application,
     chrome,
     history,
@@ -94,6 +98,7 @@ export const getTopNavConfig = (
     savedObjectsTagging,
     presentationUtil,
     usageCollection,
+    getKibanaVersion,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -154,17 +159,17 @@ export const getTopNavConfig = (
               saveOptions.dashboardId === 'new' ? '#/create' : `#/view/${saveOptions.dashboardId}`;
           }
 
-          if (newlyCreated && stateTransfer) {
+          if (stateTransfer) {
             stateTransfer.navigateToWithEmbeddablePackage(app, {
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
                 input: { savedObjectId: id },
-                embeddableId,
+                embeddableId: savedVis.copyOnSave ? undefined : embeddableId,
+                searchSessionId: data.search.session.getSessionId(),
               },
               path,
             });
           } else {
-            // TODO: need the same thing here?
             application.navigateToApp(app, { path });
           }
         } else {
@@ -214,6 +219,7 @@ export const getTopNavConfig = (
       } as VisualizeInput,
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
+      searchSessionId: data.search.session.getSessionId(),
     };
     stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
   };
@@ -277,6 +283,22 @@ export const getTopNavConfig = (
       testId: 'shareTopNavButton',
       run: (anchorElement) => {
         if (share && !embeddableId) {
+          const currentState = stateContainer.getState();
+          const searchParams = parse(history.location.search);
+          const params: VisualizeLocatorParams = {
+            visId: savedVis?.id,
+            filters: currentState.filters,
+            refreshInterval: undefined,
+            timeRange: data.query.timefilter.timefilter.getTime(),
+            uiState: currentState.uiState,
+            query: currentState.query,
+            vis: currentState.vis,
+            linked: currentState.linked,
+            indexPattern:
+              visInstance.savedSearch?.searchSource?.getField('index')?.id ??
+              (searchParams.indexPattern as string),
+            savedSearchId: visInstance.savedSearch?.id ?? (searchParams.savedSearchId as string),
+          };
           // TODO: support sharing in by-value mode
           share.toggleShareContextMenu({
             anchorElement,
@@ -286,7 +308,17 @@ export const getTopNavConfig = (
             objectId: savedVis?.id,
             objectType: 'visualization',
             sharingData: {
-              title: savedVis?.title,
+              title:
+                savedVis?.title ||
+                i18n.translate('visualize.reporting.defaultReportTitle', {
+                  defaultMessage: 'Visualization [{date}]',
+                  values: { date: moment().toISOString(true) },
+                }),
+              locatorParams: {
+                id: VISUALIZE_APP_LOCATOR,
+                version: getKibanaVersion(),
+                params,
+              },
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
             showPublicUrlSwitch,
@@ -394,6 +426,7 @@ export const getTopNavConfig = (
                     } as VisualizeInput,
                     embeddableId,
                     type: VISUALIZE_EMBEDDABLE_TYPE,
+                    searchSessionId: data.search.session.getSessionId(),
                   };
 
                   const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
@@ -449,7 +482,9 @@ export const getTopNavConfig = (
                     onSave={onSave}
                     options={tagOptions}
                     getAppNameFromId={stateTransfer.getAppNameFromId}
-                    objectType={'visualization'}
+                    objectType={i18n.translate('visualize.topNavMenu.saveVisualizationObjectType', {
+                      defaultMessage: 'visualization',
+                    })}
                     onClose={() => {}}
                     originatingApp={originatingApp}
                     returnToOriginSwitchLabel={
@@ -475,7 +510,9 @@ export const getTopNavConfig = (
                     canSaveByReference={Boolean(visualizeCapabilities.save)}
                     onSave={onSave}
                     tagOptions={tagOptions}
-                    objectType={'visualization'}
+                    objectType={i18n.translate('visualize.topNavMenu.saveVisualizationObjectType', {
+                      defaultMessage: 'visualization',
+                    })}
                     onClose={() => {}}
                   />
                 );

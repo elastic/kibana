@@ -4,6 +4,7 @@ exports[`should render a Welcome screen with no telemetry disclaimer 1`] = `
 <EuiPortal>
   <div
     className="homWelcome"
+    data-test-subj="homeWelcomeInterstitial"
   >
     <header
       className="homWelcome__header"
@@ -65,6 +66,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
 <EuiPortal>
   <div
     className="homWelcome"
+    data-test-subj="homeWelcomeInterstitial"
   >
     <header
       className="homWelcome__header"
@@ -163,6 +165,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
 <EuiPortal>
   <div
     className="homWelcome"
+    data-test-subj="homeWelcomeInterstitial"
   >
     <header
       className="homWelcome__header"
@@ -261,6 +264,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
 <EuiPortal>
   <div
     className="homWelcome"
+    data-test-subj="homeWelcomeInterstitial"
   >
     <header
       className="homWelcome__header"

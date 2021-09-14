@@ -163,7 +163,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                 {isShowingAdvanced
                   ? advancedVars.map((varDef) => {
                       const { name: varName, type: varType } = varDef;
-                      const value = packagePolicyInput.vars![varName].value;
+                      const value = packagePolicyInput.vars?.[varName]?.value;
                       return (
                         <EuiFlexItem key={varName}>
                           <PackagePolicyInputVarField

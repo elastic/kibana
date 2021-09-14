@@ -8,7 +8,7 @@
 
 export { PANEL_TYPES } from './panel_types';
 export { MODEL_TYPES } from './model_types';
-export { METRIC_TYPES, BUCKET_TYPES, EXTENDED_STATS_TYPES } from './metric_types';
+export { TSVB_METRIC_TYPES, BUCKET_TYPES } from './metric_types';
 export { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from './timerange_data_modes';
 
 export enum PALETTES {
@@ -19,4 +19,13 @@ export enum PALETTES {
 export enum TOOLTIP_MODES {
   SHOW_ALL = 'show_all',
   SHOW_FOCUSED = 'show_focused',
+}
+
+export enum DATA_FORMATTERS {
+  BYTES = 'bytes',
+  CUSTOM = 'custom',
+  DEFAULT = 'default',
+  DURATION = 'duration',
+  NUMBER = 'number',
+  PERCENT = 'percent',
 }

@@ -62,7 +62,11 @@ describe('ServiceIcons', () => {
       const { getByTestId, queryAllByTestId } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );
@@ -81,7 +85,11 @@ describe('ServiceIcons', () => {
       const { queryAllByTestId } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );
@@ -102,7 +110,11 @@ describe('ServiceIcons', () => {
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );
@@ -124,7 +136,11 @@ describe('ServiceIcons', () => {
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );
@@ -147,7 +163,11 @@ describe('ServiceIcons', () => {
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );
@@ -192,7 +212,11 @@ describe('ServiceIcons', () => {
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );
@@ -230,7 +254,11 @@ describe('ServiceIcons', () => {
       const { queryAllByTestId, getByTestId, getByText } = render(
         <Wrapper>
           <EuiThemeProvider>
-            <ServiceIcons serviceName="foo" />
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
           </EuiThemeProvider>
         </Wrapper>
       );

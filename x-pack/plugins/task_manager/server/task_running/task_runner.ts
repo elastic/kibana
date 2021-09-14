@@ -15,7 +15,11 @@ import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
 import { performance } from 'perf_hooks';
 import { identity, defaults, flow } from 'lodash';
-import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import {
+  Logger,
+  SavedObjectsErrorHelpers,
+  ExecutionContextStart,
+} from '../../../../../src/core/server';
 
 import { Middleware } from '../lib/middleware';
 import {
@@ -36,6 +40,7 @@ import {
   asTaskMarkRunningEvent,
   startTaskTimer,
   TaskTiming,
+  TaskPersistence,
 } from '../task_events';
 import { intervalFromDate, maxIntervalFromDate } from '../lib/intervals';
 import {
@@ -53,7 +58,7 @@ import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError } from './errors';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
-const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
+export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -65,6 +70,7 @@ export interface TaskRunner {
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
   id: string;
   stage: string;
+  isEphemeral?: boolean;
   toString: () => string;
 }
 
@@ -91,6 +97,7 @@ type Opts = {
   store: Updatable;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
   defaultMaxAttempts: number;
+  executionContext: ExecutionContextStart;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -105,14 +112,17 @@ export enum TaskRunResult {
 }
 
 // A ConcreteTaskInstance which we *know* has a `startedAt` Date on it
-type ConcreteTaskInstanceWithStartedAt = ConcreteTaskInstance & { startedAt: Date };
+export type ConcreteTaskInstanceWithStartedAt = ConcreteTaskInstance & { startedAt: Date };
 
 // The three possible stages for a Task Runner - Pending -> ReadyToRun -> Ran
-type PendingTask = TaskRunning<TaskRunningStage.PENDING, ConcreteTaskInstance>;
-type ReadyToRunTask = TaskRunning<TaskRunningStage.READY_TO_RUN, ConcreteTaskInstanceWithStartedAt>;
-type RanTask = TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>;
+export type PendingTask = TaskRunning<TaskRunningStage.PENDING, ConcreteTaskInstance>;
+export type ReadyToRunTask = TaskRunning<
+  TaskRunningStage.READY_TO_RUN,
+  ConcreteTaskInstanceWithStartedAt
+>;
+export type RanTask = TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>;
 
-type TaskRunningInstance = PendingTask | ReadyToRunTask | RanTask;
+export type TaskRunningInstance = PendingTask | ReadyToRunTask | RanTask;
 
 /**
  * Runs a background task, ensures that errors are properly handled,
@@ -132,6 +142,7 @@ export class TaskManagerRunner implements TaskRunner {
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
+  private readonly executionContext: ExecutionContextStart;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -152,6 +163,7 @@ export class TaskManagerRunner implements TaskRunner {
     beforeMarkRunning,
     defaultMaxAttempts,
     onTaskEvent = identity,
+    executionContext,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -161,6 +173,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
+    this.executionContext = executionContext;
   }
 
   /**
@@ -256,7 +269,15 @@ export class TaskManagerRunner implements TaskRunner {
 
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
-      const result = await withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run());
+      const ctx = {
+        type: 'task manager',
+        name: `run ${this.instance.task.taskType}`,
+        id: this.instance.task.id,
+        description: 'run task',
+      };
+      const result = await this.executionContext.withContext(ctx, () =>
+        withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+      );
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())
@@ -528,6 +549,10 @@ export class TaskManagerRunner implements TaskRunner {
             this.id,
             asOk({
               task,
+              persistence:
+                schedule || task.schedule
+                  ? TaskPersistence.Recurring
+                  : TaskPersistence.NonRecurring,
               result: await (runAt || schedule || task.schedule
                 ? this.processResultForRecurringTask(result)
                 : this.processResultWhenDone()),
@@ -540,7 +565,12 @@ export class TaskManagerRunner implements TaskRunner {
         this.onTaskEvent(
           asTaskRunEvent(
             this.id,
-            asErr({ task, result: await this.processResultForRecurringTask(result), error }),
+            asErr({
+              task,
+              persistence: task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
+              result: await this.processResultForRecurringTask(result),
+              error,
+            }),
             taskTiming
           )
         );
@@ -602,20 +632,20 @@ function performanceStopMarkingTaskAsRunning() {
 // in a specific place in the code might be
 type InstanceOf<S extends TaskRunningStage, T> = T extends TaskRunning<S, infer I> ? I : never;
 
-function isPending(taskRunning: TaskRunningInstance): taskRunning is PendingTask {
+export function isPending(taskRunning: TaskRunningInstance): taskRunning is PendingTask {
   return taskRunning.stage === TaskRunningStage.PENDING;
 }
-function asPending(task: InstanceOf<TaskRunningStage.PENDING, PendingTask>): PendingTask {
+export function asPending(task: InstanceOf<TaskRunningStage.PENDING, PendingTask>): PendingTask {
   return {
     timestamp: new Date(),
     stage: TaskRunningStage.PENDING,
     task,
   };
 }
-function isReadyToRun(taskRunning: TaskRunningInstance): taskRunning is ReadyToRunTask {
+export function isReadyToRun(taskRunning: TaskRunningInstance): taskRunning is ReadyToRunTask {
   return taskRunning.stage === TaskRunningStage.READY_TO_RUN;
 }
-function asReadyToRun(
+export function asReadyToRun(
   task: InstanceOf<TaskRunningStage.READY_TO_RUN, ReadyToRunTask>
 ): ReadyToRunTask {
   return {
@@ -624,7 +654,7 @@ function asReadyToRun(
     task,
   };
 }
-function asRan(task: InstanceOf<TaskRunningStage.RAN, RanTask>): RanTask {
+export function asRan(task: InstanceOf<TaskRunningStage.RAN, RanTask>): RanTask {
   return {
     timestamp: new Date(),
     stage: TaskRunningStage.RAN,

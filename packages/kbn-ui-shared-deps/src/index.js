@@ -57,6 +57,7 @@ exports.externals = {
   '@kbn/i18n': '__kbnSharedDeps__.KbnI18n',
   '@kbn/i18n/angular': '__kbnSharedDeps__.KbnI18nAngular',
   '@kbn/i18n/react': '__kbnSharedDeps__.KbnI18nReact',
+  '@emotion/react': '__kbnSharedDeps__.EmotionReact',
   jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
@@ -99,6 +100,8 @@ exports.externals = {
   '@kbn/std': '__kbnSharedDeps__.KbnStd',
   '@elastic/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
   'rison-node': '__kbnSharedDeps__.RisonNode',
+  history: '__kbnSharedDeps__.History',
+  classnames: '__kbnSharedDeps__.Classnames',
 };
 
 /**

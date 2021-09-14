@@ -185,6 +185,62 @@ describe('Actions Plugin', () => {
         });
       });
     });
+
+    describe('isPreconfiguredConnector', () => {
+      function getConfig(overrides = {}) {
+        return {
+          enabled: true,
+          enabledActionTypes: ['*'],
+          allowedHosts: ['*'],
+          preconfiguredAlertHistoryEsIndex: false,
+          preconfigured: {
+            preconfiguredServerLog: {
+              actionTypeId: '.server-log',
+              name: 'preconfigured-server-log',
+              config: {},
+              secrets: {},
+            },
+          },
+          proxyRejectUnauthorizedCertificates: true,
+          proxyBypassHosts: undefined,
+          proxyOnlyHosts: undefined,
+          rejectUnauthorized: true,
+          maxResponseContentLength: new ByteSizeValue(1000000),
+          responseTimeout: moment.duration('60s'),
+          cleanupFailedExecutionsTask: {
+            enabled: true,
+            cleanupInterval: schema.duration().validate('5m'),
+            idleInterval: schema.duration().validate('1h'),
+            pageSize: 100,
+          },
+          ...overrides,
+        };
+      }
+
+      function setup(config: ActionsConfig) {
+        context = coreMock.createPluginInitializerContext<ActionsConfig>(config);
+        plugin = new ActionsPlugin(context);
+        coreSetup = coreMock.createSetup();
+        pluginsSetup = {
+          taskManager: taskManagerMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+          licensing: licensingMock.createSetup(),
+          eventLog: eventLogMock.createSetup(),
+          usageCollection: usageCollectionPluginMock.createSetupContract(),
+          features: featuresPluginMock.createSetup(),
+        };
+      }
+
+      it('should correctly return whether connector is preconfigured', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        expect(pluginSetup.isPreconfiguredConnector('preconfiguredServerLog')).toEqual(true);
+        expect(pluginSetup.isPreconfiguredConnector('anotherConnectorId')).toEqual(false);
+      });
+    });
   });
 
   describe('start()', () => {

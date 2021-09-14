@@ -9,12 +9,9 @@ import React, { MouseEventHandler, FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-// @ts-expect-error untyped local
-import { Popover, PopoverChildrenProps } from '../popover';
+import { Popover } from '../popover';
 import { ArgAdd } from '../arg_add';
-// @ts-expect-error untyped local
-import { Arg } from '../../expression_types/arg';
+import type { Arg } from '../../expression_types/arg';
 
 const strings = {
   getAddAriaLabel: () =>
@@ -49,12 +46,12 @@ export const ArgAddPopover: FC<Props> = ({ options }) => {
       panelPaddingSize="none"
       button={button}
     >
-      {({ closePopover }: PopoverChildrenProps) =>
+      {({ closePopover }) =>
         options.map((opt) => (
           <ArgAdd
             key={`${opt.arg.name}-add`}
-            displayName={opt.arg.displayName}
-            help={opt.arg.help}
+            displayName={opt.arg.displayName ?? ''}
+            help={opt.arg.help ?? ''}
             onValueAdd={() => {
               opt.onValueAdd();
               closePopover();

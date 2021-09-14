@@ -12,6 +12,9 @@ import type { AgentPolicy, NewAgentPolicy, Output } from '../types';
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 
+import { getAgentsByKuery } from './agents';
+import { packagePolicyService } from './package_policy';
+
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
   mock.get.mockImplementation(async (type: string, id: string) => {
@@ -63,6 +66,8 @@ jest.mock('./output', () => {
 });
 
 jest.mock('./agent_policy_update');
+jest.mock('./agents');
+jest.mock('./package_policy');
 
 function getAgentPolicyUpdateMock() {
   return (agentPolicyUpdateEventHandler as unknown) as jest.Mock<
@@ -120,6 +125,36 @@ describe('agent policy', () => {
 
       const [, attributes] = soClient.create.mock.calls[0];
       expect(attributes).toHaveProperty('is_managed', true);
+    });
+  });
+
+  describe('delete', () => {
+    let soClient: ReturnType<typeof savedObjectsClientMock.create>;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+
+    beforeEach(() => {
+      soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      (getAgentsByKuery as jest.Mock).mockResolvedValue({
+        agents: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
+      });
+
+      (packagePolicyService.delete as jest.Mock).mockResolvedValue([
+        {
+          id: 'package-1',
+        },
+      ]);
+    });
+
+    it('should run package policy delete external callbacks', async () => {
+      await agentPolicyService.delete(soClient, esClient, 'mocked');
+      expect(packagePolicyService.runDeleteExternalCallbacks).toHaveBeenCalledWith([
+        { id: 'package-1' },
+      ]);
     });
   });
 

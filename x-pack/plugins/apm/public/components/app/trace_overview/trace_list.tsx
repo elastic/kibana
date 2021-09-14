@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
@@ -18,13 +18,12 @@ import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
-import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 
 type TraceGroup = APIReturnType<'GET /api/apm/traces'>['items'][0];
 
 const StyledTransactionLink = euiStyled(TransactionDetailLink)`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeM};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
   ${truncate('100%')};
 `;
 
@@ -73,7 +72,8 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (time: number) => asMillisecondDuration(time),
+    render: (_, { averageResponseTime }) =>
+      asMillisecondDuration(averageResponseTime),
   },
   {
     field: 'transactionsPerMinute',
@@ -82,7 +82,8 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => asTransactionRate(value),
+    render: (_, { transactionsPerMinute }) =>
+      asTransactionRate(transactionsPerMinute),
   },
   {
     field: 'impact',
@@ -109,10 +110,9 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
         </>
       </EuiToolTip>
     ),
-    width: '20%',
-    align: 'left',
+    align: RIGHT_ALIGNMENT,
     sortable: true,
-    render: (value: number) => <ImpactBar value={value} />,
+    render: (_, { impact }) => <ImpactBar value={impact} />,
   },
 ];
 
@@ -125,14 +125,14 @@ const noItemsMessage = (
 );
 
 export function TraceList({ items = [], isLoading }: Props) {
-  const noItems = isLoading ? <LoadingStatePrompt /> : noItemsMessage;
   return (
     <ManagedTable
+      isLoading={isLoading}
       columns={traceListColumns}
       items={items}
       initialSortField="impact"
       initialSortDirection="desc"
-      noItemsMessage={noItems}
+      noItemsMessage={noItemsMessage}
       initialPageSize={25}
     />
   );

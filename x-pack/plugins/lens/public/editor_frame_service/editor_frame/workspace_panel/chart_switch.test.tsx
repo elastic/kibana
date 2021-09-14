@@ -11,6 +11,7 @@ import {
   createMockVisualization,
   createMockFramePublicAPI,
   createMockDatasource,
+  mockDatasourceStates,
 } from '../../../mocks';
 import { mountWithProvider } from '../../../mocks';
 
@@ -160,15 +161,6 @@ describe('chart_switch', () => {
     datasource.getLayers.mockReturnValue(['a']);
     return {
       testDatasource: datasource,
-    };
-  }
-
-  function mockDatasourceStates() {
-    return {
-      testDatasource: {
-        state: {},
-        isLoading: false,
-      },
     };
   }
 

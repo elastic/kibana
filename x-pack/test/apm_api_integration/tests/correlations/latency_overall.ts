@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
   const archiveName = 'apm_8.0.0';
   const range = archives_metadata[archiveName];
 
@@ -22,6 +22,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     query: {
       start: range.start,
       end: range.end,
+      environment: 'ENVIRONMENT_ALL',
+      kuery: '',
     },
   });
 
@@ -57,8 +59,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns overall distribution', () => {
-        expectSnapshot(response.body?.distributionInterval).toMatchInline(`238776`);
-        expectSnapshot(response.body?.maxLatency).toMatchInline(`3581640.00000003`);
+        // less precision for distributionInterval as it is not exact
+        expectSnapshot(response.body?.distributionInterval?.toPrecision(2)).toMatchInline(
+          `"3.8e+5"`
+        );
+        expectSnapshot(response.body?.maxLatency?.toPrecision(2)).toMatchInline(`"5.8e+6"`);
         expectSnapshot(response.body?.overallDistribution?.length).toMatchInline(`15`);
       });
     }

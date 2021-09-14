@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CustomAPIFieldValue } from '../types';
+
 const mimeTypes = {
   'application/iwork-keynote-sffkey': 'Keynote',
   'application/x-iwork-keynote-sffkey': 'Keynote',
@@ -51,4 +53,5 @@ const mimeTypes = {
   'video/quicktime': 'MOV',
 } as { [key: string]: string };
 
-export const mimeType = (type: string) => mimeTypes[type.toLowerCase()] || type;
+export const mimeType = (type: CustomAPIFieldValue) =>
+  mimeTypes[type.toString().toLowerCase()] || type;

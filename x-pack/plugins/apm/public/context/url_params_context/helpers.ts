@@ -8,7 +8,7 @@
 import datemath from '@elastic/datemath';
 import { compact, pickBy } from 'lodash';
 import moment from 'moment';
-import { IUrlParams } from './types';
+import { UrlParams } from './types';
 
 function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {
@@ -30,11 +30,14 @@ export function getExactDate(rawDate: string) {
 }
 
 export function getDateRange({
-  state,
+  state = {},
   rangeFrom,
   rangeTo,
 }: {
-  state: IUrlParams;
+  state?: Pick<
+    UrlParams,
+    'rangeFrom' | 'rangeTo' | 'start' | 'end' | 'exactStart' | 'exactEnd'
+  >;
   rangeFrom?: string;
   rangeTo?: string;
 }) {

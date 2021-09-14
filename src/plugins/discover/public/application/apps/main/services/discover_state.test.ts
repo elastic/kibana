@@ -202,5 +202,11 @@ describe('createSearchSessionRestorationDataProvider', () => {
       expect(initialState.timeRange).toBe(relativeTime);
       expect(restoreState.timeRange).toBe(absoluteTime);
     });
+
+    test('restoreState has paused autoRefresh', async () => {
+      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      expect(initialState.refreshInterval).toBe(undefined);
+      expect(restoreState.refreshInterval?.pause).toBe(true);
+    });
   });
 });

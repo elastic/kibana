@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SOURCES_PATH, USERS_AND_ROLES_PATH } from '../../routes';
+import { ADD_SOURCE_PATH, USERS_AND_ROLES_PATH } from '../../routes';
 
 import { OnboardingCard } from './onboarding_card';
 import { OnboardingSteps, OrgNameOnboarding } from './onboarding_steps';
@@ -23,18 +23,15 @@ const account = {
   isAdmin: true,
   canCreatePersonalSources: true,
   groups: [],
-  isCurated: false,
-  canCreateInvitations: true,
 };
 
 describe('OnboardingSteps', () => {
   describe('Shared Sources', () => {
     it('renders 0 sources state', () => {
-      setMockValues({ canCreateContentSources: true });
       const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OnboardingCard)).toHaveLength(2);
-      expect(wrapper.find(OnboardingCard).first().prop('actionPath')).toBe(SOURCES_PATH);
+      expect(wrapper.find(OnboardingCard).first().prop('actionPath')).toBe(ADD_SOURCE_PATH);
       expect(wrapper.find(OnboardingCard).first().prop('description')).toBe(
         'Add shared sources for your organization to start searching.'
       );
@@ -47,13 +44,6 @@ describe('OnboardingSteps', () => {
       expect(wrapper.find(OnboardingCard).first().prop('description')).toEqual(
         'You have added 2 shared sources. Happy searching.'
       );
-    });
-
-    it('disables link when the user cannot create sources', () => {
-      setMockValues({ canCreateContentSources: false });
-      const wrapper = shallow(<OnboardingSteps />);
-
-      expect(wrapper.find(OnboardingCard).first().prop('actionPath')).toBe(undefined);
     });
   });
 
@@ -84,17 +74,6 @@ describe('OnboardingSteps', () => {
       expect(wrapper.find(OnboardingCard).last().prop('description')).toEqual(
         'Nice, you’ve invited colleagues to search with you.'
       );
-    });
-
-    it('disables link when the user cannot create invitations', () => {
-      setMockValues({
-        account: {
-          ...account,
-          canCreateInvitations: false,
-        },
-      });
-      const wrapper = shallow(<OnboardingSteps />);
-      expect(wrapper.find(OnboardingCard).last().prop('actionPath')).toBe(undefined);
     });
   });
 

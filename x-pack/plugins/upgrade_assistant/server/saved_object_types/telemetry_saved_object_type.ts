@@ -21,11 +21,7 @@ export const telemetrySavedObjectType: SavedObjectsType = {
             type: 'long',
             null_value: 0,
           },
-          cluster: {
-            type: 'long',
-            null_value: 0,
-          },
-          indices: {
+          elasticsearch: {
             type: 'long',
             null_value: 0,
           },

@@ -8,7 +8,7 @@
 
 import { ContextService } from '../../context';
 import { createHttpServer, createCoreContext } from '../../http/test_utils';
-import { coreMock } from '../../mocks';
+import { contextServiceMock, coreMock } from '../../mocks';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { SavedObjectsType } from '../types';
 
@@ -19,6 +19,7 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
   const contextService = new ContextService(coreContext);
 
   const server = createHttpServer(coreContext);
+  await server.preboot({ context: contextServiceMock.createPrebootContract() });
   const httpSetup = await server.setup({
     context: contextService.setup({ pluginDependencies: new Map() }),
     executionContext: executionContextServiceMock.createInternalSetupContract(),

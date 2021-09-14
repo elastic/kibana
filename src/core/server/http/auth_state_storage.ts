@@ -33,7 +33,7 @@ export enum AuthStatus {
  * @public
  */
 export type GetAuthState = <T = unknown>(
-  request: KibanaRequest | LegacyRequest
+  request: KibanaRequest
 ) => { status: AuthStatus; state: T };
 
 /**
@@ -41,7 +41,7 @@ export type GetAuthState = <T = unknown>(
  * @param request {@link KibanaRequest} - an incoming request.
  * @public
  */
-export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+export type IsAuthenticated = (request: KibanaRequest) => boolean;
 
 /** @internal */
 export class AuthStateStorage {

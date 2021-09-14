@@ -18,6 +18,7 @@ describe('interpreter/functions#field', () => {
     context = {
       getSearchContext: () => ({}),
       getSearchSessionId: () => undefined,
+      getExecutionContext: () => undefined,
       types: {},
       variables: {},
       abortSignal: {} as any,

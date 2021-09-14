@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { ApplicationStart } from 'kibana/public';
+import { safeLoad } from 'js-yaml';
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type {
@@ -48,7 +49,7 @@ import { PLUGIN_ID } from '../../../../../../common/constants';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
 import { CreatePackagePolicyPageLayout } from './components';
-import type { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
+import type { EditPackagePolicyFrom, PackagePolicyFormState } from './types';
 import type { PackagePolicyValidationResults } from './services';
 import { validatePackagePolicy, validationHasErrors } from './services';
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
@@ -104,7 +105,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
    * We may want to deprecate the ability to pass in policyId from URL params since there is no package
    * creation possible if a user has not chosen one from the packages UI.
    */
-  const from: CreatePackagePolicyFrom =
+  const from: EditPackagePolicyFrom =
     'policyId' in params || queryParamsPolicyId ? 'policy' : 'package';
 
   // Agent policy and package info states
@@ -191,7 +192,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       if (packageInfo) {
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
-          packageInfo
+          packageInfo,
+          safeLoad
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console

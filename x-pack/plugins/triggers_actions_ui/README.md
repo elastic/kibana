@@ -289,7 +289,7 @@ function getSomeNewAlertType() {
   return { ... } as AlertTypeModel;
 }
 
-triggersActionsUi.alertTypeRegistry.register(getSomeNewAlertType());
+triggersActionsUi.ruleTypeRegistry.register(getSomeNewAlertType());
 ```
 
 ## Create and register new alert type UI example
@@ -409,7 +409,7 @@ import { getAlertType as getExampledAlertType } from './example';
 ...
 
 ...
-alertTypeRegistry.register(getExampledAlertType());
+ruleTypeRegistry.register(getExampledAlertType());
 ```
 
 After these four steps, the new `Example Alert Type` is available in UI of Create flyout:
@@ -1472,7 +1472,7 @@ interface ActionAccordionFormProps {
 |---|---|
 |onSave|Optional function, which will be executed if alert was saved sucsessfuly.|
 |http|HttpSetup needed for executing API calls.|
-|alertTypeRegistry|Registry for alert types.|
+|ruleTypeRegistry|Registry for alert types.|
 |actionTypeRegistry|Registry for action types.|
 |uiSettings|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
 |docLinks|Documentation Links, needed to link to the documentation from informational callouts.|

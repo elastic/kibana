@@ -143,12 +143,16 @@ export class SampleDataRegistry {
           reference.type = embeddableType;
           reference.id = embeddableId;
 
+          const referenceName = reference.name.includes(':')
+            ? reference.name.split(':')[1]
+            : reference.name;
+
           const panels = JSON.parse(dashboard.attributes.panelsJSON);
           const panel = panels.find((panelItem: any) => {
-            return panelItem.panelRefName === reference.name;
+            return panelItem.panelRefName === referenceName;
           });
           if (!panel) {
-            throw new Error(`Unable to find panel for reference: ${reference.name}`);
+            throw new Error(`Unable to find panel for reference: ${referenceName}`);
           }
           panel.embeddableConfig = embeddableConfig;
           dashboard.attributes.panelsJSON = JSON.stringify(panels);

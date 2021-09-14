@@ -13,21 +13,26 @@ import { merge } from '@kbn/std';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import {
-  LegacyClusterClient,
-  ILegacyCustomClusterClient,
-  LegacyElasticsearchClientConfig,
-} from './legacy';
-import { ClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
+
+import { ClusterClient, ElasticsearchClientConfig } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
-import type { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
+import type { InternalHttpServiceSetup, GetAuthHeaders } from '../http';
 import type { InternalExecutionContextSetup, IExecutionContext } from '../execution_context';
-import { InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart } from './types';
+import type { InternalDeprecationsServiceSetup } from '../deprecations';
+import {
+  InternalElasticsearchServicePreboot,
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from './types';
+import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
+import { isValidConnection } from './is_valid_connection';
+import { getElasticsearchDeprecationsProvider } from './deprecations';
 
-interface SetupDeps {
+export interface SetupDeps {
   http: InternalHttpServiceSetup;
+  deprecations: InternalDeprecationsServiceSetup;
   executionContext: InternalExecutionContextSetup;
 }
 
@@ -40,13 +45,7 @@ export class ElasticsearchService
   private kibanaVersion: string;
   private getAuthHeaders?: GetAuthHeaders;
   private executionContextClient?: IExecutionContext;
-
-  private createLegacyCustomClient?: (
-    type: string,
-    clientConfig?: Partial<LegacyElasticsearchClientConfig>
-  ) => ILegacyCustomClusterClient;
-  private legacyClient?: LegacyClusterClient;
-
+  private esNodesCompatibility$?: Observable<NodesVersionCompatibility>;
   private client?: ClusterClient;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -57,6 +56,22 @@ export class ElasticsearchService
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
   }
 
+  public async preboot(): Promise<InternalElasticsearchServicePreboot> {
+    this.log.debug('Prebooting elasticsearch service');
+
+    const config = await this.config$.pipe(first()).toPromise();
+    return {
+      config: {
+        hosts: config.hosts,
+        credentialsSpecified:
+          config.username !== undefined ||
+          config.password !== undefined ||
+          config.serviceAccountToken !== undefined,
+      },
+      createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
+    };
+  }
+
   public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
     this.log.debug('Setting up elasticsearch service');
 
@@ -64,8 +79,11 @@ export class ElasticsearchService
 
     this.getAuthHeaders = deps.http.getAuthHeaders;
     this.executionContextClient = deps.executionContext;
-    this.legacyClient = this.createLegacyClusterClient('data', config);
     this.client = this.createClusterClient('data', config);
+
+    deps.deprecations
+      .getRegistry('elasticsearch')
+      .registerDeprecations(getElasticsearchDeprecationsProvider());
 
     const esNodesCompatibility$ = pollEsNodesVersion({
       internalClient: this.client.asInternalUser,
@@ -75,43 +93,41 @@ export class ElasticsearchService
       kibanaVersion: this.kibanaVersion,
     }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
 
-    this.createLegacyCustomClient = (type, clientConfig = {}) => {
-      const finalConfig = merge({}, config, clientConfig);
-      return this.createLegacyClusterClient(type, finalConfig);
-    };
+    this.esNodesCompatibility$ = esNodesCompatibility$;
 
     return {
       legacy: {
         config$: this.config$,
-        client: this.legacyClient,
-        createClient: this.createLegacyCustomClient,
       },
       esNodesCompatibility$,
       status$: calculateStatus$(esNodesCompatibility$),
     };
   }
+
   public async start(): Promise<InternalElasticsearchServiceStart> {
-    if (!this.legacyClient || !this.createLegacyCustomClient) {
+    if (!this.client || !this.esNodesCompatibility$) {
       throw new Error('ElasticsearchService needs to be setup before calling start');
     }
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    const createClient = (
-      type: string,
-      clientConfig: Partial<ElasticsearchClientConfig> = {}
-    ): ICustomClusterClient => {
-      const finalConfig = merge({}, config, clientConfig);
-      return this.createClusterClient(type, finalConfig);
-    };
+    // Log every error we may encounter in the connection to Elasticsearch
+    this.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      if (!isCompatible && message) {
+        this.log.error(message);
+      }
+    });
+
+    if (!config.skipStartupConnectionCheck) {
+      // Ensure that the connection is established and the product is valid before moving on
+      await isValidConnection(this.esNodesCompatibility$);
+    }
 
     return {
       client: this.client!,
-      createClient,
+      createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       legacy: {
         config$: this.config$,
-        client: this.legacyClient,
-        createClient: this.createLegacyCustomClient,
       },
     };
   }
@@ -122,27 +138,20 @@ export class ElasticsearchService
     if (this.client) {
       await this.client.close();
     }
-    if (this.legacyClient) {
-      this.legacyClient.close();
-    }
   }
 
-  private createClusterClient(type: string, config: ElasticsearchClientConfig) {
+  private createClusterClient(
+    type: string,
+    baseConfig: ElasticsearchConfig,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) {
+    const config = clientConfig ? merge({}, baseConfig, clientConfig) : baseConfig;
     return new ClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch'),
       type,
       this.getAuthHeaders,
-      () => this.executionContextClient?.get()
-    );
-  }
-
-  private createLegacyClusterClient(type: string, config: LegacyElasticsearchClientConfig) {
-    return new LegacyClusterClient(
-      config,
-      this.coreContext.logger.get('elasticsearch'),
-      type,
-      this.getAuthHeaders
+      () => this.executionContextClient?.getAsHeader()
     );
   }
 }

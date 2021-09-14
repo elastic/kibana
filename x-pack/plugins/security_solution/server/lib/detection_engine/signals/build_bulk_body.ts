@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SavedObject } from 'src/core/types';
 import { getMergeStrategy } from './source_fields_merging/strategies';
 import {
@@ -22,6 +23,7 @@ import { buildEventTypeSignal } from './build_event_type_signal';
 import { EqlSequence } from '../../../../common/detection_engine/types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
 import type { ConfigType } from '../../../config';
+import { BuildReasonMessage } from './reason_formatters';
 
 /**
  * Formats the search_after result for insertion into the signals index. We first create a
@@ -35,21 +37,28 @@ import type { ConfigType } from '../../../config';
 export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit,
-  mergeStrategy: ConfigType['alertMergeStrategy']
+  mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields'],
+  buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
-  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
+  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
+  const timestamp = new Date().toISOString();
+  const reason = buildReasonMessage({ mergedDoc, rule });
   const signal: Signal = {
-    ...buildSignal([mergedDoc], rule),
+    ...buildSignal([mergedDoc], rule, reason),
     ...additionalSignalFields(mergedDoc),
   };
   const event = buildEventTypeSignal(mergedDoc);
-  const { threshold_result: thresholdResult, ...filteredSource } = mergedDoc._source || {
+  // Filter out any kibana.* fields from the generated signal - kibana.* fields are aliases
+  // in siem-signals so we can't write to them, but for signals-on-signals they'll be returned
+  // in the fields API response and merged into the mergedDoc source
+  const { threshold_result: thresholdResult, kibana, ...filteredSource } = mergedDoc._source || {
     threshold_result: null,
   };
   const signalHit: SignalHit = {
     ...filteredSource,
-    '@timestamp': new Date().toISOString(),
+    [TIMESTAMP]: timestamp,
     event,
     signal,
   };
@@ -68,11 +77,20 @@ export const buildSignalGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,
   ruleSO: SavedObject<AlertAttributes>,
   outputIndex: string,
-  mergeStrategy: ConfigType['alertMergeStrategy']
+  mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields'],
+  buildReasonMessage: BuildReasonMessage
 ): WrappedSignalHit[] => {
   const wrappedBuildingBlocks = wrapBuildingBlocks(
     sequence.events.map((event) => {
-      const signal = buildSignalFromEvent(event, ruleSO, false, mergeStrategy);
+      const signal = buildSignalFromEvent(
+        event,
+        ruleSO,
+        false,
+        mergeStrategy,
+        ignoreFields,
+        buildReasonMessage
+      );
       signal.signal.rule.building_block_type = 'default';
       return signal;
     }),
@@ -91,7 +109,7 @@ export const buildSignalGroupFromSequence = (
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
   const sequenceSignal = wrapSignal(
-    buildSignalFromSequence(wrappedBuildingBlocks, ruleSO),
+    buildSignalFromSequence(wrappedBuildingBlocks, ruleSO, buildReasonMessage),
     outputIndex
   );
   wrappedBuildingBlocks.forEach((block, idx) => {
@@ -108,14 +126,17 @@ export const buildSignalGroupFromSequence = (
 
 export const buildSignalFromSequence = (
   events: WrappedSignalHit[],
-  ruleSO: SavedObject<AlertAttributes>
+  ruleSO: SavedObject<AlertAttributes>,
+  buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
-  const signal: Signal = buildSignal(events, rule);
+  const timestamp = new Date().toISOString();
   const mergedEvents = objectArrayIntersection(events.map((event) => event._source));
+  const reason = buildReasonMessage({ rule, mergedDoc: mergedEvents as SignalSourceHit });
+  const signal: Signal = buildSignal(events, rule, reason);
   return {
     ...mergedEvents,
-    '@timestamp': new Date().toISOString(),
+    [TIMESTAMP]: timestamp,
     event: {
       kind: 'signal',
     },
@@ -134,21 +155,29 @@ export const buildSignalFromEvent = (
   event: BaseSignalHit,
   ruleSO: SavedObject<AlertAttributes>,
   applyOverrides: boolean,
-  mergeStrategy: ConfigType['alertMergeStrategy']
+  mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields'],
+  buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
-  const mergedEvent = getMergeStrategy(mergeStrategy)({ doc: event });
+  const mergedEvent = getMergeStrategy(mergeStrategy)({ doc: event, ignoreFields });
   const rule = applyOverrides
     ? buildRuleWithOverrides(ruleSO, mergedEvent._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);
+  const timestamp = new Date().toISOString();
+  const reason = buildReasonMessage({ mergedDoc: mergedEvent, rule });
   const signal: Signal = {
-    ...buildSignal([mergedEvent], rule),
+    ...buildSignal([mergedEvent], rule, reason),
     ...additionalSignalFields(mergedEvent),
   };
   const eventFields = buildEventTypeSignal(mergedEvent);
+  // Filter out any kibana.* fields from the generated signal - kibana.* fields are aliases
+  // in siem-signals so we can't write to them, but for signals-on-signals they'll be returned
+  // in the fields API response and merged into the mergedDoc source
+  const { kibana, ...filteredSource } = mergedEvent._source || {};
   // TODO: better naming for SignalHit - it's really a new signal to be inserted
   const signalHit: SignalHit = {
-    ...mergedEvent._source,
-    '@timestamp': new Date().toISOString(),
+    ...filteredSource,
+    [TIMESTAMP]: timestamp,
     event: eventFields,
     signal,
   };

@@ -51,9 +51,9 @@ describe('CtiNoEvents', () => {
     );
 
     expect(
-      wrapper.find(
-        '[data-test-subj="cti-dashboard-links"] [data-test-subj="cti-inner-panel-warning"]'
-      ).length
+      wrapper
+        .find('[data-test-subj="cti-dashboard-links"] [data-test-subj="cti-inner-panel-warning"]')
+        .hostNodes().length
     ).toEqual(1);
   });
 
@@ -69,7 +69,7 @@ describe('CtiNoEvents', () => {
     );
 
     expect(wrapper.find('[data-test-subj="cti-total-event-count"]').text()).toEqual(
-      'Showing: 0 events'
+      'Showing: 0 indicators'
     );
   });
 });

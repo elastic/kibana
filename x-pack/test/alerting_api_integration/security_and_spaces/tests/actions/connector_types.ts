@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function listActionTypesTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('list_action_types', () => {
+  describe('connector_types', () => {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {

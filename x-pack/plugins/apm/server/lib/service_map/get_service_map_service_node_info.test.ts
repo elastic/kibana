@@ -8,6 +8,7 @@
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import * as getErrorRateModule from '../transaction_groups/get_error_rate';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('getServiceMapServiceNodeInfo', () => {
   describe('with no results', () => {
@@ -77,6 +78,7 @@ describe('getServiceMapServiceNodeInfo', () => {
         setup,
         serviceName,
         searchAggregatedTransactions: false,
+        environment: ENVIRONMENT_ALL.value,
       });
 
       expect(result).toEqual({

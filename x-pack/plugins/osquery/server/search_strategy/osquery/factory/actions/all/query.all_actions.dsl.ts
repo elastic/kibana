@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+
 import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import { AgentsRequestOptions } from '../../../../../../common/search_strategy';
 // import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
@@ -24,10 +26,23 @@ export const buildActionsQuery = ({
     body: {
       // query: { bool: { filter } },
       query: {
-        term: {
-          type: {
-            value: 'INPUT_ACTION',
-          },
+        bool: {
+          must: [
+            {
+              term: {
+                type: {
+                  value: 'INPUT_ACTION',
+                },
+              },
+            },
+            {
+              term: {
+                input_type: {
+                  value: 'osquery',
+                },
+              },
+            },
+          ] as estypes.QueryDslQueryContainer[],
         },
       },
       from: cursorStart,

@@ -42,7 +42,6 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
     transform: ${(
       { $isShowingTimelineOverlay } // Since the bottom bar wraps the whole overlay now, need to override any transforms when it is open
     ) => ($isShowingTimelineOverlay ? 'none' : 'translateY(calc(100% - 50px))')};
-    z-index: ${({ theme }) => theme.eui.euiZLevel8};
 
     .${IS_DRAGGING_CLASS_NAME} & {
       // When a drag is in process the bottom flyout should slide up to allow a drop
@@ -74,6 +73,9 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
+
+    /* StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop, which may account for any style discrepancies, such as the bottom border not extending the full width of the page, between EuiPageTemplate and the security solution pages.
+     */
 
     return (
       <StyledKibanaPageTemplate

@@ -18,6 +18,7 @@ import {
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
 import { from, empty, merge } from 'rxjs';
+import { Filter, MatchAllFilter, isScriptedRangeFilter } from '@kbn/es-query';
 import {
   filter,
   map,
@@ -30,11 +31,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import {
-  esFilters,
-  Filter,
-  MatchAllFilter,
-} from '../../../../../../.../../../src/plugins/data/public';
+import { esFilters } from '../../../../../../.../../../src/plugins/data/public';
 import {
   TimelineStatus,
   TimelineErrorResponse,
@@ -414,7 +411,7 @@ export const convertTimelineAsInput = (
                   ...(esFilters.isRangeFilter(basicFilter) && basicFilter.range != null
                     ? { range: convertToString(basicFilter.range) }
                     : { range: null }),
-                  ...(esFilters.isRangeFilter(basicFilter) &&
+                  ...(isScriptedRangeFilter(basicFilter) &&
                   basicFilter.script !=
                     null /* TODO remove it when PR50713 is merged || esFilters.isPhraseFilter(basicFilter) */
                     ? { script: convertToString(basicFilter.script) }

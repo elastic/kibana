@@ -114,5 +114,6 @@ const metricsApiRequest = {
   ],
   limit: 3000,
   alignDataToEnd: true,
+  dropPartialBuckets: true,
   groupBy: ['kubernetes.pod.uid'],
 };

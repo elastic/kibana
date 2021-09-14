@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { rangeQuery } from '../../../../../observability/server';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
-import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
-import { getBucketSize } from '../../helpers/get_bucket_size';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+  getSearchAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
-  calculateTransactionErrorPercentage,
+  calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
 
@@ -27,41 +30,56 @@ export async function getTransactionErrorRateChartPreview({
   setup: Setup & SetupTimeRange;
   alertParams: AlertParams;
 }) {
-  const { apmEventClient, start, end } = setup;
-  const { serviceName, environment, transactionType } = alertParams;
+  const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    ...setup,
+    kuery: '',
+  });
 
-  const query = {
-    bool: {
-      filter: [
-        { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-        ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
-        ...(transactionType
-          ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-          : []),
-        ...rangeQuery(start, end),
-        ...environmentQuery(environment),
-      ],
-    },
-  };
+  const { apmEventClient, start, end } = setup;
+  const { serviceName, environment, transactionType, interval } = alertParams;
 
   const outcomes = getOutcomeAggregation();
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets: 20 });
-
-  const aggs = {
-    outcomes,
-    timeseries: {
-      date_histogram: {
-        field: '@timestamp',
-        fixed_interval: intervalString,
-      },
-      aggs: { outcomes },
-    },
-  };
-
   const params = {
-    apm: { events: [ProcessorEvent.transaction] },
-    body: { size: 0, query, aggs },
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
+            ...(transactionType
+              ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
+              : []),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+          ],
+        },
+      },
+      aggs: {
+        outcomes,
+        timeseries: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: interval,
+            extended_bounds: {
+              min: start,
+              max: end,
+            },
+          },
+          aggs: { outcomes },
+        },
+      },
+    },
   };
 
   const resp = await apmEventClient.search(
@@ -74,12 +92,9 @@ export async function getTransactionErrorRateChartPreview({
   }
 
   return resp.aggregations.timeseries.buckets.map((bucket) => {
-    const errorPercentage = calculateTransactionErrorPercentage(
-      bucket.outcomes
-    );
     return {
       x: bucket.key,
-      y: errorPercentage,
+      y: calculateFailedTransactionRate(bucket.outcomes),
     };
   });
 }

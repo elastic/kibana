@@ -60,6 +60,7 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         timelines: {
           getLastUpdated: jest.fn(),
+          getFieldBrowser: jest.fn(),
           getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
         },
       },

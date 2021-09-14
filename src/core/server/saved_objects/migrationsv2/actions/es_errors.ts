@@ -21,3 +21,7 @@ export const isWriteBlockException = ({ type, reason }: EsErrorCause): boolean =
 export const isIncompatibleMappingException = ({ type }: EsErrorCause): boolean => {
   return type === 'strict_dynamic_mapping_exception' || type === 'mapper_parsing_exception';
 };
+
+export const isIndexNotFoundException = ({ type }: EsErrorCause): boolean => {
+  return type === 'index_not_found_exception';
+};

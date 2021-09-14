@@ -6,22 +6,35 @@
  */
 
 import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import React, { ReactNode } from 'react';
+import { CoreStart } from '../../../../../src/core/public';
+import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
 import { delay } from '../utils/testHelpers';
 import { FetcherResult, useFetcher } from './use_fetcher';
-import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
-import { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 
-// Wrap the hook with a provider so it can useApmPluginContext
-const wrapper = MockApmPluginContextWrapper;
+// Wrap the hook with a provider so it can useKibana
+const KibanaReactContext = createKibanaReactContext(({
+  notifications: { toasts: { add: () => {}, danger: () => {} } },
+} as unknown) as Partial<CoreStart>);
+
+interface WrapperProps {
+  children?: ReactNode;
+  callback: () => Promise<string>;
+  args: string[];
+}
+function wrapper({ children }: WrapperProps) {
+  return <KibanaReactContext.Provider>{children}</KibanaReactContext.Provider>;
+}
 
 describe('useFetcher', () => {
   describe('when resolving after 500ms', () => {
     let hook: RenderHookResult<
-      { children?: React.ReactNode; value?: ApmPluginContextValue },
+      WrapperProps,
       FetcherResult<string> & {
         refetch: () => void;
       }
     >;
+
     beforeEach(() => {
       jest.useFakeTimers();
       async function fn() {
@@ -66,14 +79,15 @@ describe('useFetcher', () => {
 
   describe('when throwing after 500ms', () => {
     let hook: RenderHookResult<
-      { children?: React.ReactNode; value?: ApmPluginContextValue },
-      FetcherResult<void> & {
+      WrapperProps,
+      FetcherResult<string> & {
         refetch: () => void;
       }
     >;
+
     beforeEach(() => {
       jest.useFakeTimers();
-      async function fn() {
+      async function fn(): Promise<string> {
         await delay(500);
         throw new Error('Something went wrong');
       }

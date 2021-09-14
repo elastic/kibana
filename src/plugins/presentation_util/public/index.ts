@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110893
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PresentationUtilPlugin } from './plugin';
 
 export {
@@ -37,6 +40,8 @@ export {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from './components';
+
+export * from './components/types';
 
 export {
   AddFromLibraryButton,

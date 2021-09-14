@@ -6,7 +6,12 @@
  */
 
 import { CasePostRequest, ConnectorTypeFields, MAX_TITLE_LENGTH } from '../../../common';
-import { FIELD_TYPES, fieldValidators, FormSchema } from '../../common/shared_imports';
+import {
+  FIELD_TYPES,
+  fieldValidators,
+  FormSchema,
+  VALIDATION_TYPES,
+} from '../../common/shared_imports';
 import * as i18n from './translations';
 
 import { OptionalFieldLabel } from './optional_field_label';
@@ -17,6 +22,13 @@ export const schemaTags = {
   label: i18n.TAGS,
   helpText: i18n.TAGS_HELP,
   labelAppend: OptionalFieldLabel,
+  validations: [
+    {
+      validator: emptyField(i18n.TAGS_EMPTY_ERROR),
+      type: VALIDATION_TYPES.ARRAY_ITEM,
+      isBlocking: false,
+    },
+  ],
 };
 
 export type FormProps = Omit<CasePostRequest, 'connector' | 'settings' | 'owner'> & {

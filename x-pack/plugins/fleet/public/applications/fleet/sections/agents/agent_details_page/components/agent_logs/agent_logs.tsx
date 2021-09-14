@@ -23,13 +23,13 @@ import {
 } from '@elastic/eui';
 import useMeasure from 'react-use/lib/useMeasure';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { fromKueryExpression } from '@kbn/es-query';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 
 import { createStateContainerReactHelpers } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
 import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import type { TimeRange } from '../../../../../../../../../../../src/plugins/data/public';
-import { esKuery } from '../../../../../../../../../../../src/plugins/data/public';
 import { LogStream } from '../../../../../../../../../infra/public';
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useLink, useStartServices } from '../../../../../hooks';
@@ -171,7 +171,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
     // Query validation helper
     const isQueryValid = useCallback((testQuery: string) => {
       try {
-        esKuery.fromKueryExpression(testQuery);
+        fromKueryExpression(testQuery);
         return true;
       } catch (err) {
         return false;

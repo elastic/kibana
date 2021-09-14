@@ -7,11 +7,9 @@
 
 import { LoggerFactory } from 'kibana/server';
 
-import { SearchResponse } from '@elastic/elasticsearch/api/types';
-import { JsonObject } from '@kbn/common-utils';
 import { ConfigType } from '../config';
 import { EndpointAppContextService } from './endpoint_app_context_services';
-import { HostMetadata, MetadataQueryStrategyVersions } from '../../common/endpoint/types';
+import { HostMetadata } from '../../common/endpoint/types';
 import { ExperimentalFeatures } from '../../common/experimental_features';
 
 /**
@@ -31,20 +29,9 @@ export interface EndpointAppContext {
 export interface HostListQueryResult {
   resultLength: number;
   resultList: HostMetadata[];
-  queryStrategyVersion: MetadataQueryStrategyVersions;
 }
 
 export interface HostQueryResult {
   resultLength: number;
   result: HostMetadata | undefined;
-  queryStrategyVersion: MetadataQueryStrategyVersions;
-}
-
-export interface MetadataQueryStrategy {
-  index: string;
-  extraBodyProperties?: JsonObject;
-  queryResponseToHostListResult: (
-    searchResponse: SearchResponse<HostMetadata>
-  ) => HostListQueryResult;
-  queryResponseToHostResult: (searchResponse: SearchResponse<HostMetadata>) => HostQueryResult;
 }

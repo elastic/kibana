@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { LevelLogger } from '../lib';
+jest.mock('../lib/level_logger');
+
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { LevelLogger } from '../lib/level_logger';
 
 export function createMockLevelLogger() {
   // eslint-disable-next-line no-console
   const consoleLogger = (tag: string) => (message: unknown) => console.log(tag, message);
-  const innerLogger = {
-    get: () => innerLogger,
-    debug: consoleLogger('debug'),
-    info: consoleLogger('info'),
-    warn: consoleLogger('warn'),
-    trace: consoleLogger('trace'),
-    error: consoleLogger('error'),
-    fatal: consoleLogger('fatal'),
-    log: consoleLogger('log'),
-  };
-  return new LevelLogger(innerLogger);
+
+  const logger = new LevelLogger(loggingSystemMock.create()) as jest.Mocked<LevelLogger>;
+
+  logger.clone.mockImplementation(createMockLevelLogger);
+  logger.debug.mockImplementation(consoleLogger('debug'));
+  logger.info.mockImplementation(consoleLogger('info'));
+  logger.warn.mockImplementation(consoleLogger('warn'));
+  logger.warning = jest.fn().mockImplementation(consoleLogger('warn'));
+  logger.error.mockImplementation(consoleLogger('error'));
+  logger.trace.mockImplementation(consoleLogger('trace'));
+
+  return logger;
 }

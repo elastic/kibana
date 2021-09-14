@@ -27,7 +27,7 @@ export const useLink = () => {
       core.http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${path}`),
     getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => {
       const [basePath, path] = getSeparatePaths(page, values);
-      return core.http.basePath.prepend(`${basePath}#${path}`);
+      return core.http.basePath.prepend(`${basePath}${path}`);
     },
   };
 };

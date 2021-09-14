@@ -11,3 +11,5 @@ export { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
 export { getTelemetryAllowChangingOptInStatus } from './get_telemetry_allow_changing_opt_in_status';
 export { getTelemetryFailureDetails } from './get_telemetry_failure_details';
 export type { TelemetryFailureDetails } from './get_telemetry_failure_details';
+export { getTelemetryChannelEndpoint } from './get_telemetry_channel_endpoint';
+export type { GetTelemetryChannelEndpointConfig } from './get_telemetry_channel_endpoint';

@@ -20,20 +20,35 @@ import { CodeEditor, MarkdownLang } from '../../../../kibana_react/public';
 import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getDataStart } from '../../services';
+import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
 export class MarkdownEditor extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { fieldFormatMap: undefined };
+  }
+
   handleChange = (value) => {
     this.props.onChange({ markdown: value });
   };
 
-  handleOnLoad = (ace) => {
-    this.ace = ace;
+  handleOnLoad = (editor) => {
+    this.editor = editor;
   };
 
-  handleVarClick(snippet) {
-    return () => {
-      if (this.ace) this.ace.insert(snippet);
-    };
+  handleVarClick = (snippet) => () => {
+    if (this.editor) {
+      const range = this.editor.getSelection();
+
+      this.editor.executeEdits('', [{ range, text: snippet }]);
+    }
+  };
+
+  async componentDidMount() {
+    const { indexPatterns } = getDataStart();
+    const { indexPattern } = await fetchIndexPattern(this.props.model.index_pattern, indexPatterns);
+    this.setState({ fieldFormatMap: indexPattern?.fieldFormatMap });
   }
 
   render() {
@@ -42,11 +57,10 @@ export class MarkdownEditor extends Component {
     if (!visData) {
       return null;
     }
-    const dateFormat = getConfig('dateFormat');
     const series = _.get(visData, `${model.id}.series`, []);
-    const variables = convertSeriesToVars(series, model, dateFormat, this.props.getConfig);
+    const variables = convertSeriesToVars(series, model, getConfig, this.state.fieldFormatMap);
     const rows = [];
-    const rawFormatter = createTickFormatter('0.[0000]', null, this.props.getConfig);
+    const rawFormatter = createTickFormatter('0.[0000]', null, getConfig);
 
     const createPrimitiveRow = (key) => {
       const snippet = `{{ ${key} }}`;

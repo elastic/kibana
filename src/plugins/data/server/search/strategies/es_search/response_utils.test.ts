@@ -7,7 +7,7 @@
  */
 
 import { getTotalLoaded, toKibanaSearchResponse, shimHitsTotal } from './response_utils';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 describe('response utils', () => {
   describe('getTotalLoaded', () => {
@@ -19,7 +19,7 @@ describe('response utils', () => {
           skipped: 5,
           total: 100,
         },
-      } as unknown) as SearchResponse<unknown>);
+      } as unknown) as estypes.SearchResponse<unknown>);
 
       expect(result).toEqual({
         total: 100,
@@ -37,7 +37,7 @@ describe('response utils', () => {
           skipped: 5,
           total: 100,
         },
-      } as unknown) as SearchResponse<unknown>);
+      } as unknown) as estypes.SearchResponse<unknown>);
 
       expect(result).toEqual({
         rawResponse: {

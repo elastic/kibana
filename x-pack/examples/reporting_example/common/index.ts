@@ -7,3 +7,9 @@
 
 export const PLUGIN_ID = 'reportingExample';
 export const PLUGIN_NAME = 'reportingExample';
+
+export {
+  REPORTING_EXAMPLE_LOCATOR_ID,
+  ReportingExampleLocatorDefinition,
+  ReportingExampleLocatorParams,
+} from './locator';

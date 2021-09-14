@@ -26,8 +26,8 @@ export async function getErrorGroups({
   sortDirection = 'desc',
   setup,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';

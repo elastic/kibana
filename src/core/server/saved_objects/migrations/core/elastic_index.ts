@@ -43,6 +43,10 @@ export const REMOVED_TYPES: string[] = [
   'server',
   // https://github.com/elastic/kibana/issues/95617
   'tsvb-validation-telemetry',
+  // replaced by osquery-manager-usage-metric
+  'osquery-usage-metric',
+  // Was removed in 7.16
+  'timelion-sheet',
 ].sort();
 
 // When migrating from the outdated index we use a read query which excludes

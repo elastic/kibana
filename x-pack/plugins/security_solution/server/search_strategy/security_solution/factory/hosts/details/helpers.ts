@@ -199,28 +199,32 @@ export const getHostEndpoint = async (
     };
     const endpointData =
       id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
-        ? await getHostMetaData(metadataRequestContext, id, undefined)
+        ? await getHostMetaData(metadataRequestContext, id)
         : null;
 
-    const fleetAgentId = endpointData?.metadata.elastic.agent.id;
+    const fleetAgentId = endpointData?.elastic.agent.id;
     const [fleetAgentStatus, pendingActions] = !fleetAgentId
       ? [undefined, {}]
       : await Promise.all([
           // Get Agent Status
           agentService.getAgentStatusById(esClient.asCurrentUser, fleetAgentId),
           // Get a list of pending actions (if any)
-          getPendingActionCounts(esClient.asCurrentUser, [fleetAgentId]).then((results) => {
+          getPendingActionCounts(
+            esClient.asCurrentUser,
+            endpointContext.service.getEndpointMetadataService(),
+            [fleetAgentId]
+          ).then((results) => {
             return results[0].pending_actions;
           }),
         ]);
 
-    return endpointData != null && endpointData.metadata
+    return endpointData != null && endpointData
       ? {
-          endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,
-          policyStatus: endpointData.metadata.Endpoint.policy.applied.status,
-          sensorVersion: endpointData.metadata.agent.version,
+          endpointPolicy: endpointData.Endpoint.policy.applied.name,
+          policyStatus: endpointData.Endpoint.policy.applied.status,
+          sensorVersion: endpointData.agent.version,
           elasticAgentStatus: fleetAgentStatusToEndpointHostStatus(fleetAgentStatus!),
-          isolation: endpointData.metadata.Endpoint.state?.isolation ?? false,
+          isolation: endpointData.Endpoint.state?.isolation ?? false,
           pendingActions,
         }
       : null;

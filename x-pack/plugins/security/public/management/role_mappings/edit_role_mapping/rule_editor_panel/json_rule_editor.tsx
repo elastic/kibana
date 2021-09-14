@@ -8,13 +8,17 @@
 import 'brace/mode/json';
 import 'brace/theme/github';
 
-import { EuiButton, EuiCodeEditor, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { XJsonLang } from '@kbn/monaco';
 
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  CodeEditorField,
+  useKibana,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 import type { Rule } from '../../model';
 import { generateRulesFromRaw, RuleBuilderError } from '../../model';
 
@@ -76,25 +80,26 @@ export const JSONRuleEditor = (props: Props) => {
       data-test-subj="roleMappingsJSONEditor"
     >
       <Fragment>
-        <EuiCodeEditor
+        <CodeEditorField
           aria-label={''}
-          mode={'json'}
-          theme="github"
+          languageId={XJsonLang.ID}
           value={rawRules}
           onChange={onRulesChange}
-          width="100%"
-          height="auto"
-          minLines={6}
-          maxLines={30}
-          isReadOnly={false}
-          setOptions={{
-            showLineNumbers: true,
+          fullWidth={true}
+          height="300px"
+          options={{
+            accessibilitySupport: 'off',
+            lineNumbers: 'on',
+            fontSize: 12,
             tabSize: 2,
+            automaticLayout: true,
+            minimap: { enabled: false },
+            overviewRulerBorder: false,
+            scrollbar: { alwaysConsumeMouseWheel: false },
+            scrollBeyondLastLine: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
           }}
-          editorProps={{
-            $blockScrolling: Infinity,
-          }}
-          showGutter={true}
         />
         <EuiSpacer size="s" />
         <EuiButton iconType="broom" onClick={reformatRules} size="s">

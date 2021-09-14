@@ -66,7 +66,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
    * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
    */
 
-  const isOrganization = !useRouteMatch(PERSONAL_PATH); // TODO: Once auth is figured out, we need to have a check for the equivalent of `isAdmin`.
+  const isOrganization = !useRouteMatch(PERSONAL_PATH);
 
   setContext(isOrganization);
 
@@ -94,6 +94,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       </Route>
       <Route path={PERSONAL_PATH}>
         <Switch>
+          <Redirect exact from={PERSONAL_PATH} to={PERSONAL_SOURCES_PATH} />
           <Route path={PERSONAL_SOURCES_PATH}>
             <SourcesRouter />
           </Route>

@@ -785,7 +785,7 @@ Object {
     },
   },
   "sourceFilters": undefined,
-  "timeFieldName": "timestamp",
+  "timeFieldName": "time",
   "title": "title",
   "type": "index-pattern",
   "typeMeta": undefined,

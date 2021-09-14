@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export class DuplicateIndexPatternError extends Error {
+export class DuplicateDataViewError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'DuplicateIndexPatternError';

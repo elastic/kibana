@@ -34,11 +34,14 @@ import {
   SimpleHit,
 } from '../types';
 import { createSearchAfterReturnType, makeFloatString } from '../utils';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { buildReasonMessageForEqlAlert } from '../reason_formatters';
 
 export const eqlExecutor = async ({
   rule,
   tuple,
   exceptionItems,
+  experimentalFeatures,
   services,
   version,
   logger,
@@ -50,6 +53,7 @@ export const eqlExecutor = async ({
   rule: SavedObject<AlertAttributes<EqlRuleParams>>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
+  experimentalFeatures: ExperimentalFeatures;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   logger: Logger;
@@ -71,7 +75,10 @@ export const eqlExecutor = async ({
       services.scopedClusterClient.asCurrentUser,
       ruleParams.outputIndex
     );
-    if (isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })) {
+    if (
+      !experimentalFeatures.ruleRegistryEnabled &&
+      isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })
+    ) {
       throw new Error(
         `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
       );
@@ -85,7 +92,13 @@ export const eqlExecutor = async ({
       throw err;
     }
   }
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
+  const inputIndex = await getInputIndex({
+    experimentalFeatures,
+    services,
+    version,
+    index: ruleParams.index,
+  });
+
   const request = buildEqlSearchRequest(
     ruleParams.query,
     inputIndex,
@@ -96,24 +109,28 @@ export const eqlExecutor = async ({
     exceptionItems,
     ruleParams.eventCategoryOverride
   );
+
   const eqlSignalSearchStart = performance.now();
   logger.debug(
     `EQL query request path: ${request.path}, method: ${request.method}, body: ${JSON.stringify(
       request.body
     )}`
   );
+
   // TODO: fix this later
   const { body: response } = (await services.scopedClusterClient.asCurrentUser.transport.request(
     request
   )) as ApiResponse<EqlSignalSearchResponse>;
+
   const eqlSignalSearchEnd = performance.now();
   const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
   result.searchAfterTimes = [eqlSearchDuration];
+
   let newSignals: SimpleHit[] | undefined;
   if (response.hits.sequences !== undefined) {
-    newSignals = wrapSequences(response.hits.sequences);
+    newSignals = wrapSequences(response.hits.sequences, buildReasonMessageForEqlAlert);
   } else if (response.hits.events !== undefined) {
-    newSignals = wrapHits(response.hits.events);
+    newSignals = wrapHits(response.hits.events, buildReasonMessageForEqlAlert);
   } else {
     throw new Error(
       'eql query response should have either `sequences` or `events` but had neither'
@@ -126,6 +143,7 @@ export const eqlExecutor = async ({
     result.createdSignalsCount += insertResult.createdItemsCount;
     result.createdSignals = insertResult.createdItems;
   }
+
   result.success = true;
   return result;
 };

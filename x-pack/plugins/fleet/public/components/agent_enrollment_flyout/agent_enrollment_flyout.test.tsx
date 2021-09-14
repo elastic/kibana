@@ -16,7 +16,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import type { AgentPolicy } from '../../../common';
-import { useGetSettings, sendGetFleetStatus } from '../../hooks/use_request';
+import { useGetSettings, sendGetFleetStatus, sendGetOneAgentPolicy } from '../../hooks/use_request';
 import { FleetStatusProvider, ConfigContext } from '../../hooks';
 
 import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
@@ -77,6 +77,10 @@ describe('<AgentEnrollmentFlyout />', () => {
 
     (sendGetFleetStatus as jest.Mock).mockResolvedValue({
       data: { isReady: true },
+    });
+
+    (sendGetOneAgentPolicy as jest.Mock).mockResolvedValue({
+      data: { item: { package_policies: [] } },
     });
 
     (useFleetServerInstructions as jest.Mock).mockReturnValue({

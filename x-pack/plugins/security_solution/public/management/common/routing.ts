@@ -17,7 +17,8 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
-  MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from './constants';
 import { AdministrationSubTab } from '../types';
@@ -81,6 +82,9 @@ export const getEndpointDetailsPath = (
   const queryParams: EndpointDetailsUrlProps = { ...rest };
 
   switch (props.name) {
+    case 'endpointDetails':
+      queryParams.show = 'details';
+      break;
     case 'endpointIsolate':
       queryParams.show = 'isolate';
       break;
@@ -112,7 +116,14 @@ export const getPoliciesPath = (search?: string) => {
 };
 
 export const getPolicyDetailPath = (policyId: string, search?: string) => {
-  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  })}${appendSearch(search)}`;
+};
+
+export const getPolicyTrustedAppsPath = (policyId: string, search?: string) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.policies,
     policyId,
   })}${appendSearch(search)}`;
@@ -137,6 +148,12 @@ const normalizeTrustedAppsPageLocation = (
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+      ...(!isDefaultOrMissing(location.included_policies, '')
+        ? { included_policies: location.included_policies }
+        : ''),
+      ...(!isDefaultOrMissing(location.excluded_policies, '')
+        ? { excluded_policies: location.excluded_policies }
+        : ''),
     };
   } else {
     return {};
@@ -193,10 +210,24 @@ const extractFilter = (query: querystring.ParsedUrlQuery): string => {
   return extractFirstParamValue(query, 'filter') || '';
 };
 
+const extractIncludedPolicies = (query: querystring.ParsedUrlQuery): string => {
+  return extractFirstParamValue(query, 'included_policies') || '';
+};
+
+const extractExcludedPolicies = (query: querystring.ParsedUrlQuery): string => {
+  return extractFirstParamValue(query, 'excluded_policies') || '';
+};
+
 export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
   filter: extractFilter(query),
+});
+
+export const extractTrustedAppsListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
+  ...extractListPaginationParams(query),
+  included_policies: extractIncludedPolicies(query),
+  excluded_policies: extractExcludedPolicies(query),
 });
 
 export const extractTrustedAppsListPageLocation = (
@@ -208,7 +239,7 @@ export const extractTrustedAppsListPageLocation = (
   ) as TrustedAppsListPageLocation['show'];
 
   return {
-    ...extractListPaginationParams(query),
+    ...extractTrustedAppsListPaginationParams(query),
     view_type: extractFirstParamValue(query, 'view_type') === 'list' ? 'list' : 'grid',
     show:
       showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,

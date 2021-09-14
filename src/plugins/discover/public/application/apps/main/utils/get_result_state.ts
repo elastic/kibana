@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 import { FetchStatus } from '../../../types';
 
 export const resultStatuses = {
@@ -19,13 +18,13 @@ export const resultStatuses = {
  * Returns the current state of the result, depends on fetchStatus and the given fetched rows
  * Determines what is displayed in Discover main view (loading view, data view, empty data view, ...)
  */
-export function getResultState(fetchStatus: FetchStatus, rows: ElasticSearchHit[]) {
+export function getResultState(fetchStatus: FetchStatus, foundDocuments: boolean = false) {
   if (fetchStatus === FetchStatus.UNINITIALIZED) {
     return resultStatuses.UNINITIALIZED;
   }
 
-  const rowsEmpty = !Array.isArray(rows) || rows.length === 0;
-  if (rowsEmpty && fetchStatus === FetchStatus.LOADING) return resultStatuses.LOADING;
-  else if (!rowsEmpty) return resultStatuses.READY;
+  if (!foundDocuments && fetchStatus === FetchStatus.LOADING) return resultStatuses.LOADING;
+  else if (foundDocuments) return resultStatuses.READY;
+  else if (fetchStatus === FetchStatus.PARTIAL) return resultStatuses.READY;
   else return resultStatuses.NO_RESULTS;
 }

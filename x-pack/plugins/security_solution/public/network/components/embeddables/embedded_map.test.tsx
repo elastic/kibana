@@ -32,7 +32,12 @@ jest.mock('../../../common/lib/kibana', () => {
         embeddable: {
           EmbeddablePanel: jest.fn(() => <div data-test-subj="EmbeddablePanel" />),
         },
-        docLinks: { ELASTIC_WEBSITE_URL: 'ELASTIC_WEBSITE_URL' },
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'ELASTIC_WEBSITE_URL',
+          links: {
+            siem: { networkMap: '' },
+          },
+        },
       },
     }),
   };

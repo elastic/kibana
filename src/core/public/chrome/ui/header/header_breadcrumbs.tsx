@@ -14,17 +14,15 @@ import { Observable } from 'rxjs';
 import { ChromeBreadcrumb } from '../../types';
 
 interface Props {
-  appTitle$: Observable<string>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
 }
 
-export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
-  const appTitle = useObservable(appTitle$, 'Kibana');
+export function HeaderBreadcrumbs({ breadcrumbs$ }: Props) {
   const breadcrumbs = useObservable(breadcrumbs$, []);
   let crumbs = breadcrumbs;
 
-  if (breadcrumbs.length === 0 && appTitle) {
-    crumbs = [{ text: appTitle }];
+  if (breadcrumbs.length === 0) {
+    crumbs = [{ text: 'Kibana' }];
   }
 
   crumbs = crumbs.map((breadcrumb, i) => ({

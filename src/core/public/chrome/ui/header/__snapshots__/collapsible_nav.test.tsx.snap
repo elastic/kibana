@@ -746,9 +746,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   onResize={[Function]}
                 >
                   <div>
-                    <div
-                      className=""
-                    >
+                    <div>
                       <div
                         className="euiCollapsibleNavGroup__children"
                       >
@@ -1021,9 +1019,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       onResize={[Function]}
                     >
                       <div>
-                        <div
-                          className=""
-                        >
+                        <div>
                           <div
                             className="euiCollapsibleNavGroup__children"
                           >
@@ -1315,9 +1311,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       onResize={[Function]}
                     >
                       <div>
-                        <div
-                          className=""
-                        >
+                        <div>
                           <div
                             className="euiCollapsibleNavGroup__children"
                           >
@@ -1570,9 +1564,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       onResize={[Function]}
                     >
                       <div>
-                        <div
-                          className=""
-                        >
+                        <div>
                           <div
                             className="euiCollapsibleNavGroup__children"
                           >
@@ -1786,9 +1778,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       onResize={[Function]}
                     >
                       <div>
-                        <div
-                          className=""
-                        >
+                        <div>
                           <div
                             className="euiCollapsibleNavGroup__children"
                           >

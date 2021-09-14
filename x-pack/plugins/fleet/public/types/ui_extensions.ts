@@ -52,6 +52,16 @@ export interface PackagePolicyEditExtension {
   Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
 }
 
+/** Extension point registration contract for Integration Policy Edit tabs views */
+export interface PackagePolicyEditTabsExtension {
+  package: string;
+  view: 'package-policy-edit-tabs';
+  tabs: Array<{
+    title: EuiStepProps['title'];
+    Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
+  }>;
+}
+
 /**
  * UI Component Extension is used on the pages displaying the ability to Create an
  * Integration Policy
@@ -120,6 +130,7 @@ export interface AgentEnrollmentFlyoutFinalStepExtension {
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
   | PackagePolicyEditExtension
+  | PackagePolicyEditTabsExtension
   | PackageCustomExtension
   | PackagePolicyCreateExtension
   | PackageAssetsExtension

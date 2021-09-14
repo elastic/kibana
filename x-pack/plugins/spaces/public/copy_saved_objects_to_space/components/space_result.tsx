@@ -17,9 +17,8 @@ import {
 } from '@elastic/eui';
 import React, { lazy, Suspense, useState } from 'react';
 
-import type { Space } from 'src/plugins/spaces_oss/common';
-
 import { getSpaceAvatarComponent } from '../../space_avatar';
+import type { SpacesDataEntry } from '../../types';
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
@@ -31,7 +30,7 @@ const LazySpaceAvatar = lazy(() =>
 );
 
 interface Props {
-  space: Space;
+  space: SpacesDataEntry;
   summarizedCopyResult: SummarizedCopyToSpaceResult;
   retries: ImportRetry[];
   onRetriesChange: (retries: ImportRetry[]) => void;

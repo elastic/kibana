@@ -10,6 +10,7 @@ import { createTickFormatter } from './tick_formatter';
 import { getFieldFormatsRegistry } from '../../../../../data/public/test_utils';
 import { setFieldFormats } from '../../../services';
 import { UI_SETTINGS } from '../../../../../data/public';
+import { FORMATS_UI_SETTINGS } from '../../../../../field_formats/common';
 
 const mockUiSettings = {
   get: (item) => {
@@ -22,7 +23,7 @@ const mockUiSettings = {
   [UI_SETTINGS.QUERY_STRING_OPTIONS]: {},
   [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: true,
   'dateFormat:tz': 'Browser',
-  [UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP]: {},
+  [FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP]: {},
 };
 
 const mockCore = {
@@ -45,7 +46,7 @@ describe('createTickFormatter(format, template)', () => {
 
   test('returns a percent with percent formatter', () => {
     const config = {
-      [UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: '0.[00]%',
+      [FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: '0.[00]%',
     };
     const fn = createTickFormatter('percent', null, (key) => config[key]);
     expect(fn(0.5556)).toEqual('55.56%');
@@ -53,7 +54,7 @@ describe('createTickFormatter(format, template)', () => {
 
   test('returns a byte formatted string with byte formatter', () => {
     const config = {
-      [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0.0b',
+      [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0.0b',
     };
     const fn = createTickFormatter('bytes', null, (key) => config[key]);
     expect(fn(1500 ^ 10)).toEqual('1.5KB');
@@ -66,7 +67,7 @@ describe('createTickFormatter(format, template)', () => {
 
   test('returns a located string with custom locale setting', () => {
     const config = {
-      [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE]: 'fr',
+      [FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE]: 'fr',
     };
     const fn = createTickFormatter('0,0.0', null, (key) => config[key]);
     expect(fn(1500)).toEqual('1 500,0');
@@ -89,7 +90,7 @@ describe('createTickFormatter(format, template)', () => {
 
   test('returns formatted value if passed a bad template', () => {
     const config = {
-      [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: '0,0.[00]',
+      [FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: '0,0.[00]',
     };
     const fn = createTickFormatter('number', '{{value', (key) => config[key]);
     expect(fn(1.5556)).toEqual('1.56');

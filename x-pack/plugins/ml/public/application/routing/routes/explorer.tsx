@@ -26,7 +26,6 @@ import { useExplorerData } from '../../explorer/actions';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
-import { useShowCharts } from '../../components/controls/checkbox_showcharts';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 import { useUrlState } from '../../util/url_state';
@@ -108,6 +107,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         setGlobalState('time', {
           from: start,
           to: end,
+          ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
         });
       }
     }
@@ -127,7 +127,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         to: globalState.time.to,
       });
     }
-  }, [globalState?.time?.from, globalState?.time?.to]);
+  }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {
@@ -195,6 +195,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     if (severity !== undefined) {
       explorerService.setSwimLaneSeverity(severity);
     }
+
+    if (explorerUrlState.mlShowCharts !== undefined) {
+      explorerService.setShowCharts(explorerUrlState.mlShowCharts);
+    }
   }, []);
 
   /** Sync URL state with {@link explorerService} state */
@@ -213,7 +217,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [explorerData]);
 
-  const [showCharts] = useShowCharts();
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
 
@@ -266,7 +269,11 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [JSON.stringify(loadExplorerDataConfig), selectedCells?.showTopFieldValues]);
 
-  if (explorerState === undefined || refresh === undefined || showCharts === undefined) {
+  if (
+    explorerState === undefined ||
+    refresh === undefined ||
+    explorerAppState?.mlShowCharts === undefined
+  ) {
     return null;
   }
 
@@ -276,7 +283,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         {...{
           explorerState,
           setSelectedCells,
-          showCharts,
+          showCharts: explorerState.showCharts,
           severity: tableSeverity.val,
           stoppedPartitions,
           invalidTimeRangeError,

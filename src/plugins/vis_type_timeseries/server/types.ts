@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
-import type { SharedGlobalConfig } from 'kibana/server';
+import { Observable } from 'rxjs';
+import { EsQueryConfig } from '@kbn/es-query';
+import { SharedGlobalConfig } from 'kibana/server';
 import type { IRouter, IUiSettingsClient, KibanaRequest } from 'src/core/server';
-import type {
-  DataRequestHandlerContext,
-  EsQueryConfig,
-  IndexPatternsService,
-} from '../../data/server';
+import type { DataRequestHandlerContext, IndexPatternsService } from '../../data/server';
+import type { FieldFormatsRegistry } from '../../field_formats/common';
 import type { Series, VisPayload } from '../common/types';
 import type { SearchStrategyRegistry } from './lib/search_strategies';
 import type { CachedIndexPatternFetcher } from './lib/search_strategies/lib/cached_index_pattern_fetcher';
@@ -36,6 +34,7 @@ export interface VisTypeTimeseriesRequestServices {
   indexPatternsService: IndexPatternsService;
   searchStrategyRegistry: SearchStrategyRegistry;
   cachedIndexPatternFetcher: CachedIndexPatternFetcher;
+  fieldFormatService: FieldFormatsRegistry;
   buildSeriesMetaParams: (
     index: FetchedIndexPattern,
     useKibanaIndexes: boolean,

@@ -173,7 +173,7 @@ describe('getCerts', () => {
                   "filter": Array [
                     Object {
                       "exists": Object {
-                        "field": "tls.server",
+                        "field": "tls.server.hash.sha256",
                       },
                     },
                     Object {

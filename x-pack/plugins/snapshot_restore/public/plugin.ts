@@ -7,13 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
-
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { ManagementSetup } from 'src/plugins/management/public';
+import { SharePluginSetup } from 'src/plugins/share/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
+
 import { PLUGIN } from '../common/constants';
 
 import { ClientConfigType } from './types';
@@ -22,10 +23,12 @@ import { httpService, setUiMetricService } from './application/services/http';
 import { textService } from './application/services/text';
 import { UiMetricService } from './application/services';
 import { UIM_APP_NAME } from './application/constants';
+import { SnapshotRestoreLocatorDefinition } from './locator';
 
 interface PluginsDependencies {
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
+  share: SharePluginSetup;
   home?: HomePublicPluginSetup;
 }
 
@@ -79,6 +82,12 @@ export class SnapshotRestoreUIPlugin {
         order: 630,
       });
     }
+
+    plugins.share.url.locators.create(
+      new SnapshotRestoreLocatorDefinition({
+        managementAppLocator: plugins.management.locator,
+      })
+    );
   }
 
   public start() {}

@@ -41,7 +41,7 @@ const NoContent = ({ handleAdd }: { handleAdd: () => void }) => (
         defaultMessage="Click the button below to create an annotation data source."
       />
     </p>
-    <EuiButton fill onClick={handleAdd}>
+    <EuiButton fill onClick={handleAdd} data-test-subj="addDataSourceButton">
       <FormattedMessage
         id="visTypeTimeseries.annotationsEditor.addDataSourceButtonLabel"
         defaultMessage="Add data source"

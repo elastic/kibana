@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HashRouter as Router, Route, Switch } from 'react-router-dom';
+import { Router, Route, Switch, useHistory } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
@@ -30,7 +30,7 @@ import { FleetServerUpgradeModal } from './components/fleet_server_upgrade_modal
 
 export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
-
+  const history = useHistory();
   const { agents } = useConfig();
   const capabilities = useCapabilities();
 
@@ -118,7 +118,7 @@ export const AgentsApp: React.FunctionComponent = () => {
   ) : undefined;
 
   return (
-    <Router>
+    <Router history={history}>
       <Switch>
         <Route path={FLEET_ROUTING_PATHS.agent_details}>
           <AgentDetailsPage />

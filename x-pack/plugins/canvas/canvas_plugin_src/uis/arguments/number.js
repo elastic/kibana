@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { compose, withProps } from 'recompose';
 import { EuiFieldNumber, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { get } from 'lodash';
-import { createStatefulPropHoc } from '../../../public/components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
 
@@ -21,53 +18,50 @@ const { Number: strings } = ArgumentStrings;
 // most understandable way to do this. There, I said it.
 
 // TODO: Support max/min as options
-const NumberArgInput = ({ updateValue, value, confirm, commit, argId }) => (
-  <EuiFlexGroup gutterSize="s">
-    <EuiFlexItem>
-      <EuiFieldNumber
-        compressed
-        id={argId}
-        value={Number(value)}
-        onChange={confirm ? updateValue : (ev) => commit(Number(ev.target.value))}
-      />
-    </EuiFlexItem>
-    {confirm && (
-      <EuiFlexItem grow={false}>
-        <EuiButton size="s" onClick={() => commit(Number(value))}>
-          {confirm}
-        </EuiButton>
+const NumberArgInput = ({ argId, argValue, typeInstance, onValueChange }) => {
+  const [value, setValue] = useState(argValue);
+  const confirm = typeInstance?.options?.confirm;
+
+  useEffect(() => {
+    setValue(argValue);
+  }, [argValue]);
+
+  const onChange = useCallback(
+    (ev) => {
+      const onChangeFn = confirm ? setValue : onValueChange;
+      onChangeFn(ev.target.value);
+    },
+    [confirm, onValueChange]
+  );
+
+  return (
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem>
+        <EuiFieldNumber compressed id={argId} value={Number(value)} onChange={onChange} />
       </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+
+      {confirm && (
+        <EuiFlexItem grow={false}>
+          <EuiButton size="s" onClick={() => onValueChange(Number(value))}>
+            {confirm}
+          </EuiButton>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
 
 NumberArgInput.propTypes = {
   argId: PropTypes.string.isRequired,
-  updateValue: PropTypes.func.isRequired,
-  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-  confirm: PropTypes.string,
-  commit: PropTypes.func.isRequired,
-};
-
-const EnhancedNumberArgInput = compose(
-  withProps(({ onValueChange, typeInstance, argValue }) => ({
-    confirm: get(typeInstance, 'options.confirm'),
-    commit: onValueChange,
-    value: argValue,
-  })),
-  createStatefulPropHoc('value')
-)(NumberArgInput);
-
-EnhancedNumberArgInput.propTypes = {
-  argValue: PropTypes.any.isRequired,
-  onValueChange: PropTypes.func.isRequired,
+  argValue: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
   typeInstance: PropTypes.object.isRequired,
+  onValueChange: PropTypes.func.isRequired,
 };
 
 export const number = () => ({
   name: 'number',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  simpleTemplate: templateFromReactComponent(EnhancedNumberArgInput),
+  simpleTemplate: templateFromReactComponent(NumberArgInput),
   default: '0',
 });

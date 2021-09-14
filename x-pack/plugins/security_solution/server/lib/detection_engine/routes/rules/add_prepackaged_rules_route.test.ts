@@ -9,7 +9,7 @@ import {
   getEmptyFindResult,
   addPrepackagedRulesRequest,
   getFindResultWithSingleHit,
-  getNonEmptyIndex,
+  getAlertMock,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig, mockGetCurrentUser } from '../__mocks__';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
@@ -22,6 +22,7 @@ import { ExceptionListClient } from '../../../../../../lists/server';
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -71,12 +72,16 @@ jest.mock('../../../timeline/routes/prepackaged_timelines/install_prepackaged_ti
   };
 });
 
-describe('add_prepackaged_rules_route', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('add_prepackaged_rules_route - %s', (_, isRuleRegistryEnabled) => {
   const siemMockClient = siemMock.createClient();
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let securitySetup: SecurityPluginSetup;
   let mockExceptionsClient: ExceptionListClient;
+  const testif = isRuleRegistryEnabled ? test.skip : test;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -90,8 +95,10 @@ describe('add_prepackaged_rules_route', () => {
 
     mockExceptionsClient = listMock.getExceptionListClient();
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    clients.rulesClient.update.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    );
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
@@ -102,23 +109,22 @@ describe('add_prepackaged_rules_route', () => {
       errors: [],
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
     );
-    addPrepackedRulesRoute(server.router, createMockConfig(), securitySetup);
+    addPrepackedRulesRoute(server.router, createMockConfig(), securitySetup, isRuleRegistryEnabled);
   });
 
   describe('status codes', () => {
-    test('returns 200 when creating with a valid actionClient and alertClient', async () => {
+    test('returns 200 when creating with a valid actionClient and rulesClient', async () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
     });
 
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+    test('returns 404 if rulesClient is not available on the route', async () => {
+      context.alerting!.getRulesClient = jest.fn();
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
@@ -129,24 +135,25 @@ describe('add_prepackaged_rules_route', () => {
       });
     });
 
-    test('it returns a 400 if the index does not exist', async () => {
+    test('it returns a 400 if the index does not exist when rule registry not enabled', async () => {
       const request = addPrepackagedRulesRequest();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
       );
       const response = await server.inject(request, context);
 
-      expect(response.status).toEqual(400);
-      expect(response.body).toEqual({
-        status_code: 400,
-        message: expect.stringContaining(
-          'Pre-packaged rules cannot be installed until the signals index is created'
-        ),
-      });
+      expect(response.status).toEqual(isRuleRegistryEnabled ? 200 : 400);
+      if (!isRuleRegistryEnabled) {
+        expect(response.body).toEqual({
+          status_code: 400,
+          message: expect.stringContaining(
+            'Pre-packaged rules cannot be installed until the signals index is created'
+          ),
+        });
+      }
     });
 
-    it('returns 404 if siem client is unavailable', async () => {
+    test('returns 404 if siem client is unavailable', async () => {
       const { securitySolution, ...contextWithoutSecuritySolution } = context;
       const response = await server.inject(
         addPrepackagedRulesRequest(),
@@ -160,7 +167,7 @@ describe('add_prepackaged_rules_route', () => {
 
   describe('responses', () => {
     test('1 rule is installed and 0 are updated when find results are empty', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
@@ -186,17 +193,19 @@ describe('add_prepackaged_rules_route', () => {
       });
     });
 
-    test('catches errors if payloads cause errors to be thrown', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
-        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
-      );
-      const request = addPrepackagedRulesRequest();
-      const response = await server.inject(request, context);
+    testif(
+      'catches errors if signals index does not exist when rule registry not enabled',
+      async () => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+          elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
+        );
+        const request = addPrepackagedRulesRequest();
+        const response = await server.inject(request, context);
 
-      expect(response.status).toEqual(500);
-      expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
-    });
+        expect(response.status).toEqual(500);
+        expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
+      }
+    );
   });
 
   test('should install prepackaged timelines', async () => {
@@ -297,13 +306,16 @@ describe('add_prepackaged_rules_route', () => {
         getExceptionListClient: jest.fn(),
         getListClient: jest.fn(),
       };
+      const config = createMockConfig();
 
       await createPrepackagedRules(
         context,
         siemMockClient,
-        clients.alertsClient,
+        clients.rulesClient,
         {} as FrameworkRequest,
         1200,
+        config.prebuiltRulesFromFileSystem,
+        config.prebuiltRulesFromSavedObjects,
         mockExceptionsClient
       );
 
@@ -313,13 +325,16 @@ describe('add_prepackaged_rules_route', () => {
 
     test('uses passed in exceptions list client when lists client not available in context', async () => {
       const { lists, ...myContext } = context;
+      const config = createMockConfig();
 
       await createPrepackagedRules(
         myContext,
         siemMockClient,
-        clients.alertsClient,
+        clients.rulesClient,
         {} as FrameworkRequest,
         1200,
+        config.prebuiltRulesFromFileSystem,
+        config.prebuiltRulesFromSavedObjects,
         mockExceptionsClient
       );
 

@@ -32,7 +32,6 @@ export interface CheckForUnknownDocsFoundDoc {
 
 /** @internal */
 export interface UnknownDocsFound {
-  type: 'unknown_docs_found';
   unknownDocs: CheckForUnknownDocsFoundDoc[];
 }
 
@@ -42,8 +41,8 @@ export const checkForUnknownDocs = ({
   unusedTypesQuery,
   knownTypes,
 }: CheckForUnknownDocsParams): TaskEither.TaskEither<
-  RetryableEsClientError | UnknownDocsFound,
-  {}
+  RetryableEsClientError,
+  UnknownDocsFound
 > => () => {
   const query = createUnknownDocQuery(unusedTypesQuery, knownTypes);
 
@@ -56,14 +55,9 @@ export const checkForUnknownDocs = ({
     })
     .then((response) => {
       const { hits } = response.body.hits;
-      if (hits.length) {
-        return Either.left({
-          type: 'unknown_docs_found' as const,
-          unknownDocs: hits.map((hit) => ({ id: hit._id, type: hit._source?.type ?? 'unknown' })),
-        });
-      } else {
-        return Either.right({});
-      }
+      return Either.right({
+        unknownDocs: hits.map((hit) => ({ id: hit._id, type: hit._source?.type ?? 'unknown' })),
+      });
     })
     .catch(catchRetryableEsClientErrors);
 };

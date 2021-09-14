@@ -2,18 +2,13 @@
   "id": "painlessLab",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "requiredPlugins": [
-    "devTools",
-    "licensing",
-    "home"
-  ],
-  "configPath": [
-    "xpack",
-    "painless_lab"
-  ],
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": ["devTools", "licensing", "home"],
+  "configPath": ["xpack", "painless_lab"],
   "server": true,
   "ui": true,
-  "requiredBundles": [
-    "kibanaReact"
-  ]
+  "requiredBundles": ["kibanaReact"]
 }

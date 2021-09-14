@@ -91,7 +91,7 @@ export const Credentials: React.FC = () => {
           <EuiTitle size="m">
             <h2>
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.apiKeys', {
-                defaultMessage: 'API Keys',
+                defaultMessage: 'API keys',
               })}
             </h2>
           </EuiTitle>
@@ -105,7 +105,7 @@ export const Credentials: React.FC = () => {
               onClick={() => showCredentialsForm()}
             >
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.createKey', {
-                defaultMessage: 'Create a key',
+                defaultMessage: 'Create key',
               })}
             </EuiButton>
           )}

@@ -5,79 +5,129 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { find } from 'lodash';
+import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import { useAgentDetails } from '../../agents/use_agent_details';
+import { useAgentPolicy } from '../../agent_policies';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 
-import { LiveQueryForm } from '../../live_queries/form';
+import { LiveQuery } from '../../live_queries';
 import { queryClient } from '../../query_client';
+import { OsqueryIcon } from '../../components/osquery_icon';
 
 interface OsqueryActionProps {
-  hostId?: string | undefined;
+  metadata?: {
+    info: {
+      agent: { id: string };
+    };
+  };
 }
 
-const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ hostId }) => {
-  const [agentId, setAgentId] = useState<string>();
-  const { indexPatterns, search } = useKibana().services.data;
-
-  useEffect(() => {
-    if (hostId) {
-      const findAgent = async () => {
-        const searchSource = await search.searchSource.create();
-        const indexPattern = await indexPatterns.find('.fleet-agents');
-
-        searchSource.setField('index', indexPattern[0]);
-        searchSource.setField('filter', [
-          {
-            meta: {
-              alias: null,
-              disabled: false,
-              negate: false,
-              key: 'local_metadata.host.id',
-              value: hostId,
-            },
-            query: {
-              match_phrase: {
-                'local_metadata.host.id': hostId,
-              },
-            },
-          },
-          {
-            meta: {
-              alias: null,
-              disabled: false,
-              negate: false,
-              key: 'active',
-              value: 'true',
-            },
-            query: {
-              match_phrase: {
-                active: 'true',
-              },
-            },
-          },
-        ]);
-
-        const response = await searchSource.fetch$().toPromise();
-
-        if (response.rawResponse.hits.hits.length && response.rawResponse.hits.hits[0]._id) {
-          setAgentId(response.rawResponse.hits.hits[0]._id);
-        }
-      };
-
-      findAgent();
-    }
+const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
+  const permissions = useKibana().services.application.capabilities.osquery;
+  const agentId = metadata?.info?.agent?.id ?? undefined;
+  const { data: agentData, isFetched: agentFetched } = useAgentDetails({
+    agentId,
+    silent: true,
+    skip: !agentId,
+  });
+  const {
+    data: agentPolicyData,
+    isFetched: policyFetched,
+    isError: policyError,
+    isLoading: policyLoading,
+  } = useAgentPolicy({
+    policyId: agentData?.policy_id,
+    skip: !agentData,
+    silent: true,
   });
 
-  if (!agentId) {
+  const osqueryAvailable = useMemo(() => {
+    if (policyError) return false;
+
+    const osqueryPackageInstalled = find(agentPolicyData?.package_policies, [
+      'package.name',
+      OSQUERY_INTEGRATION_NAME,
+    ]);
+    return osqueryPackageInstalled?.enabled;
+  }, [agentPolicyData?.package_policies, policyError]);
+
+  if (!(permissions.runSavedQueries || permissions.writeLiveQueries)) {
+    return (
+      <EuiEmptyPrompt
+        icon={<OsqueryIcon />}
+        title={<h2>Permissions denied</h2>}
+        titleSize="xs"
+        body={
+          <p>
+            To access this page, ask your administrator for <EuiCode>osquery</EuiCode> Kibana
+            privileges.
+          </p>
+        }
+      />
+    );
+  }
+
+  if (!agentFetched) {
     return <EuiLoadingContent lines={10} />;
   }
 
-  return (
-    // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-    <LiveQueryForm defaultValue={{ agentSelection: { agents: [agentId] } }} agentId={agentId} />
-  );
+  if (!agentId || (agentFetched && !agentData)) {
+    return (
+      <EuiEmptyPrompt
+        icon={<OsqueryIcon />}
+        title={<h2>Osquery is not available</h2>}
+        titleSize="xs"
+        body={
+          <p>
+            An Elastic Agent is not installed on this host. To run queries, install Elastic Agent on
+            the host, and then add the Osquery Manager integration to the agent policy in Fleet.
+          </p>
+        }
+      />
+    );
+  }
+
+  if (!policyFetched && policyLoading) {
+    return <EuiLoadingContent lines={10} />;
+  }
+
+  if (!osqueryAvailable) {
+    return (
+      <EuiEmptyPrompt
+        icon={<OsqueryIcon />}
+        title={<h2>Osquery is not available</h2>}
+        titleSize="xs"
+        body={
+          <p>
+            The Osquery Manager integration is not added to the agent policy. To run queries on the
+            host, add the Osquery Manager integration to the agent policy in Fleet.
+          </p>
+        }
+      />
+    );
+  }
+
+  if (agentData?.status !== 'online') {
+    return (
+      <EuiEmptyPrompt
+        icon={<OsqueryIcon />}
+        title={<h2>Osquery is not available</h2>}
+        titleSize="xs"
+        body={
+          <p>
+            To run queries on this host, the Elastic Agent must be active. Check the status of this
+            agent in Fleet.
+          </p>
+        }
+      />
+    );
+  }
+
+  return <LiveQuery agentId={agentId} />;
 };
 
 export const OsqueryAction = React.memo(OsqueryActionComponent);

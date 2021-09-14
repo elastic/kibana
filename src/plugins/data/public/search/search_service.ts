@@ -24,12 +24,20 @@ import {
   ISearchGeneric,
   SearchSourceDependencies,
   SearchSourceService,
+  extendedBoundsFunction,
+  ipRangeFunction,
   kibanaTimerangeFunction,
   luceneFunction,
   kqlFunction,
   fieldFunction,
+  numericalRangeFunction,
   rangeFunction,
+  cidrFunction,
+  dateRangeFunction,
   existsFilterFunction,
+  geoBoundingBoxFunction,
+  geoPointFunction,
+  queryFilterFunction,
   rangeFilterFunction,
   kibanaFilterFunction,
   phraseFilterFunction,
@@ -115,13 +123,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
     );
+    expressions.registerFunction(cidrFunction);
+    expressions.registerFunction(dateRangeFunction);
+    expressions.registerFunction(extendedBoundsFunction);
+    expressions.registerFunction(ipRangeFunction);
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);
     expressions.registerFunction(kibanaTimerangeFunction);
     expressions.registerFunction(fieldFunction);
+    expressions.registerFunction(numericalRangeFunction);
+    expressions.registerFunction(geoBoundingBoxFunction);
+    expressions.registerFunction(geoPointFunction);
     expressions.registerFunction(rangeFunction);
     expressions.registerFunction(kibanaFilterFunction);
     expressions.registerFunction(existsFilterFunction);
+    expressions.registerFunction(queryFilterFunction);
     expressions.registerFunction(rangeFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);

@@ -63,8 +63,8 @@ export class VisualizeEditorPageObject extends FtrService {
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
-  public async clickGo() {
-    if (await this.visChart.isNewChartsLibraryEnabled()) {
+  public async clickGo(isNewChartLibrary = false) {
+    if ((await this.visChart.isNewChartsLibraryEnabled()) || isNewChartLibrary) {
       await this.elasticChart.setNewChartUiDebugFlag();
     }
 
@@ -531,5 +531,11 @@ export class VisualizeEditorPageObject extends FtrService {
 
   public async setSeriesType(seriesNth: number, type: string) {
     await this.find.selectValue(`select#seriesType${seriesNth}`, type);
+  }
+
+  public async setTimelionInterval(interval: string) {
+    const timelionIntervalComboBoxSelector = 'timelionIntervalComboBox';
+    await this.comboBox.clearInputField(timelionIntervalComboBoxSelector);
+    await this.comboBox.setCustom(timelionIntervalComboBoxSelector, interval);
   }
 }

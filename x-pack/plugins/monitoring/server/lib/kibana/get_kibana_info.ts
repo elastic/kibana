@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 // @ts-ignore
-import { checkParam } from '../error_missing_required';
+import { checkParam, MissingRequiredError } from '../error_missing_required';
 // @ts-ignore
 import { calculateAvailability } from '../calculate_availability';
 import { LegacyRequest } from '../../types';
@@ -17,10 +17,13 @@ export function handleResponse(resp: ElasticsearchResponse) {
   const legacySource = resp.hits?.hits[0]?._source.kibana_stats;
   const mbSource = resp.hits?.hits[0]?._source.kibana?.stats;
   const kibana = resp.hits?.hits[0]?._source.kibana?.kibana ?? legacySource?.kibana;
+  const availabilityTimestamp =
+    resp.hits?.hits[0]?._source['@timestamp'] ?? legacySource?.timestamp;
+  if (!availabilityTimestamp) {
+    throw new MissingRequiredError('timestamp');
+  }
   return merge(kibana, {
-    availability: calculateAvailability(
-      resp.hits?.hits[0]?._source['@timestamp'] ?? legacySource?.timestamp
-    ),
+    availability: calculateAvailability(availabilityTimestamp),
     os_memory_free: mbSource?.os?.memory?.free_in_bytes ?? legacySource?.os?.memory?.free_in_bytes,
     uptime: mbSource?.process?.uptime?.ms ?? legacySource?.process?.uptime_in_millis,
   });

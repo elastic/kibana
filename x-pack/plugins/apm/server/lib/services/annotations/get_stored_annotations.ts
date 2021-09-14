@@ -7,7 +7,8 @@
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
+import { rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
@@ -30,7 +31,7 @@ export function getStoredAnnotations({
 }: {
   setup: Setup & SetupTimeRange;
   serviceName: string;
-  environment?: string;
+  environment: string;
   client: ElasticsearchClient;
   annotationsClient: ScopedAnnotationsClient;
   logger: Logger;

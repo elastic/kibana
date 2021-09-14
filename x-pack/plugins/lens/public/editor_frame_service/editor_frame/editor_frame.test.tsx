@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React from 'react';
 import { ReactWrapper } from 'enzyme';
 
 // Tests are executed in a jsdom environment who does not have sizing methods,
@@ -39,14 +39,15 @@ import {
   DatasourceMock,
   createExpressionRendererMock,
 } from '../../mocks';
+import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
 import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import { mockDataPlugin, mountWithProvider } from '../../mocks';
-import { setState, setToggleFullscreen } from '../../state_management';
-import { FrameLayout } from './frame_layout';
+import { setState } from '../../state_management';
+import { getLensInspectorService } from '../../lens_inspector_service';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -80,6 +81,7 @@ function getDefaultProps() {
       charts: chartPluginMock.createStartContract(),
     },
     palettes: chartPluginMock.createPaletteRegistry(),
+    lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
     showNoDataPopover: jest.fn(),
   };
   return defaultProps;
@@ -213,7 +215,7 @@ describe('editor_frame', () => {
       const props = {
         ...getDefaultProps(),
         visualizationMap: {
-          testVis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         },
         datasourceMap: {
           testDatasource: {
@@ -228,7 +230,7 @@ describe('editor_frame', () => {
         await mountWithProvider(<EditorFrame {...props} />, {
           data: props.plugins.data,
           preloadedState: {
-            visualization: { activeId: 'testVis', state: null },
+            visualization: { activeId: 'testVis', state: {} },
             datasourceStates: {
               testDatasource: {
                 isLoading: false,
@@ -246,7 +248,7 @@ describe('editor_frame', () => {
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
         "kibana
         | lens_merge_tables layerIds=\\"first\\" tables={datasource}
-        | vis"
+        | testVis"
       `);
     });
 
@@ -263,7 +265,7 @@ describe('editor_frame', () => {
       const props = {
         ...getDefaultProps(),
         visualizationMap: {
-          testVis: { ...mockVisualization, toExpression: () => 'vis' },
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         },
         datasourceMap: {
           testDatasource: {
@@ -283,7 +285,7 @@ describe('editor_frame', () => {
         await mountWithProvider(<EditorFrame {...props} />, {
           data: props.plugins.data,
           preloadedState: {
-            visualization: { activeId: 'testVis', state: null },
+            visualization: { activeId: 'testVis', state: {} },
             datasourceStates: {
               testDatasource: {
                 isLoading: false,
@@ -368,7 +370,7 @@ describe('editor_frame', () => {
             },
             Object {
               "arguments": Object {},
-              "function": "vis",
+              "function": "testVis",
               "type": "function",
             },
           ],
@@ -1099,46 +1101,6 @@ describe('editor_frame', () => {
           state: suggestionVisState,
         })
       );
-    });
-
-    it('should avoid completely to compute suggestion when in fullscreen mode', async () => {
-      const props = {
-        ...getDefaultProps(),
-        initialContext: {
-          indexPatternId: '1',
-          fieldName: 'test',
-        },
-        visualizationMap: {
-          testVis: mockVisualization,
-        },
-        datasourceMap: {
-          testDatasource: mockDatasource,
-          testDatasource2: mockDatasource2,
-        },
-
-        ExpressionRenderer: expressionRendererMock,
-      };
-
-      const { instance: el, lensStore } = await mountWithProvider(<EditorFrame {...props} />, {
-        data: props.plugins.data,
-      });
-      instance = el;
-
-      expect(
-        instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement
-      ).not.toBeUndefined();
-
-      lensStore.dispatch(setToggleFullscreen());
-      instance.update();
-
-      expect(instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement).toBe(false);
-
-      lensStore.dispatch(setToggleFullscreen());
-      instance.update();
-
-      expect(
-        instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement
-      ).not.toBeUndefined();
     });
   });
 });
