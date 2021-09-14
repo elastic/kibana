@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_ID, VERSION } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeFactory } from './persistence_types';
 
@@ -28,13 +28,13 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
               const commonRuleFields = getCommonAlertFields(options);
 
               const response = await ruleDataClient.getWriter().bulk({
-                body: alerts.flatMap((event) => [
+                body: alerts.flatMap((alert) => [
                   { index: {} },
                   {
-                    [ALERT_ID]: event.id,
+                    [ALERT_INSTANCE_ID]: alert.id,
                     [VERSION]: ruleDataClient.kibanaVersion,
                     ...commonRuleFields,
-                    ...event.fields,
+                    ...alert.fields,
                   },
                 ]),
                 refresh,

@@ -23,11 +23,13 @@ import {
   LensDocShape715,
   VisStatePost715,
   VisStatePre715,
+  VisState716,
 } from './types';
 import {
   commonRenameOperationsForFormula,
   commonRemoveTimezoneDateHistogramParam,
   commonUpdateVisLayerType,
+  commonMakeReversePaletteAsCustom,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -430,6 +432,14 @@ const addLayerTypeToVisualization: SavedObjectMigrationFn<
   return { ...newDoc, attributes: commonUpdateVisLayerType(newDoc.attributes) };
 };
 
+const moveDefaultReversedPaletteToCustom: SavedObjectMigrationFn<
+  LensDocShape715<VisState716>,
+  LensDocShape715<VisState716>
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonMakeReversePaletteAsCustom(newDoc.attributes) };
+};
+
 export const migrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -442,4 +452,5 @@ export const migrations: SavedObjectMigrationMap = {
   '7.13.1': renameOperationsForFormula, // duplicate this migration in case a broken by value panel is added to the library
   '7.14.0': removeTimezoneDateHistogramParam,
   '7.15.0': addLayerTypeToVisualization,
+  '7.16.0': moveDefaultReversedPaletteToCustom,
 };

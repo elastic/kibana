@@ -9,17 +9,11 @@ jest.mock('../../../../common/lib/fetch');
 
 import { getPdfJobParams } from './utils';
 import { workpads } from '../../../../__fixtures__/workpads';
-import { IBasePath } from 'kibana/public';
 
-const basePath = ({
-  prepend: jest.fn().mockImplementation((s) => `basepath/s/spacey/${s}`),
-  get: () => 'basepath/s/spacey',
-  serverBasePath: `basepath`,
-} as unknown) as IBasePath;
 const workpadSharingData = { workpad: workpads[0], pageCount: 12 };
 
 test('getPdfJobParams returns the correct job params for canvas layout', () => {
-  const jobParams = getPdfJobParams(workpadSharingData, basePath);
+  const jobParams = getPdfJobParams(workpadSharingData, 'v99.99.99');
   expect(jobParams).toMatchInlineSnapshot(`
     Object {
       "layout": Object {
@@ -29,21 +23,117 @@ test('getPdfJobParams returns the correct job params for canvas layout', () => {
         },
         "id": "canvas",
       },
-      "objectType": "canvas workpad",
-      "relativeUrls": Array [
-        "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/1",
-        "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/2",
-        "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/3",
-        "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/4",
-        "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/5",
-        "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/6",
-        "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/7",
-        "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/8",
-        "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/9",
-        "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/10",
-        "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/11",
-        "/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/12",
+      "locatorParams": Array [
+        Object {
+          "id": "CANVAS_APP_LOCATOR",
+          "params": Object {
+            "id": "base-workpad",
+            "page": 1,
+            "view": "workpadPDF",
+          },
+          "version": "v99.99.99",
+        },
+        Object {
+          "id": "CANVAS_APP_LOCATOR",
+          "params": Object {
+            "id": "base-workpad",
+            "page": 2,
+            "view": "workpadPDF",
+          },
+          "version": "v99.99.99",
+        },
+        Object {
+          "id": "CANVAS_APP_LOCATOR",
+          "params": Object {
+            "id": "base-workpad",
+            "page": 3,
+            "view": "workpadPDF",
+          },
+          "version": "v99.99.99",
+        },
+        Object {
+          "id": "CANVAS_APP_LOCATOR",
+          "params": Object {
+            "id": "base-workpad",
+            "page": 4,
+            "view": "workpadPDF",
+          },
+          "version": "v99.99.99",
+        },
+        Object {
+          "id": "CANVAS_APP_LOCATOR",
+          "params": Object {
+            "id": "base-workpad",
+            "page": 5,
+            "view": "workpadPDF",
+          },
+          "version": "v99.99.99",
+        },
+        Object {
+          "id": "CANVAS_APP_LOCATOR",
+          "params": Object {
+            "id": "base-workpad",
+            "page": 6,
+            "view": "workpadPDF",
+          },
+          "version": "v99.99.99",
+        },
+        Object {
+          "id": "CANVAS_APP_LOCATOR",
+          "params": Object {
+            "id": "base-workpad",
+            "page": 7,
+            "view": "workpadPDF",
+          },
+          "version": "v99.99.99",
+        },
+        Object {
+          "id": "CANVAS_APP_LOCATOR",
+          "params": Object {
+            "id": "base-workpad",
+            "page": 8,
+            "view": "workpadPDF",
+          },
+          "version": "v99.99.99",
+        },
+        Object {
+          "id": "CANVAS_APP_LOCATOR",
+          "params": Object {
+            "id": "base-workpad",
+            "page": 9,
+            "view": "workpadPDF",
+          },
+          "version": "v99.99.99",
+        },
+        Object {
+          "id": "CANVAS_APP_LOCATOR",
+          "params": Object {
+            "id": "base-workpad",
+            "page": 10,
+            "view": "workpadPDF",
+          },
+          "version": "v99.99.99",
+        },
+        Object {
+          "id": "CANVAS_APP_LOCATOR",
+          "params": Object {
+            "id": "base-workpad",
+            "page": 11,
+            "view": "workpadPDF",
+          },
+          "version": "v99.99.99",
+        },
+        Object {
+          "id": "CANVAS_APP_LOCATOR",
+          "params": Object {
+            "id": "base-workpad",
+            "page": 12,
+            "view": "workpadPDF",
+          },
+          "version": "v99.99.99",
+        },
       ],
+      "objectType": "canvas workpad",
       "title": "base workpad",
     }
   `);

@@ -36,7 +36,7 @@ describe('POST /diagnose/screenshot', () => {
         toPromise: () => (resp instanceof Error ? Promise.reject(resp) : Promise.resolve(resp)),
       }),
     }));
-    (generatePngObservableFactory as any).mockResolvedValue(generateMock);
+    (generatePngObservableFactory as jest.Mock).mockResolvedValue(generateMock);
   };
 
   const config = createMockConfigSchema({ queue: { timeout: 120000 } });
