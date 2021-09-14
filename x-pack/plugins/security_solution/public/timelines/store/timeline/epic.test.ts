@@ -90,6 +90,7 @@ describe('Epic Timeline', () => {
         ],
         deletedEventIds: [],
         description: '',
+        documentType: '',
         eqlOptions: {
           eventCategoryField: 'event.category',
           tiebreakerField: '',
@@ -144,6 +145,8 @@ describe('Epic Timeline', () => {
           },
         },
         loadingEventIds: [],
+        queryFields: [],
+        selectAll: false,
         title: 'saved',
         timelineType: TimelineType.default,
         templateTimelineId: null,
