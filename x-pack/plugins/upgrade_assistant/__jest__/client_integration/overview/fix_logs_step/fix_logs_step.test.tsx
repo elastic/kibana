@@ -198,6 +198,9 @@ describe('Overview - Fix deprecation logs step', () => {
               prepend: (url: string) => url,
             },
           },
+          plugins: {
+            infra: {},
+          },
         });
       });
 
@@ -212,12 +215,6 @@ describe('Overview - Fix deprecation logs step', () => {
     });
 
     test(`Doesn't show observability app link if infra app is not available`, async () => {
-      await act(async () => {
-        testBed = await setupOverviewPage({
-          isInfraPluginAvailable: false,
-        });
-      });
-
       const { component, exists } = testBed;
 
       component.update();

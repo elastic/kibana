@@ -34,11 +34,11 @@ export interface StartDependencies {
 
 export interface AppDependencies {
   isReadOnlyMode: boolean;
-  isInfraPluginAvailable: boolean;
   kibanaVersionInfo: KibanaVersionContext;
   plugins: {
     cloud?: CloudSetup;
     share: SharePluginSetup;
+    infra: object | undefined;
   };
   services: {
     core: CoreStart;

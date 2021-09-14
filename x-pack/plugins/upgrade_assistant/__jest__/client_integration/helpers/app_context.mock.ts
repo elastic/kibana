@@ -55,7 +55,6 @@ shareMock.url.locators.get = (id: IdKey) => ({
 
 export const getAppContextMock = () => ({
   isReadOnlyMode: false,
-  isInfraPluginAvailable: true,
   kibanaVersionInfo: {
     currentMajor: mockKibanaSemverVersion.major,
     prevMajor: mockKibanaSemverVersion.major - 1,
@@ -75,6 +74,7 @@ export const getAppContextMock = () => ({
   },
   plugins: {
     share: shareMock,
+    infra: undefined,
     cloud: {
       ...cloudMock.createSetup(),
       isCloudEnabled: false,

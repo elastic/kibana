@@ -105,11 +105,11 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
 };
 
 export const ExternalLinks: FunctionComponent<Props> = ({ checkpoint }) => {
-  const { isInfraPluginAvailable } = useAppContext();
+  const { infra: hasInfraPlugin } = useAppContext().plugins;
 
   return (
     <EuiFlexGroup>
-      {isInfraPluginAvailable && (
+      {hasInfraPlugin && (
         <EuiFlexItem>
           <EuiPanel>
             <EuiText size="s">
