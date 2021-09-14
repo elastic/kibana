@@ -4051,6 +4051,19 @@
             "deprecated": {
               "type": "long"
             },
+            "output_size": {
+              "properties": {
+                "max": {
+                  "type": "long"
+                },
+                "min": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "long"
+                }
+              }
+            },
             "app": {
               "properties": {
                 "search": {
@@ -4092,6 +4105,19 @@
             },
             "deprecated": {
               "type": "long"
+            },
+            "output_size": {
+              "properties": {
+                "max": {
+                  "type": "long"
+                },
+                "min": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "long"
+                }
+              }
             },
             "app": {
               "properties": {
@@ -4135,6 +4161,19 @@
             "deprecated": {
               "type": "long"
             },
+            "output_size": {
+              "properties": {
+                "max": {
+                  "type": "long"
+                },
+                "min": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "long"
+                }
+              }
+            },
             "app": {
               "properties": {
                 "search": {
@@ -4176,6 +4215,19 @@
             },
             "deprecated": {
               "type": "long"
+            },
+            "output_size": {
+              "properties": {
+                "max": {
+                  "type": "long"
+                },
+                "min": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "long"
+                }
+              }
             },
             "app": {
               "properties": {
@@ -4219,6 +4271,19 @@
             "deprecated": {
               "type": "long"
             },
+            "output_size": {
+              "properties": {
+                "max": {
+                  "type": "long"
+                },
+                "min": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "long"
+                }
+              }
+            },
             "app": {
               "properties": {
                 "search": {
@@ -4261,6 +4326,19 @@
             "deprecated": {
               "type": "long"
             },
+            "output_size": {
+              "properties": {
+                "max": {
+                  "type": "long"
+                },
+                "min": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "long"
+                }
+              }
+            },
             "app": {
               "properties": {
                 "search": {
@@ -4302,6 +4380,19 @@
             },
             "deprecated": {
               "type": "long"
+            },
+            "output_size": {
+              "properties": {
+                "max": {
+                  "type": "long"
+                },
+                "min": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "long"
+                }
+              }
             },
             "app": {
               "properties": {
@@ -4940,6 +5031,19 @@
             }
           }
         },
+        "output_size": {
+          "properties": {
+            "max": {
+              "type": "long"
+            },
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "long"
+            }
+          }
+        },
         "available": {
           "type": "boolean"
         },
@@ -4961,6 +5065,19 @@
                 },
                 "deprecated": {
                   "type": "long"
+                },
+                "output_size": {
+                  "properties": {
+                    "max": {
+                      "type": "long"
+                    },
+                    "min": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "long"
+                    }
+                  }
                 },
                 "app": {
                   "properties": {
@@ -5004,6 +5121,19 @@
                 "deprecated": {
                   "type": "long"
                 },
+                "output_size": {
+                  "properties": {
+                    "max": {
+                      "type": "long"
+                    },
+                    "min": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "app": {
                   "properties": {
                     "search": {
@@ -5045,6 +5175,19 @@
                 },
                 "deprecated": {
                   "type": "long"
+                },
+                "output_size": {
+                  "properties": {
+                    "max": {
+                      "type": "long"
+                    },
+                    "min": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "long"
+                    }
+                  }
                 },
                 "app": {
                   "properties": {
@@ -5088,6 +5231,19 @@
                 "deprecated": {
                   "type": "long"
                 },
+                "output_size": {
+                  "properties": {
+                    "max": {
+                      "type": "long"
+                    },
+                    "min": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "app": {
                   "properties": {
                     "search": {
@@ -5129,6 +5285,19 @@
                 },
                 "deprecated": {
                   "type": "long"
+                },
+                "output_size": {
+                  "properties": {
+                    "max": {
+                      "type": "long"
+                    },
+                    "min": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "long"
+                    }
+                  }
                 },
                 "app": {
                   "properties": {
@@ -5172,6 +5341,19 @@
                 "deprecated": {
                   "type": "long"
                 },
+                "output_size": {
+                  "properties": {
+                    "max": {
+                      "type": "long"
+                    },
+                    "min": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "app": {
                   "properties": {
                     "search": {
@@ -5213,6 +5395,19 @@
                 },
                 "deprecated": {
                   "type": "long"
+                },
+                "output_size": {
+                  "properties": {
+                    "max": {
+                      "type": "long"
+                    },
+                    "min": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "long"
+                    }
+                  }
                 },
                 "app": {
                   "properties": {
@@ -5848,6 +6043,19 @@
                       }
                     }
                   }
+                }
+              }
+            },
+            "output_size": {
+              "properties": {
+                "max": {
+                  "type": "long"
+                },
+                "min": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "long"
                 }
               }
             }
