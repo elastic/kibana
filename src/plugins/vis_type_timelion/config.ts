@@ -12,6 +12,7 @@ export const configSchema = schema.object({
   graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
   enabled: schema.boolean({ defaultValue: true }),
   // should be removed in v8.0
+  /** @deprecated **/
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
