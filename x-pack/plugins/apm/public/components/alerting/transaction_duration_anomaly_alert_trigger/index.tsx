@@ -7,18 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
 import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
+import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import {
   EnvironmentField,
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata, isNewApmRuleFromStackManagement } from '../helper';
-import { NewAlertEmptyPrompt } from '../new_alert_empty_prompt';
+import { AlertMetadata } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 import {
@@ -47,7 +48,12 @@ interface Props {
 }
 
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
+  const { services } = useKibana();
   const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
+
+  useEffect(() => {
+    createCallApmApi(services as CoreStart);
+  }, [services]);
 
   const transactionTypes = useServiceTransactionTypesFetcher({
     serviceName: metadata?.serviceName,
@@ -68,16 +74,6 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     }
   );
 
-  const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName: params.serviceName,
-    start: metadata?.start,
-    end: metadata?.end,
-  });
-
-  if (isNewApmRuleFromStackManagement(alertParams, metadata)) {
-    return <NewAlertEmptyPrompt />;
-  }
-
   const fields = [
     <ServiceField value={params.serviceName} />,
     <TransactionTypeField
@@ -87,8 +83,8 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     />,
     <EnvironmentField
       currentValue={params.environment}
-      options={environmentOptions}
-      onChange={(e) => setAlertParams('environment', e.target.value)}
+      onChange={(value) => setAlertParams('environment', value)}
+      serviceName={params.serviceName}
     />,
     <PopoverExpression
       value={<AnomalySeverity type={params.anomalySeverityType} />}

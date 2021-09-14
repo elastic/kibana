@@ -8,6 +8,7 @@
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 interface EnvironmentSelectProps {
@@ -18,10 +19,8 @@ interface EnvironmentSelectProps {
 }
 
 const allOption: EuiComboBoxOptionOption<string> = {
-  label: i18n.translate('xpack.apm.environmentSelect.allOptionLabel', {
-    defaultMessage: 'All',
-  }),
-  value: 'ALL_OPTION_VALUE',
+  label: ENVIRONMENT_ALL.text,
+  value: ENVIRONMENT_ALL.value,
 };
 
 export function EnvironmentSelect({
@@ -30,14 +29,16 @@ export function EnvironmentSelect({
   onChange,
   serviceName,
 }: EnvironmentSelectProps) {
-  const [selectedOptions, setSelectedOptions] = useState(
-    defaultValue ? [allOption] : []
-  );
+  const defaultOption =
+    !defaultValue || defaultValue === ENVIRONMENT_ALL.value
+      ? allOption
+      : { label: defaultValue, value: defaultValue };
+  const [selectedOptions, setSelectedOptions] = useState([defaultOption]);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        endpoint: 'GET /api/apm/settings/agent-configuration/environments',
+        endpoint: 'GET /api/apm/select/environments',
         params: {
           query: { serviceName },
         },
@@ -49,15 +50,12 @@ export function EnvironmentSelect({
 
   const environments = data?.environments ?? [];
 
-  const options: Array<EuiComboBoxOptionOption<string>> = environments.map(
-    ({ name }) => {
-      // TODO: Extract this from agent configuration
-      if (name === 'ALL_OPTION_VALUE') {
-        return allOption;
-      }
+  const options: Array<EuiComboBoxOptionOption<string>> = [
+    allOption,
+    ...environments.map((name) => {
       return { label: name, value: name };
-    }
-  );
+    }),
+  ];
 
   const handleChange: (
     changedOptions: Array<EuiComboBoxOptionOption<string>>

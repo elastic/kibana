@@ -6,14 +6,14 @@
  */
 
 import { Meta, Story } from '@storybook/react';
-import React, { ComponentProps } from 'react';
+import React from 'react';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
 import { EnvironmentSelect } from './';
 
 interface Args {
-  environments: Array<{ name: string }>;
+  environments: string[];
 }
 
 const stories: Meta<Args> = {
@@ -51,9 +51,5 @@ export const Example: Story<Args> = (args) => {
   return <EnvironmentSelect onChange={() => {}} />;
 };
 Example.args = {
-  environments: [
-    { name: 'ALL_OPTION_VALUE' },
-    { name: 'staging' },
-    { name: 'production' },
-  ],
+  environments: ['staging', 'production'],
 };

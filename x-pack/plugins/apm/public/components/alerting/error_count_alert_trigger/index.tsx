@@ -8,24 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
 import React, { useEffect } from 'react';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asInteger } from '../../../../common/utils/formatters';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import {
-  AlertMetadata,
-  getIntervalAndTimeRange,
-  isNewApmRuleFromStackManagement,
-  TimeUnit,
-} from '../helper';
-import { NewAlertEmptyPrompt } from '../new_alert_empty_prompt';
+import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { createCallApmApi } from '../../../services/rest/createCallApmApi';
-import { CoreStart } from '../../../../../../../src/core/public';
 
 export interface AlertParams {
   windowSize?: number;
@@ -49,12 +42,6 @@ export function ErrorCountAlertTrigger(props: Props) {
   useEffect(() => {
     createCallApmApi(services as CoreStart);
   }, [services]);
-
-  const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName: metadata?.serviceName,
-    start: metadata?.start,
-    end: metadata?.end,
-  });
 
   const params = defaults(
     { ...omit(metadata, ['start', 'end']), ...alertParams },
@@ -94,10 +81,6 @@ export function ErrorCountAlertTrigger(props: Props) {
       params.serviceName,
     ]
   );
-
-  if (isNewApmRuleFromStackManagement(alertParams, metadata)) {
-    return <NewAlertEmptyPrompt />;
-  }
 
   const fields = [
     <ServiceField value={params.serviceName} />,

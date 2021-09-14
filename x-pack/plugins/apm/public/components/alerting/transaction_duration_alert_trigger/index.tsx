@@ -15,7 +15,6 @@ import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import {
@@ -29,13 +28,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import {
-  AlertMetadata,
-  getIntervalAndTimeRange,
-  isNewApmRuleFromStackManagement,
-  TimeUnit,
-} from '../helper';
-import { NewAlertEmptyPrompt } from '../new_alert_empty_prompt';
+import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 
@@ -106,12 +99,6 @@ export function TransactionDurationAlertTrigger(props: Props) {
     }
   );
 
-  const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName: params.serviceName,
-    start: metadata?.start,
-    end: metadata?.end,
-  });
-
   const { data } = useFetcher(
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
@@ -162,14 +149,6 @@ export function TransactionDurationAlertTrigger(props: Props) {
     />
   );
 
-  if (isNewApmRuleFromStackManagement(alertParams, metadata)) {
-    return <NewAlertEmptyPrompt />;
-  }
-
-  if (!params.serviceName) {
-    return null;
-  }
-
   const fields = [
     <ServiceField value={params.serviceName} />,
     <TransactionTypeField
@@ -179,8 +158,8 @@ export function TransactionDurationAlertTrigger(props: Props) {
     />,
     <EnvironmentField
       currentValue={params.environment}
-      options={environmentOptions}
-      onChange={(e) => setAlertParams('environment', e.target.value)}
+      onChange={(value) => setAlertParams('environment', value)}
+      serviceName={params.serviceName}
     />,
     <PopoverExpression
       value={params.aggregationType}

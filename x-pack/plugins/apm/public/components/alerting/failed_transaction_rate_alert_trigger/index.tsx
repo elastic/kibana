@@ -13,7 +13,6 @@ import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
@@ -23,13 +22,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import {
-  AlertMetadata,
-  getIntervalAndTimeRange,
-  isNewApmRuleFromStackManagement,
-  TimeUnit,
-} from '../helper';
-import { NewAlertEmptyPrompt } from '../new_alert_empty_prompt';
+import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 interface AlertParams {
@@ -72,12 +65,6 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     }
   );
 
-  const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName: params.serviceName,
-    start: metadata?.start,
-    end: metadata?.end,
-  });
-
   const thresholdAsPercent = (params.threshold ?? 0) / 100;
 
   const { data } = useFetcher(
@@ -111,10 +98,6 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     ]
   );
 
-  if (isNewApmRuleFromStackManagement(alertParams, metadata)) {
-    return <NewAlertEmptyPrompt />;
-  }
-
   const fields = [
     <ServiceField value={params.serviceName} />,
     <TransactionTypeField
@@ -124,8 +107,8 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     />,
     <EnvironmentField
       currentValue={params.environment}
-      options={environmentOptions}
-      onChange={(e) => setAlertParams('environment', e.target.value)}
+      onChange={(value) => setAlertParams('environment', value)}
+      serviceName={params.serviceName}
     />,
     <IsAboveField
       value={params.threshold}
