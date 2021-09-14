@@ -385,7 +385,7 @@ export class Dispatch {
         .find('[data-label]')
         .css('opacity', 1) //Opacity 1 is needed to avoid the css application
         .not((els, el) => String($(el).data('label')) === label)
-        .css('opacity', justifyOpacity(0.5));
+        .css('opacity', 0.5);
     };
   }
 
@@ -466,10 +466,4 @@ export class Dispatch {
 
 function validBrushClick(event) {
   return event.button === 0;
-}
-
-function justifyOpacity(opacity) {
-  const decimalNumber = parseFloat(opacity, 10);
-  const fallbackOpacity = 0.5;
-  return 0 <= decimalNumber && decimalNumber <= 1 ? decimalNumber : fallbackOpacity;
 }
