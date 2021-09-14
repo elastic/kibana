@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110891
-/* eslint-disable @kbn/eslint/no_export_all */
-
-export * from './types';
+export { AggTypes, TableVisParams, VIS_TYPE_TABLE } from './types';
