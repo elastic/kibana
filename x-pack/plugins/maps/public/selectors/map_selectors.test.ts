@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../../common';
+import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../../common/constants';
 
 jest.mock('../classes/layers/tiled_vector_layer/tiled_vector_layer', () => {});
 jest.mock('../classes/layers/blended_vector_layer/blended_vector_layer', () => {});
