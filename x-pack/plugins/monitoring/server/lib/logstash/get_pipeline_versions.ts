@@ -5,14 +5,25 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
-import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
+import { LegacyRequest } from '../../types';
 
-function fetchPipelineVersions(...args) {
-  const [req, config, logstashIndexPattern, clusterUuid, pipelineId] = args;
-  checkParam(logstashIndexPattern, 'logstashIndexPattern in getPipelineVersions');
+function fetchPipelineVersions({
+  req,
+  lsIndexPattern,
+  clusterUuid,
+  pipelineId,
+}: {
+  req: LegacyRequest;
+  lsIndexPattern: string;
+  clusterUuid: string;
+  pipelineId: string;
+}) {
+  const config = req.server.config();
+  checkParam(lsIndexPattern, 'logstashIndexPattern in getPipelineVersions');
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
   const filters = [
@@ -80,7 +91,7 @@ function fetchPipelineVersions(...args) {
   };
 
   const params = {
-    index: logstashIndexPattern,
+    index: lsIndexPattern,
     size: 0,
     ignore_unavailable: true,
     body: {
@@ -93,20 +104,25 @@ function fetchPipelineVersions(...args) {
   return callWithRequest(req, 'search', params);
 }
 
-export function _handleResponse(response) {
+export function _handleResponse(response: any) {
   const pipelineHashes = get(
     response,
     'aggregations.pipelines.scoped.by_pipeline_hash.buckets',
     []
   );
-  return pipelineHashes.map((pipelineHash) => ({
+  return pipelineHashes.map((pipelineHash: any) => ({
     hash: pipelineHash.key,
     firstSeen: get(pipelineHash, 'path_to_root.first_seen.value'),
     lastSeen: get(pipelineHash, 'path_to_root.last_seen.value'),
   }));
 }
 
-export async function getPipelineVersions(...args) {
-  const response = await fetchPipelineVersions(...args);
+export async function getPipelineVersions(args: {
+  req: LegacyRequest;
+  lsIndexPattern: string;
+  clusterUuid: string;
+  pipelineId: string;
+}) {
+  const response = await fetchPipelineVersions(args);
   return _handleResponse(response);
 }

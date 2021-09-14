@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export function paginate({ size, index }, data) {
-  const start = index * size;
-  return data.slice(start, start + size);
+import { useFetcher } from '../../../../hooks/use_fetcher';
+
+export function useHasRumData() {
+  return useFetcher((callApmApi) => {
+    return callApmApi({
+      endpoint: 'GET /api/apm/observability_overview/has_rum_data',
+    });
+  }, []);
 }
