@@ -16,15 +16,24 @@ import { cleanup } from './migrations_state_machine_cleanup';
 import { ReindexSourceToTempIndex, ReindexSourceToTempIndexBulk, State } from './types';
 import { SavedObjectsRawDoc } from '../serialization';
 
+interface StateTransitionLogMeta extends LogMeta {
+  kibana: {
+    migrations: {
+      state: State;
+      duration: number;
+    };
+  };
+}
+
 const logStateTransition = (
   logger: Logger,
   logMessagePrefix: string,
-  oldState: State,
-  newState: State,
+  prevState: State,
+  currState: State,
   tookMs: number
 ) => {
-  if (newState.logs.length > oldState.logs.length) {
-    newState.logs.slice(oldState.logs.length).forEach(({ message, level }) => {
+  if (currState.logs.length > prevState.logs.length) {
+    currState.logs.slice(prevState.logs.length).forEach(({ message, level }) => {
       switch (level) {
         case 'error':
           return logger.error(logMessagePrefix + message);
@@ -39,7 +48,18 @@ const logStateTransition = (
   }
 
   logger.info(
-    logMessagePrefix + `${oldState.controlState} -> ${newState.controlState}. took: ${tookMs}ms.`
+    logMessagePrefix + `${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`
+  );
+  logger.debug<StateTransitionLogMeta>(
+    logMessagePrefix + `${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`,
+    {
+      kibana: {
+        migrations: {
+          state: currState,
+          duration: tookMs,
+        },
+      },
+    }
   );
 };
 

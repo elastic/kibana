@@ -88,71 +88,7 @@ describe('migrationsStateActionMachine', () => {
     const logs = loggingSystemMock.collect(mockLogger);
     const doneLog = logs.info.splice(8, 1)[0][0];
     expect(doneLog).toMatch(/\[.my-so-index\] Migration completed after \d+ms/);
-    expect(logs).toMatchInlineSnapshot(`
-      Object {
-        "debug": Array [
-          Array [
-            "[.my-so-index] INIT RESPONSE",
-            Object {
-              "_tag": "Right",
-              "right": "response",
-            },
-          ],
-          Array [
-            "[.my-so-index] LEGACY_REINDEX RESPONSE",
-            Object {
-              "_tag": "Right",
-              "right": "response",
-            },
-          ],
-          Array [
-            "[.my-so-index] LEGACY_DELETE RESPONSE",
-            Object {
-              "_tag": "Right",
-              "right": "response",
-            },
-          ],
-          Array [
-            "[.my-so-index] LEGACY_DELETE RESPONSE",
-            Object {
-              "_tag": "Right",
-              "right": "response",
-            },
-          ],
-        ],
-        "error": Array [],
-        "fatal": Array [],
-        "info": Array [
-          Array [
-            "[.my-so-index] Log from LEGACY_REINDEX control state",
-          ],
-          Array [
-            "[.my-so-index] INIT -> LEGACY_REINDEX. took: 0ms.",
-          ],
-          Array [
-            "[.my-so-index] Log from LEGACY_DELETE control state",
-          ],
-          Array [
-            "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE. took: 0ms.",
-          ],
-          Array [
-            "[.my-so-index] Log from LEGACY_DELETE control state",
-          ],
-          Array [
-            "[.my-so-index] LEGACY_DELETE -> LEGACY_DELETE. took: 0ms.",
-          ],
-          Array [
-            "[.my-so-index] Log from DONE control state",
-          ],
-          Array [
-            "[.my-so-index] LEGACY_DELETE -> DONE. took: 0ms.",
-          ],
-        ],
-        "log": Array [],
-        "trace": Array [],
-        "warn": Array [],
-      }
-    `);
+    expect(logs).toMatchSnapshot();
   });
 
   it('logs state transitions, messages in state.logs and action responses when reaching FATAL', async () => {
@@ -168,45 +104,7 @@ describe('migrationsStateActionMachine', () => {
       next,
       client: esClient,
     }).catch((err) => err);
-    expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
-      Object {
-        "debug": Array [
-          Array [
-            "[.my-so-index] INIT RESPONSE",
-            Object {
-              "_tag": "Right",
-              "right": "response",
-            },
-          ],
-          Array [
-            "[.my-so-index] LEGACY_DELETE RESPONSE",
-            Object {
-              "_tag": "Right",
-              "right": "response",
-            },
-          ],
-        ],
-        "error": Array [],
-        "fatal": Array [],
-        "info": Array [
-          Array [
-            "[.my-so-index] Log from LEGACY_DELETE control state",
-          ],
-          Array [
-            "[.my-so-index] INIT -> LEGACY_DELETE. took: 0ms.",
-          ],
-          Array [
-            "[.my-so-index] Log from FATAL control state",
-          ],
-          Array [
-            "[.my-so-index] LEGACY_DELETE -> FATAL. took: 0ms.",
-          ],
-        ],
-        "log": Array [],
-        "trace": Array [],
-        "warn": Array [],
-      }
-    `);
+    expect(loggingSystemMock.collect(mockLogger)).toMatchSnapshot();
   });
 
   // see https://github.com/elastic/kibana/issues/98406
