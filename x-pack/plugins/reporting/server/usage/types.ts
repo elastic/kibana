@@ -6,9 +6,9 @@
  */
 
 interface SizeStats {
-  sizeMin: { value: number | null };
-  sizeMax: { value: number | null };
-  sizeAvg: { value: number | null };
+  sizeMin?: { value: number | null };
+  sizeMax?: { value: number | null };
+  sizeAvg?: { value: number | null };
 }
 
 export interface KeyCountBucket extends SizeStats {
@@ -63,15 +63,17 @@ export interface SearchResponse {
   };
 }
 
+export interface SizeMetrics {
+  max: number | null;
+  min: number | null;
+  avg: number | null;
+}
+
 export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
-  output_size: {
-    max: number | null;
-    min: number | null;
-    avg: number | null;
-  };
+  output_size: SizeMetrics;
   app?: {
     search?: number;
     dashboard?: number;
@@ -122,11 +124,7 @@ export type RangeStats = JobTypes & {
   _all: number;
   status: StatusCounts;
   statuses?: StatusByAppCounts;
-  output_size?: {
-    max: number | null;
-    min: number | null;
-    avg: number | null;
-  };
+  output_size: SizeMetrics;
 };
 
 export type ReportingUsageType = RangeStats & {

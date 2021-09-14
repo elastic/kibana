@@ -14,6 +14,7 @@ import {
   LayoutCounts,
   RangeStats,
   ReportingUsageType,
+  SizeMetrics,
 } from './types';
 
 const appCountsSchema: MakeSchemaFrom<AppCounts> = {
@@ -39,10 +40,17 @@ const byAppCountsSchema: MakeSchemaFrom<ByAppCounts> = {
   printable_pdf_v2: appCountsSchema,
 };
 
+const sizesSchema: MakeSchemaFrom<SizeMetrics> = {
+  max: { type: 'long' },
+  min: { type: 'long' },
+  avg: { type: 'long' },
+};
+
 const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   available: { type: 'boolean' },
   total: { type: 'long' },
   deprecated: { type: 'long' },
+  output_size: sizesSchema,
   app: appCountsSchema,
   layout: layoutCountsSchema,
 };
@@ -74,11 +82,7 @@ const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
     pending: byAppCountsSchema,
     processing: byAppCountsSchema,
   },
-  output_size: {
-    max: { type: 'long' },
-    min: { type: 'long' },
-    avg: { type: 'long' },
-  },
+  output_size: sizesSchema,
 };
 
 export const reportingSchema: MakeSchemaFrom<ReportingUsageType> = {
