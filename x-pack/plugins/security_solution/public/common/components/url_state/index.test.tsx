@@ -23,6 +23,7 @@ import {
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { waitFor } from '@testing-library/react';
+import { useLocation } from 'react-router-dom';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -67,6 +68,15 @@ jest.mock('react-redux', () => {
   };
 });
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useLocation: jest.fn(),
+  };
+});
+
 describe('UrlStateContainer', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -84,6 +94,11 @@ describe('UrlStateContainer', () => {
               pageName,
               detailName,
             }).relativeTimeSearch.undefinedQuery;
+
+            (useLocation as jest.Mock).mockReturnValue({
+              pathname: mockProps.pathName,
+            });
+
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
             expect(mockSetRelativeRangeDatePicker.mock.calls[1][0]).toEqual({
@@ -113,6 +128,11 @@ describe('UrlStateContainer', () => {
           (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
             mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
               .absoluteTimeSearch.undefinedQuery;
+
+            (useLocation as jest.Mock).mockReturnValue({
+              pathname: mockProps.pathName,
+            });
+
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
             expect(mockSetAbsoluteRangeDatePicker.mock.calls[1][0]).toEqual({
@@ -138,6 +158,11 @@ describe('UrlStateContainer', () => {
           (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
             mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
               .relativeTimeSearch.undefinedQuery;
+
+            (useLocation as jest.Mock).mockReturnValue({
+              pathname: mockProps.pathName,
+            });
+
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
             expect(mockSetFilterQuery.mock.calls[0][0]).toEqual({
@@ -162,6 +187,11 @@ describe('UrlStateContainer', () => {
               pageName,
               detailName,
             }).noSearch.definedQuery;
+
+            (useLocation as jest.Mock).mockReturnValue({
+              pathname: mockProps.pathName,
+            });
+
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
             expect(
@@ -176,6 +206,24 @@ describe('UrlStateContainer', () => {
         );
       });
     });
+
+    it("it doesn't update URL state when pathName and browserPAth are out of sync", () => {
+      mockProps = getMockPropsObj({
+        page: CONSTANTS.networkPage,
+        examplePath: '/network',
+        namespaceLower: 'network',
+        pageName: SecurityPageName.network,
+        detailName: undefined,
+      }).noSearch.undefinedQuery;
+
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: 'out of sync path',
+      });
+
+      mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
+
+      expect(mockHistory.replace).not.toHaveBeenCalled();
+    });
   });
 
   describe('After Initialization, keep Relative Date up to date for global only on alerts page', () => {
@@ -189,6 +237,11 @@ describe('UrlStateContainer', () => {
           pageName,
           detailName,
         }).relativeTimeSearch.undefinedQuery;
+
+        (useLocation as jest.Mock).mockReturnValue({
+          pathname: mockProps.pathName,
+        });
+
         const wrapper = mount(
           <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
         );
