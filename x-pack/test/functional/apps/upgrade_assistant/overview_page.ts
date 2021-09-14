@@ -44,7 +44,7 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
     });
 
     describe('fixLogsStep', () => {
-      beforeEach(async () => {
+      before(async () => {
         // Access to system indices will be deprecated and should generate a deprecation log
         await es.transport.request({
           method: 'GET',
