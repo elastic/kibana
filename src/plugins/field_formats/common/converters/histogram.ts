@@ -34,7 +34,7 @@ export class HistogramFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val) => {
+  textConvert: TextContextTypeConvert = (val: number) => {
     if (typeof val === 'number') {
       const subFormatId = this.param('id');
       const SubFormat =

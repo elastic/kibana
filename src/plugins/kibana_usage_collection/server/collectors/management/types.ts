@@ -40,7 +40,6 @@ export interface UsageStats {
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
   'visualization:regionmap:showWarnings': boolean;
-  'visualization:dimmingOpacity': number;
   'visualization:tileMap:maxPrecision': number;
   'csv:separator': string;
   'visualization:tileMap:WMSdefaults': string;
