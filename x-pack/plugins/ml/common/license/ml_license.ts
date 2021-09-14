@@ -32,7 +32,7 @@ export class MlLicense {
     license$: Observable<ILicense>,
     postInitFunctions?: Array<(lic: MlLicense) => void>
   ) {
-    this._licenseSubscription = license$.subscribe(async (license) => {
+    this._licenseSubscription = license$.subscribe((license) => {
       const { isEnabled: securityIsEnabled } = license.getFeature('security');
 
       this._license = license;

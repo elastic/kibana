@@ -190,6 +190,8 @@ export { URL_MAX_LENGTH } from './core_app';
 
 export type { KibanaExecutionContext } from './execution_context';
 
+export { FatalErrorEvent } from './fatal_errors';
+
 /**
  * Core services exposed to the `Plugin` setup lifecycle
  *

@@ -6,6 +6,7 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 
 import type { ElasticsearchClient, HttpServiceSetup, Logger } from 'src/core/server';
 
@@ -86,13 +87,20 @@ export class SessionManagementService {
       logger: this.logger.get('index'),
     });
 
-    this.statusSubscription = online$.subscribe(async ({ scheduleRetry }) => {
-      try {
-        await Promise.all([this.sessionIndex.initialize(), this.scheduleCleanupTask(taskManager)]);
-      } catch (err) {
-        scheduleRetry();
-      }
-    });
+    this.statusSubscription = online$
+      .pipe(
+        mergeMap(async ({ scheduleRetry }) => {
+          try {
+            await Promise.all([
+              this.sessionIndex.initialize(),
+              this.scheduleCleanupTask(taskManager),
+            ]);
+          } catch (err) {
+            scheduleRetry();
+          }
+        })
+      )
+      .subscribe();
 
     return {
       session: new Session({

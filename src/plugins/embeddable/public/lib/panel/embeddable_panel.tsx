@@ -185,7 +185,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const { parent } = embeddable;
 
     this.subscription.add(
-      embeddable.getInput$().subscribe(async () => {
+      embeddable.getInput$().subscribe(() => {
         if (this.mounted) {
           this.setState({
             viewMode: embeddable.getInput().viewMode ?? ViewMode.EDIT,
@@ -198,7 +198,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     );
 
     if (parent) {
-      this.parentSubscription = parent.getInput$().subscribe(async () => {
+      this.parentSubscription = parent.getInput$().subscribe(() => {
         if (this.mounted && parent) {
           this.setState({
             hidePanelTitle:

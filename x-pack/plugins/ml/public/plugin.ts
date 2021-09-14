@@ -14,7 +14,7 @@ import type {
   PluginInitializerContext,
 } from 'kibana/public';
 import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take, mergeMap } from 'rxjs/operators';
 
 import type { ManagementSetup } from 'src/plugins/management/public';
 import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
@@ -23,7 +23,12 @@ import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 
-import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import {
+  AppStatus,
+  AppUpdater,
+  DEFAULT_APP_CATEGORIES,
+  FatalErrorEvent,
+} from '../../../../src/core/public';
 import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 
@@ -132,48 +137,56 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       }).enable();
     }
 
-    const licensing = pluginsSetup.licensing.license$.pipe(take(1));
-    licensing.subscribe(async (license) => {
-      const [coreStart] = await core.getStartServices();
-      const { capabilities } = coreStart.application;
+    pluginsSetup.licensing.license$
+      .pipe(
+        take(1),
+        mergeMap(async (license) => {
+          const [coreStart] = await core.getStartServices();
+          const { capabilities } = coreStart.application;
 
-      if (isMlEnabled(license)) {
-        // add ML to home page
-        if (pluginsSetup.home) {
-          registerFeature(pluginsSetup.home);
-        }
-      } else {
-        // if ml is disabled in elasticsearch, disable ML in kibana
-        this.appUpdater$.next(() => ({
-          status: AppStatus.inaccessible,
-        }));
-      }
-
-      // register various ML plugin features which require a full license
-      // note including registerFeature in register_helper would cause the page bundle size to increase significantly
-      const {
-        registerEmbeddables,
-        registerMlUiActions,
-        registerSearchLinks,
-        registerMlAlerts,
-      } = await import('./register_helper');
-
-      const mlEnabled = isMlEnabled(license);
-      const fullLicense = isFullLicense(license);
-      if (mlEnabled) {
-        registerSearchLinks(this.appUpdater$, fullLicense);
-
-        if (fullLicense) {
-          registerEmbeddables(pluginsSetup.embeddable, core);
-          registerMlUiActions(pluginsSetup.uiActions, core);
-
-          const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
-          if (pluginsSetup.triggersActionsUi && canUseMlAlerts) {
-            registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
+          if (isMlEnabled(license)) {
+            // add ML to home page
+            if (pluginsSetup.home) {
+              registerFeature(pluginsSetup.home);
+            }
+          } else {
+            // if ml is disabled in elasticsearch, disable ML in kibana
+            this.appUpdater$.next(() => ({
+              status: AppStatus.inaccessible,
+            }));
           }
-        }
-      }
-    });
+
+          // register various ML plugin features which require a full license
+          // note including registerFeature in register_helper would cause the page bundle size to increase significantly
+          const {
+            registerEmbeddables,
+            registerMlUiActions,
+            registerSearchLinks,
+            registerMlAlerts,
+          } = await import('./register_helper');
+
+          const mlEnabled = isMlEnabled(license);
+          const fullLicense = isFullLicense(license);
+          if (mlEnabled) {
+            registerSearchLinks(this.appUpdater$, fullLicense);
+
+            if (fullLicense) {
+              registerEmbeddables(pluginsSetup.embeddable, core);
+              registerMlUiActions(pluginsSetup.uiActions, core);
+
+              const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
+              if (pluginsSetup.triggersActionsUi && canUseMlAlerts) {
+                registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
+              }
+            }
+          }
+        })
+      )
+      .subscribe({
+        error(error) {
+          window.dispatchEvent(new FatalErrorEvent(error));
+        },
+      });
 
     return {
       locator: this.locator,

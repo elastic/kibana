@@ -65,7 +65,7 @@ export class SecurityNavControl extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this.subscription = this.props.userMenuLinks$.subscribe(async (userMenuLinks) => {
+    this.subscription = this.props.userMenuLinks$.subscribe((userMenuLinks) => {
       this.setState({ userMenuLinks });
     });
   }

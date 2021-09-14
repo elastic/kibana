@@ -9,6 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 import { TodoSavedObjectAttributes } from 'examples/embeddable_examples/common';
 import { SavedObjectsClientContract } from 'kibana/public';
 import {
@@ -17,6 +18,7 @@ import {
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
 } from '../../../../src/plugins/embeddable/public';
+import { FatalErrorEvent } from '../../../../src/core/public';
 import { TodoRefEmbeddableComponent } from './todo_ref_component';
 
 // Notice this is not the same value as the 'todo' saved object type. Many of our
@@ -83,30 +85,38 @@ export class TodoRefEmbeddable extends Embeddable<TodoRefInput, TodoRefOutput> {
     super(initialInput, { hasMatch: false }, parent);
     this.savedObjectsClient = savedObjectsClient;
 
-    this.subscription = this.getInput$().subscribe(async () => {
-      // There is a little more work today for this embeddable because it has
-      // more output it needs to update in response to input state changes.
-      let savedAttributes: TodoSavedObjectAttributes | undefined;
+    this.subscription = this.getInput$()
+      .pipe(
+        mergeMap(async () => {
+          // There is a little more work today for this embeddable because it has
+          // more output it needs to update in response to input state changes.
+          let savedAttributes: TodoSavedObjectAttributes | undefined;
 
-      // Since this is an expensive task, we save a local copy of the previous
-      // savedObjectId locally and only retrieve the new saved object if the id
-      // actually changed.
-      if (this.savedObjectId !== this.input.savedObjectId) {
-        this.savedObjectId = this.input.savedObjectId;
-        const todoSavedObject = await this.savedObjectsClient.get<TodoSavedObjectAttributes>(
-          'todo',
-          this.input.savedObjectId
-        );
-        savedAttributes = todoSavedObject?.attributes;
-      }
+          // Since this is an expensive task, we save a local copy of the previous
+          // savedObjectId locally and only retrieve the new saved object if the id
+          // actually changed.
+          if (this.savedObjectId !== this.input.savedObjectId) {
+            this.savedObjectId = this.input.savedObjectId;
+            const todoSavedObject = await this.savedObjectsClient.get<TodoSavedObjectAttributes>(
+              'todo',
+              this.input.savedObjectId
+            );
+            savedAttributes = todoSavedObject?.attributes;
+          }
 
-      // The search string might have changed as well so we need to make sure we recalculate
-      // hasMatch.
-      this.updateOutput({
-        hasMatch: getHasMatch(this.input.search, savedAttributes),
-        savedAttributes,
+          // The search string might have changed as well so we need to make sure we recalculate
+          // hasMatch.
+          this.updateOutput({
+            hasMatch: getHasMatch(this.input.search, savedAttributes),
+            savedAttributes,
+          });
+        })
+      )
+      .subscribe({
+        error: (error) => {
+          window.dispatchEvent(new FatalErrorEvent(error));
+        },
       });
-    });
   }
 
   public render(node: HTMLElement) {

@@ -85,7 +85,7 @@ export class EphemeralTaskLifecycle {
             );
           })
         )
-        .subscribe(async (e) => {
+        .subscribe(() => {
           let overallCapacity = this.getCapacity();
           const capacityByType = new Map<string, number>();
           const tasksWithinCapacity = [...this.ephemeralTaskQueue]

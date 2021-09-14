@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { takeUntil, finalize, map } from 'rxjs/operators';
+import { takeUntil, finalize, map, mergeMap } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import type { ISavedObjectsRepository } from 'kibana/server';
 import {
@@ -44,13 +44,18 @@ export function startTrackingEventLoopDelaysUsage(
     .pipe(
       map((i) => (i + 1) % resetOnCount === 0),
       takeUntil(stopMonitoringEventLoop$),
-      finalize(() => eventLoopDelaysCollector.stop())
+      finalize(() => eventLoopDelaysCollector.stop()),
+      mergeMap(async (shouldReset) => {
+        try {
+          const histogram = eventLoopDelaysCollector.collect();
+          if (shouldReset) {
+            eventLoopDelaysCollector.reset();
+          }
+          await storeHistogram(histogram, internalRepository);
+        } catch (error) {
+          // TODO: we need to handle errors properly
+        }
+      })
     )
-    .subscribe(async (shouldReset) => {
-      const histogram = eventLoopDelaysCollector.collect();
-      if (shouldReset) {
-        eventLoopDelaysCollector.reset();
-      }
-      await storeHistogram(histogram, internalRepository);
-    });
+    .subscribe();
 }

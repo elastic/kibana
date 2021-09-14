@@ -9,6 +9,7 @@ import querystring from 'querystring';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Observable, Subscription } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 
 import type {
   CapabilitiesSetup,
@@ -20,6 +21,7 @@ import type {
 } from 'src/core/server';
 import type { Capabilities as UICapabilities } from 'src/core/types';
 
+import { FatalErrorEvent } from '../../../../../src/core/public';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
@@ -201,18 +203,26 @@ export class AuthorizationService {
     validateFeaturePrivileges(allFeatures);
     validateReservedPrivileges(allFeatures);
 
-    this.statusSubscription = online$.subscribe(async ({ scheduleRetry }) => {
-      try {
-        await registerPrivilegesWithCluster(
-          this.logger,
-          this.privileges,
-          this.applicationName,
-          clusterClient
-        );
-      } catch (err) {
-        scheduleRetry();
-      }
-    });
+    this.statusSubscription = online$
+      .pipe(
+        mergeMap(async ({ scheduleRetry }) => {
+          try {
+            await registerPrivilegesWithCluster(
+              this.logger,
+              this.privileges,
+              this.applicationName,
+              clusterClient
+            );
+          } catch (err) {
+            scheduleRetry();
+          }
+        })
+      )
+      .subscribe({
+        error(error) {
+          window.dispatchEvent(new FatalErrorEvent(error));
+        },
+      });
   }
 
   stop() {

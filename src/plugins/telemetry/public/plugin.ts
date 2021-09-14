@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { mergeMap } from 'rxjs/operators';
+
 import type {
   Plugin,
   CoreStart,
@@ -18,6 +20,7 @@ import type {
 } from 'src/core/public';
 
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+import { FatalErrorEvent } from '../../../core/public';
 
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {
@@ -155,25 +158,33 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     });
     this.telemetryNotifications = telemetryNotifications;
 
-    application.currentAppId$.subscribe(async () => {
-      const isUnauthenticated = this.getIsUnauthenticated(http);
-      if (isUnauthenticated) {
-        return;
-      }
+    application.currentAppId$
+      .pipe(
+        mergeMap(async () => {
+          const isUnauthenticated = this.getIsUnauthenticated(http);
+          if (isUnauthenticated) {
+            return;
+          }
 
-      // Update the telemetry config based as a mix of the config files and saved objects
-      const telemetrySavedObject = await this.getTelemetrySavedObject(savedObjects.client);
-      const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
-      this.telemetryService!.config = updatedConfig;
+          // Update the telemetry config based as a mix of the config files and saved objects
+          const telemetrySavedObject = await this.getTelemetrySavedObject(savedObjects.client);
+          const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
+          this.telemetryService!.config = updatedConfig;
 
-      const telemetryBanner = updatedConfig.banner;
+          const telemetryBanner = updatedConfig.banner;
 
-      this.maybeStartTelemetryPoller();
-      if (telemetryBanner) {
-        this.maybeShowOptedInNotificationBanner();
-        this.maybeShowOptInBanner();
-      }
-    });
+          this.maybeStartTelemetryPoller();
+          if (telemetryBanner) {
+            this.maybeShowOptedInNotificationBanner();
+            this.maybeShowOptInBanner();
+          }
+        })
+      )
+      .subscribe({
+        error: (error) => {
+          window.dispatchEvent(new FatalErrorEvent(error));
+        },
+      });
 
     return {
       telemetryService: this.getTelemetryServicePublicApis(),

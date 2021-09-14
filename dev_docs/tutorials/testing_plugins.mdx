@@ -493,7 +493,7 @@ export const renderApp = (
 
   // uiSettings subscription
   const uiSettingsClient = core.uiSettings.client;
-  const pollingSubscription = uiSettingClient.get$('mysetting1').subscribe(async mySetting1 => {
+  const pollingSubscription = uiSettingClient.get$('mysetting1').subscribe((mySetting1) => {
     const value = core.http.fetch(/** use `mySetting1` in request **/);
     // ...
   });

@@ -47,7 +47,7 @@ export function startTrackingEventLoopDelaysThreshold(
       takeUntil(stopMonitoringEventLoop$),
       finalize(() => eventLoopDelaysCollector.stop())
     )
-    .subscribe(async () => {
+    .subscribe(() => {
       const { mean } = eventLoopDelaysCollector.collect();
       const meanDurationMs = moment
         .duration(mean / ONE_MILLISECOND_AS_NANOSECONDS)

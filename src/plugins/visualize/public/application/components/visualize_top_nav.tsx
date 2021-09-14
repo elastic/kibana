@@ -7,10 +7,12 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import { mergeMap } from 'rxjs/operators';
 
 import { AppMountParameters, OverlayRef } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../kibana_react/public';
+import { FatalErrorEvent } from '../../../../../core/public';
 import {
   VisualizeServices,
   VisualizeAppState,
@@ -191,12 +193,19 @@ const TopNav = ({
   useEffect(() => {
     const autoRefreshFetchSub = services.data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
-      .subscribe(async (done) => {
-        try {
-          await doReload();
-        } finally {
-          done();
-        }
+      .pipe(
+        mergeMap(async (done) => {
+          try {
+            await doReload();
+          } finally {
+            done();
+          }
+        })
+      )
+      .subscribe({
+        error: (error) => {
+          window.dispatchEvent(new FatalErrorEvent(error));
+        },
       });
     return () => {
       autoRefreshFetchSub.unsubscribe();

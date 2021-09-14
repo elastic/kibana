@@ -70,7 +70,7 @@ export class BookEmbeddable
   ) {
     super(initialInput, {} as BookEmbeddableOutput, parent);
 
-    this.subscription = this.getInput$().subscribe(async () => {
+    this.subscription = this.getInput$().subscribe(() => {
       const savedObjectId = (this.getInput() as BookByReferenceInput).savedObjectId;
       const attributes = (this.getInput() as BookByValueInput).attributes;
       if (this.attributes !== attributes || this.savedObjectId !== savedObjectId) {

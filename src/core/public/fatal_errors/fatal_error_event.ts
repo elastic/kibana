@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { FatalErrorsService } from './fatal_errors_service';
-export type { FatalErrorsSetup, FatalErrorsStart } from './fatal_errors_service';
-export type { FatalErrorInfo } from './get_error_info';
-export { FatalErrorEvent } from './fatal_error_event';
+export class FatalErrorEvent extends window.Event {
+  constructor(public readonly reason: Error) {
+    super('kibana-fatalError');
+  }
+}

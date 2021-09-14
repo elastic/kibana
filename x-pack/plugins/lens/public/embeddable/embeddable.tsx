@@ -22,7 +22,7 @@ import type { Start as InspectorStart } from 'src/plugins/inspector/public';
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
 import { RenderMode } from 'src/plugins/expressions';
-import { map, distinctUntilChanged, skip } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, mergeMap } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -57,6 +57,7 @@ import {
 } from '../types';
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
+import { FatalErrorEvent } from '../../../../../src/core/public';
 import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
 import { IBasePath } from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
@@ -212,11 +213,16 @@ export class Embeddable
               ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
             )
           ),
-          skip(1)
+          skip(1),
+          mergeMap(async (input) => {
+            await this.initializeSavedVis(input);
+            this.reload();
+          })
         )
-        .subscribe(async (input) => {
-          await this.initializeSavedVis(input);
-          this.reload();
+        .subscribe({
+          error(error) {
+            window.dispatchEvent(new FatalErrorEvent(error));
+          },
         })
     );
 
@@ -233,7 +239,7 @@ export class Embeddable
           ),
           skip(1)
         )
-        .subscribe(async (input) => {
+        .subscribe((input) => {
           this.onContainerStateChanged(input);
         })
     );
