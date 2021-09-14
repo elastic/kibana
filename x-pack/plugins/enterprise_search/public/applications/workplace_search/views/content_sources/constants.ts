@@ -21,6 +21,13 @@ export const CONTENT_SUMMARY_TITLE = i18n.translate(
   }
 );
 
+export const CONTENT_SUMMARY_LOADING_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.contentSummaryLoading.text',
+  {
+    defaultMessage: 'Loading summary details...',
+  }
+);
+
 export const CONTENT_TYPE_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.contentType.header',
   {
