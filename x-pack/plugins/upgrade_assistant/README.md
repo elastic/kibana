@@ -86,7 +86,7 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
             enabled: true
   ```
 
-  To verify it's working as expected, kick off a reindex task in UA. Then, navigate to **Security > API keys** and verify a API key was created. The name should be prefixed with `ua_reindex_`. Once the reindex task as completed successfully, the API should be deleted.
+  To verify it's working as expected, kick off a reindex task in UA. Then, navigate to **Security > API keys** and verify an API key was created. The name should be prefixed with `ua_reindex_`. Once the reindex task has completed successfully, the API should be deleted.
 
 **2. Upgrading or deleting ML job model snapshots**
 
