@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
@@ -16,6 +16,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { Legacy } from '../../../legacy_shims';
 import { Enabler } from './enabler';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 const CODE_PATHS = [CODE_PATH_LICENSE];
 
@@ -47,6 +48,16 @@ export const NoDataPage = () => {
     isCollectionIntervalUpdating: false,
     isCollectionIntervalUpdated: false,
   } as any);
+
+  const { update: updateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  updateBreadcrumbs([
+    {
+      'data-test-subj': 'breadcrumbClusters',
+      text: 'Clusters',
+      href: '#/home',
+      ignoreGlobalState: true,
+    }
+  ]);
 
   const checkers: SettingsChecker[] = [
     {
