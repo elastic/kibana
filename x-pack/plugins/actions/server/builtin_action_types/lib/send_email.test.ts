@@ -9,6 +9,13 @@ jest.mock('nodemailer', () => ({
   createTransport: jest.fn(),
 }));
 
+jest.mock('./send_email_graph_api', () => ({
+  sendEmailGraphApi: jest.fn(),
+}));
+jest.mock('./request_oauth_client_credentials_token', () => ({
+  requestOAuthClientCredentialsToken: jest.fn(),
+}));
+
 import { Logger } from '../../../../../../src/core/server';
 import { sendEmail } from './send_email';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
@@ -16,19 +23,12 @@ import nodemailer from 'nodemailer';
 import { ProxySettings } from '../../types';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { CustomHostSettings } from '../../config';
+import { sendEmailGraphApi } from './send_email_graph_api';
+import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
 const sendMailMock = jest.fn();
-
-jest.mock('./send_email_graph_api', () => ({
-  sendEmailGraphApi: jest.fn(),
-}));
-
-jest.mock('./request_oauth_client_credentials_token', () => ({
-  requestOAuthClientCredentialsToken: jest.fn(),
-}));
-
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 describe('send_email module', () => {
@@ -39,7 +39,7 @@ describe('send_email module', () => {
   });
 
   test('handles authenticated email using service', async () => {
-    const sendEmailOptions = getSendEmailOptions({ transport: { service: '__json' } });
+    const sendEmailOptions = getSendEmailOptions({ transport: { service: 'other' } });
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -80,41 +80,132 @@ describe('send_email module', () => {
   });
 
   test('uses OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
-    const sendEmailOptions = getSendEmailOptions({ transport: { service: 'exchange_server' } });
-    const result = await sendEmail(mockLogger, sendEmailOptions);
-    expect(result).toBe(sendMailMockResult);
-    expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
+    const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
+    const requestOAuthClientCredentialsTokenMock = requestOAuthClientCredentialsToken as jest.Mock;
+    const sendEmailOptions = getSendEmailOptions({
+      transport: {
+        service: 'exchange_server',
+        clientId: '123456',
+        clientSecret: 'sdfhkdsjhfksdjfh',
+      },
+    });
+    requestOAuthClientCredentialsTokenMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        tokenType: 'Bearer',
+        accessToken: 'dfjsdfgdjhfgsjdf',
+        expiresIn: 123,
+      },
+    });
+
+    sendEmailGraphApiMock.mockReturnValue({
+      status: 202,
+    });
+
+    await sendEmail(mockLogger, sendEmailOptions);
+    expect(requestOAuthClientCredentialsTokenMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
+        "login.microsoftonline.com/undefined/oauth2/v2.0/token",
         Object {
-          "auth": Object {
-            "pass": "changeme",
-            "user": "elastic",
-          },
-          "host": undefined,
-          "port": undefined,
-          "secure": false,
-          "tls": Object {
-            "rejectUnauthorized": true,
-          },
+          "context": Array [],
+          "debug": [MockFunction],
+          "error": [MockFunction],
+          "fatal": [MockFunction],
+          "get": [MockFunction],
+          "info": [MockFunction],
+          "log": [MockFunction],
+          "trace": [MockFunction],
+          "warn": [MockFunction],
+        },
+        Object {
+          "clientId": "123456",
+          "clientSecret": "sdfhkdsjhfksdjfh",
+          "scope": "https://graph.microsoft.com/.default",
+        },
+        Object {
+          "ensureActionTypeEnabled": [MockFunction],
+          "ensureHostnameAllowed": [MockFunction],
+          "ensureUriAllowed": [MockFunction],
+          "getCustomHostSettings": [MockFunction],
+          "getProxySettings": [MockFunction],
+          "getResponseSettings": [MockFunction],
+          "getSSLSettings": [MockFunction],
+          "isActionTypeEnabled": [MockFunction],
+          "isHostnameAllowed": [MockFunction],
+          "isUriAllowed": [MockFunction],
         },
       ]
     `);
-    expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
+
+    expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "bcc": Array [],
-          "cc": Array [
-            "bob@example.com",
-            "robert@example.com",
-          ],
-          "from": "fred@example.com",
-          "html": "<p>a message</p>
+          "headers": Object {
+            "Authorization": "undefined undefined",
+            "Content-Type": "application/json",
+          },
+          "messageHTML": "<p>a message</p>
       ",
-          "subject": "a subject",
-          "text": "a message",
-          "to": Array [
-            "jim@example.com",
-          ],
+          "options": Object {
+            "configurationUtilities": Object {
+              "ensureActionTypeEnabled": [MockFunction],
+              "ensureHostnameAllowed": [MockFunction],
+              "ensureUriAllowed": [MockFunction],
+              "getCustomHostSettings": [MockFunction],
+              "getProxySettings": [MockFunction],
+              "getResponseSettings": [MockFunction],
+              "getSSLSettings": [MockFunction],
+              "isActionTypeEnabled": [MockFunction],
+              "isHostnameAllowed": [MockFunction],
+              "isUriAllowed": [MockFunction],
+            },
+            "content": Object {
+              "message": "a message",
+              "subject": "a subject",
+            },
+            "hasAuth": true,
+            "routing": Object {
+              "bcc": Array [],
+              "cc": Array [
+                "bob@example.com",
+                "robert@example.com",
+              ],
+              "from": "fred@example.com",
+              "to": Array [
+                "jim@example.com",
+              ],
+            },
+            "transport": Object {
+              "clientId": "123456",
+              "clientSecret": "sdfhkdsjhfksdjfh",
+              "password": "changeme",
+              "service": "exchange_server",
+              "user": "elastic",
+            },
+          },
+        },
+        Object {
+          "context": Array [],
+          "debug": [MockFunction],
+          "error": [MockFunction],
+          "fatal": [MockFunction],
+          "get": [MockFunction],
+          "info": [MockFunction],
+          "log": [MockFunction],
+          "trace": [MockFunction],
+          "warn": [MockFunction],
+        },
+        Object {
+          "ensureActionTypeEnabled": [MockFunction],
+          "ensureHostnameAllowed": [MockFunction],
+          "ensureUriAllowed": [MockFunction],
+          "getCustomHostSettings": [MockFunction],
+          "getProxySettings": [MockFunction],
+          "getResponseSettings": [MockFunction],
+          "getSSLSettings": [MockFunction],
+          "isActionTypeEnabled": [MockFunction],
+          "isHostnameAllowed": [MockFunction],
+          "isUriAllowed": [MockFunction],
         },
       ]
     `);
@@ -126,6 +217,7 @@ describe('send_email module', () => {
         transport: {
           host: 'example.com',
           port: 1025,
+          service: 'other',
         },
       },
       {
@@ -566,22 +658,22 @@ function getSendEmailOptions(
   }
   return {
     content: {
-      ...content,
       message: 'a message',
       subject: 'a subject',
+      ...content,
     },
     routing: {
-      ...routing,
       from: 'fred@example.com',
       to: ['jim@example.com'],
       cc: ['bob@example.com', 'robert@example.com'],
       bcc: [],
+      ...routing,
     },
     transport: {
-      ...transport,
       service: 'other',
       user: 'elastic',
       password: 'changeme',
+      ...transport,
     },
     hasAuth: true,
     configurationUtilities,

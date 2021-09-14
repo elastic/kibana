@@ -15,7 +15,10 @@ import { CustomHostSettings } from '../../config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 import { AdditionalEmailServices } from '../email';
 import { sendEmailGraphApi } from './send_email_graph_api';
-import { requestOAuthClientCredentialsToken, ClientCredentialsResponse } from './request_oauth_client_credentials_token';
+import {
+  requestOAuthClientCredentialsToken,
+  ClientCredentialsResponse,
+} from './request_oauth_client_credentials_token';
 import { ProxySettings } from '../../types';
 
 // an email "service" which doesn't actually send, just returns what it would send
@@ -69,9 +72,11 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
   const messageHTML = htmlFromMarkdown(logger, message);
 
   if (service === AdditionalEmailServices.EXCHANGE) {
+    console.log('gfjsdgfsjdfgsjdfgsdjfgsdjfgsdjfgs');
     // request access token for microsoft exchange online server with Graph API scope
-    const tokenResult = await requestOAuthClientCredentialsToken(
-      (transport.oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${transport.tenantId}/oauth2/v2.0/token`),
+    const tokenResult = (await requestOAuthClientCredentialsToken(
+      transport.oauthTokenUrl ??
+        `${EXCHANGE_ONLINE_SERVER_HOST}/${transport.tenantId}/oauth2/v2.0/token`,
       logger,
       {
         scope: GRAPH_API_OAUTH_SCOPE,
@@ -79,8 +84,8 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
         clientSecret,
       },
       configurationUtilities
-    ) as ClientCredentialsResponse;
-
+    )) as ClientCredentialsResponse;
+    console.log(tokenResult);
     const headers = {
       'Content-Type': 'application/json',
       Authorization: `${tokenResult.tokenType} ${tokenResult.accessToken}`,
