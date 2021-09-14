@@ -4,6 +4,43 @@
   height: 100%;
   overflow: hidden;
 
+  // TODO hack to re-style Document field
+  .euiDataGridRowCell, .euiDataGridHeaderCell {
+    font-size: $euiFontSizeXS;
+  }
+
+  // TODO - apply this if testing feedback suggests cell content is too tight
+  // .euiDataGrid--fontSizeSmall .euiDataGridRowCell {
+  //   line-height: $euiFontSizeM * 1.25;
+  // }
+
+  // .dscDiscoverGrid__descriptionListDescription {
+  //   word-break: normal !important;
+  // }
+
+  .euiCheckbox .euiCheckbox__input + .euiCheckbox__square,
+  .euiButtonIcon.euiButtonIcon--empty:not(.euiDataGridRowCell__actionButtonIcon) {
+    margin-top: 4px; // it's 7px by default and the bottom edge is cut off
+  }
+
+  .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandButton {
+    // in compressed mode, the row heights are not 34px and this bleeds over row below
+    padding: 5px 0; // it's 6px by default, we need some to keep a reasonable target size
+    top: -4px; // this is a pure hack to align in compressed mode
+  }
+
+  // TODO the margin creates a ragged left edge when type is inline
+  .euiDescriptionList.euiDescriptionList--inline .euiDescriptionList__title {
+    margin-left: 0;
+    background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
+    border: none;
+    padding: 2px 4px;
+  }
+
+  .euiDescriptionList.euiDescriptionList--inline .euiDescriptionList__description {
+    margin-right: $euiSizeXS;
+  }
+
   .euiDataGrid__controls {
     border: none;
     border-bottom: $euiBorderThin;
