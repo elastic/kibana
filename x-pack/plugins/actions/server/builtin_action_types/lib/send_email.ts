@@ -65,18 +65,17 @@ export interface Content {
 // send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
-  const { service, clientId, clientSecret } = transport;
+  const { service, clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
 
   const messageHTML = htmlFromMarkdown(logger, message);
 
   if (service === AdditionalEmailServices.EXCHANGE) {
-    console.log('gfjsdgfsjdfgsjdfgsdjfgsdjfgsdjfgs');
     // request access token for microsoft exchange online server with Graph API scope
+
     const tokenResult = (await requestOAuthClientCredentialsToken(
-      transport.oauthTokenUrl ??
-        `${EXCHANGE_ONLINE_SERVER_HOST}/${transport.tenantId}/oauth2/v2.0/token`,
+      oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
       logger,
       {
         scope: GRAPH_API_OAUTH_SCOPE,
@@ -85,7 +84,6 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       },
       configurationUtilities
     )) as ClientCredentialsResponse;
-    console.log(tokenResult);
     const headers = {
       'Content-Type': 'application/json',
       Authorization: `${tokenResult.tokenType} ${tokenResult.accessToken}`,
