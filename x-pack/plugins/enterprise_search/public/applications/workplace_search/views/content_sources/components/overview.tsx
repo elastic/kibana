@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiListGroup,
-  EuiListGroupItem,
   EuiListGroupItemTo,
   EuiLink,
   EuiPanel,
@@ -239,13 +238,13 @@ export const Overview: React.FC = () => {
       <EuiPanel color="subdued">
         <EuiListGroup flush={true} color="ghost" maxWidth={false} data-test-subj="GroupsSummary">
           {groups.map((group, index) => (
-            <EuiListGroupItem
+            <EuiListGroupItemTo
               label={group.name}
               key={index}
               to={getGroupPath(group.id)}
               data-test-subj="SourceGroupLink"
             >
-            </EuiListGroupItem>
+            </EuiListGroupItemTo>
           ))}
         </EuiListGroup>
       </EuiPanel>
