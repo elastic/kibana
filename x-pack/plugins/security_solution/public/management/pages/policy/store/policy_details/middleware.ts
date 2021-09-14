@@ -6,13 +6,17 @@
  */
 
 import { IHttpFetchError } from 'kibana/public';
-import { DefaultPolicyNotificationMessage } from '../../../../../../common/endpoint/models/policy_config';
+import {
+  DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
+} from '../../../../../../common/endpoint/models/policy_config';
 import { PolicyDetailsState, UpdatePolicyResponse } from '../../types';
 import {
   policyIdFromParams,
   isOnPolicyDetailsPage,
   policyDetails,
   policyDetailsForUpdate,
+  needsToRefresh,
 } from './selectors';
 import {
   sendGetPackagePolicy,
@@ -31,7 +35,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
     next(action);
     const state = getState();
 
-    if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
+    if (action.type === 'userChangedUrl' && needsToRefresh(state) && isOnPolicyDetailsPage(state)) {
       const id = policyIdFromParams(state);
       let policyItem: PolicyData;
 
@@ -49,20 +53,20 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
         if (
           policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message === ''
         ) {
-          policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message = DefaultPolicyNotificationMessage;
+          policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message = DefaultPolicyRuleNotificationMessage;
         }
         if (
           policyItem.inputs[0].config.policy.value.windows.popup.behavior_protection.message === ''
         ) {
-          policyItem.inputs[0].config.policy.value.windows.popup.behavior_protection.message = DefaultPolicyNotificationMessage;
+          policyItem.inputs[0].config.policy.value.windows.popup.behavior_protection.message = DefaultPolicyRuleNotificationMessage;
         }
         if (policyItem.inputs[0].config.policy.value.mac.popup.behavior_protection.message === '') {
-          policyItem.inputs[0].config.policy.value.mac.popup.behavior_protection.message = DefaultPolicyNotificationMessage;
+          policyItem.inputs[0].config.policy.value.mac.popup.behavior_protection.message = DefaultPolicyRuleNotificationMessage;
         }
         if (
           policyItem.inputs[0].config.policy.value.linux.popup.behavior_protection.message === ''
         ) {
-          policyItem.inputs[0].config.policy.value.linux.popup.behavior_protection.message = DefaultPolicyNotificationMessage;
+          policyItem.inputs[0].config.policy.value.linux.popup.behavior_protection.message = DefaultPolicyRuleNotificationMessage;
         }
       } catch (error) {
         dispatch({

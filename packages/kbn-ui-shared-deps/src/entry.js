@@ -55,3 +55,5 @@ export const KbnAnalytics = require('@kbn/analytics');
 export const KbnStd = require('@kbn/std');
 export const SaferLodashSet = require('@elastic/safer-lodash-set');
 export const RisonNode = require('rison-node');
+export const History = require('history');
+export const Classnames = require('classnames');
