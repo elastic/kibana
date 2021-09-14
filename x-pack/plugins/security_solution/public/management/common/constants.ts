@@ -30,6 +30,7 @@ export const MANAGEMENT_STORE_ENDPOINTS_NAMESPACE = 'endpoints';
 export const MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE = 'trustedApps';
 /** Namespace within the Management state where event filters page state is maintained */
 export const MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE = 'eventFilters';
+export const MANAGEMENT_STORE_HOST_ISOLATION_EXCEPTIONS_NAMESPACE = 'hostIsolationExceptions';
 
 export const MANAGEMENT_PAGE_SIZE_OPTIONS: readonly number[] = [10, 20, 50];
 export const MANAGEMENT_DEFAULT_PAGE = 0;
