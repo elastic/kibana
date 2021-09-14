@@ -33,6 +33,7 @@ export async function requestOAuthClientCredentialsToken(
 ): Promise<ClientCredentialsResponse> {
   const axiosInstance = axios.create();
   const { clientId, clientSecret, scope } = params;
+
   const res = await request({
     axios: axiosInstance,
     url: tokenUrl,
@@ -50,6 +51,7 @@ export async function requestOAuthClientCredentialsToken(
     configurationUtilities,
     validateStatus: () => true,
   });
+
   if (res.status === 200) {
     return {
       tokenType: res.data.token_type,

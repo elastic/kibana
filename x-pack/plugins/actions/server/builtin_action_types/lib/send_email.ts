@@ -15,17 +15,14 @@ import { CustomHostSettings } from '../../config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 import { AdditionalEmailServices } from '../email';
 import { sendEmailGraphApi } from './send_email_graph_api';
-import {
-  requestOAuthClientCredentialsToken,
-  ClientCredentialsResponse,
-} from './request_oauth_client_credentials_token';
+import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 import { ProxySettings } from '../../types';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
 // The value is the resource identifier (Application ID URI) of the resource you want, affixed with the .default suffix. For Microsoft Graph, the value is https://graph.microsoft.com/.default. This value informs the Microsoft identity platform endpoint that of all the application permissions you have configured for your app in the app registration portal, it should issue a token for the ones associated with the resource you want to use.
 export const GRAPH_API_OAUTH_SCOPE = 'https://graph.microsoft.com/.default';
-export const EXCHANGE_ONLINE_SERVER_HOST = 'login.microsoftonline.com';
+export const EXCHANGE_ONLINE_SERVER_HOST = 'https://login.microsoftonline.com';
 
 export interface SendEmailOptions {
   transport: Transport;
@@ -74,7 +71,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
   if (service === AdditionalEmailServices.EXCHANGE) {
     // request access token for microsoft exchange online server with Graph API scope
 
-    const tokenResult = (await requestOAuthClientCredentialsToken(
+    const tokenResult = await requestOAuthClientCredentialsToken(
       oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
       logger,
       {
@@ -83,7 +80,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
         clientSecret,
       },
       configurationUtilities
-    )) as ClientCredentialsResponse;
+    );
     const headers = {
       'Content-Type': 'application/json',
       Authorization: `${tokenResult.tokenType} ${tokenResult.accessToken}`,
