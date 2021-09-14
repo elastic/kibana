@@ -6,8 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { CommonProps, EuiHorizontalRule, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import styled from 'styled-components';
+import { CommonProps, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import { CardHeader, CardHeaderProps } from './components/card_header';
 import { CardSubHeader } from './components/card_sub_header';
 import { getEmptyValue } from '../../../common/components/empty_value';
@@ -17,12 +16,8 @@ import { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_sup
 import { AnyArtifact } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
-
-const CardContainerPanel = styled(EuiPanel)`
-  &.artifactEntryCard + &.artifactEntryCard {
-    margin-top: ${({ theme }) => theme.eui.spacerSizes.l};
-  }
-`;
+import { CardContainerPanel } from './components/card_container_panel';
+import { CardSectionPanel } from './components/card_section_panel';
 
 export interface ArtifactEntryCardProps extends CommonProps {
   item: AnyArtifact;
@@ -71,14 +66,8 @@ export const ArtifactEntryCard = memo(
     }, [artifact.effectScope, policies]);
 
     return (
-      <CardContainerPanel
-        hasBorder={true}
-        {...commonProps}
-        data-test-subj={dataTestSubj}
-        paddingSize="none"
-        className="artifactEntryCard"
-      >
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+      <CardContainerPanel {...commonProps} data-test-subj={dataTestSubj}>
+        <CardSectionPanel>
           <CardHeader
             name={artifact.name}
             createdDate={artifact.created_at}
@@ -100,17 +89,17 @@ export const ArtifactEntryCard = memo(
               {artifact.description || getEmptyValue()}
             </p>
           </EuiText>
-        </EuiPanel>
+        </CardSectionPanel>
 
         <EuiHorizontalRule margin="xs" />
 
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+        <CardSectionPanel>
           <CriteriaConditions
             os={artifact.os as CriteriaConditionsProps['os']}
             entries={artifact.entries}
             data-test-subj={getTestId('criteriaConditions')}
           />
-        </EuiPanel>
+        </CardSectionPanel>
       </CardContainerPanel>
     );
   }
