@@ -351,14 +351,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       let kibanaDataViews: KibanaDataView[];
       try {
         // check for/generate default Security Solution Kibana index pattern
-        const a = await coreStart.http.fetch(SOURCERER_API_URL, {
+        const sourcererDataViews = await coreStart.http.fetch(SOURCERER_API_URL, {
           method: 'POST',
           body: JSON.stringify({
             patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
           }),
         });
-        defaultDataView = a.defaultDataView;
-        kibanaDataViews = a.kibanaDataViews;
+        defaultDataView = sourcererDataViews.defaultDataView;
+        kibanaDataViews = sourcererDataViews.kibanaDataViews;
       } catch (error) {
         defaultDataView = { id: null, ...error };
         kibanaDataViews = [];

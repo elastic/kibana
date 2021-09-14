@@ -253,7 +253,6 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                // ensures all selected patterns are selectable
                 const newSelectedPatterns = selectedPatterns.filter((pattern) =>
                   patternList.includes(pattern)
                 );
@@ -272,8 +271,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                       indicesExist: patternList.length > 0,
                       loading: false,
                       runtimeMappings: response.runtimeMappings,
-                      selectedPatterns: newSelectedPatterns,
-                      selectedDataViewId,
+                      // selectedPatterns: newSelectedPatterns,
+                      // selectedDataViewId,
                     },
                   })
                 );

@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsType } from '../../../../../../../src/core/server';
-import { migrations } from './migrations';
+import { timelinesMigrations } from './migrations';
 
 export const timelineSavedObjectType = 'siem-ui-timeline';
 
@@ -286,9 +286,6 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
         },
       },
     },
-    savedQueryId: {
-      type: 'keyword',
-    },
     sort: {
       dynamic: false,
       properties: {
@@ -326,5 +323,5 @@ export const timelineType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'single',
   mappings: timelineSavedObjectMappings,
-  migrations,
+  migrations: timelinesMigrations,
 };
