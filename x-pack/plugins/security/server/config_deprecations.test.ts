@@ -42,8 +42,8 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(defaultConfig);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Session idle timeout (\\"xpack.security.session.idleTimeout\\") will be set to 1 hour by default in the next major version (8.0).",
-        "Session lifespan (\\"xpack.security.session.lifespan\\") will be set to 30 days by default in the next major version (8.0).",
+        "The session idle timeout will default to 1 hour in 8.0.",
+        "The session lifespan will default to 30 days in 8.0.",
       ]
     `);
   });
@@ -54,7 +54,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(defaultConfig);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Session idle timeout (\\"xpack.security.session.idleTimeout\\") will be set to 1 hour by default in the next major version (8.0).",
+        "The session idle timeout will default to 1 hour in 8.0.",
       ]
     `);
   });
@@ -65,7 +65,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(defaultConfig);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Session lifespan (\\"xpack.security.session.lifespan\\") will be set to 30 days by default in the next major version (8.0).",
+        "The session lifespan will default to 30 days in 8.0.",
       ]
     `);
   });
@@ -84,7 +84,7 @@ describe('Config Deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Setting \\"xpack.security.sessionTimeout\\" has been replaced by \\"xpack.security.session.idleTimeout\\"",
-        "Session lifespan (\\"xpack.security.session.lifespan\\") will be set to 30 days by default in the next major version (8.0).",
+        "The session lifespan will default to 30 days in 8.0.",
       ]
     `);
   });

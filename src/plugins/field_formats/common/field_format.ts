@@ -16,7 +16,8 @@ import {
   FieldFormatConvertFunction,
   HtmlContextTypeOptions,
   TextContextTypeOptions,
-  IFieldFormatMetaParams,
+  FieldFormatMetaParams,
+  FieldFormatParams,
 } from './types';
 import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
 import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
@@ -83,13 +84,16 @@ export abstract class FieldFormat {
    * @property {Function} - ref to child class
    * @private
    */
-  public type: any = this.constructor;
+  public type = this.constructor as typeof FieldFormat;
   public allowsNumericalAggregations?: boolean;
 
-  protected readonly _params: any;
+  protected readonly _params: FieldFormatParams & FieldFormatMetaParams;
   protected getConfig: FieldFormatsGetConfigFn | undefined;
 
-  constructor(_params: IFieldFormatMetaParams = {}, getConfig?: FieldFormatsGetConfigFn) {
+  constructor(
+    _params: FieldFormatParams & FieldFormatMetaParams = {},
+    getConfig?: FieldFormatsGetConfigFn
+  ) {
     this._params = _params;
 
     if (getConfig) {
@@ -99,7 +103,7 @@ export abstract class FieldFormat {
 
   /**
    * Convert a raw value to a formatted string
-   * @param  {any} value
+   * @param  {unknown} value
    * @param  {string} [contentType=text] - optional content type, the only two contentTypes
    *                                currently supported are "html" and "text", which helps
    *                                formatters adjust to different contexts
@@ -108,7 +112,7 @@ export abstract class FieldFormat {
    * @public
    */
   convert(
-    value: any,
+    value: unknown,
     contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE,
     options?: HtmlContextTypeOptions | TextContextTypeOptions
   ): string {
@@ -118,7 +122,8 @@ export abstract class FieldFormat {
       return converter.call(this, value, options);
     }
 
-    return value;
+    // TODO: should be "return `${value}`;", but might be a breaking change
+    return value as string;
   }
 
   /**
@@ -142,7 +147,7 @@ export abstract class FieldFormat {
    * @return {object} - parameter defaults
    * @public
    */
-  getParamDefaults(): Record<string, any> {
+  getParamDefaults(): FieldFormatParams {
     return {};
   }
 
@@ -150,7 +155,7 @@ export abstract class FieldFormat {
    * Get the value of a param. This value may be a default value.
    *
    * @param  {string} name - the param name to fetch
-   * @return {any}
+   * @return {any} TODO: https://github.com/elastic/kibana/issues/108158
    * @public
    */
   param(name: string): any {
@@ -170,7 +175,7 @@ export abstract class FieldFormat {
    * @return {object}
    * @public
    */
-  params(): Record<string, any> {
+  params(): FieldFormatParams & FieldFormatMetaParams {
     return cloneDeep(defaults({}, this._params, this.getParamDefaults()));
   }
 
@@ -182,12 +187,12 @@ export abstract class FieldFormat {
    * @public
    */
   toJSON() {
-    const id = get(this.type, 'id');
+    const id = this.type.id;
     const defaultsParams = this.getParamDefaults() || {};
 
     const params = transform(
       this._params,
-      (uniqParams: any, val, param: string) => {
+      (uniqParams: FieldFormatParams & FieldFormatMetaParams, val: unknown, param: string) => {
         if (param === 'parsedUrl') return;
         if (param && val !== get(defaultsParams, param)) {
           uniqParams[param] = val;
@@ -198,7 +203,7 @@ export abstract class FieldFormat {
 
     return {
       id,
-      params: size(params) ? (params as any) : undefined,
+      params: size(params) ? params : undefined,
     };
   }
 
@@ -213,7 +218,7 @@ export abstract class FieldFormat {
     };
   }
 
-  static isInstanceOfFieldFormat(fieldFormat: any): fieldFormat is FieldFormat {
-    return Boolean(fieldFormat && fieldFormat.convert);
+  static isInstanceOfFieldFormat(fieldFormat: unknown): fieldFormat is FieldFormat {
+    return Boolean(fieldFormat && typeof fieldFormat === 'object' && 'convert' in fieldFormat);
   }
 }

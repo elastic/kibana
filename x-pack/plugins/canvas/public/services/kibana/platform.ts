@@ -30,6 +30,7 @@ export const platformServiceFactory: CanvaPlatformServiceFactory = ({ coreStart,
     // though we don't do this.  So this cast may be the best option.
     getHasWriteAccess: () => coreStart.application.capabilities.canvas.save as boolean,
     getUISetting: coreStart.uiSettings.get.bind(coreStart.uiSettings),
+    hasHeaderBanner$: coreStart.chrome.hasHeaderBanner$,
     setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
     setRecentlyAccessed: coreStart.chrome.recentlyAccessed.add,
     setFullscreen: coreStart.chrome.setIsVisible,
