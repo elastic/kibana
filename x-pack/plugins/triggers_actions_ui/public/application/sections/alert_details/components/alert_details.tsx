@@ -22,7 +22,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiLoadingSpinner,
-  EuiIcon,
+  EuiIconTip,
   EuiEmptyPrompt,
   EuiPageTemplate,
 } from '@elastic/eui';
@@ -232,10 +232,18 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     defaultMessage="Actions"
                   />{' '}
                   {hasActionsWithBrokenConnector && (
-                    <EuiIcon
+                    <EuiIconTip
                       data-test-subj="actionWithBrokenConnector"
                       type="alert"
                       color="danger"
+                      content={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsWarningTooltip',
+                        {
+                          defaultMessage:
+                            'Unable to load one of the connectors associated with this rule. Edit the rule to select a new connector.',
+                        }
+                      )}
+                      position="right"
                     />
                   )}
                 </EuiText>
