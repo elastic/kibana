@@ -51,7 +51,7 @@ import {
   getParamEditor,
   formulaOperationName,
   DimensionEditorTabs,
-  FormulaCalloutWarning,
+  CalloutWarning,
   LabelInput,
   getErrorMessage,
 } from './dimensions_editor_helpers';
@@ -140,7 +140,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const showStaticValueFunction =
     temporaryStaticValue ||
-    (supportStaticValue &&
+    (temporaryState === 'none' &&
+      supportStaticValue &&
       (!selectedColumn || selectedColumn?.operationType === staticValueOperationName));
 
   const addStaticValueColumn = (prevLayer = props.state.layers[props.layerId]) => {
@@ -731,8 +732,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         />
       ) : null}
 
-      <FormulaCalloutWarning
-        isFormulaActive={selectedColumn?.operationType === formulaOperationName}
+      <CalloutWarning
+        currentOperationType={selectedColumn?.operationType}
         temporaryStateType={temporaryState}
       />
       {TabContent}

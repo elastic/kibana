@@ -78,15 +78,42 @@ export function getParamEditor(
   return null;
 }
 
-export const FormulaCalloutWarning = ({
-  isFormulaActive,
+export const CalloutWarning = ({
+  currentOperationType,
   temporaryStateType,
 }: {
-  isFormulaActive: boolean;
+  currentOperationType: keyof typeof operationDefinitionMap | undefined;
   temporaryStateType: TemporaryState;
 }) => {
-  if (!isFormulaActive || temporaryStateType === 'none') {
+  if (
+    temporaryStateType === 'none' ||
+    (currentOperationType != null && isQuickFunction(currentOperationType))
+  ) {
     return null;
+  }
+  if (
+    currentOperationType === staticValueOperationName &&
+    temporaryStateType === 'quickFunctions'
+  ) {
+    return (
+      <>
+        <EuiCallOut
+          className="lnsIndexPatternDimensionEditor__warning"
+          size="s"
+          title={i18n.translate('xpack.lens.indexPattern.staticValueWarning', {
+            defaultMessage: 'Static value currently applied',
+          })}
+          iconType="alert"
+          color="warning"
+        >
+          <p>
+            {i18n.translate('xpack.lens.indexPattern.staticValueWarningText', {
+              defaultMessage: 'To overwrite your static value, select a quick function',
+            })}
+          </p>
+        </EuiCallOut>
+      </>
+    );
   }
   return (
     <>
