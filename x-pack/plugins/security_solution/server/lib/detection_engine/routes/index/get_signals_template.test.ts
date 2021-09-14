@@ -125,7 +125,7 @@ describe('get_signals_template', () => {
     expect(template).toMatchSnapshot();
   });
 
-  test('backwards compatibility mappings for version 45 should match snapshot', () => {
+  test.skip('backwards compatibility mappings for version 45 should match snapshot', () => {
     const mapping = createBackwardsCompatibilityMapping(45);
     expect(mapping).toMatchSnapshot();
   });
