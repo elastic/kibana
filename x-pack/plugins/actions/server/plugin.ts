@@ -84,7 +84,7 @@ import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
-import { AlertHistoryEsIndexConnectorId } from '../common';
+import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 
 export interface PluginSetupContract {
@@ -263,8 +263,15 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       );
     }
 
+    // Usage counter for telemetry
+    const usageCounter = plugins.usageCollection?.createUsageCounter(ACTIONS_FEATURE_ID);
+
     // Routes
-    defineRoutes(core.http.createRouter<ActionsRequestHandlerContext>(), this.licenseState);
+    defineRoutes(
+      core.http.createRouter<ActionsRequestHandlerContext>(),
+      this.licenseState,
+      usageCounter
+    );
 
     // Cleanup failed execution task definition
     if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
