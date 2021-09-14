@@ -28,6 +28,10 @@ TBD
 
 Check out our simplified home page, which has a new design that helps you get to the solutions and your data faster.  
 
+In the solutions section, the previously titled *{kib}* group has been renamed *Analytics*, and we've given equal prominence to each solution card, in addition to reducing and simplifying the descriptions.
+
+In the *Add data* section, we’ve reduced and simplified the available actions to the primary *Add your data* action, and *Try sample data*.
+
 [role="screenshot"]
 image:images/whats-new_home-page.png[Home page]
 
@@ -35,7 +39,28 @@ image:images/whats-new_home-page.png[Home page]
 [[maps-7-15]]
 === Maps
 
-TBD
+*Maps* now has the ability to highlight a single layer with the *Show this layer only* action. 
+
+[role="screenshot"]
+image:images/whats-new_highlight-single-layer.gif[Highlight a single layer in Maps]
+
+[float]
+[[maps-7-15-tooltip-feedbacj]]
+==== Choropleth layer tooltip feedback
+
+Choropleth layers now provide you with tooltip feedback for errors when you join data to a layer. The tooltip feedback is helpful for underlying configuration issues in the term-join, or when there are inconsistencies in the underlying data.
+
+[role="screenshot"]
+image:images/whats-new_tooltip-feedback.png[Tooltip feedback in Maps choropleth layers]
+
+[float]
+[[maps-7-15-dynamically-retrieved-data-indicator]]
+==== Indicator for dynamically retrieved data
+
+To help you determine if the data incrementally refreshes as you pan and zoom, the layer-entry in the table of contents now indicates when the layer data is dynamically retrieved based on the current extent of the map.
+
+[role="screenshot"]
+image:images/whats-new_Maps_layer-indicator.png[Indicator for when the layer data is dynamically retrieved]
 
 [float]
 [[discover-7-15]]
@@ -94,6 +119,84 @@ In *TSVB*, you can now visualize multiple percentiles as their own sereies, and 
 [float]
 [[synchronized-cursor-hover]]
 ==== Synchronized cursor hover
+
+When your dashboard contains time series panels, hovering on one panel also hovers on the same time period as the other panels, regardless of the index pattern. 
+
+When your dashboard contains non-time series panels, hovering on one value now highlights the same value on the other panels, as long as the data is from the same index pattern.
+
+[role="screenshot"]
+image:images/whats-new_Dashboard_synchronized-cursor-hover.gif[Synchronized cursor hover in dashboard panels]
+
+Synchronized cursor hover is supported in the following visualization editors:
+
+* Drag-and-drop *Lens* editor
+
+* *TSVB*
+
+* *Aggregation based* area, line, and bar charts
+
+* *Timelion*
+
+[float]
+[[inspect-multiple-requests]]
+==== Inspect multiple requests for multiple layers
+
+The drag-and-drop *Lens* visualization editor now supports *Inspect*, which allows you to view the data in visualizations that contain multiple index patterns.
+
+[float]
+[[canvas-7-15]]
+=== Canvas
+
+[float]
+[[saved-objects-7-15]]
+=== Saved objects
+
+[float]
+[[security-7-15]]
+=== Security
+
+[float]
+[[machine-learning-7-15]]
+=== Machine Learning
+
+[float]
+[[index-lifecycle-policies-7-15]]
+=== Index Lifecycle Policies
+
+Multiple index templates can refer to the same index lifecycle policy. This makes editing an index lifecycle policy an uncertain process -- how do you know which index templates will be affected by a change? Now you can answer this question by reviewing a list of the affected index templates directly in the *Index Lifecycle Policies* app. Whenever you edit a policy, you’ll know exactly which index templates will be affected.
+
+[role="screenshot"]
+image:images/whats-new_index-lifecycle-policies.png[A list of affected index templates in the *Index Lifecycle Policies* app]
+
+[float]
+[[runtime-fields-7-15]]
+=== Runtime fields preview
+
+Getting your Painless script just right doesn’t always happen on the first try. The new *Preview* pane in the *Create field* editor provides a real-time preview, and improved error handling to make it easier to troubleshoot as scripts get more complex. Now you can evaluate your script against multiple documents, and browse the available fields without leaving the editor.
+
+[role="screenshot"]
+image:images/whats-new_runtime-fields_preview-pane.png[Preview pane in the runtime fields *Create field* editor]
+
+[float]
+[[osquery-manager-7-15]]
+=== beta[] Osquery Manager 
+
+[float]
+[[access-controls]]
+==== Access controls
+
+7.15.0 gives security teams more control over who can access Osquery and view results. Previously, only superusers could use Osquery, but now you can grant any users access to sensitive Osquery data, and specify run, save, and scheduled query privileges.
+
+[float]
+[[standardized-scheduled-query-results-with-ecs]]
+==== Standardized scheduled query results with ECS
+
+When defining scheduled queries, you can now map query results to ECS fields to standardize your Osquery data for use across detections, machine learning, and any other areas that rely on ECS-compliant data. With standardized scheduled query results, you greatly increase the value of the queries you run by making the results more readily usable across the Elastic Stack.
+
+[float]
+[[scheduled-query-status-at-a-glance]]
+==== Scheduled query status at a glance
+Scheduled query groups now show the status of individual queries within a group, enabling you to understand at a glance if there are results to review or issues to address. Surfacing this information can also help you tune the queries you’re running. For example, you can identify queries that run too frequently or errors you need to resolve.
 
 
 // end::notable-highlights[]
