@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { CommonProps, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import { CardHeader, CardHeaderProps } from './components/card_header';
 import { CardSubHeader } from './components/card_sub_header';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
-import { EffectScopeProps } from './components/effect_scope';
-import { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_support/context_menu_item_nav_by_rotuer';
-import { AnyArtifact } from './types';
+import { AnyArtifact, MenuItemPropsByPolicyId } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { CardContainerPanel } from './components/card_container_panel';
 import { CardSectionPanel } from './components/card_section_panel';
+import { usePolicyNavLinks } from './hooks/use_policy_nav_links';
 
 export interface ArtifactEntryCardProps extends CommonProps {
   item: AnyArtifact;
@@ -30,40 +29,18 @@ export interface ArtifactEntryCardProps extends CommonProps {
    * Information about the policies that are assigned to the `item`'s `effectScope` and that will be
    * use to create a navigation link
    */
-  policies?: {
-    [policyId: string]: ContextMenuItemNavByRouterProps;
-  };
+  policies?: MenuItemPropsByPolicyId;
 }
 
 /**
  * Display Artifact Items (ex. Trusted App, Event Filter, etc) as a card.
  * This component is a TS Generic that allows you to set what the Item type is
  */
-export const ArtifactEntryCard = memo(
-  ({
-    item,
-    policies,
-    actions,
-    'data-test-subj': dataTestSubj,
-    ...commonProps
-  }: ArtifactEntryCardProps) => {
+export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
+  ({ item, policies, actions, 'data-test-subj': dataTestSubj, ...commonProps }) => {
     const artifact = useNormalizedArtifact(item);
     const getTestId = useTestIdGenerator(dataTestSubj);
-
-    // create the policy links for each policy listed in the artifact record by grabbing the
-    // navigation data from the `policies` prop (if any)
-    const policyNavLinks = useMemo<EffectScopeProps['policies']>(() => {
-      return artifact.effectScope.type === 'policy'
-        ? artifact?.effectScope.policies.map((id) => {
-            return policies && policies[id]
-              ? policies[id]
-              : // else, unable to build a nav link, so just show id
-                {
-                  children: id,
-                };
-          })
-        : undefined;
-    }, [artifact.effectScope, policies]);
+    const policyNavLinks = usePolicyNavLinks(artifact, policies);
 
     return (
       <CardContainerPanel {...commonProps} data-test-subj={dataTestSubj}>
