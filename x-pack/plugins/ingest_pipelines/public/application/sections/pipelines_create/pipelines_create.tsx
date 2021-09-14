@@ -55,6 +55,16 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
     services.breadcrumbs.setBreadcrumbs('create');
   }, [services]);
 
+  const getDefaultValue = () => {
+    if (sourcePipeline) return sourcePipeline;
+
+    if (history.location.state?.sourcePipeline) {
+      return history.location.state.sourcePipeline;
+    }
+
+    return undefined;
+  }
+
   return (
     <>
       <EuiPageHeader
@@ -87,7 +97,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
       <EuiSpacer size="l" />
 
       <PipelineForm
-        defaultValue={sourcePipeline}
+        defaultValue={getDefaultValue()}
         onSave={onSave}
         onCancel={onCancel}
         isSaving={isSaving}

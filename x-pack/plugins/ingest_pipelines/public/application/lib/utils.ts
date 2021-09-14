@@ -24,3 +24,31 @@ export const parseJson = (jsonString: string): object[] => {
 
   return parsedJSON;
 };
+
+export function readFile(file: File, maxFileSizeBytes: any): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (file && file.size) {
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file);
+
+      reader.onload = (() => {
+        return () => {
+          const decoder = new TextDecoder();
+          const data = reader.result;
+          if (data === null || typeof data === 'string') {
+            return reject();
+          }
+          const fileContents = decoder.decode(data.slice(0, maxFileSizeBytes));
+
+          if (fileContents === '') {
+            reject();
+          } else {
+            resolve(fileContents);
+          }
+        };
+      })();
+    } else {
+      reject();
+    }
+  });
+}

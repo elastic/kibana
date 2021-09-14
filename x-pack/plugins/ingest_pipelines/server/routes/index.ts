@@ -16,6 +16,7 @@ import {
   registerSimulateRoute,
   registerDocumentsRoute,
 } from './api';
+import { registerMapRoute } from './api/map';
 
 export class ApiRoutes {
   setup(dependencies: RouteDependencies) {
@@ -26,5 +27,6 @@ export class ApiRoutes {
     registerDeleteRoute(dependencies);
     registerSimulateRoute(dependencies);
     registerDocumentsRoute(dependencies);
+    registerMapRoute(dependencies);
   }
 }

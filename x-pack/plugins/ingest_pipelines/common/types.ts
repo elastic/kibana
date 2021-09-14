@@ -33,3 +33,8 @@ export interface PipelinesByName {
     on_failure?: Processor[];
   };
 }
+
+export enum FieldCopyAction {
+  Copy = 'copy',
+  Rename = 'rename',
+}
