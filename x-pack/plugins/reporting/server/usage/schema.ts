@@ -74,6 +74,11 @@ const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
     pending: byAppCountsSchema,
     processing: byAppCountsSchema,
   },
+  output_size: {
+    max: { type: 'long' },
+    min: { type: 'long' },
+    avg: { type: 'long' },
+  },
 };
 
 export const reportingSchema: MakeSchemaFrom<ReportingUsageType> = {
