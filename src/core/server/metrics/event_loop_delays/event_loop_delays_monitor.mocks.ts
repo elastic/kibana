@@ -6,26 +6,11 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import type { IntervalHistogram } from './event_loop_delays';
-
-export const mockMonitorEnable = jest.fn();
-export const mockMonitorPercentile = jest.fn();
-export const mockMonitorReset = jest.fn();
-export const mockMonitorDisable = jest.fn();
-export const monitorEventLoopDelay = jest.fn().mockReturnValue({
-  enable: mockMonitorEnable,
-  percentile: mockMonitorPercentile,
-  disable: mockMonitorDisable,
-  reset: mockMonitorReset,
-  ...createMockHistogram(),
-});
-
-jest.doMock('perf_hooks', () => ({
-  monitorEventLoopDelay,
-}));
+import type { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
+import type { IntervalHistogram } from '../types';
 
 function createMockHistogram(overwrites: Partial<IntervalHistogram> = {}): IntervalHistogram {
-  const now = moment();
+  const now = Date.now();
 
   return {
     min: 9093120,
@@ -33,8 +18,8 @@ function createMockHistogram(overwrites: Partial<IntervalHistogram> = {}): Inter
     mean: 11993238.600747818,
     exceeds: 0,
     stddev: 1168191.9357543814,
-    fromTimestamp: now.startOf('day').toISOString(),
-    lastUpdatedAt: now.toISOString(),
+    fromTimestamp: moment(now).toISOString(),
+    lastUpdatedAt: moment(now).toISOString(),
     percentiles: {
       '50': 12607487,
       '75': 12615679,
@@ -45,6 +30,22 @@ function createMockHistogram(overwrites: Partial<IntervalHistogram> = {}): Inter
   };
 }
 
+function createMockEventLoopDelaysMonitor() {
+  const mockCollect = jest.fn();
+  const MockEventLoopDelaysMonitor: jest.MockedClass<
+    typeof EventLoopDelaysMonitor
+  > = jest.fn().mockReturnValue({
+    collect: mockCollect,
+    reset: jest.fn(),
+    stop: jest.fn(),
+  });
+
+  mockCollect.mockReturnValue(createMockHistogram());
+
+  return new MockEventLoopDelaysMonitor();
+}
+
 export const mocked = {
   createHistogram: createMockHistogram,
+  createEventLoopDelaysMonitor: createMockEventLoopDelaysMonitor,
 };

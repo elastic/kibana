@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { services as functionalServices } from '../functional/services';
+export const getIndexForTypeMock = jest.fn();
 
-export const services = functionalServices;
+jest.doMock('../service/lib/get_index_for_type', () => ({
+  getIndexForType: getIndexForTypeMock,
+}));
