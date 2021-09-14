@@ -27,7 +27,7 @@ IF EXIST "%CONFIG_DIR%\node.options" (
   )
 )
 
-TITLE Kibana Keystore
+TITLE Kibana Verification Code
 "%NODE%" "%DIR%\src\cli_verification_code\dist" %*
 
 :finally
