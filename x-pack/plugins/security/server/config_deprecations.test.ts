@@ -391,7 +391,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Enabling or disabling the Security plugin in Kibana is deprecated. To enable or disable security, set \\"xpack.security.enabled\\" to true or false in elasticsearch.yml.",
+        "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
       ]
     `);
   });
@@ -409,7 +409,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Enabling or disabling the Security plugin in Kibana is deprecated. To enable or disable security, set \\"xpack.security.enabled\\" to true or false in elasticsearch.yml.",
+        "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
       ]
     `);
   });
