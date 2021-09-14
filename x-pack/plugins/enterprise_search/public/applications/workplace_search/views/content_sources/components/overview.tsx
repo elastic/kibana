@@ -14,6 +14,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiListGroupItemTo,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -233,22 +236,19 @@ export const Overview: React.FC = () => {
         <h5>{GROUP_ACCESS_TITLE}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="GroupsSummary">
-        {groups.map((group, index) => (
-          <EuiFlexItem key={index}>
-            <EuiPanelTo
-              hasShadow={false}
-              color="subdued"
+      <EuiPanel color="subdued">
+        <EuiListGroup flush={true} color="ghost" maxWidth={false} data-test-subj="GroupsSummary">
+          {groups.map((group, index) => (
+            <EuiListGroupItem
+              label={group.name}
+              key={index}
               to={getGroupPath(group.id)}
               data-test-subj="SourceGroupLink"
             >
-              <EuiText size="s" className="eui-textTruncate">
-                <strong>{group.name}</strong>
-              </EuiText>
-            </EuiPanelTo>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+            </EuiListGroupItem>
+          ))}
+        </EuiListGroup>
+      </EuiPanel>
     </>
   );
 
