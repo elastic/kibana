@@ -6,8 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-const apmIndicesSaveURL =
-  'http://apm_power_user:changeme@localhost:5620/api/apm/settings/apm-indices/save';
+const apmIndicesSaveURL = '/api/apm/settings/apm-indices/save';
 
 describe('No data screen', () => {
   describe('bypass no data screen on settings pages', () => {
@@ -31,6 +30,7 @@ describe('No data screen', () => {
         headers: {
           'kbn-xsrf': true,
         },
+        auth: { user: 'apm_power_user', pass: 'changeme' },
       });
     });
 
@@ -58,6 +58,7 @@ describe('No data screen', () => {
           'apm_oss.metricsIndices': '',
         },
         headers: { 'kbn-xsrf': true },
+        auth: { user: 'apm_power_user', pass: 'changeme' },
       });
     });
   });
