@@ -33,6 +33,7 @@ RUNTIME_DEPS = [
   "//packages/elastic-datemath",
   "//packages/elastic-safer-lodash-set",
   "//packages/kbn-analytics",
+  "//packages/kbn-field-types",
   "//packages/kbn-babel-preset",
   "//packages/kbn-i18n",
   "//packages/kbn-monaco",
