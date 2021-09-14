@@ -14,7 +14,6 @@
     "xpack.discover": "plugins/discover_enhanced",
     "xpack.crossClusterReplication": "plugins/cross_cluster_replication",
     "xpack.data": "plugins/data_enhanced",
-    "xpack.ecsMapper": "plugins/ecs_mapper",
     "xpack.embeddableEnhanced": "plugins/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "plugins/enterprise_search",
