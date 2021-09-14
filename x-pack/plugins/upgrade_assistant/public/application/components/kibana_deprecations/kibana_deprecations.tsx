@@ -144,9 +144,14 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
       const deprecationErrors: string[] = [];
 
       allDeprecations.forEach((deprecation) => {
-        // Keep track of any deprecations that failed to fetch to show warning in UI
+        // Keep track of any plugin deprecations that failed to fetch to show warning in UI
         if (deprecation.level === 'fetch_error') {
-          deprecationErrors.push(deprecation.domainId);
+          // It's possible that a plugin registered more than one deprecation that could fail
+          // We only want to keep track of the unique plugin failures
+          const pluginErrorExists = deprecationErrors.includes(deprecation.domainId);
+          if (pluginErrorExists === false) {
+            deprecationErrors.push(deprecation.domainId);
+          }
           return;
         }
 

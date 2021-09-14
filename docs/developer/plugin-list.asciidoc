@@ -239,11 +239,6 @@ generating deep links to other apps, and creating short URLs.
 |Create a coordinate map. Display the results of a geohash_tile aggregation as bubbles, rectangles, or heatmap color blobs.
 
 
-|{kib-repo}blob/{branch}/src/plugins/timelion/README.md[timelion]
-|Contains the deprecated timelion application. For the timelion visualization,
-which also contains the timelion APIs and backend, look at the vis_type_timelion plugin.
-
-
 |<<uiactions-plugin>>
 |UI Actions plugins provides API to manage *triggers* and *actions*.
 
