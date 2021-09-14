@@ -8,6 +8,7 @@ import React, { useContext, useCallback } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { pure, compose, withState, withProps, getContext, withHandlers } from 'recompose';
+import useObservable from 'react-use/lib/useObservable';
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { fetchAllRenderables } from '../../state/actions/elements';
 import { setZoomScale } from '../../state/actions/transient';
@@ -22,6 +23,7 @@ import { zoomHandlerCreators } from '../../lib/app_handler_creators';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY } from '../../../common/lib/constants';
 import { WorkpadRoutingContext } from '../../routes/workpad';
+import { usePlatformService } from '../../services';
 import { Workpad as WorkpadComponent } from './workpad';
 
 const mapStateToProps = (state) => {
@@ -57,6 +59,10 @@ const AddContexts = (props) => {
     WorkpadRoutingContext
   );
 
+  const platformService = usePlatformService();
+
+  const hasHeaderBanner = useObservable(platformService.hasHeaderBanner$());
+
   const setFullscreenWithEffect = useCallback(
     (fullscreen) => {
       setFullscreen(fullscreen);
@@ -79,6 +85,7 @@ const AddContexts = (props) => {
       isFullscreen={isFullscreen}
       undoHistory={undo}
       redoHistory={redo}
+      hasHeaderBanner={hasHeaderBanner}
     />
   );
 };
