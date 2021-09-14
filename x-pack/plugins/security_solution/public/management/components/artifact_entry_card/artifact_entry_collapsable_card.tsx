@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import classNames from 'classnames';
 import { ArtifactEntryCardProps } from './artifact_entry_card';
 import { CardContainerPanel } from './components/card_container_panel';
@@ -18,6 +18,7 @@ import { TextValueDisplay } from './components/text_value_display';
 import { EffectScope } from './components/effect_scope';
 import { CardExpandButton } from './components/card_expand_button';
 import { CardActionsFlexItem } from './components/card_actions_flex_item';
+import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
 
 export interface ArtifactEntryCollapsableCardProps extends ArtifactEntryCardProps {
   onExpandCollapse: () => void;
@@ -77,6 +78,19 @@ export const ArtifactEntryCollapsableCard = memo<ArtifactEntryCollapsableCardPro
             <CardActionsFlexItem actions={actions} data-test-subj={getTestId('actions')} />
           </EuiFlexGroup>
         </CardSectionPanel>
+        {expanded && (
+          <>
+            <EuiHorizontalRule margin="xs" />
+
+            <CardSectionPanel>
+              <CriteriaConditions
+                os={artifact.os as CriteriaConditionsProps['os']}
+                entries={artifact.entries}
+                data-test-subj={getTestId('criteriaConditions')}
+              />
+            </CardSectionPanel>
+          </>
+        )}
       </CardContainerPanel>
     );
   }
