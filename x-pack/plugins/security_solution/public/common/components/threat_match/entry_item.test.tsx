@@ -13,7 +13,7 @@ import { EntryItem } from './entry_item';
 import {
   fields,
   getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+} from '../../../../../../../src/plugins/data/common/data_views/fields/fields.mocks';
 import { IndexPattern } from 'src/plugins/data/public';
 
 jest.mock('../../../common/lib/kibana');

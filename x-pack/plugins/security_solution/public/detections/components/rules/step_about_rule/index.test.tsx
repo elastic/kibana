@@ -10,7 +10,7 @@ import { mount, shallow } from 'enzyme';
 import { ThemeProvider } from 'styled-components';
 import { act } from '@testing-library/react';
 
-import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
+import { stubIndexPattern } from 'src/plugins/data/common/data_views/index_pattern.stub';
 import { StepAboutRule } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';

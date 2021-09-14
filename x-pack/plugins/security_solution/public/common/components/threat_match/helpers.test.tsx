@@ -8,7 +8,7 @@
 import {
   fields,
   getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+} from '../../../../../../../src/plugins/data/common/data_views/fields/fields.mocks';
 import { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
 import { FieldSpec, IndexPattern } from '../../../../../../../src/plugins/data/common';
 import moment from 'moment-timezone';
