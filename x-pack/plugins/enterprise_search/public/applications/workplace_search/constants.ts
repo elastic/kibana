@@ -583,8 +583,8 @@ export const NON_PLATINUM_OAUTH_DESCRIPTION = i18n.translate(
   }
 );
 
-export const NON_PLATINUM_OAUTH_LINK = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.nonPlatinumOauthLinkLabel',
+export const EXPLORE_PLATINUM_FEATURES_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.explorePlatinumFeatures.link',
   {
     defaultMessage: 'Explore Platinum features',
   }

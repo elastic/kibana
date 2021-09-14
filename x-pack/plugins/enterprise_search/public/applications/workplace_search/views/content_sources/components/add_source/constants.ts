@@ -451,12 +451,6 @@ export const SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE = i18n.translate
   }
 );
 
-export const SOURCE_FEATURES_EXPLORE_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.explore.button',
-  {
-    defaultMessage: 'Explore Platinum features',
-  }
-);
 export const CONNECT_WHICH_OPTION_LINK = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.whichOption.link',
   {
