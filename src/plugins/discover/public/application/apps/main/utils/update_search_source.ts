@@ -57,7 +57,10 @@ export function updateSearchSource(
 
     // this is not the default index pattern, it determines that it's not of type rollup
     if (indexPatternsUtils.isDefault(indexPattern)) {
-      searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern));
+      searchSource.setField(
+        'filter',
+        data.query.timefilter.timefilter.createRelativeFilter(indexPattern)
+      );
     }
 
     if (useNewFieldsApi) {
