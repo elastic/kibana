@@ -153,6 +153,7 @@ export interface ResolverNode {
  */
 export interface NewResolverTree {
   originID: string;
+  originTimestamp?: string;
   nodes: ResolverNode[];
 }
 
@@ -824,6 +825,10 @@ export type ResolverEntityIndex = Array<{
    * Unique ID value for the requested document using the `_id` field passed to the /entity route
    */
   id: string;
+  /**
+   * Timestamp for the origin event, to give users a suggested time range to display at least 1 process event
+   */
+  originTimestamp?: string;
 }>;
 
 /**

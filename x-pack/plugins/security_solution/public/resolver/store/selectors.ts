@@ -59,6 +59,11 @@ export const resolverTreeHasNodes = composeSelectors(
   dataSelectors.resolverTreeHasNodes
 );
 
+export const resolverTreeOriginTimestamp = composeSelectors(
+  dataStateSelector,
+  dataSelectors.resolverTreeOriginTimestamp
+);
+
 /**
  * The position of nodes and edges.
  */

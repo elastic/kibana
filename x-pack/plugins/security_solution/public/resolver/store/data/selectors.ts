@@ -78,6 +78,16 @@ const resolverTreeResponse = (state: DataState): NewResolverTree | undefined => 
   return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
 };
 
+/**
+ * The timestamp for the origin process event. It's possible the user has filtered the dates to a range that
+ * has 0 process events. This information exists in the entity response, so use it to show a more helpful message to the user.
+ */
+export const resolverTreeOriginTimestamp = (state: DataState): string | undefined => {
+  return state.tree?.lastResponse?.successful
+    ? state.tree?.lastResponse.result.originTimestamp
+    : undefined;
+};
+
 export const resolverTreeHasNodes = (state: DataState): boolean => {
   return state.tree?.lastResponse?.successful
     ? state.tree?.lastResponse?.result?.nodes.length > 0

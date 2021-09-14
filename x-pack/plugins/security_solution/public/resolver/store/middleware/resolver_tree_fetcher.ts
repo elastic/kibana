@@ -68,6 +68,7 @@ export function ResolverTreeFetcher(
           return;
         }
         ({ id: entityIDToFetch, schema: dataSourceSchema, name: dataSource } = matchingEntities[0]);
+        const originTimestamp = matchingEntities[0].originTimestamp;
 
         result = await dataAccessLayer.resolverTree({
           dataId: entityIDToFetch,
@@ -86,7 +87,7 @@ export function ResolverTreeFetcher(
         api.dispatch({
           type: 'serverReturnedResolverData',
           payload: {
-            result: resolverTree,
+            result: { ...resolverTree, originTimestamp },
             dataSource,
             schema: dataSourceSchema,
             parameters: databaseParameters,

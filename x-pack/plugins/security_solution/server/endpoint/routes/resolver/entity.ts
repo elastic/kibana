@@ -120,11 +120,13 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
           // that we did not find the schema
           foundSchema = foundSchema && fieldValue?.toLowerCase() === constraint.value.toLowerCase();
         }
+        const originTimestamp = getFieldAsString(hit._source, '@timestamp');
 
         if (foundSchema && id !== undefined && id !== '') {
           responseBody.push({
             name: supportedSchema.name,
             schema: supportedSchema.schema,
+            originTimestamp,
             id,
           });
         }
