@@ -92,6 +92,7 @@ export const NoDataPage = () => {
   );
 
   const getPageData = useCallback(async () => {
+    let catchReason;
     try {
       const clusters = await getClusters(services);
 
@@ -99,18 +100,21 @@ export const NoDataPage = () => {
         setShouldRedirect(true);
         return;
       }
-
-      // TODO this check might be required for internal collection enablement to work smoothly
-      // if (!model.isCollectionEnabledUpdating && !model.isCollectionIntervalUpdating) {
-      await startChecks(clusterCheckers, services.http, updateModel);
     } catch (err) {
-      // TODO something useful with the error reason
-      // if (err && err.status === 503) {
-      //   catchReason = {
-      //     property: 'custom',
-      //     message: err.data.message,
-      //   };
-      // }
+      if (err && err.status === 503) {
+        catchReason = {
+          property: 'custom',
+          message: err.data.message,
+        };
+      }
+    }
+
+    if (catchReason) {
+      updateModel({ reason: catchReason });
+    } else {
+      // TODO not sure if we can add this conditional, but might be required for smooth internal collection enablement
+      // if (!this.isCollectionEnabledUpdating && !this.isCollectionIntervalUpdating) {
+      await startChecks(clusterCheckers, services.http, updateModel);
     }
   }, [services, updateModel]);
 
