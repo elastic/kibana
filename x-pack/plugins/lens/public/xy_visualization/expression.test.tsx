@@ -974,7 +974,6 @@ describe('xy_expression', () => {
           }}
         />
       );
-      expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBucket')).toEqual(true);
       wrapper.find(Settings).first().prop('onBrushEnd')!({ x: [1585757732783, 1585758880838] });
 
       expect(onSelectRange).toHaveBeenCalledWith({
