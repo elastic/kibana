@@ -278,21 +278,37 @@ describe('disable button', () => {
     });
   });
 
-  it('should render a enable button when alert is disabled', () => {
+  it('should render a enable button and empty state when alert is disabled', async () => {
     const alert = mockAlert({
       enabled: false,
     });
-    const enableButton = shallow(
+    const wrapper = mountWithIntl(
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-    )
-      .find(EuiSwitch)
-      .find('[name="enable"]')
-      .first();
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    const enableButton = wrapper.find(EuiSwitch).find('[name="enable"]').first();
+    const disabledEmptyPrompt = wrapper.find('[data-test-subj="disabledEmptyPrompt"]');
+    const disabledEmptyPromptAction = wrapper.find('[data-test-subj="disabledEmptyPromptAction"]');
 
     expect(enableButton.props()).toMatchObject({
       checked: false,
       disabled: false,
     });
+    expect(disabledEmptyPrompt.exists()).toBeTruthy();
+    expect(disabledEmptyPromptAction.exists()).toBeTruthy();
+
+    disabledEmptyPromptAction.first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(mockAlertApis.enableAlert).toHaveBeenCalledTimes(1);
   });
 
   it('should disable the alert when alert is enabled and button is clicked', () => {
@@ -642,7 +658,7 @@ describe('edit button', () => {
 
   it('should not render an edit button when alert editable but actions arent', () => {
     const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
-    hasExecuteActionsCapability.mockReturnValue(false);
+    hasExecuteActionsCapability.mockReturnValueOnce(false);
     const alert = mockAlert({
       enabled: true,
       muteAll: false,
@@ -673,7 +689,7 @@ describe('edit button', () => {
 
   it('should render an edit button when alert editable but actions arent when there are no actions on the alert', async () => {
     const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
-    hasExecuteActionsCapability.mockReturnValue(false);
+    hasExecuteActionsCapability.mockReturnValueOnce(false);
     const alert = mockAlert({
       enabled: true,
       muteAll: false,
@@ -757,7 +773,7 @@ describe('broken connector indicator', () => {
     },
   ]);
 
-  it('should not render broken connector indicator if all rule actions connectors exist', async () => {
+  it('should not render broken connector indicator or warning if all rule actions connectors exist', async () => {
     const alert = mockAlert({
       enabled: true,
       muteAll: false,
@@ -791,10 +807,14 @@ describe('broken connector indicator', () => {
     const brokenConnectorIndicator = wrapper
       .find('[data-test-subj="actionWithBrokenConnector"]')
       .first();
+    const brokenConnectorWarningBanner = wrapper
+      .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
+      .first();
     expect(brokenConnectorIndicator.exists()).toBeFalsy();
+    expect(brokenConnectorWarningBanner.exists()).toBeFalsy();
   });
 
-  it('should render broken connector indicator if any rule actions connector does not exist', async () => {
+  it('should render broken connector indicator and warning if any rule actions connector does not exist', async () => {
     const alert = mockAlert({
       enabled: true,
       muteAll: false,
@@ -834,7 +854,68 @@ describe('broken connector indicator', () => {
     const brokenConnectorIndicator = wrapper
       .find('[data-test-subj="actionWithBrokenConnector"]')
       .first();
+    const brokenConnectorWarningBanner = wrapper
+      .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
+      .first();
+    const brokenConnectorWarningBannerAction = wrapper
+      .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
+      .first();
     expect(brokenConnectorIndicator.exists()).toBeTruthy();
+    expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
+    expect(brokenConnectorWarningBannerAction.exists()).toBeTruthy();
+  });
+
+  it('should render broken connector indicator and warning with no edit button if any rule actions connector does not exist and user has no edit access', async () => {
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [
+        {
+          group: 'default',
+          id: 'connector-id-1',
+          params: {},
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: 'connector-id-2',
+          params: {},
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: 'connector-id-doesnt-exist',
+          params: {},
+          actionTypeId: '.server-log',
+        },
+      ],
+    });
+    const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+    hasExecuteActionsCapability.mockReturnValue(false);
+    const wrapper = mountWithIntl(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={actionTypes}
+        {...mockAlertApis}
+      />
+    );
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    const brokenConnectorIndicator = wrapper
+      .find('[data-test-subj="actionWithBrokenConnector"]')
+      .first();
+    const brokenConnectorWarningBanner = wrapper
+      .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
+      .first();
+    const brokenConnectorWarningBannerAction = wrapper
+      .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
+      .first();
+    expect(brokenConnectorIndicator.exists()).toBeTruthy();
+    expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
+    expect(brokenConnectorWarningBannerAction.exists()).toBeFalsy();
   });
 });
 
