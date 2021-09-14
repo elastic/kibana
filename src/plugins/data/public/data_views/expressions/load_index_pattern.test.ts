@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternLoadStartDependencies } from '../../../common/index_patterns/expressions';
+import { IndexPatternLoadStartDependencies } from '../../../common/data_views/expressions';
 import { getFunctionDefinition } from './load_index_pattern';
 
 describe('indexPattern expression function', () => {

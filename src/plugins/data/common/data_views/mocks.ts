@@ -7,4 +7,4 @@
  */
 
 export * from './fields/fields.mocks';
-export * from './index_patterns/index_pattern.stub';
+export * from './data_views/index_pattern.stub';

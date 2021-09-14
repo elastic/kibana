@@ -8,7 +8,7 @@
 
 import { map, last } from 'lodash';
 
-import { IndexPattern } from './index_pattern';
+import { IndexPattern } from './data_view';
 
 import { DuplicateField } from '../../../../kibana_utils/common';
 

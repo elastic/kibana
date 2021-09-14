@@ -7,8 +7,8 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../core/server';
-import { IndexPatternSavedObjectAttrs } from '../../common/index_patterns/index_patterns';
-import { FLEET_ASSETS_TO_IGNORE } from '../../common/index_patterns/constants';
+import { IndexPatternSavedObjectAttrs } from '../../common/data_views/data_views';
+import { FLEET_ASSETS_TO_IGNORE } from '../../common/data_views/constants';
 
 interface Deps {
   esClient: ElasticsearchClient;

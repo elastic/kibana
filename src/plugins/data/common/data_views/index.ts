@@ -15,6 +15,7 @@ export {
   DataViewsService,
   DataViewsContract,
 } from './data_views';
-export type { IndexPattern, IndexPatternListItem, DataView, DataViewListItem } from './data_views';
+// todo was trying to export this as type but wasn't working
+export { IndexPattern, IndexPatternListItem, DataView, DataViewListItem } from './data_views';
 export * from './errors';
 export * from './expressions';

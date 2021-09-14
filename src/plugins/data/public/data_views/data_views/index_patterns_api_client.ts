@@ -7,12 +7,12 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { DataViewMissingIndices } from '../../../common/index_patterns/lib';
+import { DataViewMissingIndices } from '../../../common/data_views/lib';
 import {
   GetFieldsOptions,
   IIndexPatternsApiClient,
   GetFieldsOptionsTimePattern,
-} from '../../../common/index_patterns/types';
+} from '../../../common/data_views/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 

@@ -15,8 +15,8 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE, SavedObjectsClientCommon } from '../..';
 
 import { createDataViewCache } from '.';
 import type { RuntimeField } from '../types';
-import { DataView } from './index_pattern';
-import { createEnsureDefaultDataView, EnsureDefaultDataView } from './ensure_default_index_pattern';
+import { DataView } from './data_view';
+import { createEnsureDefaultDataView, EnsureDefaultDataView } from './ensure_default_data_view';
 import {
   OnNotification,
   OnError,
@@ -237,7 +237,7 @@ export class DataViewsService {
   /**
    * Checks if current user has a user created index pattern ignoring fleet's server default index patterns
    */
-  async hasUserIndexPattern(): Promise<boolean> {
+  async hasUserDataView(): Promise<boolean> {
     return this.apiClient.hasUserIndexPattern();
   }
 

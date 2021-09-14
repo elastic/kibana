@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IndexPatternSavedObjectAttrs } from './index_patterns';
+import type { IndexPatternSavedObjectAttrs } from './data_views';
 import type { SavedObjectsClientCommon } from '../types';
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../constants';

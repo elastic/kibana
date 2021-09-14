@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FieldDescriptor } from '../../../../../../src/plugins/data/server/index_patterns';
+import { FieldDescriptor } from '../../../../../../src/plugins/data/server/data_views';
 
 export const mockAuditbeatIndexField: FieldDescriptor[] = [
   {

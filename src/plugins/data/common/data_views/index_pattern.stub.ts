@@ -7,8 +7,8 @@
  */
 
 import { stubFieldSpecMap, stubLogstashFieldSpecMap } from './field.stub';
-import { createStubIndexPattern } from './index_patterns/index_pattern.stub';
-export { createStubIndexPattern } from './index_patterns/index_pattern.stub';
+import { createStubIndexPattern } from './data_views/index_pattern.stub';
+export { createStubIndexPattern } from './data_views/index_pattern.stub';
 import { SavedObject } from '../../../../core/types';
 import { IndexPatternAttributes } from '../types';
 

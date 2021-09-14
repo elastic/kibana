@@ -11,8 +11,8 @@ import {
   GetFieldsOptions,
   IIndexPatternsApiClient,
   GetFieldsOptionsTimePattern,
-} from '../../common/index_patterns/types';
-import { DataViewMissingIndices } from '../../common/index_patterns/lib';
+} from '../../common/data_views/types';
+import { DataViewMissingIndices } from '../../common/data_views/lib';
 import { IndexPatternsFetcher } from './fetcher';
 import { hasUserIndexPattern } from './has_user_index_pattern';
 

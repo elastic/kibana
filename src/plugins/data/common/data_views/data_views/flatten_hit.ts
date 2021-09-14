@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { DataView } from './index_pattern';
+import { DataView } from './data_view';
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version

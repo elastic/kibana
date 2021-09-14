@@ -7,7 +7,7 @@
  */
 
 import { includes } from 'lodash';
-import { DataViewsContract } from './index_patterns';
+import { DataViewsContract } from './data_views';
 import { UiSettingsCommon } from '../types';
 
 export type EnsureDefaultDataView = () => Promise<unknown> | undefined;

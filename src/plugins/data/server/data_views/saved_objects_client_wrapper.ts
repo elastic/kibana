@@ -10,7 +10,7 @@ import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
-} from '../../common/index_patterns';
+} from '../../common/data_views';
 
 export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SavedObjectsClientContract;

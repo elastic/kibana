@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern } from './index_pattern';
+import { IndexPattern } from './data_view';
 
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 import { flattenHitWrapper } from './flatten_hit';

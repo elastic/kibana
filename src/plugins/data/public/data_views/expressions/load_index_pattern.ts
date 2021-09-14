@@ -11,7 +11,7 @@ import {
   getIndexPatternLoadMeta,
   IndexPatternLoadExpressionFunctionDefinition,
   IndexPatternLoadStartDependencies,
-} from '../../../common/index_patterns/expressions';
+} from '../../../common/data_views/expressions';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
 /**

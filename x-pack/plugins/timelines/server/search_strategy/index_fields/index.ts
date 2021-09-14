@@ -14,7 +14,7 @@ import {
   SearchStrategyDependencies,
 } from '../../../../../../src/plugins/data/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FieldDescriptor } from '../../../../../../src/plugins/data/server/index_patterns';
+import { FieldDescriptor } from '../../../../../../src/plugins/data/server/data_views';
 
 // TODO cleanup path
 import {

@@ -7,7 +7,7 @@
  */
 
 import { IndexPatternField } from './index_pattern_field';
-import { IndexPattern } from '../index_patterns';
+import { IndexPattern } from '..';
 import { KBN_FIELD_TYPES } from '../../../common';
 import { FieldSpec, RuntimeField } from '../types';
 import { FieldFormat } from '../../../../field_formats/common';

@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { DataView } from './index_pattern';
+import { DataView } from './data_view';
 import { FieldFormatsContentType } from '../../../../field_formats/common';
 
 const formattedCache = new WeakMap();

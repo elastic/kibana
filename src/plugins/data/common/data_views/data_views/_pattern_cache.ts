@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from './index_pattern';
+import { DataView } from './data_view';
 
 export interface DataViewCache {
   get: (id: string) => Promise<DataView> | undefined;

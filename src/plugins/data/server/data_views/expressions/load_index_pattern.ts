@@ -13,7 +13,7 @@ import {
   getIndexPatternLoadMeta,
   IndexPatternLoadExpressionFunctionDefinition,
   IndexPatternLoadStartDependencies,
-} from '../../../common/index_patterns/expressions';
+} from '../../../common/data_views/expressions';
 import { DataPluginStartDependencies, DataPluginStart } from '../../plugin';
 
 /**
