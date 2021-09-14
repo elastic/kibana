@@ -71,6 +71,7 @@ export const buildQueryBarDescription = ({
 }: BuildQueryBarDescription): ListItems[] => {
   let items: ListItems[] = [];
   if (!isEmpty(filters)) {
+    cy.log('indexPatterns?!', indexPatterns);
     filterManager.setFilters(filters);
     items = [
       ...items,

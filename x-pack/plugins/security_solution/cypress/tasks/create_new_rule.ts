@@ -543,7 +543,7 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
           return alertCount >= alertCountThreshold;
         });
     },
-    { interval: 500, timeout: 12000 }
+    { interval: 500, timeout: 25000 }
   );
 };
 
