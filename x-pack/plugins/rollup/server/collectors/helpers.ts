@@ -168,7 +168,7 @@ export async function fetchRollupVisualizations(
     const visualizations = get(savedVisualizationsList, 'hits.hits', []);
     const sort =
       savedVisualizationsList.hits.hits[savedVisualizationsList.hits.hits.length - 1].sort;
-    visualizations.forEach(async (visualization: any) => {
+    visualizations.forEach((visualization: any) => {
       const references: Array<{ name: string; id: string; type: string }> | undefined = get(
         visualization,
         '_source.references'
@@ -193,7 +193,7 @@ export async function fetchRollupVisualizations(
           }
         }
       }
-    }, [] as string[]);
+    });
 
     if (savedVisualizationsList.hits.hits.length < ES_MAX_RESULT_WINDOW_DEFAULT_VALUE) {
       break;
