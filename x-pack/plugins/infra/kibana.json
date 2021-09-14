@@ -1,0 +1,36 @@
+{
+  "id": "infra",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [
+    "features",
+    "usageCollection",
+    "spaces",
+    "embeddable",
+    "data",
+    "dataEnhanced",
+    "visTypeTimeseries",
+    "alerting",
+    "triggersActionsUi",
+    "observability",
+    "ruleRegistry"
+  ],
+  "optionalPlugins": ["ml", "home", "embeddable", "osquery"],
+  "server": true,
+  "ui": true,
+  "configPath": ["xpack", "infra"],
+  "requiredBundles": [
+    "observability",
+    "licenseManagement",
+    "kibanaUtils",
+    "kibanaReact",
+    "home",
+    "ml",
+    "embeddable"
+  ],
+  "owner": {
+    "name": "Logs and Metrics UI",
+    "githubTeam": "logs-metrics-ui"
+  },
+  "description": "This plugin visualizes data from Filebeat and Metricbeat, and integrates with other Observability solutions"
+}

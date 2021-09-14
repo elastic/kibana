@@ -1,16 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiInMemoryTable,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiEmptyPrompt } from '@elastic/eui';
 
 export const FieldList = ({
   columns,
@@ -23,12 +21,7 @@ export const FieldList = ({
   let message;
 
   if (!fields.length) {
-    message = (
-      <EuiEmptyPrompt
-        title={emptyMessage}
-        titleSize="xs"
-      />
-    );
+    message = <EuiEmptyPrompt title={emptyMessage} titleSize="xs" />;
   }
 
   let extendedColumns;
@@ -37,15 +30,17 @@ export const FieldList = ({
     extendedColumns = columns.concat({
       name: 'Remove',
       width: '80px',
-      actions: [{
-        name: 'Remove',
-        isPrimary: true,
-        description: 'Remove this field',
-        icon: 'trash',
-        type: 'icon',
-        color: 'danger',
-        onClick: (field) => onRemoveField(field),
-      }]
+      actions: [
+        {
+          name: 'Remove',
+          isPrimary: true,
+          description: 'Remove this field',
+          icon: 'trash',
+          type: 'icon',
+          color: 'danger',
+          onClick: (field) => onRemoveField(field),
+        },
+      ],
     });
   } else {
     extendedColumns = columns;
@@ -61,7 +56,7 @@ export const FieldList = ({
 
   const pagination = {
     initialPageSize: 200,
-    pageSizeOptions: [20, 100, 200]
+    pageSizeOptions: [20, 100, 200],
   };
 
   return (

@@ -1,37 +1,34 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
 
 export default function ({ getService }) {
-  const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   describe('url shortener', () => {
-    before(() => esArchiver.load('saved_objects/basic'));
-    after(() => esArchiver.unload('saved_objects/basic'));
+    before(async () => {
+      await kibanaServer.importExport.load(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      );
+    });
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      );
+    });
 
     it('generates shortened urls', async () => {
       const resp = await supertest
         .post('/api/shorten_url')
         .set('content-type', 'application/json')
-        .send({ url: '/app/kibana#/visualize/create' })
+        .send({ url: '/app/visualize#/create' })
         .expect(200);
 
       expect(resp.body).to.have.property('urlId');
@@ -43,13 +40,13 @@ export default function ({ getService }) {
       const resp = await supertest
         .post('/api/shorten_url')
         .set('content-type', 'application/json')
-        .send({ url: '/app/kibana#/visualize/create' });
+        .send({ url: '/app/visualize#/create' });
 
       const urlId = resp.body.urlId;
       await supertest
         .get(`/goto/${urlId}`)
         .expect(302)
-        .expect('location', '/app/kibana#/visualize/create');
+        .expect('location', '/app/visualize#/create');
     });
   });
 }

@@ -1,40 +1,66 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { I18nServiceType } from '@kbn/i18n/angular';
-// @ts-ignore: implicit any for JS file
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ShareActionProps } from 'ui/share/share_action';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_action_registry';
-import { ReportingPanelContent } from '../components/reporting_panel_content';
+import type { SearchSourceFields } from 'src/plugins/data/common';
+import { ExportPanelShareOpts } from '.';
+import type { ShareContext } from '../../../../../src/plugins/share/public';
+import { CSV_JOB_TYPE } from '../../common/constants';
+import { checkLicense } from '../lib/license_check';
+import { ReportingPanelContent } from './reporting_panel_content_lazy';
 
-function reportingProvider(Private: any, i18n: I18nServiceType) {
-  const xpackInfo = Private(XPackInfoProvider);
-  const getShareActions = ({
-    objectType,
-    objectId,
-    sharingData,
-    isDirty,
-    onClose,
-  }: ShareActionProps) => {
+export const ReportingCsvShareProvider = ({
+  apiClient,
+  toasts,
+  uiSettings,
+  license$,
+  startServices$,
+  usesUiCapabilities,
+}: ExportPanelShareOpts) => {
+  let licenseToolTipContent = '';
+  let licenseHasCsvReporting = false;
+  let licenseDisabled = true;
+  let capabilityHasCsvReporting = false;
+
+  license$.subscribe((license) => {
+    const licenseCheck = checkLicense(license.check('reporting', 'basic'));
+    licenseToolTipContent = licenseCheck.message;
+    licenseHasCsvReporting = licenseCheck.showLinks;
+    licenseDisabled = !licenseCheck.enableLinks;
+  });
+
+  if (usesUiCapabilities) {
+    startServices$.subscribe(([{ application }]) => {
+      // TODO: add abstractions in ExportTypeRegistry to use here?
+      capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
+    });
+  } else {
+    capabilityHasCsvReporting = true; // deprecated
+  }
+
+  const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
 
-    const getJobParams = () => {
-      return {
-        ...sharingData,
-        type: objectType,
-      };
+    const jobParams = {
+      title: sharingData.title as string,
+      objectType,
+      searchSource: sharingData.searchSource as SearchSourceFields,
+      columns: sharingData.columns as string[] | undefined,
     };
 
+    const getJobParams = () => jobParams;
+
     const shareActions = [];
-    if (xpackInfo.get('features.reporting.csv.showLinks', false)) {
-      const panelTitle = i18n('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
+
+    if (licenseHasCsvReporting && capabilityHasCsvReporting) {
+      const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
         defaultMessage: 'CSV Reports',
       });
 
@@ -42,20 +68,24 @@ function reportingProvider(Private: any, i18n: I18nServiceType) {
         shareMenuItem: {
           name: panelTitle,
           icon: 'document',
-          toolTipContent: xpackInfo.get('features.reporting.csv.message'),
-          disabled: !xpackInfo.get('features.reporting.csv.enableLinks', false) ? true : false,
+          toolTipContent: licenseToolTipContent,
+          disabled: licenseDisabled,
           ['data-test-subj']: 'csvReportMenuItem',
+          sortOrder: 1,
         },
         panel: {
+          id: 'csvReportingPanel',
           title: panelTitle,
           content: (
             <ReportingPanelContent
-              reportType="csv"
+              requiresSavedState={false}
+              apiClient={apiClient}
+              toasts={toasts}
+              uiSettings={uiSettings}
+              reportType={CSV_JOB_TYPE}
               layoutId={undefined}
-              objectType={objectType}
               objectId={objectId}
               getJobParams={getJobParams}
-              isDirty={isDirty}
               onClose={onClose}
             />
           ),
@@ -68,8 +98,6 @@ function reportingProvider(Private: any, i18n: I18nServiceType) {
 
   return {
     id: 'csvReports',
-    getShareActions,
+    getShareMenuItems,
   };
-}
-
-ShareContextMenuExtensionsRegistryProvider.register(reportingProvider);
+};

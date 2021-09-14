@@ -1,25 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects }) {
-
   const PageObjects = getPageObjects(['maps', 'header']);
 
-  describe('layer errors', () => {
-
+  describe.skip('layer errors', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('layer with errors');
     });
 
-    describe('ESSearchSource with missing index pattern id', async () => {
+    describe('ESSearchSource with missing index pattern id', () => {
       const MISSING_INDEX_ID = 'idThatDoesNotExitForESSearchSource';
       const LAYER_NAME = MISSING_INDEX_ID;
-
 
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
@@ -33,7 +31,7 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('ESGeoGridSource with missing index pattern id', async () => {
+    describe('ESGeoGridSource with missing index pattern id', () => {
       const MISSING_INDEX_ID = 'idThatDoesNotExitForESGeoGridSource';
       const LAYER_NAME = MISSING_INDEX_ID;
 
@@ -49,13 +47,15 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('ESJoinSource with missing index pattern id', async () => {
+    describe('ESJoinSource with missing index pattern id', () => {
       const MISSING_INDEX_ID = 'idThatDoesNotExitForESJoinSource';
       const LAYER_NAME = 'geo_shapes*';
 
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(`Join error: Unable to find Index pattern for id: ${MISSING_INDEX_ID}`);
+        expect(errorMsg).to.equal(
+          `Join error: Unable to find Index pattern for id: ${MISSING_INDEX_ID}`
+        );
       });
 
       it('should allow deletion of layer', async () => {
@@ -65,13 +65,15 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('EMSFileSource with missing EMS id', async () => {
+    describe('EMSFileSource with missing EMS id', () => {
       const MISSING_EMS_ID = 'idThatDoesNotExitForEMSFileSource';
       const LAYER_NAME = 'EMS_vector_shapes';
 
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(`Unable to find EMS vector shapes for id: ${MISSING_EMS_ID}`);
+        expect(errorMsg).to.equal(
+          `Unable to find EMS vector shapes for id: ${MISSING_EMS_ID}. Kibana is unable to access Elastic Maps Service. Contact your system administrator.`
+        );
       });
 
       it('should allow deletion of layer', async () => {
@@ -81,13 +83,18 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('EMSTMSSource with missing EMS id', async () => {
+    describe('EMSTMSSource with missing EMS id', () => {
       const MISSING_EMS_ID = 'idThatDoesNotExitForEMSTile';
       const LAYER_NAME = 'EMS_tiles';
 
-      it('should diplay error message in layer panel', async () => {
+      // Flaky test on cloud and windows when run against a snapshot build of 7.11.
+      // https://github.com/elastic/kibana/issues/91043
+
+      it.skip('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(`Unable to find EMS tile configuration for id: ${MISSING_EMS_ID}`);
+        expect(errorMsg).to.equal(
+          `Unable to find EMS tile configuration for id: ${MISSING_EMS_ID}. Kibana is unable to access Elastic Maps Service. Contact your system administrator.`
+        );
       });
 
       it('should allow deletion of layer', async () => {
@@ -97,13 +104,15 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('KibanaRegionmapSource with missing region map configuration', async () => {
+    describe('KibanaRegionmapSource with missing region map configuration', () => {
       const MISSING_REGION_NAME = 'nameThatDoesNotExitForKibanaRegionmapSource';
       const LAYER_NAME = 'Custom_vector_shapes';
 
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(`Unable to find map.regionmap configuration for ${MISSING_REGION_NAME}`);
+        expect(errorMsg).to.equal(
+          `Unable to find map.regionmap configuration for ${MISSING_REGION_NAME}`
+        );
       });
 
       it('should allow deletion of layer', async () => {
@@ -113,7 +122,7 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('KibanaTilemapSource with missing map.tilemap.url configuration', async () => {
+    describe('KibanaTilemapSource with missing map.tilemap.url configuration', () => {
       const LAYER_NAME = 'Custom_TMS';
 
       it('should diplay error message in layer panel', async () => {

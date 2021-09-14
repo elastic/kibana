@@ -1,41 +1,51 @@
 [[saved-objects-api-get]]
-=== Get Object
+=== Get object API
+++++
+<titleabbrev>Get object</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Retrieve a single {kib} saved object by ID.
 
-The get saved object API enables you to retrieve a single Kibana saved object
-by id.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[saved-objects-api-get-request]]
 ==== Request
 
-`GET /api/saved_objects/<type>/<id>`
+`GET <kibana host>:<port>/api/saved_objects/<type>/<id>`
 
-==== Path Parameters
+`GET <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
 
-`type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+[[saved-objects-api-get-params]]
+==== Path parameters
 
-`id` (required)::
-  (string) ID of object to retrieve
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 
-==== Examples
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
 
-The following example retrieves the index pattern object with an id of
-`my-pattern`.
+`id`::
+  (Required, string) The ID of the object to retrieve.
 
-[source,js]
+[[saved-objects-api-get-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[saved-objects-api-get-example]]
+==== Example
+
+Retrieve the index pattern object with the `my-pattern` ID:
+
+[source,sh]
 --------------------------------------------------
-GET api/saved_objects/index-pattern/my-pattern
+$ curl -X GET api/saved_objects/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "id": "my-pattern",
@@ -43,6 +53,62 @@ containing a JSON structure similar to the following example:
   "version": 1,
   "attributes": {
     "title": "my-pattern-*"
+  }
+}
+--------------------------------------------------
+
+Retrieve a dashboard object in the `testspace` by ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET s/testspace/api/saved_objects/dashboard/7adfa750-4c81-11e8-b3d7-01146121b73d
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "type": "dashboard",
+  "updated_at": "2019-07-23T00:11:07.059Z",
+  "version": "WzQ0LDFd",
+  "attributes": {
+    "title": "[Flights] Global Flight Dashboard",
+    "hits": 0,
+    "description": "Analyze mock flight data for ES-Air, Logstash Airways, Kibana Airlines and JetBeats",
+    "panelsJSON": "[ . . . ]",
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "version": 1,
+    "timeRestore": true,
+    "timeTo": "now",
+    "timeFrom": "now-24h",
+    "refreshInterval": {
+      "display": "15 minutes",
+      "pause": false,
+      "section": 2,
+      "value": 900000
+    },
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+    }
+  },
+  "references": [
+    {
+      "name": "panel_0",
+      "type": "visualization",
+      "id": "aeb212e0-4c84-11e8-b3d7-01146121b73d"
+    },
+    . . .
+    {
+      "name": "panel_18",
+      "type": "visualization",
+      "id": "ed78a660-53a0-11e8-acbd-0be0ad9d822b"
+    }
+  ],
+  "migrationVersion": {
+    "dashboard": "7.0.0"
   }
 }
 --------------------------------------------------

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
 import { toExpression } from '@kbn/interpreter/common';
-import { interpretAst } from 'plugins/interpreter/interpreter';
+import { interpretAst } from '../../lib/run_interpreter';
 import { modelRegistry, viewRegistry, transformRegistry } from '../../expression_types';
 import { FunctionFormList as Component } from './function_form_list';
 
@@ -29,7 +30,7 @@ function getArgTypeDef(fn) {
   return modelRegistry.get(fn) || viewRegistry.get(fn) || transformRegistry.get(fn);
 }
 
-const functionFormItems = withProps(props => {
+const functionFormItems = withProps((props) => {
   const selectedElement = props.element;
   const FunctionFormChain = get(selectedElement, 'ast.chain', []);
 
@@ -47,7 +48,7 @@ const functionFormItems = withProps(props => {
           args: argType.arguments,
           argType: argType.function,
           argTypeDef: argTypeDef,
-          argResolver: argAst => interpretAst(argAst, prevContext),
+          argResolver: (argAst) => interpretAst(argAst, prevContext),
           contextExpression: getExpression(prevContext),
           expressionIndex: i, // preserve the index in the AST
           nextArgType: nextArg && nextArg.function,

@@ -1,6 +1,16 @@
 {
-  "extends": "../../tsconfig.json",
-  "include": [
-    "types/**/*"
-  ]
+  "extends": "../../tsconfig.bazel.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./target_types",
+    "stripInternal": true,
+    "rootDir": "src",
+    "sourceMap": true,
+    "sourceRoot": "../../../../../../packages/kbn-test/src",
+    "types": ["jest", "node"]
+  },
+  "include": ["src/**/*", "index.d.ts"],
+  "exclude": ["**/__fixtures__/**/*"]
 }

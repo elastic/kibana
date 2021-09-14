@@ -1,26 +1,30 @@
 [[upgrade-assistant-api-status]]
-=== Upgrade Readiness Status
+=== Upgrade readiness status API
+++++
+<titleabbrev>Upgrade readiness status</titleabbrev>
+++++
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are currently experimental.]
+experimental[] Check the status of your cluster.
 
+Check the status of your cluster.
+
+[[upgrade-assistant-api-status-request]]
 ==== Request
 
-To check the status of your cluster, submit a GET request to the `/api/upgrade_assistant/status` endpoint:
+`GET <kibana host>:<port>/api/upgrade_assistant/status`
 
-Note: You cannot access this endpoint via the Console in Kibana.
+[[upgrade-assistant-api-status-response-codes]]
+==== Response codes
 
-[source,js]
---------------------------------------------------
-GET /api/upgrade_assistant/status
---------------------------------------------------
-// KIBANA
+`200`::
+  Indicates a successful call.
 
-==== Response
+[[upgrade-assistant-api-status-example]]
+==== Example
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "readyForUpgrade": false,
@@ -45,4 +49,4 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-<1> You can fix indices with the `reindex` attribute set to `true` using the <<upgrade-assistant-api-reindexing>>.
+<1> To fix indices with the `reindex` attribute, set to `true` using the <<start-resume-reindex, Start or resume reindex API>>.

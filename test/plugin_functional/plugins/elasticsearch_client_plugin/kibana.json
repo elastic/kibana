@@ -1,0 +1,11 @@
+{
+  "id": "elasticsearchClientPlugin",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": false
+}

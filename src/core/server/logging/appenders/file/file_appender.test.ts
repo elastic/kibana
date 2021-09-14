@@ -1,29 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { mockCreateWriteStream } from './file_appender.test.mocks';
 
-import { LogLevel } from '../../log_level';
-import { LogRecord } from '../../log_record';
+import { LogRecord, LogLevel } from '@kbn/logging';
 import { FileAppender } from './file_appender';
 
-const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const tickMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 beforeEach(() => {
   mockCreateWriteStream.mockReset();
@@ -32,24 +20,24 @@ beforeEach(() => {
 test('`createConfigSchema()` creates correct schema.', () => {
   const appenderSchema = FileAppender.configSchema;
 
-  const validConfig = { kind: 'file', layout: { kind: 'mock' }, path: 'path' };
+  const validConfig = { type: 'file', layout: { type: 'mock' }, fileName: 'path' };
   expect(appenderSchema.validate(validConfig)).toEqual({
-    kind: 'file',
-    layout: { kind: 'mock' },
-    path: 'path',
+    type: 'file',
+    layout: { type: 'mock' },
+    fileName: 'path',
   });
 
   const wrongConfig1 = {
-    kind: 'not-file',
-    layout: { kind: 'mock' },
-    path: 'path',
+    type: 'not-file',
+    layout: { type: 'mock' },
+    fileName: 'path',
   };
   expect(() => appenderSchema.validate(wrongConfig1)).toThrow();
 
-  const wrongConfig2 = { kind: 'file', layout: { kind: 'mock' } };
+  const wrongConfig2 = { type: 'file', layout: { type: 'mock' } };
   expect(() => appenderSchema.validate(wrongConfig2)).toThrow();
 
-  const wrongConfig3 = { kind: 'console', layout: { kind: 'mock' } };
+  const wrongConfig3 = { type: 'console', layout: { type: 'mock' } };
   expect(() => appenderSchema.validate(wrongConfig3)).toThrow();
 });
 
@@ -70,6 +58,7 @@ test('file stream is created only once and only after first `append()` is called
     level: LogLevel.All,
     message: 'message-1',
     timestamp: new Date(),
+    pid: 5355,
   });
 
   expect(mockCreateWriteStream).toHaveBeenCalledTimes(1);
@@ -84,6 +73,7 @@ test('file stream is created only once and only after first `append()` is called
     level: LogLevel.All,
     message: 'message-2',
     timestamp: new Date(),
+    pid: 5355,
   });
 
   expect(mockCreateWriteStream).not.toHaveBeenCalled();
@@ -99,12 +89,14 @@ test('`append()` correctly formats records and pushes them to the file.', () => 
       level: LogLevel.All,
       message: 'message-1',
       timestamp: new Date(),
+      pid: 5355,
     },
     {
       context: 'context-2',
       level: LogLevel.Trace,
       message: 'message-2',
       timestamp: new Date(),
+      pid: 5355,
     },
     {
       context: 'context-3',
@@ -112,6 +104,7 @@ test('`append()` correctly formats records and pushes them to the file.', () => 
       level: LogLevel.Fatal,
       message: 'message-3',
       timestamp: new Date(),
+      pid: 5355,
     },
   ];
 
@@ -140,7 +133,7 @@ test('`dispose()` succeeds even if stream is not created.', async () => {
 
 test('`dispose()` closes stream.', async () => {
   const mockStreamEndFinished = jest.fn();
-  const mockStreamEnd = jest.fn(async (chunk, encoding, callback) => {
+  const mockStreamEnd = jest.fn(async (callback) => {
     // It's required to make sure `dispose` waits for `end` to complete.
     await tickMs(100);
     mockStreamEndFinished();
@@ -160,12 +153,13 @@ test('`dispose()` closes stream.', async () => {
     level: LogLevel.All,
     message: 'message-1',
     timestamp: new Date(),
+    pid: 5355,
   });
 
   await appender.dispose();
 
   expect(mockStreamEnd).toHaveBeenCalledTimes(1);
-  expect(mockStreamEnd).toHaveBeenCalledWith(undefined, undefined, expect.any(Function));
+  expect(mockStreamEnd).toHaveBeenCalledWith(expect.any(Function));
   expect(mockStreamEndFinished).toHaveBeenCalled();
 
   // Consequent `dispose` calls should not fail even if stream has been disposed.

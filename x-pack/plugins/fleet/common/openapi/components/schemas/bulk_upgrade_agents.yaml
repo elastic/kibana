@@ -1,0 +1,16 @@
+title: Bulk upgrade agents
+type: object
+properties:
+  version:
+    type: string
+  source_uri:
+    type: string
+  agents:
+    oneOf:
+      - type: array
+        items:
+          type: string
+      - type: string
+required:
+  - agents
+  - version

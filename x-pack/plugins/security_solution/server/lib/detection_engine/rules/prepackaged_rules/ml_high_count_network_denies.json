@@ -1,0 +1,29 @@
+{
+  "anomaly_threshold": 75,
+  "author": [
+    "Elastic"
+  ],
+  "description": "A machine learning job detected an unusually large spike in network traffic that was denied by network access control lists (ACLs) or firewall rules. Such a burst of denied traffic is usually caused by either 1) a mis-configured application or firewall or 2) suspicious or malicious activity. Unsuccessful attempts at network transit, in order to connect to command-and-control (C2), or engage in data exfiltration, may produce a burst of failed connections. This could also be due to unusually large amounts of reconnaissance or enumeration traffic. Denial-of-service attacks or traffic floods may also produce such a surge in traffic.",
+  "false_positives": [
+    "A misconfgured network application or firewall may trigger this alert. Security scans or test cycles may trigger this alert."
+  ],
+  "from": "now-30m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "high_count_network_denies",
+  "name": "Spike in Firewall Denies",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "eaa77d63-9679-4ce3-be25-3ba8b795e5fa",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Network",
+    "Threat Detection",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 2
+}

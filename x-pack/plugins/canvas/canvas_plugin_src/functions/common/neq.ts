@@ -1,24 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
 
-type Context = boolean | number | string | null;
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
+
+type Input = boolean | number | string | null;
 
 interface Arguments {
-  value: Context;
+  value: Input;
 }
 
-export function neq(): ExpressionFunction<'neq', Context, Arguments, boolean> {
+export function neq(): ExpressionFunctionDefinition<'neq', Input, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().neq;
 
   return {
     name: 'neq',
     type: 'boolean',
     help,
+    context: {
+      types: ['boolean', 'number', 'string', 'null'],
+    },
     args: {
       value: {
         aliases: ['_'],
@@ -27,8 +32,8 @@ export function neq(): ExpressionFunction<'neq', Context, Arguments, boolean> {
         help: argHelp.value,
       },
     },
-    fn: (context, args) => {
-      return context !== args.value;
+    fn: (input, args) => {
+      return input !== args.value;
     },
   };
 }

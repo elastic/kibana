@@ -1,27 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   pattern: string;
   flags: string;
   replacement: string;
 }
-export function replace(): ExpressionFunction<'replace', string, Arguments, string> {
+export function replace(): ExpressionFunctionDefinition<'replace', string, Arguments, string> {
   const { help, args: argHelp } = getFunctionHelp().replace;
 
   return {
     name: 'replace',
     type: 'string',
     help,
-    context: {
-      types: ['string'],
-    },
+    inputTypes: ['string'],
     args: {
       pattern: {
         aliases: ['_', 'regex'],
@@ -40,6 +39,6 @@ export function replace(): ExpressionFunction<'replace', string, Arguments, stri
         default: '""',
       },
     },
-    fn: (context, args) => context.replace(new RegExp(args.pattern, args.flags), args.replacement),
+    fn: (input, args) => input.replace(new RegExp(args.pattern, args.flags), args.replacement),
   };
 }

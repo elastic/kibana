@@ -1,0 +1,38 @@
+[[logstash-configuration-management-api-list]]
+=== List Logstash pipeline API
+++++
+<titleabbrev>List pipeline</titleabbrev>
+++++
+
+experimental[] List all centrally-managed Logstash pipelines.
+
+[[logstash-configuration-management-api-list-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/logstash/pipelines`
+
+[[logstash-configuration-management-api-list-example]]
+==== Example
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "pipelines": [
+    {
+      "id": "hello-world",
+      "description": "Just a simple pipeline",
+      "last_modified": "2018-04-14T12:23:29.772Z",
+      "username": "elastic" <1>
+    },
+    {
+      "id": "sleepy-pipeline",
+      "description": "",
+      "last_modified": "2018-03-24T03:41:30.554Z"
+    }
+  ]
+}
+--------------------------------------------------
+
+<1> The `username` property appears when security is enabled, and depends on when the pipeline was created or last updated.

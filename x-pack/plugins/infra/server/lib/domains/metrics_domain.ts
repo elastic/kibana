@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { InfraMetricData } from '../../graphql/types';
-import { InfraFrameworkRequest } from '../adapters/framework/adapter_types';
+import { KibanaRequest } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../types';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from '../adapters/metrics/adapter_types';
+import { NodeDetailsMetricData } from '../../../common/http_api/node_details_api';
 
 export class InfraMetricsDomain {
   private adapter: InfraMetricsAdapter;
@@ -16,9 +18,10 @@ export class InfraMetricsDomain {
   }
 
   public async getMetrics(
-    req: InfraFrameworkRequest,
-    options: InfraMetricsRequestOptions
-  ): Promise<InfraMetricData[]> {
-    return await this.adapter.getMetrics(req, options);
+    requestContext: InfraPluginRequestHandlerContext,
+    options: InfraMetricsRequestOptions,
+    rawRequest: KibanaRequest
+  ): Promise<NodeDetailsMetricData[]> {
+    return await this.adapter.getMetrics(requestContext, options, rawRequest);
   }
 }

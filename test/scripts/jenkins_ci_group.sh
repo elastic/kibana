@@ -1,31 +1,38 @@
 #!/usr/bin/env bash
 
-set -e
+source test/scripts/jenkins_test_setup_oss.sh
 
-function report {
-  if [[ -z "$PR_SOURCE_BRANCH" ]]; then
-    node src/dev/failed_tests/cli
-  else
-    echo "Failure issues not created on pull requests"
+if [[ -z "$CODE_COVERAGE" ]]; then
+  echo " -> Running functional and api tests"
 
+  checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" \
+    node scripts/functional_tests \
+      --debug --bail \
+      --kibana-install-dir "$KIBANA_INSTALL_DIR" \
+      --include-tag "ciGroup$CI_GROUP"
+
+  if [[ ! "$TASK_QUEUE_PROCESS_ID" && "$CI_GROUP" == "1" ]]; then
+    source test/scripts/jenkins_build_kbn_sample_panel_action.sh
+    ./test/scripts/test/plugin_functional.sh
+    ./test/scripts/test/interpreter_functional.sh
   fi
-}
+else
+  echo " -> Running Functional tests with code coverage"
+  export NODE_OPTIONS=--max_old_space_size=8192
 
-trap report EXIT
+  echo " -> making hard link clones"
+  cd ..
+  cp -RlP kibana "kibana${CI_GROUP}"
+  cd "kibana${CI_GROUP}"
 
-yarn run grunt functionalTests:ensureAllTestsInCiGroup;
+  echo " -> running tests from the clone folder"
+  node scripts/functional_tests --debug --include-tag "ciGroup$CI_GROUP"  --exclude-tag "skipCoverage" || true;
 
-node scripts/build --debug --oss;
+  echo " -> moving junit output, silently fail in case of no report"
+  mkdir -p ../kibana/target/junit
+  mv target/junit/* ../kibana/target/junit/ || echo "copying junit failed"
 
-export TEST_BROWSER_HEADLESS=1
-
-checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
-
-if [ "$CI_GROUP" == "1" ]; then
-  # build kbn_tp_sample_panel_action
-  cd test/plugin_functional/plugins/kbn_tp_sample_panel_action;
-  checks-reporter-with-killswitch "Build kbn_tp_sample_panel_action" yarn build;
-  cd -;
-  yarn run grunt run:pluginFunctionalTestsRelease --from=source;
-  yarn run grunt run:interpreterFunctionalTestsRelease;
+  echo " -> copying screenshots and html for failures"
+  cp -r test/functional/screenshots/* ../kibana/test/functional/screenshots/ || echo "copying screenshots failed"
+  cp -r test/functional/failure_debug ../kibana/test/functional/ || echo "copying html failed"
 fi

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -9,31 +10,41 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { partial } from 'lodash';
-import uiRoutes from 'ui/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { get, partial } from 'lodash';
+import { uiRoutes } from '../../../angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import { getPageData } from './get_page_data';
 import template from './index.html';
+import { SetupModeRenderer } from '../../../components/renderers';
 import { Node } from '../../../components/elasticsearch/node/node';
-import { I18nContext } from 'ui/i18n';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
 import { MonitoringViewBaseController } from '../../base_controller';
+import {
+  CODE_PATH_ELASTICSEARCH,
+  RULE_CPU_USAGE,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_MISSING_MONITORING_DATA,
+  RULE_DISK_USAGE,
+  RULE_MEMORY_USAGE,
+  ELASTICSEARCH_SYSTEM_ID,
+} from '../../../../common/constants';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
-    pageData: getPageData
+    pageData: getPageData,
   },
   controllerAs: 'monitoringElasticsearchNodeApp',
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
       const $route = $injector.get('$route');
-      const kbnUrl = $injector.get('kbnUrl');
       const nodeName = $route.current.params.node;
 
       super({
@@ -41,13 +52,32 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
           defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
           values: {
             nodeName,
-          }
+          },
         }),
+        telemetryPageViewTitle: 'elasticsearch_node',
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchNodeApp',
         $scope,
-        $injector
+        $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [
+              RULE_CPU_USAGE,
+              RULE_DISK_USAGE,
+              RULE_THREAD_POOL_SEARCH_REJECTIONS,
+              RULE_THREAD_POOL_WRITE_REJECTIONS,
+              RULE_MEMORY_USAGE,
+              RULE_MISSING_MONITORING_DATA,
+            ],
+            filters: [
+              {
+                nodeUuid: nodeName,
+              },
+            ],
+          },
+        },
       });
 
       this.nodeName = nodeName;
@@ -61,33 +91,65 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
         // preserve setting in localStorage
         features.update('showSystemIndices', isChecked);
         // update the page
-        callPageData().then(data => this.data = data);
+        callPageData().then((data) => (this.data = data));
       };
 
       const transformer = nodesByIndices();
-      $scope.$watch(() => this.data, data => {
-        if (!data || !data.shards) {
-          return;
-        }
+      $scope.$watch(
+        () => this.data,
+        (data) => {
+          if (!data || !data.shards) {
+            return;
+          }
 
-        const shards = data.shards;
-        $scope.totalCount = shards.length;
-        $scope.showing = transformer(shards, data.nodes);
-        $scope.labels = labels.node;
+          this.setTitle(
+            i18n.translate('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
+              defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
+              values: {
+                nodeName: get(data, 'nodeSummary.name'),
+              },
+            })
+          );
 
-        this.renderReact(
-          <I18nContext>
-            <Node
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.elasticsearch.node.overview.pageTitle', {
+              defaultMessage: 'Elasticsearch node: {node}',
+              values: {
+                node: get(data, 'nodeSummary.name'),
+              },
+            })
+          );
+
+          const shards = data.shards;
+          $scope.totalCount = shards.length;
+          $scope.showing = transformer(shards, data.nodes);
+          $scope.labels = labels.node;
+
+          this.renderReact(
+            <SetupModeRenderer
               scope={$scope}
-              kbnUrl={kbnUrl}
-              nodeId={this.nodeName}
-              clusterUuid={$scope.cluster.cluster_uuid}
-              onBrush={this.onBrush}
-              {...data}
+              injector={$injector}
+              productName={ELASTICSEARCH_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <Node
+                    scope={$scope}
+                    setupMode={setupMode}
+                    alerts={this.alerts}
+                    nodeId={this.nodeName}
+                    clusterUuid={$scope.cluster.cluster_uuid}
+                    onBrush={this.onBrush}
+                    zoomInfo={this.zoomInfo}
+                    {...data}
+                  />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
             />
-          </I18nContext>
-        );
-      });
+          );
+        }
+      );
     }
-  }
+  },
 });

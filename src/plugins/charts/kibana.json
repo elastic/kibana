@@ -1,0 +1,11 @@
+{
+  "id": "charts",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["expressions"],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  }
+}

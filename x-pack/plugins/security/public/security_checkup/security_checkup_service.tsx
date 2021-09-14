@@ -1,0 +1,52 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { DocLinksStart } from 'src/core/public';
+import type {
+  SecurityOssPluginSetup,
+  SecurityOssPluginStart,
+} from 'src/plugins/security_oss/public';
+
+import { insecureClusterAlertText, insecureClusterAlertTitle } from './components';
+
+interface SetupDeps {
+  securityOssSetup: SecurityOssPluginSetup;
+}
+
+interface StartDeps {
+  securityOssStart: SecurityOssPluginStart;
+  docLinks: DocLinksStart;
+}
+
+export class SecurityCheckupService {
+  private securityOssStart?: SecurityOssPluginStart;
+
+  private docLinks?: DocLinksStart;
+
+  public setup({ securityOssSetup }: SetupDeps) {
+    securityOssSetup.insecureCluster.setAlertTitle(insecureClusterAlertTitle);
+    securityOssSetup.insecureCluster.setAlertText(
+      insecureClusterAlertText(
+        () => this.docLinks!,
+        (persist: boolean) => this.onDismiss(persist)
+      )
+    );
+  }
+
+  public start({ securityOssStart, docLinks }: StartDeps) {
+    this.securityOssStart = securityOssStart;
+    this.docLinks = docLinks;
+  }
+
+  private onDismiss(persist: boolean) {
+    if (this.securityOssStart) {
+      this.securityOssStart.insecureCluster.hideAlert(persist);
+    }
+  }
+
+  public stop() {}
+}

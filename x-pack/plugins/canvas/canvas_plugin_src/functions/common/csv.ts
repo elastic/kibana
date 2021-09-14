@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Papa from 'papaparse';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Datatable } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   data: string;
@@ -15,21 +16,20 @@ interface Arguments {
   newline: string;
 }
 
-export function csv(): ExpressionFunction<'csv', null, Arguments, Datatable> {
+export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().csv;
   const errorMessages = getFunctionErrors().csv;
 
   return {
     name: 'csv',
     type: 'datatable',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {
       data: {
         aliases: ['_'],
         types: ['string'],
+        required: true,
         help: argHelp.data,
       },
       delimiter: {
@@ -41,7 +41,7 @@ export function csv(): ExpressionFunction<'csv', null, Arguments, Datatable> {
         help: argHelp.newline,
       },
     },
-    fn(_context, args) {
+    fn(input, args) {
       const { data: csvString, delimiter, newline } = args;
 
       const config: Papa.ParseConfig = {
@@ -73,7 +73,11 @@ export function csv(): ExpressionFunction<'csv', null, Arguments, Datatable> {
           if (i === 0) {
             // first row, assume header values
             row.forEach((colName: string) =>
-              acc.columns.push({ name: colName.trim(), type: 'string' })
+              acc.columns.push({
+                id: colName.trim(),
+                name: colName.trim(),
+                meta: { type: 'string' },
+              })
             );
           } else {
             // any other row is a data row

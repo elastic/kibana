@@ -1,0 +1,35 @@
+.appSearchResultField {
+  font-size: $euiFontSizeS;
+  line-height: $euiLineHeight;
+  display: grid;
+  grid-template-columns: .85fr $euiSizeXL 1fr;
+  grid-gap: $euiSizeXS;
+
+  &__separator {
+    text-align: center;
+
+    &:after {
+      content: '=>';
+      color: $euiColorDarkShade;
+    }
+  }
+
+  &__key {
+    display: flex;
+    align-items: center;
+    @include euiCodeFont;
+
+    .euiToken {
+      margin-right: $euiSizeS;
+    }
+  }
+
+  &__value {
+    padding-left: $euiSize;
+    overflow: hidden;
+
+    @include euiBreakpoint('xs') {
+      padding-left: 0;
+    }
+  }
+}

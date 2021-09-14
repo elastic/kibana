@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mountHook } from 'test_utils/enzyme_helpers';
+import { mountHook } from '@kbn/test/jest';
 
 import { useLogViewConfiguration } from './log_view_configuration';
 
@@ -45,33 +46,8 @@ describe('useLogViewConfiguration hook', () => {
     });
   });
 
-  describe('intervalSize state', () => {
-    it('has a default value', () => {
-      const { getLastHookValue } = mountHook(() => useLogViewConfiguration().intervalSize);
-
-      expect(getLastHookValue()).toEqual(86400000);
-    });
-
-    it('can be updated', () => {
-      const { act, getLastHookValue } = mountHook(() => useLogViewConfiguration());
-
-      act(({ setIntervalSize }) => {
-        setIntervalSize(90000000);
-      });
-
-      expect(getLastHookValue().intervalSize).toEqual(90000000);
-    });
-  });
-
   it('provides the available text scales', () => {
     const { getLastHookValue } = mountHook(() => useLogViewConfiguration().availableTextScales);
-
-    expect(getLastHookValue()).toEqual(expect.any(Array));
-    expect(getLastHookValue().length).toBeGreaterThan(0);
-  });
-
-  it('provides the available interval sizes', () => {
-    const { getLastHookValue } = mountHook(() => useLogViewConfiguration().availableIntervalSizes);
 
     expect(getLastHookValue()).toEqual(expect.any(Array));
     expect(getLastHookValue().length).toBeGreaterThan(0);

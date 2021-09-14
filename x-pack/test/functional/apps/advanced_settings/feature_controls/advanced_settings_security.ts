@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
@@ -18,11 +19,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
   describe('security feature controls', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('global advanced_settings all privileges', () => {
@@ -47,8 +48,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
-
+        await PageObjects.security.forceLogout();
         await PageObjects.security.login(
           'global_advanced_settings_all_user',
           'global_advanced_settings_all_user-password',
@@ -56,24 +56,21 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             expectSpaceSelector: false,
           }
         );
-
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_advanced_settings_all_role'),
           security.user.delete('global_advanced_settings_all_user'),
-          PageObjects.security.logout(),
         ]);
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`allows settings to be changed`, async () => {
@@ -128,10 +125,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`does not allow settings to be changed`, async () => {
@@ -144,7 +139,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
     });
 
-    describe('no advanced_settings privileges', () => {
+    describe('no advanced_settings privileges', function () {
       before(async () => {
         await security.role.create('no_advanced_settings_privileges_role', {
           elasticsearch: {
@@ -153,7 +148,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           kibana: [
             {
               feature: {
-                discover: ['all'],
+                discover: ['read'],
               },
               spaces: ['*'],
             },
@@ -180,19 +175,18 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await security.user.delete('no_advanced_settings_privileges_user');
       });
 
-      it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Discover', 'Management']);
+      it('does not show Management navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Discover']);
       });
 
-      it(`does not allow navigation to advanced settings; redirects to Kibana home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+      it(`does not allow navigation to advanced settings; shows "not found" error`, async () => {
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('appNotFoundPageContent');
       });
     });
   });

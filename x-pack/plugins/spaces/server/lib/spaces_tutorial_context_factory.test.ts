@@ -1,39 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
 import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { createSpacesService } from './create_spaces_service';
+import { spacesClientServiceMock } from '../spaces_client/spaces_client_service.mock';
+import { SpacesService } from '../spaces_service';
+import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 
-const server = {
-  config: () => {
-    return {
-      get: (key: string) => {
-        if (key === 'server.basePath') {
-          return '/foo';
-        }
-        throw new Error('unexpected key ' + key);
-      },
-    };
-  },
-};
+const service = new SpacesService();
 
 describe('createSpacesTutorialContextFactory', () => {
-  it('should create a valid context factory', () => {
-    const spacesService = createSpacesService(server);
-    expect(typeof createSpacesTutorialContextFactory(spacesService)).toEqual('function');
+  it('should create a valid context factory', async () => {
+    const spacesService = spacesServiceMock.createStartContract();
+    expect(typeof createSpacesTutorialContextFactory(() => spacesService)).toEqual('function');
   });
 
-  it('should create context with the current space id for space my-space-id', () => {
-    const spacesService = createSpacesService(server);
-    const contextFactory = createSpacesTutorialContextFactory(spacesService);
+  it('should create context with the current space id for space my-space-id', async () => {
+    const spacesService = spacesServiceMock.createStartContract('my-space-id');
+    const contextFactory = createSpacesTutorialContextFactory(() => spacesService);
 
-    const request = {
-      getBasePath: () => '/foo/s/my-space-id',
-    };
+    const request = httpServerMock.createKibanaRequest();
 
     expect(contextFactory(request)).toEqual({
       spaceId: 'my-space-id',
@@ -41,13 +33,18 @@ describe('createSpacesTutorialContextFactory', () => {
     });
   });
 
-  it('should create context with the current space id for the default space', () => {
-    const spacesService = createSpacesService(server);
-    const contextFactory = createSpacesTutorialContextFactory(spacesService);
+  it('should create context with the current space id for the default space', async () => {
+    service.setup({
+      basePath: coreMock.createSetup().http.basePath,
+    });
+    const contextFactory = createSpacesTutorialContextFactory(() =>
+      service.start({
+        basePath: coreMock.createStart().http.basePath,
+        spacesClientService: spacesClientServiceMock.createStart(),
+      })
+    );
 
-    const request = {
-      getBasePath: () => '/foo',
-    };
+    const request = httpServerMock.createKibanaRequest();
 
     expect(contextFactory(request)).toEqual({
       spaceId: DEFAULT_SPACE_ID,

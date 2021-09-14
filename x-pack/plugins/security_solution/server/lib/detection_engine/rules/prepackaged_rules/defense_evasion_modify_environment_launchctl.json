@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies modifications to an environment variable using the built-in launchctl command. Adversaries may execute their own malicious payloads by hijacking certain environment variables to load arbitrary libraries or bypass certain restrictions.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Modification of Environment Variable via Launchctl",
+  "query": "event.category:process and event.type:start and\n  process.name:launchctl and\n  process.args:(setenv and not (JAVA*_HOME or\n                                RUNTIME_JAVA_HOME or\n                                DBUS_LAUNCHD_SESSION_BUS_SOCKET or\n                                ANT_HOME or\n                                LG_WEBOS_TV_SDK_HOME or\n                                WEBOS_CLI_TV or\n                                EDEN_ENV)\n                ) and\n  not process.parent.executable:(\"/Applications/NoMachine.app/Contents/Frameworks/bin/nxserver.bin\" or\n                                 \"/usr/local/bin/kr\" or\n                                 \"/Applications/NoMachine.app/Contents/Frameworks/bin/nxserver.bin\" or\n                                 \"/Applications/IntelliJ IDEA CE.app/Contents/jbr/Contents/Home/lib/jspawnhelper\")\n",
+  "references": [
+    "https://github.com/rapid7/metasploit-framework/blob/master//modules/post/osx/escalate/tccbypass.rb"
+  ],
+  "risk_score": 47,
+  "rule_id": "7453e19e-3dbf-4e4e-9ae0-33d6c6ed15e1",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1574",
+          "name": "Hijack Execution Flow",
+          "reference": "https://attack.mitre.org/techniques/T1574/",
+          "subtechnique": [
+            {
+              "id": "T1574.007",
+              "name": "Path Interception by PATH Environment Variable",
+              "reference": "https://attack.mitre.org/techniques/T1574/007/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

@@ -2,10 +2,9 @@
 
 exports[`Logs should render a link to filter by cluster uuid 1`] = `
 <EuiCallOut
-  color="primary"
-  iconType="loggingApp"
+  iconType="logsApp"
   size="m"
-  title="Want to see more logs?"
+  title="Want to see more log entries?"
 >
   <p>
     <FormattedMessage
@@ -14,9 +13,7 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
       values={
         Object {
           "link": <EuiLink
-            color="primary"
-            href="/app/infra#/link-to/logs?filter=elasticsearch.cluster.uuid:12345"
-            type="button"
+            href="/app/logs/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345"
           >
             Logs
           </EuiLink>,
@@ -29,10 +26,9 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
 
 exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] = `
 <EuiCallOut
-  color="primary"
-  iconType="loggingApp"
+  iconType="logsApp"
   size="m"
-  title="Want to see more logs?"
+  title="Want to see more log entries?"
 >
   <p>
     <FormattedMessage
@@ -41,9 +37,7 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
       values={
         Object {
           "link": <EuiLink
-            color="primary"
-            href="/app/infra#/link-to/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.index.name:6789"
-            type="button"
+            href="/app/logs/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.index.name:6789"
           >
             Logs
           </EuiLink>,
@@ -56,10 +50,9 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
 
 exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] = `
 <EuiCallOut
-  color="primary"
-  iconType="loggingApp"
+  iconType="logsApp"
   size="m"
-  title="Want to see more logs?"
+  title="Want to see more log entries?"
 >
   <p>
     <FormattedMessage
@@ -68,9 +61,7 @@ exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] =
       values={
         Object {
           "link": <EuiLink
-            color="primary"
-            href="/app/infra#/link-to/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.node.id:6789"
-            type="button"
+            href="/app/logs/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.node.id:6789"
           >
             Logs
           </EuiLink>,
@@ -85,14 +76,14 @@ exports[`Logs should render a reason if the logs are disabled 1`] = `
 <div>
   <EuiTitle>
     <h1>
-      Recent Logs
+      Recent Log Entries
     </h1>
   </EuiTitle>
   <EuiText
     size="s"
   >
     <p>
-      Showing the most recent logs for this cluster, up to 15 total logs.
+      Showing the most recent log entries for this cluster, up to 15 total log entries.
     </p>
   </EuiText>
   <EuiSpacer
@@ -143,14 +134,14 @@ exports[`Logs should render normally 1`] = `
 <div>
   <EuiTitle>
     <h1>
-      Recent Logs
+      Recent Log Entries
     </h1>
   </EuiTitle>
   <EuiText
     size="s"
   >
     <p>
-      Showing the most recent logs for this cluster, up to 10 total logs.
+      Showing the most recent log entries for this cluster, up to 10 total log entries.
     </p>
   </EuiText>
   <EuiSpacer
@@ -279,15 +270,15 @@ exports[`Logs should render normally 1`] = `
     }
     noItemsMessage="No items found"
     responsive={true}
+    tableLayout="fixed"
   />
   <EuiSpacer
     size="m"
   />
   <EuiCallOut
-    color="primary"
-    iconType="loggingApp"
+    iconType="logsApp"
     size="m"
-    title="Want to see more logs?"
+    title="Want to see more log entries?"
   >
     <p>
       <FormattedMessage
@@ -296,9 +287,7 @@ exports[`Logs should render normally 1`] = `
         values={
           Object {
             "link": <EuiLink
-              color="primary"
-              href="/app/infra#/link-to/logs"
-              type="button"
+              href="/app/logs/link-to/internal-stack-monitoring/logs"
             >
               Logs
             </EuiLink>,

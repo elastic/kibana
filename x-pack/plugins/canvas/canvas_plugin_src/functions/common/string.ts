@@ -1,31 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
-  value: string[];
+  value: Array<string | number | boolean>;
 }
 
-export function string(): ExpressionFunction<'string', any, Arguments, string> {
+export function string(): ExpressionFunctionDefinition<'string', null, Arguments, string> {
   const { help, args: argHelp } = getFunctionHelp().string;
 
   return {
     name: 'string',
+    inputTypes: ['null'],
     aliases: [],
     type: 'string',
     help,
     args: {
       value: {
         aliases: ['_'],
-        types: ['string'],
+        types: ['string', 'number', 'boolean'],
         multi: true,
         help: argHelp.value,
       },
     },
-    fn: (_context, args) => args.value.join(''),
+    fn: (input, args) => args.value.join(''),
   };
 }

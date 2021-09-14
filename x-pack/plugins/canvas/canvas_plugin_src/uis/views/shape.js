@@ -1,48 +1,55 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { shapes } from '../../renderers/shape/shapes';
+import { getAvailableShapes } from '../../../../../../src/plugins/expression_shape/common';
+import { ViewStrings } from '../../../i18n';
+
+const { Shape: strings } = ViewStrings;
 
 export const shape = () => ({
   name: 'shape',
-  displayName: 'Shape',
+  displayName: strings.getDisplayName(),
   modelArgs: [],
   requiresContext: false,
   args: [
     {
       name: '_',
-      displayName: 'Select a shape',
+      displayName: strings.getShapeDisplayName(),
       argType: 'shape',
       options: {
-        shapes,
+        shapes: getAvailableShapes(),
       },
     },
     {
       name: 'fill',
-      displayName: 'Fill',
+      displayName: strings.getFillDisplayName(),
       argType: 'color',
-      help: 'Accepts HEX, RGB or HTML Color names',
+      help: strings.getFillHelp(),
     },
     {
       name: 'border',
-      displayName: 'Border',
+      displayName: strings.getBorderDisplayName(),
       argType: 'color',
-      help: 'Accepts HEX, RGB or HTML Color names',
+      help: strings.getBorderHelp(),
     },
     {
       name: 'borderWidth',
-      displayName: 'Border width',
+      displayName: strings.getBorderWidthDisplayName(),
       argType: 'number',
-      help: 'Border width',
+      help: strings.getBorderWidthHelp(),
     },
     {
       name: 'maintainAspect',
-      displayName: 'Maintain aspect ratio',
+      displayName: strings.getMaintainAspectDisplayName(),
       argType: 'toggle',
-      help: `Select 'true' to maintain aspect ratio`,
+      help: strings.getMaintainAspectHelp(),
+      options: {
+        labelValue: strings.getMaintainAspectLabelName(),
+      },
     },
   ],
 });

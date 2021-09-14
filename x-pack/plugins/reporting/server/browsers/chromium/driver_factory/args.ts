@@ -1,28 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-interface Opts {
+import { CaptureConfig } from '../../../../server/types';
+
+type ViewportConfig = CaptureConfig['viewport'];
+type BrowserConfig = CaptureConfig['browser']['chromium'];
+
+interface LaunchArgs {
   userDataDir: string;
-  viewport: { width: number; height: number };
-  disableSandbox: boolean;
-  proxyConfig: {
-    enabled: boolean;
-    server: string;
-    bypass?: string[];
-  };
-  verboseLogging: boolean;
+  viewport: ViewportConfig;
+  disableSandbox: BrowserConfig['disableSandbox'];
+  proxy: BrowserConfig['proxy'];
 }
 
-export const args = ({
-  userDataDir,
-  viewport,
-  disableSandbox,
-  proxyConfig,
-  verboseLogging,
-}: Opts) => {
+export const args = ({ userDataDir, viewport, disableSandbox, proxy: proxyConfig }: LaunchArgs) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
@@ -47,7 +42,12 @@ export const args = ({
     '--disable-gpu',
     '--headless',
     '--hide-scrollbars',
+    // NOTE: setting the window size does NOT set the viewport size: viewport and window size are different.
+    // The viewport may later need to be resized depending on the position of the clip area.
+    // These numbers come from the job parameters, so this is a close guess.
     `--window-size=${Math.floor(viewport.width)},${Math.floor(viewport.height)}`,
+    // allow screenshot clip region to go outside of the viewport
+    `--mainFrameClipsContent=false`,
   ];
 
   if (proxyConfig.enabled) {
@@ -59,11 +59,6 @@ export const args = ({
 
   if (disableSandbox) {
     flags.push('--no-sandbox');
-  }
-
-  if (verboseLogging) {
-    flags.push('--enable-logging');
-    flags.push('--v=1');
   }
 
   if (process.platform === 'linux') {

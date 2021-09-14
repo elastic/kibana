@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { flattenPipelineSection } from './flatten_pipeline_section';
@@ -18,7 +19,7 @@ describe('flattenPipelineSection', () => {
   it('creates list for only-plugin pipeline section', () => {
     pipelineSection = [
       PluginStatement.fromPipelineGraphVertex({ id: 'first' }),
-      PluginStatement.fromPipelineGraphVertex({ id: 'second' })
+      PluginStatement.fromPipelineGraphVertex({ id: 'second' }),
     ];
 
     const result = flattenPipelineSection(pipelineSection, 0, null);
@@ -37,9 +38,9 @@ describe('flattenPipelineSection', () => {
       PluginStatement.fromPipelineGraphVertex({ id: 'first' }),
       new IfStatement(
         { id: 'if_parent' },
-        [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
+        [PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
         []
-      )
+      ),
     ];
 
     const result = flattenPipelineSection(pipelineSection, 0, null);
@@ -58,9 +59,9 @@ describe('flattenPipelineSection', () => {
     pipelineSection = [
       new IfStatement(
         { id: 'if_parent' },
-        [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
-        [ PluginStatement.fromPipelineGraphVertex({ id: 'else_child1' })]
-      )
+        [PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
+        [PluginStatement.fromPipelineGraphVertex({ id: 'else_child1' })]
+      ),
     ];
 
     const result = flattenPipelineSection(pipelineSection, 0, null);
@@ -85,15 +86,16 @@ describe('flattenPipelineSection', () => {
     pipelineSection = [
       new IfStatement(
         { id: 'if_parent' },
-        [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
+        [PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
         [
           new IfStatement(
             { id: 'if_parent2' },
-            [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child2' })],
+            [PluginStatement.fromPipelineGraphVertex({ id: 'if_child2' })],
             []
           ),
-          PluginStatement.fromPipelineGraphVertex({ id: 'else_child1' })]
-      )
+          PluginStatement.fromPipelineGraphVertex({ id: 'else_child1' }),
+        ]
+      ),
     ];
 
     const result = flattenPipelineSection(pipelineSection, 0, null);

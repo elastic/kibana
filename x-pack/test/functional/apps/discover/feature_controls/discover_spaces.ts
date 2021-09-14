@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import expect from '@kbn/expect';
-import { SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
+  const config = getService('config');
+  const spacesService = getService('spaces');
   const PageObjects = getPageObjects([
     'common',
+    'error',
     'discover',
     'timePicker',
     'security',
@@ -20,23 +22,28 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const kibanaServer = getService('kibanaServer');
 
   async function setDiscoverTimeRange() {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
-    await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
   describe('spaces', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('space with no features disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('discover/feature_controls/spaces');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/custom_space',
+          { space: 'custom_space' }
+        );
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -46,16 +53,20 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('discover/feature_controls/spaces');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/custom_space',
+          { space: 'custom_space' }
+        );
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
+        );
       });
 
       it('shows discover navlink', async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Discover');
       });
 
@@ -63,7 +74,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('discoverSaveButton', 10000);
+        await testSubjects.existOrFail('discoverSaveButton', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it('shows "visualize" field button', async () => {
@@ -80,7 +93,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('discover/feature_controls/spaces');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
+        );
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -90,38 +105,35 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('discover/feature_controls/spaces');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
+        );
       });
 
       it(`doesn't show discover navlink`, async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Discover');
       });
 
-      it(`redirects to the home page`, async () => {
-        // to test whether they're being redirected properly, we first load
-        // the discover app in the default space, and then we load up the discover
-        // app in the custom space and ensure we end up on the home page
-        await PageObjects.common.navigateToApp('discover');
+      it(`shows 404`, async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           basePath: '/s/custom_space',
           shouldLoginIfPrompted: false,
           ensureCurrentUrl: false,
+          useActualUrl: true,
         });
-        await PageObjects.spaceSelector.expectHomePage('custom_space');
+        await PageObjects.error.expectNotFound();
       });
     });
 
-    describe('space with Visualize disabled', async () => {
+    describe('space with Visualize disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('spaces/disabled_features');
+        await esArchiver.load('x-pack/test/functional/es_archives/spaces/disabled_features');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -131,7 +143,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('spaces/disabled_features');
+        await esArchiver.unload('x-pack/test/functional/es_archives/spaces/disabled_features');
       });
 
       it('Does not show the "visualize" field button', async () => {
@@ -141,6 +153,32 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await setDiscoverTimeRange();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+      });
+    });
+
+    describe('space with index pattern management disabled', function () {
+      // unskipped because of flakiness in cloud, caused be ingest management tests
+      // should be unskipped when https://github.com/elastic/kibana/issues/74353 was resolved
+      this.tags(['skipCloud']);
+      before(async () => {
+        await spacesService.create({
+          id: 'custom_space_no_index_patterns',
+          name: 'custom_space_no_index_patterns',
+          disabledFeatures: ['indexPatterns'],
+        });
+      });
+
+      after(async () => {
+        await spacesService.delete('custom_space_no_index_patterns');
+      });
+
+      it('Navigates to Kibana home rather than index pattern management when no index patterns exist', async () => {
+        await PageObjects.common.navigateToUrl('discover', '', {
+          basePath: '/s/custom_space_no_index_patterns',
+          ensureCurrentUrl: false,
+          shouldUseHashForSubUrl: false,
+        });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });

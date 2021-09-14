@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,6 +12,7 @@ import { PluginStatement as PluginStatementModel } from '../models/pipeline/plug
 import { CollapsibleStatement } from './collapsible_statement';
 import { IfElement } from '../models/list/if_element';
 import { PluginStatement } from './plugin_statement';
+import './statement.scss';
 
 function renderStatementName(name, onVertexSelected) {
   return (
@@ -32,11 +34,7 @@ function renderIfStatement({ condition }, onVertexSelected) {
   return [
     renderStatementName('if', onVertexSelected),
     <EuiFlexItem key="ifContent" grow={false}>
-      <EuiCodeBlock
-        fontSize="s"
-        paddingSize="none"
-        transparentBackground={true}
-      >
+      <EuiCodeBlock fontSize="s" paddingSize="none" transparentBackground={true}>
         {condition}
       </EuiCodeBlock>
     </EuiFlexItem>,
@@ -56,9 +54,7 @@ function getStatementBody(isIf, statement, vertex, onShowVertexDetails) {
 function renderNestingSpacers(depth) {
   const spacers = [];
   for (let i = 0; i < depth; i += 1) {
-    spacers.push(
-      <div key={`spacer_${i}`} className="monPipelineViewer__spacer" />
-    );
+    spacers.push(<div key={`spacer_${i}`} className="monPipelineViewer__spacer" />);
   }
   return spacers;
 }
@@ -76,12 +72,7 @@ function renderStatement({
   onShowVertexDetails,
 }) {
   if (statement instanceof PluginStatementModel) {
-    return (
-      <PluginStatement
-        statement={statement}
-        onShowVertexDetails={onShowVertexDetails}
-      />
-    );
+    return <PluginStatement statement={statement} onShowVertexDetails={onShowVertexDetails} />;
   }
 
   const statementBody = getStatementBody(
@@ -92,12 +83,7 @@ function renderStatement({
   );
 
   return (
-    <CollapsibleStatement
-      expand={expand}
-      collapse={collapse}
-      isCollapsed={isCollapsed}
-      id={id}
-    >
+    <CollapsibleStatement expand={expand} collapse={collapse} isCollapsed={isCollapsed} id={id}>
       {statementBody}
     </CollapsibleStatement>
   );
@@ -108,9 +94,7 @@ export function Statement(props) {
 
   return (
     <li className={`monPipelineViewer__listItem`}>
-      <div className="monPipelineViewer__spaceContainer">
-        {renderNestingSpacers(depth)}
-      </div>
+      <div className="monPipelineViewer__spaceContainer">{renderNestingSpacers(depth)}</div>
       {renderStatement(props)}
     </li>
   );

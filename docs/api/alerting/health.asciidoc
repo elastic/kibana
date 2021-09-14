@@ -1,0 +1,93 @@
+[[get-alerting-framework-health-api]]
+=== Get Alerting framework health API
+++++
+<titleabbrev>Get Alerting framework health</titleabbrev>
+++++
+
+Retrieve the health status of the Alerting framework.
+
+[[get-alerting-framework-health-api-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/alerting/_health`
+
+`GET <kibana host>:<port>/s/<space_id>/api/alerting/_health`
+
+[[get-alerting-framework-health-api-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[get-alerting-framework-health-api-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[get-alerting-framework-health-api-example]]
+==== Example
+
+Retrieve the health status of the Alerting framework:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/alerting/_health
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+   "is_sufficiently_secure":true,
+   "has_permanent_encryption_key":true,
+   "alerting_framework_health":{
+      "decryption_health":{
+         "status":"ok",
+         "timestamp":"2021-02-10T23:35:04.949Z"
+      },
+      "execution_health":{
+         "status":"ok",
+         "timestamp":"2021-02-10T23:35:04.949Z"
+      },
+      "read_health":{
+         "status":"ok",
+         "timestamp":"2021-02-10T23:35:04.949Z"
+      }
+   }
+}
+--------------------------------------------------
+
+The health API response contains the following properties:
+
+[cols="2*<"]
+|===
+
+| `is_sufficiently_secure`
+| Returns `false` if security is enabled, but TLS is not.
+
+| `has_permanent_encryption_key`
+| Return the state `false` if Encrypted Saved Object plugin has not a permanent encryption Key.
+
+| `alerting_framework_health`
+| This state property has three substates that identify the health of the alerting framework API: `decryption_health`, `execution_health`, and `read_health`.
+
+|===
+
+`alerting_framework_health` consists of the following properties:
+
+[cols="2*<"]
+|===
+
+| `decryption_health`
+| Returns the timestamp and status of the rule decryption: `ok`, `warn` or `error` .
+
+| `execution_health`
+| Returns the timestamp and status of the rule execution: `ok`, `warn` or `error`.
+
+| `read_health`
+| Returns the timestamp and status of the rule reading events: `ok`, `warn` or `error`.
+
+|===

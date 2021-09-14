@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 // linear algebra
-type f64 = number; // eventual AssemblyScript compatibility; doesn't hurt with vanilla TS either
-type f = f64; // shorthand
+type F64 = number; // eventual AssemblyScript compatibility; doesn't hurt with vanilla TS either
+type F = F64; // shorthand
 
-export type Vector2d = Readonly<[f, f, f]>;
-export type Vector3d = Readonly<[f, f, f, f]>;
+export type Vector2d = Readonly<[F, F, F]>;
+export type Vector3d = Readonly<[F, F, F, F]>;
 
-export type Matrix2d = [f, f, f, f, f, f, f, f, f];
+export type Matrix2d = [F, F, F, F, F, F, F, F, F];
 export type TransformMatrix2d = Readonly<Matrix2d>;
-export type Matrix3d = [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f];
+export type Matrix3d = [F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F];
 export type TransformMatrix3d = Readonly<Matrix3d>;
 
 // plain, JSON-bijective value
@@ -37,11 +38,13 @@ interface WithActionId {
 // reselect-based data flow
 export type PlainFun = (...args: Json[]) => Json;
 export type Selector = (...fns: Resolve[]) => Resolve;
-export type Resolve = ((obj: State) => Json);
+export type Resolve = (obj: State) => Json;
 
 export type TypeName = string;
 export type Payload = JsonMap;
 export type UpdaterFunction = (arg: State) => State;
+
+export type CommitFn = (type: TypeName, payload: Payload) => void;
 
 export interface Store {
   getCurrentState: () => State;

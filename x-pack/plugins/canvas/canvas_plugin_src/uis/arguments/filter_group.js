@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useState } from 'react';
@@ -16,6 +17,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../../i18n';
+
+const { FilterGroup: strings } = ArgumentStrings;
 
 const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
   const [inputValue, setInputValue] = useState('');
@@ -26,15 +30,15 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
 
   const choices = [{ text: 'No group', value: '' }].concat(
     argValueChoice,
-    filterGroups.map(f => ({ text: f }))
+    filterGroups.map((f) => ({ text: f }))
   );
 
-  const handleSelectGroup = ev => {
+  const handleSelectGroup = (ev) => {
     const selected = ev.target.value;
     onValueChange(selected);
   };
 
-  const handleAddGroup = ev => {
+  const handleAddGroup = (ev) => {
     // stop the form from submitting
     ev.preventDefault();
     // set the new value
@@ -53,18 +57,18 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
             compressed
             type="text"
             value={inputValue}
-            onChange={ev => setInputValue(ev.target.value)}
+            onChange={(ev) => setInputValue(ev.target.value)}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">
           <EuiButton type="submit" size="s" onClick={handleAddGroup}>
-            Set
+            {strings.getButtonSet()}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiButtonEmpty color="danger" size="xs" onClick={() => setAddMode(!addMode)} flush="left">
-        Cancel
+        {strings.getButtonCancel()}
       </EuiButtonEmpty>
     </form>
   );
@@ -80,7 +84,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
       />
       <EuiSpacer size="s" />
       <EuiButtonEmpty size="xs" onClick={() => setAddMode(!addMode)} flush="left">
-        Create new group
+        {strings.getCreateNewGroup()}
       </EuiButtonEmpty>
     </Fragment>
   );
@@ -99,7 +103,7 @@ FilterGroupInput.propTypes = {
 
 export const filterGroup = () => ({
   name: 'filterGroup',
-  displayName: 'Filter Group',
-  help: 'Create or select a filter group',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(FilterGroupInput),
 });

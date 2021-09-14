@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
 
-const assertStatsAndMetrics = body => {
+const assertStatsAndMetrics = (body) => {
   expect(body.kibana.name).to.be.a('string');
   expect(body.kibana.uuid).to.be.a('string');
   expect(body.kibana.host).to.be.a('string');
@@ -55,7 +44,20 @@ const assertStatsAndMetrics = body => {
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
+
   describe('kibana stats api', () => {
+    before(async () => {
+      await kibanaServer.importExport.load(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      );
+    });
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      );
+    });
+
     describe('basic', () => {
       it('should return the stats without cluster_uuid with no query string params', () => {
         return supertest
@@ -145,4 +147,3 @@ export default function ({ getService }) {
     });
   });
 }
-

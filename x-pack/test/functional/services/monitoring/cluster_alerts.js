@@ -1,13 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { range } from 'lodash';
-import {
-  map as mapAsync,
-} from 'bluebird';
+import { map as mapAsync } from 'bluebird';
 
 export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
@@ -19,17 +18,16 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
   const SUBJ_OVERVIEW_ICONS =
     `[data-test-subj="${SUBJ_OVERVIEW_CLUSTER_ALERTS}"] ` +
     `[data-test-subj="topAlertItem"] .euiCallOutHeader__title`;
-  const SUBJ_OVERVIEW_TEXTS = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} alertText`;
-  const SUBJ_OVERVIEW_ACTIONS = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} alertAction`;
-  const SUBJ_OVERVIEW_VIEW_ALL = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} viewAllAlerts`;
+  const SUBJ_OVERVIEW_TEXTS = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} > alertText`;
+  const SUBJ_OVERVIEW_ACTIONS = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} > alertAction`;
+  const SUBJ_OVERVIEW_VIEW_ALL = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} > viewAllAlerts`;
 
-  const SUBJ_TABLE_BODY    = 'alertsTableContainer';
-  const SUBJ_TABLE_ICONS   = `${SUBJ_TABLE_BODY} alertIcon`;
-  const SUBJ_TABLE_TEXTS   = `${SUBJ_TABLE_BODY} alertText`;
-  const SUBJ_TABLE_ACTIONS = `${SUBJ_TABLE_BODY} alertAction`;
+  const SUBJ_TABLE_BODY = 'alertsTableContainer';
+  const SUBJ_TABLE_ICONS = `${SUBJ_TABLE_BODY} > alertIcon`;
+  const SUBJ_TABLE_TEXTS = `${SUBJ_TABLE_BODY} > alertText`;
+  const SUBJ_TABLE_ACTIONS = `${SUBJ_TABLE_BODY} > alertAction`;
 
-  return new class ClusterAlerts {
-
+  return new (class ClusterAlerts {
     /*
      * Helper function to return the testable panel listing content or table content
      */
@@ -45,8 +43,8 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
           {
             alertIcon: alertIcons[current],
             alertText: alertTexts[current],
-            alertAction: alertActions[current]
-          }
+            alertAction: alertActions[current],
+          },
         ];
       }, []);
     }
@@ -56,7 +54,7 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
      */
 
     getOverviewAlerts() {
-      return testSubjects.findAll(`${SUBJ_OVERVIEW_CLUSTER_ALERTS} topAlertItem`);
+      return testSubjects.findAll(`${SUBJ_OVERVIEW_CLUSTER_ALERTS} > topAlertItem`);
     }
 
     async getOverviewAlertsAll() {
@@ -72,7 +70,7 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
         size: listingRows.length,
         alertIcons,
         textsSubj: SUBJ_OVERVIEW_TEXTS,
-        actionsSubj: SUBJ_OVERVIEW_ACTIONS
+        actionsSubj: SUBJ_OVERVIEW_ACTIONS,
       });
     }
 
@@ -106,7 +104,7 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
         size: tableRows.length,
         alertIcons,
         textsSubj: SUBJ_TABLE_TEXTS,
-        actionsSubj: SUBJ_TABLE_ACTIONS
+        actionsSubj: SUBJ_TABLE_ACTIONS,
       });
     }
 
@@ -114,7 +112,5 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
       const alerts = await this.getTableAlertsAll();
       return alerts[index];
     }
-
-  };
+  })();
 }
-

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import globSync from 'glob';
@@ -23,10 +12,10 @@ import { promisify } from 'util';
 
 import { CliError } from './errors';
 import { Project } from './project';
-import { workspacePackagePaths } from './workspaces';
 
 const glob = promisify(globSync);
 
+/** a Map of project names to Project instances */
 export type ProjectMap = Map<string, Project>;
 export type ProjectGraph = Map<string, Project[]>;
 export interface IProjectsOptions {
@@ -37,11 +26,10 @@ export interface IProjectsOptions {
 export async function getProjects(
   rootPath: string,
   projectsPathsPatterns: string[],
-  { include = [], exclude = [] }: IProjectsOptions = {}
+  { include = [], exclude = [] }: IProjectsOptions = {},
+  bazelOnly: boolean = false
 ) {
   const projects: ProjectMap = new Map();
-
-  const workspaceProjectsPaths = await workspacePackagePaths(rootPath);
 
   for (const pattern of projectsPathsPatterns) {
     const pathsToProcess = await packagesFromGlobPattern({ pattern, rootPath });
@@ -51,12 +39,10 @@ export async function getProjects(
       const projectDir = path.dirname(projectConfigPath);
       const project = await Project.fromPath(projectDir);
 
-      if (workspaceProjectsPaths.indexOf(filePath) >= 0) {
-        project.isWorkspaceProject = true;
-      }
-
       const excludeProject =
-        exclude.includes(project.name) || (include.length > 0 && !include.includes(project.name));
+        exclude.includes(project.name) ||
+        (include.length > 0 && !include.includes(project.name)) ||
+        (bazelOnly && !project.isBazelPackage());
 
       if (excludeProject) {
         continue;
@@ -74,6 +60,30 @@ export async function getProjects(
   }
 
   return projects;
+}
+
+export async function getNonBazelProjectsOnly(projects: ProjectMap) {
+  const bazelProjectsOnly: ProjectMap = new Map();
+
+  for (const project of projects.values()) {
+    if (!project.isBazelPackage()) {
+      bazelProjectsOnly.set(project.name, project);
+    }
+  }
+
+  return bazelProjectsOnly;
+}
+
+export async function getBazelProjectsOnly(projects: ProjectMap) {
+  const bazelProjectsOnly: ProjectMap = new Map();
+
+  for (const project of projects.values()) {
+    if (project.isBazelPackage()) {
+      bazelProjectsOnly.set(project.name, project);
+    }
+  }
+
+  return bazelProjectsOnly;
 }
 
 function packagesFromGlobPattern({ pattern, rootPath }: { pattern: string; rootPath: string }) {
@@ -111,10 +121,7 @@ export function buildProjectGraph(projects: ProjectMap) {
     for (const depName of Object.keys(dependencies)) {
       if (projects.has(depName)) {
         const dep = projects.get(depName)!;
-
-        const dependentProjectIsInWorkspace =
-          project.isWorkspaceProject || project.json.name === 'kibana';
-        project.ensureValidProjectDependency(dep, dependentProjectIsInWorkspace);
+        project.ensureValidProjectDependency(dep);
 
         projectDeps.push(dep);
       }
@@ -128,37 +135,11 @@ export function buildProjectGraph(projects: ProjectMap) {
 
 export function topologicallyBatchProjects(
   projectsToBatch: ProjectMap,
-  projectGraph: ProjectGraph,
-  { batchByWorkspace = false } = {}
+  projectGraph: ProjectGraph
 ) {
   // We're going to be chopping stuff out of this list, so copy it.
   const projectsLeftToBatch = new Set(projectsToBatch.keys());
   const batches = [];
-
-  if (batchByWorkspace) {
-    const workspaceRootProject = Array.from(projectsToBatch.values()).find(p => p.isWorkspaceRoot);
-
-    if (!workspaceRootProject) {
-      throw new CliError(`There was no yarn workspace root found.`);
-    }
-
-    // Push in the workspace root first.
-    batches.push([workspaceRootProject]);
-    projectsLeftToBatch.delete(workspaceRootProject.name);
-
-    // In the next batch, push in all workspace projects.
-    const workspaceBatch = [];
-    for (const projectName of projectsLeftToBatch) {
-      const project = projectsToBatch.get(projectName)!;
-
-      if (project.isWorkspaceProject) {
-        workspaceBatch.push(project);
-        projectsLeftToBatch.delete(projectName);
-      }
-    }
-
-    batches.push(workspaceBatch);
-  }
 
   while (projectsLeftToBatch.size > 0) {
     // Get all projects that have no remaining dependencies within the repo
@@ -166,7 +147,7 @@ export function topologicallyBatchProjects(
     const batch = [];
     for (const projectName of projectsLeftToBatch) {
       const projectDeps = projectGraph.get(projectName)!;
-      const needsDependenciesBatched = projectDeps.some(dep => projectsLeftToBatch.has(dep.name));
+      const needsDependenciesBatched = projectDeps.some((dep) => projectsLeftToBatch.has(dep.name));
 
       if (!needsDependenciesBatched) {
         batch.push(projectsToBatch.get(projectName)!);
@@ -187,7 +168,7 @@ export function topologicallyBatchProjects(
 
     batches.push(batch);
 
-    batch.forEach(project => projectsLeftToBatch.delete(project.name));
+    batch.forEach((project) => projectsLeftToBatch.delete(project.name));
   }
 
   return batches;
@@ -198,7 +179,7 @@ export function includeTransitiveProjects(
   allProjects: ProjectMap,
   { onlyProductionDependencies = false } = {}
 ) {
-  const dependentProjects: ProjectMap = new Map();
+  const projectsWithDependents: ProjectMap = new Map();
 
   // the current list of packages we are expanding using breadth-first-search
   const toProcess = [...subsetOfProjects];
@@ -210,14 +191,14 @@ export function includeTransitiveProjects(
       ? project.productionDependencies
       : project.allDependencies;
 
-    Object.keys(dependencies).forEach(dep => {
+    Object.keys(dependencies).forEach((dep) => {
       if (allProjects.has(dep)) {
         toProcess.push(allProjects.get(dep)!);
       }
     });
 
-    dependentProjects.set(project.name, project);
+    projectsWithDependents.set(project.name, project);
   }
 
-  return dependentProjects;
+  return projectsWithDependents;
 }

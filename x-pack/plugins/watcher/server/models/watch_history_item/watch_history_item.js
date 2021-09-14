@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { get, cloneDeep } from 'lodash';
 import { WatchStatus } from '../watch_status';
@@ -31,7 +32,7 @@ export class WatchHistoryItem {
       watchId: this.watchId,
       details: this.includeDetails ? this.details : null,
       startTime: this.startTime.toISOString(),
-      watchStatus: this.watchStatus.downstreamJson
+      watchStatus: this.watchStatus.downstreamJson,
     };
   }
 
@@ -40,31 +41,37 @@ export class WatchHistoryItem {
     if (!json.id) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.watchHistoryItem.idPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {id} property',
+          defaultMessage: 'JSON argument must contain an {id} property',
           values: {
-            id: 'id'
-          }
-        }),
+            id: 'id',
+          },
+        })
       );
     }
     if (!json.watchId) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watchHistoryItem.watchIdPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain a {watchId} property',
-          values: {
-            watchId: 'watchId'
+        i18n.translate(
+          'xpack.watcher.models.watchHistoryItem.watchIdPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain a {watchId} property',
+            values: {
+              watchId: 'watchId',
+            },
           }
-        }),
+        )
       );
     }
     if (!json.watchHistoryItemJson) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watchHistoryItem.watchHistoryItemJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain a {watchHistoryItemJson} property',
-          values: {
-            watchHistoryItemJson: 'watchHistoryItemJson'
+        i18n.translate(
+          'xpack.watcher.models.watchHistoryItem.watchHistoryItemJsonPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain a {watchHistoryItemJson} property',
+            values: {
+              watchHistoryItemJson: 'watchHistoryItemJson',
+            },
           }
-        }),
+        )
       );
     }
 

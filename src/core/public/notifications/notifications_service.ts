@@ -1,33 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 
 import { Subscription } from 'rxjs';
-import { I18nStart, I18nSetup } from '../i18n';
+import { I18nStart } from '../i18n';
 import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
-import { UiSettingsSetup } from '../ui_settings';
+import { IUiSettingsClient } from '../ui_settings';
 import { OverlayStart } from '../overlays';
 
 interface SetupDeps {
-  i18n: I18nSetup;
-  uiSettings: UiSettingsSetup;
+  uiSettings: IUiSettingsClient;
 }
 
 interface StartDeps {
@@ -46,10 +34,10 @@ export class NotificationsService {
     this.toasts = new ToastsService();
   }
 
-  public setup({ i18n: i18nSetup, uiSettings }: SetupDeps): NotificationsSetup {
-    const notificationSetup = { toasts: this.toasts.setup({ i18n: i18nSetup, uiSettings }) };
+  public setup({ uiSettings }: SetupDeps): NotificationsSetup {
+    const notificationSetup = { toasts: this.toasts.setup({ uiSettings }) };
 
-    this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe(error => {
+    this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
       notificationSetup.toasts.addDanger({
         title: i18n.translate('core.notifications.unableUpdateUISettingNotificationMessageTitle', {
           defaultMessage: 'Unable to update UI setting',
@@ -86,10 +74,12 @@ export class NotificationsService {
 
 /** @public */
 export interface NotificationsSetup {
+  /** {@link ToastsSetup} */
   toasts: ToastsSetup;
 }
 
 /** @public */
 export interface NotificationsStart {
+  /** {@link ToastsStart} */
   toasts: ToastsStart;
 }

@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 export enum Operation {
   EQ = 'eq',
-  NE = 'ne',
-  LT = 'lt',
   GT = 'gt',
-  LTE = 'lte',
   GTE = 'gte',
+  LT = 'lt',
+  LTE = 'lte',
+  NE = 'ne',
+  NEQ = 'neq',
 }
 
 interface Arguments {
@@ -22,7 +25,7 @@ interface Arguments {
 
 type Context = boolean | number | string | null;
 
-export function compare(): ExpressionFunction<'compare', Context, Arguments, boolean> {
+export function compare(): ExpressionFunctionDefinition<'compare', Context, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().compare;
   const errors = getFunctionErrors().compare;
 
@@ -31,9 +34,7 @@ export function compare(): ExpressionFunction<'compare', Context, Arguments, boo
     help,
     aliases: ['condition'],
     type: 'boolean',
-    context: {
-      types: ['null', 'string', 'number', 'boolean'],
-    },
+    inputTypes: ['string', 'number', 'boolean', 'null'],
     args: {
       op: {
         aliases: ['_'],
@@ -47,8 +48,8 @@ export function compare(): ExpressionFunction<'compare', Context, Arguments, boo
         help: argHelp.to,
       },
     },
-    fn: (context, args) => {
-      const a = context;
+    fn: (input, args) => {
+      const a = input;
       const { to: b, op } = args;
       const typesMatch = typeof a === typeof b;
 
@@ -56,28 +57,29 @@ export function compare(): ExpressionFunction<'compare', Context, Arguments, boo
         case Operation.EQ:
           return a === b;
         case Operation.NE:
+        case Operation.NEQ:
           return a !== b;
         case Operation.LT:
           if (typesMatch) {
-            // @ts-ignore #35433 This is a wonky comparison for nulls
+            // @ts-expect-error #35433 This is a wonky comparison for nulls
             return a < b;
           }
           return false;
         case Operation.LTE:
           if (typesMatch) {
-            // @ts-ignore #35433 This is a wonky comparison for nulls
+            // @ts-expect-error #35433 This is a wonky comparison for nulls
             return a <= b;
           }
           return false;
         case Operation.GT:
           if (typesMatch) {
-            // @ts-ignore #35433 This is a wonky comparison for nulls
+            // @ts-expect-error #35433 This is a wonky comparison for nulls
             return a > b;
           }
           return false;
         case Operation.GTE:
           if (typesMatch) {
-            // @ts-ignore #35433 This is a wonky comparison for nulls
+            // @ts-expect-error #35433 This is a wonky comparison for nulls
             return a >= b;
           }
           return false;

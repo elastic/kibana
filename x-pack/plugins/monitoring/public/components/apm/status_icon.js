@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { StatusIcon } from 'plugins/monitoring/components/status_icon';
-import { injectI18n } from '@kbn/i18n/react';
+import { StatusIcon } from '../../components/status_icon';
+import { i18n } from '@kbn/i18n';
 
-function ApmStatusIconUI({ status, availability = true, intl }) {
+export function ApmStatusIcon({ status, availability = true }) {
   const type = (() => {
     if (!availability) {
       return StatusIcon.TYPES.GRAY;
@@ -21,13 +22,12 @@ function ApmStatusIconUI({ status, availability = true, intl }) {
   return (
     <StatusIcon
       type={type}
-      label={intl.formatMessage({
-        id: 'xpack.monitoring.apm.healthStatusLabel',
-        defaultMessage: 'Health: {status}' }, {
-        status
+      label={i18n.translate('xpack.monitoring.apm.healthStatusLabel', {
+        defaultMessage: 'Health: {status}',
+        values: {
+          status,
+        },
       })}
     />
   );
 }
-
-export const ApmStatusIcon = injectI18n(ApmStatusIconUI);

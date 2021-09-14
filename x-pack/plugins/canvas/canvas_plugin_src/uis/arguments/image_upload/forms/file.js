@@ -1,21 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFilePicker } from '@elastic/eui';
 import { Loading } from '../../../../../public/components/loading/loading';
+import { ArgumentStrings } from '../../../../../i18n';
+
+const { ImageUpload: strings } = ArgumentStrings;
 
 export const FileForm = ({ loading, onChange }) =>
   loading ? (
-    <Loading animated text="Image uploading" />
+    <Loading animated text={strings.getImageUploading()} />
   ) : (
     <EuiFilePicker
-      initialPromptText="Select or drag and drop an image"
+      initialPromptText={strings.getFileUploadPrompt()}
       onChange={onChange}
       compressed
+      display="default"
       className="canvasImageUpload"
       accept="image/*"
     />

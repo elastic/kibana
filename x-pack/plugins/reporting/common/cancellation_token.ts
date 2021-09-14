@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isFunction } from 'lodash';
 
 export class CancellationToken {
-  private isCancelled: boolean;
+  private _isCancelled: boolean;
   private _callbacks: Function[];
 
   constructor() {
-    this.isCancelled = false;
+    this._isCancelled = false;
     this._callbacks = [];
   }
 
@@ -20,7 +21,7 @@ export class CancellationToken {
       throw new Error('Expected callback to be a function');
     }
 
-    if (this.isCancelled) {
+    if (this._isCancelled) {
       callback();
       return;
     }
@@ -29,7 +30,11 @@ export class CancellationToken {
   };
 
   public cancel = () => {
-    this.isCancelled = true;
-    this._callbacks.forEach(callback => callback());
+    this._isCancelled = true;
+    this._callbacks.forEach((callback) => callback());
   };
+
+  public isCancelled() {
+    return this._isCancelled;
+  }
 }

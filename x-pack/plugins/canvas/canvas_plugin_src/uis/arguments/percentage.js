@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiRange } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../../i18n';
+
+const { Percentage: strings } = ArgumentStrings;
 
 const PercentageArgInput = ({ onValueChange, argValue }) => {
-  const handleChange = ev => {
+  const handleChange = (ev) => {
     return onValueChange(ev.target.value / 100);
   };
 
@@ -35,7 +39,7 @@ PercentageArgInput.propTypes = {
 
 export const percentage = () => ({
   name: 'percentage',
-  displayName: 'Percentage',
-  help: 'Slider for percentage ',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(PercentageArgInput),
 });

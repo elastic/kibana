@@ -1,47 +1,62 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { HttpService, Router } from '.';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { getEnvOptions } from '../config/mocks';
+import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
-import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
-import { loggingServiceMock } from '../logging/logging_service.mock';
-import { getEnvOptions } from '../config/__mocks__/env';
+import { httpServerMock } from './http_server.mocks';
+import { ConfigService, Env } from '../config';
+import { loggingSystemMock } from '../logging/logging_system.mock';
+import { contextServiceMock } from '../context/context_service.mock';
+import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
+import { config as cspConfig } from '../csp';
+import { config as externalUrlConfig, ExternalUrlConfig } from '../external_url';
+import { Router } from './router';
 
-const logger = loggingServiceMock.create();
-const env = Env.createDefault(getEnvOptions());
+const logger = loggingSystemMock.create();
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
+const coreId = Symbol();
 
 const createConfigService = (value: Partial<HttpConfigType> = {}) => {
   const configService = new ConfigService(
-    new BehaviorSubject<Config>(
-      new ObjectToConfigAdapter({
-        server: value,
-      })
-    ),
+    {
+      getConfig$: () =>
+        new BehaviorSubject({
+          server: value,
+        }),
+    },
     env,
     logger
   );
   configService.setSchema(config.path, config.schema);
+  configService.setSchema(cspConfig.path, cspConfig.schema);
+  configService.setSchema(externalUrlConfig.path, externalUrlConfig.schema);
   return configService;
+};
+const contextPreboot = contextServiceMock.createPrebootContract();
+const contextSetup = contextServiceMock.createSetupContract();
+
+const prebootDeps = {
+  context: contextPreboot,
+};
+const setupDeps = {
+  context: contextSetup,
+  executionContext: executionContextServiceMock.createInternalSetupContract(),
+};
+const fakeHapiServer = {
+  start: noop,
+  stop: noop,
+  route: noop,
 };
 
 afterEach(() => {
@@ -56,82 +71,124 @@ test('creates and sets up http server', async () => {
 
   const httpServer = {
     isListening: () => false,
-    setup: jest.fn(),
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
     start: jest.fn(),
-    stop: noop,
+    stop: jest.fn(),
   };
-  mockHttpServer.mockImplementation(() => httpServer);
+  const prebootHttpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  mockHttpServer.mockImplementationOnce(() => prebootHttpServer);
+  mockHttpServer.mockImplementationOnce(() => httpServer);
 
-  const service = new HttpService({ configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger });
 
-  expect(mockHttpServer.mock.instances.length).toBe(1);
+  expect(mockHttpServer.mock.instances.length).toBe(2);
 
   expect(httpServer.setup).not.toHaveBeenCalled();
+  expect(prebootHttpServer.setup).not.toHaveBeenCalled();
 
-  await service.setup();
-  expect(httpServer.setup).toHaveBeenCalledTimes(1);
+  await service.preboot(prebootDeps);
+  expect(httpServer.setup).not.toHaveBeenCalled();
   expect(httpServer.start).not.toHaveBeenCalled();
 
+  expect(prebootHttpServer.setup).toHaveBeenCalled();
+  expect(prebootHttpServer.start).toHaveBeenCalled();
+
+  await service.setup(setupDeps);
+  expect(httpServer.setup).toHaveBeenCalled();
+  expect(httpServer.start).not.toHaveBeenCalled();
+  expect(prebootHttpServer.stop).not.toHaveBeenCalled();
+
   await service.start();
-  expect(httpServer.start).toHaveBeenCalledTimes(1);
+  expect(httpServer.start).toHaveBeenCalled();
+  expect(prebootHttpServer.stop).toHaveBeenCalled();
 });
 
-// this is an integration test!
-test('creates and sets up second http server', async () => {
-  const configService = createConfigService({
-    host: 'localhost',
-    port: 1234,
+test('spins up `preboot` server until started if configured with `autoListen:true`', async () => {
+  const configService = createConfigService();
+  const httpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({}),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  const prebootHapiServer = {
+    start: jest.fn(),
+    stop: jest.fn(),
+    route: jest.fn(),
+  };
+
+  mockHttpServer
+    .mockImplementationOnce(() => ({
+      setup: () => ({ server: prebootHapiServer, registerStaticDir: jest.fn() }),
+      start: jest.fn(),
+      stop: jest.fn().mockImplementation(() => prebootHapiServer.stop()),
+    }))
+    .mockImplementationOnce(() => httpServer);
+
+  const service = new HttpService({
+    coreId,
+    configService,
+    env: Env.createDefault(REPO_ROOT, getEnvOptions()),
+    logger,
   });
-  const { HttpServer } = jest.requireActual('./http_server');
 
-  mockHttpServer.mockImplementation((...args) => new HttpServer(...args));
+  await service.preboot(prebootDeps);
 
-  const service = new HttpService({ configService, env, logger });
-  const serverSetup = await service.setup();
-  const cfg = { port: 2345 };
-  await serverSetup.createNewServer(cfg);
-  const server = await service.start();
-  expect(server.isListening()).toBeTruthy();
-  expect(server.isListening(cfg.port)).toBeTruthy();
+  const mockResponse: any = {
+    code: jest.fn().mockImplementation(() => mockResponse),
+    header: jest.fn().mockImplementation(() => mockResponse),
+  };
+  const mockResponseToolkit = {
+    response: jest.fn().mockReturnValue(mockResponse),
+  };
 
-  try {
-    await serverSetup.createNewServer(cfg);
-  } catch (err) {
-    expect(err.message).toBe('port 2345 is already in use');
-  }
+  const [[{ handler }]] = prebootHapiServer.route.mock.calls;
+  const response503 = await handler(httpServerMock.createRawRequest(), mockResponseToolkit);
+  expect(response503).toBe(mockResponse);
+  expect({
+    body: mockResponseToolkit.response.mock.calls,
+    code: mockResponse.code.mock.calls,
+    header: mockResponse.header.mock.calls,
+  }).toMatchSnapshot('503 response');
 
-  try {
-    await serverSetup.createNewServer({ port: 1234 });
-  } catch (err) {
-    expect(err.message).toBe('port 1234 is already in use');
-  }
+  await service.setup(setupDeps);
+  await service.start();
 
-  try {
-    await serverSetup.createNewServer({ host: 'example.org' });
-  } catch (err) {
-    expect(err.message).toBe('port must be defined');
-  }
-  await service.stop();
-  expect(server.isListening()).toBeFalsy();
-  expect(server.isListening(cfg.port)).toBeFalsy();
+  expect(httpServer.start).toBeCalledTimes(1);
+  expect(prebootHapiServer.stop).toBeCalledTimes(1);
 });
 
 test('logs error if already set up', async () => {
   const configService = createConfigService();
 
+  mockHttpServer.mockImplementationOnce(() => ({
+    setup: () => ({
+      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
+      registerStaticDir: jest.fn(),
+    }),
+    start: noop,
+    stop: noop,
+  }));
+
   const httpServer = {
     isListening: () => true,
-    setup: jest.fn(),
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
     start: noop,
     stop: noop,
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService({ configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger });
 
-  await service.setup();
+  await service.preboot(prebootDeps);
+  await service.setup(setupDeps);
 
-  expect(loggingServiceMock.collect(logger).warn).toMatchSnapshot();
+  expect(loggingSystemMock.collect(logger).warn).toMatchSnapshot();
 });
 
 test('stops http server', async () => {
@@ -139,106 +196,271 @@ test('stops http server', async () => {
 
   const httpServer = {
     isListening: () => false,
-    setup: noop,
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
     start: noop,
     stop: jest.fn(),
   };
-  mockHttpServer.mockImplementation(() => httpServer);
+  const prebootHttpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+    start: noop,
+    stop: jest.fn(),
+  };
+  mockHttpServer.mockImplementationOnce(() => prebootHttpServer);
+  mockHttpServer.mockImplementationOnce(() => httpServer);
 
-  const service = new HttpService({ configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger });
 
-  await service.setup();
+  await service.preboot(prebootDeps);
+  await service.setup(setupDeps);
   await service.start();
 
   expect(httpServer.stop).toHaveBeenCalledTimes(0);
+  expect(prebootHttpServer.stop).toHaveBeenCalledTimes(1);
 
   await service.stop();
 
   expect(httpServer.stop).toHaveBeenCalledTimes(1);
 });
 
+test('stops `preboot` server if it is running', async () => {
+  const configService = createConfigService();
+  const mockHapiServer = {
+    start: jest.fn(),
+    stop: jest.fn(),
+    route: jest.fn(),
+  };
+  const httpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: mockHapiServer, registerStaticDir: jest.fn() }),
+    start: noop,
+    stop: jest.fn().mockImplementation(() => mockHapiServer.stop()),
+  };
+  mockHttpServer.mockImplementation(() => httpServer);
+
+  const service = new HttpService({ coreId, configService, env, logger });
+
+  await service.preboot(prebootDeps);
+
+  await service.stop();
+
+  expect(mockHapiServer.stop).toHaveBeenCalledTimes(2);
+});
+
+test('does not try to stop `preboot` server if it has been already stopped', async () => {
+  const prebootHttpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+    start: noop,
+    stop: jest.fn(),
+  };
+  const standardHttpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
+    start: noop,
+    stop: jest.fn(),
+  };
+
+  mockHttpServer
+    .mockImplementationOnce(() => prebootHttpServer)
+    .mockImplementationOnce(() => standardHttpServer);
+
+  const service = new HttpService({ coreId, configService: createConfigService(), env, logger });
+  await service.preboot(prebootDeps);
+  await service.setup(setupDeps);
+
+  expect(prebootHttpServer.stop).not.toHaveBeenCalled();
+  expect(standardHttpServer.stop).not.toHaveBeenCalled();
+
+  await service.start();
+
+  expect(prebootHttpServer.stop).toHaveBeenCalledTimes(1);
+  expect(standardHttpServer.stop).not.toHaveBeenCalled();
+
+  await service.stop();
+
+  expect(prebootHttpServer.stop).toHaveBeenCalledTimes(1);
+  expect(standardHttpServer.stop).toHaveBeenCalledTimes(1);
+});
+
 test('register route handler', async () => {
   const configService = createConfigService();
+
+  mockHttpServer.mockImplementationOnce(() => ({
+    setup: () => ({
+      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
+      registerStaticDir: jest.fn(),
+    }),
+    start: noop,
+    stop: noop,
+  }));
 
   const registerRouterMock = jest.fn();
   const httpServer = {
     isListening: () => false,
-    setup: () => ({ registerRouter: registerRouterMock }),
+    setup: jest
+      .fn()
+      .mockReturnValue({ server: fakeHapiServer, registerRouter: registerRouterMock }),
     start: noop,
     stop: noop,
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService({ configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger });
 
-  const router = new Router('/foo');
-  const { registerRouter } = await service.setup();
-  registerRouter(router);
+  await service.preboot(prebootDeps);
+  const { createRouter } = await service.setup(setupDeps);
+  const router = createRouter('/foo');
 
   expect(registerRouterMock).toHaveBeenCalledTimes(1);
   expect(registerRouterMock).toHaveBeenLastCalledWith(router);
 });
 
-test('returns http server contract on setup', async () => {
+test('register preboot route handler on preboot', async () => {
+  const registerRouterMock = jest.fn();
+  mockHttpServer.mockImplementationOnce(() => ({
+    setup: () => ({
+      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
+      registerStaticDir: jest.fn(),
+      registerRouterAfterListening: registerRouterMock,
+    }),
+    start: noop,
+    stop: noop,
+  }));
+
+  const service = new HttpService({ coreId, configService: createConfigService(), env, logger });
+
+  const registerRoutesMock = jest.fn();
+  const { registerRoutes } = await service.preboot(prebootDeps);
+  registerRoutes('some-path', registerRoutesMock);
+
+  expect(registerRoutesMock).toHaveBeenCalledTimes(1);
+  expect(registerRoutesMock).toHaveBeenCalledWith(expect.any(Router));
+
+  const [[router]] = registerRoutesMock.mock.calls;
+  expect(registerRouterMock).toHaveBeenCalledTimes(1);
+  expect(registerRouterMock).toHaveBeenCalledWith(router);
+});
+
+test('register preboot route handler on setup', async () => {
+  const registerRouterMock = jest.fn();
+  mockHttpServer
+    .mockImplementationOnce(() => ({
+      setup: () => ({
+        server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
+        registerStaticDir: jest.fn(),
+        registerRouterAfterListening: registerRouterMock,
+      }),
+      start: noop,
+      stop: noop,
+    }))
+    .mockImplementationOnce(() => ({ setup: () => ({ server: {} }), start: noop, stop: noop }));
+
+  const service = new HttpService({ coreId, configService: createConfigService(), env, logger });
+  await service.preboot(prebootDeps);
+
+  const registerRoutesMock = jest.fn();
+  const { registerPrebootRoutes } = await service.setup(setupDeps);
+  registerPrebootRoutes('some-path', registerRoutesMock);
+
+  expect(registerRoutesMock).toHaveBeenCalledTimes(1);
+  expect(registerRoutesMock).toHaveBeenCalledWith(expect.any(Router));
+
+  const [[router]] = registerRoutesMock.mock.calls;
+  expect(registerRouterMock).toHaveBeenCalledTimes(1);
+  expect(registerRouterMock).toHaveBeenCalledWith(router);
+});
+
+test('returns `preboot` http server contract on preboot', async () => {
   const configService = createConfigService();
   const httpServer = {
-    server: {},
-    options: { someOption: true },
+    server: fakeHapiServer,
+    registerStaticDir: jest.fn(),
+    auth: Symbol('auth'),
+    basePath: Symbol('basePath'),
+    csp: Symbol('csp'),
+    getServerInfo: jest.fn(),
   };
 
   mockHttpServer.mockImplementation(() => ({
     isListening: () => false,
     setup: jest.fn().mockReturnValue(httpServer),
+    start: noop,
     stop: noop,
   }));
 
-  const service = new HttpService({ configService, env, logger });
-  const { createNewServer, ...setupHttpServer } = await service.setup();
-  expect(createNewServer).toBeDefined();
-  expect(setupHttpServer).toEqual(httpServer);
+  const service = new HttpService({ coreId, configService, env, logger });
+  await expect(service.preboot(prebootDeps)).resolves.toMatchObject({
+    auth: httpServer.auth,
+    basePath: httpServer.basePath,
+    csp: httpServer.csp,
+    externalUrl: expect.any(ExternalUrlConfig),
+    registerRouteHandlerContext: expect.any(Function),
+    registerRoutes: expect.any(Function),
+    registerStaticDir: expect.any(Function),
+    getServerInfo: expect.any(Function),
+  });
 });
 
-test('does not start http server if process is dev cluster master', async () => {
+test('returns http server contract on setup', async () => {
   const configService = createConfigService();
-  const httpServer = {
-    isListening: () => false,
-    setup: noop,
-    start: jest.fn(),
+  const httpServer = { server: fakeHapiServer, options: { someOption: true } };
+
+  mockHttpServer.mockImplementationOnce(() => ({
+    setup: () => ({
+      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
+      registerStaticDir: jest.fn(),
+    }),
+    start: noop,
     stop: noop,
-  };
-  mockHttpServer.mockImplementation(() => httpServer);
+  }));
 
-  const service = new HttpService({
-    configService,
-    env: new Env('.', getEnvOptions({ isDevClusterMaster: true })),
-    logger,
+  mockHttpServer.mockImplementation(() => ({
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue(httpServer),
+    start: noop,
+    stop: noop,
+  }));
+
+  const service = new HttpService({ coreId, configService, env, logger });
+  await service.preboot(prebootDeps);
+  const setupContract = await service.setup(setupDeps);
+  expect(setupContract).toMatchObject(httpServer);
+  expect(setupContract).toMatchObject({
+    createRouter: expect.any(Function),
+    registerPrebootRoutes: expect.any(Function),
   });
-
-  await service.setup();
-  await service.start();
-
-  expect(httpServer.start).not.toHaveBeenCalled();
 });
 
 test('does not start http server if configured with `autoListen:false`', async () => {
   const configService = createConfigService({
     autoListen: false,
   });
+  mockHttpServer.mockImplementationOnce(() => ({
+    setup: () => ({
+      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
+      registerStaticDir: jest.fn(),
+    }),
+    start: noop,
+    stop: noop,
+  }));
   const httpServer = {
     isListening: () => false,
-    setup: noop,
+    setup: jest.fn().mockReturnValue({}),
     start: jest.fn(),
     stop: noop,
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
   const service = new HttpService({
+    coreId,
     configService,
-    env: new Env('.', getEnvOptions()),
+    env: Env.createDefault(REPO_ROOT, getEnvOptions()),
     logger,
   });
 
-  await service.setup();
+  await service.preboot(prebootDeps);
+  await service.setup(setupDeps);
   await service.start();
 
   expect(httpServer.start).not.toHaveBeenCalled();

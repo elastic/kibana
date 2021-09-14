@@ -1,25 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const path = require('path');
 const fs = require('fs');
-const mkdirp = require('mkdirp');
 
 /**
  * Copies config references to an absolute path to
@@ -33,7 +21,7 @@ exports.extractConfigFiles = function extractConfigFiles(config, dest, options =
   const originalConfig = typeof config === 'string' ? [config] : config;
   const localConfig = [];
 
-  originalConfig.forEach(prop => {
+  originalConfig.forEach((prop) => {
     const [key, value] = prop.split('=');
 
     if (isFile(value)) {
@@ -55,14 +43,14 @@ exports.extractConfigFiles = function extractConfigFiles(config, dest, options =
 };
 
 function isFile(dest = '') {
-  return path.isAbsolute(dest) && path.extname(dest).length > 0;
+  return path.isAbsolute(dest) && path.extname(dest).length > 0 && fs.existsSync(dest);
 }
 
 function copyFileSync(src, dest) {
   const destPath = path.dirname(dest);
 
   if (!fs.existsSync(destPath)) {
-    mkdirp(destPath);
+    fs.mkdirSync(destPath, { recursive: true });
   }
 
   fs.writeFileSync(dest, fs.readFileSync(src));

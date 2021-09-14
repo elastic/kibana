@@ -1,0 +1,32 @@
+{
+  "id": "graph",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "licensing",
+    "data",
+    "navigation",
+    "savedObjects",
+    "kibanaLegacy"
+  ],
+  "optionalPlugins": [
+    "home",
+    "features",
+    "spaces"
+  ],
+  "configPath": [
+    "xpack",
+    "graph"
+  ],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "home"
+  ],
+  "owner": {
+    "name": "Data Discovery",
+    "githubTeam": "kibana-data-discovery"
+  }
+}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // Api
@@ -18,6 +19,8 @@ export const AUTO_FOLLOW_PATTERN_GET = 'AUTO_FOLLOW_PATTERN_GET';
 export const AUTO_FOLLOW_PATTERN_CREATE = 'AUTO_FOLLOW_PATTERN_CREATE';
 export const AUTO_FOLLOW_PATTERN_UPDATE = 'AUTO_FOLLOW_PATTERN_UPDATE';
 export const AUTO_FOLLOW_PATTERN_DELETE = 'AUTO_FOLLOW_PATTERN_DELETE';
+export const AUTO_FOLLOW_PATTERN_PAUSE = 'AUTO_FOLLOW_PATTERN_PAUSE';
+export const AUTO_FOLLOW_PATTERN_RESUME = 'AUTO_FOLLOW_PATTERN_RESUME';
 
 // Follower index
 export const FOLLOWER_INDEX_SELECT_DETAIL = 'FOLLOWER_INDEX_SELECT_DETAIL';

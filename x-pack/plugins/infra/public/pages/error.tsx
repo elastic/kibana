@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiCallOut,
   EuiPage,
@@ -15,23 +17,21 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import euiStyled from '../../../../common/eui_styled_components';
-import { Header } from '../components/header';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import { ColumnarPage, PageContent } from '../components/page';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
+  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
 `;
 
 interface Props {
   message: string;
 }
 
-export const Error: React.SFC<Props> = ({ message }) => {
+export const Error: React.FC<Props> = ({ message }) => {
   return (
     <ColumnarPage>
-      <Header />
       <DetailPageContent>
         <ErrorPageBody message={message} />
       </DetailPageContent>
@@ -39,7 +39,7 @@ export const Error: React.SFC<Props> = ({ message }) => {
   );
 };
 
-export const ErrorPageBody: React.SFC<{ message: string }> = ({ message }) => {
+export const ErrorPageBody: React.FC<{ message: string }> = ({ message }) => {
   return (
     <EuiPage style={{ flex: '1 0 auto' }}>
       <EuiPageBody>

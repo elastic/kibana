@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const hexToRgb = (hex: string) => {
@@ -10,12 +11,12 @@ export const hexToRgb = (hex: string) => {
 
   const shorthandMatches = shorthandHexColor.exec(hex);
   if (shorthandMatches) {
-    return shorthandMatches.slice(1, 4).map(mappedHex => parseInt(mappedHex + mappedHex, 16));
+    return shorthandMatches.slice(1, 4).map((mappedHex) => parseInt(mappedHex + mappedHex, 16));
   }
 
   const hexMatches = hexColor.exec(hex);
   if (hexMatches) {
-    return hexMatches.slice(1, 4).map(slicedHex => parseInt(slicedHex, 16));
+    return hexMatches.slice(1, 4).map((slicedHex) => parseInt(slicedHex, 16));
   }
 
   return null;

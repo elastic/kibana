@@ -1,0 +1,8 @@
+{
+  "id": "testFeatureUsage",
+  "owner": { "name": "Platform Security", "githubTeam": "kibana-security" },
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["licensing"]
+}

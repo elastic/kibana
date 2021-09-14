@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -20,14 +21,14 @@ const initialState = {
 
 function mapJobsToIds(jobs) {
   const jobsById = {};
-  jobs.forEach(job => {
+  jobs.forEach((job) => {
     jobsById[job.id] = job;
   });
   return jobsById;
 }
 
 function getJobsIds(jobs) {
-  return jobs.map(job => job.id);
+  return jobs.map((job) => job.id);
 }
 
 export function jobs(state = initialState, action) {
@@ -57,7 +58,7 @@ export function jobs(state = initialState, action) {
       return {
         ...state,
         isLoading: false,
-        jobLoadError: payload.error
+        jobLoadError: payload.error,
       };
 
     case CREATE_JOB_SUCCESS:

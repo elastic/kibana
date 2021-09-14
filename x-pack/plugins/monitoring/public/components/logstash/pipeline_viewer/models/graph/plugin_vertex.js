@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -63,7 +64,10 @@ export class PluginVertex extends Vertex {
     }
 
     const eps = { ...this.eventsPerMillisecond }; // Clone the object so we don't modify the original one
-    eps.data = this.eventsPerMillisecond.data.map(([timestamp, value]) => [ timestamp, value * 1000]);
+    eps.data = this.eventsPerMillisecond.data.map(([timestamp, value]) => [
+      timestamp,
+      value * 1000,
+    ]);
     return eps;
   }
 
@@ -81,7 +85,8 @@ export class PluginVertex extends Vertex {
     const expectedPercentOfTotalProcessorTime = 1 / this.graph.processorVertices.length;
 
     // If a processor takes more than some threshold beyond that it may be slow
-    const threshold = TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT * expectedPercentOfTotalProcessorTime;
+    const threshold =
+      TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT * expectedPercentOfTotalProcessorTime;
 
     return this.percentOfTotalProcessorTime > threshold;
   }
@@ -93,15 +98,17 @@ export class PluginVertex extends Vertex {
       return 0;
     }
 
-    const meanmillisPerEvent = this.graph.processorVertices.reduce((acc, v) => {
-      return acc + v.latestMillisPerEvent || 0;
-    }, 0) / totalProcessorVertices;
+    const meanmillisPerEvent =
+      this.graph.processorVertices.reduce((acc, v) => {
+        return acc + v.latestMillisPerEvent || 0;
+      }, 0) / totalProcessorVertices;
 
-    const variance = this.graph.processorVertices.reduce((acc, v) => {
-      const difference = (v.latestMillisPerEvent || 0) - meanmillisPerEvent;
-      const square = difference * difference;
-      return acc + square;
-    }, 0) / totalProcessorVertices;
+    const variance =
+      this.graph.processorVertices.reduce((acc, v) => {
+        const difference = (v.latestMillisPerEvent || 0) - meanmillisPerEvent;
+        const square = difference * difference;
+        return acc + square;
+      }, 0) / totalProcessorVertices;
 
     const stdDeviation = Math.sqrt(variance);
 
@@ -112,7 +119,7 @@ export class PluginVertex extends Vertex {
   }
 
   get iconType() {
-    switch(this.pluginType) {
+    switch (this.pluginType) {
       case 'input':
         return 'logstashInput';
       case 'filter':

@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Filter renders correctly against snapshot 1`] = `
+<TextFilter
+  columnId="@timestamp"
+  minWidth={190}
+  onFilterChange={[Function]}
+/>
+`;

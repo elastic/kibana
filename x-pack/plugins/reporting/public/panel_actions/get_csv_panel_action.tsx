@@ -1,108 +1,131 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import dateMath from '@elastic/datemath';
+
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
+import * as Rx from 'rxjs';
+import type { CoreSetup, IUiSettingsClient, NotificationsSetup } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
+import type { ISearchEmbeddable, SavedSearch } from '../../../../../src/plugins/discover/public';
+import {
+  loadSharingDataHelpers,
+  SEARCH_EMBEDDABLE_TYPE,
+} from '../../../../../src/plugins/discover/public';
+import type { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
+import { ViewMode } from '../../../../../src/plugins/embeddable/public';
+import type { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
+import { IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
+import type { LicensingPluginSetup } from '../../../licensing/public';
+import { CSV_REPORTING_ACTION } from '../../common/constants';
+import { checkLicense } from '../lib/license_check';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 
-import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embeddable';
-import { PanelActionAPI } from 'ui/embeddable/context_menu_actions/types';
-import { kfetch } from 'ui/kfetch';
-import { toastNotifications } from 'ui/notify';
-import chrome from 'ui/chrome';
-import { API_BASE_URL_V1 } from '../../common/constants';
+function isSavedSearchEmbeddable(
+  embeddable: IEmbeddable | ISearchEmbeddable
+): embeddable is ISearchEmbeddable {
+  return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
+}
 
-const API_BASE_URL = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object`;
+export interface ActionContext {
+  embeddable: ISearchEmbeddable;
+}
 
-class GetCsvReportPanelAction extends ContextMenuAction {
+interface Params {
+  apiClient: ReportingAPIClient;
+  core: CoreSetup;
+  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
+  license$: LicensingPluginSetup['license$'];
+  usesUiCapabilities: boolean;
+}
+
+export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> {
   private isDownloading: boolean;
+  public readonly type = '';
+  public readonly id = CSV_REPORTING_ACTION;
+  private licenseHasDownloadCsv: boolean = false;
+  private capabilityHasDownloadCsv: boolean = false;
+  private uiSettings: IUiSettingsClient;
+  private notifications: NotificationsSetup;
+  private apiClient: ReportingAPIClient;
 
-  constructor() {
-    super(
-      {
-        id: 'downloadCsvReport',
-        parentPanelId: 'mainMenu',
-      },
-      {
-        icon: 'document',
-        getDisplayName: () =>
-          i18n.translate('xpack.reporting.dashboard.downloadCsvPanelTitle', {
-            defaultMessage: 'Download CSV',
-          }),
-      }
-    );
-
+  constructor({ core, startServices$, license$, usesUiCapabilities, apiClient }: Params) {
     this.isDownloading = false;
+
+    this.uiSettings = core.uiSettings;
+    this.notifications = core.notifications;
+    this.apiClient = apiClient;
+
+    license$.subscribe((license) => {
+      const results = license.check('reporting', 'basic');
+      const { showLinks } = checkLicense(results);
+      this.licenseHasDownloadCsv = showLinks;
+    });
+
+    if (usesUiCapabilities) {
+      startServices$.subscribe(([{ application }]) => {
+        this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
+      });
+    } else {
+      this.capabilityHasDownloadCsv = true; // deprecated
+    }
   }
 
-  public async getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
-    const adapters = searchEmbeddable.getInspectorAdapters();
-    if (!adapters) {
-      return {};
-    }
-
-    if (adapters.requests.requests.length === 0) {
-      return {};
-    }
-
-    return searchEmbeddable.searchScope.searchSource.getSearchRequestBody();
+  public getIconType() {
+    return 'document';
   }
 
-  public isVisible = (panelActionAPI: PanelActionAPI): boolean => {
-    const enablePanelActionDownload = chrome.getInjected('enablePanelActionDownload');
+  public getDisplayName() {
+    return i18n.translate('xpack.reporting.dashboard.downloadCsvPanelTitle', {
+      defaultMessage: 'Download CSV',
+    });
+  }
 
-    if (!enablePanelActionDownload) {
+  public async getSearchSource(savedSearch: SavedSearch, embeddable: ISearchEmbeddable) {
+    const { getSharingData } = await loadSharingDataHelpers();
+    return await getSharingData(
+      savedSearch.searchSource,
+      savedSearch, // TODO: get unsaved state (using embeddale.searchScope): https://github.com/elastic/kibana/issues/43977
+      this.uiSettings
+    );
+  }
+
+  public isCompatible = async (context: ActionContext) => {
+    if (!this.licenseHasDownloadCsv || !this.capabilityHasDownloadCsv) {
       return false;
     }
 
-    const { embeddable, containerState } = panelActionAPI;
+    const { embeddable } = context;
 
-    return (
-      containerState.viewMode !== 'edit' && !!embeddable && embeddable.hasOwnProperty('savedSearch')
-    );
+    return embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === 'search';
   };
 
-  public onClick = async (panelActionAPI: PanelActionAPI) => {
-    const { embeddable } = panelActionAPI as any;
-    const {
-      timeRange: { from, to },
-    } = embeddable;
+  public execute = async (context: ActionContext) => {
+    const { embeddable } = context;
 
-    if (!embeddable || this.isDownloading) {
+    if (!isSavedSearchEmbeddable(embeddable) || !(await this.isCompatible(context))) {
+      throw new IncompatibleActionError();
+    }
+
+    if (this.isDownloading) {
       return;
     }
 
-    const searchEmbeddable = embeddable;
-    const searchRequestBody = await this.getSearchRequestBody({ searchEmbeddable });
-    const state = _.pick(searchRequestBody, ['sort', 'docvalue_fields', 'query']);
-    const kibanaTimezone = chrome.getUiSettingsClient().get('dateFormat:tz');
+    const savedSearch = embeddable.getSavedSearch();
+    const { columns, searchSource } = await this.getSearchSource(savedSearch, embeddable);
 
-    const id = `search:${embeddable.savedSearch.id}`;
-    const filename = embeddable.getPanelTitle();
-    const timezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
-    const fromTime = dateMath.parse(from);
-    const toTime = dateMath.parse(to);
-
-    if (!fromTime || !toTime) {
-      return this.onGenerationFail(
-        new Error(`Invalid time range: From: ${fromTime}, To: ${toTime}`)
-      );
-    }
-
-    const body = JSON.stringify({
-      timerange: {
-        min: fromTime.format(),
-        max: toTime.format(),
-        timezone,
-      },
-      state,
+    const immediateJobParams = this.apiClient.getDecoratedJobParams({
+      searchSource,
+      columns,
+      title: savedSearch.title,
+      objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType
     });
 
     this.isDownloading = true;
 
-    toastNotifications.addSuccess({
+    this.notifications.toasts.addSuccess({
       title: i18n.translate('xpack.reporting.dashboard.csvDownloadStartedTitle', {
         defaultMessage: `CSV Download Started`,
       }),
@@ -112,11 +135,12 @@ class GetCsvReportPanelAction extends ContextMenuAction {
       'data-test-subj': 'csvDownloadStarted',
     });
 
-    await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${id}`, body })
-      .then((rawResponse: string) => {
+    await this.apiClient
+      .createImmediateReport(immediateJobParams)
+      .then((rawResponse) => {
         this.isDownloading = false;
 
-        const download = `${filename}.csv`;
+        const download = `${savedSearch.title}.csv`;
         const blob = new Blob([rawResponse], { type: 'text/csv;charset=utf-8;' });
 
         // Hack for IE11 Support
@@ -139,7 +163,7 @@ class GetCsvReportPanelAction extends ContextMenuAction {
 
   private onGenerationFail(error: Error) {
     this.isDownloading = false;
-    toastNotifications.addDanger({
+    this.notifications.toasts.addDanger({
       title: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadTitle', {
         defaultMessage: `CSV download failed`,
       }),
@@ -150,5 +174,3 @@ class GetCsvReportPanelAction extends ContextMenuAction {
     });
   }
 }
-
-ContextMenuActionsRegistryProvider.register(() => new GetCsvReportPanelAction());

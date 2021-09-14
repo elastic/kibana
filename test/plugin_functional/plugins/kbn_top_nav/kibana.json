@@ -1,0 +1,13 @@
+{
+  "id": "kbnTopNav",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["kbn_top_nav"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["navigation"]
+}

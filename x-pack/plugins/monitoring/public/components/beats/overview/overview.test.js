@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
 jest.mock('../stats', () => ({
   Stats: () => 'Stats',
 }));
-jest.mock('../../', () => ({
+jest.mock('../../chart', () => ({
   MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
 }));
 
@@ -28,21 +29,21 @@ describe('Overview', () => {
     const latestTypes = [
       { type: 'Packetbeat', count: 4 },
       { type: 'Metricbeat', count: 4 },
-      { type: 'Heartbeat', count: 2 }
+      { type: 'Heartbeat', count: 2 },
     ];
     const latestVersions = [
       { version: '6.3.1', count: 8 },
-      { version: '6.3.0', count: 2 }
+      { version: '6.3.0', count: 2 },
     ];
     const metrics = {
       beat_event_rates: 1,
       beat_fail_rates: 1,
       beat_throughput_rates: 1,
-      beat_output_errors: 1
+      beat_output_errors: 1,
     };
 
-    const component = shallowWithIntl(
-      <BeatsOverview.WrappedComponent
+    const component = shallow(
+      <BeatsOverview
         latestActive={latestActive}
         latestTypes={latestTypes}
         latestVersions={latestVersions}
@@ -59,15 +60,10 @@ describe('Overview', () => {
       beat_event_rates: 1,
       beat_fail_rates: 1,
       beat_throughput_rates: 1,
-      beat_output_errors: 1
+      beat_output_errors: 1,
     };
 
-    const component = shallowWithIntl(
-      <BeatsOverview.WrappedComponent
-        stats={[]}
-        metrics={metrics}
-      />
-    );
+    const component = shallow(<BeatsOverview stats={[]} metrics={metrics} />);
 
     expect(component).toMatchSnapshot();
   });

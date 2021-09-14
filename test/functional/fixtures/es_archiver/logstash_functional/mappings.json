@@ -127,6 +127,9 @@
             },
             "ram": {
               "type": "long"
+            },
+            "ram_range": {
+              "type": "long_range"
             }
           }
         },
@@ -150,6 +153,14 @@
                   "type": "integer"
                 }
               }
+            }
+          }
+        },
+        "nestedField": {
+          "type": "nested",
+          "properties": {
+            "child": {
+              "type": "keyword"
             }
           }
         },
@@ -492,6 +503,9 @@
             },
             "ram": {
               "type": "long"
+            },
+            "ram_range": {
+              "type": "long_range"
             }
           }
         },
@@ -515,6 +529,14 @@
                   "type": "integer"
                 }
               }
+            }
+          }
+        },
+        "nestedField": {
+          "type": "nested",
+          "properties": {
+            "child": {
+              "type": "keyword"
             }
           }
         },
@@ -857,6 +879,9 @@
             },
             "ram": {
               "type": "long"
+            },
+            "ram_range": {
+              "type": "long_range"
             }
           }
         },
@@ -880,6 +905,14 @@
                   "type": "integer"
                 }
               }
+            }
+          }
+        },
+        "nestedField": {
+          "type": "nested",
+          "properties": {
+            "child": {
+              "type": "keyword"
             }
           }
         },

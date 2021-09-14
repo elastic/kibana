@@ -1,0 +1,50 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects attempts to exploit privilege escalation vulnerabilities related to the Print Spooler service. For more information refer to the following CVE's - CVE-2020-1048, CVE-2020-1337 and CVE-2020-1300 and verify that the impacted system is patched.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious PrintSpooler Service Executable File Creation",
+  "query": "file where event.type != \"deletion\" and process.name : \"spoolsv.exe\" and\n  file.extension : (\"exe\", \"dll\") and\n  not file.path : (\"?:\\\\Windows\\\\System32\\\\spool\\\\*\", \"?:\\\\Windows\\\\Temp\\\\*\", \"?:\\\\Users\\\\*\")\n",
+  "references": [
+    "https://voidsec.com/cve-2020-1337-printdemon-is-dead-long-live-printdemon/",
+    "https://www.thezdi.com/blog/2020/7/8/cve-2020-1300-remote-code-execution-through-microsoft-windows-cab-files"
+  ],
+  "risk_score": 73,
+  "rule_id": "5bb4a95d-5a08-48eb-80db-4c3a63ec78a8",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1068",
+          "name": "Exploitation for Privilege Escalation",
+          "reference": "https://attack.mitre.org/techniques/T1068/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 4
+}

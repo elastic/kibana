@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const AUTHENTICATION = {
@@ -63,6 +64,22 @@ export const AUTHENTICATION = {
   },
   KIBANA_RBAC_SPACE_1_2_READ_USER: {
     username: 'a_kibana_rbac_space_1_2_read_user',
+    password: 'password',
+  },
+  KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_ALL_USER: {
+    username: 'a_kibana_rbac_default_space_saved_objects_all_user',
+    password: 'password',
+  },
+  KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_READ_USER: {
+    username: 'a_kibana_rbac_default_space_saved_objects_read_user',
+    password: 'password',
+  },
+  KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_ALL_USER: {
+    username: 'a_kibana_rbac_space_1_saved_objects_all_user',
+    password: 'password',
+  },
+  KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_READ_USER: {
+    username: 'a_kibana_rbac_space_1_saved_objects_read_user',
     password: 'password',
   },
   APM_USER: {

@@ -1,0 +1,28 @@
+.gphFieldEditor__badge {
+  @include gphFieldBadgeSize;
+
+  &.gphFieldEditor__badge--disabled,
+  &.gphFieldEditor__badge--disabled:hover,
+  &.gphFieldEditor__badge--disabled:focus,
+  &.gphFieldEditor__badge--disabled:not(:disabled):hover
+  &.gphFieldEditor__badge--disabled:not(:disabled):focus {
+    opacity: .7;
+    text-decoration: line-through;
+  }
+
+  // Chrome fix for focus: duplicate or Safari will ignore completely the disabled rule
+  &.gphFieldEditor__badge--disabled:focus:not(:focus-visible),
+  &.gphFieldEditor__badge--disabled:hover:not(:focus-visible) {
+    opacity: .7;
+    text-decoration: line-through;
+  }
+}
+
+.gphFieldEditor__badgeIcon {
+  width: auto;
+  margin-right: $euiSizeXS;
+}
+
+.gphFieldEditor__displayForm {
+  padding: $euiSizeS;
+}

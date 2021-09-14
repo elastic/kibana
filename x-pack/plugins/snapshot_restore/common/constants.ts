@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { LICENSE_TYPE_BASIC, LicenseType } from '../../../common/constants';
+
+import { LicenseType } from '../../licensing/common/types';
 import { RepositoryType } from './types';
 
+const basicLicense: LicenseType = 'basic';
+
 export const PLUGIN = {
-  ID: 'snapshot_restore',
-  MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as LicenseType,
+  id: 'snapshot_restore',
+  minimumLicenseType: basicLicense,
   getI18nName: (i18n: any): string => {
     return i18n.translate('xpack.snapshotRestore.appName', {
-      defaultMessage: 'Snapshot Repositories',
+      defaultMessage: 'Snapshot and Restore',
     });
   },
 };
@@ -48,4 +52,22 @@ export const REPOSITORY_PLUGINS_MAP: { [key: string]: RepositoryType } = {
   'repository-gcs': REPOSITORY_TYPES.gcs,
 };
 
-export const APP_PERMISSIONS = ['create_snapshot', 'cluster:admin/repository'];
+export const APP_REQUIRED_CLUSTER_PRIVILEGES = [
+  'cluster:admin/snapshot',
+  'cluster:admin/repository',
+];
+export const APP_RESTORE_INDEX_PRIVILEGES = ['monitor'];
+export const APP_SLM_CLUSTER_PRIVILEGES = ['manage_slm', 'cluster:monitor/state'];
+
+export const TIME_UNITS: { [key: string]: 'd' | 'h' | 'm' | 's' } = {
+  DAY: 'd',
+  HOUR: 'h',
+  MINUTE: 'm',
+  SECOND: 's',
+};
+
+/**
+ * [Temporary workaround] In order to prevent client-side performance issues for users with a large number of snapshots,
+ * we set a hard-coded limit on the number of snapshots we return from the ES snapshots API
+ */
+export const SNAPSHOT_LIST_MAX_SIZE = 1000;

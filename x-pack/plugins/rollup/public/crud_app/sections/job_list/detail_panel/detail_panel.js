@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiErrorBoundary,
@@ -33,7 +35,8 @@ import {
   UIM_DETAIL_PANEL_METRICS_TAB_CLICK,
   UIM_DETAIL_PANEL_JSON_TAB_CLICK,
 } from '../../../../../common';
-import { trackUiMetric } from '../../../services';
+import { METRIC_TYPE } from '../../../services';
+import { trackUiMetric } from '../../../../kibana_services';
 
 import {
   JobActionMenu,
@@ -62,7 +65,7 @@ const tabToUiMetricMap = {
   [JOB_DETAILS_TAB_JSON]: UIM_DETAIL_PANEL_JSON_TAB_CLICK,
 };
 
-export class DetailPanelUi extends Component {
+export class DetailPanel extends Component {
   static propTypes = {
     isOpen: PropTypes.bool.isRequired,
     isLoading: PropTypes.bool,
@@ -71,11 +74,11 @@ export class DetailPanelUi extends Component {
     panelType: PropTypes.oneOf(JOB_DETAILS_TABS),
     closeDetailPanel: PropTypes.func.isRequired,
     openDetailPanel: PropTypes.func.isRequired,
-  }
+  };
 
   static defaultProps = {
     panelType: JOB_DETAILS_TABS[0],
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -88,12 +91,7 @@ export class DetailPanelUi extends Component {
       return;
     }
 
-    const {
-      id,
-      terms,
-      histogram,
-      metrics,
-    } = job;
+    const { id, terms, histogram, metrics } = job;
 
     const renderedTabs = [];
 
@@ -114,7 +112,7 @@ export class DetailPanelUi extends Component {
       renderedTabs.push(
         <EuiTab
           onClick={() => {
-            trackUiMetric(tabToUiMetricMap[tab]);
+            trackUiMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab]);
             openDetailPanel({ panelType: tab, jobId: id });
           }}
           isSelected={isSelected}
@@ -129,24 +127,15 @@ export class DetailPanelUi extends Component {
     return (
       <Fragment>
         <EuiSpacer size="s" />
-        <EuiTabs>
-          {renderedTabs}
-        </EuiTabs>
+        <EuiTabs>{renderedTabs}</EuiTabs>
       </Fragment>
     );
   }
 
   renderJob() {
-    const { panelType, job, intl } = this.props;
+    const { panelType, job } = this.props;
 
-    const {
-      status,
-      documentsProcessed,
-      pagesProcessed,
-      rollupsIndexed,
-      triggerCount,
-      json,
-    } = job;
+    const { status, documentsProcessed, pagesProcessed, rollupsIndexed, triggerCount, json } = job;
 
     const stats = {
       status,
@@ -160,12 +149,7 @@ export class DetailPanelUi extends Component {
       <Fragment>
         <EuiFlyoutBody data-test-subj="rollupJobDetailTabContent">
           <EuiErrorBoundary>
-            <JobDetails
-              tab={panelType}
-              job={job}
-              stats={stats}
-              json={json}
-            />
+            <JobDetails tab={panelType} job={job} stats={stats} json={json} />
           </EuiErrorBoundary>
         </EuiFlyoutBody>
 
@@ -178,8 +162,7 @@ export class DetailPanelUi extends Component {
                 anchorPosition="upRight"
                 detailPanel={true}
                 iconType="arrowUp"
-                label={intl.formatMessage({
-                  id: 'xpack.rollupJobs.detailPanel.jobActionMenu.buttonLabel',
+                label={i18n.translate('xpack.rollupJobs.detailPanel.jobActionMenu.buttonLabel', {
                   defaultMessage: 'Manage',
                 })}
               />
@@ -191,13 +174,7 @@ export class DetailPanelUi extends Component {
   }
 
   render() {
-    const {
-      isOpen,
-      isLoading,
-      closeDetailPanel,
-      job,
-      jobId,
-    } = this.props;
+    const { isOpen, isLoading, closeDetailPanel, job, jobId } = this.props;
 
     if (!isOpen) {
       return null;
@@ -207,14 +184,8 @@ export class DetailPanelUi extends Component {
 
     if (isLoading) {
       content = (
-        <EuiFlyoutBody
-          data-test-subj="rollupJobDetailLoading"
-        >
-          <EuiFlexGroup
-            justifyContent="flexStart"
-            alignItems="center"
-            gutterSize="s"
-          >
+        <EuiFlyoutBody data-test-subj="rollupJobDetailLoading">
+          <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner size="m" />
             </EuiFlexItem>
@@ -224,7 +195,7 @@ export class DetailPanelUi extends Component {
                 <EuiTextColor color="subdued">
                   <FormattedMessage
                     id="xpack.rollupJobs.detailPanel.loadingLabel"
-                    defaultMessage="Loading rollup job..."
+                    defaultMessage="Loading rollup job…"
                   />
                 </EuiTextColor>
               </EuiText>
@@ -236,14 +207,8 @@ export class DetailPanelUi extends Component {
       content = this.renderJob();
     } else {
       content = (
-        <EuiFlyoutBody
-          data-test-subj="rollupJobDetailJobNotFound"
-        >
-          <EuiFlexGroup
-            justifyContent="flexStart"
-            alignItems="center"
-            gutterSize="s"
-          >
+        <EuiFlyoutBody data-test-subj="rollupJobDetailJobNotFound">
+          <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiIcon size="m" type="alert" color="danger" />
             </EuiFlexItem>
@@ -269,7 +234,7 @@ export class DetailPanelUi extends Component {
         onClose={closeDetailPanel}
         aria-labelledby="rollupJobDetailsFlyoutTitle"
         size="m"
-        maxWidth={400}
+        maxWidth={550}
       >
         <EuiFlyoutHeader>
           <EuiTitle
@@ -288,5 +253,3 @@ export class DetailPanelUi extends Component {
     );
   }
 }
-
-export const DetailPanel = injectI18n(DetailPanelUi);

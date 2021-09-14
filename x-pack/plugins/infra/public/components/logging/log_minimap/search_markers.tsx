@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import classNames from 'classnames';
@@ -9,11 +10,11 @@ import { scaleTime } from 'd3-scale';
 import * as React from 'react';
 
 import { LogEntryTime } from '../../../../common/log_entry';
-import { SearchSummaryBucket } from '../../../../common/log_search_summary';
 import { SearchMarker } from './search_marker';
+import { LogEntriesSummaryHighlightsBucket } from '../../../../common/http_api';
 
 interface SearchMarkersProps {
-  buckets: SearchSummaryBucket[];
+  buckets: LogEntriesSummaryHighlightsBucket[];
   className?: string;
   end: number;
   start: number;
@@ -31,14 +32,15 @@ export class SearchMarkers extends React.PureComponent<SearchMarkersProps, {}> {
       return null;
     }
 
-    const yScale = scaleTime()
-      .domain([start, end])
-      .range([0, height]);
+    const yScale = scaleTime().domain([start, end]).range([0, height]);
 
     return (
-      <g className={classes}>
-        {buckets.map(bucket => (
-          <g key={bucket.representative.gid} transform={`translate(0, ${yScale(bucket.start)})`}>
+      <g transform={`translate(${width / 2}, 0)`} className={classes}>
+        {buckets.map((bucket) => (
+          <g
+            key={`${bucket.representativeKey.time}:${bucket.representativeKey.tiebreaker}`}
+            transform={`translate(0, ${yScale(bucket.start)})`}
+          >
             <SearchMarker
               bucket={bucket}
               height={yScale(bucket.end) - yScale(bucket.start)}

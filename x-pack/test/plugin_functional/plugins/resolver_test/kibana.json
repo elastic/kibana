@@ -1,0 +1,14 @@
+{
+  "id": "resolverTest",
+  "owner": {
+    "githubTeam": "security-threat-hunting",
+    "name": "Security Solution Threat Hunting"
+  },
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "resolverTest"],
+  "requiredPlugins": ["securitySolution"],
+  "requiredBundles": ["kibanaReact"],
+  "server": false,
+  "ui": true
+}

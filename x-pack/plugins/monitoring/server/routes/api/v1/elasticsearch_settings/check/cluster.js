@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { checkClusterSettings } from '../../../../../lib/elasticsearch_settings';
@@ -15,15 +16,16 @@ export function clusterSettingsCheckRoute(server) {
     method: 'GET',
     path: '/api/monitoring/v1/elasticsearch_settings/check/cluster',
     config: {
-      validate: {}
+      validate: {},
     },
     async handler(req) {
       try {
         const response = await checkClusterSettings(req); // needs to be try/catch to handle privilege error
         return response;
       } catch (err) {
+        console.log(err);
         throw handleSettingsError(err);
       }
-    }
+    },
   });
 }

@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render with error 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  display="row"
+  error={
+    Array [
+      "Must be between 0 and 20",
+    ]
+  }
+  fullWidth={false}
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  isInvalid={true}
+  label="foobar"
+  labelType="label"
+>
+  <EuiFieldNumber
+    aria-label="foobar number input"
+    isInvalid={true}
+    max={20}
+    min={0}
+    onChange={[Function]}
+    value={30}
+  />
+</EuiFormRow>
+`;
+
+exports[`should render without error 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  display="row"
+  error={Array []}
+  fullWidth={false}
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  isInvalid={false}
+  label="foobar"
+  labelType="label"
+>
+  <EuiFieldNumber
+    aria-label="foobar number input"
+    isInvalid={false}
+    max={20}
+    min={0}
+    onChange={[Function]}
+    value={10}
+  />
+</EuiFormRow>
+`;

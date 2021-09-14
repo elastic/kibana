@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import expect from '@kbn/expect';
-import { SecurityService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -18,7 +18,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
@@ -66,15 +66,17 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it('shows uptime navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
+        expect(navLinks.map((link) => link.text)).to.eql([
+          'Overview',
+          'Alerts',
           'Uptime',
-          'Management',
+          'Stack Management',
         ]);
       });
 
       it('can navigate to Uptime app', async () => {
         await PageObjects.common.navigateToApp('uptime');
-        await testSubjects.existOrFail('uptimeApp', 10000);
+        await testSubjects.existOrFail('uptimeApp', { timeout: 10000 });
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -119,15 +121,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows uptime navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Uptime', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Uptime', 'Stack Management']);
       });
 
       it('can navigate to Uptime app', async () => {
         await PageObjects.common.navigateToApp('uptime');
-        await testSubjects.existOrFail('uptimeApp', 10000);
+        await testSubjects.existOrFail('uptimeApp', { timeout: 10000 });
       });
 
       it(`shows read-only badge`, async () => {
@@ -172,18 +172,16 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`doesn't show uptime navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Uptime');
       });
 
-      it(`renders not found page`, async () => {
+      it(`renders no permission page`, async () => {
         await PageObjects.common.navigateToUrl('uptime', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

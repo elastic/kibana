@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getStats, getApms } from '../../../../lib/apm';
 import { handleError } from '../../../../lib/errors';
@@ -16,17 +17,17 @@ export function apmInstancesRoute(server) {
     path: '/api/monitoring/v1/clusters/{clusterUuid}/apm/instances',
     config: {
       validate: {
-        params: Joi.object({
-          clusterUuid: Joi.string().required()
+        params: schema.object({
+          clusterUuid: schema.string(),
         }),
-        payload: Joi.object({
-          ccs: Joi.string().optional(),
-          timeRange: Joi.object({
-            min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+        payload: schema.object({
+          ccs: schema.maybe(schema.string()),
+          timeRange: schema.object({
+            min: schema.string(),
+            max: schema.string(),
+          }),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -35,19 +36,19 @@ export function apmInstancesRoute(server) {
       const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
       try {
-
-        const [ stats, apms ] = await Promise.all([
+        const [stats, apms] = await Promise.all([
           getStats(req, apmIndexPattern, clusterUuid),
           getApms(req, apmIndexPattern, clusterUuid),
         ]);
 
         return {
           stats,
-          apms
+          apms,
+          cgroup: req.server.config().get('monitoring.ui.container.apm.enabled'),
         };
       } catch (err) {
         return handleError(err, req);
       }
-    }
+    },
   });
 }

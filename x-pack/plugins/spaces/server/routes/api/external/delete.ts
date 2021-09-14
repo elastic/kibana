@@ -1,40 +1,53 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
-import { wrapError } from '../../../lib/errors';
-import { SpacesClient } from '../../../lib/spaces_client';
+import Boom from '@hapi/boom';
 
-export function initDeleteSpacesApi(server: any, routePreCheckLicenseFn: any) {
-  server.route({
-    method: 'DELETE',
-    path: '/api/spaces/space/{id}',
-    async handler(request: any, h: any) {
-      const { SavedObjectsClient } = server.savedObjects;
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
+import { schema } from '@kbn/config-schema';
+
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
+import { wrapError } from '../../../lib/errors';
+import { createLicensedRouteHandler } from '../../lib';
+import type { ExternalRouteDeps } from './';
+
+export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
+  const { externalRouter, log, getSpacesService } = deps;
+
+  externalRouter.delete(
+    {
+      path: '/api/spaces/space/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      const spacesClient = getSpacesService().createSpacesClient(request);
 
       const id = request.params.id;
 
-      let result;
-
       try {
-        result = await spacesClient.delete(id);
+        await spacesClient.delete(id);
       } catch (error) {
-        if (SavedObjectsClient.errors.isNotFoundError(error)) {
-          return Boom.notFound();
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          return response.notFound();
+        } else if (SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)) {
+          log.error(
+            `Failed to delete space '${id}', cannot execute script in Elasticsearch query: ${error.message}`
+          );
+          return response.customError(
+            wrapError(Boom.badRequest('Cannot execute script in Elasticsearch query'))
+          );
         }
-        return wrapError(error);
+        return response.customError(wrapError(error));
       }
 
-      return h.response(result).code(204);
-    },
-    config: {
-      pre: [routePreCheckLicenseFn],
-    },
-  });
+      return response.noContent();
+    })
+  );
 }

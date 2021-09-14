@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -25,23 +26,20 @@ export class GrokdebuggerRequest {
             grok: {
               field: 'rawEvent',
               pattern_definitions: this.customPatterns,
-              patterns: [
-                this.pattern.toString()
-              ]
-            }
-          }
-        ]
+              patterns: [this.pattern.toString()],
+            },
+          },
+        ],
       },
       docs: [
         {
           _index: 'grokdebugger',
-          _type: 'grokdebugger',
           _id: 'grokdebugger',
           _source: {
-            rawEvent: this.rawEvent.toString()
-          }
-        }
-      ]
+            rawEvent: this.rawEvent.toString(),
+          },
+        },
+      ],
     };
   }
 
@@ -50,7 +48,7 @@ export class GrokdebuggerRequest {
     const opts = {
       rawEvent: downstreamGrokdebuggerRequest.rawEvent,
       pattern: downstreamGrokdebuggerRequest.pattern,
-      customPatterns: downstreamGrokdebuggerRequest.customPatterns
+      customPatterns: downstreamGrokdebuggerRequest.customPatterns,
     };
 
     return new GrokdebuggerRequest(opts);

@@ -1,51 +1,74 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
-import url from 'url';
-
-import chrome from 'ui/chrome';
-import { InfraLogItem } from '../../../graphql/types';
+import React, { useMemo } from 'react';
+import { useVisibilityState } from '../../../utils/use_visibility_state';
+import { getApmTraceUrl } from '../../../../../observability/public';
+import { useLinkProps, LinkDescriptor } from '../../../hooks/use_link_props';
+import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 
 export const LogEntryActionsMenu: React.FunctionComponent<{
-  logItem: InfraLogItem;
-}> = ({ logItem }) => {
-  const { hide, isVisible, show } = useVisibility();
+  logEntry: LogEntry;
+}> = ({ logEntry }) => {
+  const { hide, isVisible, show } = useVisibilityState(false);
 
-  const uptimeLink = useMemo(() => getUptimeLink(logItem), [logItem]);
+  const apmLinkDescriptor = useMemo(() => getAPMLink(logEntry), [logEntry]);
+  const uptimeLinkDescriptor = useMemo(() => getUptimeLink(logEntry), [logEntry]);
+
+  const uptimeLinkProps = useLinkProps({
+    app: 'uptime',
+    ...(uptimeLinkDescriptor ? uptimeLinkDescriptor : {}),
+  });
+
+  const apmLinkProps = useLinkProps({
+    app: 'apm',
+    ...(apmLinkDescriptor ? apmLinkDescriptor : {}),
+  });
 
   const menuItems = useMemo(
     () => [
       <EuiContextMenuItem
         data-test-subj="logEntryActionsMenuItem uptimeLogEntryActionsMenuItem"
-        disabled={!uptimeLink}
-        href={uptimeLink}
+        disabled={!uptimeLinkDescriptor}
         icon="uptimeApp"
         key="uptimeLink"
+        {...uptimeLinkProps}
       >
         <FormattedMessage
           id="xpack.infra.logEntryActionsMenu.uptimeActionLabel"
-          defaultMessage="View monitor status"
+          defaultMessage="View status in Uptime"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        data-test-subj="logEntryActionsMenuItem apmLogEntryActionsMenuItem"
+        disabled={!apmLinkDescriptor}
+        icon="apmApp"
+        key="apmLink"
+        {...apmLinkProps}
+      >
+        <FormattedMessage
+          id="xpack.infra.logEntryActionsMenu.apmActionLabel"
+          defaultMessage="View in APM"
         />
       </EuiContextMenuItem>,
     ],
-    [uptimeLink]
+    [uptimeLinkDescriptor, apmLinkDescriptor, apmLinkProps, uptimeLinkProps]
   );
 
   const hasMenuItems = useMemo(() => menuItems.length > 0, [menuItems]);
-
   return (
     <EuiPopover
       anchorPosition="downRight"
       button={
-        <EuiButtonEmpty
+        <EuiButton
           data-test-subj="logEntryActionsMenuButton"
           disabled={!hasMenuItems}
           iconSide="right"
@@ -54,9 +77,9 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
         >
           <FormattedMessage
             id="xpack.infra.logEntryActionsMenu.buttonLabel"
-            defaultMessage="Actions"
+            defaultMessage="Investigate"
           />
-        </EuiButtonEmpty>
+        </EuiButton>
       }
       closePopover={hide}
       id="logEntryActionsMenu"
@@ -68,26 +91,52 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
   );
 };
 
-const useVisibility = (initialVisibility: boolean = false) => {
-  const [isVisible, setIsVisible] = useState(initialVisibility);
-
-  const hide = useCallback(() => setIsVisible(false), [setIsVisible]);
-  const show = useCallback(() => setIsVisible(true), [setIsVisible]);
-
-  return { hide, isVisible, show };
-};
-
-const getUptimeLink = (logItem: InfraLogItem) => {
-  const searchExpressions = logItem.fields
+const getUptimeLink = (logEntry: LogEntry): LinkDescriptor | undefined => {
+  const searchExpressions = logEntry.fields
     .filter(({ field, value }) => value != null && UPTIME_FIELDS.includes(field))
-    .map(({ field, value }) => `${field}:${value}`);
+    .reduce<string[]>((acc, fieldItem) => {
+      const { field, value } = fieldItem;
+      return acc.concat(value.map((val) => `${field}:${val}`));
+    }, []);
 
   if (searchExpressions.length === 0) {
     return undefined;
   }
+  return {
+    app: 'uptime',
+    hash: '/',
+    search: {
+      search: `${searchExpressions.join(' or ')}`,
+    },
+  };
+};
 
-  return url.format({
-    pathname: chrome.addBasePath('/app/uptime'),
-    hash: `/?search=(${searchExpressions.join(' OR ')})`,
-  });
+const getAPMLink = (logEntry: LogEntry): LinkDescriptor | undefined => {
+  const traceId = logEntry.fields.find(
+    ({ field, value }) => typeof value[0] === 'string' && field === 'trace.id'
+  )?.value?.[0];
+
+  if (typeof traceId !== 'string') {
+    return undefined;
+  }
+
+  const timestampField = logEntry.fields.find(({ field }) => field === '@timestamp');
+  const timestamp = timestampField ? timestampField.value[0] : null;
+  const { rangeFrom, rangeTo } =
+    typeof timestamp === 'number'
+      ? (() => {
+          const from = new Date(timestamp);
+          const to = new Date(timestamp);
+
+          from.setMinutes(from.getMinutes() - 10);
+          to.setMinutes(to.getMinutes() + 10);
+
+          return { rangeFrom: from.toISOString(), rangeTo: to.toISOString() };
+        })()
+      : { rangeFrom: 'now-1y', rangeTo: 'now' };
+
+  return {
+    app: 'apm',
+    pathname: getApmTraceUrl({ traceId, rangeFrom, rangeTo }),
+  };
 };

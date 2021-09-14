@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { forEach, keys, sortBy } from 'lodash';
 import { normalizedFieldTypes } from '../../lib/normalized_field_types';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +32,7 @@ function buildFieldList(fields) {
       type,
       normalizedType,
       aggregatable,
-      searchable
+      searchable,
     });
   });
 
@@ -45,7 +46,7 @@ export class Fields {
 
   get downstreamJson() {
     const result = {
-      fields: this.fields
+      fields: this.fields,
     };
 
     return result;
@@ -55,11 +56,11 @@ export class Fields {
     if (!json.fields) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.fields.fieldsPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain a {fields} property',
+          defaultMessage: 'JSON argument must contain a {fields} property',
           values: {
-            fields: 'fields'
-          }
-        }),
+            fields: 'fields',
+          },
+        })
       );
     }
 

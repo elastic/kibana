@@ -9,7 +9,7 @@ To convert existing code over to TypeScript:
 
 ### How to fix common TypeScript errors
 
-The first thing that will probably happen when you convert a `.js` file in our system to `.ts` is that some imports will be lacking types. 
+The first thing that will probably happen when you convert a `.js` file in our system to `.ts` is that some imports will be lacking types.
 
 #### EUI component is missing types
 
@@ -21,7 +21,7 @@ The first thing that will probably happen when you convert a `.js` file in our s
 
 declare module '@elastic/eui' {
   // Add your types here
-  export const EuiPopoverTitle: React.SFC<EuiPopoverTitleProps>;
+  export const EuiPopoverTitle: React.FC<EuiPopoverTitleProps>;
   ...
 }
 ```
@@ -47,22 +47,22 @@ Since `@elastic/eui` already ships with a module declaration, any local addition
 // file `typings/@elastic/eui/index.d.ts`
 
 import { CommonProps } from '@elastic/eui';
-import { SFC } from 'react';
+import { FC } from 'react';
 
 declare module '@elastic/eui' {
   export type EuiNewComponentProps = CommonProps & {
     additionalProp: string;
   };
-  export const EuiNewComponent: SFC<EuiNewComponentProps>;
+  export const EuiNewComponent: FC<EuiNewComponentProps>;
 }
 ```
 
 #### Internal dependency is missing types.
 
-1. Open up the file and see how easy it would be to convert to TypeScript. 
+1. Open up the file and see how easy it would be to convert to TypeScript.
 2. If it's very straightforward, go for it.
 3. If it's not and you wish to stay focused on your own PR, get around the error by adding a type definition file in the same folder as the dependency, with the same name.
-4. Minimally you will need to type what you are using in your PR.  No need to go crazy to fully type the thing or you might be there for awhile depending on what's available.
+4. Minimally you will need to type what you are using in your PR.  No need to go crazy to fully type the thing or you might be there for a while depending on what's available.
 
 For example:
 
@@ -101,7 +101,7 @@ export { metadata };
 
 `yarn add -D @types/markdown-it@8.4.1`
 
-Use the version number that we have installed in package.json. This may not always work, and you might get something like: 
+Use the version number that we have installed in package.json. This may not always work, and you might get something like:
 
 `Please choose a version of "@types/markdown-it" from this list:`
 
@@ -110,12 +110,12 @@ If that happens, just pick the closest one.
 If yarn doesn't find the module it may not have types.  For example, our `rison_node` package doesn't have types. In this case you have a few options:
 
 1. Contribute types into the DefinitelyTyped repo itself, or
-2. Create a top level `types` folder and point to that in the tsconfig. For example, Infra team already handled this for `rison_node` and added: `x-pack/plugins/infra/types/rison_node.d.ts`. Other code uses it too so we will need to pull it up. Or,
+2. Create a top level `types` folder and point to that in the tsconfig. For example, Infra team already handled this for `rison_node` and added: `x-pack/legacy/plugins/infra/types/rison_node.d.ts`. Other code uses it too so we will need to pull it up. Or,
 3. Add a `// @ts-ignore` line above the import. This should be used minimally, the above options are better. However, sometimes you have to resort to this method.
 
 ### TypeScripting react files
 
-React has it's own concept of runtime types via `proptypes`. TypeScript gives you compile time types so I prefer those.  
+React has it's own concept of runtime types via `proptypes`. TypeScript gives you compile time types so I prefer those.
 
 Before:
 ```jsx
@@ -126,12 +126,12 @@ import PropTypes from 'prop-types';
    state = {
      buttonWasClicked = false
    };
- 
+
    render() {
      return <button onClick={() => setState({ buttonWasClicked: true })}>{this.props.text}</button>
    }
  }
- 
+
  Button.proptypes = {
   text: PropTypes.string,
  }
@@ -152,7 +152,7 @@ interface State {
    state = {
      buttonWasClicked = false
    };
- 
+
    render() {
      return <button onClick={() => setState({ buttonWasClicked: true })}>{this.props.text}</button>
    }
@@ -197,7 +197,7 @@ function ({ title, description }: Options) {
   ...
 }
 ```
- 
+
 ## Use `any` as little as possible
 
 Using any is sometimes valid, but should rarely be used, even if to make quicker progress. Even `Unknown` is better than using `any` if you aren't sure of an input parameter.

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment';
 import { get } from 'lodash';
 import { standaloneClusterFilter } from './';
@@ -13,7 +15,25 @@ export async function hasStandaloneClusters(req, indexPatterns) {
     return list;
   }, []);
 
-  const filters = [standaloneClusterFilter];
+  const filters = [
+    standaloneClusterFilter,
+    {
+      bool: {
+        should: [
+          {
+            terms: {
+              type: ['logstash_stats', 'logstash_state', 'beats_stats', 'beats_state'],
+            },
+          },
+          {
+            terms: {
+              'metricset.name': ['logstash_stats', 'logstash_state', 'beats_stats', 'beats_state'],
+            },
+          },
+        ],
+      },
+    },
+  ];
   // Not every page will contain a time range so check for that
   if (req.payload.timeRange) {
     const start = req.payload.timeRange.min;
@@ -22,9 +42,9 @@ export async function hasStandaloneClusters(req, indexPatterns) {
     const timeRangeFilter = {
       range: {
         timestamp: {
-          format: 'epoch_millis'
-        }
-      }
+          format: 'epoch_millis',
+        },
+      },
     };
 
     if (start) {
@@ -44,9 +64,9 @@ export async function hasStandaloneClusters(req, indexPatterns) {
       query: {
         bool: {
           filter: filters,
-        }
-      }
-    }
+        },
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

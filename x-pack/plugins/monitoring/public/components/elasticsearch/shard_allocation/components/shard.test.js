@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -17,11 +18,11 @@ describe('Shard', () => {
         shard: 0,
         tooltip_message: 'Unassigned',
         type: 'shard',
-        master: true
-      }
+        master: true,
+      },
     };
 
-    const component = shallow(<Shard {...props}/>);
+    const component = shallow(<Shard {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -33,11 +34,11 @@ describe('Shard', () => {
         shard: 0,
         tooltip_message: 'Unassigned',
         type: 'shard',
-        master: false
-      }
+        master: false,
+      },
     };
 
-    const component = shallow(<Shard {...props}/>);
+    const component = shallow(<Shard {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -49,11 +50,11 @@ describe('Shard', () => {
         shard: 0,
         tooltip_message: 'Started',
         type: 'shard',
-        master: true
-      }
+        master: true,
+      },
     };
 
-    const component = shallow(<Shard {...props}/>);
+    const component = shallow(<Shard {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -65,11 +66,11 @@ describe('Shard', () => {
         shard: 0,
         tooltip_message: 'Started',
         type: 'shard',
-        master: true
-      }
+        master: true,
+      },
     };
 
-    const component = shallow(<Shard {...props}/>);
+    const component = shallow(<Shard {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -81,11 +82,11 @@ describe('Shard', () => {
         shard: 0,
         tooltip_message: 'Relocating',
         type: 'shard',
-        master: true
-      }
+        master: true,
+      },
     };
 
-    const component = shallow(<Shard {...props}/>);
+    const component = shallow(<Shard {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -97,11 +98,11 @@ describe('Shard', () => {
         shard: 0,
         tooltip_message: 'Initializing',
         type: 'shard',
-        master: true
-      }
+        master: true,
+      },
     };
 
-    const component = shallow(<Shard {...props}/>);
+    const component = shallow(<Shard {...props} />);
     expect(component).toMatchSnapshot();
   });
 });

@@ -1,0 +1,11 @@
+{
+  "get_script_languages": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_script_language"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting.html"
+  }
+}

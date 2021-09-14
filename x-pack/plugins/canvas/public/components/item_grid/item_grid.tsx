@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { last } from 'lodash';
@@ -19,13 +20,13 @@ export interface Props<T> {
    */
   itemsPerRow?: number;
   /** A function with which to iterate upon the items collection, producing nodes. */
-  children: (item: T) => ReactElement<any>;
+  children: (item: T) => ReactElement;
 }
 
 // We need this type in order to define propTypes on the object.  It's a bit redundant,
 // but TS needs to know that ItemGrid can have propTypes defined on it.
 interface ItemGridType {
-  <T>(props: Props<T>): ReactElement<any>;
+  <T>(props: Props<T>): ReactElement;
   propTypes?: ValidationMap<Props<any>>;
 }
 
@@ -35,16 +36,22 @@ export const ItemGrid: ItemGridType = function ItemGridFunc<T>({
   children,
 }: Props<T>) {
   const reducedRows = items.reduce(
-    (rows: Array<Array<ReactElement<any>>>, item: any) => {
-      if (last(rows).length >= itemsPerRow) {
+    (rows: ReactElement[][], item: T) => {
+      let end = last(rows);
+
+      if (end && end.length >= itemsPerRow) {
         rows.push([]);
       }
 
-      last(rows).push(children(item));
+      end = last(rows);
+
+      if (end) {
+        end.push(children(item));
+      }
 
       return rows;
     },
-    [[]] as Array<Array<ReactElement<any>>>
+    [[]] as ReactElement[][]
   );
 
   return (

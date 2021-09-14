@@ -1,0 +1,67 @@
+[float]
+=== PDF
+
+[float]
+==== Job parameters
+If integrating with Reporting via a custom UI, the following job parameters must be Rison encoded and posted to
+the aforementioned generate job url:
+
+----
+interface jobParameters {
+  objectType: string;
+  title: string;
+  browserTimezone: string;
+  relativeUrls: string[];
+  layout: {
+    id: string;
+    dimensions: {
+      height: number;
+      width: number;
+    };
+  };
+}
+----
+
+`jobParameters.browserTimezone` is a string that appears in the tz database
+`jobParameters.layout.id` presently only accepts "print" and "preserve_layout"
+`jobParameters.layout.dimensions` is only currently used by "preserve_layout"
+
+[float]
+==== `export-config` directive
+If integrating with Reporting via the `export-config` directive, the AngularJS controller that contains
+the directive should expose the following methods and the `export-config` directive will POST them to the
+reporting API:
+
+----
+
+function getSharingType(): string;
+
+function getSharingTitle(): string;
+
+----
+
+The `export-config` directive will use the browser's current URL and timezone when generating the job
+parameters automatically. The `export-config` directive will also grab the height/width of the element
+with the `data-shared-items-container` attribute and use this as the dimensions.
+
+[float]
+==== Screenshot capturing attributes
+When generating the PDF, reporting looks for a number of attributes in the DOM to determine which elements
+should have their screenshot taken and when the Visualizations are done rendering.
+
+The print layout takes a screenshot of every element with the `data-shared-item` attribute and includes the
+individual screenshots in the PDF. The print layout also uses the `data-title` and `data-description`
+attributes on the same HTMLElement as the `data-shared-item` to specify the title and description.
+
+The preserve layout takes a screenshot of the element with the `data-shared-items-container` attribute. Additionally,
+reporting will resize the element with the `data-shared-items-container` to be the size specified in the layout dimensions.
+The preserve layout also uses the `data-title` and `data-description` attributes on the HTMLElement with the
+`data-shared-items-container` attribute to specify the title/description for the entire PDF.
+
+Reporting needs to determine when all of the visualizations have completed rendering, so that it can begin taking screenshots.
+If there are multiple visualizations, the `data-shared-items-count` attribute should be specified to let Reporting know how
+many Visualizations to look for. Reporting will look at every element with the `data-shared-item` attribute and use the corresponding
+`data-render-complete` attribute and `renderComplete` events to listen for rendering to complete. When rendering is complete for a visualization
+the `data-render-complete` attribute should be set to "true" and it should dispatch a custom DOM `renderComplete` event.
+
+If the reporting job uses multiple URLs, before looking for any of the `data-shared-item` or `data-shared-items-count` attributes, it waits for a `data-shared-page` attribute that specifies which page is being loaded.

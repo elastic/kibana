@@ -1,0 +1,141 @@
+{
+  "id": "banners",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "banners",
+        "id": "def-common.BannerConfiguration",
+        "type": "Interface",
+        "tags": [],
+        "label": "BannerConfiguration",
+        "description": [],
+        "path": "x-pack/plugins/banners/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "banners",
+            "id": "def-common.BannerConfiguration.placement",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "placement",
+            "description": [],
+            "signature": [
+              "\"top\" | \"disabled\""
+            ],
+            "path": "x-pack/plugins/banners/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "banners",
+            "id": "def-common.BannerConfiguration.textContent",
+            "type": "string",
+            "tags": [],
+            "label": "textContent",
+            "description": [],
+            "path": "x-pack/plugins/banners/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "banners",
+            "id": "def-common.BannerConfiguration.textColor",
+            "type": "string",
+            "tags": [],
+            "label": "textColor",
+            "description": [],
+            "path": "x-pack/plugins/banners/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "banners",
+            "id": "def-common.BannerConfiguration.backgroundColor",
+            "type": "string",
+            "tags": [],
+            "label": "backgroundColor",
+            "description": [],
+            "path": "x-pack/plugins/banners/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "banners",
+        "id": "def-common.BannerInfoResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BannerInfoResponse",
+        "description": [],
+        "path": "x-pack/plugins/banners/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "banners",
+            "id": "def-common.BannerInfoResponse.allowed",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowed",
+            "description": [],
+            "path": "x-pack/plugins/banners/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "banners",
+            "id": "def-common.BannerInfoResponse.banner",
+            "type": "Object",
+            "tags": [],
+            "label": "banner",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "banners",
+                "scope": "common",
+                "docId": "kibBannersPluginApi",
+                "section": "def-common.BannerConfiguration",
+                "text": "BannerConfiguration"
+              }
+            ],
+            "path": "x-pack/plugins/banners/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "banners",
+        "id": "def-common.BannerPlacement",
+        "type": "Type",
+        "tags": [],
+        "label": "BannerPlacement",
+        "description": [],
+        "signature": [
+          "\"top\" | \"disabled\""
+        ],
+        "path": "x-pack/plugins/banners/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   fn: any[];
 }
 
-export function doFn(): ExpressionFunction<'do', any, Arguments, any> {
+export function doFn(): ExpressionFunctionDefinition<'do', unknown, Arguments, unknown> {
   const { help, args: argHelp } = getFunctionHelp().do;
 
   return {
@@ -18,11 +20,11 @@ export function doFn(): ExpressionFunction<'do', any, Arguments, any> {
     help,
     args: {
       fn: {
-        aliases: ['_'],
+        aliases: ['_', 'exp', 'expression', 'function'],
         multi: true,
         help: argHelp.fn,
       },
     },
-    fn: context => context,
+    fn: (context) => context,
   };
 }

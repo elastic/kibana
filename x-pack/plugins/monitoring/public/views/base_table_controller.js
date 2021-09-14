@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MonitoringViewBaseController } from './';
-import { tableStorageGetter, tableStorageSetter } from 'plugins/monitoring/components/table';
+import { tableStorageGetter, tableStorageSetter } from '../components/table';
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -18,7 +19,6 @@ import { tableStorageGetter, tableStorageSetter } from 'plugins/monitoring/compo
  * This is expected to be extended, and behavior enabled using super();
  */
 export class MonitoringViewBaseTableController extends MonitoringViewBaseController {
-
   /**
    * Create a table view controller
    * - used by parent class:
@@ -46,7 +46,7 @@ export class MonitoringViewBaseTableController extends MonitoringViewBaseControl
     this.sortKey = sortKey;
     this.sortOrder = sortOrder;
 
-    this.onNewState = newState => {
+    this.onNewState = (newState) => {
       setLocalStorageData(storage, newState);
     };
   }

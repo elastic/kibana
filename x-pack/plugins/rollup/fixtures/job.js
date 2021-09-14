@@ -1,20 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { getRandomString } from '../../../test_utils';
+import { getRandomString } from '@kbn/test/jest';
 
 const initialValues = {
   dateHistogramField: 'timestamp',
   dateHistogramInterval: '24h',
   dateHistogramTimeZone: 'UTC',
   documentsProcessed: 10,
-  histogram: [
-    { name: 'DistanceMiles' },
-    { name: 'FlightTimeMin' },
-  ],
+  histogram: [{ name: 'DistanceMiles' }, { name: 'FlightTimeMin' }],
   id: 'test',
   indexPattern: 'kibana*',
   json: {
@@ -23,12 +21,12 @@ const initialValues = {
   metrics: [
     {
       name: 'dayOfWeek',
-      types: ['avg', 'max', 'min']
+      types: ['avg', 'max', 'min'],
     },
     {
       name: 'distanceKilometers',
-      types: ['avg', 'max']
-    }
+      types: ['avg', 'max'],
+    },
   ],
   pagesProcessed: 3,
   rollupCron: '0 0 0 ? * 7',
@@ -36,14 +34,19 @@ const initialValues = {
   rollupIndex: 'my_rollup_index',
   rollupsIndexed: 2,
   status: 'stopped',
-  terms: [
-    { name: 'Dest' },
-    { name: 'Carrier' },
-    { name: 'DestCountry' },
-  ],
+  terms: [{ name: 'Dest' }, { name: 'Carrier' }, { name: 'DestCountry' }],
   triggerCount: 7,
 };
 
-export const getJob = (values = { id: getRandomString() }) => ({ ...initialValues, ...values });
+const statuses = [
+  'stopped',
+  'stopping',
+  'started',
+  'indexing',
+  'abort',
+  'abc' /* unknown status */,
+];
 
-export const getJobs = (total = 5) => new Array(total).fill().map(() => getJob());
+export const getJob = (values = { id: getRandomString() }) => ({ ...initialValues, ...values });
+export const jobCount = statuses.length;
+export const getJobs = () => statuses.map((status) => getJob({ status, id: getRandomString() }));

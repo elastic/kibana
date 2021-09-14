@@ -1,42 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { handleActions } from 'redux-actions';
-import { assign, push, del, set } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import * as actions from '../actions/elements';
 
-const getLocation = type => (type === 'group' ? 'groups' : 'elements');
+const { assign, push, del, set } = immutable;
+
+const getLocation = (type) => (type === 'group' ? 'groups' : 'elements');
 const firstOccurrence = (element, index, array) => array.indexOf(element) === index;
 
 const getLocationFromIds = (workpadState, pageId, nodeId) => {
-  const page = workpadState.pages.find(p => p.id === pageId);
+  const page = workpadState.pages.find((p) => p.id === pageId);
   const groups = page == null ? [] : page.groups || [];
-  return groups.find(e => e.id === nodeId) ? 'groups' : 'elements';
+  return groups.find((e) => e.id === nodeId) ? 'groups' : 'elements';
 };
 
 function getPageIndexById(workpadState, pageId) {
-  return get(workpadState, 'pages', []).findIndex(page => page.id === pageId);
+  return get(workpadState, 'pages', []).findIndex((page) => page.id === pageId);
 }
 
 function getNodeIndexById(page, nodeId, location) {
-  return page[location].findIndex(node => node.id === nodeId);
+  return page[location].findIndex((node) => node.id === nodeId);
 }
 
-function assignNodeProperties(workpadState, pageId, nodeId, props) {
+export function assignNodeProperties(workpadState, pageId, nodeId, props) {
   const pageIndex = getPageIndexById(workpadState, pageId);
   const location = getLocationFromIds(workpadState, pageId, nodeId);
-  const nodesPath = ['pages', pageIndex, location];
-  const nodeIndex = get(workpadState, nodesPath, []).findIndex(node => node.id === nodeId);
+  const nodesPath = `pages.${pageIndex}.${location}`;
+  const nodeIndex = get(workpadState, nodesPath, []).findIndex((node) => node.id === nodeId);
 
   if (pageIndex === -1 || nodeIndex === -1) {
     return workpadState;
   }
 
-  return assign(workpadState, nodesPath.concat(nodeIndex), props);
+  return assign(workpadState, `${nodesPath}.${nodeIndex}`, props);
 }
 
 function moveNodeLayer(workpadState, pageId, nodeId, movement, location) {
@@ -45,7 +48,7 @@ function moveNodeLayer(workpadState, pageId, nodeId, movement, location) {
   const nodes = get(workpadState, ['pages', pageIndex, location]);
   const from = nodeIndex;
 
-  const to = (function() {
+  const to = (function () {
     if (movement < Infinity && movement > -Infinity) {
       return nodeIndex + movement;
     }
@@ -66,7 +69,7 @@ function moveNodeLayer(workpadState, pageId, nodeId, movement, location) {
   const newNodes = nodes.slice(0);
   newNodes.splice(to, 0, newNodes.splice(from, 1)[0]);
 
-  return set(workpadState, ['pages', pageIndex, location], newNodes);
+  return set(workpadState, `pages.${pageIndex}.${location}`, newNodes);
 }
 
 const trimPosition = ({ left, top, width, height, angle, parent }) => ({
@@ -85,6 +88,18 @@ const trimElement = ({ id, position, expression, filter }) => ({
   ...(filter !== void 0 && { filter }),
 });
 
+const getPageWithElementId = (workpad, elementId) => {
+  const matchingPage = workpad.pages.find((page) =>
+    page.elements.map((element) => element.id).includes(elementId)
+  );
+
+  if (matchingPage) {
+    return matchingPage.id;
+  }
+
+  return undefined;
+};
+
 export const elementsReducer = handleActions(
   {
     // TODO: This takes the entire element, which is not necessary, it could just take the id.
@@ -93,7 +108,8 @@ export const elementsReducer = handleActions(
       return assignNodeProperties(workpadState, pageId, elementId, { expression });
     },
     [actions.setFilter]: (workpadState, { payload }) => {
-      const { filter, pageId, elementId } = payload;
+      const { filter, elementId } = payload;
+      const pageId = getPageWithElementId(workpadState, elementId);
       return assignNodeProperties(workpadState, pageId, elementId, { filter });
     },
     [actions.setMultiplePositions]: (workpadState, { payload }) =>
@@ -116,14 +132,14 @@ export const elementsReducer = handleActions(
       if (
         // don't add a group that is already persisted
         workpadState.pages[pageIndex][getLocation(element.position.type)].find(
-          e => e.id === element.id
+          (e) => e.id === element.id
         )
       ) {
         return workpadState;
       }
       return push(
         workpadState,
-        ['pages', pageIndex, getLocation(element.position.type)],
+        `pages.${pageIndex}.${getLocation(element.position.type)}`,
         trimElement(element)
       );
     },
@@ -136,7 +152,7 @@ export const elementsReducer = handleActions(
         (state, element) =>
           push(
             state,
-            ['pages', pageIndex, getLocation(element.position.type)],
+            `pages.${pageIndex}.${getLocation(element.position.type)}`,
             trimElement(element)
           ),
         workpadState
@@ -150,7 +166,7 @@ export const elementsReducer = handleActions(
 
       const nodeIndices = elementIds
         .filter(firstOccurrence)
-        .map(nodeId => {
+        .map((nodeId) => {
           const location = getLocationFromIds(workpadState, pageId, nodeId);
           return {
             location,
@@ -160,7 +176,7 @@ export const elementsReducer = handleActions(
         .sort((a, b) => b.index - a.index); // deleting from end toward beginning, otherwise indices will become off - todo fuse loops!
 
       return nodeIndices.reduce((state, { location, index }) => {
-        return del(state, ['pages', pageIndex, location, index]);
+        return del(state, `pages.${pageIndex}.${location}.${index}`);
       }, workpadState);
     },
   },

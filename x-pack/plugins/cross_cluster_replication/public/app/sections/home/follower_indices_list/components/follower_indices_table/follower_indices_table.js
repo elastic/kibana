@@ -1,262 +1,259 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiHealth,
-  EuiIcon,
+  EuiButton,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingKibana,
   EuiOverlayMask,
 } from '@elastic/eui';
+
 import { API_STATUS, UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK } from '../../../../../constants';
-import {
-  FollowerIndexPauseProvider,
-  FollowerIndexResumeProvider,
-  FollowerIndexUnfollowProvider
-} from '../../../../../components';
-import routing from '../../../../../services/routing';
+import { FollowerIndexActionsProvider } from '../../../../../components';
+import { routing } from '../../../../../services/routing';
 import { trackUiMetric } from '../../../../../services/track_ui_metric';
 import { ContextMenu } from '../context_menu';
+import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
+
+const actionI18nTexts = {
+  pause: i18n.translate(
+    'xpack.crossClusterReplication.followerIndexList.table.actionPauseDescription',
+    {
+      defaultMessage: 'Pause replication',
+    }
+  ),
+  resume: i18n.translate(
+    'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
+    {
+      defaultMessage: 'Resume replication',
+    }
+  ),
+  edit: i18n.translate(
+    'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
+    {
+      defaultMessage: 'Edit follower index',
+    }
+  ),
+  unfollow: i18n.translate(
+    'xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription',
+    {
+      defaultMessage: 'Unfollow leader index',
+    }
+  ),
+};
+
+const getFilteredIndices = (followerIndices, queryText) => {
+  if (queryText) {
+    const normalizedSearchText = queryText.toLowerCase();
+
+    return followerIndices.filter((followerIndex) => {
+      // default values to avoid undefined errors
+      const { name = '', remoteCluster = '', leaderIndex = '' } = followerIndex;
+
+      if (name.toLowerCase().includes(normalizedSearchText)) {
+        return true;
+      }
+
+      if (leaderIndex.toLowerCase().includes(normalizedSearchText)) {
+        return true;
+      }
+
+      if (remoteCluster.toLowerCase().includes(normalizedSearchText)) {
+        return true;
+      }
+
+      return false;
+    });
+  }
+
+  return followerIndices;
+};
 
 export class FollowerIndicesTable extends PureComponent {
   static propTypes = {
     followerIndices: PropTypes.array,
     selectFollowerIndex: PropTypes.func.isRequired,
+  };
+
+  static getDerivedStateFromProps(props, state) {
+    const { followerIndices } = props;
+    const { prevFollowerIndices, queryText } = state;
+
+    // If a follower index gets deleted, we need to recreate the cached filtered follower indices.
+    if (prevFollowerIndices !== followerIndices) {
+      return {
+        prevFollowerIndices: followerIndices,
+        filteredIndices: getFilteredIndices(followerIndices, queryText),
+      };
+    }
+
+    return null;
   }
 
-  state = {
-    selectedItems: [],
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      prevFollowerIndices: props.followerIndices,
+      selectedItems: [],
+      filteredIndices: props.followerIndices,
+      queryText: '',
+    };
   }
 
   onSearch = ({ query }) => {
+    const { followerIndices } = this.props;
     const { text } = query;
-    const normalizedSearchText = text.toLowerCase();
+
+    // We cache the filtered indices instead of calculating them inside render() because
+    // of https://github.com/elastic/eui/issues/3445.
     this.setState({
-      queryText: normalizedSearchText,
+      queryText: text,
+      filteredIndices: getFilteredIndices(followerIndices, text),
     });
   };
 
   editFollowerIndex = (id) => {
-    const uri = routing.getFollowerIndexPath(id, '/edit', false);
+    const uri = routing.getFollowerIndexPath(id);
     routing.navigate(uri);
-  }
-
-  getFilteredIndices = () => {
-    const { followerIndices } = this.props;
-    const { queryText } = this.state;
-
-    if(queryText) {
-      return followerIndices.filter(followerIndex => {
-        const { name, shards } = followerIndex;
-
-        const inName = name.toLowerCase().includes(queryText);
-        const inRemoteCluster = shards[0].remoteCluster.toLowerCase().includes(queryText);
-        const inLeaderIndex = shards[0].leaderIndex.toLowerCase().includes(queryText);
-
-        return inName || inRemoteCluster || inLeaderIndex;
-      });
-    }
-
-    return followerIndices.slice(0);
   };
 
-  getTableColumns() {
+  getTableColumns(actionHandlers) {
     const { selectFollowerIndex } = this.props;
 
     const actions = [
-      /* Pause or resume follower index */
+      /* Pause follower index */
       {
-        render: (followerIndex) => {
-          const { name, isPaused } = followerIndex;
-          const label = isPaused
-            ? i18n.translate(
-              'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
-              {
-                defaultMessage: 'Resume replication'
-              }
-            ) : i18n.translate(
-              'xpack.crossClusterReplication.followerIndexList.table.actionPauseDescription',
-              {
-                defaultMessage: 'Pause replication'
-              }
-            );
-
-          return isPaused ? (
-            <FollowerIndexResumeProvider>
-              {(resumeFollowerIndex) => (
-                <span
-                  onClick={() => resumeFollowerIndex(name)}
-                  data-test-subj="resumeButton"
-                >
-                  <EuiIcon
-                    aria-label={label}
-                    type="play"
-                    className="euiContextMenu__icon"
-                  />
-                  <span>{label}</span>
-                </span>
-              )}
-            </FollowerIndexResumeProvider>
-          ) : (
-            <FollowerIndexPauseProvider>
-              {(pauseFollowerIndex) => (
-                <span
-                  onClick={() => pauseFollowerIndex(followerIndex)}
-                  data-test-subj="pauseButton"
-                >
-                  <EuiIcon
-                    aria-label={label}
-                    type="pause"
-                    className="euiContextMenu__icon"
-                  />
-                  <span>{label}</span>
-                </span>
-              )}
-            </FollowerIndexPauseProvider>
-          );
-        },
+        name: actionI18nTexts.pause,
+        description: actionI18nTexts.pause,
+        icon: 'pause',
+        onClick: (item) => actionHandlers.pauseFollowerIndex(item),
+        available: (item) => !item.isPaused,
+        'data-test-subj': 'pauseButton',
+      },
+      /* Resume follower index */
+      {
+        name: actionI18nTexts.resume,
+        description: actionI18nTexts.resume,
+        icon: 'play',
+        onClick: (item) => actionHandlers.resumeFollowerIndex(item.name),
+        available: (item) => item.isPaused,
+        'data-test-subj': 'resumeButton',
       },
       /* Edit follower index */
       {
-        render: ({ name }) => {
-          const label = i18n.translate(
-            'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
-            {
-              defaultMessage: 'Edit follower index'
-            }
-          );
-
-          return (
-            <span
-              onClick={() => this.editFollowerIndex(name)}
-              data-test-subj="editButton"
-            >
-              <EuiIcon
-                aria-label={label}
-                type="pencil"
-                className="euiContextMenu__icon"
-              />
-              <span>{label}</span>
-            </span>
-          );
-        },
+        name: actionI18nTexts.edit,
+        description: actionI18nTexts.edit,
+        onClick: (item) => this.editFollowerIndex(item.name),
+        icon: 'pencil',
+        'data-test-subj': 'editButton',
       },
       /* Unfollow leader index */
       {
-        render: ({ name }) => {
-          const label = i18n.translate(
-            'xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription',
-            {
-              defaultMessage: 'Unfollow leader index'
-            }
-          );
-
-          return (
-            <FollowerIndexUnfollowProvider>
-              {(unfollowLeaderIndex) => (
-                <span
-                  onClick={() => unfollowLeaderIndex(name)}
-                  data-test-subj="unfollowButton"
-                >
-                  <EuiIcon
-                    aria-label={label}
-                    type="indexFlush"
-                    className="euiContextMenu__icon"
-                  />
-                  <span>{label}</span>
-                </span>
-              )}
-            </FollowerIndexUnfollowProvider>
-          );
-        },
+        name: actionI18nTexts.unfollow,
+        description: actionI18nTexts.unfollow,
+        onClick: (item) => actionHandlers.unfollowLeaderIndex(item.name),
+        icon: 'indexFlush',
+        'data-test-subj': 'unfollowButton',
       },
     ];
 
-    return [{
-      field: 'name',
-      name: i18n.translate('xpack.crossClusterReplication.followerIndexList.table.nameColumnTitle', {
-        defaultMessage: 'Name'
-      }),
-      sortable: true,
-      truncateText: false,
-      render: (name) => {
-        return (
-          <EuiLink
-            onClick={() => {
-              trackUiMetric(UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK);
-              selectFollowerIndex(name);
-            }}
-            data-test-subj="followerIndexLink"
-          >
-            {name}
-          </EuiLink>
-        );
-      }
-    }, {
-      field: 'isPaused',
-      name: i18n.translate(
-        'xpack.crossClusterReplication.followerIndexList.table.statusColumnTitle',
-        {
-          defaultMessage: 'Status'
-        }
-      ),
-      truncateText: true,
-      sortable: true,
-      render: (isPaused) => {
-        return isPaused ? (
-          <EuiHealth color="subdued">
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexList.table.statusColumn.pausedLabel"
-              defaultMessage="Paused"
-            />
-          </EuiHealth>
-        ) : (
-          <EuiHealth color="success">
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexList.table.statusColumn.activeLabel"
-              defaultMessage="Active"
-            />
-          </EuiHealth>
-        );
-      }
-    }, {
-      field: 'remoteCluster',
-      name: i18n.translate(
-        'xpack.crossClusterReplication.followerIndexList.table.clusterColumnTitle',
-        {
-          defaultMessage: 'Remote cluster'
-        }
-      ),
-      truncateText: true,
-      sortable: true,
-    }, {
-      field: 'leaderIndex',
-      name: i18n.translate(
-        'xpack.crossClusterReplication.followerIndexList.table.leaderIndexColumnTitle',
-        {
-          defaultMessage: 'Leader index'
-        }
-      ),
-      truncateText: true,
-      sortable: true,
-    }, {
-      name: i18n.translate(
-        'xpack.crossClusterReplication.followerIndexList.table.actionsColumnTitle',
-        {
-          defaultMessage: 'Actions'
-        }
-      ),
-      actions,
-      width: '100px',
-    }];
+    return [
+      {
+        field: 'name',
+        name: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.nameColumnTitle',
+          {
+            defaultMessage: 'Name',
+          }
+        ),
+        sortable: true,
+        truncateText: false,
+        render: (name) => {
+          return (
+            <EuiLink
+              onClick={() => {
+                trackUiMetric('click', UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK);
+                selectFollowerIndex(name);
+              }}
+              data-test-subj="followerIndexLink"
+            >
+              {name}
+            </EuiLink>
+          );
+        },
+      },
+      {
+        field: 'isPaused',
+        name: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.statusColumnTitle',
+          {
+            defaultMessage: 'Status',
+          }
+        ),
+        truncateText: true,
+        sortable: true,
+        render: (isPaused) => {
+          return isPaused ? (
+            <EuiHealth color="subdued">
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexList.table.statusColumn.pausedLabel"
+                defaultMessage="Paused"
+              />
+            </EuiHealth>
+          ) : (
+            <EuiHealth color="success">
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexList.table.statusColumn.activeLabel"
+                defaultMessage="Active"
+              />
+            </EuiHealth>
+          );
+        },
+      },
+      {
+        field: 'remoteCluster',
+        name: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.clusterColumnTitle',
+          {
+            defaultMessage: 'Remote cluster',
+          }
+        ),
+        truncateText: true,
+        sortable: true,
+      },
+      {
+        field: 'leaderIndex',
+        name: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.leaderIndexColumnTitle',
+          {
+            defaultMessage: 'Leader index',
+          }
+        ),
+        truncateText: true,
+        sortable: true,
+      },
+      {
+        name: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.actionsColumnTitle',
+          {
+            defaultMessage: 'Actions',
+          }
+        ),
+        actions,
+        width: '100px',
+      },
+    ];
   }
 
   renderLoading = () => {
@@ -265,7 +262,7 @@ export class FollowerIndicesTable extends PureComponent {
     if (apiStatusDelete === API_STATUS.DELETING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl"/>
+          <EuiLoadingKibana size="xl" />
         </EuiOverlayMask>
       );
     }
@@ -273,60 +270,76 @@ export class FollowerIndicesTable extends PureComponent {
   };
 
   render() {
-    const {
-      selectedItems,
-    } = this.state;
+    const { selectedItems, filteredIndices } = this.state;
 
     const sorting = {
       sort: {
         field: 'name',
         direction: 'asc',
-      }
+      },
     };
 
     const pagination = {
       initialPageSize: 20,
-      pageSizeOptions: [10, 20, 50]
+      pageSizeOptions: [10, 20, 50],
     };
 
     const selection = {
-      onSelectionChange: (selectedItems) => this.setState({ selectedItems })
+      onSelectionChange: (newSelectedItems) => this.setState({ selectedItems: newSelectedItems }),
     };
 
     const search = {
       toolsLeft: selectedItems.length ? (
-        <ContextMenu
-          followerIndices={selectedItems}
-          testSubj="contextMenuButton"
-        />
+        <ContextMenu followerIndices={selectedItems} testSubj="contextMenuButton" />
       ) : undefined,
+      toolsRight: (
+        <EuiButton
+          {...reactRouterNavigate(routing._reactRouter.history, `/follower_indices/add`)}
+          fill
+          iconType="plusInCircle"
+          data-test-subj="createFollowerIndexButton"
+        >
+          <FormattedMessage
+            id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
+            defaultMessage="Create a follower index"
+          />
+        </EuiButton>
+      ),
       onChange: this.onSearch,
       box: {
         incremental: true,
+        'data-test-subj': 'followerIndexSearch',
       },
     };
 
     return (
-      <Fragment>
-        <EuiInMemoryTable
-          items={this.getFilteredIndices()}
-          itemId="name"
-          columns={this.getTableColumns()}
-          search={search}
-          pagination={pagination}
-          sorting={sorting}
-          selection={selection}
-          isSelectable={true}
-          rowProps={() => ({
-            'data-test-subj': 'row'
-          })}
-          cellProps={(item, column) => ({
-            'data-test-subj': `cell-${column.field}`
-          })}
-          data-test-subj="followerIndexListTable"
-        />
-        {this.renderLoading()}
-      </Fragment>
+      <FollowerIndexActionsProvider>
+        {(getActionHandlers) => {
+          const actionHandlers = getActionHandlers();
+          return (
+            <>
+              <EuiInMemoryTable
+                items={filteredIndices}
+                itemId="name"
+                columns={this.getTableColumns(actionHandlers)}
+                search={search}
+                pagination={pagination}
+                sorting={sorting}
+                selection={selection}
+                isSelectable={true}
+                rowProps={() => ({
+                  'data-test-subj': 'row',
+                })}
+                cellProps={(item, column) => ({
+                  'data-test-subj': `cell-${column.field}`,
+                })}
+                data-test-subj="followerIndexListTable"
+              />
+              {this.renderLoading()}
+            </>
+          );
+        }}
+      </FollowerIndexActionsProvider>
     );
   }
 }

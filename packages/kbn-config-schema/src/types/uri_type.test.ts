@@ -1,26 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '..';
 
 test('is required by default', () => {
-  expect(() => schema.uri().validate(undefined)).toThrowErrorMatchingSnapshot();
+  expect(() => schema.uri().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [undefined]."`
+  );
 });
 
 test('returns value for valid URI as per RFC3986', () => {
@@ -54,17 +45,23 @@ test('returns value for valid URI as per RFC3986', () => {
 test('returns error when value is not a URI', () => {
   const uriSchema = schema.uri();
 
-  expect(() => uriSchema.validate('3domain.local')).toThrowErrorMatchingSnapshot();
+  expect(() => uriSchema.validate('3domain.local')).toThrowErrorMatchingInlineSnapshot(
+    `"value must be a valid URI (see RFC 3986)."`
+  );
   expect(() =>
     uriSchema.validate('http://8010:0:0:0:9:500:300C:200A')
-  ).toThrowErrorMatchingSnapshot();
-  expect(() => uriSchema.validate('-')).toThrowErrorMatchingSnapshot();
+  ).toThrowErrorMatchingInlineSnapshot(`"value must be a valid URI (see RFC 3986)."`);
+  expect(() => uriSchema.validate('-')).toThrowErrorMatchingInlineSnapshot(
+    `"value must be a valid URI (see RFC 3986)."`
+  );
   expect(() =>
     uriSchema.validate('https://example.com?baz[]=foo&baz[]=bar')
-  ).toThrowErrorMatchingSnapshot();
+  ).toThrowErrorMatchingInlineSnapshot(`"value must be a valid URI (see RFC 3986)."`);
 
   const tooLongUri = `http://${'a'.repeat(256)}`;
-  expect(() => uriSchema.validate(tooLongUri)).toThrowErrorMatchingSnapshot();
+  expect(() => uriSchema.validate(tooLongUri)).toThrowErrorMatchingInlineSnapshot(
+    `"value must be a valid URI (see RFC 3986)."`
+  );
 });
 
 describe('#scheme', () => {
@@ -78,8 +75,12 @@ describe('#scheme', () => {
   test('returns error when shorter string', () => {
     const uriSchema = schema.uri({ scheme: ['http', 'https'] });
 
-    expect(() => uriSchema.validate('ftp://elastic.co')).toThrowErrorMatchingSnapshot();
-    expect(() => uriSchema.validate('file:///kibana.log')).toThrowErrorMatchingSnapshot();
+    expect(() => uriSchema.validate('ftp://elastic.co')).toThrowErrorMatchingInlineSnapshot(
+      `"expected URI with scheme [http|https]."`
+    );
+    expect(() => uriSchema.validate('file:///kibana.log')).toThrowErrorMatchingInlineSnapshot(
+      `"expected URI with scheme [http|https]."`
+    );
   });
 });
 
@@ -131,14 +132,20 @@ describe('#validate', () => {
 
     expect(() =>
       schema.uri({ validate }).validate('http://kibana.local')
-    ).toThrowErrorMatchingSnapshot();
+    ).toThrowErrorMatchingInlineSnapshot(`"validator failure"`);
   });
 });
 
 test('returns error when not string', () => {
-  expect(() => schema.uri().validate(123)).toThrowErrorMatchingSnapshot();
+  expect(() => schema.uri().validate(123)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [number]."`
+  );
 
-  expect(() => schema.uri().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
+  expect(() => schema.uri().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [Array]."`
+  );
 
-  expect(() => schema.uri().validate(/abc/)).toThrowErrorMatchingSnapshot();
+  expect(() => schema.uri().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [RegExp]."`
+  );
 });

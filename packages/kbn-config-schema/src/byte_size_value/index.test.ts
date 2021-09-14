@@ -1,25 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ByteSizeValue } from '.';
 
 describe('parsing units', () => {
+  test('number string (bytes)', () => {
+    expect(ByteSizeValue.parse('123').getValueInBytes()).toBe(123);
+  });
+
   test('bytes', () => {
     expect(ByteSizeValue.parse('123b').getValueInBytes()).toBe(123);
   });
@@ -37,24 +30,30 @@ describe('parsing units', () => {
     expect(ByteSizeValue.parse('1gb').getValueInBytes()).toBe(1073741824);
   });
 
-  test('throws an error when no unit specified', () => {
-    expect(() => ByteSizeValue.parse('123')).toThrowError('could not parse byte size value');
-  });
-
   test('throws an error when unsupported unit specified', () => {
-    expect(() => ByteSizeValue.parse('1tb')).toThrowError('could not parse byte size value');
+    expect(() => ByteSizeValue.parse('1tb')).toThrowErrorMatchingInlineSnapshot(
+      `"Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
+    );
   });
 });
 
 describe('#constructor', () => {
   test('throws if number of bytes is negative', () => {
-    expect(() => new ByteSizeValue(-1024)).toThrowErrorMatchingSnapshot();
+    expect(() => new ByteSizeValue(-1024)).toThrowErrorMatchingInlineSnapshot(
+      `"Value in bytes is expected to be a safe positive integer."`
+    );
   });
 
   test('throws if number of bytes is not safe', () => {
-    expect(() => new ByteSizeValue(NaN)).toThrowErrorMatchingSnapshot();
-    expect(() => new ByteSizeValue(Infinity)).toThrowErrorMatchingSnapshot();
-    expect(() => new ByteSizeValue(Math.pow(2, 53))).toThrowErrorMatchingSnapshot();
+    expect(() => new ByteSizeValue(NaN)).toThrowErrorMatchingInlineSnapshot(
+      `"Value in bytes is expected to be a safe positive integer."`
+    );
+    expect(() => new ByteSizeValue(Infinity)).toThrowErrorMatchingInlineSnapshot(
+      `"Value in bytes is expected to be a safe positive integer."`
+    );
+    expect(() => new ByteSizeValue(Math.pow(2, 53))).toThrowErrorMatchingInlineSnapshot(
+      `"Value in bytes is expected to be a safe positive integer."`
+    );
   });
 
   test('accepts 0', () => {

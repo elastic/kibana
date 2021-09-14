@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { handleActions, combineActions } from 'redux-actions';
-import { set, assign, del } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { createAsset, setAssetValue, removeAsset, setAssets, resetAssets } from '../actions/assets';
 import { getId } from '../../lib/get_id';
+
+const { set, assign, del } = immutable;
 
 export const assetsReducer = handleActions(
   {
@@ -34,7 +37,7 @@ export const assetsReducer = handleActions(
       return del(assetState, assetId);
     },
 
-    [combineActions(setAssets, resetAssets)]: (assetState, { payload }) => payload || {},
+    [combineActions(setAssets, resetAssets)]: (_assetState, { payload }) => payload || {},
   },
   {}
 );

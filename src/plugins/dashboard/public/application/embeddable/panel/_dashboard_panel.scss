@@ -1,0 +1,24 @@
+/**
+  * EDITING MODE
+  * Use .dshLayout--editing to target editing state because
+  * .embPanel--editing doesn't get updating without a hard refresh
+  */
+
+// LAYOUT MODES
+
+// Adjust borders/etc... for non-spaced out and expanded panels
+.dshLayout-withoutMargins,
+.dshDashboardGrid__item--expanded {
+  .embPanel {
+    box-shadow: none;
+    border-radius: 0;
+  }
+}
+
+// Remove border color unless in editing mode
+.dshLayout-withoutMargins:not(.dshLayout--editing),
+.dshDashboardGrid__item--expanded {
+  .embPanel {
+    border-color: transparent;
+  }
+}

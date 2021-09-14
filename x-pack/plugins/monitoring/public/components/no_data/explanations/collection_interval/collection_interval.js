@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -15,7 +16,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiHorizontalRule,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { WhatIs } from '../../blurbs';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -32,13 +33,8 @@ export class ExplainCollectionInterval extends React.Component {
   }
 
   render() {
-    const {
-      context,
-      property,
-      data,
-      isCollectionIntervalUpdated,
-      isCollectionIntervalUpdating
-    } = this.props;
+    const { reason, isCollectionIntervalUpdated, isCollectionIntervalUpdating } = this.props;
+    const { context, property, data } = reason;
 
     const renderButton = () => (
       <Fragment>
@@ -52,8 +48,8 @@ export class ExplainCollectionInterval extends React.Component {
               is set to {data}."
               values={{
                 context,
-                property: (<EuiCode>{property}</EuiCode>),
-                data: (<EuiCode>{data}</EuiCode>)
+                property: <EuiCode>{property}</EuiCode>,
+                data: <EuiCode>{data}</EuiCode>,
               }}
             />
           </p>
@@ -72,11 +68,7 @@ export class ExplainCollectionInterval extends React.Component {
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceAround"
-          gutterSize="s"
-        >
+        <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton
               fill={true}
@@ -131,9 +123,7 @@ export class ExplainCollectionInterval extends React.Component {
 
 ExplainCollectionInterval.propTypes = {
   enabler: PropTypes.object.isRequired,
-  context: PropTypes.string.isRequired,
-  property: PropTypes.string.isRequired,
-  data: PropTypes.string.isRequired,
+  reason: PropTypes.object.isRequired,
   isCollectionIntervalUpdated: PropTypes.bool,
-  isCollectionIntervalUpdating: PropTypes.bool
+  isCollectionIntervalUpdating: PropTypes.bool,
 };

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { StatusIcon } from 'plugins/monitoring/components/status_icon';
-import { injectI18n } from '@kbn/i18n/react';
+import { StatusIcon } from '../../status_icon';
+import { i18n } from '@kbn/i18n';
 
-export function MachineLearningJobStatusIconUI({ status, intl }) {
+export function MachineLearningJobStatusIcon({ status }) {
   const type = (() => {
     const statusKey = status.toUpperCase();
 
@@ -27,12 +28,10 @@ export function MachineLearningJobStatusIconUI({ status, intl }) {
   return (
     <StatusIcon
       type={type}
-      label={intl.formatMessage({
-        id: 'xpack.monitoring.elasticsearch.mlJobListing.statusIconLabel',
-        defaultMessage: 'Job Status: {status}' }, { status }
-      )}
+      label={i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.statusIconLabel', {
+        defaultMessage: 'Job Status: {status}',
+        values: { status },
+      })}
     />
   );
 }
-
-export const MachineLearningJobStatusIcon = injectI18n(MachineLearningJobStatusIconUI);

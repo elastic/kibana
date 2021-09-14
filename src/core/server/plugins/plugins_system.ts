@@ -1,83 +1,155 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { pick } from 'lodash';
-
+import { withTimeout, isPromise } from '@kbn/std';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
-import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
-import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import { PluginWrapper } from './plugin';
+import { DiscoveredPlugin, PluginDependencies, PluginName, PluginType } from './types';
+import {
+  createPluginPrebootSetupContext,
+  createPluginSetupContext,
+  createPluginStartContext,
+} from './plugin_context';
+import {
+  PluginsServicePrebootSetupDeps,
+  PluginsServiceSetupDeps,
+  PluginsServiceStartDeps,
+} from './plugins_service';
+
+const Sec = 1000;
 
 /** @internal */
-export class PluginsSystem {
+export class PluginsSystem<T extends PluginType> {
   private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
 
-  constructor(private readonly coreContext: CoreContext) {
-    this.log = coreContext.logger.get('plugins-system');
+  constructor(private readonly coreContext: CoreContext, public readonly type: T) {
+    this.log = coreContext.logger.get('plugins-system', this.type);
   }
 
   public addPlugin(plugin: PluginWrapper) {
+    if (plugin.manifest.type !== this.type) {
+      throw new Error(
+        `Cannot add plugin with type "${plugin.manifest.type}" to plugin system with type "${this.type}".`
+      );
+    }
+
     this.plugins.set(plugin.name, plugin);
   }
 
-  public async setupPlugins(deps: PluginsServiceSetupDeps) {
+  public getPlugins() {
+    return [...this.plugins.values()];
+  }
+
+  /**
+   * @returns a ReadonlyMap of each plugin and an Array of its available dependencies
+   * @internal
+   */
+  public getPluginDependencies(): PluginDependencies {
+    const asNames = new Map(
+      [...this.plugins].map(([name, plugin]) => [
+        plugin.name,
+        [
+          ...new Set([
+            ...plugin.requiredPlugins,
+            ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
+          ]),
+        ].map((depId) => this.plugins.get(depId)!.name),
+      ])
+    );
+    const asOpaqueIds = new Map(
+      [...this.plugins].map(([name, plugin]) => [
+        plugin.opaqueId,
+        [
+          ...new Set([
+            ...plugin.requiredPlugins,
+            ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
+          ]),
+        ].map((depId) => this.plugins.get(depId)!.opaqueId),
+      ])
+    );
+
+    return { asNames, asOpaqueIds };
+  }
+
+  public async setupPlugins(
+    deps: T extends PluginType.preboot ? PluginsServicePrebootSetupDeps : PluginsServiceSetupDeps
+  ): Promise<Map<string, unknown>> {
     const contracts = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
       return contracts;
     }
 
-    const sortedPlugins = this.getTopologicallySortedPluginNames();
-    this.log.info(`Setting up [${this.plugins.size}] plugins: [${[...sortedPlugins]}]`);
+    const sortedPlugins = new Map(
+      [...this.getTopologicallySortedPluginNames()]
+        .map((pluginName) => [pluginName, this.plugins.get(pluginName)!] as [string, PluginWrapper])
+        .filter(([pluginName, plugin]) => plugin.includesServerPlugin)
+    );
+    this.log.info(
+      `Setting up [${sortedPlugins.size}] plugins: [${[...sortedPlugins.keys()].join(',')}]`
+    );
 
-    for (const pluginName of sortedPlugins) {
-      const plugin = this.plugins.get(pluginName)!;
-      if (!plugin.includesServerPlugin) {
-        continue;
-      }
-
+    for (const [pluginName, plugin] of sortedPlugins) {
       this.log.debug(`Setting up plugin "${pluginName}"...`);
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have server-side code or is a
-          // missing optional dependency.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
+      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have server-side code or is a
+        // missing optional dependency.
+        if (contracts.has(dependencyName)) {
+          depContracts[dependencyName] = contracts.get(dependencyName);
+        }
 
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
+        return depContracts;
+      }, {} as Record<PluginName, unknown>);
 
-      contracts.set(
-        pluginName,
-        await plugin.setup(
-          createPluginSetupContext(this.coreContext, deps, plugin),
-          pluginDepContracts
-        )
-      );
+      let pluginSetupContext;
+      if (this.type === PluginType.preboot) {
+        pluginSetupContext = createPluginPrebootSetupContext(
+          this.coreContext,
+          deps as PluginsServicePrebootSetupDeps,
+          plugin
+        );
+      } else {
+        pluginSetupContext = createPluginSetupContext(
+          this.coreContext,
+          deps as PluginsServiceSetupDeps,
+          plugin
+        );
+      }
 
+      let contract: unknown;
+      const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
+      if (isPromise(contractOrPromise)) {
+        if (this.coreContext.env.mode.dev) {
+          this.log.warn(
+            `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
+          );
+        }
+        const contractMaybe = await withTimeout<any>({
+          promise: contractOrPromise,
+          timeoutMs: 10 * Sec,
+        });
+
+        if (contractMaybe.timedout) {
+          throw new Error(
+            `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+          );
+        } else {
+          contract = contractMaybe.value;
+        }
+      } else {
+        contract = contractOrPromise;
+      }
+
+      contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
     }
 
@@ -85,6 +157,10 @@ export class PluginsSystem {
   }
 
   public async startPlugins(deps: PluginsServiceStartDeps) {
+    if (this.type === PluginType.preboot) {
+      throw new Error('Preboot plugins cannot be started.');
+    }
+
     const contracts = new Map<PluginName, unknown>();
     if (this.satupPlugins.length === 0) {
       return contracts;
@@ -96,26 +172,44 @@ export class PluginsSystem {
       this.log.debug(`Starting plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have server-side code or is a
-          // missing optional dependency.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
+      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have server-side code or is a
+        // missing optional dependency.
+        if (contracts.has(dependencyName)) {
+          depContracts[dependencyName] = contracts.get(dependencyName);
+        }
 
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
+        return depContracts;
+      }, {} as Record<PluginName, unknown>);
 
-      contracts.set(
-        pluginName,
-        await plugin.start(
-          createPluginStartContext(this.coreContext, deps, plugin),
-          pluginDepContracts
-        )
+      let contract: unknown;
+      const contractOrPromise = plugin.start(
+        createPluginStartContext(this.coreContext, deps, plugin),
+        pluginDepContracts
       );
+      if (isPromise(contractOrPromise)) {
+        if (this.coreContext.env.mode.dev) {
+          this.log.warn(
+            `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
+          );
+        }
+        const contractMaybe = await withTimeout({
+          promise: contractOrPromise,
+          timeoutMs: 10 * Sec,
+        });
+
+        if (contractMaybe.timedout) {
+          throw new Error(
+            `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+          );
+        } else {
+          contract = contractMaybe.value;
+        }
+      } else {
+        contract = contractOrPromise;
+      }
+
+      contracts.set(pluginName, contract);
     }
 
     return contracts;
@@ -133,7 +227,15 @@ export class PluginsSystem {
       const pluginName = this.satupPlugins.pop()!;
 
       this.log.debug(`Stopping plugin "${pluginName}"...`);
-      await this.plugins.get(pluginName)!.stop();
+
+      const resultMaybe = await withTimeout({
+        promise: this.plugins.get(pluginName)!.stop(),
+        timeoutMs: 30 * Sec,
+      });
+
+      if (resultMaybe?.timedout) {
+        this.log.warn(`"${pluginName}" plugin didn't stop in 30sec., move on to the next.`);
+      }
     }
   }
 
@@ -141,35 +243,31 @@ export class PluginsSystem {
    * Get a Map of all discovered UI plugins in topological order.
    */
   public uiPlugins() {
-    const internal = new Map<PluginName, DiscoveredPluginInternal>(
-      [...this.getTopologicallySortedPluginNames().keys()]
-        .filter(pluginName => this.plugins.get(pluginName)!.includesUiPlugin)
-        .map(pluginName => {
-          const plugin = this.plugins.get(pluginName)!;
-          return [
-            pluginName,
-            {
-              id: pluginName,
-              path: plugin.path,
-              configPath: plugin.manifest.configPath,
-              requiredPlugins: plugin.manifest.requiredPlugins,
-              optionalPlugins: plugin.manifest.optionalPlugins,
-            },
-          ] as [PluginName, DiscoveredPluginInternal];
-        })
+    const uiPluginNames = [...this.getTopologicallySortedPluginNames().keys()].filter(
+      (pluginName) => this.plugins.get(pluginName)!.includesUiPlugin
     );
-
     const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
-      [...internal.entries()].map(
-        ([pluginName, plugin]) =>
-          [
-            pluginName,
-            pick(plugin, ['id', 'configPath', 'requiredPlugins', 'optionalPlugins']),
-          ] as [PluginName, DiscoveredPlugin]
-      )
+      uiPluginNames.map((pluginName) => {
+        const plugin = this.plugins.get(pluginName)!;
+        return [
+          pluginName,
+          {
+            id: pluginName,
+            type: plugin.manifest.type,
+            configPath: plugin.manifest.configPath,
+            requiredPlugins: plugin.manifest.requiredPlugins.filter((p) =>
+              uiPluginNames.includes(p)
+            ),
+            optionalPlugins: plugin.manifest.optionalPlugins.filter((p) =>
+              uiPluginNames.includes(p)
+            ),
+            requiredBundles: plugin.manifest.requiredBundles,
+          },
+        ];
+      })
     );
 
-    return { public: publicPlugins, internal };
+    return publicPlugins;
   }
 
   /**
@@ -191,7 +289,7 @@ export class PluginsSystem {
           pluginName,
           new Set([
             ...plugin.requiredPlugins,
-            ...plugin.optionalPlugins.filter(dependency => this.plugins.has(dependency)),
+            ...plugin.optionalPlugins.filter((dependency) => this.plugins.has(dependency)),
           ]),
         ] as [PluginName, Set<PluginName>];
       })
@@ -200,7 +298,7 @@ export class PluginsSystem {
     // First, find a list of "start nodes" which have no outgoing edges. At least
     // one such node must exist in a non-empty acyclic graph.
     const pluginsWithAllDependenciesSorted = [...pluginsDependenciesGraph.keys()].filter(
-      pluginName => pluginsDependenciesGraph.get(pluginName)!.size === 0
+      (pluginName) => pluginsDependenciesGraph.get(pluginName)!.size === 0
     );
 
     const sortedPluginNames = new Set<PluginName>();
@@ -224,9 +322,9 @@ export class PluginsSystem {
     }
 
     if (pluginsDependenciesGraph.size > 0) {
-      const edgesLeft = JSON.stringify([...pluginsDependenciesGraph.entries()]);
+      const edgesLeft = JSON.stringify([...pluginsDependenciesGraph.keys()]);
       throw new Error(
-        `Topological ordering of plugins did not complete, these edges could not be ordered: ${edgesLeft}`
+        `Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ${edgesLeft}`
       );
     }
 

@@ -1,5 +1,0 @@
-[[export-data]]
-== Exporting data
-
-Exporting a data table or saved search from a dashboard or visualization report 
-has known limitations. The PDF report only includes the data visible on the screen.

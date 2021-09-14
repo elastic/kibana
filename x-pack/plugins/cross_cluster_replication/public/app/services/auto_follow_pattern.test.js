@@ -1,10 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment';
-import { getPreviewIndicesFromAutoFollowPattern, getPrefixSuffixFromFollowPattern } from './auto_follow_pattern';
+import {
+  getPreviewIndicesFromAutoFollowPattern,
+  getPrefixSuffixFromFollowPattern,
+} from './auto_follow_pattern';
 
 describe('Auto-follo pattern service', () => {
   describe('getPreviewIndicesFromAutoFollowPattern()', () => {
@@ -19,10 +24,14 @@ describe('Auto-follo pattern service', () => {
     });
 
     it('should render a list of indices preview', () => {
-      const { indicesPreview, hasMore } = getPreviewIndicesFromAutoFollowPattern({ prefix, suffix, leaderIndexPatterns });
+      const { indicesPreview, hasMore } = getPreviewIndicesFromAutoFollowPattern({
+        prefix,
+        suffix,
+        leaderIndexPatterns,
+      });
 
       expect(hasMore).toBe(false);
-      expect(indicesPreview.map(preview => preview.toString)).toEqual([
+      expect(indicesPreview.map((preview) => preview.toString)).toEqual([
         `prefix_logstash-${moment().format('YYYY-MM-DD')}_suffix`,
         `prefix_logstash-${moment().add(1, 'days').format('YYYY-MM-DD')}_suffix`,
         `prefix_logstash-${moment().add(2, 'days').format('YYYY-MM-DD')}_suffix`,
@@ -32,10 +41,14 @@ describe('Auto-follo pattern service', () => {
     it('should have a default limit of 5', () => {
       leaderIndexPatterns.push('other-*');
 
-      const { indicesPreview, hasMore } = getPreviewIndicesFromAutoFollowPattern({ prefix, suffix, leaderIndexPatterns });
+      const { indicesPreview, hasMore } = getPreviewIndicesFromAutoFollowPattern({
+        prefix,
+        suffix,
+        leaderIndexPatterns,
+      });
 
       expect(hasMore).toBe(true);
-      expect(indicesPreview.map(preview => preview.toString)).toEqual([
+      expect(indicesPreview.map((preview) => preview.toString)).toEqual([
         `prefix_logstash-${moment().format('YYYY-MM-DD')}_suffix`,
         `prefix_logstash-${moment().add(1, 'days').format('YYYY-MM-DD')}_suffix`,
         `prefix_logstash-${moment().add(2, 'days').format('YYYY-MM-DD')}_suffix`,
@@ -52,15 +65,14 @@ describe('Auto-follo pattern service', () => {
         suffix,
         leaderIndexPatterns,
         limit,
-        wildcardPlaceHolders
+        wildcardPlaceHolders,
       });
 
-      expect(indicesPreview.map(preview => preview.toString)).toEqual([
+      expect(indicesPreview.map((preview) => preview.toString)).toEqual([
         'prefix_logstash-A_suffix',
         'prefix_logstash-B_suffix',
       ]);
     });
-
   });
 
   describe('getPrefixSuffixFromFollowPattern()', () => {

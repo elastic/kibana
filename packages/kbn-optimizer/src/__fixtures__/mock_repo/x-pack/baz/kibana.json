@@ -1,0 +1,6 @@
+{
+  "id": "baz",
+  "owner": { "name": "Operations", "githubTeam": "kibana-operations" },
+  "ui": true,
+  "version": "8.0.0"
+}

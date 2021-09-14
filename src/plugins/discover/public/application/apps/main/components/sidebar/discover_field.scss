@@ -1,0 +1,10 @@
+.dscSidebarItem__fieldPopoverPanel {
+  min-width: $euiSizeXXL * 6.5;
+  max-width: $euiSizeXXL * 7.5;
+}
+
+.dscSidebarItem--multi {
+  .kbnFieldButton__button {
+    padding-left: 0;
+  }
+}

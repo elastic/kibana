@@ -1,16 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ascending, bisector } from 'd3-array';
-import pick from 'lodash/fp/pick';
+import { pick } from 'lodash';
 
 export interface TimeKey {
   time: number;
   tiebreaker: number;
   gid?: string;
+  fromAutoReload?: boolean;
+}
+
+export interface UniqueTimeKey extends TimeKey {
+  gid: string;
 }
 
 export type Comparator = (firstValue: any, secondValue: any) => number;
@@ -22,7 +28,7 @@ export const isTimeKey = (value: any): value is TimeKey =>
   typeof value.tiebreaker === 'number';
 
 export const pickTimeKey = <T extends TimeKey>(value: T): TimeKey =>
-  pick(['time', 'tiebreaker'], value);
+  pick(value, ['time', 'tiebreaker']);
 
 export function compareTimeKeys(
   firstKey: TimeKey,
@@ -77,3 +83,15 @@ export const getIndexAtTimeKey = <Value>(
 
 export const timeKeyIsBetween = (min: TimeKey, max: TimeKey, operand: TimeKey) =>
   compareTimeKeys(min, operand) <= 0 && compareTimeKeys(max, operand) >= 0;
+
+export const getPreviousTimeKey = (timeKey: TimeKey) => ({
+  ...timeKey,
+  time: timeKey.time,
+  tiebreaker: timeKey.tiebreaker - 1,
+});
+
+export const getNextTimeKey = (timeKey: TimeKey) => ({
+  ...timeKey,
+  time: timeKey.time,
+  tiebreaker: timeKey.tiebreaker + 1,
+});

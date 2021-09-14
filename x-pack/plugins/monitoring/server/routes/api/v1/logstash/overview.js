@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
@@ -31,17 +32,17 @@ export function logstashOverviewRoute(server) {
     path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash',
     config: {
       validate: {
-        params: Joi.object({
-          clusterUuid: Joi.string().required()
+        params: schema.object({
+          clusterUuid: schema.string(),
         }),
-        payload: Joi.object({
-          ccs: Joi.string().optional(),
-          timeRange: Joi.object({
-            min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+        payload: schema.object({
+          ccs: schema.maybe(schema.string()),
+          timeRange: schema.object({
+            min: schema.string(),
+            max: schema.string(),
+          }),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -50,18 +51,27 @@ export function logstashOverviewRoute(server) {
       const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
       try {
-        const [ metrics, clusterStatus ] = await Promise.all([
-          getMetrics(req, lsIndexPattern, metricSet),
-          getClusterStatus(req, lsIndexPattern, { clusterUuid })
+        const [metrics, clusterStatus] = await Promise.all([
+          getMetrics(req, lsIndexPattern, metricSet, [
+            {
+              bool: {
+                should: [
+                  { term: { type: 'logstash_stats' } },
+                  { term: { 'metricset.name': 'stats' } },
+                ],
+              },
+            },
+          ]),
+          getClusterStatus(req, lsIndexPattern, { clusterUuid }),
         ]);
 
         return {
           metrics,
           clusterStatus,
         };
-      } catch(err) {
+      } catch (err) {
         throw handleError(err, req);
       }
-    }
+    },
   });
 }

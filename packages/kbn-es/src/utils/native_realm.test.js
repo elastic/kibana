@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const { NativeRealm } = require('./native_realm');
@@ -40,7 +29,7 @@ const log = new ToolingLog();
 let nativeRealm;
 
 beforeEach(() => {
-  nativeRealm = new NativeRealm('changeme', '9200', log);
+  nativeRealm = new NativeRealm({ elasticPassword: 'changeme', port: '9200', log });
 });
 
 afterAll(() => {
@@ -85,7 +74,7 @@ describe('isSecurityEnabled', () => {
       throw error;
     });
 
-    expect(await nativeRealm.isSecurityEnabled()).toBe(false);
+    expect(await nativeRealm.isSecurityEnabled({ maxAttempts: 1 })).toBe(false);
   });
 
   test('rejects if unexpected error is thrown', async () => {
@@ -97,9 +86,9 @@ describe('isSecurityEnabled', () => {
       throw error;
     });
 
-    await expect(nativeRealm.isSecurityEnabled()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"ResponseError"`
-    );
+    await expect(
+      nativeRealm.isSecurityEnabled({ maxAttempts: 1 })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"ResponseError"`);
   });
 });
 
@@ -109,7 +98,7 @@ describe('setPasswords', () => {
 
     mockClient.security.getUser.mockImplementation(() => ({
       body: {
-        kibana: {
+        kibana_system: {
           metadata: {
             _reserved: true,
           },
@@ -138,7 +127,7 @@ describe('setPasswords', () => {
     }));
 
     await nativeRealm.setPasswords({
-      'password.kibana': 'bar',
+      'password.kibana_system': 'bar',
     });
 
     expect(mockClient.security.changePassword.mock.calls).toMatchInlineSnapshot(`
@@ -149,7 +138,7 @@ Array [
         "password": "bar",
       },
       "refresh": "wait_for",
-      "username": "kibana",
+      "username": "kibana_system",
     },
   ],
   Array [
@@ -188,7 +177,7 @@ describe('getReservedUsers', () => {
   it('returns array of reserved usernames', async () => {
     mockClient.security.getUser.mockImplementation(() => ({
       body: {
-        kibana: {
+        kibana_system: {
           metadata: {
             _reserved: true,
           },
@@ -206,17 +195,17 @@ describe('getReservedUsers', () => {
       },
     }));
 
-    expect(await nativeRealm.getReservedUsers()).toEqual(['kibana', 'logstash_system']);
+    expect(await nativeRealm.getReservedUsers()).toEqual(['kibana_system', 'logstash_system']);
   });
 });
 
 describe('setPassword', () => {
   it('sets password for provided user', async () => {
-    await nativeRealm.setPassword('kibana', 'foo');
+    await nativeRealm.setPassword('kibana_system', 'foo');
     expect(mockClient.security.changePassword).toHaveBeenCalledWith({
       body: { password: 'foo' },
       refresh: 'wait_for',
-      username: 'kibana',
+      username: 'kibana_system',
     });
   });
 
@@ -226,7 +215,7 @@ describe('setPassword', () => {
     });
 
     await expect(
-      nativeRealm.setPassword('kibana', 'foo')
+      nativeRealm.setPassword('kibana_system', 'foo', { maxAttempts: 1 })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"SomeError"`);
   });
 });

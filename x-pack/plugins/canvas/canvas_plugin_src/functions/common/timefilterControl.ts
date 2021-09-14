@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Render } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Render } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
-interface Arguments {
+export interface Arguments {
   column: string;
   compact: boolean;
-  filterGroup: string | null;
+  filterGroup: string;
 }
-export function timefilterControl(): ExpressionFunction<
+export function timefilterControl(): ExpressionFunctionDefinition<
   'timefilterControl',
   null,
   Arguments,
@@ -25,16 +26,16 @@ export function timefilterControl(): ExpressionFunction<
     name: 'timefilterControl',
     aliases: [],
     type: 'render',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     help,
     args: {
       column: {
         types: ['string'],
         aliases: ['field', 'c'],
         help: argHelp.column,
+        default: '@timestamp',
       },
+      // TODO: remove this deprecated arg
       compact: {
         types: ['boolean'],
         help: argHelp.compact,
@@ -42,11 +43,11 @@ export function timefilterControl(): ExpressionFunction<
         options: [true, false],
       },
       filterGroup: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.filterGroup,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       return {
         type: 'render',
         as: 'time_filter',

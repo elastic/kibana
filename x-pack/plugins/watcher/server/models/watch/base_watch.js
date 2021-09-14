@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, map, pick } from 'lodash';
-import { badRequest } from 'boom';
-import { Action } from '../action';
+import { badRequest } from '@hapi/boom';
+import { Action } from '../../../common/models/action';
 import { WatchStatus } from '../watch_status';
 import { i18n } from '@kbn/i18n';
 import { WatchErrors } from '../watch_errors';
@@ -31,9 +32,9 @@ export class BaseWatch {
     const result = {
       metadata: {
         xpack: {
-          type: this.type
-        }
-      }
+          type: this.type,
+        },
+      },
     };
 
     if (this.name) {
@@ -60,32 +61,22 @@ export class BaseWatch {
       isSystemWatch: this.isSystemWatch,
       watchStatus: this.watchStatus ? this.watchStatus.downstreamJson : undefined,
       watchErrors: this.watchErrors ? this.watchErrors.downstreamJson : undefined,
-      actions: map(this.actions, (action) => action.downstreamJson)
+      actions: map(this.actions, (action) => action.downstreamJson),
     };
 
     return json;
   }
 
-  // to Elasticsearch
-  get upstreamJson() {
-    const watch = this.watchJson;
-
-    return {
-      id: this.id,
-      watch
-    };
-  }
-
   // from Kibana
   static getPropsFromDownstreamJson(json) {
-    const actions = map(json.actions, action => {
+    const actions = map(json.actions, (action) => {
       return Action.fromDownstreamJson(action);
     });
 
     return {
       id: json.id,
       name: json.name,
-      actions
+      actions,
     };
   }
 
@@ -94,31 +85,34 @@ export class BaseWatch {
     if (!json.id) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.baseWatch.idPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {id} property',
+          defaultMessage: 'JSON argument must contain an {id} property',
           values: {
-            id: 'id'
-          }
-        }),
+            id: 'id',
+          },
+        })
       );
     }
     if (!json.watchJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.baseWatch.watchJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain a {watchJson} property',
+          defaultMessage: 'JSON argument must contain a {watchJson} property',
           values: {
-            watchJson: 'watchJson'
-          }
-        }),
+            watchJson: 'watchJson',
+          },
+        })
       );
     }
     if (!json.watchStatusJson) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.baseWatch.watchStatusJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain a {watchStatusJson} property',
-          values: {
-            watchStatusJson: 'watchStatusJson'
+        i18n.translate(
+          'xpack.watcher.models.baseWatch.watchStatusJsonPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain a {watchStatusJson} property',
+            values: {
+              watchStatusJson: 'watchStatusJson',
+            },
           }
-        }),
+        )
       );
     }
 
@@ -131,7 +125,7 @@ export class BaseWatch {
       'metadata',
       'transform',
       'throttle_period',
-      'throttle_period_in_millis'
+      'throttle_period_in_millis',
     ]);
     const watchStatusJson = json.watchStatusJson;
     const name = get(watchJson, 'metadata.name');
@@ -155,7 +149,7 @@ export class BaseWatch {
       watchJson,
       watchStatus,
       watchErrors,
-      actions
+      actions,
     };
   }
 

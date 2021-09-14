@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/tinymath",
+  "version": "2.0.0",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "private": true,
+  "main": "src/index.js",
+  "types": "index.d.ts"
+}

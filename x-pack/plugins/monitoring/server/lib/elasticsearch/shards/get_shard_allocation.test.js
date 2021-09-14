@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { handleResponse } from './get_shard_allocation';
 
 describe('get_shard_allocation', () => {
-
   const exampleShardSource = {
     cluster_uuid: 'Xb_iFZeMSDialSlUwnH53w',
     state_uuid: 'Xobm9shMQGa2p52j-Vh61A',
@@ -35,25 +35,26 @@ describe('get_shard_allocation', () => {
   ];
 
   describe('handleResponse', () => {
-
     it('deduplicates shards', () => {
       const nextTimestamp = '2018-07-06T00:00:01.259Z';
-      const hits = shards.map(shard => {
+      const hits = shards.map((shard) => {
         return {
           _source: {
             ...exampleShardSource,
-            shard
-          }
+            shard,
+          },
         };
       });
 
       // duplicate all of them; this is how a response would really come back, with only the timestamp changed
-      hits.concat(hits.map(hit => {
-        return {
-          ...hit,
-          timestamp: nextTimestamp,
-        };
-      }));
+      hits.concat(
+        hits.map((hit) => {
+          return {
+            ...hit,
+            timestamp: nextTimestamp,
+          };
+        })
+      );
 
       const deduplicatedShards = handleResponse({ hits: { hits } });
 
@@ -62,7 +63,5 @@ describe('get_shard_allocation', () => {
         expect(shard).toMatchObject(shards[index]);
       });
     });
-
   });
-
 });

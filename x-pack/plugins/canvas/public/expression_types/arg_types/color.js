@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,11 +10,19 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 import { ColorPickerPopover } from '../../components/color_picker_popover';
+import { ArgTypesStrings } from '../../../i18n';
 
-const ColorArgInput = ({ onValueChange, argValue, workpad }) => (
+const { Color: strings } = ArgTypesStrings;
+
+const ColorArgInput = ({ onValueChange, argValue, workpad, typeInstance }) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={false}>
-      <ColorPickerPopover value={argValue} onChange={onValueChange} colors={workpad.colors} />
+      <ColorPickerPopover
+        value={argValue}
+        onChange={onValueChange}
+        colors={workpad.colors}
+        ariaLabel={`${typeInstance.displayName} ${strings.getDisplayName()}`}
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -28,8 +37,8 @@ ColorArgInput.propTypes = {
 
 export const color = () => ({
   name: 'color',
-  displayName: 'Color',
-  help: 'Color picker',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(ColorArgInput),
   default: '#000000',
 });

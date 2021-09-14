@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { connect } from 'react-redux';
@@ -36,7 +37,7 @@ const mapStateToProps = (state) => ({
   followerIndex: getSelectedFollowerIndex('edit')(state),
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   getFollowerIndex: (id) => dispatch(getFollowerIndex(id)),
   selectFollowerIndex: (id) => dispatch(selectEditFollowerIndex(id)),
   saveFollowerIndex: (id, followerIndex) => dispatch(saveFollowerIndex(id, followerIndex, true)),

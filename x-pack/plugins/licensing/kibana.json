@@ -1,0 +1,13 @@
+{
+  "id": "licensing",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "licensing"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["kibanaReact"]
+}

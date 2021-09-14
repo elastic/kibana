@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { Legacy } from '../../../legacy_shims';
 import { capitalize } from 'lodash';
-import { formatMetric } from 'plugins/monitoring/lib/format_number';
+import { formatMetric } from '../../../lib/format_number';
 import { formatDateTimeLocal } from '../../../../common/formatting';
 
-const getIpAndPort = transport => {
+const getIpAndPort = (transport) => {
   if (transport !== undefined) {
     const matches = transport.match(/([\d\.:]+)\]$/);
     if (matches) {
@@ -18,11 +20,11 @@ const getIpAndPort = transport => {
   return transport;
 };
 
-const normalizeString = text => {
+const normalizeString = (text) => {
   return capitalize(text.toLowerCase());
 };
 
-export const parseProps = props => {
+export const parseProps = (props) => {
   const {
     id,
     stage,
@@ -34,18 +36,20 @@ export const parseProps = props => {
     source,
     target,
     translog,
-    type
+    type,
   } = props;
 
   const { files, size } = index;
+  const injector = Legacy.shims.getAngularInjector();
+  const timezone = injector.get('config').get('dateFormat:tz');
 
   return {
     name: indexName || index.name,
     shard: `${id} / ${isPrimary ? 'Primary' : 'Replica'}`,
     relocationType: type === 'PRIMARY_RELOCATION' ? 'Primary Relocation' : normalizeString(type),
     stage: normalizeString(stage),
-    startTime: formatDateTimeLocal(startTimeInMillis),
-    totalTime: formatMetric(totalTimeInMillis / 1000, '00:00:00'),
+    startTime: formatDateTimeLocal(startTimeInMillis, timezone),
+    totalTime: formatMetric(Math.floor(totalTimeInMillis / 1000), '00:00:00'),
     isCopiedFromPrimary: !isPrimary || type === 'PRIMARY_RELOCATION',
     sourceName: source.name === undefined ? 'n/a' : source.name,
     targetName: target.name,
@@ -63,6 +67,6 @@ export const parseProps = props => {
     hasTranslog: translog.total > 0,
     translogPercent: translog.percent,
     translogDone: translog.total,
-    translogTotal: translog.total_on_start
+    translogTotal: translog.total_on_start,
   };
 };

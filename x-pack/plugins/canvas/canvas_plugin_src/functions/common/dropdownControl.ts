@@ -1,30 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { uniq } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable, Render } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { uniqBy } from 'lodash';
+import { Datatable, ExpressionValueRender, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   filterColumn: string;
+  labelColumn: string;
   valueColumn: string;
-  filterGroup: string | null;
+  filterGroup: string;
 }
 
 interface Return {
   column: string;
-  choices: any;
+  choices: Array<[string, string]>;
 }
 
-export function dropdownControl(): ExpressionFunction<
+export function dropdownControl(): ExpressionFunctionDefinition<
   'dropdownControl',
   Datatable,
   Arguments,
-  Render<Return>
+  ExpressionValueRender<Return>
 > {
   const { help, args: argHelp } = getFunctionHelp().dropdownControl;
 
@@ -32,29 +33,41 @@ export function dropdownControl(): ExpressionFunction<
     name: 'dropdownControl',
     aliases: [],
     type: 'render',
-    context: {
-      types: ['datatable'],
-    },
+    inputTypes: ['datatable'],
     help,
     args: {
       filterColumn: {
         types: ['string'],
+        required: true,
         help: argHelp.filterColumn,
+      },
+      labelColumn: {
+        types: ['string'],
+        required: false,
+        help: argHelp.labelColumn,
       },
       valueColumn: {
         types: ['string'],
+        required: true,
         help: argHelp.valueColumn,
       },
       filterGroup: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.filterGroup,
       },
     },
-    fn: (context, { valueColumn, filterColumn, filterGroup }) => {
-      let choices = [];
+    fn: (input, { valueColumn, filterColumn, filterGroup, labelColumn }) => {
+      let choices: Array<[string, string]> = [];
+      const labelCol = labelColumn || valueColumn;
 
-      if (context.rows[0][valueColumn]) {
-        choices = uniq(context.rows.map(row => row[valueColumn])).sort();
+      const filteredRows = input.rows.filter(
+        (row) => row[valueColumn] !== null && row[valueColumn] !== undefined
+      );
+
+      if (filteredRows.length > 0) {
+        choices = filteredRows.map((row) => [row[valueColumn], row[labelCol]]);
+
+        choices = uniqBy(choices, (choice) => choice[0]);
       }
 
       const column = filterColumn || valueColumn;

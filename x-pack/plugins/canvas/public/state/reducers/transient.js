@@ -1,29 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { handleActions } from 'redux-actions';
-import { set, del } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { restoreHistory } from '../actions/history';
 import * as pageActions from '../actions/pages';
 import * as transientActions from '../actions/transient';
 import { removeElements } from '../actions/elements';
 import { setRefreshInterval, enableAutoplay, setAutoplayInterval } from '../actions/workpad';
 
+const { set, del } = immutable;
+
 export const transientReducer = handleActions(
   {
     // clear all the resolved args when restoring the history
     // TODO: we shouldn't need to reset the resolved args for history
-    [restoreHistory]: transientState => set(transientState, 'resolvedArgs', {}),
+    [restoreHistory]: (transientState) => set(transientState, 'resolvedArgs', {}),
 
     [removeElements]: (transientState, { payload: { elementIds } }) => {
       const { selectedToplevelNodes } = transientState;
       return del(
         {
           ...transientState,
-          selectedToplevelNodes: selectedToplevelNodes.filter(n => elementIds.indexOf(n) < 0),
+          selectedToplevelNodes: selectedToplevelNodes.filter((n) => elementIds.indexOf(n) < 0),
         },
         ['resolvedArgs', elementIds]
       );
@@ -48,15 +51,22 @@ export const transientReducer = handleActions(
       };
     },
 
-    [pageActions.setPage]: transientState => {
+    [transientActions.setZoomScale]: (transientState, { payload }) => {
+      return {
+        ...transientState,
+        zoomScale: payload || 1,
+      };
+    },
+
+    [pageActions.setPage]: (transientState) => {
       return { ...transientState, selectedToplevelNodes: [] };
     },
 
-    [pageActions.addPage]: transientState => {
+    [pageActions.addPage]: (transientState) => {
       return { ...transientState, selectedToplevelNodes: [] };
     },
 
-    [pageActions.duplicatePage]: transientState => {
+    [pageActions.duplicatePage]: (transientState) => {
       return { ...transientState, selectedToplevelNodes: [] };
     },
 

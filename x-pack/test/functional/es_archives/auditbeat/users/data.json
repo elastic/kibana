@@ -1,0 +1,69 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "auditbeat-users",
+    "type": "_doc",
+    "id": "Xa2ipWkBCQofM5eXEgsv",
+    "source": {
+      "@timestamp": "2018-11-27T02:59:28.060Z",
+      "auditd": {
+        "data": {
+          "hostname": "51.38.82.60",
+          "terminal": "ssh",
+          "op": "PAM:bad_ident"
+        },
+        "summary": {
+          "actor": {
+            "primary": "unset",
+            "secondary": "root"
+          },
+          "object": {
+            "primary": "ssh",
+            "secondary": "51.38.82.60",
+            "type": "user-session"
+          },
+          "how": "/usr/sbin/sshd"
+        },
+        "sequence": 43319,
+        "result": "fail",
+        "session": "unset"
+      },
+      "destination" : {
+        "ip" : "0.0.0.0"
+      },
+      "event": {
+        "type": "user_err",
+        "action": "error",
+        "module": "auditd",
+        "category": "user-login"
+      },
+      "user" : {
+        "group" : {
+          "name" : "root",
+          "id" : "0"
+        },
+        "id" : "0",
+        "name" : "root"
+      },
+      "process": {
+        "exe": "/usr/sbin/sshd",
+        "pid": "13647"
+      },
+      "source": {
+        "ip": "51.38.82.60",
+        "port": "22"
+      },
+      "network": {
+        "direction": "incoming"
+      },
+      "beat": {
+        "name": "demo-stack-mysql-01",
+        "hostname": "demo-stack-mysql-01",
+        "version": "7.0.0-alpha1"
+      },
+      "host": {
+        "name": "demo-stack-mysql-01"
+      }
+    }
+  }
+}

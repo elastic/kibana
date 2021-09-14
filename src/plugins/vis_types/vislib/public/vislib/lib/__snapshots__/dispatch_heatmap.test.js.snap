@@ -1,0 +1,153 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Vislib event responses dispatcher - for heatmap return valid data for a heatmap popover 1`] = `
+Object {
+  "color": undefined,
+  "config": Object {
+    "get": [Function],
+  },
+  "data": Object {
+    "series": Array [
+      Object {
+        "id": "1",
+        "label": "Thursday",
+        "rawId": "Thursday-col-2-1",
+        "values": Array [],
+      },
+      Object {
+        "id": "1",
+        "label": "Friday",
+        "rawId": "Friday-col-2-1",
+        "values": Array [],
+      },
+      Object {
+        "id": "1",
+        "label": "Tuesday",
+        "rawId": "Tuesday-col-2-1",
+        "values": Array [],
+      },
+      Object {
+        "id": "1",
+        "label": "Wednesday",
+        "rawId": "Wednesday-col-2-1",
+        "values": Array [],
+      },
+      Object {
+        "id": "1",
+        "label": "Saturday",
+        "rawId": "Saturday-col-2-1",
+        "values": Array [],
+      },
+    ],
+  },
+  "datum": Object {
+    "extraMetrics": Array [],
+    "parent": Object {
+      "accessor": "col-0-2",
+      "column": 0,
+      "params": Object {},
+      "title": "day_of_week: Descending",
+    },
+    "series": "Thursday",
+    "seriesId": "Thursday-col-2-1",
+    "x": "Men's Shoes",
+    "y": 43,
+  },
+  "e": Object {
+    "target": Object {
+      "nearestViewportElement": Object {
+        "__data__": Object {
+          "series": Array [
+            Object {
+              "id": "1",
+              "label": "Thursday",
+              "rawId": "Thursday-col-2-1",
+              "values": Array [],
+            },
+            Object {
+              "id": "1",
+              "label": "Friday",
+              "rawId": "Friday-col-2-1",
+              "values": Array [],
+            },
+            Object {
+              "id": "1",
+              "label": "Tuesday",
+              "rawId": "Tuesday-col-2-1",
+              "values": Array [],
+            },
+            Object {
+              "id": "1",
+              "label": "Wednesday",
+              "rawId": "Wednesday-col-2-1",
+              "values": Array [],
+            },
+            Object {
+              "id": "1",
+              "label": "Saturday",
+              "rawId": "Saturday-col-2-1",
+              "values": Array [],
+            },
+          ],
+        },
+      },
+    },
+  },
+  "handler": Object {
+    "data": Object {},
+    "visConfig": Object {
+      "get": [Function],
+    },
+  },
+  "isPercentageMode": false,
+  "label": "Thursday",
+  "point": Object {
+    "extraMetrics": Array [],
+    "parent": Object {
+      "accessor": "col-0-2",
+      "column": 0,
+      "params": Object {},
+      "title": "day_of_week: Descending",
+    },
+    "series": "Thursday",
+    "seriesId": "Thursday-col-2-1",
+    "x": "Men's Shoes",
+    "y": 43,
+  },
+  "pointIndex": 0,
+  "series": Array [
+    Object {
+      "id": "1",
+      "label": "Thursday",
+      "rawId": "Thursday-col-2-1",
+      "values": Array [],
+    },
+    Object {
+      "id": "1",
+      "label": "Friday",
+      "rawId": "Friday-col-2-1",
+      "values": Array [],
+    },
+    Object {
+      "id": "1",
+      "label": "Tuesday",
+      "rawId": "Tuesday-col-2-1",
+      "values": Array [],
+    },
+    Object {
+      "id": "1",
+      "label": "Wednesday",
+      "rawId": "Wednesday-col-2-1",
+      "values": Array [],
+    },
+    Object {
+      "id": "1",
+      "label": "Saturday",
+      "rawId": "Saturday-col-2-1",
+      "values": Array [],
+    },
+  ],
+  "slices": undefined,
+  "value": 43,
+}
+`;

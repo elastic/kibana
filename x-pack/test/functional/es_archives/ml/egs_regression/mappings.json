@@ -1,0 +1,60 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "ft_egs_regression",
+    "mappings": {
+      "properties": {
+        "g1": {
+          "type": "float"
+        },
+        "g2": {
+          "type": "float"
+        },
+        "g3": {
+          "type": "float"
+        },
+        "g4": {
+          "type": "float"
+        },
+        "p1": {
+          "type": "float"
+        },
+        "p2": {
+          "type": "float"
+        },
+        "p3": {
+          "type": "float"
+        },
+        "p4": {
+          "type": "float"
+        },
+        "stab": {
+          "type": "float"
+        },
+        "stabf": {
+          "type": "keyword"
+        },
+        "tau1": {
+          "type": "float"
+        },
+        "tau2": {
+          "type": "float"
+        },
+        "tau3": {
+          "type": "float"
+        },
+        "tau4": {
+          "type": "float"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

@@ -1,32 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import chrome from 'ui/chrome';
 import { ROUTES } from '../../../common/constants';
-import { Cluster } from 'plugins/logstash/models/cluster';
+import { Cluster } from '../../models/cluster';
 
 export class ClusterService {
-  constructor($http) {
-    this.$http = $http;
-    this.basePath = chrome.addBasePath(ROUTES.API_ROOT);
+  constructor(http) {
+    this.http = http;
   }
 
   loadCluster() {
-    return this.$http.get(`${this.basePath}/cluster`)
-      .then(response => {
-        if (!response.data) {
-          return;
-        }
-        return Cluster.fromUpstreamJSON(response.data.cluster);
-      });
+    return this.http.get(`${ROUTES.API_ROOT}/cluster`).then((response) => {
+      if (!response) {
+        return;
+      }
+      return Cluster.fromUpstreamJSON(response.cluster);
+    });
   }
 
   isClusterInfoAvailable() {
     return this.loadCluster()
-      .then(cluster => Boolean(cluster))
+      .then((cluster) => Boolean(cluster))
       .catch(() => false);
   }
 }

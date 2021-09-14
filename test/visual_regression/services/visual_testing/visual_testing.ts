@@ -1,87 +1,114 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { postSnapshot } from '@percy/agent';
-import { Test } from 'mocha';
-
-import { pkg } from '../../../../src/legacy/utils/package_json';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { postSnapshot } from '@percy/agent/dist/utils/sdk-utils';
+import testSubjSelector from '@kbn/test-subj-selector';
+import { Test } from '@kbn/test';
+import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { FtrService, FtrProviderContext } from '../../ftr_provider_context';
 
 // @ts-ignore internal js that is passed to the browser as is
 import { takePercySnapshot, takePercySnapshotWithAgent } from './take_percy_snapshot';
 
-export async function VisualTestingProvider({ getService }: FtrProviderContext) {
-  const browser = getService('browser');
-  const log = getService('log');
-  const lifecycle = getService('lifecycle');
+export const DEFAULT_OPTIONS = {
+  widths: [1200],
+};
 
-  const DEFAULT_OPTIONS = {
-    widths: [1200],
-  };
+export interface SnapshotOptions {
+  /**
+   * name to append to visual test name
+   */
+  name?: string;
+  /**
+   * test subject selectiors to __show__ in screenshot
+   */
+  show?: string[];
+  /**
+   * test subject selectiors to __hide__ in screenshot
+   */
+  hide?: string[];
+}
 
-  let currentTest: Test | undefined;
-  lifecycle.on('beforeEachTest', (test: Test) => {
-    currentTest = test;
-  });
+const statsCache = new WeakMap<Test, { snapshotCount: number }>();
 
-  const statsCache = new WeakMap<Test, { snapshotCount: number }>();
-  function getStats(test: Test) {
-    if (!statsCache.has(test)) {
-      statsCache.set(test, {
-        snapshotCount: 0,
-      });
-    }
-
-    return statsCache.get(test)!;
+function getStats(test: Test) {
+  if (!statsCache.has(test)) {
+    statsCache.set(test, {
+      snapshotCount: 0,
+    });
   }
 
-  return new class VisualTesting {
-    public async snapshot(name?: string) {
-      log.debug('Capturing percy snapshot');
+  return statsCache.get(test)!;
+}
 
-      if (!currentTest) {
-        throw new Error('unable to determine current test');
-      }
+export class VisualTestingService extends FtrService {
+  private readonly browser = this.ctx.getService('browser');
+  private readonly log = this.ctx.getService('log');
 
-      const [domSnapshot, url] = await Promise.all([this.getSnapshot(), browser.getCurrentUrl()]);
+  private currentTest: Test | undefined;
 
-      const stats = getStats(currentTest);
-      stats.snapshotCount += 1;
+  constructor(ctx: FtrProviderContext) {
+    super(ctx);
 
-      const success = await postSnapshot({
-        name: `${currentTest.fullTitle()} [${name ? name : stats.snapshotCount}]`,
-        url,
-        domSnapshot,
-        clientInfo: `kibana-ftr:${pkg.version}`,
-        ...DEFAULT_OPTIONS,
-      });
+    this.ctx.getService('lifecycle').beforeEachTest.add((test) => {
+      this.currentTest = test;
+    });
+  }
 
-      if (!success) {
-        throw new Error('Percy snapshot failed');
-      }
+  public async snapshot(options: SnapshotOptions = {}) {
+    if (process.env.DISABLE_VISUAL_TESTING) {
+      this.log.warning(
+        'Capturing of percy snapshots disabled, would normally capture a snapshot here!'
+      );
+      return;
     }
 
-    private async getSnapshot() {
-      const snapshot = await browser.execute<[], string | false>(takePercySnapshot);
-      return snapshot !== false
-        ? snapshot
-        : await browser.execute<[], string>(takePercySnapshotWithAgent);
+    this.log.debug('Capturing percy snapshot');
+
+    if (!this.currentTest) {
+      throw new Error('unable to determine current test');
     }
-  }();
+
+    const [domSnapshot, url] = await Promise.all([
+      this.getSnapshot(options.show, options.hide),
+      this.browser.getCurrentUrl(),
+    ]);
+    const stats = getStats(this.currentTest);
+    stats.snapshotCount += 1;
+
+    const { name } = options;
+    const success = await postSnapshot({
+      name: `${this.currentTest.fullTitle()} [${name ? name : stats.snapshotCount}]`,
+      url,
+      domSnapshot,
+      clientInfo: `kibana-ftr:${pkg.version}`,
+      ...DEFAULT_OPTIONS,
+    });
+
+    if (!success) {
+      throw new Error('Percy snapshot failed');
+    }
+  }
+
+  private async getSnapshot(show: string[] = [], hide: string[] = []) {
+    const showSelectors = show.map(testSubjSelector);
+    const hideSelectors = hide.map(testSubjSelector);
+    const snapshot = await this.browser.execute<[string[], string[]], string | false>(
+      takePercySnapshot,
+      showSelectors,
+      hideSelectors
+    );
+    return snapshot !== false
+      ? snapshot
+      : await this.browser.execute<[string[], string[]], string>(
+          takePercySnapshotWithAgent,
+          showSelectors,
+          hideSelectors
+        );
+  }
 }

@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Map Tooltip it renders 1`] = `
+Array [
+  <div
+    class="euiPopoverTitle"
+  />,
+  .c1.c1.c1 {
+  width: 25%;
+}
+
+.c0.c0.c0 {
+  width: 75%;
+}
+
+<dl
+    class="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+    style="width:300px"
+  >
+    <dt
+      class="euiDescriptionList__title c0 eui-textNoWrap"
+    >
+      Average page load duration
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
+    />
+  </dl>,
+]
+`;
+
+exports[`Map Tooltip it shallow renders 1`] = `
+<EuiOutsideClickDetector
+  onOutsideClick={[Function]}
+>
+  <EuiPopoverTitle />
+  <EuiDescriptionList
+    compressed={true}
+    style={
+      Object {
+        "width": 300,
+      }
+    }
+    textStyle="reverse"
+    type="column"
+  >
+    <Styled(EuiDescriptionListTitle)
+      className="eui-textNoWrap"
+    >
+      Average page load duration
+    </Styled(EuiDescriptionListTitle)>
+    <Styled(EuiDescriptionListDescription) />
+  </EuiDescriptionList>
+</EuiOutsideClickDetector>
+`;

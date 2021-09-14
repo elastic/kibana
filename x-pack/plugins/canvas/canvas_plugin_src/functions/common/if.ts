@@ -1,18 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+
+import { Observable, defer, of } from 'rxjs';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
-  condition: boolean | null;
-  then: () => Promise<any>;
-  else: () => Promise<any>;
+  condition: boolean;
+  then?(): Observable<any>;
+  else?(): Observable<any>;
 }
 
-export function ifFn(): ExpressionFunction<'if', any, Arguments, any> {
+export function ifFn(): ExpressionFunctionDefinition<
+  'if',
+  unknown,
+  Arguments,
+  Observable<unknown>
+> {
   const { help, args: argHelp } = getFunctionHelp().if;
 
   return {
@@ -20,31 +28,22 @@ export function ifFn(): ExpressionFunction<'if', any, Arguments, any> {
     help,
     args: {
       condition: {
-        types: ['boolean', 'null'],
+        types: ['boolean'],
         aliases: ['_'],
         help: argHelp.condition,
+        required: true,
       },
       then: {
         resolve: false,
-        help: argHelp.then,
+        help: argHelp.then!,
       },
       else: {
         resolve: false,
-        help: argHelp.else,
+        help: argHelp.else!,
       },
     },
-    fn: async (context, args) => {
-      if (args.condition) {
-        if (typeof args.then === 'undefined') {
-          return context;
-        }
-        return await args.then();
-      } else {
-        if (typeof args.else === 'undefined') {
-          return context;
-        }
-        return await args.else();
-      }
+    fn(input, args) {
+      return defer(() => (args.condition ? args.then?.() : args.else?.()) ?? of(input));
     },
   };
 }

@@ -1,0 +1,12 @@
+.monChart__tooltipLabel,
+.monChart__tooltipValue {
+  text-align: left;
+  font-size: $euiFontSizeXS;
+  padding: $euiSizeXS;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.monChart__tooltipLabel {
+  font-weight: $euiFontWeightBold;
+}

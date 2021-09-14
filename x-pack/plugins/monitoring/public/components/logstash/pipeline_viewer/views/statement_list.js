@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -29,19 +30,19 @@ export class StatementList extends React.PureComponent {
     };
   }
 
-  expand = elementId => {
+  expand = (elementId) => {
     const collapsedIds = new Set(this.state.collapsedIds);
     collapsedIds.delete(elementId);
     this.updateCollapsedElement(collapsedIds);
   };
 
-  collapse = elementId => {
+  collapse = (elementId) => {
     const collapsedIds = new Set(this.state.collapsedIds);
     collapsedIds.add(elementId);
     this.updateCollapsedElement(collapsedIds);
   };
 
-  updateCollapsedElement = collapsedIds => {
+  updateCollapsedElement = (collapsedIds) => {
     const { elements } = this.props;
     const collapsedChildIds = getCollapsedChildIds(elements, collapsedIds);
 
@@ -51,33 +52,29 @@ export class StatementList extends React.PureComponent {
     });
   };
 
-  elementIsCollapsed = elementId => this.state.collapsedIds.has(elementId);
+  elementIsCollapsed = (elementId) => this.state.collapsedIds.has(elementId);
 
-  renderStatement = element => {
+  renderStatement = (element) => {
     const { id, parentId } = element;
     const { onShowVertexDetails } = this.props;
 
     return this.state.collapsedIds.has(parentId) ||
       this.state.collapsedChildIds.has(parentId) ? null : (
-        <Statement
-          key={id}
-          element={element}
-          collapse={this.collapse}
-          expand={this.expand}
-          isCollapsed={this.elementIsCollapsed(id)}
-          onShowVertexDetails={onShowVertexDetails}
-        />
-      );
+      <Statement
+        key={id}
+        element={element}
+        collapse={this.collapse}
+        expand={this.expand}
+        isCollapsed={this.elementIsCollapsed(id)}
+        onShowVertexDetails={onShowVertexDetails}
+      />
+    );
   };
 
   render() {
     const { elements } = this.props;
 
-    return (
-      <ul className="monPipelineViewer__list">
-        {elements.map(this.renderStatement)}
-      </ul>
-    );
+    return <ul className="monPipelineViewer__list">{elements.map(this.renderStatement)}</ul>;
   }
 }
 

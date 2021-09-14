@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the deletion of sensitive Linux system logs. This may indicate an attempt to evade detection or destroy forensic evidence on a system.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "System Log File Deletion",
+  "query": "file where event.type == \"deletion\" and \n  file.path : \n    (\n    \"/var/run/utmp\", \n    \"/var/log/wtmp\", \n    \"/var/log/btmp\", \n    \"/var/log/lastlog\", \n    \"/var/log/faillog\",\n    \"/var/log/syslog\", \n    \"/var/log/messages\", \n    \"/var/log/secure\", \n    \"/var/log/auth.log\"\n    )\n",
+  "references": [
+    "https://www.fireeye.com/blog/threat-research/2020/11/live-off-the-land-an-overview-of-unc1945.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "aa895aea-b69c-4411-b110-8d7599634b30",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1070",
+          "name": "Indicator Removal on Host",
+          "reference": "https://attack.mitre.org/techniques/T1070/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

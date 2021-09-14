@@ -1,0 +1,93 @@
+// SASSTODO: This file needs a rewrite. It is overwriting EUI in very dangerous / brittle ways.
+.ml-rule-editor-flyout {
+  font-size: $euiFontSizeS;
+
+  .select-rule-action .rule-detector-description-list {
+    padding-left: $euiSize;
+  }
+
+  .select-rule-action-panel {
+    padding: $euiSizeS 0;
+
+    // SASSTODO: Dangerous EUI overwrite
+    .euiDescriptionList {
+      .euiDescriptionList__title {
+        flex-basis: 15%;
+        padding: 0 $euiSize;
+      }
+
+      .euiDescriptionList__description {
+        flex-basis: 85%;
+      }
+
+      .euiDescriptionList__title:nth-child(1),
+      .euiDescriptionList__description:nth-child(2) {
+        color: $euiTitleColor;
+        font-weight: $euiFontWeightBold;
+        border-bottom: $euiBorderThin;
+        padding-bottom: $euiSizeM;
+      }
+
+      .euiDescriptionList__title:nth-child(3),
+      .euiDescriptionList__description:nth-child(4) {
+        padding-top: $euiSizeS;
+      }
+    }
+
+    // SASSTODO: Dangerous EUI overwrite
+    .euiDescriptionList.euiDescriptionList--column > * {
+      margin-top: $euiSizeXS;
+    }
+  }
+
+  // SASSTODO: Dangerous EUI overwrite
+  .scope-enable-checkbox {
+    .euiCheckbox__input[disabled] ~ .euiCheckbox__label {
+      color: inherit;
+    }
+  }
+
+  // SASSTODO: Dangerous EUI overwrite
+  .scope-field-checkbox {
+    margin-right: $euiSizeXS / 2;
+
+    .euiCheckbox {
+      margin-top: $euiSizeXS;
+    }
+  }
+
+  .scope-field-button {
+    pointer-events: none;
+    border-bottom: none;
+  }
+
+  .scope-edit-filter-link {
+    line-height: $euiSizeXL;
+    font-size: $euiFontSizeXS;
+  }
+
+  // SASSTODO: Needs proper calculated values
+  .condition-edit-value-field {
+    width: 170px;
+    height: 28px;
+    margin: 0 2px;
+
+    input {
+      height: 28px;
+    }
+  }
+
+  .euiExpressionButton.disabled {
+    pointer-events: none;
+
+    .euiExpressionButton__value,
+    .euiExpressionButton__description {
+      color: $euiColorLightShade;
+    }
+  }
+
+  .text-highlight {
+    font-weight: $euiFontWeightBold;
+  }
+
+}

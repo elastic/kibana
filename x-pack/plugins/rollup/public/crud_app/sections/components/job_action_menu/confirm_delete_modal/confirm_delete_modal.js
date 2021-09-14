@@ -1,58 +1,61 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiConfirmModal,
-  EuiOverlayMask,
-} from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
-class ConfirmDeleteModalUi extends Component {
+export class ConfirmDeleteModal extends Component {
   static propTypes = {
     isSingleSelection: PropTypes.bool.isRequired,
     jobs: PropTypes.array.isRequired,
     onCancel: PropTypes.func.isRequired,
     onConfirm: PropTypes.func.isRequired,
-  }
+  };
 
   renderJobs() {
-    const { jobs, intl } = this.props;
+    const { jobs } = this.props;
     const jobItems = jobs.map(({ id, status }) => {
-      const startedMessage = intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.startedMessage',
-        defaultMessage: 'started'
-      });
+      const startedMessage = i18n.translate(
+        'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.startedMessage',
+        {
+          defaultMessage: 'started',
+        }
+      );
       const statusText = status === 'started' ? ` (${startedMessage})` : null;
-      return <li key={id}>{id}{statusText}</li>;
+      return (
+        <li key={id}>
+          {id}
+          {statusText}
+        </li>
+      );
     });
 
     return <ul>{jobItems}</ul>;
   }
 
   render() {
-    const {
-      isSingleSelection,
-      jobs,
-      onCancel,
-      onConfirm,
-      intl,
-    } = this.props;
+    const { isSingleSelection, jobs, onCancel, onConfirm } = this.props;
 
     let title;
     let content;
 
     if (isSingleSelection) {
       const { id, status } = jobs[0];
-      title = intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.deleteSingleJobTitle',
-        defaultMessage: 'Delete rollup job \'{id}\'?',
-      }, { id });
+      title = i18n.translate(
+        'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.deleteSingleJobTitle',
+        {
+          defaultMessage: "Delete rollup job '{id}'?",
+          values: { id },
+        }
+      );
 
       if (status === 'started') {
         content = (
@@ -65,10 +68,13 @@ class ConfirmDeleteModalUi extends Component {
         );
       }
     } else {
-      title = intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.multipleDeletionTitle',
-        defaultMessage: 'Delete {count} rollup jobs?',
-      }, { count: jobs.length });
+      title = i18n.translate(
+        'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.multipleDeletionTitle',
+        {
+          defaultMessage: 'Delete {count} rollup jobs?',
+          values: { count: jobs.length },
+        }
+      );
 
       content = (
         <Fragment>
@@ -85,30 +91,26 @@ class ConfirmDeleteModalUi extends Component {
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={title}
-          onCancel={onCancel}
-          onConfirm={onConfirm}
-          cancelButtonText={
-            intl.formatMessage({
-              id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.cancelButtonText',
-              defaultMessage: 'Cancel',
-            })
+      <EuiConfirmModal
+        title={title}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        cancelButtonText={i18n.translate(
+          'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.cancelButtonText',
+          {
+            defaultMessage: 'Cancel',
           }
-          buttonColor="danger"
-          confirmButtonText={
-            intl.formatMessage({
-              id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.confirmButtonText',
-              defaultMessage: 'Delete',
-            })
+        )}
+        buttonColor="danger"
+        confirmButtonText={i18n.translate(
+          'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.confirmButtonText',
+          {
+            defaultMessage: 'Delete',
           }
-        >
-          {content}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+        )}
+      >
+        {content}
+      </EuiConfirmModal>
     );
   }
 }
-
-export const ConfirmDeleteModal = injectI18n(ConfirmDeleteModalUi);

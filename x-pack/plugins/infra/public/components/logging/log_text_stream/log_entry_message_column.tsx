@@ -1,72 +1,116 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useMemo } from 'react';
-
-import { css } from '../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { LogColumn, LogMessagePart } from '../../../../common/log_entry';
 import {
   isConstantSegment,
   isFieldSegment,
-  LogEntryMessageSegment,
+  isHighlightFieldSegment,
+  isHighlightMessageColumn,
+  isMessageColumn,
 } from '../../../utils/log_entry';
+import { FieldValue } from './field_value';
 import { LogEntryColumnContent } from './log_entry_column';
-import { hoveredContentStyle } from './text_styles';
+import {
+  longWrappedContentStyle,
+  preWrappedContentStyle,
+  unwrappedContentStyle,
+  WrapMode,
+} from './text_styles';
 
 interface LogEntryMessageColumnProps {
-  segments: LogEntryMessageSegment[];
-  isHovered: boolean;
-  isWrapped: boolean;
-  isHighlighted: boolean;
+  columnValue: LogColumn;
+  highlights: LogColumn[];
+  isActiveHighlight: boolean;
+  wrapMode: WrapMode;
+  render?: (message: string) => React.ReactNode;
 }
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ isHighlighted, isHovered, isWrapped, segments }) => {
-    const message = useMemo(() => segments.map(formatMessageSegment).join(''), [segments]);
+  ({ columnValue, highlights, isActiveHighlight, wrapMode, render }) => {
+    const message = useMemo(
+      () =>
+        isMessageColumn(columnValue)
+          ? formatMessageSegments(columnValue.message, highlights, isActiveHighlight)
+          : null,
+      [columnValue, highlights, isActiveHighlight]
+    );
+
+    const messageAsString = useMemo(
+      () => (isMessageColumn(columnValue) ? renderMessageSegments(columnValue.message) : ''),
+      [columnValue]
+    );
 
     return (
-      <MessageColumnContent
-        isHighlighted={isHighlighted}
-        isHovered={isHovered}
-        isWrapped={isWrapped}
-      >
-        {message}
+      <MessageColumnContent wrapMode={wrapMode}>
+        {render ? render(messageAsString) : message}
       </MessageColumnContent>
     );
   }
 );
 
-const wrappedContentStyle = css`
-  overflow: visible;
-  white-space: pre-wrap;
-  word-break: break-all;
-`;
+interface MessageColumnContentProps {
+  wrapMode: WrapMode;
+}
 
-const unwrappedContentStyle = css`
-  overflow: hidden;
-  white-space: pre;
-`;
-
-const MessageColumnContent = LogEntryColumnContent.extend.attrs<{
-  isHovered: boolean;
-  isHighlighted: boolean;
-  isWrapped?: boolean;
-}>({})`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnContentProps>`
   text-overflow: ellipsis;
-
-  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
-  ${props => (props.isWrapped ? wrappedContentStyle : unwrappedContentStyle)};
+  ${(props) =>
+    props.wrapMode === 'long'
+      ? longWrappedContentStyle
+      : props.wrapMode === 'pre-wrapped'
+      ? preWrappedContentStyle
+      : unwrappedContentStyle};
 `;
 
-const formatMessageSegment = (messageSegment: LogEntryMessageSegment): string => {
-  if (isFieldSegment(messageSegment)) {
-    return messageSegment.value;
-  } else if (isConstantSegment(messageSegment)) {
-    return messageSegment.constant;
-  }
+const formatMessageSegments = (
+  messageSegments: LogMessagePart[],
+  highlights: LogColumn[],
+  isActiveHighlight: boolean
+) =>
+  messageSegments.map((messageSegment, index) => {
+    if (isFieldSegment(messageSegment)) {
+      // we only support one highlight for now
+      const [firstHighlight = []] = highlights.map((highlight) => {
+        if (isHighlightMessageColumn(highlight)) {
+          const segment = highlight.message[index];
+          if (isHighlightFieldSegment(segment)) {
+            return segment.highlights;
+          }
+        }
+        return [];
+      });
 
-  return 'failed to format message';
+      return (
+        <FieldValue
+          highlightTerms={firstHighlight}
+          isActiveHighlight={isActiveHighlight}
+          key={`MessageSegment-${index}`}
+          value={messageSegment.value}
+        />
+      );
+    } else if (isConstantSegment(messageSegment)) {
+      return messageSegment.constant;
+    }
+
+    return 'failed to format message';
+  });
+
+const renderMessageSegments = (messageSegments: LogMessagePart[]): string => {
+  return messageSegments
+    .map((messageSegment) => {
+      if (isConstantSegment(messageSegment)) {
+        return messageSegment.constant;
+      }
+      if (isFieldSegment(messageSegment)) {
+        return messageSegment.value.toString();
+      }
+    })
+    .join(' ');
 };

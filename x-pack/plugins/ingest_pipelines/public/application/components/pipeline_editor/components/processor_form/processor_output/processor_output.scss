@@ -1,0 +1,12 @@
+.processorOutput {
+  &__callOut {
+    &--customIcon {
+      .euiCallOutHeader {
+        align-items: center;
+      }
+    }
+    &__codeBlock > pre {
+      background: transparent;
+    }
+  }
+}

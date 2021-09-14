@@ -1,30 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import sinon from 'sinon';
-import Progress from './progress';
-import Logger from '../lib/logger';
+
+import { Progress } from './progress';
+import { Logger } from '../lib/logger';
 
 describe('kibana cli', function () {
-
   describe('plugin installer', function () {
-
     describe('progressReporter', function () {
       let logger;
       let progress;
@@ -42,7 +30,6 @@ describe('kibana cli', function () {
       });
 
       describe('handleData', function () {
-
         it('should show a max of 20 dots for full progress', function () {
           progress.init(1000);
           progress.progress(1000);
@@ -77,7 +64,7 @@ describe('kibana cli', function () {
           progress.init(1000);
           expect(logger.log.callCount).toBe(1);
 
-          progress.progress(50);  //5%
+          progress.progress(50); //5%
           expect(logger.log.callCount).toBe(2);
 
           progress.progress(100); //15%
@@ -89,7 +76,7 @@ describe('kibana cli', function () {
           progress.progress(590); //94%
           expect(logger.log.callCount).toBe(20);
 
-          progress.progress(60);  //100%
+          progress.progress(60); //100%
           expect(logger.log.callCount).toBe(21);
 
           //Any progress over 100% should be ignored.
@@ -102,10 +89,7 @@ describe('kibana cli', function () {
           expect(logger.log.getCall(0).args[0]).toMatch(/transfer/i);
           expect(logger.log.getCall(21).args[0]).toMatch(/complete/i);
         });
-
       });
     });
-
   });
-
 });

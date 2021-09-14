@@ -1,17 +1,30 @@
-`xpack.infra.enabled`:: Set to `false` to disable the Logs and Infrastructure UI plugin {kib}. Defaults to `true`.
+[cols="2*<"]
+|===
+| `xpack.infra.enabled`
+  | Set to `false` to disable the Logs and Metrics app plugin {kib}. Defaults to `true`.
 
-`xpack.infra.sources.default.logAlias`:: Index pattern for matching indices that contain log data. Defaults to `filebeat-*,kibana_sample_data_logs*`. To match multiple wildcard patterns, use a comma to separate the names, with no space after the comma. For example, `logstash-app1-*,default-logs-*`.
+| `xpack.infra.sources.default.logAlias`
+  | Index pattern for matching indices that contain log data. Defaults to `filebeat-*,kibana_sample_data_logs*`. To match multiple wildcard patterns, use a comma to separate the names, with no space after the comma. For example, `logstash-app1-*,default-logs-*`.
 
-`xpack.infra.sources.default.metricAlias`:: Index pattern for matching indices that contain Metricbeat data. Defaults to `metricbeat-*`. To match multiple wildcard patterns, use a comma to separate the names, with no space after the comma. For example, `logstash-app1-*,default-logs-*`.
+| `xpack.infra.sources.default.metricAlias`
+  | Index pattern for matching indices that contain Metricbeat data. Defaults to `metricbeat-*`. To match multiple wildcard patterns, use a comma to separate the names, with no space after the comma. For example, `logstash-app1-*,default-logs-*`.
 
-`xpack.infra.sources.default.fields.timestamp`:: Timestamp used to sort log entries. Defaults to `@timestamp`.
+| `xpack.infra.sources.default.fields.timestamp`
+  | Timestamp used to sort log entries. Defaults to `@timestamp`.
 
-`xpack.infra.sources.default.fields.message`:: Fields used to display messages in the Logs UI. Defaults to `['message', '@message']`.
+| `xpack.infra.sources.default.fields.message`
+  | Fields used to display messages in the Logs app. Defaults to `['message', '@message']`.
 
-`xpack.infra.sources.default.fields.tiebreaker`:: Field used to break ties between two entries with the same timestamp. Defaults to `_doc`.
+| `xpack.infra.sources.default.fields.tiebreaker`
+  | Field used to break ties between two entries with the same timestamp. Defaults to `_doc`.
 
-`xpack.infra.sources.default.fields.host`:: Field used to identify hosts. Defaults to `host.name`.
+| `xpack.infra.sources.default.fields.host`
+  | Field used to identify hosts. Defaults to `host.name`.
 
-`xpack.infra.sources.default.fields.container`:: Field used to identify Docker containers. Defaults to `container.id`.
+| `xpack.infra.sources.default.fields.container`
+  | Field used to identify Docker containers. Defaults to `container.id`.
 
-`xpack.infra.sources.default.fields.pod`:: Field used to identify Kubernetes pods. Defaults to `kubernetes.pod.uid`.
+| `xpack.infra.sources.default.fields.pod`
+  | Field used to identify Kubernetes pods. Defaults to `kubernetes.pod.uid`.
+
+|===

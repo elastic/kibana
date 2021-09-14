@@ -1,0 +1,13 @@
+{
+  "id": "telemetry",
+  "owner": {
+    "name": "Kibana Telemetry",
+    "githubTeam": "kibana-telemetry"
+  },
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["telemetryCollectionManager", "usageCollection", "screenshotMode"],
+  "extraPublicDirs": ["common/constants"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+}

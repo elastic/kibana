@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: Transform List Expanded Row <ExpandedRowJsonPane /> Minimal initialization 1`] = `
+<div
+  data-test-subj="transformJsonTabContent"
+>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiCodeBlock
+        aria-label="JSON of transform configuration"
+        fontSize="s"
+        isCopyable={true}
+        language="json"
+        paddingSize="s"
+        style={
+          Object {
+            "width": "100%",
+          }
+        }
+      >
+        value=
+        {
+  "id": "fq_date_histogram_1m_1441",
+  "source": {
+    "index": [
+      "farequote-2019"
+    ],
+    "query": {
+      "match_all": {}
+    }
+  },
+  "dest": {
+    "index": "fq_date_histogram_1m_1441"
+  },
+  "pivot": {
+    "group_by": {
+      "@timestamp": {
+        "date_histogram": {
+          "field": "@timestamp",
+          "calendar_interval": "1m"
+        }
+      }
+    },
+    "aggregations": {
+      "responsetime.avg": {
+        "avg": {
+          "field": "responsetime"
+        }
+      }
+    }
+  },
+  "version": "8.0.0",
+  "create_time": 1564388146667
+}
+      </EuiCodeBlock>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+       
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

@@ -1,89 +1,109 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { useContext } from 'react';
+import { transparentize } from 'polished';
 
-import euiStyled from '../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
-  LogColumnConfiguration,
-  isTimestampLogColumnConfiguration,
-  isFieldLogColumnConfiguration,
-  isMessageLogColumnConfiguration,
-} from '../../../utils/source_configuration';
-import { LogEntryColumnWidth, LogEntryColumn, LogEntryColumnContent } from './log_entry_column';
+  LogEntryColumn,
+  LogEntryColumnContent,
+  LogEntryColumnWidth,
+  LogEntryColumnWidths,
+} from './log_entry_column';
 import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
+import { LogPositionState } from '../../../containers/logs/log_position';
+import { localizedDate } from '../../../../common/formatters/datetime';
+import {
+  LogColumnRenderConfiguration,
+  isTimestampColumnRenderConfiguration,
+  isMessageColumnRenderConfiguration,
+  isFieldColumnRenderConfiguration,
+} from '../../../utils/log_column_render_configuration';
 
-export const LogColumnHeaders = injectI18n<{
-  columnConfigurations: LogColumnConfiguration[];
-  columnWidths: LogEntryColumnWidth[];
-  showColumnConfiguration: () => void;
-}>(({ columnConfigurations, columnWidths, intl, showColumnConfiguration }) => {
-  const iconColumnWidth = useMemo(() => columnWidths[columnWidths.length - 1], [columnWidths]);
-
-  const showColumnConfigurationLabel = intl.formatMessage({
-    id: 'xpack.infra.logColumnHeaders.configureColumnsLabel',
-    defaultMessage: 'Configure columns',
-  });
-
+export const LogColumnHeaders: React.FunctionComponent<{
+  columnConfigurations: LogColumnRenderConfiguration[];
+  columnWidths: LogEntryColumnWidths;
+}> = ({ columnConfigurations, columnWidths }) => {
+  const { firstVisiblePosition } = useContext(LogPositionState.Context);
   return (
     <LogColumnHeadersWrapper>
-      {columnConfigurations.map((columnConfiguration, columnIndex) => {
-        const columnWidth = columnWidths[columnIndex];
-        if (isTimestampLogColumnConfiguration(columnConfiguration)) {
+      {columnConfigurations.map((columnConfiguration) => {
+        if (isTimestampColumnRenderConfiguration(columnConfiguration)) {
+          let columnHeader;
+          if (columnConfiguration.timestampColumn.header === false) {
+            columnHeader = null;
+          } else if (typeof columnConfiguration.timestampColumn.header === 'string') {
+            columnHeader = columnConfiguration.timestampColumn.header;
+          } else {
+            columnHeader = firstVisiblePosition
+              ? localizedDate(firstVisiblePosition.time)
+              : i18n.translate('xpack.infra.logs.stream.timestampColumnTitle', {
+                  defaultMessage: 'Timestamp',
+                });
+          }
+
           return (
             <LogColumnHeader
-              columnWidth={columnWidth}
-              data-test-subj="logColumnHeader timestampLogColumnHeader"
               key={columnConfiguration.timestampColumn.id}
+              columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
+              data-test-subj="logColumnHeader timestampLogColumnHeader"
             >
-              Timestamp
+              {columnHeader}
             </LogColumnHeader>
           );
-        } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
+        } else if (isMessageColumnRenderConfiguration(columnConfiguration)) {
+          let columnHeader;
+          if (columnConfiguration.messageColumn.header === false) {
+            columnHeader = null;
+          } else if (typeof columnConfiguration.messageColumn.header === 'string') {
+            columnHeader = columnConfiguration.messageColumn.header;
+          } else {
+            columnHeader = i18n.translate('xpack.infra.logs.stream.messageColumnTitle', {
+              defaultMessage: 'Message',
+            });
+          }
+
           return (
             <LogColumnHeader
-              columnWidth={columnWidth}
+              columnWidth={columnWidths[columnConfiguration.messageColumn.id]}
               data-test-subj="logColumnHeader messageLogColumnHeader"
               key={columnConfiguration.messageColumn.id}
             >
-              Message
+              {columnHeader}
             </LogColumnHeader>
           );
-        } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
+        } else if (isFieldColumnRenderConfiguration(columnConfiguration)) {
+          let columnHeader;
+          if (columnConfiguration.fieldColumn.header === false) {
+            columnHeader = null;
+          } else if (typeof columnConfiguration.fieldColumn.header === 'string') {
+            columnHeader = columnConfiguration.fieldColumn.header;
+          } else {
+            columnHeader = columnConfiguration.fieldColumn.field;
+          }
+
           return (
             <LogColumnHeader
-              columnWidth={columnWidth}
+              columnWidth={columnWidths[columnConfiguration.fieldColumn.id]}
               data-test-subj="logColumnHeader fieldLogColumnHeader"
               key={columnConfiguration.fieldColumn.id}
             >
-              {columnConfiguration.fieldColumn.field}
+              {columnHeader}
             </LogColumnHeader>
           );
         }
       })}
-      <LogColumnHeader
-        columnWidth={iconColumnWidth}
-        data-test-subj="logColumnHeader iconLogColumnHeader"
-        key="iconColumnHeader"
-      >
-        <EuiButtonIcon
-          aria-label={showColumnConfigurationLabel}
-          color="text"
-          iconType="gear"
-          onClick={showColumnConfiguration}
-          title={showColumnConfigurationLabel}
-        />
-      </LogColumnHeader>
     </LogColumnHeadersWrapper>
   );
-});
+};
 
-const LogColumnHeader: React.FunctionComponent<{
+export const LogColumnHeader: React.FunctionComponent<{
   columnWidth: LogEntryColumnWidth;
   'data-test-subj'?: string;
 }> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
@@ -92,9 +112,9 @@ const LogColumnHeader: React.FunctionComponent<{
   </LogColumnHeaderWrapper>
 );
 
-const LogColumnHeadersWrapper = euiStyled.div.attrs({
-  role: 'row',
-})`
+export const LogColumnHeadersWrapper = euiStyled.div.attrs((props) => ({
+  role: props.role ?? 'row',
+}))`
   align-items: stretch;
   display: flex;
   flex-direction: row;
@@ -102,24 +122,27 @@ const LogColumnHeadersWrapper = euiStyled.div.attrs({
   justify-content: flex-start;
   overflow: hidden;
   padding-right: ${ASSUMED_SCROLLBAR_WIDTH}px;
+  border-bottom: ${(props) => props.theme.eui.euiBorderThin};
+  box-shadow: 0 2px 2px -1px ${(props) => transparentize(0.3, props.theme.eui.euiColorLightShade)};
+  position: relative;
+  z-index: 1;
 `;
 
-const LogColumnHeaderWrapper = LogEntryColumn.extend.attrs({
-  role: 'columnheader',
-})`
+const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs((props) => ({
+  role: props.role ?? 'columnheader',
+}))`
   align-items: center;
-  border-bottom: ${props => props.theme.eui.euiBorderThick};
   display: flex;
   flex-direction: row;
   height: 32px;
   overflow: hidden;
 `;
 
-const LogColumnHeaderContent = LogEntryColumnContent.extend`
-  color: ${props => props.theme.eui.euiTitleColor};
-  font-size: ${props => props.theme.eui.euiFontSizeS};
-  font-weight: ${props => props.theme.eui.euiFontWeightSemiBold};
-  line-height: ${props => props.theme.eui.euiLineHeight};
+const LogColumnHeaderContent = euiStyled(LogEntryColumnContent)`
+  color: ${(props) => props.theme.eui.euiTitleColor};
+  font-size: ${(props) => props.theme.eui.euiFontSizeS};
+  font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold};
+  line-height: ${(props) => props.theme.eui.euiLineHeight};
   text-overflow: clip;
   white-space: pre;
 `;

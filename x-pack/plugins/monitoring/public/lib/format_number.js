@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -44,7 +45,9 @@ export function formatNumber(num, which) {
       postfix = 'ms';
       break;
     default:
-      if (which) { format = which; }
+      if (which) {
+        format = which;
+      }
   }
   return numeral(num).format(format) + postfix;
 }
@@ -62,5 +65,7 @@ export function formatMetric(value, format, suffix, options = {}) {
     }
     return formatNumber(value, format) + _suffix;
   }
-  return i18n.translate('xpack.monitoring.formatNumbers.notAvailableLabel', { defaultMessage: 'N/A' });
+  return i18n.translate('xpack.monitoring.formatNumbers.notAvailableLabel', {
+    defaultMessage: 'N/A',
+  });
 }

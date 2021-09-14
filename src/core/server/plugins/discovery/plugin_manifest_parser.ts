@@ -1,29 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { readFile, stat } from 'fs';
 import { resolve } from 'path';
 import { coerce } from 'semver';
 import { promisify } from 'util';
+import { snakeCase } from 'lodash';
 import { isConfigPath, PackageInfo } from '../../config';
-import { PluginManifest } from '../plugin';
+import { PluginManifest, PluginType } from '../types';
 import { PluginDiscoveryError } from './plugin_discovery_error';
+import { isCamelCase } from './is_camel_case';
 
 const fsReadFileAsync = promisify(readFile);
 const fsStatAsync = promisify(stat);
@@ -48,12 +39,18 @@ const KNOWN_MANIFEST_FIELDS = (() => {
   const manifestFields: { [P in keyof PluginManifest]: boolean } = {
     id: true,
     kibanaVersion: true,
+    type: true,
     version: true,
     configPath: true,
     requiredPlugins: true,
     optionalPlugins: true,
     ui: true,
     server: true,
+    extraPublicDirs: true,
+    requiredBundles: true,
+    serviceFolders: true,
+    owner: true,
+    description: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -67,7 +64,10 @@ const KNOWN_MANIFEST_FIELDS = (() => {
  * @param packageInfo Kibana package info.
  * @internal
  */
-export async function parseManifest(pluginPath: string, packageInfo: PackageInfo) {
+export async function parseManifest(
+  pluginPath: string,
+  packageInfo: PackageInfo
+): Promise<PluginManifest> {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
 
   let manifestContent;
@@ -107,6 +107,13 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
+  if (!isCamelCase(manifest.id)) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(`Plugin "id" must be camelCase, but found: ${manifest.id}.`)
+    );
+  }
+
   if (!manifest.version || typeof manifest.version !== 'string') {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
@@ -114,13 +121,33 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
+  if (!manifest.owner || !manifest.owner.name || typeof manifest.owner.name !== 'string') {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `Plugin manifest for "${manifest.id}" must contain an "owner" property, which includes a nested "name" property.`
+      )
+    );
+  }
+
   if (manifest.configPath !== undefined && !isConfigPath(manifest.configPath)) {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
       new Error(
-        `The "configPath" in plugin manifest for "${
-          manifest.id
-        }" should either be a string or an array of strings.`
+        `The "configPath" in plugin manifest for "${manifest.id}" should either be a string or an array of strings.`
+      )
+    );
+  }
+
+  if (
+    manifest.extraPublicDirs &&
+    (!Array.isArray(manifest.extraPublicDirs) ||
+      !manifest.extraPublicDirs.every((dir) => typeof dir === 'string'))
+  ) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `The "extraPublicDirs" in plugin manifest for "${manifest.id}" should be an array of strings.`
       )
     );
   }
@@ -133,11 +160,7 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     throw PluginDiscoveryError.incompatibleVersion(
       manifestPath,
       new Error(
-        `Plugin "${
-          manifest.id
-        }" is only compatible with Kibana version "${expectedKibanaVersion}", but used Kibana version is "${
-          packageInfo.version
-        }".`
+        `Plugin "${manifest.id}" is only compatible with Kibana version "${expectedKibanaVersion}", but used Kibana version is "${packageInfo.version}".`
       )
     );
   }
@@ -148,21 +171,29 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
       new Error(
-        `Both "server" and "ui" are missing or set to "false" in plugin manifest for "${
-          manifest.id
-        }", but at least one of these must be set to "true".`
+        `Both "server" and "ui" are missing or set to "false" in plugin manifest for "${manifest.id}", but at least one of these must be set to "true".`
       )
     );
   }
 
-  const unknownManifestKeys = Object.keys(manifest).filter(key => !KNOWN_MANIFEST_FIELDS.has(key));
+  const unknownManifestKeys = Object.keys(manifest).filter(
+    (key) => !KNOWN_MANIFEST_FIELDS.has(key)
+  );
   if (unknownManifestKeys.length > 0) {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
       new Error(
-        `Manifest for plugin "${
-          manifest.id
-        }" contains the following unrecognized properties: ${unknownManifestKeys}.`
+        `Manifest for plugin "${manifest.id}" contains the following unrecognized properties: ${unknownManifestKeys}.`
+      )
+    );
+  }
+
+  const type = manifest.type ?? PluginType.standard;
+  if (type !== PluginType.preboot && type !== PluginType.standard) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `The "type" in manifest for plugin "${manifest.id}" is set to "${type}", but it should either be "standard" or "preboot".`
       )
     );
   }
@@ -171,11 +202,16 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     id: manifest.id,
     version: manifest.version,
     kibanaVersion: expectedKibanaVersion,
-    configPath: manifest.configPath || manifest.id,
+    type,
+    configPath: manifest.configPath || snakeCase(manifest.id),
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
+    requiredBundles: Array.isArray(manifest.requiredBundles) ? manifest.requiredBundles : [],
     ui: includesUiPlugin,
     server: includesServerPlugin,
+    extraPublicDirs: manifest.extraPublicDirs,
+    owner: manifest.owner!,
+    description: manifest.description,
   };
 }
 

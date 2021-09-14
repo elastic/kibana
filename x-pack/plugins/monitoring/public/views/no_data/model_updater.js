@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -12,7 +13,7 @@
  *
  * I use 1 method to handling property values that are either primitives or
  * arrays, because it allows the callers to be a little more dumb. All they
-  * have to know is the property name, rather than the type as well.
+ * have to know is the property name, rather than the type as well.
  */
 export class ModelUpdater {
   constructor($scope, model) {
@@ -25,7 +26,7 @@ export class ModelUpdater {
     const { $scope, model } = this;
     const keys = Object.keys(properties);
     $scope.$evalAsync(() => {
-      keys.forEach(key => {
+      keys.forEach((key) => {
         if (Array.isArray(model[key])) {
           model[key].push(properties[key]);
         } else {

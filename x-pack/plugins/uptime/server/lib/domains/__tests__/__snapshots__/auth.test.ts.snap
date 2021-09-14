@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Auth domain lib throws for empty request authentication field 1`] = `"Missing authentication"`;
-
-exports[`Auth domain lib throws for null license information 1`] = `"Missing license information"`;
-
-exports[`Auth domain lib throws when license is not active 1`] = `"License not active"`;
-
-exports[`Auth domain lib throws when license type not supported 1`] = `"License not supported"`;

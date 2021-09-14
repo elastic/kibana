@@ -1,0 +1,12 @@
+{
+  "id": "bfetch",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["kibanaUtils"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Considering using bfetch capabilities when fetching large amounts of data. This services supports batching HTTP requests and streaming responses back."
+}

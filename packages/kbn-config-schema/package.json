@@ -1,20 +1,8 @@
 {
   "name": "@kbn/config-schema",
-  "main": "./target/out/index.js",
-  "types": "./target/types/index.d.ts",
+  "main": "./target_node/index.js",
+  "types": "./target_types/index.d.ts",
   "version": "1.0.0",
-  "license": "Apache-2.0",
-  "private": true,
-  "scripts": {
-    "build": "tsc",
-    "kbn:bootstrap": "yarn build"
-  },
-  "devDependencies": {
-    "typescript": "^3.3.3333"
-  },
-  "peerDependencies": {
-    "joi": "^13.5.2",
-    "moment": "^2.20.1",
-    "type-detect": "^4.0.8"
-  }
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "private": true
 }

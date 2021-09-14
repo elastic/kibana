@@ -1,0 +1,41 @@
+// set width and height to fixed values to prevent resizing when you switch tabs
+.shardFailureModal {
+  min-height: 75vh;
+  width: 768px;
+}
+
+.shardFailureModal__desc {
+  // set for IE11, since without it depending on the content the width of the list
+  // could be much higher than the available screenspace
+  max-width: 686px;
+}
+
+.shardFailureModal__descTitle {
+  width: 20% !important;
+  margin-top: $euiSizeS;
+}
+
+.shardFailureModal__descValue {
+  width: 80% !important;
+  margin-top: $euiSizeS;
+}
+.shardFailureModal__keyValueTitle {
+  padding-right: $euiSizeS;
+}
+
+@include euiBreakpoint('xs','s') {
+  .shardFailureModal__keyValueTitle {
+    display: block;
+    width: 100%;
+  }
+
+  .shardFailureModal__descTitle {
+    display: block;
+    width: 100% !important;
+  }
+
+  .shardFailureModal__descValue {
+    display: block;
+    width: 100% !important;
+  }
+}

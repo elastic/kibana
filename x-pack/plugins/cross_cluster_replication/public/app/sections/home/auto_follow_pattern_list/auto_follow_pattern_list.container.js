@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { connect } from 'react-redux';
@@ -31,10 +32,10 @@ const mapStateToProps = (state) => ({
   isAuthorized: isApiAuthorized(scope)(state),
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   loadAutoFollowPatterns: (inBackground) => dispatch(loadAutoFollowPatterns(inBackground)),
   selectAutoFollowPattern: (id) => dispatch(selectDetailAutoFollowPattern(id)),
-  loadAutoFollowStats: () => dispatch(loadAutoFollowStats())
+  loadAutoFollowStats: () => dispatch(loadAutoFollowStats()),
 });
 
 export const AutoFollowPatternList = connect(

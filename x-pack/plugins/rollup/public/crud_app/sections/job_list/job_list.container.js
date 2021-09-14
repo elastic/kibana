@@ -1,22 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { connect } from 'react-redux';
 
-import {
-  isLoading,
-  jobLoadError,
-  getJobsList,
-} from '../../store/selectors';
+import { isLoading, jobLoadError, getJobsList } from '../../store/selectors';
 
 import {
   loadJobs,
   refreshJobs,
   openDetailPanel,
   closeDetailPanel,
+  cloneJob,
 } from '../../store/actions';
 
 import { JobList as JobListView } from './job_list';
@@ -34,14 +32,17 @@ const mapDispatchToProps = (dispatch) => {
     loadJobs: () => {
       dispatch(loadJobs());
     },
-    refreshJobs: () => {
-      dispatch(refreshJobs());
+    refreshJobs: (options) => {
+      dispatch(refreshJobs(options));
     },
     openDetailPanel: (jobId) => {
       dispatch(openDetailPanel({ jobId: jobId }));
     },
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
+    },
+    cloneJob: (jobConfig) => {
+      dispatch(cloneJob(jobConfig));
     },
   };
 };

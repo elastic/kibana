@@ -1,30 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-// @ts-ignore untyped Elastic library
-import { getType } from '@kbn/interpreter/common';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { Datatable, ExpressionFunctionDefinition, getType } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   name: string;
 }
 
-type Context = string | boolean | number | null;
+type Input = string | boolean | number | null;
 
-export function asFn(): ExpressionFunction<'as', Context, Arguments, Datatable> {
+export function asFn(): ExpressionFunctionDefinition<'as', Input, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().as;
 
   return {
     name: 'as',
     type: 'datatable',
-    context: {
-      types: ['string', 'boolean', 'number', 'null'],
-    },
+    inputTypes: ['string', 'boolean', 'number', 'null'],
     help,
     args: {
       name: {
@@ -34,18 +30,19 @@ export function asFn(): ExpressionFunction<'as', Context, Arguments, Datatable> 
         default: 'value',
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       return {
         type: 'datatable',
         columns: [
           {
+            id: args.name,
             name: args.name,
-            type: getType(context),
+            meta: { type: getType(input) },
           },
         ],
         rows: [
           {
-            [args.name]: context,
+            [args.name]: input,
           },
         ],
       };

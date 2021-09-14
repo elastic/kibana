@@ -1,0 +1,50 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when a user is added as an owner for an Azure service principal. The service principal object defines what the application can do in the specific tenant, who can access the application, and what resources the app can access. A service principal object is created when an application is given permission to access resources in a tenant. An adversary may add a user account as an owner for a service principal and use that account in order to define what an application can do in the Azure AD tenant.",
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "User Added as Owner for Azure Service Principal",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Add owner to service principal\" and event.outcome:(Success or success)\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals"
+  ],
+  "risk_score": 21,
+  "rule_id": "38e5acdd-5f20-4d99-8fe4-f0a1a592077f",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

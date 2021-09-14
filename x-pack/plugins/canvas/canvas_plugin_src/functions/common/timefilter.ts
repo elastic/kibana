@@ -1,22 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import dateMath from '@elastic/datemath';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Filter } from '../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { ExpressionValueFilter, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   column: string;
-  from: string | null;
-  to: string | null;
-  filterGroup: string | null;
+  from: string;
+  to: string;
+  filterGroup: string;
 }
 
-export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments, Filter> {
+export function timefilter(): ExpressionFunctionDefinition<
+  'timefilter',
+  ExpressionValueFilter,
+  Arguments,
+  ExpressionValueFilter
+> {
   const { help, args: argHelp } = getFunctionHelp().timefilter;
   const errors = getFunctionErrors().timefilter;
 
@@ -24,9 +29,7 @@ export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments
     name: 'timefilter',
     aliases: [],
     type: 'filter',
-    context: {
-      types: ['filter'],
-    },
+    inputTypes: ['filter'],
     help,
     args: {
       column: {
@@ -36,34 +39,35 @@ export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments
         help: argHelp.column,
       },
       from: {
-        types: ['string', 'null'],
+        types: ['string'],
         aliases: ['f', 'start'],
         help: argHelp.from,
       },
       to: {
-        types: ['string', 'null'],
+        types: ['string'],
         aliases: ['t', 'end'],
         help: argHelp.to,
       },
       filterGroup: {
-        types: ['string', 'null'],
-        help: 'Group name for the filter',
+        types: ['string'],
+        help: 'The group name for the filter',
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.from && !args.to) {
-        return context;
+        return input;
       }
 
       const { from, to, column } = args;
-      const filter = {
-        type: 'time',
+      const filter: ExpressionValueFilter = {
+        type: 'filter',
+        filterType: 'time',
         column,
         and: [],
       };
 
-      function parseAndValidate(str: string): string {
-        const moment = dateMath.parse(str);
+      function parseAndValidate(str: string, { roundUp }: { roundUp: boolean }): string {
+        const moment = dateMath.parse(str, { roundUp });
 
         if (!moment || !moment.isValid()) {
           throw errors.invalidString(str);
@@ -73,14 +77,14 @@ export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments
       }
 
       if (!!to) {
-        (filter as any).to = parseAndValidate(to);
+        filter.to = parseAndValidate(to, { roundUp: true });
       }
 
       if (!!from) {
-        (filter as any).from = parseAndValidate(from);
+        filter.from = parseAndValidate(from, { roundUp: false });
       }
 
-      return { ...context, and: [...context.and, filter] };
+      return { ...input, and: [...input.and, filter] };
     },
   };
 }

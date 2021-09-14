@@ -1,0 +1,222 @@
+{
+  "id": "devTools",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "devTools",
+        "id": "def-public.DevToolsPlugin",
+        "type": "Class",
+        "tags": [],
+        "label": "DevToolsPlugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "devTools",
+            "scope": "public",
+            "docId": "kibDevToolsPluginApi",
+            "section": "def-public.DevToolsPlugin",
+            "text": "DevToolsPlugin"
+          },
+          " implements ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.Plugin",
+            "text": "Plugin"
+          },
+          "<",
+          {
+            "pluginId": "devTools",
+            "scope": "public",
+            "docId": "kibDevToolsPluginApi",
+            "section": "def-public.DevToolsSetup",
+            "text": "DevToolsSetup"
+          },
+          ", void, object, object>"
+        ],
+        "path": "src/plugins/dev_tools/public/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "devTools",
+            "id": "def-public.DevToolsPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(coreSetup: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>, { urlForwarding }: { urlForwarding: { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }; }) => { register: (devToolArgs: ",
+              "CreateDevToolArgs",
+              ") => ",
+              "DevToolApp",
+              "; }"
+            ],
+            "path": "src/plugins/dev_tools/public/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "devTools",
+                "id": "def-public.DevToolsPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreSetup",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>"
+                ],
+                "path": "src/plugins/dev_tools/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "devTools",
+                "id": "def-public.DevToolsPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ urlForwarding }",
+                "description": [],
+                "path": "src/plugins/dev_tools/public/plugin.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "devTools",
+                    "id": "def-public.DevToolsPlugin.setup.$2.urlForwarding",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "urlForwarding",
+                    "description": [],
+                    "signature": [
+                      "{ forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
+                    ],
+                    "path": "src/plugins/dev_tools/public/plugin.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "devTools",
+            "id": "def-public.DevToolsPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/dev_tools/public/plugin.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "devTools",
+            "id": "def-public.DevToolsPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/dev_tools/public/plugin.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "devTools",
+      "id": "def-public.DevToolsSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "DevToolsSetup",
+      "description": [],
+      "path": "src/plugins/dev_tools/public/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "devTools",
+          "id": "def-public.DevToolsSetup.register",
+          "type": "Function",
+          "tags": [],
+          "label": "register",
+          "description": [
+            "\nRegister a developer tool. It will be available\nin the dev tools app under a separate tab.\n\nRegistering dev tools works almost similar to registering\napplications in the core application service,\nbut they will be rendered with a frame containing tabs\nto switch between the tools."
+          ],
+          "signature": [
+            "(devTool: ",
+            "CreateDevToolArgs",
+            ") => ",
+            "DevToolApp"
+          ],
+          "path": "src/plugins/dev_tools/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "devTools",
+              "id": "def-public.DevToolsSetup.register.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "devTool",
+              "description": [
+                "The dev tools descriptor"
+              ],
+              "signature": [
+                "CreateDevToolArgs"
+              ],
+              "path": "src/plugins/dev_tools/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

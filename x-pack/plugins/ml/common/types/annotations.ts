@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // The Annotation interface is based on annotation documents stored in the
@@ -58,7 +59,19 @@
 //     ]
 // }
 
+import { PartitionFieldsType } from './anomalies';
 import { ANNOTATION_TYPE } from '../constants/annotations';
+
+export type AnnotationFieldName = 'partition_field_name' | 'over_field_name' | 'by_field_name';
+export type AnnotationFieldValue = 'partition_field_value' | 'over_field_value' | 'by_field_value';
+
+export function getAnnotationFieldName(fieldType: PartitionFieldsType): AnnotationFieldName {
+  return `${fieldType}_name` as AnnotationFieldName;
+}
+
+export function getAnnotationFieldValue(fieldType: PartitionFieldsType): AnnotationFieldValue {
+  return `${fieldType}_value` as AnnotationFieldValue;
+}
 
 export interface Annotation {
   _id?: string;
@@ -73,8 +86,20 @@ export interface Annotation {
   annotation: string;
   job_id: string;
   type: ANNOTATION_TYPE.ANNOTATION | ANNOTATION_TYPE.COMMENT;
+  event?:
+    | 'user'
+    | 'delayed_data'
+    | 'model_snapshot_stored'
+    | 'model_change'
+    | 'categorization_status_change';
+  detector_index?: number;
+  partition_field_name?: string;
+  partition_field_value?: string;
+  over_field_name?: string;
+  over_field_value?: string;
+  by_field_name?: string;
+  by_field_value?: string;
 }
-
 export function isAnnotation(arg: any): arg is Annotation {
   return (
     arg.timestamp !== undefined &&
@@ -84,12 +109,42 @@ export function isAnnotation(arg: any): arg is Annotation {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Annotations extends Array<Annotation> {}
+export type Annotations = Annotation[];
 
 export function isAnnotations(arg: any): arg is Annotations {
   if (Array.isArray(arg) === false) {
     return false;
   }
   return arg.every((d: Annotation) => isAnnotation(d));
+}
+
+export interface FieldToBucket {
+  field: string;
+  missing?: string | number;
+}
+
+export interface FieldToBucketResult {
+  key: string;
+  doc_count: number;
+}
+
+export interface TermAggregationResult {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: FieldToBucketResult[];
+}
+
+export type EsAggregationResult = Record<string, TermAggregationResult>;
+
+export interface GetAnnotationsResponse {
+  aggregations?: EsAggregationResult;
+  annotations: Record<string, Annotations>;
+  error?: string;
+  success: boolean;
+}
+
+export interface AnnotationsTable {
+  annotationsData: Annotations;
+  aggregations: EsAggregationResult;
+  error?: string;
 }

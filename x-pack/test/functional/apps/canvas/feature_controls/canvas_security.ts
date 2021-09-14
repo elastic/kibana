@@ -1,28 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
-  const esArchiver = getService('esArchiver');
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'canvas', 'error', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
-  describe('security feature controls', function() {
+  describe('security feature controls', function () {
     this.tags(['skipFirefox']);
-    before(async () => {
-      await esArchiver.load('canvas/default');
-    });
 
-    after(async () => {
-      await esArchiver.unload('canvas/default');
-    });
+    before(async () => await kibanaServer.importExport.load(archive));
+
+    after(async () => await kibanaServer.importExport.unload(archive));
 
     describe('global canvas all privileges', () => {
       before(async () => {
@@ -46,7 +46,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_canvas_all_user',
@@ -58,18 +58,16 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_canvas_all_role'),
           security.user.delete('global_canvas_all_user'),
-          PageObjects.security.logout(),
         ]);
       });
 
       it('shows canvas navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Canvas', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Canvas']);
       });
 
       it(`landing page shows "Create new workpad" button`, async () => {
@@ -85,10 +83,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`allows a workpad to be created`, async () => {
-        await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
-          ensureCurrentUrl: true,
-          showLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl('canvas');
+
+        await testSubjects.click('create-workpad-button');
 
         await PageObjects.canvas.expectAddElementButton();
       });
@@ -99,7 +96,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
           {
             ensureCurrentUrl: true,
-            showLoginIfPrompted: false,
+            shouldLoginIfPrompted: false,
           }
         );
 
@@ -144,10 +141,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows canvas navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Canvas', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Canvas']);
       });
 
       it(`landing page shows disabled "Create new workpad" button`, async () => {
@@ -222,34 +217,20 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await security.user.delete('no_canvas_privileges_user');
       });
 
-      it(`returns a 404`, async () => {
+      it(`returns a 403`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        PageObjects.error.expectForbidden();
       });
 
-      it(`create new workpad returns a 404`, async () => {
+      it(`create new workpad returns a 403`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        PageObjects.error.expectForbidden();
       });
     });
   });

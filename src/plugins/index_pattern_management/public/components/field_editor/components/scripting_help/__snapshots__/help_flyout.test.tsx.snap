@@ -1,0 +1,83 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScriptingHelpFlyout should render normally 1`] = `
+<EuiFlyout
+  data-test-subj="scriptedFieldsHelpFlyout"
+  onClose={[Function]}
+>
+  <EuiFlyoutBody>
+    <EuiTabbedContent
+      autoFocus="initial"
+      initialSelectedTab={
+        Object {
+          "content": <ScriptingSyntax />,
+          "data-test-subj": "syntaxTab",
+          "id": "syntax",
+          "name": "Syntax",
+        }
+      }
+      tabs={
+        Array [
+          Object {
+            "content": <ScriptingSyntax />,
+            "data-test-subj": "syntaxTab",
+            "id": "syntax",
+            "name": "Syntax",
+          },
+          Object {
+            "content": <TestScript
+              executeScript={[Function]}
+              indexPattern={Object {}}
+              lang="painless"
+            />,
+            "data-test-subj": "testTab",
+            "id": "test",
+            "name": "Preview results",
+          },
+        ]
+      }
+    />
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;
+
+exports[`ScriptingHelpFlyout should render nothing if not visible 1`] = `
+<EuiFlyout
+  data-test-subj="scriptedFieldsHelpFlyout"
+  onClose={[Function]}
+>
+  <EuiFlyoutBody>
+    <EuiTabbedContent
+      autoFocus="initial"
+      initialSelectedTab={
+        Object {
+          "content": <ScriptingSyntax />,
+          "data-test-subj": "syntaxTab",
+          "id": "syntax",
+          "name": "Syntax",
+        }
+      }
+      tabs={
+        Array [
+          Object {
+            "content": <ScriptingSyntax />,
+            "data-test-subj": "syntaxTab",
+            "id": "syntax",
+            "name": "Syntax",
+          },
+          Object {
+            "content": <TestScript
+              executeScript={[Function]}
+              indexPattern={Object {}}
+              lang="painless"
+            />,
+            "data-test-subj": "testTab",
+            "id": "test",
+            "name": "Preview results",
+          },
+        ]
+      }
+    />
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;

@@ -1,38 +1,239 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('Suggestions API', function () {
-    before(() => esArchiver.load('index_patterns/basic_index'));
-    after(() => esArchiver.unload('index_patterns/basic_index'));
+    describe('non time based', () => {
+      before(async () => {
+        await esArchiver.load(
+          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        );
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/index_patterns/basic_kibana.json'
+        );
+      });
+      after(async () => {
+        await esArchiver.unload(
+          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        );
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/index_patterns/basic_kibana.json'
+        );
+      });
+      it('should return 200 without a query', () =>
+        supertest
+          .post('/api/kibana/suggestions/values/basic_index')
+          .send({
+            field: 'baz.keyword',
+            query: '',
+          })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).to.have.length(1);
+            expect(body).to.contain('hello');
+          }));
 
-    it('should return 200 with special characters', () => (
-      supertest
-        .post('/api/kibana/suggestions/values/basic_index')
-        .send({
-          field: 'baz.keyword',
-          query: '<something?with:lots&of^ bad characters'
-        })
-        .expect(200)
-    ));
+      it('should return 200 without a query and with method set to terms_agg', () =>
+        supertest
+          .post('/api/kibana/suggestions/values/basic_index')
+          .send({
+            field: 'baz.keyword',
+            method: 'terms_agg',
+            query: '',
+          })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).to.have.length(1);
+            expect(body).to.contain('hello');
+          }));
+
+      it('should return 200 without a query and with method set to terms_enum', () =>
+        supertest
+          .post('/api/kibana/suggestions/values/basic_index')
+          .send({
+            field: 'baz.keyword',
+            method: 'terms_enum',
+            query: '',
+          })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).to.have.length(1);
+            expect(body).to.contain('hello');
+          }));
+
+      it('should return 200 with special characters', () =>
+        supertest
+          .post('/api/kibana/suggestions/values/basic_index')
+          .send({
+            field: 'baz.keyword',
+            query: '<something?with:lots&of^ bad characters',
+          })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).to.be.empty();
+          }));
+
+      it('should support nested fields', () =>
+        supertest
+          .post('/api/kibana/suggestions/values/basic_index')
+          .send({
+            field: 'nestedField.child',
+            query: 'nes',
+          })
+          .expect(200, ['nestedValue']));
+
+      it('should return 404 if index is not found', () =>
+        supertest
+          .post('/api/kibana/suggestions/values/not_found')
+          .send({
+            field: 'baz.keyword',
+            query: '1',
+          })
+          .expect(404));
+
+      it('should return 400 without a query', () =>
+        supertest
+          .post('/api/kibana/suggestions/values/basic_index')
+          .send({
+            field: 'baz.keyword',
+          })
+          .expect(400));
+
+      it('should return 400 with a bad method', () =>
+        supertest
+          .post('/api/kibana/suggestions/values/basic_index')
+          .send({
+            field: 'baz.keyword',
+            query: '',
+            method: 'cookie',
+          })
+          .expect(400));
+    });
+
+    describe('time based', () => {
+      before(async () => {
+        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        );
+      });
+
+      it('filter is applied on a document level with terms_agg', () =>
+        supertest
+          .post('/api/kibana/suggestions/values/logstash-*')
+          .send({
+            field: 'extension.raw',
+            query: '',
+            method: 'terms_agg',
+            filters: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2015-09-19T23:43:00.000Z',
+                    lte: '2015-09-20T00:25:00.000Z',
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+            ],
+          })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).to.have.length(1);
+            expect(body).to.contain('jpg');
+          }));
+
+      it('filter returns all results because it was applied on an index level with terms_enum', () =>
+        supertest
+          .post('/api/kibana/suggestions/values/logstash-*')
+          .send({
+            field: 'extension.raw',
+            query: '',
+            method: 'terms_enum',
+            filters: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2015-09-19T23:43:00.000Z',
+                    lte: '2015-09-20T00:25:00.000Z',
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+            ],
+          })
+          .expect(200)
+          .then(({ body }) => {
+            // All indices have
+            expect(body).to.have.length(5);
+          }));
+
+      it('filter is applied on an index level with terms_enum - find in range', () =>
+        supertest
+          .post('/api/kibana/suggestions/values/logstash-*')
+          .send({
+            field: 'request.raw',
+            query: '/uploads/anatoly-art',
+            method: 'terms_enum',
+            filters: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2015-09-22T00:00:00.000Z',
+                    lte: '2015-09-23T00:00:00.000Z',
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+            ],
+          })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).to.have.length(2);
+          }));
+
+      it('filter is applied on an index level with terms_enum - DONT find in range', () => {
+        supertest
+          .post('/api/kibana/suggestions/values/logstash-*')
+          .send({
+            field: 'request.raw',
+            query: '/uploads/anatoly-art',
+            method: 'terms_enum',
+            filters: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2015-09-23T00:00:00.000Z',
+                    lte: '2015-09-24T00:00:00.000Z',
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+            ],
+          })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).to.have.length(0);
+          });
+      });
+    });
   });
 }

@@ -1,27 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { ViewStrings } from '../../../i18n';
+
+const { Timefilter: strings } = ViewStrings;
 
 export const timefilterControl = () => ({
   name: 'timefilterControl',
-  displayName: 'Time filter',
+  displayName: strings.getDisplayName(),
   modelArgs: [],
   args: [
     {
       name: 'column',
-      displayName: 'Column',
-      help: 'Column to which selected time is applied',
+      displayName: strings.getColumnDisplayName(),
+      help: strings.getColumnHelp(),
       argType: 'string',
       options: {
-        confirm: 'Set',
+        confirm: strings.getColumnConfirm(),
       },
     },
     {
       name: 'filterGroup',
-      displayName: 'Filter group name',
-      help: "Apply the selected group name to an element's filters function to target this filter",
+      displayName: strings.getFilterGroupDisplayName(),
+      help: strings.getFilterGroupHelp(),
       argType: 'filterGroup',
     },
   ],

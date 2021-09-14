@@ -1,32 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { bisector } from 'd3-array';
-
 import { compareToTimeKey, TimeKey } from '../../../../common/time';
-import { LogEntry } from '../../../utils/log_entry';
+import { LogEntry } from '../../../../common/log_entry';
 
 export type StreamItem = LogEntryStreamItem;
 
 export interface LogEntryStreamItem {
   kind: 'logEntry';
   logEntry: LogEntry;
+  highlights: LogEntry[];
 }
 
 export function getStreamItemTimeKey(item: StreamItem) {
   switch (item.kind) {
     case 'logEntry':
-      return item.logEntry.key;
+      return item.logEntry.cursor;
   }
 }
 
 export function getStreamItemId(item: StreamItem) {
   switch (item.kind) {
     case 'logEntry':
-      return `${item.logEntry.key.time}:${item.logEntry.key.tiebreaker}:${item.logEntry.gid}`;
+      return `${item.logEntry.cursor.time}:${item.logEntry.cursor.tiebreaker}:${item.logEntry.id}`;
   }
 }
 

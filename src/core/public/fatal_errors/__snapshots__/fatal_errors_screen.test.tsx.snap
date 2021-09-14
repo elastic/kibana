@@ -1,20 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`rendering render matches snapshot 1`] = `
+exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
 <EuiPage
-  restrictWidth={false}
   style={
     Object {
       "minHeight": "100vh",
     }
   }
 >
-  <EuiPageBody
-    restrictWidth={false}
-  >
+  <EuiPageBody>
     <EuiPageContent
       horizontalPosition="center"
-      panelPaddingSize="l"
       verticalPosition="center"
     >
       <EuiEmptyPrompt
@@ -24,10 +20,7 @@ exports[`rendering render matches snapshot 1`] = `
               color="primary"
               data-test-subj="clearSession"
               fill={true}
-              iconSide="left"
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Clear your session"
@@ -36,11 +29,8 @@ exports[`rendering render matches snapshot 1`] = `
               />
             </EuiButton>,
             <EuiButtonEmpty
-              color="primary"
               data-test-subj="goBack"
-              iconSide="left"
               onClick={[Function]}
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Go back"
@@ -75,7 +65,6 @@ exports[`rendering render matches snapshot 1`] = `
         color="danger"
         iconType="alert"
         key="0"
-        size="m"
         title="foo"
       >
         <EuiCodeBlock
@@ -92,7 +81,6 @@ Error: foo
         color="danger"
         iconType="alert"
         key="1"
-        size="m"
         title="bar"
       >
         <EuiCodeBlock

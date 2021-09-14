@@ -1,33 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { spawn, spawnStreaming } from './child_process';
 import { Project } from './project';
 
-interface WorkspaceInfo {
-  location: string;
-  workspaceDependencies: string[];
-}
-
-interface WorkspacesInfo {
-  [s: string]: WorkspaceInfo;
-}
+const YARN_EXEC = process.env.npm_execpath || 'yarn';
 
 /**
  * Install all dependencies in the given directory
@@ -37,7 +19,7 @@ export async function installInDir(directory: string, extraArgs: string[] = []) 
 
   // We pass the mutex flag to ensure only one instance of yarn runs at any
   // given time (e.g. to avoid conflicts).
-  await spawn('yarn', options, {
+  await spawn(YARN_EXEC, options, {
     cwd: directory,
   });
 }
@@ -50,28 +32,29 @@ export async function runScriptInPackage(script: string, args: string[], pkg: Pr
     cwd: pkg.path,
   };
 
-  await spawn('yarn', ['run', script, ...args], execOpts);
+  await spawn(YARN_EXEC, ['run', script, ...args], execOpts);
 }
 
 /**
  * Run script in the given directory
  */
-export function runScriptInPackageStreaming(script: string, args: string[], pkg: Project) {
+export function runScriptInPackageStreaming({
+  script,
+  args,
+  pkg,
+  debug,
+}: {
+  script: string;
+  args: string[];
+  pkg: Project;
+  debug?: boolean;
+}) {
   const execOpts = {
     cwd: pkg.path,
   };
 
-  return spawnStreaming('yarn', ['run', script, ...args], execOpts, {
+  return spawnStreaming(YARN_EXEC, ['run', script, ...args], execOpts, {
     prefix: pkg.name,
+    debug,
   });
-}
-
-export async function yarnWorkspacesInfo(directory: string): Promise<WorkspacesInfo> {
-  const workspacesInfo = await spawn('yarn', ['workspaces', 'info', '--json'], {
-    cwd: directory,
-    stdio: 'pipe',
-  });
-
-  const stdout = JSON.parse(workspacesInfo.stdout);
-  return JSON.parse(stdout.data);
 }

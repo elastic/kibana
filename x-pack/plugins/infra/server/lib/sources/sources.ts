@@ -1,44 +1,56 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import * as runtimeTypes from 'io-ts';
+import { fold, map } from 'fp-ts/lib/Either';
+import { constant, identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { failure } from 'io-ts/lib/PathReporter';
-import { Legacy } from 'kibana';
-
-import { Pick3 } from '../../../common/utility_types';
-import { InfraConfigurationAdapter } from '../adapters/configuration';
-import { InfraFrameworkRequest, internalInfraFrameworkRequest } from '../adapters/framework';
-import { defaultSourceConfiguration } from './defaults';
-import { NotFoundError } from './errors';
-import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';
+import { inRange } from 'lodash';
+import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import {
   InfraSavedSourceConfiguration,
+  InfraSource,
   InfraSourceConfiguration,
   InfraStaticSourceConfiguration,
-  pickSavedSourceConfiguration,
+  SourceConfigurationConfigFileProperties,
+  sourceConfigurationConfigFilePropertiesRT,
   SourceConfigurationSavedObjectRuntimeType,
-  StaticSourceConfigurationRuntimeType,
-} from './types';
+} from '../../../common/source_configuration/source_configuration';
+import { InfraConfig } from '../../../server';
+import { defaultSourceConfiguration } from './defaults';
+import { AnomalyThresholdRangeError, NotFoundError } from './errors';
+import {
+  extractSavedObjectReferences,
+  resolveSavedObjectReferences,
+} from './saved_object_references';
+import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
+
+interface Libs {
+  config: InfraConfig;
+}
+
+// extract public interface
+export type IInfraSources = Pick<InfraSources, keyof InfraSources>;
 
 export class InfraSources {
   private internalSourceConfigurations: Map<string, InfraStaticSourceConfiguration> = new Map();
+  private readonly libs: Libs;
 
-  constructor(
-    private readonly libs: {
-      configuration: InfraConfigurationAdapter;
-      savedObjects: Pick<Legacy.SavedObjectsService, 'getScopedSavedObjectsClient'> &
-        Pick3<Legacy.SavedObjectsService, 'SavedObjectsClient', 'errors', 'isNotFoundError'>;
-    }
-  ) {}
+  constructor(libs: Libs) {
+    this.libs = libs;
+  }
 
-  public async getSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
+  public async getSourceConfiguration(
+    savedObjectsClient: SavedObjectsClientContract,
+    sourceId: string
+  ): Promise<InfraSource> {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
-
     const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
-      .then(internalSourceConfiguration => ({
+      .then((internalSourceConfiguration) => ({
         id: sourceId,
         version: undefined,
         updatedAt: undefined,
@@ -48,9 +60,9 @@ export class InfraSources {
           internalSourceConfiguration
         ),
       }))
-      .catch(err =>
+      .catch((err) =>
         err instanceof NotFoundError
-          ? this.getSavedSourceConfiguration(request, sourceId).then(result => ({
+          ? this.getSavedSourceConfiguration(savedObjectsClient, sourceId).then((result) => ({
               ...result,
               configuration: mergeSourceConfiguration(
                 staticDefaultSourceConfiguration,
@@ -59,8 +71,8 @@ export class InfraSources {
             }))
           : Promise.reject(err)
       )
-      .catch(err =>
-        this.libs.savedObjects.SavedObjectsClient.errors.isNotFoundError(err)
+      .catch((err) =>
+        savedObjectsClient.errors.isNotFoundError(err)
           ? Promise.resolve({
               id: sourceId,
               version: undefined,
@@ -74,12 +86,14 @@ export class InfraSources {
     return savedSourceConfiguration;
   }
 
-  public async getAllSourceConfigurations(request: InfraFrameworkRequest) {
+  public async getAllSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
-    const savedSourceConfigurations = await this.getAllSavedSourceConfigurations(request);
+    const savedSourceConfigurations = await this.getAllSavedSourceConfigurations(
+      savedObjectsClient
+    );
 
-    return savedSourceConfigurations.map(savedSourceConfiguration => ({
+    return savedSourceConfigurations.map((savedSourceConfiguration) => ({
       ...savedSourceConfiguration,
       configuration: mergeSourceConfiguration(
         staticDefaultSourceConfiguration,
@@ -89,25 +103,26 @@ export class InfraSources {
   }
 
   public async createSourceConfiguration(
-    request: InfraFrameworkRequest,
+    savedObjectsClient: SavedObjectsClientContract,
     sourceId: string,
     source: InfraSavedSourceConfiguration
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
+    const { anomalyThreshold } = source;
+    if (anomalyThreshold && !inRange(anomalyThreshold, 0, 101))
+      throw new AnomalyThresholdRangeError('anomalyThreshold must be 1-100');
 
     const newSourceConfiguration = mergeSourceConfiguration(
       staticDefaultSourceConfiguration,
       source
     );
+    const { attributes, references } = extractSavedObjectReferences(newSourceConfiguration);
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await this.libs.savedObjects
-        .getScopedSavedObjectsClient(request[internalInfraFrameworkRequest])
-        .create(
-          infraSourceConfigurationSavedObjectType,
-          pickSavedSourceConfiguration(newSourceConfiguration) as any,
-          { id: sourceId }
-        )
+      await savedObjectsClient.create(infraSourceConfigurationSavedObjectName, attributes, {
+        id: sourceId,
+        references,
+      })
     );
 
     return {
@@ -119,37 +134,46 @@ export class InfraSources {
     };
   }
 
-  public async deleteSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
-    await this.libs.savedObjects
-      .getScopedSavedObjectsClient(request[internalInfraFrameworkRequest])
-      .delete(infraSourceConfigurationSavedObjectType, sourceId);
+  public async deleteSourceConfiguration(
+    savedObjectsClient: SavedObjectsClientContract,
+    sourceId: string
+  ) {
+    await savedObjectsClient.delete(infraSourceConfigurationSavedObjectName, sourceId);
   }
 
   public async updateSourceConfiguration(
-    request: InfraFrameworkRequest,
+    savedObjectsClient: SavedObjectsClientContract,
     sourceId: string,
     sourceProperties: InfraSavedSourceConfiguration
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
+    const { anomalyThreshold } = sourceProperties;
 
-    const { configuration, version } = await this.getSourceConfiguration(request, sourceId);
+    if (anomalyThreshold && !inRange(anomalyThreshold, 0, 101))
+      throw new AnomalyThresholdRangeError('anomalyThreshold must be 1-100');
+
+    const { configuration, version } = await this.getSourceConfiguration(
+      savedObjectsClient,
+      sourceId
+    );
 
     const updatedSourceConfigurationAttributes = mergeSourceConfiguration(
       configuration,
       sourceProperties
     );
+    const { attributes, references } = extractSavedObjectReferences(
+      updatedSourceConfigurationAttributes
+    );
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await this.libs.savedObjects
-        .getScopedSavedObjectsClient(request[internalInfraFrameworkRequest])
-        .update(
-          infraSourceConfigurationSavedObjectType,
-          sourceId,
-          pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
-          {
-            version,
-          }
-        )
+      // update() will perform a deep merge. We use create() with overwrite: true instead. mergeSourceConfiguration()
+      // ensures the correct and intended merging of properties.
+      await savedObjectsClient.create(infraSourceConfigurationSavedObjectName, attributes, {
+        id: sourceId,
+        overwrite: true,
+        references,
+        version,
+      })
     );
 
     return {
@@ -181,40 +205,49 @@ export class InfraSources {
   }
 
   private async getStaticDefaultSourceConfiguration() {
-    const staticConfiguration = await this.libs.configuration.get();
-    const staticSourceConfiguration = runtimeTypes
-      .type({
-        sources: runtimeTypes.type({
-          default: StaticSourceConfigurationRuntimeType,
-        }),
-      })
-      .decode(staticConfiguration)
-      .map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration)
-      .getOrElse({});
-
-    return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
-  }
-
-  private async getSavedSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalInfraFrameworkRequest]
+    const staticSourceConfiguration: SourceConfigurationConfigFileProperties['sources']['default'] = pipe(
+      sourceConfigurationConfigFilePropertiesRT.decode(this.libs.config),
+      map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
+      fold(constant({}), identity)
     );
 
+    // NOTE: Legacy logAlias needs converting to a logIndices reference until we can remove
+    // config file sources in 8.0.0.
+    if (staticSourceConfiguration && staticSourceConfiguration.logAlias) {
+      const convertedStaticSourceConfiguration: InfraStaticSourceConfiguration & {
+        logAlias?: string;
+      } = {
+        ...staticSourceConfiguration,
+        logIndices: {
+          type: 'index_name',
+          indexName: staticSourceConfiguration.logAlias,
+        },
+      };
+      delete convertedStaticSourceConfiguration.logAlias;
+      return mergeSourceConfiguration(
+        defaultSourceConfiguration,
+        convertedStaticSourceConfiguration
+      );
+    } else {
+      return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
+    }
+  }
+
+  private async getSavedSourceConfiguration(
+    savedObjectsClient: SavedObjectsClientContract,
+    sourceId: string
+  ) {
     const savedObject = await savedObjectsClient.get(
-      infraSourceConfigurationSavedObjectType,
+      infraSourceConfigurationSavedObjectName,
       sourceId
     );
 
     return convertSavedObjectToSavedSourceConfiguration(savedObject);
   }
 
-  private async getAllSavedSourceConfigurations(request: InfraFrameworkRequest) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalInfraFrameworkRequest]
-    );
-
+  private async getAllSavedSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
     const savedObjects = await savedObjectsClient.find({
-      type: infraSourceConfigurationSavedObjectType,
+      type: infraSourceConfigurationSavedObjectName,
     });
 
     return savedObjects.saved_objects.map(convertSavedObjectToSavedSourceConfiguration);
@@ -237,15 +270,20 @@ const mergeSourceConfiguration = (
     first
   );
 
-const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
-  SourceConfigurationSavedObjectRuntimeType.decode(savedObject)
-    .map(savedSourceConfiguration => ({
+export const convertSavedObjectToSavedSourceConfiguration = (savedObject: SavedObject<unknown>) =>
+  pipe(
+    SourceConfigurationSavedObjectRuntimeType.decode(savedObject),
+    map((savedSourceConfiguration) => ({
       id: savedSourceConfiguration.id,
       version: savedSourceConfiguration.version,
       updatedAt: savedSourceConfiguration.updated_at,
       origin: 'stored' as 'stored',
-      configuration: savedSourceConfiguration.attributes,
-    }))
-    .getOrElseL(errors => {
+      configuration: resolveSavedObjectReferences(
+        savedSourceConfiguration.attributes,
+        savedObject.references
+      ),
+    })),
+    fold((errors) => {
       throw new Error(failure(errors).join('\n'));
-    });
+    }, identity)
+  );

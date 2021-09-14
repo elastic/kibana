@@ -1,55 +1,79 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Render, ContainerStyle } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionValueRender, ContainerStyle } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
+import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
 
 interface ContainerStyleArgument extends ContainerStyle {
   type: 'containerStyle';
 }
 
 interface Arguments {
-  as: string | null;
-  css: string | null;
-  containerStyle: ContainerStyleArgument | null;
+  as: string;
+  css: string;
+  containerStyle: ContainerStyleArgument;
 }
 
-export function render(): ExpressionFunction<'render', Render<any>, Arguments, Render<Arguments>> {
+export type Renderable = ExpressionValueRender<Arguments> & Arguments;
+
+export function render(): ExpressionFunctionDefinition<
+  'render',
+  ExpressionValueRender<any>,
+  Arguments,
+  ExpressionValueRender<Arguments>
+> {
   const { help, args: argHelp } = getFunctionHelp().render;
 
   return {
     name: 'render',
     aliases: [],
     type: 'render',
+    inputTypes: ['render'],
     help,
-    context: {
-      types: ['render'],
-    },
     args: {
       as: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.as,
-        options: ['debug', 'error', 'image', 'pie', 'plot', 'shape', 'table', 'text'],
+        options: [
+          'advanced_filter',
+          'debug',
+          'dropdown_filter',
+          'error',
+          'image',
+          'markdown',
+          'metric',
+          'pie',
+          'plot',
+          'progress',
+          'repeatImage',
+          'shape',
+          'table',
+          'time_filter',
+          'text',
+        ],
       },
       css: {
-        types: ['string', 'null'],
-        default: '"* > * {}"',
+        types: ['string'],
         help: argHelp.css,
+        default: `"${DEFAULT_ELEMENT_CSS}"`,
       },
       containerStyle: {
-        types: ['containerStyle', 'null'],
+        types: ['containerStyle'],
         help: argHelp.containerStyle,
+        default: '{containerStyle}',
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       return {
-        ...context,
-        as: args.as || context.as,
-        css: args.css,
+        ...input,
+        as: args.as || input.as,
+        css: args.css || DEFAULT_ELEMENT_CSS,
         containerStyle: args.containerStyle,
       };
     },

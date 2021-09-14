@@ -1,25 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-const mockKeystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH'
-  + 'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M'
-  + 'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
+const mockKeystoreData =
+  '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH' +
+  'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M' +
+  'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
 jest.mock('fs', () => ({
   readFileSync: jest.fn().mockImplementation((path) => {
@@ -32,16 +22,16 @@ jest.mock('fs', () => ({
   existsSync: jest.fn().mockImplementation((path) => {
     return !path.includes('nonexistent');
   }),
-  writeFileSync: jest.fn()
+  writeFileSync: jest.fn(),
 }));
 
 import sinon from 'sinon';
 import { PassThrough } from 'stream';
 
-import { Keystore } from '../legacy/server/keystore';
+import { Keystore } from '../cli/keystore';
 import { add } from './add';
-import Logger from '../cli_plugin/lib/logger';
-import * as prompt from '../legacy/server/utils/prompt';
+import { Logger } from '../cli_plugin/lib/logger';
+import * as prompt from './utils/prompt';
 
 describe('Kibana keystore', () => {
   describe('add', () => {
@@ -61,7 +51,7 @@ describe('Kibana keystore', () => {
 
     it('returns an error for a nonexistent keystore', async () => {
       const keystore = new Keystore('/data/nonexistent.keystore');
-      const message = 'ERROR: Kibana keystore not found. Use \'create\' command to create one.';
+      const message = "ERROR: Kibana keystore not found. Use 'create' command to create one.";
 
       await add(keystore, 'foo');
 
@@ -128,9 +118,19 @@ describe('Kibana keystore', () => {
       expect(keystore.data.foo).toEqual('bar');
     });
 
+    it('parses JSON values', async () => {
+      prompt.question.returns(Promise.resolve('["bar"]\n'));
+
+      const keystore = new Keystore('/data/test.keystore');
+      sandbox.stub(keystore, 'save');
+
+      await add(keystore, 'foo');
+
+      expect(keystore.data.foo).toEqual(['bar']);
+    });
+
     it('persists updated keystore', async () => {
       prompt.question.returns(Promise.resolve('bar\n'));
-
 
       const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');

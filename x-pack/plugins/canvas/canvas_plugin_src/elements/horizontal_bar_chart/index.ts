@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ElementFactory } from '../types';
-import header from './header.png';
+import { ElementFactory } from '../../../types';
 
 export const horizontalBarChart: ElementFactory = () => ({
   name: 'horizontalBarChart',
-  displayName: 'Horizontal bar chart',
-  tags: ['chart'],
+  displayName: 'Bar horizontal',
+  type: 'chart',
   help: 'A customizable horizontal bar chart',
-  image: header,
+  icon: 'visBarHorizontal',
   expression: `filters
 | demodata
 | pointseries x="size(cost)" y="project" color="project"

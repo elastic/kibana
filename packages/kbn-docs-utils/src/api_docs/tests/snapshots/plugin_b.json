@@ -1,0 +1,82 @@
+{
+  "id": "pluginB",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "pluginB",
+        "id": "def-public.anIdFun",
+        "type": "Function",
+        "tags": [],
+        "label": "anIdFun",
+        "description": [],
+        "signature": [
+          "(dep: ",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.AnotherInterface",
+            "text": "AnotherInterface"
+          },
+          "<any>) => ",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.AnotherInterface",
+            "text": "AnotherInterface"
+          },
+          "<any>"
+        ],
+        "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_b/public/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "pluginB",
+            "id": "def-public.anIdFun.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dep",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "pluginA",
+                "scope": "public",
+                "docId": "kibPluginAPluginApi",
+                "section": "def-public.AnotherInterface",
+                "text": "AnotherInterface"
+              },
+              "<any>"
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_b/public/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

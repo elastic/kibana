@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // call setNext on all the N-1 checkers to link them to the next checker
-const mapCheckers = _checkers => {
+const mapCheckers = (_checkers) => {
   return _checkers.map((current, checkerIndex) => {
     const next = _checkers[checkerIndex + 1];
     if (next !== undefined) {
@@ -22,7 +23,7 @@ const mapCheckers = _checkers => {
  * model its their own.
  */
 export async function startChecks(checkers, updateModel) {
-  const runCheck = async currentChecker => {
+  const runCheck = async (currentChecker) => {
     updateModel({ checkMessage: currentChecker.getMessage() });
 
     const { found, reason, error, errorReason } = await currentChecker.executeCheck();
@@ -36,7 +37,7 @@ export async function startChecks(checkers, updateModel) {
       return updateModel({
         reason,
         isLoading: false,
-        checkMessage: null
+        checkMessage: null,
       });
     } else if (currentChecker.hasNext()) {
       return runCheck(currentChecker.getNext());
@@ -46,7 +47,7 @@ export async function startChecks(checkers, updateModel) {
     updateModel({
       reason: null,
       isLoading: false,
-      checkMessage: null
+      checkMessage: null,
     });
   };
 

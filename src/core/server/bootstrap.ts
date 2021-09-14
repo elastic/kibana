@@ -1,43 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import chalk from 'chalk';
-import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
-import { LegacyObjectToConfigAdapter } from './legacy';
 import { Root } from './root';
-
-interface KibanaFeatures {
-  // Indicates whether we can run Kibana in a so called cluster mode in which
-  // Kibana is run as a "worker" process together with optimizer "worker" process
-  // that are orchestrated by the "master" process (dev mode only feature).
-  isClusterModeSupported: boolean;
-
-  // Indicates whether we can run Kibana in REPL mode (dev mode only feature).
-  isReplModeSupported: boolean;
-}
+import { CriticalError } from './errors';
 
 interface BootstrapArgs {
   configs: string[];
   cliArgs: CliArgs;
   applyConfigOverrides: (config: Record<string, any>) => Record<string, any>;
-  features: KibanaFeatures;
 }
 
 /**
@@ -45,52 +22,46 @@ interface BootstrapArgs {
  * @internal
  * @param param0 - options
  */
-export async function bootstrap({
-  configs,
-  cliArgs,
-  applyConfigOverrides,
-  features,
-}: BootstrapArgs) {
-  if (cliArgs.repl && !features.isReplModeSupported) {
-    onRootShutdown('Kibana REPL mode can only be run in development mode.');
+export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) {
+  if (cliArgs.optimize) {
+    // --optimize is deprecated and does nothing now, avoid starting up and just shutdown
+    return;
   }
 
-  const env = Env.createDefault({
+  // `bootstrap` is exported from the `src/core/server/index` module,
+  // meaning that any test importing, implicitly or explicitly, anything concrete
+  // from `core/server` will load `dev-utils`. As some tests are mocking the `fs` package,
+  // and as `REPO_ROOT` is initialized on the fly when importing `dev-utils` and requires
+  // the `fs` package, it causes failures. This is why we use a dynamic `require` here.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { REPO_ROOT } = require('@kbn/utils');
+
+  const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
-    isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,
   });
 
-  const rawConfigService = new RawConfigService(
-    env.configs,
-    rawConfig => new LegacyObjectToConfigAdapter(applyConfigOverrides(rawConfig))
-  );
-
+  const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
   rawConfigService.loadConfig();
 
-  const root = new Root(rawConfigService.getConfig$(), env, onRootShutdown);
+  const root = new Root(rawConfigService, env, onRootShutdown);
 
-  function shutdown(reason?: Error) {
-    rawConfigService.stop();
-    return root.shutdown(reason);
-  }
+  process.on('SIGHUP', () => reloadConfiguration());
 
-  try {
-    await root.setup();
-    await root.start();
-  } catch (err) {
-    await shutdown(err);
-  }
+  // This is only used by the LogRotator service
+  // in order to be able to reload the log configuration
+  // under the cluster mode
+  process.on('message', (msg) => {
+    if (!msg || msg.reloadConfiguration !== true) {
+      return;
+    }
 
-  if (cliArgs.optimize) {
+    reloadConfiguration();
+  });
+
+  function reloadConfiguration(reason = 'SIGHUP signal received') {
     const cliLogger = root.logger.get('cli');
-    cliLogger.info('Optimization done.');
-    await shutdown();
-  }
-
-  process.on('SIGHUP', () => {
-    const cliLogger = root.logger.get('cli');
-    cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
+    cliLogger.info(`Reloading Kibana configuration (reason: ${reason}).`, { tags: ['config'] });
 
     try {
       rawConfigService.reloadConfig();
@@ -98,11 +69,45 @@ export async function bootstrap({
       return shutdown(err);
     }
 
-    cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
-  });
+    cliLogger.info(`Reloaded Kibana configuration (reason: ${reason}).`, { tags: ['config'] });
+  }
 
   process.on('SIGINT', () => shutdown());
   process.on('SIGTERM', () => shutdown());
+
+  function shutdown(reason?: Error) {
+    rawConfigService.stop();
+    return root.shutdown(reason);
+  }
+
+  try {
+    const { preboot } = await root.preboot();
+
+    // If setup is on hold then preboot server is supposed to serve user requests and we can let
+    // dev parent process know that we are ready for dev mode.
+    const isSetupOnHold = preboot.isSetupOnHold();
+    if (process.send && isSetupOnHold) {
+      process.send(['SERVER_LISTENING']);
+    }
+
+    if (isSetupOnHold) {
+      root.logger.get().info('Holding setup until preboot stage is completed.');
+      const { shouldReloadConfig } = await preboot.waitUntilCanSetup();
+      if (shouldReloadConfig) {
+        await reloadConfiguration('configuration might have changed during preboot stage');
+      }
+    }
+
+    await root.setup();
+    await root.start();
+
+    // Notify parent process if we haven't done that yet during preboot stage.
+    if (process.send && !isSetupOnHold) {
+      process.send(['SERVER_LISTENING']);
+    }
+  } catch (err) {
+    await shutdown(err);
+  }
 }
 
 function onRootShutdown(reason?: any) {
@@ -112,7 +117,9 @@ function onRootShutdown(reason?: any) {
     // mirror such fatal errors in standard output with `console.error`.
     // eslint-disable-next-line
     console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+
+    process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
   }
 
-  process.exit(reason === undefined ? 0 : (reason as any).processExitCode || 1);
+  process.exit(0);
 }

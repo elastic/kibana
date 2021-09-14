@@ -1,0 +1,49 @@
+{
+  "id": "lens",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "charts",
+    "expressions",
+    "fieldFormats",
+    "inspector",
+    "navigation",
+    "urlForwarding",
+    "visualizations",
+    "dashboard",
+    "uiActions",
+    "embeddable",
+    "share",
+    "presentationUtil",
+    "indexPatternFieldEditor"
+  ],
+  "optionalPlugins": [
+    "usageCollection",
+    "taskManager",
+    "globalSearch",
+    "savedObjectsTagging",
+    "spaces"
+  ],
+  "configPath": [
+    "xpack",
+    "lens"
+  ],
+  "extraPublicDirs": [
+    "common/constants"
+  ],
+  "requiredBundles": [
+    "savedObjects",
+    "kibanaUtils",
+    "kibanaReact",
+    "embeddable",
+    "fieldFormats"
+  ],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  },
+  "description": "Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads. Exposes components to embed visualizations and link into the Lens editor from within other apps in Kibana."
+}

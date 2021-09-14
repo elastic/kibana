@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export function MonitoringElasticsearchOverviewProvider({ getService }) {
@@ -10,11 +11,10 @@ export function MonitoringElasticsearchOverviewProvider({ getService }) {
 
   const SUBJ_OVERVIEW_PAGE = 'elasticsearchOverviewPage';
 
-  return new class ElasticsearchIndices {
+  return new (class ElasticsearchIndices {
     async isOnOverview() {
       const pageId = await retry.try(() => testSubjects.find(SUBJ_OVERVIEW_PAGE));
       return pageId !== null;
     }
-
-  };
+  })();
 }

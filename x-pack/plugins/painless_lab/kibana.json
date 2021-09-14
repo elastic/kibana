@@ -1,0 +1,14 @@
+{
+  "id": "painlessLab",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": ["devTools", "licensing", "home"],
+  "configPath": ["xpack", "painless_lab"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["kibanaReact"]
+}

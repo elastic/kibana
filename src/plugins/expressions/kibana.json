@@ -1,0 +1,13 @@
+{
+  "id": "expressions",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Adds expression runtime to Kibana",
+  "extraPublicDirs": ["common", "common/fonts"],
+  "requiredBundles": ["kibanaUtils", "inspector"]
+}

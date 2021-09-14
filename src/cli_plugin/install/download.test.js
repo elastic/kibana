@@ -1,35 +1,25 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import Fs from 'fs';
+import { join } from 'path';
+import http from 'http';
 
 import sinon from 'sinon';
 import nock from 'nock';
 import glob from 'glob-all';
-import rimraf from 'rimraf';
-import mkdirp from 'mkdirp';
-import Logger from '../lib/logger';
+import del from 'del';
+
+import { Logger } from '../lib/logger';
 import { UnsupportedProtocolError } from '../lib/errors';
 import { download, _downloadSingle, _getFilePath, _checkFilePathDeprecation } from './download';
-import { join } from 'path';
-import http from 'http';
 
 describe('kibana cli', function () {
-
   describe('plugin downloader', function () {
     const testWorkingPath = join(__dirname, '.test.data.download');
     const tempArchiveFilePath = join(testWorkingPath, 'archive.part');
@@ -38,7 +28,7 @@ describe('kibana cli', function () {
       urls: [],
       workingPath: testWorkingPath,
       tempArchiveFile: tempArchiveFilePath,
-      timeout: 0
+      timeout: 0,
     };
     const logger = new Logger(settings);
 
@@ -49,9 +39,7 @@ describe('kibana cli', function () {
 
     function expectWorkingPathNotEmpty() {
       const files = glob.sync('**/*', { cwd: testWorkingPath });
-      const expected = [
-        'archive.part'
-      ];
+      const expected = ['archive.part'];
 
       expect(files.sort()).toEqual(expected.sort());
     }
@@ -63,45 +51,38 @@ describe('kibana cli', function () {
     beforeEach(function () {
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      rimraf.sync(testWorkingPath);
-      mkdirp.sync(testWorkingPath);
+      del.sync(testWorkingPath);
+      Fs.mkdirSync(testWorkingPath, { recursive: true });
     });
 
     afterEach(function () {
       logger.log.restore();
       logger.error.restore();
-      rimraf.sync(testWorkingPath);
+      del.sync(testWorkingPath);
     });
 
     describe('_downloadSingle', function () {
-
-      beforeEach(function () {
-      });
+      beforeEach(function () {});
 
       describe('http downloader', function () {
-
         it('should throw an ENOTFOUND error for a http ulr that returns 404', function () {
-          nock('http://example.com')
-            .get('/plugin.tar.gz')
-            .reply(404);
+          nock('http://example.com').get('/plugin.tar.gz').reply(404);
 
           const sourceUrl = 'http://example.com/plugin.tar.gz';
 
-          return _downloadSingle(settings, logger, sourceUrl)
-            .then(shouldReject, function (err) {
-              expect(err.message).toMatch(/ENOTFOUND/);
-              expectWorkingPathEmpty();
-            });
+          return _downloadSingle(settings, logger, sourceUrl).then(shouldReject, function (err) {
+            expect(err.message).toMatch(/ENOTFOUND/);
+            expectWorkingPathEmpty();
+          });
         });
 
         it('should throw an UnsupportedProtocolError for an invalid url', function () {
           const sourceUrl = 'i am an invalid url';
 
-          return _downloadSingle(settings, logger, sourceUrl)
-            .then(shouldReject, function (err) {
-              expect(err).toBeInstanceOf(UnsupportedProtocolError);
-              expectWorkingPathEmpty();
-            });
+          return _downloadSingle(settings, logger, sourceUrl).then(shouldReject, function (err) {
+            expect(err).toBeInstanceOf(UnsupportedProtocolError);
+            expectWorkingPathEmpty();
+          });
         });
 
         it('should download a file from a valid http url', function () {
@@ -110,46 +91,39 @@ describe('kibana cli', function () {
           nock('http://example.com')
             .defaultReplyHeaders({
               'content-length': '341965',
-              'content-type': 'application/zip'
+              'content-type': 'application/zip',
             })
             .get('/plugin.zip')
             .replyWithFile(200, filePath);
 
           const sourceUrl = 'http://example.com/plugin.zip';
 
-          return _downloadSingle(settings, logger, sourceUrl)
-            .then(function () {
-              expectWorkingPathNotEmpty();
-            });
+          return _downloadSingle(settings, logger, sourceUrl).then(function () {
+            expectWorkingPathNotEmpty();
+          });
         });
-
       });
 
       describe('local file downloader', function () {
-
         it('should throw an ENOTFOUND error for an invalid local file', function () {
           const filePath = join(__dirname, '__fixtures__/replies/i-am-not-there.zip');
           const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
 
-          return _downloadSingle(settings, logger, sourceUrl)
-            .then(shouldReject, function (err) {
-              expect(err.message).toMatch(/ENOTFOUND/);
-              expectWorkingPathEmpty();
-            });
+          return _downloadSingle(settings, logger, sourceUrl).then(shouldReject, function (err) {
+            expect(err.message).toMatch(/ENOTFOUND/);
+            expectWorkingPathEmpty();
+          });
         });
 
         it('should copy a valid local file', function () {
           const filePath = join(__dirname, '__fixtures__/replies/banana.jpg');
           const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
 
-          return _downloadSingle(settings, logger, sourceUrl)
-            .then(function () {
-              expectWorkingPathNotEmpty();
-            });
+          return _downloadSingle(settings, logger, sourceUrl).then(function () {
+            expectWorkingPathNotEmpty();
+          });
         });
-
       });
-
     });
 
     describe('_getFilePath', function () {
@@ -165,7 +139,6 @@ describe('kibana cli', function () {
 
         Object.defineProperty(process, 'platform', platform);
       });
-
     });
 
     describe('Windows file:// deprecation', function () {
@@ -173,12 +146,14 @@ describe('kibana cli', function () {
         const platform = Object.getOwnPropertyDescriptor(process, 'platform');
         Object.defineProperty(process, 'platform', { value: 'win32' });
         const logger = {
-          log: sinon.spy()
+          log: sinon.spy(),
         };
         _checkFilePathDeprecation('file://foo/bar', logger);
         _checkFilePathDeprecation('file:///foo/bar', logger);
         expect(logger.log.callCount).toBe(1);
-        expect(logger.log.calledWith('Install paths with file:// are deprecated, use file:/// instead')).toBe(true);
+        expect(
+          logger.log.calledWith('Install paths with file:// are deprecated, use file:/// instead')
+        ).toBe(true);
         Object.defineProperty(process, 'platform', platform);
       });
     });
@@ -190,12 +165,12 @@ describe('kibana cli', function () {
           'http://example.com/badfile1.tar.gz',
           'http://example.com/badfile2.tar.gz',
           'I am a bad uri',
-          'http://example.com/goodfile.tar.gz'
+          'http://example.com/goodfile.tar.gz',
         ];
 
         nock('http://example.com')
           .defaultReplyHeaders({
-            'content-length': '10'
+            'content-length': '10',
           })
           .get('/badfile1.tar.gz')
           .reply(404)
@@ -204,14 +179,13 @@ describe('kibana cli', function () {
           .get('/goodfile.tar.gz')
           .replyWithFile(200, filePath);
 
-        return download(settings, logger)
-          .then(function () {
-            expect(logger.log.getCall(0).args[0]).toMatch(/badfile1.tar.gz/);
-            expect(logger.log.getCall(1).args[0]).toMatch(/badfile2.tar.gz/);
-            expect(logger.log.getCall(2).args[0]).toMatch(/I am a bad uri/);
-            expect(logger.log.getCall(3).args[0]).toMatch(/goodfile.tar.gz/);
-            expectWorkingPathNotEmpty();
-          });
+        return download(settings, logger).then(function () {
+          expect(logger.log.getCall(0).args[0]).toMatch(/badfile1.tar.gz/);
+          expect(logger.log.getCall(1).args[0]).toMatch(/badfile2.tar.gz/);
+          expect(logger.log.getCall(2).args[0]).toMatch(/I am a bad uri/);
+          expect(logger.log.getCall(3).args[0]).toMatch(/goodfile.tar.gz/);
+          expectWorkingPathNotEmpty();
+        });
       });
 
       it('should stop looping through urls when it finds a good one.', function () {
@@ -220,12 +194,12 @@ describe('kibana cli', function () {
           'http://example.com/badfile1.tar.gz',
           'http://example.com/badfile2.tar.gz',
           'http://example.com/goodfile.tar.gz',
-          'http://example.com/badfile3.tar.gz'
+          'http://example.com/badfile3.tar.gz',
         ];
 
         nock('http://example.com')
           .defaultReplyHeaders({
-            'content-length': '10'
+            'content-length': '10',
           })
           .get('/badfile1.tar.gz')
           .reply(404)
@@ -236,25 +210,24 @@ describe('kibana cli', function () {
           .get('/badfile3.tar.gz')
           .reply(404);
 
-        return download(settings, logger)
-          .then(function () {
-            for (let i = 0; i < logger.log.callCount; i++) {
-              expect(logger.log.getCall(i).args[0]).not.toMatch(/badfile3.tar.gz/);
-            }
-            expectWorkingPathNotEmpty();
-          });
+        return download(settings, logger).then(function () {
+          for (let i = 0; i < logger.log.callCount; i++) {
+            expect(logger.log.getCall(i).args[0]).not.toMatch(/badfile3.tar.gz/);
+          }
+          expectWorkingPathNotEmpty();
+        });
       });
 
-      it('should throw an error when it doesn\'t find a good url.', function () {
+      it("should throw an error when it doesn't find a good url.", function () {
         settings.urls = [
           'http://example.com/badfile1.tar.gz',
           'http://example.com/badfile2.tar.gz',
-          'http://example.com/badfile3.tar.gz'
+          'http://example.com/badfile3.tar.gz',
         ];
 
         nock('http://example.com')
           .defaultReplyHeaders({
-            'content-length': '10'
+            'content-length': '10',
           })
           .get('/badfile1.tar.gz')
           .reply(404)
@@ -263,21 +236,18 @@ describe('kibana cli', function () {
           .get('/badfile3.tar.gz')
           .reply(404);
 
-        return download(settings, logger)
-          .then(shouldReject, function (err) {
-            expect(err.message).toMatch(/no valid url specified/i);
-            expectWorkingPathEmpty();
-          });
+        return download(settings, logger).then(shouldReject, function (err) {
+          expect(err.message).toMatch(/no valid url specified/i);
+          expectWorkingPathEmpty();
+        });
       });
 
       afterAll(function () {
         nock.cleanAll();
       });
-
     });
 
     describe('proxy support', function () {
-
       const proxyPort = 2626;
       const proxyUrl = `http://localhost:${proxyPort}`;
 
@@ -339,23 +309,24 @@ describe('kibana cli', function () {
         process.env.http_proxy = proxyUrl;
         settings.urls = ['http://example.com/plugin.zip'];
 
-        return download(settings, logger)
-          .then(expectProxyHit);
+        return download(settings, logger).then(expectProxyHit);
       });
 
       it('should use https_proxy for secure URLs', function () {
         process.env.https_proxy = proxyUrl;
         settings.urls = ['https://example.com/plugin.zip'];
 
-        return download(settings, logger)
-          .then(() => {
+        return download(settings, logger).then(
+          () => {
             // If the proxy is hit, the request should fail, since our test proxy
             // doesn't actually forward HTTPS requests.
             expect().fail('Should not succeed a HTTPS proxy request.');
-          }, () => {
+          },
+          () => {
             // Check if the proxy was actually hit before the failure.
             expect(proxyConnectHit).toBe(true);
-          });
+          }
+        );
       });
 
       it('should not use http_proxy for HTTPS urls', function () {
@@ -364,8 +335,7 @@ describe('kibana cli', function () {
 
         nockPluginForUrl('https://example.com');
 
-        return download(settings, logger)
-          .then(expectNoProxyHit);
+        return download(settings, logger).then(expectNoProxyHit);
       });
 
       it('should not use https_proxy for HTTP urls', function () {
@@ -374,8 +344,7 @@ describe('kibana cli', function () {
 
         nockPluginForUrl('http://example.com');
 
-        return download(settings, logger)
-          .then(expectNoProxyHit);
+        return download(settings, logger).then(expectNoProxyHit);
       });
 
       it('should support domains in no_proxy', function () {
@@ -385,8 +354,7 @@ describe('kibana cli', function () {
 
         nockPluginForUrl('http://example.com');
 
-        return download(settings, logger)
-          .then(expectNoProxyHit);
+        return download(settings, logger).then(expectNoProxyHit);
       });
 
       it('should support subdomains in no_proxy', function () {
@@ -396,8 +364,7 @@ describe('kibana cli', function () {
 
         nockPluginForUrl('http://plugins.example.com');
 
-        return download(settings, logger)
-          .then(expectNoProxyHit);
+        return download(settings, logger).then(expectNoProxyHit);
       });
 
       it('should accept wildcard subdomains in no_proxy', function () {
@@ -407,8 +374,7 @@ describe('kibana cli', function () {
 
         nockPluginForUrl('http://plugins.example.com');
 
-        return download(settings, logger)
-          .then(expectNoProxyHit);
+        return download(settings, logger).then(expectNoProxyHit);
       });
 
       it('should support asterisk wildcard no_proxy syntax', function () {
@@ -418,8 +384,7 @@ describe('kibana cli', function () {
 
         nockPluginForUrl('http://plugins.example.com');
 
-        return download(settings, logger)
-          .then(expectNoProxyHit);
+        return download(settings, logger).then(expectNoProxyHit);
       });
 
       it('should support implicit ports in no_proxy', function () {
@@ -429,16 +394,12 @@ describe('kibana cli', function () {
 
         nockPluginForUrl('https://example.com');
 
-        return download(settings, logger)
-          .then(expectNoProxyHit);
+        return download(settings, logger).then(expectNoProxyHit);
       });
 
       afterAll(function (done) {
         proxy.close(done);
       });
-
     });
-
   });
-
 });

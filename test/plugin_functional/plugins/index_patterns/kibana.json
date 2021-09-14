@@ -1,0 +1,14 @@
+{
+  "id": "indexPatternsTestPlugin",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["index_patterns_test_plugin"],
+  "server": true,
+  "ui": false,
+  "requiredPlugins": ["data"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Index pattern test plugin"
+}

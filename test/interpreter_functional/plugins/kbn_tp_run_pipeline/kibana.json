@@ -1,0 +1,13 @@
+{
+  "id": "kbnTpRunPipeline",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": ["data", "savedObjects", "kibanaUtils", "expressions"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["inspector"]
+}

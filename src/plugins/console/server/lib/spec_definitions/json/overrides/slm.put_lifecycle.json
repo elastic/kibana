@@ -1,0 +1,10 @@
+{
+  "slm.put_lifecycle": {
+    "data_autocomplete_rules": {
+      "schedule": "",
+      "name": "",
+      "repository": "",
+      "config": {}
+    }
+  }
+}

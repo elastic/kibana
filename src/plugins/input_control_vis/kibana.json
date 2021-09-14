@@ -1,0 +1,14 @@
+{
+  "id": "inputControlVis",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "description": "Adds Input Control visualization to Kibana",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["data", "expressions", "visDefaultEditor", "visualizations"],
+  "requiredBundles": ["kibanaReact"]
+}

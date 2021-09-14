@@ -1,0 +1,45 @@
+{
+  "action": {
+    "properties": {
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "actionTypeId": {
+        "type": "keyword"
+      },
+      "isMissingSecrets": {
+        "type": "boolean"
+      },
+      "config": {
+        "enabled": false,
+        "type": "object"
+      },
+      "secrets": {
+        "type": "binary"
+      }
+    }
+  },
+  "action_task_params": {
+    "properties": {
+      "actionId": {
+        "type": "keyword"
+      },
+      "params": {
+        "enabled": false,
+        "type": "object"
+      },
+      "apiKey": {
+        "type": "binary"
+      },
+      "relatedSavedObjects": {
+        "enabled": false,
+        "type": "object"
+      }
+    }
+  }
+}

@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TableVisBasic should init data grid 1`] = `
+<Fragment>
+  <EuiDataGrid
+    aria-label="Data table visualization"
+    columnVisibility={
+      Object {
+        "setVisibleColumns": [Function],
+        "visibleColumns": Array [],
+      }
+    }
+    columns={Array []}
+    gridStyle={
+      Object {
+        "border": "horizontal",
+        "header": "underline",
+      }
+    }
+    minSizeForControls={1}
+    onColumnResize={[Function]}
+    renderCellValue={[Function]}
+    rowCount={0}
+    sorting={
+      Object {
+        "columns": Array [],
+        "onSort": [Function],
+      }
+    }
+  />
+</Fragment>
+`;
+
+exports[`TableVisBasic should init data grid with title provided - for split mode 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+  >
+    <h3>
+      My data table
+    </h3>
+  </EuiTitle>
+  <EuiDataGrid
+    aria-label="My data table"
+    columnVisibility={
+      Object {
+        "setVisibleColumns": [Function],
+        "visibleColumns": Array [],
+      }
+    }
+    columns={Array []}
+    gridStyle={
+      Object {
+        "border": "horizontal",
+        "header": "underline",
+      }
+    }
+    minSizeForControls={1}
+    onColumnResize={[Function]}
+    renderCellValue={[Function]}
+    rowCount={0}
+    sorting={
+      Object {
+        "columns": Array [],
+        "onSort": [Function],
+      }
+    }
+  />
+</Fragment>
+`;
+
+exports[`TableVisBasic should render the toolbar 1`] = `
+<Fragment>
+  <EuiDataGrid
+    aria-label="My saved vis"
+    columnVisibility={
+      Object {
+        "setVisibleColumns": [Function],
+        "visibleColumns": Array [],
+      }
+    }
+    columns={Array []}
+    gridStyle={
+      Object {
+        "border": "horizontal",
+        "header": "underline",
+      }
+    }
+    minSizeForControls={1}
+    onColumnResize={[Function]}
+    renderCellValue={[Function]}
+    rowCount={0}
+    sorting={
+      Object {
+        "columns": Array [],
+        "onSort": [Function],
+      }
+    }
+    toolbarVisibility={
+      Object {
+        "additionalControls": <Memo
+          columns={Array []}
+          dataGridAriaLabel="My saved vis"
+          filename="My saved vis"
+          rows={Array []}
+        />,
+        "showColumnSelector": false,
+        "showFullScreenSelector": false,
+        "showSortSelector": false,
+        "showStyleSelector": false,
+      }
+    }
+  />
+</Fragment>
+`;

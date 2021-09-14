@@ -1,61 +1,69 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
 import dedent from 'dedent';
 import getopts from 'getopts';
 import { resolve } from 'path';
+import { pickLevelFromFlags } from '@kbn/dev-utils/tooling_log';
 
 import { commands } from './commands';
 import { runCommand } from './run';
 import { log } from './utils/log';
 
 function help() {
-  const availableCommands = Object.keys(commands)
-    .map(commandName => commands[commandName])
-    .map(command => `${command.name} - ${command.description}`);
+  log.info(
+    dedent`
+      usage: kbn <command> [<args>]
 
-  log.write(dedent`
-    usage: kbn <command> [<args>]
+      By default commands are run for Kibana itself, all packages in the 'packages/'
+      folder and for all plugins in './plugins' and '../kibana-extra'.
 
-    By default commands are run for Kibana itself, all packages in the 'packages/'
-    folder and for all plugins in './plugins' and '../kibana-extra'.
+      Available commands:
 
-    Available commands:
+        ${Object.values(commands)
+          .map((command) => `${command.name} - ${command.description}`)
+          .join('\n        ')}
 
-       ${availableCommands.join('\n       ')}
+      Global options:
 
-    Global options:
+        -e, --exclude           Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
+        -i, --include           Include only specified projects. If left unspecified, it defaults to including all projects.
+        --oss                   Do not include the x-pack when running command.
+        --skip-kibana-plugins   Filter all plugins in ./plugins and ../kibana-extra when running command.
+        --no-cache              Disable the kbn packages bootstrap cache
+        --no-validate           Disable the bootstrap yarn.lock validation
+        --force-install         Forces yarn install to run on bootstrap
+        --offline               Run in offline mode
+        --verbose               Set log level to verbose
+        --debug                 Set log level to debug
+        --quiet                 Set log level to error
+        --silent                Disable log output
 
-       -e, --exclude          Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
-       -i, --include          Include only specified projects. If left unspecified, it defaults to including all projects.
-       --oss                  Do not include the x-pack when running command.
-       --skip-kibana-plugins  Filter all plugins in ./plugins and ../kibana-extra when running command.
-  `);
+      "run" options:
+        --skip-missing          Ignore packages which don't have the requested script
+    ` + '\n'
+  );
 }
 
 export async function run(argv: string[]) {
+  log.setLogLevel(
+    pickLevelFromFlags(
+      getopts(argv, {
+        boolean: ['verbose', 'debug', 'quiet', 'silent', 'skip-missing'],
+      })
+    )
+  );
+
   // We can simplify this setup (and remove this extra handling) once Yarn
   // starts forwarding the `--` directly to this script, see
   // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
   if (argv.includes('--')) {
-    log.write(chalk.red(`Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`));
+    log.error(`Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`);
     process.exit(1);
   }
 
@@ -65,7 +73,13 @@ export async function run(argv: string[]) {
       h: 'help',
       i: 'include',
     },
-    boolean: ['prefer-offline', 'frozen-lockfile'],
+    default: {
+      cache: true,
+      'force-install': false,
+      offline: false,
+      validate: true,
+    },
+    boolean: ['cache', 'force-install', 'offline', 'validate'],
   });
 
   const args = options._;
@@ -86,7 +100,7 @@ export async function run(argv: string[]) {
 
   const command = commands[commandName];
   if (command === undefined) {
-    log.write(chalk.red(`[${commandName}] is not a valid command, see 'kbn --help'`));
+    log.error(`[${commandName}] is not a valid command, see 'kbn --help'`);
     process.exit(1);
   }
 

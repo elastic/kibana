@@ -1,24 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import {
-  GetUICapabilitiesFailureReason,
-  UICapabilitiesService,
-} from '../../common/services/ui_capabilities';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function catalogueTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function catalogueTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
+  const esFeatureExceptions = [
+    'security',
+    'index_lifecycle_management',
+    'snapshot_restore',
+    'rollup_jobs',
+    'reporting',
+    'transform',
+    'watcher',
+  ];
+
   describe('catalogue', () => {
-    UserAtSpaceScenarios.forEach(scenario => {
+    UserAtSpaceScenarios.forEach((scenario) => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
 
@@ -36,40 +43,83 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
             break;
           }
           case 'global_all at everything_space':
-          case 'dual_privileges_all at everything_space':
+          case 'dual_privileges_all at everything_space': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything except ml, monitoring, and ES features are enabled
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) =>
+                catalogueId !== 'ml' &&
+                catalogueId !== 'ml_file_data_visualizer' &&
+                catalogueId !== 'monitoring' &&
+                catalogueId !== 'osquery' &&
+                !esFeatureExceptions.includes(catalogueId)
+            );
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
+            break;
+          }
           case 'everything_space_all at everything_space':
           case 'global_read at everything_space':
           case 'dual_privileges_read at everything_space':
           case 'everything_space_read at everything_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything except ml and monitoring is enabled
+            // everything except spaces, ml, monitoring, the enterprise search suite, and ES features are enabled
+            // (easier to say: all "proper" Kibana features are enabled)
+            const exceptions = [
+              'ml',
+              'ml_file_data_visualizer',
+              'monitoring',
+              'enterpriseSearch',
+              'appSearch',
+              'workplaceSearch',
+              'spaces',
+              'osquery',
+              ...esFeatureExceptions,
+            ];
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
-              (enabled, catalogueId) => catalogueId !== 'ml' && catalogueId !== 'monitoring'
+              (enabled, catalogueId) => !exceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }
-          // the nothing_space has no features enabled, so even if we have
-          // privileges to perform these actions, we won't be able to
-          case 'superuser at nothing_space':
+          // the nothing_space has no Kibana features enabled, so even if we have
+          // privileges to perform these actions, we won't be able to.
+          // Note that ES features may still be enabled if the user has privileges, since
+          // they cannot be disabled at the space level at this time.
+          case 'superuser at nothing_space': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything is disabled except for the es feature exceptions and spaces management
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) =>
+                esFeatureExceptions.includes(catalogueId) || catalogueId === 'spaces'
+            );
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
+            break;
+          }
+          // the nothing_space has no Kibana features enabled, so even if we have
+          // privileges to perform these actions, we won't be able to.
           case 'global_all at nothing_space':
+          case 'dual_privileges_all at nothing_space': {
+            // everything is disabled except for spaces management
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) => catalogueId === 'spaces'
+            );
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
+            break;
+          }
+          // the nothing_space has no Kibana features enabled, so even if we have
+          // privileges to perform these actions, we won't be able to.
           case 'global_read at nothing_space':
           case 'dual_privileges_all at nothing_space':
           case 'dual_privileges_read at nothing_space':
           case 'nothing_space_all at nothing_space':
-          case 'nothing_space_read at nothing_space': {
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything is disabled
-            const expected = mapValues(uiCapabilities.value!.catalogue, () => false);
-            expect(uiCapabilities.value!.catalogue).to.eql(expected);
-            break;
-          }
-          // if we don't have access at the space itself, we're
-          // redirected to the space selector and the ui capabilities
-          // are lagely irrelevant because they won't be consumed
+          case 'nothing_space_read at nothing_space':
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':
@@ -77,12 +127,17 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
           case 'everything_space_all at nothing_space':
           case 'everything_space_read at nothing_space':
           case 'nothing_space_all at everything_space':
-          case 'nothing_space_read at everything_space':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(
-              GetUICapabilitiesFailureReason.RedirectedToRoot
+          case 'nothing_space_read at everything_space': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything is disabled
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) => false
             );
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
+          }
           default:
             throw new UnreachableError(scenario);
         }

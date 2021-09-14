@@ -1,0 +1,53 @@
+@import '@elastic/eui/src/global_styling/variables/header';
+@import '../../../../../src/core/public/mixins';
+
+/**
+ * This is a very brittle way of preventing the editor and other content from disappearing
+ * behind the bottom bar.
+ */
+$bottomBarHeight: $euiSize * 3;
+
+.painlessLabBottomBarPlaceholder {
+  height: $bottomBarHeight;
+}
+
+.painlessLabLeftPane {
+  padding-top: $euiSizeM;
+  background-color: $euiFormBackgroundColor;
+}
+
+.painlessLabRightPane {
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+  border-radius: 0;
+  padding-top: 0;
+  height: 100%;
+}
+
+.painlessLabRightPane__tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  [role='tabpanel'] {
+    height: 100%;
+    overflow-y: auto;
+  }
+}
+
+.painlessLab__betaLabelContainer {
+  line-height: 0;
+}
+
+// adding dev tool top bar + bottom bar height to the body offset
+$bodyOffset: $euiHeaderHeightCompensation + $bottomBarHeight;
+
+.painlessLabMainContainer {
+  @include kibanaFullBodyHeight($bodyOffset);
+}
+
+.painlessLabPanelsContainer {
+  // The panels container should adopt the height of the main container
+  height: 100%;
+}

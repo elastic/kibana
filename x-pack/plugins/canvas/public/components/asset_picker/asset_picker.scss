@@ -11,7 +11,7 @@
     text-align: center;
 
     &:hover {
-      outline: solid 3px rgba(0, 121, 165, 0.1);
+      outline: solid $euiSizeXS transparentize($euiColorPrimary, .9);
     }
   }
 

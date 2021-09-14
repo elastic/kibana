@@ -1,0 +1,31 @@
+allOf:
+  - $ref: ./new_agent_policy.yaml
+  - type: object
+    properties:
+      id:
+        type: string
+      status:
+        type: string
+        enum:
+          - active
+          - inactive
+      packagePolicies:
+        oneOf:
+          - type: array
+            items:
+              type: string
+          - type: array
+            items:
+              $ref: ./package_policy.yaml
+      updated_on:
+        type: string
+        format: date-time
+      updated_by:
+        type: string
+      revision:
+        type: number
+      agents:
+        type: number
+    required:
+      - id
+      - status

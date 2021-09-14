@@ -1,46 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { InfraSourceConfiguration } from '../../public/graphql/types';
-import { InfraConfigurationAdapter } from './adapters/configuration';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from './adapters/framework';
+import { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
+import { InfraConfig } from '../plugin';
+import { GetLogQueryFields } from '../services/log_queries/get_log_query_fields';
+import { RulesServiceSetup } from '../services/rules';
+import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
-import { InfraMetadataDomain } from './domains/metadata_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
-import { InfraSnapshot } from './snapshot';
-import { InfraSourceStatus } from './source_status';
 import { InfraSources } from './sources';
+import { InfraSourceStatus } from './source_status';
 
 export interface InfraDomainLibs {
-  metadata: InfraMetadataDomain;
   fields: InfraFieldsDomain;
   logEntries: InfraLogEntriesDomain;
   metrics: InfraMetricsDomain;
 }
 
 export interface InfraBackendLibs extends InfraDomainLibs {
-  configuration: InfraConfigurationAdapter;
-  framework: InfraBackendFrameworkAdapter;
-  snapshot: InfraSnapshot;
+  configuration: InfraConfig;
+  framework: KibanaFramework;
   sources: InfraSources;
   sourceStatus: InfraSourceStatus;
-}
-
-export interface InfraConfiguration {
-  enabled: boolean;
-  query: {
-    partitionSize: number;
-    partitionFactor: number;
-  };
-  sources: {
-    default: InfraSourceConfiguration;
-  };
-}
-
-export interface InfraContext {
-  req: InfraFrameworkRequest;
+  getLogQueryFields: GetLogQueryFields;
+  handleEsError: typeof handleEsError;
+  logsRules: RulesServiceSetup;
+  metricsRules: RulesServiceSetup;
 }

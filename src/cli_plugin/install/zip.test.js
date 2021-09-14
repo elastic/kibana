@@ -1,31 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import rimraf from 'rimraf';
 import path from 'path';
 import os from 'os';
-import glob from 'glob';
 import fs from 'fs';
-import { analyzeArchive, extractArchive, _isDirectory } from './zip';
+
+import del from 'del';
+import glob from 'glob';
+
+import { analyzeArchive, extractArchive } from './zip';
+
+const getMode = (path) => (fs.statSync(path).mode & parseInt('777', 8)).toString(8);
 
 describe('kibana cli', function () {
-
   describe('zip', function () {
     const repliesPath = path.resolve(__dirname, '__fixtures__', 'replies');
     const archivePath = path.resolve(repliesPath, 'test_plugin.zip');
@@ -38,38 +30,43 @@ describe('kibana cli', function () {
     });
 
     afterEach(() => {
-      rimraf.sync(tempPath);
+      del.sync(tempPath, { force: true });
     });
 
     describe('analyzeArchive', function () {
       it('returns array of plugins', async () => {
         const packages = await analyzeArchive(archivePath);
-        const plugin = packages[0];
-
-        expect(packages).toBeInstanceOf(Array);
-        expect(plugin.name).toBe('test-plugin');
-        expect(plugin.archivePath).toBe('kibana/test-plugin');
-        expect(plugin.archive).toBe(archivePath);
-        expect(plugin.kibanaVersion).toBe('1.0.0');
+        expect(packages).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "id": "testPlugin",
+              "kibanaVersion": "1.0.0",
+              "stripPrefix": "kibana/test-plugin",
+            },
+          ]
+        `);
       });
     });
 
     describe('extractArchive', () => {
       it('extracts files using the extractPath filter', async () => {
-        const archive = path.resolve(repliesPath, 'test_plugin_many.zip');
-
+        const archive = path.resolve(repliesPath, 'test_plugin.zip');
         await extractArchive(archive, tempPath, 'kibana/test-plugin');
-        const files = await glob.sync('**/*', { cwd: tempPath });
 
-        const expected = [
-          'extra file only in zip.txt',
-          'index.js',
-          'package.json',
-          'public',
-          'public/app.js',
-          'README.md'
-        ];
-        expect(files.sort()).toEqual(expected.sort());
+        expect(glob.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
+          Array [
+            "bin",
+            "bin/executable",
+            "bin/not-executable",
+            "kibana.json",
+            "node_modules",
+            "node_modules/some-package",
+            "node_modules/some-package/index.js",
+            "node_modules/some-package/package.json",
+            "public",
+            "public/index.js",
+          ]
+        `);
       });
     });
 
@@ -77,48 +74,26 @@ describe('kibana cli', function () {
       it('verify consistency of modes of files', async () => {
         const archivePath = path.resolve(repliesPath, 'test_plugin.zip');
 
-        await extractArchive(archivePath, tempPath, 'kibana/libs');
-        const files = await glob.sync('**/*', { cwd: tempPath });
+        await extractArchive(archivePath, tempPath, 'kibana/test-plugin/bin');
 
-        const expected = [
-          'executable',
-          'unexecutable'
-        ];
-        expect(files.sort()).toEqual(expected.sort());
+        expect(glob.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
+          Array [
+            "executable",
+            "not-executable",
+          ]
+        `);
 
-        const executableMode = '0' + (fs.statSync(path.resolve(tempPath, 'executable')).mode & parseInt('777', 8)).toString(8);
-        const unExecutableMode = '0' + (fs.statSync(path.resolve(tempPath, 'unexecutable')).mode & parseInt('777', 8)).toString(8);
-
-        expect(executableMode).toEqual('0755');
-        expect(unExecutableMode).toEqual('0644');
-
+        expect(getMode(path.resolve(tempPath, 'executable'))).toEqual('755');
+        expect(getMode(path.resolve(tempPath, 'not-executable'))).toEqual('644');
       });
     });
 
     it('handles a corrupt zip archive', async () => {
-      try {
-        await extractArchive(path.resolve(repliesPath, 'corrupt.zip'));
-        throw new Error('This should have failed');
-      } catch(e) {
-        return;
-      }
+      await expect(
+        extractArchive(path.resolve(repliesPath, 'corrupt.zip'))
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"end of central directory record signature not found"`
+      );
     });
   });
-
-  describe('_isDirectory', () => {
-    it('should check for a forward slash', () => {
-      expect(_isDirectory('/foo/bar/')).toBe(true);
-    });
-
-    it('should check for a backslash', () => {
-      expect(_isDirectory('\\foo\\bar\\')).toBe(true);
-    });
-
-    it('should return false for files', () => {
-      expect(_isDirectory('foo.txt')).toBe(false);
-      expect(_isDirectory('\\path\\to\\foo.txt')).toBe(false);
-      expect(_isDirectory('/path/to/foo.txt')).toBe(false);
-    });
-  });
-
 });

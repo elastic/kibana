@@ -1,29 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { take } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { Datatable, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   count: number;
 }
 
-export function head(): ExpressionFunction<'head', Datatable, Arguments, Datatable> {
+export function head(): ExpressionFunctionDefinition<'head', Datatable, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().head;
 
   return {
     name: 'head',
     aliases: [],
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       count: {
         aliases: ['_'],
@@ -32,9 +30,9 @@ export function head(): ExpressionFunction<'head', Datatable, Arguments, Datatab
         default: 1,
       },
     },
-    fn: (context, args) => ({
-      ...context,
-      rows: take(context.rows, args.count),
+    fn: (input, args) => ({
+      ...input,
+      rows: take(input.rows, args.count),
     }),
   };
 }

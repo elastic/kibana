@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import rimraf from 'rimraf';
+import del from 'del';
 import fs from 'fs';
 
 export function cleanPrevious(settings, logger) {
@@ -27,7 +16,7 @@ export function cleanPrevious(settings, logger) {
 
       logger.log('Found previous install attempt. Deleting...');
       try {
-        rimraf.sync(settings.workingPath);
+        del.sync(settings.workingPath, { force: true });
       } catch (e) {
         reject(e);
       }
@@ -44,8 +33,6 @@ export function cleanArtifacts(settings) {
   // delete the working directory.
   // At this point we're bailing, so swallow any errors on delete.
   try {
-    rimraf.sync(settings.workingPath);
-    rimraf.sync(settings.plugins[0].path);
-  }
-  catch (e) {} // eslint-disable-line no-empty
+    del.sync(settings.workingPath);
+  } catch (e) {} // eslint-disable-line no-empty
 }

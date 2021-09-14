@@ -1,0 +1,49 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects attempts to disable Gatekeeper on macOS. Gatekeeper is a security feature that's designed to ensure that only trusted software is run. Adversaries may attempt to disable Gatekeeper before executing malicious code.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Attempt to Disable Gatekeeper",
+  "query": "event.category:process and event.type:(start or process_started) and \n  process.args:(spctl and \"--master-disable\")\n",
+  "references": [
+    "https://support.apple.com/en-us/HT202491",
+    "https://www.carbonblack.com/blog/tau-threat-intelligence-notification-new-macos-malware-variant-of-shlayer-osx-discovered/"
+  ],
+  "risk_score": 47,
+  "rule_id": "4da13d6e-904f-4636-81d8-6ab14b4e6ae9",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1553",
+          "name": "Subvert Trust Controls",
+          "reference": "https://attack.mitre.org/techniques/T1553/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

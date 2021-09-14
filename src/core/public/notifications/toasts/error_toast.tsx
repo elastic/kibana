@@ -1,23 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 import {
   EuiButton,
@@ -30,17 +20,27 @@ import {
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { I18nSetup } from '../../i18n';
-import { OverlayStart } from '../../overlays';
+import { OverlayStart } from 'kibana/public';
+import { I18nStart } from '../../i18n';
 
 interface ErrorToastProps {
   title: string;
   error: Error;
   toastMessage: string;
-  i18nContext: I18nSetup['Context'];
   openModal: OverlayStart['openModal'];
+  i18nContext: () => I18nStart['Context'];
 }
+
+interface RequestError extends Error {
+  body?: { attributes?: { error: { caused_by: { type: string; reason: string } } } };
+}
+
+const isRequestError = (e: Error | RequestError): e is RequestError => {
+  if ('body' in e) {
+    return e.body?.attributes?.error?.caused_by !== undefined;
+  }
+  return false;
+};
 
 /**
  * This should instead be replaced by the overlay service once it's available.
@@ -51,31 +51,50 @@ interface ErrorToastProps {
 function showErrorDialog({
   title,
   error,
-  i18nContext: I18nContext,
   openModal,
-}: Pick<ErrorToastProps, 'error' | 'title' | 'i18nContext' | 'openModal'>) {
+  i18nContext,
+}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'i18nContext'>) {
+  const I18nContext = i18nContext();
+  let text = '';
+
+  if (isRequestError(error)) {
+    text += `${error?.body?.attributes?.error?.caused_by.type}\n`;
+    text += `${error?.body?.attributes?.error?.caused_by.reason}\n\n`;
+  }
+
+  if (error.stack) {
+    text += error.stack;
+  }
+
   const modal = openModal(
-    <React.Fragment>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
-        <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
-        {error.stack && (
-          <React.Fragment>
-            <EuiSpacer size="s" />
-            <EuiCodeBlock isCopyable={true} paddingSize="s">
-              {error.stack}
-            </EuiCodeBlock>
-          </React.Fragment>
-        )}
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButton onClick={() => modal.close()} fill>
-          <FormattedMessage id="core.notifications.errorToast.closeModal" defaultMessage="Close" />
-        </EuiButton>
-      </EuiModalFooter>
-    </React.Fragment>
+    mount(
+      <React.Fragment>
+        <I18nContext>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
+            {text && (
+              <React.Fragment>
+                <EuiSpacer size="s" />
+                <EuiCodeBlock isCopyable={true} paddingSize="s">
+                  {text}
+                </EuiCodeBlock>
+              </React.Fragment>
+            )}
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton onClick={() => modal.close()} fill>
+              <FormattedMessage
+                id="core.notifications.errorToast.closeModal"
+                defaultMessage="Close"
+              />
+            </EuiButton>
+          </EuiModalFooter>
+        </I18nContext>
+      </React.Fragment>
+    )
   );
 }
 
@@ -83,8 +102,8 @@ export function ErrorToast({
   title,
   error,
   toastMessage,
-  i18nContext,
   openModal,
+  i18nContext,
 }: ErrorToastProps) {
   return (
     <React.Fragment>
@@ -104,3 +123,8 @@ export function ErrorToast({
     </React.Fragment>
   );
 }
+
+const mount = (component: React.ReactElement) => (container: HTMLElement) => {
+  ReactDOM.render(component, container);
+  return () => ReactDOM.unmountComponentAtNode(container);
+};

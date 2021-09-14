@@ -12,6 +12,7 @@
     overflow: auto;
 
     // removes white square in the scrollbar corner
+    // sass-lint:disable no-vendor-prefixes
     &::-webkit-scrollbar-corner {
       background: transparent;
     }
@@ -21,6 +22,8 @@
     width: 100%;
     display: flex;
     justify-content: space-around;
+    padding: $euiSizeS;
+    border-top: $euiBorderThin;
   }
 
   .canvasDataTable__table {
@@ -29,8 +32,8 @@
 
   .canvasDataTable__th,
   .canvasDataTable__td {
-    text-align: left;
-    padding: $euiSizeS;
+    padding: $euiSizeS $euiSizeXS;
+    border-bottom: $euiBorderThin;
   }
 
   .canvasDataTable__th {

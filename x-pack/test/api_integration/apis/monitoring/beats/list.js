@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,10 +13,10 @@ export default function ({ getService }) {
 
   describe('list', () => {
     describe('with restarted beat instance', () => {
-      const archive = 'monitoring/beats-with-restarted-instance';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/beats_with_restarted_instance';
       const timeRange = {
         min: '2018-02-09T20:49:00Z',
-        max: '2018-02-09T21:50:00Z'
+        max: '2018-02-09T21:50:00Z',
       };
 
       before('load clusters archive', () => {
@@ -28,9 +29,7 @@ export default function ({ getService }) {
 
       it('should load multiple clusters', async () => {
         const { body } = await supertest
-          .post(
-            '/api/monitoring/v1/clusters/fHJwISmKTFO8bj57oFBLUQ/beats/beats'
-          )
+          .post('/api/monitoring/v1/clusters/fHJwISmKTFO8bj57oFBLUQ/beats/beats')
           .set('kbn-xsrf', 'xxx')
           .send({ timeRange })
           .expect(200);
@@ -40,9 +39,9 @@ export default function ({ getService }) {
             total: 2,
             types: [
               { type: 'Metricbeat', count: 1 },
-              { type: 'Filebeat', count: 1 }
+              { type: 'Filebeat', count: 1 },
             ],
-            stats: { totalEvents: 12829, bytesSent: 2040312125 }
+            stats: { totalEvents: 12829, bytesSent: 2040312125 },
           },
           listing: [
             {
@@ -66,8 +65,8 @@ export default function ({ getService }) {
               errors: 0,
               memory: 7598304,
               version: '7.0.0-alpha1',
-            }
-          ]
+            },
+          ],
         };
         expect(body).to.eql(expected);
       });

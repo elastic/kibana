@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const { join, dirname, extname } = require('path');
@@ -27,7 +16,6 @@ const {
   getProjectRoot,
   getWebpackConfig,
   isFile,
-  isProbablyWebpackShim,
   getIsPathRequest,
   resolveWebpackAlias,
 } = require('./lib');
@@ -73,15 +61,6 @@ exports.resolve = function resolveKibanaPath(importRequest, file, config) {
     return tryNodeResolver(importRequest, file, config);
   }
 
-  // these modules are simulated by webpack, so there is no
-  // path to resolve to and no reason to do any more work
-  if (importRequest.startsWith('uiExports/')) {
-    return {
-      found: true,
-      path: null,
-    };
-  }
-
   const { webpackConfig, aliasEntries } = initContext(file, config);
   let isPathRequest = getIsPathRequest(importRequest);
 
@@ -110,16 +89,9 @@ exports.resolve = function resolveKibanaPath(importRequest, file, config) {
     }
   }
 
-  // only use the node resolver if the importRequest is a path, or is
-  // a module request but not one that's probably a webpackShim. This
-  // prevents false positives as webpackShims are likely to be resolved
-  // to the node_modules directory by the node resolver, but we want
-  // them to resolve to the actual shim
-  if (isPathRequest || !isProbablyWebpackShim(importRequest, file)) {
-    const nodeResult = tryNodeResolver(importRequest, file, config);
-    if (nodeResult && nodeResult.found) {
-      return nodeResult;
-    }
+  const nodeResult = tryNodeResolver(importRequest, file, config);
+  if (nodeResult && nodeResult.found) {
+    return nodeResult;
   }
 
   return webpackResolver.resolve(importRequest, file, {

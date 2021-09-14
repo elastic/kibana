@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,10 +13,11 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('node detail advanced', () => {
-    const archive = 'monitoring/singlecluster-three-nodes-shard-relocation';
+    const archive =
+      'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation';
     const timeRange = {
       min: '2017-10-05T20:31:48.000Z',
-      max: '2017-10-05T20:35:12.000Z'
+      max: '2017-10-05T20:35:12.000Z',
     };
 
     before('load archive', () => {
@@ -28,11 +30,13 @@ export default function ({ getService }) {
 
     it('should summarize node with metrics', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/nodes/jUT5KdxfRbORSCWkb5zjmA')
+        .post(
+          '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/nodes/jUT5KdxfRbORSCWkb5zjmA'
+        )
         .set('kbn-xsrf', 'xxx')
         .send({
           timeRange,
-          is_advanced: true
+          is_advanced: true,
         })
         .expect(200);
 

@@ -1,0 +1,11 @@
+{
+  "id": "devTools",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": ["urlForwarding"]
+}

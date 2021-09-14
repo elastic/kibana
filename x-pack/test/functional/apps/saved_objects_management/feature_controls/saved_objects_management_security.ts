@@ -1,28 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings', 'security', 'error', 'savedObjects']);
   let version: string = '';
 
   describe('feature controls saved objects management', () => {
     before(async () => {
-      await esArchiver.load('saved_objects_management/feature_controls/security');
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/saved_objects_management/feature_controls/security'
+      );
       const versionService = getService('kibanaServer').version;
       version = await versionService.get();
     });
 
     after(async () => {
-      await esArchiver.unload('saved_objects_management/feature_controls/security');
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/saved_objects_management/feature_controls/security'
+      );
     });
 
     describe('global all privileges', () => {
@@ -45,7 +50,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login('global_all_user', 'global_all_user-password', {
           expectSpaceSelector: false,
@@ -53,10 +58,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_all_role'),
           security.user.delete('global_all_user'),
-          PageObjects.security.logout(),
         ]);
       });
 
@@ -67,9 +72,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         });
 
         it('shows all saved objects', async () => {
-          const objects = await PageObjects.settings.getSavedObjectsInTable();
+          const objects = await PageObjects.savedObjects.getRowTitles();
           expect(objects).to.eql([
-            'Advanced Settings [6.0.0]',
             `Advanced Settings [${version}]`,
             'A Dashboard',
             'logstash-*',
@@ -78,12 +82,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         });
 
         it('can view all saved objects in applications', async () => {
-          const bools = await PageObjects.settings.getSavedObjectsTableSummary();
+          const bools = await PageObjects.savedObjects.getTableSummary();
           expect(bools).to.eql([
-            {
-              title: 'Advanced Settings [6.0.0]',
-              canViewInApp: false,
-            },
             {
               title: `Advanced Settings [${version}]`,
               canViewInApp: false,
@@ -104,19 +104,20 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         });
 
         it('can delete all saved objects', async () => {
-          await PageObjects.settings.clickSavedObjectsTableSelectAll();
-          const actual = await PageObjects.settings.canSavedObjectsBeDeleted();
+          await PageObjects.savedObjects.clickTableSelectAll();
+          const actual = await PageObjects.savedObjects.canBeDeleted();
           expect(actual).to.be(true);
         });
       });
 
       describe('edit visualization', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'kibana',
-            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+          await PageObjects.common.navigateToUrl(
+            'management',
+            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
-              loginIfPrompted: false,
+              shouldLoginIfPrompted: false,
+              shouldUseHashForSubUrl: false,
             }
           );
         });
@@ -163,7 +164,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login('global_som_read_user', 'global_som_read_user-password', {
           expectSpaceSelector: false,
@@ -171,10 +172,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_som_read_role'),
           security.user.delete('global_som_read_user'),
-          PageObjects.security.logout(),
         ]);
       });
 
@@ -185,9 +186,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         });
 
         it('shows all saved objects', async () => {
-          const objects = await PageObjects.settings.getSavedObjectsInTable();
+          const objects = await PageObjects.savedObjects.getRowTitles();
           expect(objects).to.eql([
-            'Advanced Settings [6.0.0]',
             `Advanced Settings [${version}]`,
             'A Dashboard',
             'logstash-*',
@@ -196,12 +196,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         });
 
         it('cannot view any saved objects in applications', async () => {
-          const bools = await PageObjects.settings.getSavedObjectsTableSummary();
+          const bools = await PageObjects.savedObjects.getTableSummary();
           expect(bools).to.eql([
-            {
-              title: 'Advanced Settings [6.0.0]',
-              canViewInApp: false,
-            },
             {
               title: `Advanced Settings [${version}]`,
               canViewInApp: false,
@@ -222,19 +218,20 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         });
 
         it(`can't delete all saved objects`, async () => {
-          await PageObjects.settings.clickSavedObjectsTableSelectAll();
-          const actual = await PageObjects.settings.canSavedObjectsBeDeleted();
+          await PageObjects.savedObjects.clickTableSelectAll();
+          const actual = await PageObjects.savedObjects.canBeDeleted();
           expect(actual).to.be(false);
         });
       });
 
       describe('edit visualization', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'kibana',
-            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+          await PageObjects.common.navigateToUrl(
+            'management',
+            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
-              loginIfPrompted: false,
+              shouldLoginIfPrompted: false,
+              shouldUseHashForSubUrl: false,
             }
           );
           await testSubjects.existOrFail('savedObjectsEdit');
@@ -269,7 +266,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           kibana: [
             {
               feature: {
-                visualize: ['all'],
+                visualize: ['minimal_all'],
               },
               spaces: ['*'],
             },
@@ -282,7 +279,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_visualize_all_user',
@@ -294,34 +291,37 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_visualize_all_role'),
           security.user.delete('global_visualize_all_user'),
-          PageObjects.security.logout(),
         ]);
       });
 
       describe('listing', () => {
-        it('redirects to Kibana home', async () => {
-          await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/objects', {
+        it(`can't navigate to listing page`, async () => {
+          await PageObjects.common.navigateToUrl('management', 'kibana/objects', {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
+            shouldUseHashForSubUrl: false,
           });
-          await testSubjects.existOrFail('homeApp');
+
+          await testSubjects.existOrFail('appNotFoundPageContent');
         });
       });
 
       describe('edit visualization', () => {
-        it('redirects to Kibana home', async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'kibana',
-            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+        it('redirects to management home', async () => {
+          await PageObjects.common.navigateToUrl(
+            'management',
+            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
-              loginIfPrompted: false,
+              shouldLoginIfPrompted: false,
               ensureCurrentUrl: false,
+              shouldUseHashForSubUrl: false,
             }
           );
-          await testSubjects.existOrFail('homeApp');
+          await testSubjects.existOrFail('appNotFoundPageContent');
         });
       });
     });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -16,10 +17,15 @@ export default function ({ getService, getPageObjects }) {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-        from: '2017-10-05 20:31:48.354',
-        to: '2017-10-05 20:35:12.176'
-      });
+      await setup(
+        'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
+        {
+          from: 'Oct 5, 2017 @ 20:31:48.354',
+          to: 'Oct 5, 2017 @ 20:35:12.176',
+        }
+      );
+
+      await clusterOverview.closeAlertsModal();
 
       // go to overview
       await clusterOverview.clickEsOverview();
@@ -34,9 +40,9 @@ export default function ({ getService, getPageObjects }) {
       expect(await esClusterSummaryStatus.getContent()).to.eql({
         nodesCount: 'Nodes\n3',
         indicesCount: 'Indices\n20',
-        memory: 'Memory\n575.3 MB / 2.0 GB',
-        totalShards: 'Total Shards\n80',
-        unassignedShards: 'Unassigned Shards\n5',
+        memory: 'JVM Heap\n575.3 MB / 2.0 GB',
+        totalShards: 'Total shards\n80',
+        unassignedShards: 'Unassigned shards\n5',
         documentCount: 'Documents\n25,927',
         dataSize: 'Data\n101.6 MB',
         health: 'Health: yellow',

@@ -1,42 +1,27 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { EnvironmentMode } from '../config';
+import { shareReplay } from 'rxjs/operators';
+import type { RequestHandlerContext } from 'src/core/server';
 import { CoreContext } from '../core_context';
-import { LoggerFactory } from '../logging';
-import { PluginWrapper, PluginManifest } from './plugin';
-import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { CoreSetup, CoreStart } from '..';
+import { PluginWrapper } from './plugin';
+import {
+  PluginsServicePrebootSetupDeps,
+  PluginsServiceSetupDeps,
+  PluginsServiceStartDeps,
+} from './plugins_service';
+import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
+import { IRouter, RequestHandlerContextProvider } from '../http';
+import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
+import { CorePreboot, CoreSetup, CoreStart } from '..';
 
-/**
- * Context that's available to plugins during initialization stage.
- *
- * @public
- */
-export interface PluginInitializerContext {
-  env: { mode: EnvironmentMode };
-  logger: LoggerFactory;
-  config: {
-    create: <Schema>() => Observable<Schema>;
-    createIfExists: <Schema>() => Observable<Schema | undefined>;
-  };
+export interface InstanceInfo {
+  uuid: string;
 }
 
 /**
@@ -54,13 +39,22 @@ export interface PluginInitializerContext {
  */
 export function createPluginInitializerContext(
   coreContext: CoreContext,
-  pluginManifest: PluginManifest
+  opaqueId: PluginOpaqueId,
+  pluginManifest: PluginManifest,
+  instanceInfo: InstanceInfo
 ): PluginInitializerContext {
   return {
+    opaqueId,
+
     /**
      * Environment information that is safe to expose to plugins and may be beneficial for them.
      */
-    env: { mode: coreContext.env.mode },
+    env: {
+      mode: coreContext.env.mode,
+      packageInfo: coreContext.env.packageInfo,
+      instanceUuid: instanceInfo.uuid,
+      configs: coreContext.env.configs,
+    },
 
     /**
      * Plugin-scoped logger
@@ -75,19 +69,58 @@ export function createPluginInitializerContext(
      * Core configuration functionality, enables fetching a subset of the config.
      */
     config: {
+      legacy: {
+        globalConfig$: getGlobalConfig$(coreContext.configService),
+        get: () => getGlobalConfig(coreContext.configService),
+      },
+
       /**
        * Reads the subset of the config at the `configPath` defined in the plugin
-       * manifest and validates it against the schema in the static `schema` on
-       * the given `ConfigClass`.
-       * @param ConfigClass A class (not an instance of a class) that contains a
-       * static `schema` that we validate the config at the given `path` against.
+       * manifest.
        */
-      create() {
-        return coreContext.configService.atPath(pluginManifest.configPath);
+      create<T>() {
+        return coreContext.configService.atPath<T>(pluginManifest.configPath).pipe(shareReplay(1));
       },
-      createIfExists() {
-        return coreContext.configService.optionalAtPath(pluginManifest.configPath);
+      get<T>() {
+        return coreContext.configService.atPathSync<T>(pluginManifest.configPath);
       },
+    },
+  };
+}
+
+/**
+ * Provides `CorePreboot` contract that will be exposed to the `preboot` plugin `setup` method.
+ * This contract should be safe to use only within `setup` itself.
+ *
+ * This is called for each `preboot` plugin when it's set up, so each plugin gets its own
+ * version of these values.
+ *
+ * We should aim to be restrictive and specific in the APIs that we expose.
+ *
+ * @param coreContext Kibana core context
+ * @param deps Dependencies that Plugins services gets during setup.
+ * @param plugin The plugin we're building these values for.
+ * @internal
+ */
+export function createPluginPrebootSetupContext(
+  coreContext: CoreContext,
+  deps: PluginsServicePrebootSetupDeps,
+  plugin: PluginWrapper
+): CorePreboot {
+  return {
+    elasticsearch: {
+      config: deps.elasticsearch.config,
+      createClient: deps.elasticsearch.createClient,
+    },
+    http: {
+      registerRoutes: deps.http.registerRoutes,
+      basePath: deps.http.basePath,
+      getServerInfo: deps.http.getServerInfo,
+    },
+    preboot: {
+      isSetupOnHold: deps.preboot.isSetupOnHold,
+      holdSetupUntilResolved: (reason, promise) =>
+        deps.preboot.holdSetupUntilResolved(plugin.name, reason, promise),
     },
   };
 }
@@ -111,18 +144,75 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreSetup {
+  const router = deps.http.createRouter('', plugin.opaqueId);
+
   return {
+    capabilities: {
+      registerProvider: deps.capabilities.registerProvider,
+      registerSwitcher: deps.capabilities.registerSwitcher,
+    },
+    context: {
+      createContextContainer: deps.context.createContextContainer,
+    },
     elasticsearch: {
-      adminClient$: deps.elasticsearch.adminClient$,
-      dataClient$: deps.elasticsearch.dataClient$,
+      legacy: deps.elasticsearch.legacy,
+    },
+    executionContext: {
+      withContext: deps.executionContext.withContext,
     },
     http: {
+      createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
+      registerRouteHandlerContext: <
+        Context extends RequestHandlerContext,
+        ContextName extends keyof Context
+      >(
+        contextName: ContextName,
+        provider: RequestHandlerContextProvider<Context, ContextName>
+      ) => deps.http.registerRouteHandlerContext(plugin.opaqueId, contextName, provider),
+      createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() =>
+        router as IRouter<Context>,
+      resources: deps.httpResources.createRegistrar(router),
+      registerOnPreRouting: deps.http.registerOnPreRouting,
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,
-      getBasePathFor: deps.http.getBasePathFor,
-      setBasePathFor: deps.http.setBasePathFor,
-      createNewServer: deps.http.createNewServer,
+      registerOnPreResponse: deps.http.registerOnPreResponse,
+      basePath: deps.http.basePath,
+      auth: {
+        get: deps.http.auth.get,
+        isAuthenticated: deps.http.auth.isAuthenticated,
+      },
+      csp: deps.http.csp,
+      getServerInfo: deps.http.getServerInfo,
+    },
+    i18n: deps.i18n,
+    logging: {
+      configure: (config$) => deps.logging.configure(['plugins', plugin.name], config$),
+    },
+    metrics: {
+      collectionInterval: deps.metrics.collectionInterval,
+      getOpsMetrics$: deps.metrics.getOpsMetrics$,
+    },
+    savedObjects: {
+      setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
+      addClientWrapper: deps.savedObjects.addClientWrapper,
+      registerType: deps.savedObjects.registerType,
+    },
+    status: {
+      core$: deps.status.core$,
+      overall$: deps.status.overall$,
+      set: deps.status.plugins.set.bind(null, plugin.name),
+      dependencies$: deps.status.plugins.getDependenciesStatus$(plugin.name),
+      derivedStatus$: deps.status.plugins.getDerivedStatus$(plugin.name),
+      isStatusPageAnonymous: deps.status.isStatusPageAnonymous,
+    },
+    uiSettings: {
+      register: deps.uiSettings.register,
+    },
+    getStartServices: () => plugin.startDependencies,
+    deprecations: deps.deprecations.getRegistry(plugin.name),
+    coreUsageData: {
+      registerUsageCounter: deps.coreUsageData.registerUsageCounter,
     },
   };
 }
@@ -144,5 +234,37 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreStart {
-  return {};
+  return {
+    capabilities: {
+      resolveCapabilities: deps.capabilities.resolveCapabilities,
+    },
+    elasticsearch: {
+      client: deps.elasticsearch.client,
+      createClient: deps.elasticsearch.createClient,
+      legacy: deps.elasticsearch.legacy,
+    },
+    executionContext: deps.executionContext,
+    http: {
+      auth: deps.http.auth,
+      basePath: deps.http.basePath,
+      getServerInfo: deps.http.getServerInfo,
+    },
+    savedObjects: {
+      getScopedClient: deps.savedObjects.getScopedClient,
+      createInternalRepository: deps.savedObjects.createInternalRepository,
+      createScopedRepository: deps.savedObjects.createScopedRepository,
+      createSerializer: deps.savedObjects.createSerializer,
+      createExporter: deps.savedObjects.createExporter,
+      createImporter: deps.savedObjects.createImporter,
+      getTypeRegistry: deps.savedObjects.getTypeRegistry,
+    },
+    metrics: {
+      collectionInterval: deps.metrics.collectionInterval,
+      getOpsMetrics$: deps.metrics.getOpsMetrics$,
+    },
+    uiSettings: {
+      asScopedToClient: deps.uiSettings.asScopedToClient,
+    },
+    coreUsageData: deps.coreUsageData,
+  };
 }

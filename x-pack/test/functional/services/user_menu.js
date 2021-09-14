@@ -1,35 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export function UserMenuProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  return new class UserMenu {
+  return new (class UserMenu {
     async clickLogoutButton() {
       await this._ensureMenuOpen();
-      await testSubjects.click('userMenu logoutLink');
+      await testSubjects.click('userMenu > logoutLink');
     }
 
     async clickProvileLink() {
       await this._ensureMenuOpen();
-      await testSubjects.click('userMenu profileLink');
+      await testSubjects.click('userMenu > profileLink');
     }
 
     async logoutLinkExists() {
-      if (!await testSubjects.exists('userMenuButton')) {
+      if (!(await testSubjects.exists('userMenuButton'))) {
         return;
       }
 
       await this._ensureMenuOpen();
-      return await testSubjects.exists('userMenu logoutLink');
+      return await testSubjects.exists('userMenu > logoutLink');
     }
 
     async closeMenu() {
-      if (!await testSubjects.exists('userMenu')) {
+      if (!(await testSubjects.exists('userMenu'))) {
         return;
       }
 
@@ -42,10 +43,10 @@ export function UserMenuProvider({ getService }) {
         return;
       }
 
-      await testSubjects.click('userMenuButton');
-      await retry.waitFor('user menu opened', async () => (
-        await testSubjects.exists('userMenu')
-      ));
+      await retry.try(async () => {
+        await testSubjects.click('userMenuButton');
+        await testSubjects.existOrFail('userMenu');
+      });
     }
-  };
+  })();
 }

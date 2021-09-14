@@ -1,46 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import {
-  PROCESSOR_EVENT,
   TRACE_ID,
-  TRANSACTION_ID
+  TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../typings/common';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { rangeFilter } from '../../helpers/range_filter';
-import { Setup } from '../../helpers/setup_request';
+import { rangeQuery } from '../../../../../observability/server';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 
-export type TransactionAPIResponse = PromiseReturnType<typeof getTransaction>;
-export async function getTransaction(
-  transactionId: string,
-  traceId: string,
-  setup: Setup
-) {
-  const { start, end, uiFiltersES, client, config } = setup;
+export async function getTransaction({
+  transactionId,
+  traceId,
+  setup,
+}: {
+  transactionId: string;
+  traceId?: string;
+  setup: Setup | (Setup & SetupTimeRange);
+}) {
+  const { apmEventClient } = setup;
 
-  const params = {
-    index: config.get<string>('apm_oss.transactionIndices'),
+  const resp = await apmEventClient.search('get_transaction', {
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
     body: {
       size: 1,
       query: {
         bool: {
-          filter: [
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
+          filter: asMutableArray([
             { term: { [TRANSACTION_ID]: transactionId } },
-            { term: { [TRACE_ID]: traceId } },
-            { range: rangeFilter(start, end) },
-            ...uiFiltersES
-          ]
-        }
-      }
-    }
-  };
+            ...(traceId ? [{ term: { [TRACE_ID]: traceId } }] : []),
+            ...('start' in setup ? rangeQuery(setup.start, setup.end) : []),
+          ]),
+        },
+      },
+    },
+  });
 
-  const resp = await client.search<Transaction>(params);
-  return idx(resp, _ => _.hits.hits[0]._source);
+  return resp.hits.hits[0]?._source;
 }

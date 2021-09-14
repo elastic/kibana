@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -25,15 +26,14 @@ export class FieldChooser extends Component {
     fields: PropTypes.array.isRequired,
     selectedFields: PropTypes.array.isRequired,
     onSelectField: PropTypes.func.isRequired,
-    columns: PropTypes.array.isRequired,
     prompt: PropTypes.string,
     dataTestSubj: PropTypes.string,
-  }
+  };
 
   static defaultProps = {
     prompt: 'Search',
-    dataTestSubj: 'rollupJobFieldChooser'
-  }
+    dataTestSubj: 'rollupJobFieldChooser',
+  };
 
   constructor(props) {
     super(props);
@@ -51,7 +51,7 @@ export class FieldChooser extends Component {
   };
 
   onButtonClick = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isOpen: !state.isOpen,
     }));
   };
@@ -90,11 +90,15 @@ export class FieldChooser extends Component {
         return !selectedFieldNames.includes(name);
       });
 
-      const searchedItems = searchValue ? unselectedFields.filter(item => {
-        const normalizedSearchValue = searchValue.trim().toLowerCase();
-        return item.name.toLowerCase().includes(normalizedSearchValue) ||
-          item.type.toLowerCase().includes(normalizedSearchValue);
-      }) : unselectedFields;
+      const searchedItems = searchValue
+        ? unselectedFields.filter((item) => {
+            const normalizedSearchValue = searchValue.trim().toLowerCase();
+            return (
+              item.name.toLowerCase().includes(normalizedSearchValue) ||
+              item.type.toLowerCase().includes(normalizedSearchValue)
+            );
+          })
+        : unselectedFields;
 
       return (
         <EuiFlyout
@@ -136,13 +140,9 @@ export class FieldChooser extends Component {
         </EuiFlyout>
       );
     };
-
     return (
       <Fragment>
-        <EuiButton
-          onClick={this.onButtonClick}
-          data-test-subj="rollupJobShowFieldChooserButton"
-        >
+        <EuiButton onClick={this.onButtonClick} data-test-subj="rollupJobShowFieldChooserButton">
           {buttonLabel}
         </EuiButton>
 

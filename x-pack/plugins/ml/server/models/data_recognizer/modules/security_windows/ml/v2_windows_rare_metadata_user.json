@@ -1,0 +1,37 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "This is a new refactored job which works on ECS compatible events across multiple indices. Security: Windows - Looks for anomalous access to the metadata service by an unusual user. The metadata service may be targeted in order to harvest credentials or user data scripts containing secrets.",
+  "groups": [
+    "security",
+    "endpoint",
+    "event-log",
+    "process",
+    "sysmon",
+    "windows",
+    "winlogbeat"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "rare by \"user.name\"",
+        "function": "rare",
+        "by_field_name": "user.name"
+      }
+    ],
+    "influencers": [
+      "host.name",
+      "user.name"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "32mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-windows"
+  }
+}

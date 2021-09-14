@@ -1,42 +1,30 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+const fs = require('fs');
+const util = require('util');
 const execa = require('execa');
 const chalk = require('chalk');
 const path = require('path');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
-const {
-  log: defaultLog,
-  parseEsLog,
-  extractConfigFiles,
-  decompress,
-  NativeRealm,
-} = require('./utils');
+const { log: defaultLog, parseEsLog, extractConfigFiles, NativeRealm } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
+const { parseSettings, SettingsFilter } = require('./settings');
+const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD, extract } = require('@kbn/dev-utils');
+const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
-  new Promise(resolve => {
-    const onData = data => {
+  new Promise((resolve) => {
+    const onData = (data) => {
       const result = map(data);
       if (result !== undefined) {
         resolve(result);
@@ -47,8 +35,10 @@ const first = (stream, map) =>
   });
 
 exports.Cluster = class Cluster {
-  constructor(log = defaultLog) {
+  constructor({ log = defaultLog, ssl = false } = {}) {
     this._log = log;
+    this._ssl = ssl;
+    this._caCertPromise = ssl ? readFile(CA_CERT_PATH) : undefined;
   }
 
   /**
@@ -137,23 +127,28 @@ exports.Cluster = class Cluster {
   }
 
   /**
-   * Unpakcs a tar or zip file containing the data directory for an
+   * Unpacks a tar or zip file containing the data directory for an
    * ES cluster.
    *
    * @param {String} installPath
    * @param {String} archivePath
+   * @param {String} [extractDirName]
    */
-  async extractDataDirectory(installPath, archivePath) {
+  async extractDataDirectory(installPath, archivePath, extractDirName = 'data') {
     this._log.info(chalk.bold(`Extracting data directory`));
     this._log.indent(4);
 
-    // decompress excludes the root directory as that is how our archives are
+    // stripComponents=1 excludes the root directory as that is how our archives are
     // structured. This works in our favor as we can explicitly extract into the data dir
-    const extractPath = path.resolve(installPath, 'data');
+    const extractPath = path.resolve(installPath, extractDirName);
     this._log.info(`Data archive: ${archivePath}`);
     this._log.info(`Extract path: ${extractPath}`);
 
-    await decompress(archivePath, extractPath);
+    await extract({
+      archivePath,
+      targetDir: extractPath,
+      stripComponents: 1,
+    });
 
     this._log.indent(-4);
   }
@@ -173,7 +168,7 @@ exports.Cluster = class Cluster {
     await Promise.race([
       // wait for native realm to be setup and es to be started
       Promise.all([
-        first(this._process.stdout, data => {
+        first(this._process.stdout, (data) => {
           if (/started/.test(data)) {
             return true;
           }
@@ -200,7 +195,7 @@ exports.Cluster = class Cluster {
     this._exec(installPath, options);
 
     // log native realm setup errors so they aren't uncaught
-    this._nativeRealmSetup.catch(error => {
+    this._nativeRealmSetup.catch((error) => {
       this._log.error(error);
       this.stop();
     });
@@ -239,10 +234,14 @@ exports.Cluster = class Cluster {
    * @private
    * @param {String} installPath
    * @param {Object} options
-   * @property {Array} options.esArgs
+   * @property {string|Array} options.esArgs
+   * @property {string} options.esJavaOpts
+   * @property {Boolean} options.skipNativeRealmSetup
    * @return {undefined}
    */
-  _exec(installPath, options = {}) {
+  _exec(installPath, opts = {}) {
+    const { skipNativeRealmSetup = false, ...options } = opts;
+
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
     }
@@ -250,23 +249,54 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const args = extractConfigFiles(options.esArgs || [], installPath, {
-      log: this._log,
-    }).reduce((acc, cur) => acc.concat(['-E', cur]), []);
+    const esArgs = [
+      'action.destructive_requires_name=true',
+      'ingest.geoip.downloader.enabled=false',
+    ].concat(options.esArgs || []);
+
+    // Add to esArgs if ssl is enabled
+    if (this._ssl) {
+      esArgs.push('xpack.security.http.ssl.enabled=true');
+      esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+      esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
+      esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
+    }
+
+    const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {
+      filter: SettingsFilter.NonSecureOnly,
+    }).reduce(
+      (acc, [settingName, settingValue]) => acc.concat(['-E', `${settingName}=${settingValue}`]),
+      []
+    );
 
     this._log.debug('%s %s', ES_BIN, args.join(' '));
+
+    let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
+
+    // ES now automatically sets heap size to 50% of the machine's available memory
+    // so we need to set it to a smaller size for local dev and CI
+    // especially because we currently run many instances of ES on the same machine during CI
+    // inital and max must be the same, so we only need to check the max
+    if (!esJavaOpts.includes('Xmx')) {
+      // 1536m === 1.5g
+      esJavaOpts += ' -Xms1536m -Xmx1536m';
+    }
+
+    this._log.debug('ES_JAVA_OPTS: %s', esJavaOpts.trim());
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
       env: {
+        ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
-        ...(options.esEnvVars || {}),
+        JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
+        ES_JAVA_OPTS: esJavaOpts.trim(),
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     // parse log output to find http port
-    const httpPort = first(this._process.stdout, data => {
+    const httpPort = first(this._process.stdout, (data) => {
       const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
 
       if (match) {
@@ -275,25 +305,36 @@ exports.Cluster = class Cluster {
     });
 
     // once the http port is available setup the native realm
-    this._nativeRealmSetup = httpPort.then(async port => {
-      const nativeRealm = new NativeRealm(options.password, port, this._log);
+    this._nativeRealmSetup = httpPort.then(async (port) => {
+      if (skipNativeRealmSetup) {
+        return;
+      }
+
+      const caCert = await this._caCertPromise;
+      const nativeRealm = new NativeRealm({
+        port,
+        caCert,
+        log: this._log,
+        elasticPassword: options.password,
+        ssl: this._ssl,
+      });
       await nativeRealm.setPasswords(options);
     });
 
     // parse and forward es stdout to the log
-    this._process.stdout.on('data', data => {
+    this._process.stdout.on('data', (data) => {
       const lines = parseEsLog(data.toString());
-      lines.forEach(line => {
+      lines.forEach((line) => {
         this._log.info(line.formattedMessage);
       });
     });
 
     // forward es stderr to the log
-    this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));
+    this._process.stderr.on('data', (data) => this._log.error(chalk.red(data.toString())));
 
     // observe the exit code of the process and reflect in _outcome promies
-    const exitCode = new Promise(resolve => this._process.once('exit', resolve));
-    this._outcome = exitCode.then(code => {
+    const exitCode = new Promise((resolve) => this._process.once('exit', resolve));
+    this._outcome = exitCode.then((code) => {
       if (this._stopCalled) {
         return;
       }

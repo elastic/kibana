@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies an unexpected executable file being created or modified by a Windows system critical process, which may indicate activity related to remote code execution or other forms of exploitation.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Unusual Executable File Creation by a System Critical Process",
+  "query": "file where event.type != \"deletion\" and\n  file.extension : (\"exe\", \"dll\") and\n  process.name : (\"smss.exe\",\n                  \"autochk.exe\",\n                  \"csrss.exe\",\n                  \"wininit.exe\",\n                  \"services.exe\",\n                  \"lsass.exe\",\n                  \"winlogon.exe\",\n                  \"userinit.exe\",\n                  \"LogonUI.exe\")\n",
+  "risk_score": 73,
+  "rule_id": "e94262f2-c1e9-4d3f-a907-aeab16712e1a",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1211",
+          "name": "Exploitation for Defense Evasion",
+          "reference": "https://attack.mitre.org/techniques/T1211/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 4
+}

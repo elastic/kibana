@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`VisualizationNoResults should render according to snapshot 1`] = `
+<div
+  class="visError"
+  data-test-subj="visNoResult"
+>
+  <div
+    class="euiEmptyPrompt"
+    data-test-subj="visualization-error"
+  >
+    <span
+      color="default"
+      data-euiicon-type="visualizeApp"
+    />
+    <div
+      class="euiSpacer euiSpacer--m"
+    />
+    <span
+      class="euiTextColor euiTextColor--subdued"
+    >
+      <div
+        class="euiText euiText--medium"
+      >
+        <div
+          class="euiText euiText--extraSmall"
+        >
+          No results found
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+`;

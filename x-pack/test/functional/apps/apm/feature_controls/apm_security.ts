@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import expect from '@kbn/expect';
-import { SecurityService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -18,7 +18,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
@@ -62,15 +62,20 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it('shows apm navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
+        expect(navLinks.map((link) => link.text)).to.eql([
+          'Overview',
+          'Alerts',
           'APM',
-          'Management',
+          'User Experience',
+          'Stack Management',
         ]);
       });
 
       it('can navigate to APM app', async () => {
         await PageObjects.common.navigateToApp('apm');
-        await testSubjects.existOrFail('apmMainContainer', 10000);
+        await testSubjects.existOrFail('apmMainContainer', {
+          timeout: 10000,
+        });
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -111,15 +116,21 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows apm navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['APM', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql([
+          'Overview',
+          'Alerts',
+          'APM',
+          'User Experience',
+          'Stack Management',
+        ]);
       });
 
       it('can navigate to APM app', async () => {
         await PageObjects.common.navigateToApp('apm');
-        await testSubjects.existOrFail('apmMainContainer', 10000);
+        await testSubjects.existOrFail('apmMainContainer', {
+          timeout: 10000,
+        });
       });
 
       it(`shows read-only badge`, async () => {
@@ -164,18 +175,16 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`doesn't show APM navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('APM');
       });
 
-      it(`renders not found page`, async () => {
+      it(`renders no permission page`, async () => {
         await PageObjects.common.navigateToUrl('apm', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

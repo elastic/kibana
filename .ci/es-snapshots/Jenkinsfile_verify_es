@@ -1,0 +1,61 @@
+#!/bin/groovy
+
+library 'kibana-pipeline-library'
+kibanaLibrary.load()
+
+def SNAPSHOT_VERSION = params.SNAPSHOT_VERSION
+def SNAPSHOT_ID = params.SNAPSHOT_ID
+
+if (!SNAPSHOT_VERSION) {
+  error "Parameter SNAPSHOT_VERSION must be specified"
+}
+
+if (!SNAPSHOT_ID) {
+  error "Parameter SNAPSHOT_ID must be specified"
+}
+
+currentBuild.displayName += " - ${SNAPSHOT_VERSION}"
+currentBuild.description = "ES: ${SNAPSHOT_VERSION}<br />Kibana: ${params.branch_specifier}"
+
+def SNAPSHOT_MANIFEST = "https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/manifest.json"
+
+kibanaPipeline(timeoutMinutes: 210) {
+  catchErrors {
+    slackNotifications.onFailure(
+      title: "*<${env.BUILD_URL}|[${SNAPSHOT_VERSION}] ES Snapshot Verification Failure>*",
+      message: "[${SNAPSHOT_VERSION}] ES Snapshot Verification Failure",
+    ) {
+      retryable.enable(2)
+      withEnv([
+        "ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}",
+        'IGNORE_SHIP_CI_STATS_ERROR=true',
+      ]) {
+        kibanaPipeline.withTasks {
+          tasks([
+            kibanaPipeline.scriptTaskDocker('Jest Integration Tests', 'test/scripts/test/jest_integration.sh'),
+            kibanaPipeline.scriptTask('API Integration Tests', 'test/scripts/test/api_integration.sh'),
+          ])
+
+          task {
+            kibanaPipeline.buildKibana(16)
+            tasks.ossCiGroups()
+            tasks.xpackCiGroups()
+            tasks.xpackCiGroupDocker()
+          }
+        }
+      }
+
+      promoteSnapshot(SNAPSHOT_VERSION, SNAPSHOT_ID)
+    }
+  }
+
+  kibanaPipeline.sendMail()
+}
+
+def promoteSnapshot(snapshotVersion, snapshotId) {
+  if (buildUtils.getBuildStatus() == 'SUCCESS') {
+    node(workers.label('s')) {
+      esSnapshots.promote(snapshotVersion, snapshotId)
+    }
+  }
+}

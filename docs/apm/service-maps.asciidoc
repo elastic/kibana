@@ -1,0 +1,118 @@
+[role="xpack"]
+[[service-maps]]
+=== Service map
+
+A service map is a real-time visual representation of the instrumented services in your application's architecture.
+It shows you how these services are connected, along with high-level metrics like average transaction duration,
+requests per minute, and errors per minute.
+If enabled, service maps also integrate with machine learning--for real time health indicators based on anomaly detection scores.
+All of these features can help you quickly and visually assess your services' status and health.
+
+// Conditionally display a screenshot or video depending on what the
+// current documentation version is.
+
+ifeval::["{is-current-version}"=="true"]
+++++
+<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js"></script>
+<img
+  style="width: 100%; margin: auto; display: block;"
+  class="vidyard-player-embed"
+  src="https://play.vidyard.com/VH8gKnPE3Z2csACZTCeQrw.jpg"
+  data-uuid="VH8gKnPE3Z2csACZTCeQrw"
+  data-v="4"
+  data-type="inline"
+/>
+</br>
+++++
+endif::[]
+
+ifeval::["{is-current-version}"=="false"]
+[role="screenshot"]
+image::apm/images/service-maps.png[Example view of service maps in the APM app in Kibana]
+endif::[]
+
+We currently surface two types of service maps:
+
+* Global: All services instrumented with APM agents and the connections between them are shown.
+* Service-specific: Highlight connections for a selected service.
+
+[float]
+[[service-maps-how]]
+=== How do service maps work?
+
+Service maps rely on distributed traces to draw connections between services.
+As {apm-overview-ref-v}/distributed-tracing.html[distributed tracing] is enabled out-of-the-box for supported technologies, so are service maps.
+However, if a service isn't instrumented,
+or a `traceparent` header isn't being propagated to it,
+distributed tracing will not work, and the connection will not be drawn on the map.
+
+[float]
+[[visualize-your-architecture]]
+=== Visualize your architecture
+
+Select the **Service Map** tab to get started.
+By default, all instrumented services and connections are shown.
+Whether you're onboarding a new engineer, or just trying to grasp the big picture,
+drag things around, zoom in and out, and begin to visualize how your services are connected.
+
+If there's a specific service that interests you, select that service to highlight its connections.
+Clicking **Focus map** will refocus the map on that specific service and lock the connection highlighting.
+From here, select **Service Details**, or click on the **Transaction** tab to jump to the Transaction overview
+for the selected service.
+You can also use the tabs at the top of the page to easily jump to the **Errors** or **Metrics** overview.
+
+Filter out your maps by picking the environment from the environment drop-down filter.
+This can be useful if you have two or more services, in separate environments, but with the same name.
+Use the environment drop-down to only see the data you're interested in, like `dev` or `production`.
+Additional filters are not currently available for service maps.
+
+[role="screenshot"]
+image::apm/images/service-maps-java.png[Example view of service maps with Java highlighted in the APM app in Kibana]
+
+[float]
+[[service-map-anomaly-detection]]
+=== Anomaly detection with machine learning
+
+Machine learning jobs can be created to calculate anomaly scores on APM transaction durations within the selected service.
+When these jobs are active, service maps will display a color-coded anomaly indicator based on the detected anomaly score:
+
+[horizontal]
+image:apm/images/green-service.png[APM green service]:: Max anomaly score **≤25**. Service is healthy.
+image:apm/images/yellow-service.png[APM yellow service]:: Max anomaly score **26-74**. Anomalous activity detected. Service may be degraded.
+image:apm/images/red-service.png[APM red service]:: Max anomaly score **≥75**. Anomalous activity detected. Service is unhealthy.
+
+[role="screenshot"]
+image::apm/images/apm-service-map-anomaly.png[Example view of anomaly scores on service maps in the APM app]
+
+If an anomaly has been detected, click *view anomalies* to view the anomaly detection metric viewier in the Machine learning app.
+This time series analysis will display additional details on the severity and time of the detected anomalies.
+
+To learn how to create a machine learning job, see <<machine-learning-integration,machine learning integration>>.
+
+[float]
+[[service-maps-legend]]
+=== Legend
+
+Nodes appear on the map in one of two shapes:
+
+* **Circle**: Instrumented services. Interior icons are based on the language of the agent used.
+* **Diamond**: Databases, external, and messaging. Interior icons represent the generic type,
+with specific icons for known entities, like Elasticsearch.
+Type and subtype are based on `span.type`, and `span.subtype`.
+
+[float]
+[[service-maps-supported]]
+=== Supported APM Agents
+
+Service maps are supported for the following Agent versions:
+
+[horizontal]
+Go agent:: ≥ v1.7.0
+iOS agent:: _Not yet supported_
+Java agent:: ≥ v1.13.0
+.NET agent:: ≥ v1.3.0
+Node.js agent:: ≥ v3.6.0
+PHP agent:: _Not yet supported_
+Python agent:: ≥ v5.5.0
+Ruby agent:: ≥ v3.6.0
+Real User Monitoring (RUM) agent:: ≥ v4.7.0

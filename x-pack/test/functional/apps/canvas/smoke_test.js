@@ -1,33 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import { parse } from 'url';
 
 export default function canvasSmokeTest({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
+  const kibanaServer = getService('kibanaServer');
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
-  describe('smoke test', async () => {
-    const workpadListSelector = 'canvasWorkpadLoaderTable canvasWorkpadLoaderWorkpad';
+  describe('smoke test', function () {
+    this.tags('includeFirefox');
+    const workpadListSelector = 'canvasWorkpadTable > canvasWorkpadTableWorkpad';
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
-      // init data
-      await Promise.all([
-        esArchiver.loadIfNeeded('logstash_functional'),
-        esArchiver.load('canvas/default'),
-      ]);
-
-      // load canvas
-      // see also navigateToUrl(app, hash)
+      await kibanaServer.importExport.load(archive);
       await PageObjects.common.navigateToApp('canvas');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(archive);
     });
 
     it('loads workpad list', async () => {
@@ -48,7 +47,10 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
       // check that workpad loaded in url
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(parse(url).hash).to.equal(`#/workpad/${testWorkpadId}/page/1`);
+
+        // remove all the search params, just compare the route
+        const hashRoute = new URL(url).hash.split('?')[0];
+        expect(hashRoute).to.equal(`#/workpad/${testWorkpadId}/page/1`);
       });
     });
 
@@ -56,7 +58,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
       await retry.try(async () => {
         // check for elements on the page
         const elements = await testSubjects.findAll(
-          'canvasWorkpadPage canvasWorkpadPageElementContent'
+          'canvasWorkpadPage > canvasWorkpadPageElementContent'
         );
         expect(elements).to.have.length(4);
 

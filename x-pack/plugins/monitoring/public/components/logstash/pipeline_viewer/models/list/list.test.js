@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { List } from './list';
@@ -16,30 +17,22 @@ describe('pipelineToList', () => {
 
   beforeEach(() => {
     pipeline = {
-      inputStatements: [
-        PluginStatement.fromPipelineGraphVertex({ id: 'first' }),
-      ],
+      inputStatements: [PluginStatement.fromPipelineGraphVertex({ id: 'first' })],
       filterStatements: [
         new IfStatement(
           { id: 'if' },
-          [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child' })],
-          [ PluginStatement.fromPipelineGraphVertex({ id: 'else_child' })]
-        )
+          [PluginStatement.fromPipelineGraphVertex({ id: 'if_child' })],
+          [PluginStatement.fromPipelineGraphVertex({ id: 'else_child' })]
+        ),
       ],
-      outputStatements: [
-        PluginStatement.fromPipelineGraphVertex({ id: 'output' })
-      ],
-      queue: { }
+      outputStatements: [PluginStatement.fromPipelineGraphVertex({ id: 'output' })],
+      queue: {},
     };
   });
 
   it('creates list with element for each statement', () => {
     const result = List.fromPipeline(pipeline);
-    const {
-      inputs,
-      filters,
-      outputs
-    } = result;
+    const { inputs, filters, outputs } = result;
 
     expect(inputs).toHaveLength(1);
     expect(filters).toHaveLength(4);
@@ -50,17 +43,13 @@ describe('pipelineToList', () => {
     pipeline.outputStatements.push(
       new IfStatement(
         { id: 'output_if' },
-        [ PluginStatement.fromPipelineGraphVertex({ id: 'output_true' })],
-        [ PluginStatement.fromPipelineGraphVertex({ id: 'output_else' })]
+        [PluginStatement.fromPipelineGraphVertex({ id: 'output_true' })],
+        [PluginStatement.fromPipelineGraphVertex({ id: 'output_else' })]
       )
     );
 
     const result = List.fromPipeline(pipeline);
-    const {
-      inputs,
-      filters,
-      outputs
-    } = result;
+    const { inputs, filters, outputs } = result;
 
     expect(inputs).toHaveLength(1);
     expect(filters).toHaveLength(4);
@@ -79,26 +68,22 @@ describe('pipelineToList', () => {
         [
           new IfStatement(
             { id: 'filter_if_2' },
-            [ PluginStatement.fromPipelineGraphVertex({ id: 'plugin_1' })],
-            [ ]
-          )
+            [PluginStatement.fromPipelineGraphVertex({ id: 'plugin_1' })],
+            []
+          ),
         ],
         [
           new IfStatement(
             { id: 'filter_if_3' },
-            [ PluginStatement.fromPipelineGraphVertex({ id: 'plugin_2' })],
-            [ PluginStatement.fromPipelineGraphVertex({ id: 'plugin_3' })]
-          )
+            [PluginStatement.fromPipelineGraphVertex({ id: 'plugin_2' })],
+            [PluginStatement.fromPipelineGraphVertex({ id: 'plugin_3' })]
+          ),
         ]
-      )
+      ),
     ];
 
     const result = List.fromPipeline(pipeline);
-    const {
-      inputs,
-      filters,
-      outputs
-    } = result;
+    const { inputs, filters, outputs } = result;
 
     expect(inputs).toHaveLength(1);
     expect(outputs).toHaveLength(1);

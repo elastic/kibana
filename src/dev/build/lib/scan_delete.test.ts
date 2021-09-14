@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { readdirSync } from 'fs';
@@ -42,11 +31,21 @@ afterAll(async () => {
   await del(TMP);
 });
 
-it('requires an absolute directory', async () => {
+it('requires absolute paths', async () => {
   await expect(
     scanDelete({
       directory: relative(process.cwd(), TMP),
       regularExpressions: [],
+    })
+  ).rejects.toMatchInlineSnapshot(
+    `[TypeError: Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`.]`
+  );
+
+  await expect(
+    scanDelete({
+      directory: TMP,
+      regularExpressions: [],
+      excludePaths: ['foo'],
     })
   ).rejects.toMatchInlineSnapshot(
     `[TypeError: Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`.]`
@@ -61,4 +60,25 @@ it('deletes files/folders matching regular expression', async () => {
   expect(readdirSync(resolve(TMP, 'foo'))).toEqual([]);
   expect(readdirSync(resolve(TMP, 'a'))).toEqual(['b']);
   expect(readdirSync(resolve(TMP, 'a/b'))).toEqual([]);
+});
+
+it('exludes directories mentioned in excludePaths', async () => {
+  await scanDelete({
+    directory: TMP,
+    regularExpressions: [/^.*[\/\\](bar|c)([\/\\]|$)/],
+    excludePaths: [resolve(TMP, 'foo')],
+  });
+  expect(readdirSync(resolve(TMP, 'foo'))).toEqual(['bar']);
+  expect(readdirSync(resolve(TMP, 'a'))).toEqual(['b']);
+  expect(readdirSync(resolve(TMP, 'a/b'))).toEqual([]);
+});
+
+it('exludes files mentioned in excludePaths', async () => {
+  await scanDelete({
+    directory: TMP,
+    regularExpressions: [/box/],
+    excludePaths: [resolve(TMP, 'foo/bar/box')],
+  });
+
+  expect(readdirSync(resolve(TMP, 'foo/bar'))).toEqual(['baz', 'box']);
 });

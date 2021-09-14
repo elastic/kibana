@@ -1,21 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 
-const getFollowPattern = (prefix = '', suffix = '', template = '{{leader_index}}') => (
-  {
-    followPattern: {
-      prefix,
-      suffix,
-      template,
-    },
-    toString: prefix + template + suffix
-  }
-);
+const getFollowPattern = (prefix = '', suffix = '', template = '{{leader_index}}') => ({
+  followPattern: {
+    prefix,
+    suffix,
+    template,
+  },
+  toString: prefix + template + suffix,
+});
 
 /**
  * Generate an array of indices preview that would be generated for an auto-follow pattern.
@@ -33,7 +32,7 @@ export const getPreviewIndicesFromAutoFollowPattern = ({
     moment().format('YYYY-MM-DD'),
     moment().add(1, 'days').format('YYYY-MM-DD'),
     moment().add(2, 'days').format('YYYY-MM-DD'),
-  ]
+  ],
 }) => {
   const indicesPreview = [];
   let indexPreview;
@@ -44,7 +43,9 @@ export const getPreviewIndicesFromAutoFollowPattern = ({
       leaderIndexTemplate = leaderIndexPattern.replace(/\*/g, placeHolder);
       indexPreview = getFollowPattern(prefix, suffix, leaderIndexTemplate);
 
-      if (!indicesPreview.some((_indexPreview) => indexPreview.toString === _indexPreview.toString)) {
+      if (
+        !indicesPreview.some((_indexPreview) => indexPreview.toString === _indexPreview.toString)
+      ) {
         indicesPreview.push(indexPreview);
       }
     });

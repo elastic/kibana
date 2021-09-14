@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import axios, { AxiosInstance } from 'axios';
-import cheerio from 'cheerio';
-import { UICapabilities } from 'ui/capabilities';
+import type { Capabilities as UICapabilities } from 'src/core/types';
 import { format as formatUrl } from 'url';
 import util from 'util';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { LogService } from '../../../types/services';
+import { ToolingLog } from '@kbn/dev-utils';
+import { FtrProviderContext } from '../ftr_provider_context';
+import { FeaturesService, FeaturesProvider } from './features';
 
 export interface BasicCredentials {
   username: string;
@@ -17,7 +19,7 @@ export interface BasicCredentials {
 }
 
 export enum GetUICapabilitiesFailureReason {
-  RedirectedToRoot = 'Redirected to Root',
+  RedirectedToSpaceSelector = 'Redirected to Space Selector',
   NotFound = 'Not Found',
 }
 
@@ -28,10 +30,11 @@ interface GetUICapabilitiesResult {
 }
 
 export class UICapabilitiesService {
-  private readonly log: LogService;
+  private readonly log: ToolingLog;
   private readonly axios: AxiosInstance;
+  private readonly featureService: FeaturesService;
 
-  constructor(url: string, log: LogService) {
+  constructor(url: string, log: ToolingLog, featureService: FeaturesService) {
     this.log = log;
     this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/ui_capabilities' },
@@ -39,6 +42,7 @@ export class UICapabilitiesService {
       maxRedirects: 0,
       validateStatus: () => true, // we'll handle our own statusCodes and throw informative errors
     });
+    this.featureService = featureService;
   }
 
   public async get({
@@ -48,8 +52,15 @@ export class UICapabilitiesService {
     credentials?: BasicCredentials;
     spaceId?: string;
   }): Promise<GetUICapabilitiesResult> {
+    const features = await this.featureService.get();
+    const applications = Object.values(features)
+      .flatMap((feature) => feature.app)
+      .filter((link) => !!link);
+
     const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
-    this.log.debug(`requesting ${spaceUrlPrefix}/app/kibana to parse the uiCapabilities`);
+    this.log.debug(
+      `requesting ${spaceUrlPrefix}/api/core/capabilities to parse the uiCapabilities`
+    );
     const requestHeaders = credentials
       ? {
           Authorization: `Basic ${Buffer.from(
@@ -57,14 +68,18 @@ export class UICapabilitiesService {
           ).toString('base64')}`,
         }
       : {};
-    const response = await this.axios.get(`${spaceUrlPrefix}/app/kibana`, {
-      headers: requestHeaders,
-    });
+    const response = await this.axios.post(
+      `${spaceUrlPrefix}/api/core/capabilities`,
+      { applications: [...applications, 'kibana:stack_management'] },
+      {
+        headers: requestHeaders,
+      }
+    );
 
-    if (response.status === 302 && response.headers.location === '/') {
+    if (response.status === 302 && response.headers.location === '/spaces/space_selector') {
       return {
         success: false,
-        failureReason: GetUICapabilitiesFailureReason.RedirectedToRoot,
+        failureReason: GetUICapabilitiesFailureReason.RedirectedToSpaceSelector,
       };
     }
 
@@ -83,35 +98,20 @@ export class UICapabilitiesService {
       );
     }
 
-    const dom = cheerio.load(response.data.toString());
-    const element = dom('kbn-injected-metadata');
-    if (!element) {
-      throw new Error('Unable to find "kbn-injected-metadata" element');
-    }
-
-    const dataAttrJson = element.attr('data');
-
-    try {
-      const dataAttr = JSON.parse(dataAttrJson);
-      return {
-        success: true,
-        value: dataAttr.capabilities as UICapabilities,
-      };
-    } catch (err) {
-      throw new Error(
-        `Unable to parse JSON from the kbn-injected-metadata data attribute: ${dataAttrJson}`
-      );
-    }
+    return {
+      success: true,
+      value: response.data,
+    };
   }
 }
 
-export function UICapabilitiesProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
-  const log = getService('log');
-  const config = getService('config');
+export function UICapabilitiesProvider(context: FtrProviderContext) {
+  const log = context.getService('log');
+  const config = context.getService('config');
   const noAuthUrl = formatUrl({
     ...config.get('servers.kibana'),
     auth: undefined,
   });
 
-  return new UICapabilitiesService(noAuthUrl, log);
+  return new UICapabilitiesService(noAuthUrl, log, FeaturesProvider(context));
 }

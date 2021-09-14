@@ -1,0 +1,45 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies network activity from unexpected system applications. This may indicate adversarial activity as these applications are often leveraged by adversaries to execute code and evade detection.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Unusual Process Network Connection",
+  "query": "sequence by process.entity_id\n  [process where (process.name : \"Microsoft.Workflow.Compiler.exe\" or\n                  process.name : \"bginfo.exe\" or\n                  process.name : \"cdb.exe\" or\n                  process.name : \"cmstp.exe\" or\n                  process.name : \"csi.exe\" or\n                  process.name : \"dnx.exe\" or\n                  process.name : \"fsi.exe\" or\n                  process.name : \"ieexec.exe\" or\n                  process.name : \"iexpress.exe\" or\n                  process.name : \"odbcconf.exe\" or\n                  process.name : \"rcsi.exe\" or\n                  process.name : \"xwizard.exe\") and\n     event.type == \"start\"]\n  [network where (process.name : \"Microsoft.Workflow.Compiler.exe\" or\n                  process.name : \"bginfo.exe\" or\n                  process.name : \"cdb.exe\" or\n                  process.name : \"cmstp.exe\" or\n                  process.name : \"csi.exe\" or\n                  process.name : \"dnx.exe\" or\n                  process.name : \"fsi.exe\" or\n                  process.name : \"ieexec.exe\" or\n                  process.name : \"iexpress.exe\" or\n                  process.name : \"odbcconf.exe\" or\n                  process.name : \"rcsi.exe\" or\n                  process.name : \"xwizard.exe\")]\n",
+  "risk_score": 21,
+  "rule_id": "610949a1-312f-4e04-bb55-3a79b8c95267",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1127",
+          "name": "Trusted Developer Utilities Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1127/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 7
+}

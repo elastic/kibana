@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,14 +14,10 @@ describe('Latest Types', () => {
     const latestTypes = [
       { type: 'Packetbeat', count: 4 },
       { type: 'Metricbeat', count: 4 },
-      { type: 'Heartbeat', count: 2 }
+      { type: 'Heartbeat', count: 2 },
     ];
 
-    const component = shallow(
-      <LatestTypes
-        latestTypes={latestTypes}
-      />
-    );
+    const component = shallow(<LatestTypes latestTypes={latestTypes} />);
 
     expect(component).toMatchSnapshot();
   });

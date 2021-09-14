@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Location } from 'history';
-import { TIMEPICKER_DEFAULTS } from '../../../context/UrlParamsContext/constants';
 import { toQuery } from './url_helpers';
 
 export interface TimepickerRisonData {
@@ -21,18 +21,18 @@ export interface TimepickerRisonData {
 
 export function getTimepickerRisonData(currentSearch: Location['search']) {
   const currentQuery = toQuery(currentSearch);
-  const nextQuery = {
-    ...TIMEPICKER_DEFAULTS,
-    ...currentQuery
-  };
   return {
     time: {
-      from: encodeURIComponent(nextQuery.rangeFrom),
-      to: encodeURIComponent(nextQuery.rangeTo)
+      from: currentQuery.rangeFrom || '',
+      to: currentQuery.rangeTo || '',
     },
     refreshInterval: {
-      pause: String(nextQuery.refreshPaused),
-      value: String(nextQuery.refreshInterval)
-    }
+      pause: currentQuery.refreshPaused
+        ? Boolean(currentQuery.refreshPaused)
+        : true,
+      value: currentQuery.refreshInterval
+        ? parseInt(currentQuery.refreshInterval, 10)
+        : 0,
+    },
   };
 }

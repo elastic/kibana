@@ -1,0 +1,11 @@
+{
+  "get_script_context": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_script_context"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/painless/master/painless-contexts.html"
+  }
+}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { checkNodesSettings } from '../../../../../lib/elasticsearch_settings';
@@ -15,7 +16,7 @@ export function nodesSettingsCheckRoute(server) {
     method: 'GET',
     path: '/api/monitoring/v1/elasticsearch_settings/check/nodes',
     config: {
-      validate: {}
+      validate: {},
     },
     async handler(req) {
       try {
@@ -24,6 +25,6 @@ export function nodesSettingsCheckRoute(server) {
       } catch (err) {
         throw handleSettingsError(err);
       }
-    }
+    },
   });
 }

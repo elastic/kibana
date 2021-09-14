@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export type ElasticsearchMappingOf<Type> = Type extends string
   ? ElasticsearchStringFieldMapping
   : Type extends number
   ? ElasticsearchNumberFieldMapping
+  : Type extends boolean
+  ? ElasticsearchBooleanFieldMapping
   : Type extends object[]
   ? ElasticsearchNestedFieldMapping<Type>
   : Type extends {}
@@ -16,6 +19,10 @@ export type ElasticsearchMappingOf<Type> = Type extends string
 
 export interface ElasticsearchStringFieldMapping {
   type: 'keyword' | 'text';
+}
+
+export interface ElasticsearchBooleanFieldMapping {
+  type: 'boolean';
 }
 
 export interface ElasticsearchNumberFieldMapping {

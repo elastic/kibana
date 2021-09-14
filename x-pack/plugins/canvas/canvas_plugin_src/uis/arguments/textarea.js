@@ -1,69 +1,72 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { compose, withProps } from 'recompose';
-import { EuiForm, EuiTextArea, EuiSpacer, EuiButton } from '@elastic/eui';
-import { get } from 'lodash';
-import { createStatefulPropHoc } from '../../../public/components/enhance/stateful_prop';
+import { EuiFormRow, EuiTextArea, EuiSpacer, EuiButton } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../../i18n';
 
-const TextAreaArgInput = ({ updateValue, value, confirm, commit, renderError, argId }) => {
-  if (typeof value !== 'string') {
+const { Textarea: strings } = ArgumentStrings;
+
+const TextAreaArgInput = ({ argValue, typeInstance, onValueChange, renderError, argId }) => {
+  const confirm = typeInstance?.options?.confirm;
+  const [value, setValue] = useState();
+
+  const onChange = useCallback(
+    (ev) => {
+      const onChangeFn = confirm ? setValue : onValueChange;
+      onChangeFn(ev.target.value);
+    },
+    [confirm, onValueChange]
+  );
+
+  useEffect(() => {
+    setValue(argValue);
+  }, [argValue]);
+
+  if (typeof argValue !== 'string') {
     renderError();
     return null;
   }
+
   return (
-    <EuiForm>
-      <EuiTextArea
-        className="canvasTextArea--code"
-        id={argId}
-        rows={10}
-        value={value}
-        resize="none"
-        onChange={confirm ? updateValue : ev => commit(ev.target.value)}
-      />
+    <div>
+      <EuiFormRow display="rowCompressed">
+        <EuiTextArea
+          className="canvasTextArea__code"
+          id={argId}
+          compressed
+          rows={10}
+          value={value}
+          resize="none"
+          onChange={onChange}
+        />
+      </EuiFormRow>
       <EuiSpacer size="s" />
-      <EuiButton size="s" onClick={() => commit(value)}>
+      <EuiButton size="s" onClick={() => onValueChange(value)}>
         {confirm}
       </EuiButton>
       <EuiSpacer size="xs" />
-    </EuiForm>
+    </div>
   );
 };
 
 TextAreaArgInput.propTypes = {
-  updateValue: PropTypes.func.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
-  confirm: PropTypes.string,
-  commit: PropTypes.func.isRequired,
-  renderError: PropTypes.func,
-  argId: PropTypes.string.isRequired,
-};
-
-const EnhancedTextAreaArgInput = compose(
-  withProps(({ onValueChange, typeInstance, argValue }) => ({
-    confirm: get(typeInstance, 'options.confirm'),
-    commit: onValueChange,
-    value: argValue,
-  })),
-  createStatefulPropHoc('value')
-)(TextAreaArgInput);
-
-EnhancedTextAreaArgInput.propTypes = {
   argValue: PropTypes.any.isRequired,
   onValueChange: PropTypes.func.isRequired,
+  renderError: PropTypes.func,
+  argId: PropTypes.string.isRequired,
   typeInstance: PropTypes.object.isRequired,
-  renderError: PropTypes.func.isRequired,
 };
 
 export const textarea = () => ({
   name: 'textarea',
-  displayName: 'Textarea',
-  help: 'Input long strings',
-  template: templateFromReactComponent(EnhancedTextAreaArgInput),
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
+  template: templateFromReactComponent(TextAreaArgInput),
 });

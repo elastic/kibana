@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies suspicious child processes of Microsoft Outlook. These child processes are often associated with spear phishing activity.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious MS Outlook Child Process",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"outlook.exe\" and\n  process.name : (\"Microsoft.Workflow.Compiler.exe\", \"arp.exe\", \"atbroker.exe\", \"bginfo.exe\", \"bitsadmin.exe\",\n                  \"cdb.exe\", \"certutil.exe\", \"cmd.exe\", \"cmstp.exe\", \"cscript.exe\", \"csi.exe\", \"dnx.exe\", \"dsget.exe\",\n                  \"dsquery.exe\", \"forfiles.exe\", \"fsi.exe\", \"ftp.exe\", \"gpresult.exe\", \"hostname.exe\", \"ieexec.exe\",\n                  \"iexpress.exe\", \"installutil.exe\", \"ipconfig.exe\", \"mshta.exe\", \"msxsl.exe\", \"nbtstat.exe\", \"net.exe\",\n                  \"net1.exe\", \"netsh.exe\", \"netstat.exe\", \"nltest.exe\", \"odbcconf.exe\", \"ping.exe\", \"powershell.exe\",\n                  \"pwsh.exe\", \"qprocess.exe\", \"quser.exe\", \"qwinsta.exe\", \"rcsi.exe\", \"reg.exe\", \"regasm.exe\",\n                  \"regsvcs.exe\", \"regsvr32.exe\", \"sc.exe\", \"schtasks.exe\", \"systeminfo.exe\", \"tasklist.exe\",\n                  \"tracert.exe\", \"whoami.exe\", \"wmic.exe\", \"wscript.exe\", \"xwizard.exe\")\n",
+  "risk_score": 21,
+  "rule_id": "32f4675e-6c49-4ace-80f9-97c9259dca2e",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Initial Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1566",
+          "name": "Phishing",
+          "reference": "https://attack.mitre.org/techniques/T1566/",
+          "subtechnique": [
+            {
+              "id": "T1566.001",
+              "name": "Spearphishing Attachment",
+              "reference": "https://attack.mitre.org/techniques/T1566/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 9
+}

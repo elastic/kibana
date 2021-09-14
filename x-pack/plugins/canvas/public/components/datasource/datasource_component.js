@@ -1,23 +1,44 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import {
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiButtonEmpty,
   EuiSpacer,
+  EuiIcon,
+  EuiCallOut,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
+
+import { getDefaultIndex } from '../../lib/es_service';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 
+const strings = {
+  getExpressionArgDescription: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourceComponent.expressionArgDescription', {
+      defaultMessage:
+        'The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.',
+    }),
+  getPreviewButtonLabel: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourceComponent.previewButtonLabel', {
+      defaultMessage: 'Preview data',
+    }),
+  getSaveButtonLabel: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourceComponent.saveButtonLabel', {
+      defaultMessage: 'Save',
+    }),
+};
 export class DatasourceComponent extends PureComponent {
   static propTypes = {
     args: PropTypes.object.isRequired,
@@ -39,7 +60,14 @@ export class DatasourceComponent extends PureComponent {
     setPreviewing: PropTypes.func,
     isInvalid: PropTypes.bool,
     setInvalid: PropTypes.func,
+    renderError: PropTypes.func,
   };
+
+  state = { defaultIndex: '' };
+
+  componentDidMount() {
+    getDefaultIndex().then((defaultIndex) => this.setState({ defaultIndex }));
+  }
 
   componentDidUpdate(prevProps) {
     const { args, resetArgs, datasource, selectDatasource } = this.props;
@@ -58,7 +86,7 @@ export class DatasourceComponent extends PureComponent {
     type: 'function',
   });
 
-  setSelectedDatasource = value => {
+  setSelectedDatasource = (value) => {
     const {
       datasource,
       resetArgs,
@@ -75,7 +103,7 @@ export class DatasourceComponent extends PureComponent {
       // otherwise, clear the arguments, the form will update them
       updateArgs && updateArgs({});
     }
-    selectDatasource && selectDatasource(datasources.find(d => d.name === value));
+    selectDatasource && selectDatasource(datasources.find((d) => d.name === value));
     setSelecting(false);
   };
 
@@ -98,10 +126,19 @@ export class DatasourceComponent extends PureComponent {
       setPreviewing,
       isInvalid,
       setInvalid,
+      renderError,
     } = this.props;
 
+    const { defaultIndex } = this.state;
+
     if (selecting) {
-      return <DatasourceSelector datasources={datasources} onSelect={this.setSelectedDatasource} />;
+      return (
+        <DatasourceSelector
+          datasources={datasources}
+          onSelect={this.setSelectedDatasource}
+          current={stateDatasource.name}
+        />
+      );
     }
 
     const datasourcePreview = previewing ? (
@@ -112,46 +149,63 @@ export class DatasourceComponent extends PureComponent {
       />
     ) : null;
 
+    const datasourceRender = () =>
+      stateDatasource.render({
+        args: stateArgs,
+        updateArgs,
+        datasourceDef,
+        isInvalid,
+        setInvalid,
+        defaultIndex,
+        renderError,
+      });
+
+    const hasExpressionArgs = Object.values(stateArgs).some((a) => a && typeof a[0] === 'object');
+
     return (
       <Fragment>
-        <EuiPanel>
+        <div className="canvasDataSource__section">
           <EuiButtonEmpty
             iconSide="right"
-            flush="left"
-            iconType="sortRight"
+            iconType="arrowRight"
             onClick={() => setSelecting(!selecting)}
+            className="canvasDataSource__triggerButton"
+            flush="left"
+            size="s"
           >
-            Change your data source
+            <EuiIcon type={stateDatasource.image} className="canvasDataSource__triggerButtonIcon" />
+            {stateDatasource.displayName}
           </EuiButtonEmpty>
           <EuiSpacer size="s" />
-          {stateDatasource.render({
-            args: stateArgs,
-            updateArgs,
-            datasourceDef,
-            isInvalid,
-            setInvalid,
-          })}
-          <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={() => setPreviewing(true)} icon="check">
-                Preview
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                disabled={isInvalid}
-                size="s"
-                color="secondary"
-                fill
-                onClick={this.save}
-                icon="check"
-              >
-                Save
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+          {!hasExpressionArgs ? (
+            <>
+              {datasourceRender()}
+              <EuiHorizontalRule margin="m" />
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty size="s" onClick={() => setPreviewing(true)}>
+                    {strings.getPreviewButtonLabel()}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    disabled={isInvalid}
+                    size="s"
+                    onClick={this.save}
+                    fill
+                    color="secondary"
+                  >
+                    {strings.getSaveButtonLabel()}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : (
+            <EuiCallOut color="warning">
+              <p>{strings.getExpressionArgDescription()}</p>
+            </EuiCallOut>
+          )}
+        </div>
 
         {datasourcePreview}
       </Fragment>

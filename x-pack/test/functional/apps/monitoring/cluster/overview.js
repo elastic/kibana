@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,18 +16,16 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-green-gold', {
-          from: '2017-08-23 21:29:35.267',
-          to: '2017-08-23 21:47:25.556',
+        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_green_gold', {
+          from: 'Aug 23, 2017 @ 21:29:35.267',
+          to: 'Aug 23, 2017 @ 21:47:25.556',
         });
+
+        await overview.closeAlertsModal();
       });
 
       after(async () => {
         await tearDown();
-      });
-
-      it('shows alerts panel, because there are resolved alerts in the time range', async () => {
-        expect(await overview.doesClusterAlertsExist()).to.be(true);
       });
 
       it('elasticsearch panel has no ML line, because license is Gold', async () => {
@@ -34,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows elasticsearch panel with data', async () => {
-        expect(await overview.getEsStatus()).to.be('Health is green');
+        expect(await overview.getEsStatus()).to.be('Healthy');
         expect(await overview.getEsVersion()).to.be('7.0.0-alpha1');
         expect(await overview.getEsUptime()).to.be('20 minutes');
         expect(await overview.getEsNumberOfNodes()).to.be('Nodes: 2');
@@ -48,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows kibana panel', async () => {
-        expect(await overview.getEsStatus()).to.be('Health is green');
+        expect(await overview.getEsStatus()).to.be('Healthy');
         expect(await overview.getKbnRequests()).to.be('914');
         expect(await overview.getKbnMaxResponseTime()).to.be('2873 ms');
         expect(await overview.getKbnInstances()).to.be('Instances: 1');
@@ -70,18 +69,16 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-yellow-platinum', {
-          from: '2017-08-29 17:23:47.528',
-          to: '2017-08-29 17:25:50.701',
+        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum', {
+          from: 'Aug 29, 2017 @ 17:23:47.528',
+          to: 'Aug 29, 2017 @ 17:25:50.701',
         });
+
+        await overview.closeAlertsModal();
       });
 
       after(async () => {
         await tearDown();
-      });
-
-      it('shows alerts panel, because cluster status is Yellow', async () => {
-        expect(await overview.doesClusterAlertsExist()).to.be(true);
       });
 
       it('elasticsearch panel has ML, because license is Platinum', async () => {
@@ -89,7 +86,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows elasticsearch panel with data', async () => {
-        expect(await overview.getEsStatus()).to.be('Health is yellow');
+        expect(await overview.getEsStatus()).to.be('Missing replica shards');
         expect(await overview.getEsVersion()).to.be('7.0.0-alpha1');
         expect(await overview.getEsUptime()).to.be('5 minutes');
         expect(await overview.getEsNumberOfNodes()).to.be('Nodes: 1');
@@ -103,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows kibana panel', async () => {
-        expect(await overview.getKbnStatus()).to.be('Health is green');
+        expect(await overview.getKbnStatus()).to.be('Healthy');
         expect(await overview.getKbnRequests()).to.be('174');
         expect(await overview.getKbnMaxResponseTime()).to.be('2203 ms');
         expect(await overview.getKbnInstances()).to.be('Instances: 1');
@@ -120,10 +117,12 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-yellow-basic', {
-          from: '2017-08-29 17:55:43.879',
-          to: '2017-08-29 18:01:34.958',
+        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_basic', {
+          from: 'Aug 29, 2017 @ 17:55:43.879',
+          to: 'Aug 29, 2017 @ 18:01:34.958',
         });
+
+        await overview.closeAlertsModal();
       });
 
       after(async () => {
@@ -139,7 +138,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows elasticsearch panel with data', async () => {
-        expect(await overview.getEsStatus()).to.be('Health is yellow');
+        expect(await overview.getEsStatus()).to.be('Missing replica shards');
         expect(await overview.getEsVersion()).to.be('7.0.0-alpha1');
         expect(await overview.getEsUptime()).to.be('8 minutes');
         expect(await overview.getEsNumberOfNodes()).to.be('Nodes: 1');

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import './collapsible_statement.scss';
 
 function getToggleIconType(isCollapsed) {
   return isCollapsed ? 'arrowRight' : 'arrowDown';
@@ -29,7 +31,7 @@ export function CollapsibleStatement(props) {
       responsive={false}
       gutterSize="none"
       alignItems="center"
-      className="monPipelineViewer__statement"
+      className="monPipelineViewer__collapsibleStatement"
     >
       <EuiFlexItem key={id} grow={false}>
         <EuiButtonIcon

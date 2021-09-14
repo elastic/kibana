@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { parse } from '@babel/parser';
@@ -39,21 +28,21 @@ description 3\` });
 
 describe('dev/i18n/extractors/i18n_call', () => {
   test('extracts "i18n" and "i18n.translate" functions call message', () => {
-    let callExpressionNode = [...traverseNodes(parse(i18nCallMessageSource).program.body)].find(
-      node => isCallExpression(node)
-    );
+    let callExpressionNode = [
+      ...traverseNodes(parse(i18nCallMessageSource).program.body),
+    ].find((node) => isCallExpression(node));
 
     expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
 
-    callExpressionNode = [...traverseNodes(parse(translateCallMessageSource).program.body)].find(
-      node => isCallExpression(node)
-    );
+    callExpressionNode = [
+      ...traverseNodes(parse(translateCallMessageSource).program.body),
+    ].find((node) => isCallExpression(node));
 
     expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
 
     callExpressionNode = [
       ...traverseNodes(parse(i18nCallMessageWithTemplateLiteralSource).program.body),
-    ].find(node => isCallExpression(node));
+    ].find((node) => isCallExpression(node));
 
     expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
   });
@@ -62,7 +51,7 @@ describe('dev/i18n/extractors/i18n_call', () => {
     const source = `
 i18n(messageIdIdentifier, { defaultMessage: 'Default message', description: 'Message description' });
 `;
-    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find((node) =>
       isCallExpression(node)
     );
 
@@ -71,7 +60,7 @@ i18n(messageIdIdentifier, { defaultMessage: 'Default message', description: 'Mes
 
   test('throws if properties object is not provided', () => {
     const source = `i18n('message-id');`;
-    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find((node) =>
       isCallExpression(node)
     );
 
@@ -83,7 +72,7 @@ i18n(messageIdIdentifier, { defaultMessage: 'Default message', description: 'Mes
 const message = 'Default message';
 i18n('message-id', { defaultMessage: message });
 `;
-    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find((node) =>
       isCallExpression(node)
     );
 
@@ -92,7 +81,7 @@ i18n('message-id', { defaultMessage: message });
 
   test('throws on empty defaultMessage', () => {
     const source = `i18n('message-id', { defaultMessage: '' });`;
-    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find((node) =>
       isCallExpression(node)
     );
 

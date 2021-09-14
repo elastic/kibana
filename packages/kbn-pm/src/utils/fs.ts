@@ -1,39 +1,30 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import cmdShimCb from 'cmd-shim';
+import del from 'del';
 import fs from 'fs';
-import mkdirpCb from 'mkdirp';
 import { ncp } from 'ncp';
 import { dirname, relative } from 'path';
 import { promisify } from 'util';
 
 const lstat = promisify(fs.lstat);
-const readFile = promisify(fs.readFile);
+export const readFile = promisify(fs.readFile);
+export const writeFile = promisify(fs.writeFile);
 const symlink = promisify(fs.symlink);
-const chmod = promisify(fs.chmod);
+export const chmod = promisify(fs.chmod);
 const cmdShim = promisify<string, string>(cmdShimCb);
-const mkdirp = promisify(mkdirpCb);
+const mkdir = promisify(fs.mkdir);
+const realpathNative = promisify(fs.realpath.native);
+export const mkdirp = async (path: string) => await mkdir(path, { recursive: true });
+export const rmdirp = async (path: string) => await del(path, { force: true });
 export const unlink = promisify(fs.unlink);
 export const copyDirectory = promisify(ncp);
-
-export { chmod, readFile, mkdirp };
 
 async function statTest(path: string, block: (stats: fs.Stats) => boolean) {
   try {
@@ -51,7 +42,7 @@ async function statTest(path: string, block: (stats: fs.Stats) => boolean) {
  * @param path
  */
 export async function isSymlink(path: string) {
-  return await statTest(path, stats => stats.isSymbolicLink());
+  return await statTest(path, (stats) => stats.isSymbolicLink());
 }
 
 /**
@@ -59,7 +50,7 @@ export async function isSymlink(path: string) {
  * @param path
  */
 export async function isDirectory(path: string) {
-  return await statTest(path, stats => stats.isDirectory());
+  return await statTest(path, (stats) => stats.isDirectory());
 }
 
 /**
@@ -67,7 +58,7 @@ export async function isDirectory(path: string) {
  * @param path
  */
 export async function isFile(path: string) {
-  return await statTest(path, stats => stats.isFile());
+  return await statTest(path, (stats) => stats.isFile());
 }
 
 /**
@@ -105,4 +96,18 @@ async function forceCreate(src: string, dest: string, type: string) {
   }
 
   await symlink(src, dest, type);
+}
+
+export async function tryRealpath(path: string): Promise<string> {
+  let calculatedPath = path;
+
+  try {
+    calculatedPath = await realpathNative(path);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  return calculatedPath;
 }

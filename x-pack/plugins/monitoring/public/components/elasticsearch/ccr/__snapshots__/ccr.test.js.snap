@@ -1,15 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Ccr that it renders normally 1`] = `
-<EuiPage
-  restrictWidth={false}
->
-  <EuiPageBody
-    restrictWidth={false}
-  >
-    <EuiPageContent
-      panelPaddingSize="l"
-    >
+<EuiPage>
+  <EuiPageBody>
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="CCR"
+          id="xpack.monitoring.elasticsearch.ccr.heading"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
+    <EuiPageContent>
       <EuiPageContentBody>
         <EuiInMemoryTable
           className="monitoringElasticsearchCcrListingTable"
@@ -24,6 +27,12 @@ exports[`Ccr that it renders normally 1`] = `
               Object {
                 "field": "follows",
                 "name": "Follows",
+                "sortable": true,
+              },
+              Object {
+                "field": "alerts",
+                "name": "Alerts",
+                "render": [Function],
                 "sortable": true,
               },
               Object {
@@ -128,6 +137,7 @@ exports[`Ccr that it renders normally 1`] = `
               },
             }
           }
+          tableLayout="fixed"
         />
       </EuiPageContentBody>
     </EuiPageContent>

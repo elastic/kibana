@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { first, map, publishReplay, switchMap, tap } from 'rxjs/operators';
+import { ConnectableObservable, Subscription } from 'rxjs';
+import { first, publishReplay, switchMap, concatMap, tap } from 'rxjs/operators';
 
-import { Config, Env } from '../config';
-import { Logger, LoggerFactory, LoggingConfigType, LoggingService } from '../logging';
+import { Env, RawConfigurationProvider } from '../config';
+import { Logger, LoggerFactory, LoggingConfigType, LoggingSystem } from '../logging';
 import { Server } from '../server';
 
 /**
@@ -30,25 +19,35 @@ import { Server } from '../server';
 export class Root {
   public readonly logger: LoggerFactory;
   private readonly log: Logger;
-  private readonly loggingService: LoggingService;
+  private readonly loggingSystem: LoggingSystem;
   private readonly server: Server;
   private loggingConfigSubscription?: Subscription;
 
   constructor(
-    config$: Observable<Config>,
+    rawConfigProvider: RawConfigurationProvider,
     env: Env,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
-    this.loggingService = new LoggingService();
-    this.logger = this.loggingService.asLoggerFactory();
+    this.loggingSystem = new LoggingSystem();
+    this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('root');
-    this.server = new Server(config$, env, this.logger);
+    this.server = new Server(rawConfigProvider, env, this.loggingSystem);
+  }
+
+  public async preboot() {
+    try {
+      this.server.setupCoreConfig();
+      await this.setupLogging();
+      this.log.debug('prebooting root');
+      return await this.server.preboot();
+    } catch (e) {
+      await this.shutdown(e);
+      throw e;
+    }
   }
 
   public async setup() {
     try {
-      await this.server.setupConfigSchemas();
-      await this.setupLogging();
       this.log.debug('setting up root');
       return await this.server.setup();
     } catch (e) {
@@ -86,7 +85,7 @@ export class Root {
       this.loggingConfigSubscription.unsubscribe();
       this.loggingConfigSubscription = undefined;
     }
-    await this.loggingService.stop();
+    await this.loggingSystem.stop();
 
     if (this.onShutdown !== undefined) {
       this.onShutdown(reason);
@@ -99,10 +98,10 @@ export class Root {
     const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
       switchMap(() => configService.atPath<LoggingConfigType>('logging')),
-      map(config => this.loggingService.upgrade(config)),
+      concatMap((config) => this.loggingSystem.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
       // eslint-disable-next-line no-console
-      tap({ error: err => console.error('Configuring logger failed:', err) }),
+      tap({ error: (err) => console.error('Configuring logger failed:', err) }),
       publishReplay(1)
     ) as ConnectableObservable<void>;
 
@@ -112,7 +111,7 @@ export class Root {
 
     // Send subsequent update failures to this.shutdown(), stopped via loggingConfigSubscription.
     this.loggingConfigSubscription = update$.subscribe({
-      error: err => this.shutdown(err),
+      error: (err) => this.shutdown(err),
     });
 
     // Add subscription we got from `connect` so that we can dispose both of them

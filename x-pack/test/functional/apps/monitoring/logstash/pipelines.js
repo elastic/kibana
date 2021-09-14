@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects(['common']);
+  const retry = getService('retry');
   const overview = getService('monitoringClusterOverview');
   const pipelinesList = getService('monitoringLogstashPipelines');
   const lsClusterSummaryStatus = getService('monitoringLogstashSummaryStatus');
@@ -16,10 +19,12 @@ export default function ({ getService, getPageObjects }) {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('monitoring/logstash-pipelines', {
-        from: '2018-01-22 09:10:00.000',
-        to: '2018-01-22 09:41:00.000',
+      await setup('x-pack/test/functional/es_archives/monitoring/logstash_pipelines', {
+        from: 'Jan 22, 2018 @ 09:10:00.000',
+        to: 'Jan 22, 2018 @ 09:41:00.000',
       });
+
+      await overview.closeAlertsModal();
 
       // go to pipelines listing
       await overview.clickLsPipelines();
@@ -35,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
         nodeCount: 'Nodes\n2',
         memoryUsed: 'Memory\n528.4 MB / 1.9 GB',
         eventsInTotal: 'Events Received\n117.9k',
-        eventsOutTotal: 'Events Emitted\n111.9k'
+        eventsOutTotal: 'Events Emitted\n111.9k',
       });
     });
 
@@ -43,13 +48,15 @@ export default function ({ getService, getPageObjects }) {
       const rows = await pipelinesList.getRows();
       expect(rows.length).to.be(4);
 
+      await pipelinesList.clickIdCol();
+
       const pipelinesAll = await pipelinesList.getPipelinesAll();
 
       const tableData = [
-        { id: 'main', eventsEmittedRate: '108.3 e/s', nodeCount: '1' },
-        { id: 'nginx_logs', eventsEmittedRate: '29.2 e/s', nodeCount: '1' },
+        { id: 'main', eventsEmittedRate: '162.5 e/s', nodeCount: '1' },
+        { id: 'nginx_logs', eventsEmittedRate: '62.5 e/s', nodeCount: '1' },
         { id: 'test_interpolation', eventsEmittedRate: '0 e/s', nodeCount: '1' },
-        { id: 'tweets_about_labradoodles', eventsEmittedRate: '0.6 e/s', nodeCount: '1' },
+        { id: 'tweets_about_labradoodles', eventsEmittedRate: '1.2 e/s', nodeCount: '1' },
       ];
 
       // check the all data in the table
@@ -70,9 +77,9 @@ export default function ({ getService, getPageObjects }) {
 
       const tableData = [
         { id: 'test_interpolation', eventsEmittedRate: '0 e/s', nodeCount: '1' },
-        { id: 'tweets_about_labradoodles', eventsEmittedRate: '0.6 e/s', nodeCount: '1' },
-        { id: 'nginx_logs', eventsEmittedRate: '29.2 e/s', nodeCount: '1' },
-        { id: 'main', eventsEmittedRate: '108.3 e/s', nodeCount: '1' },
+        { id: 'tweets_about_labradoodles', eventsEmittedRate: '1.2 e/s', nodeCount: '1' },
+        { id: 'nginx_logs', eventsEmittedRate: '62.5 e/s', nodeCount: '1' },
+        { id: 'main', eventsEmittedRate: '162.5 e/s', nodeCount: '1' },
       ];
 
       // check the all data in the table
@@ -85,8 +92,11 @@ export default function ({ getService, getPageObjects }) {
 
     it('should filter for specific pipelines', async () => {
       await pipelinesList.setFilter('la');
-      const rows = await pipelinesList.getRows();
-      expect(rows.length).to.be(2);
+      await PageObjects.common.pressEnterKey();
+      await retry.try(async () => {
+        const rows = await pipelinesList.getRows();
+        expect(rows.length).to.be(2);
+      });
       await pipelinesList.clearFilter();
     });
 

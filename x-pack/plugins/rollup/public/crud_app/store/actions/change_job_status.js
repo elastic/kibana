@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,11 +14,7 @@ import {
   showApiError,
 } from '../../services';
 
-import {
-  UPDATE_JOB_START,
-  UPDATE_JOB_SUCCESS,
-  UPDATE_JOB_FAILURE,
-} from '../action_types';
+import { UPDATE_JOB_START, UPDATE_JOB_SUCCESS, UPDATE_JOB_FAILURE } from '../action_types';
 
 import { refreshJobs } from './refresh_jobs';
 
@@ -33,9 +30,12 @@ export const startJobs = (jobIds) => async (dispatch) => {
       type: UPDATE_JOB_FAILURE,
     });
 
-    return showApiError(error, i18n.translate('xpack.rollupJobs.startJobsAction.errorTitle', {
-      defaultMessage: 'Error starting rollup jobs',
-    }));
+    return showApiError(
+      error,
+      i18n.translate('xpack.rollupJobs.startJobsAction.errorTitle', {
+        defaultMessage: 'Error starting rollup jobs',
+      })
+    );
   }
 
   dispatch({
@@ -57,9 +57,12 @@ export const stopJobs = (jobIds) => async (dispatch) => {
       type: UPDATE_JOB_FAILURE,
     });
 
-    return showApiError(error, i18n.translate('xpack.rollupJobs.stopJobsAction.errorTitle', {
-      defaultMessage: 'Error stopping rollup jobs',
-    }));
+    return showApiError(
+      error,
+      i18n.translate('xpack.rollupJobs.stopJobsAction.errorTitle', {
+        defaultMessage: 'Error stopping rollup jobs',
+      })
+    );
   }
 
   dispatch({

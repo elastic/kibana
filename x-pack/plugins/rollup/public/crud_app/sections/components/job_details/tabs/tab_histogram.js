@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -17,12 +18,15 @@ import {
 
 import { FieldList } from '../../field_list';
 
-const columns = [{
-  field: 'name',
-  name: i18n.translate('xpack.rollupJobs.jobDetails.tabHistogram.nameColumnLabel', {
-    defaultMessage: 'Field' }),
-  sortable: true,
-}];
+const columns = [
+  {
+    field: 'name',
+    name: i18n.translate('xpack.rollupJobs.jobDetails.tabHistogram.nameColumnLabel', {
+      defaultMessage: 'Field',
+    }),
+    sortable: true,
+  },
+];
 
 export const TabHistogram = ({ histogram, histogramInterval }) => (
   <Fragment>
@@ -34,17 +38,11 @@ export const TabHistogram = ({ histogram, histogramInterval }) => (
         />
       </EuiDescriptionListTitle>
 
-      <EuiDescriptionListDescription>
-        {histogramInterval}
-      </EuiDescriptionListDescription>
+      <EuiDescriptionListDescription>{histogramInterval}</EuiDescriptionListDescription>
     </EuiDescriptionList>
 
     <EuiSpacer size="l" />
 
-    <FieldList
-      columns={columns}
-      fields={histogram}
-      dataTestSubj="detailPanelHistogramTabTable"
-    />
+    <FieldList columns={columns} fields={histogram} dataTestSubj="detailPanelHistogramTabTable" />
   </Fragment>
 );

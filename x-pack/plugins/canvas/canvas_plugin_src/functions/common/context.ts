@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
-export function context(): ExpressionFunction<'context', any, {}, any> {
+export function context(): ExpressionFunctionDefinition<'context', unknown, {}, unknown> {
   const { help } = getFunctionHelp().context;
 
   return {
     name: 'context',
     help,
     args: {},
-    fn: obj => obj,
+    fn: (obj) => obj,
   };
 }

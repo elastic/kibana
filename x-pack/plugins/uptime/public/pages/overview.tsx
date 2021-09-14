@@ -1,95 +1,52 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-// @ts-ignore EuiSearchBar missing
-import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext, useEffect } from 'react';
-import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
-import { UMUpdateBreadcrumbs } from '../lib/lib';
-import { UptimeSettingsContext } from '../contexts';
-import { useUrlParams } from '../hooks';
-import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import styled from 'styled-components';
 
-interface OverviewPageProps {
-  basePath: string;
-  history: any;
-  location: {
-    pathname: string;
-    search: string;
-  };
-  setBreadcrumbs: UMUpdateBreadcrumbs;
-}
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { useTrackPageview } from '../../../observability/public';
+import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
+import { EmptyState, FilterGroup } from '../components/overview';
+import { StatusPanel } from '../components/overview/status_panel';
+import { QueryBar } from '../components/overview/query_bar/query_bar';
+import { MONITORING_OVERVIEW_LABEL } from '../routes';
 
-type Props = OverviewPageProps;
-
-export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
-
-export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Props) => {
-  const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
-  const [params, updateUrl] = useUrlParams(history, location);
-  const { dateRangeStart, dateRangeEnd, search } = params;
-
-  useEffect(() => {
-    setBreadcrumbs(getOverviewPageBreadcrumbs());
-    if (setHeadingText) {
-      setHeadingText(
-        i18n.translate('xpack.uptime.overviewPage.headerText', {
-          defaultMessage: 'Overview',
-          description: `The text that will be displayed in the app's heading when the Overview page loads.`,
-        })
-      );
+const EuiFlexItemStyled = styled(EuiFlexItem)`
+  && {
+    min-width: 598px;
+    @media only screen and (max-width: 1128px) {
+      min-width: 500px;
     }
-  }, []);
-
-  const filterQueryString = search || '';
-  const sharedProps = {
-    dateRangeStart,
-    dateRangeEnd,
-    filters: search ? JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString)) : undefined,
-  };
-
-  const updateQuery: UptimeSearchBarQueryChangeHandler = ({ query }) => {
-    try {
-      if (query && typeof query.text !== 'undefined') {
-        updateUrl({ search: query.text });
-      }
-      if (refreshApp) {
-        refreshApp();
-      }
-    } catch (e) {
-      updateUrl({ search: '' });
+    @media only screen and (max-width: 630px) {
+      min-width: initial;
     }
-  };
+  }
+`;
 
-  const linkParameters = stringifyUrlParams(params);
+export const OverviewPageComponent = () => {
+  useTrackPageview({ app: 'uptime', path: 'overview' });
+  useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
+
+  useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview
 
   return (
-    <Fragment>
-      <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
-        <FilterBar
-          currentQuery={filterQueryString}
-          updateQuery={updateQuery}
-          variables={sharedProps}
-        />
-        <EuiSpacer size="s" />
-        <Snapshot colors={colors} variables={sharedProps} />
-        <EuiSpacer size="s" />
-        <MonitorList
-          basePath={basePath}
-          dangerColor={colors.danger}
-          dateRangeStart={dateRangeStart}
-          dateRangeEnd={dateRangeEnd}
-          linkParameters={linkParameters}
-          variables={sharedProps}
-        />
-        <EuiSpacer size="s" />
-        <ErrorList linkParameters={linkParameters} variables={sharedProps} />
-      </EmptyState>
-    </Fragment>
+    <EmptyState>
+      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+        <QueryBar />
+        <EuiFlexItemStyled grow={true}>
+          <FilterGroup />
+        </EuiFlexItemStyled>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <StatusPanel />
+      <EuiSpacer size="s" />
+      <MonitorList />
+    </EmptyState>
   );
 };

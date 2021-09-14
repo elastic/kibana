@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Statement } from './statement';
@@ -11,9 +12,9 @@ import { IfElement } from '../list/if_element';
 import { ElseElement } from '../list/else_element';
 
 function makeStatementsForOutgoingVertices(outgoingVertices, statements, next, pipelineStage) {
-  outgoingVertices.forEach(vertex => {
+  outgoingVertices.forEach((vertex) => {
     let currentVertex = vertex;
-    while(isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
+    while (isVertexPipelineStage(currentVertex, pipelineStage) && currentVertex !== next) {
       statements.push(makeStatement(currentVertex, pipelineStage));
       currentVertex = currentVertex.next;
     }
@@ -21,7 +22,7 @@ function makeStatementsForOutgoingVertices(outgoingVertices, statements, next, p
 }
 
 function addStatementsToList(list, statements, depth, id) {
-  statements.forEach(statement => {
+  statements.forEach((statement) => {
     list.push(...statement.toList(depth, id));
   });
 }
@@ -59,20 +60,13 @@ export class IfStatement extends Statement {
   static fromPipelineGraphVertex(ifVertex, pipelineStage) {
     const trueStatements = [];
     const elseStatements = [];
-    const {
-      trueOutgoingVertices,
-      falseOutgoingVertices
-    } = ifVertex;
+    const { trueOutgoingVertices, falseOutgoingVertices } = ifVertex;
 
     const next = ifVertex.next;
 
     makeStatementsForOutgoingVertices(trueOutgoingVertices, trueStatements, next, pipelineStage);
     makeStatementsForOutgoingVertices(falseOutgoingVertices, elseStatements, next, pipelineStage);
 
-    return new IfStatement(
-      ifVertex,
-      trueStatements,
-      elseStatements
-    );
+    return new IfStatement(ifVertex, trueStatements, elseStatements);
   }
 }

@@ -1,0 +1,84 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the loading of a non Microsoft signed DLL that is missing on a default Windows install (phantom DLL) or one that can be loaded from a different location by a native Windows process. This may be abused to persist or elevate privileges via privileged file write vulnerabilities.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious DLL Loaded for Persistence or Privilege Escalation",
+  "query": "library where dll.name :\n  (\n  \"wlbsctrl.dll\",\n  \"wbemcomn.dll\",\n  \"WptsExtensions.dll\",\n  \"Tsmsisrv.dll\",\n  \"TSVIPSrv.dll\",\n  \"Msfte.dll\",\n  \"wow64log.dll\",\n  \"WindowsCoreDeviceInfo.dll\",\n  \"Ualapi.dll\",\n  \"wlanhlp.dll\",\n  \"phoneinfo.dll\",\n  \"EdgeGdi.dll\",\n  \"cdpsgshims.dll\",\n  \"windowsperformancerecordercontrol.dll\",\n  \"diagtrack_win.dll\"\n  ) and \nnot (dll.code_signature.subject_name : (\"Microsoft Windows\", \"Microsoft Corporation\") and dll.code_signature.status : \"trusted\")\n",
+  "references": [
+    "https://itm4n.github.io/windows-dll-hijacking-clarified/",
+    "http://remoteawesomethoughts.blogspot.com/2019/05/windows-10-task-schedulerservice.html",
+    "https://googleprojectzero.blogspot.com/2018/04/windows-exploitation-tricks-exploiting.html",
+    "https://shellz.club/edgegdi-dll-for-persistence-and-lateral-movement/",
+    "https://windows-internals.com/faxing-your-way-to-system/",
+    "http://waleedassar.blogspot.com/2013/01/wow64logdll.html"
+  ],
+  "risk_score": 73,
+  "rule_id": "bfeaf89b-a2a7-48a3-817f-e41829dc61ee",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1574",
+          "name": "Hijack Execution Flow",
+          "reference": "https://attack.mitre.org/techniques/T1574/",
+          "subtechnique": [
+            {
+              "id": "T1574.002",
+              "name": "DLL Side-Loading",
+              "reference": "https://attack.mitre.org/techniques/T1574/002/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1574",
+          "name": "Hijack Execution Flow",
+          "reference": "https://attack.mitre.org/techniques/T1574/",
+          "subtechnique": [
+            {
+              "id": "T1574.001",
+              "name": "DLL Search Order Hijacking",
+              "reference": "https://attack.mitre.org/techniques/T1574/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 2
+}

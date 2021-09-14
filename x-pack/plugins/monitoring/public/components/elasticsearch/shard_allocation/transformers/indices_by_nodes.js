@@ -1,17 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-
-
-import _ from 'lodash';
+import { find, reduce, values, sortBy } from 'lodash';
 import { decorateShards } from '../lib/decorate_shards';
 
 export function indicesByNodes() {
   return function indicesByNodesFn(shards, nodes) {
-
     function createIndex(obj, shard) {
       const id = shard.index;
       if (obj[id]) {
@@ -23,7 +21,7 @@ export function indicesByNodes() {
         children: [],
         unassigned: [],
         unassignedPrimaries: false,
-        type: 'index'
+        type: 'index',
       };
       return obj;
     }
@@ -33,7 +31,7 @@ export function indicesByNodes() {
 
       // If the node is null then it's an unassigned shard and we need to
       // add it to the unassigned array.
-      if (!shard.node || (shard.node === null)) {
+      if (!shard.node || shard.node === null) {
         obj[index].unassigned.push(shard);
         // if the shard is a primary we need to set the unassignedPrimaries flag
         if (shard.primary) {
@@ -42,7 +40,7 @@ export function indicesByNodes() {
         return obj;
       }
 
-      let nodeObj = _.find(obj[index].children, { id: node });
+      let nodeObj = find(obj[index].children, { id: node });
       if (!nodeObj) {
         nodeObj = {
           id: node,
@@ -50,7 +48,7 @@ export function indicesByNodes() {
           name: nodes[node].name,
           node_type: nodes[node].type,
           ip_port: nodes[node].transport_address,
-          children: []
+          children: [],
         };
         obj[index].children.push(nodeObj);
       }
@@ -58,16 +56,20 @@ export function indicesByNodes() {
       return obj;
     }
 
-    const data = _.reduce(decorateShards(shards, nodes), function (obj, shard) {
-      obj = createIndex(obj, shard);
-      obj = createNodeAddShard(obj, shard);
-      return obj;
-    }, {});
-
-    return _(data)
-      .values()
-      .sortBy(index => [ !index.unassignedPrimaries, /^\./.test(index.name), index.name ])
-      .value();
+    const data = reduce(
+      decorateShards(shards, nodes),
+      function (obj, shard) {
+        obj = createIndex(obj, shard);
+        obj = createNodeAddShard(obj, shard);
+        return obj;
+      },
+      {}
+    );
+    const dataValues = values(data);
+    return sortBy(dataValues, (index) => [
+      !index.unassignedPrimaries,
+      /^\./.test(index.name),
+      index.name,
+    ]);
   };
 }
-

@@ -1,41 +1,86 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SearchParams } from 'elasticsearch';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
-  PROCESSOR_EVENT,
-  TRACE_ID
+  TRACE_ID,
+  TRANSACTION_DURATION,
+  SPAN_DURATION,
+  PARENT_ID,
+  ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
-import { Span } from '../../../typings/es_schemas/ui/Span';
-import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
-import { rangeFilter } from '../helpers/range_filter';
-import { Setup } from '../helpers/setup_request';
+import { rangeQuery } from '../../../../observability/server';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
-export async function getTraceItems(traceId: string, setup: Setup) {
-  const { start, end, client, config } = setup;
+export async function getTraceItems(
+  traceId: string,
+  setup: Setup & SetupTimeRange
+) {
+  const { start, end, apmEventClient, config } = setup;
+  const maxTraceItems = config['xpack.apm.ui.maxTraceItems'];
+  const excludedLogLevels = ['debug', 'info', 'warning'];
 
-  const params: SearchParams = {
-    index: [
-      config.get('apm_oss.spanIndices'),
-      config.get('apm_oss.transactionIndices')
-    ],
+  const errorResponsePromise = apmEventClient.search('get_errors_docs', {
+    apm: {
+      events: [ProcessorEvent.error],
+    },
     body: {
-      size: 1000,
+      size: maxTraceItems,
       query: {
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { terms: { [PROCESSOR_EVENT]: ['span', 'transaction'] } },
-            { range: rangeFilter(start, end) }
-          ]
-        }
-      }
-    }
-  };
+            ...rangeQuery(start, end),
+          ],
+          must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
+        },
+      },
+    },
+  });
 
-  const resp = await client.search<Transaction | Span>(params);
-  return resp.hits.hits.map(hit => hit._source);
+  const traceResponsePromise = apmEventClient.search('get_trace_docs', {
+    apm: {
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+    },
+    body: {
+      size: maxTraceItems,
+      query: {
+        bool: {
+          filter: [
+            { term: { [TRACE_ID]: traceId } },
+            ...rangeQuery(start, end),
+          ] as QueryDslQueryContainer[],
+          should: {
+            exists: { field: PARENT_ID },
+          },
+        },
+      },
+      sort: [
+        { _score: { order: 'asc' as const } },
+        { [TRANSACTION_DURATION]: { order: 'desc' as const } },
+        { [SPAN_DURATION]: { order: 'desc' as const } },
+      ],
+      track_total_hits: true,
+    },
+  });
+
+  const [errorResponse, traceResponse] = await Promise.all([
+    errorResponsePromise,
+    traceResponsePromise,
+  ]);
+
+  const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
+  const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
+  const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
+
+  return {
+    exceedsMax,
+    traceDocs,
+    errorDocs,
+  };
 }

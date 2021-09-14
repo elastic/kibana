@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
@@ -13,19 +14,15 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const screenshot = getService('screenshots');
-  const PageObjects = getPageObjects([
-    'security',
-    'common',
-    'header',
-    'discover',
-    'settings']);
+  const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
 
   describe('dls', function () {
     before('initialize tests', async () => {
-      await esArchiver.load('empty_kibana');
-      await esArchiver.loadIfNeeded('security/dlstest');
-      browser.setWindowSize(1600, 1000);
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/dlstest');
+      await browser.setWindowSize(1600, 1000);
 
+      await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('dlstest', null);
 
       await PageObjects.settings.navigateTo();
@@ -35,17 +32,19 @@ export default function ({ getService, getPageObjects }) {
     it('should add new role myroleEast', async function () {
       await PageObjects.security.addRole('myroleEast', {
         elasticsearch: {
-          'indices': [{
-            'names': ['dlstest'],
-            'privileges': ['read', 'view_index_metadata'],
-            'query': '{"match": {"region": "EAST"}}'
-          }]
+          indices: [
+            {
+              names: ['dlstest'],
+              privileges: ['read', 'view_index_metadata'],
+              query: '{"match": {"region": "EAST"}}',
+            },
+          ],
         },
         kibana: {
-          global: ['all']
-        }
+          global: ['all'],
+        },
       });
-      const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
+      const roles = keyBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
       expect(roles).to.have.key('myroleEast');
       expect(roles.myroleEast.reserved).to.be(false);
@@ -53,20 +52,22 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user userEAST ', async function () {
-      await PageObjects.security.clickElasticsearchUsers();
-      await PageObjects.security.addUser({
-        username: 'userEast', password: 'changeme',
-        confirmPassword: 'changeme', fullname: 'dls EAST',
-        email: 'dlstest@elastic.com', save: true, roles: ['kibana_user', 'myroleEast']
+      await PageObjects.security.createUser({
+        username: 'userEast',
+        password: 'changeme',
+        confirm_password: 'changeme',
+        full_name: 'dls EAST',
+        email: 'dlstest@elastic.com',
+        roles: ['kibana_admin', 'myroleEast'],
       });
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
-      expect(users.userEast.roles).to.eql(['kibana_user', 'myroleEast']);
+      expect(users.userEast.roles).to.eql(['kibana_admin', 'myroleEast']);
       expect(users.userEast.reserved).to.be(false);
     });
 
     it('user East should only see EAST doc', async function () {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
       await PageObjects.security.login('userEast', 'changeme');
       await PageObjects.common.navigateToApp('discover');
       await retry.try(async () => {
@@ -74,10 +75,10 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('1');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be('name:ABC Company region:EAST _id:doc1 _type:_doc _index:dlstest _score:0');
+      expect(rowData).to.contain('EAST');
     });
     after('logout', async () => {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
   });
 }

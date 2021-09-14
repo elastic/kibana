@@ -1,50 +1,81 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import glob from 'glob';
-import { resolve } from 'path';
+import Path from 'path';
+import { REPO_ROOT } from '@kbn/utils';
+import { Project, ProjectOptions } from './project';
 
-import { REPO_ROOT } from '../constants';
-import { Project } from './project';
+/**
+ * Simple map of all projects defined in this file, to speed of some other operations
+ * which need to load files by path and to avoid re-parsing base config files hundreds of times
+ */
+export const PROJECT_CACHE = new Map<string, Project>();
 
-export const PROJECTS = [
-  new Project(resolve(REPO_ROOT, 'tsconfig.json')),
-  new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), 'kibana/test'),
-  new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
-  new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), 'x-pack/test'),
+const createProject = (rootRelativePath: string, options: ProjectOptions = {}) =>
+  Project.load(Path.resolve(REPO_ROOT, rootRelativePath), options, {
+    cache: PROJECT_CACHE,
+  });
 
+const findProjects = (pattern: string) =>
   // NOTE: using glob.sync rather than glob-all or globby
   // because it takes less than 10 ms, while the other modules
   // both took closer to 1000ms.
-  ...glob
-    .sync('packages/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map(path => new Project(resolve(REPO_ROOT, path))),
-  ...glob
-    .sync('test/plugin_functional/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map(path => new Project(resolve(REPO_ROOT, path))),
+  glob.sync(pattern, { cwd: REPO_ROOT }).map((path) => createProject(path));
+
+export const PROJECTS = [
+  createProject('tsconfig.json'),
+  createProject('test/tsconfig.json', { name: 'kibana/test' }),
+  createProject('x-pack/test/tsconfig.json', { name: 'x-pack/test' }),
+  createProject('src/core/tsconfig.json'),
+
+  createProject('x-pack/plugins/drilldowns/url_drilldown/tsconfig.json', {
+    name: 'security_solution/cypress',
+  }),
+  createProject('x-pack/plugins/security_solution/cypress/tsconfig.json', {
+    name: 'security_solution/cypress',
+  }),
+  createProject(
+    'x-pack/plugins/enterprise_search/public/applications/shared/cypress/tsconfig.json',
+    { name: 'enterprise_search/shared/cypress' }
+  ),
+  createProject(
+    'x-pack/plugins/enterprise_search/public/applications/enterprise_search/cypress/tsconfig.json',
+    { name: 'enterprise_search/overview/cypress' }
+  ),
+  createProject(
+    'x-pack/plugins/enterprise_search/public/applications/app_search/cypress/tsconfig.json',
+    { name: 'enterprise_search/app_search/cypress' }
+  ),
+  createProject(
+    'x-pack/plugins/enterprise_search/public/applications/workplace_search/cypress/tsconfig.json',
+    { name: 'enterprise_search/workplace_search/cypress' }
+  ),
+  createProject('x-pack/plugins/osquery/cypress/tsconfig.json', {
+    name: 'osquery/cypress',
+  }),
+  createProject('x-pack/plugins/apm/e2e/tsconfig.json', {
+    name: 'apm/cypress',
+    disableTypeCheck: true,
+  }),
+  createProject('x-pack/plugins/apm/ftr_e2e/tsconfig.json', {
+    name: 'apm/ftr_e2e',
+    disableTypeCheck: true,
+  }),
+
+  ...findProjects('packages/*/tsconfig.json'),
+  ...findProjects('src/plugins/*/tsconfig.json'),
+  ...findProjects('src/plugins/chart_expressions/*/tsconfig.json'),
+  ...findProjects('src/plugins/vis_types/*/tsconfig.json'),
+  ...findProjects('x-pack/plugins/*/tsconfig.json'),
+  ...findProjects('examples/*/tsconfig.json'),
+  ...findProjects('x-pack/examples/*/tsconfig.json'),
+  ...findProjects('test/plugin_functional/plugins/*/tsconfig.json'),
+  ...findProjects('test/interpreter_functional/plugins/*/tsconfig.json'),
+  ...findProjects('test/server_integration/__fixtures__/plugins/*/tsconfig.json'),
 ];
-
-export function filterProjectsByFlag(projectFlag?: string) {
-  if (!projectFlag) {
-    return PROJECTS;
-  }
-
-  const tsConfigPath = resolve(projectFlag);
-  return PROJECTS.filter(project => project.tsConfigPath === tsConfigPath);
-}

@@ -1,0 +1,13 @@
+{
+  "id": "mapsEms",
+  "owner": {
+    "name": "GIS",
+    "githubTeam": "kibana-gis"
+  },
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["map"],
+  "ui": true,
+  "server": true,
+  "extraPublicDirs": ["common"]
+}

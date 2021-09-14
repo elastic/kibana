@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { readFile } from 'fs';
@@ -23,11 +12,11 @@ import { parseSingleFile } from './code_parser';
 import { _calculateTopLevelDependency, dependenciesParseStrategy } from './strategies';
 
 jest.mock('./can_require', () => ({
-  canRequire: jest.fn()
+  canRequire: jest.fn(),
 }));
 
 jest.mock('fs', () => ({
-  readFile: jest.fn()
+  readFile: jest.fn(),
 }));
 
 const mockCwd = '/tmp/project/dir/';
@@ -69,7 +58,13 @@ describe('Code Parser Strategies', () => {
       }
     });
 
-    const results = await dependenciesParseStrategy(mockCwd, parseSingleFile, 'dep1/file.js', {}, {});
+    const results = await dependenciesParseStrategy(
+      mockCwd,
+      parseSingleFile,
+      'dep1/file.js',
+      {},
+      {}
+    );
     expect(results[0]).toBe(`${mockCwd}node_modules/dep_from_node_modules/index.js`);
   });
 
@@ -86,7 +81,13 @@ describe('Code Parser Strategies', () => {
       return false;
     });
 
-    const results = await dependenciesParseStrategy(mockCwd, parseSingleFile, 'dep1/file.js', {}, {});
+    const results = await dependenciesParseStrategy(
+      mockCwd,
+      parseSingleFile,
+      'dep1/file.js',
+      {},
+      {}
+    );
     expect(results[0]).toBe(`${mockCwd}dep1/relative_dep/index.js`);
   });
 

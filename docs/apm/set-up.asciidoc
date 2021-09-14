@@ -1,0 +1,36 @@
+[role="xpack"]
+[[apm-ui]]
+== Set up the APM app
+
+++++
+<titleabbrev>Set up</titleabbrev>
+++++
+
+APM is available via the navigation sidebar in {Kib}.
+If you have not already installed and configured Elastic APM,
+the *Setup Instructions* in Kibana will get you started.
+
+[role="screenshot"]
+image::apm/images/apm-setup.png[Installation instructions on the APM page in Kibana]
+
+[float]
+[[apm-configure-index-pattern]]
+=== Load the index pattern
+
+Index patterns tell Kibana which Elasticsearch indices you want to explore.
+An APM index pattern is necessary for certain features in the APM app, like the query bar.
+To set up the correct index pattern,
+simply click *Load Kibana objects* at the bottom of the Setup Instructions.
+
+[role="screenshot"]
+image::apm/images/apm-index-pattern.png[Setup index pattern for APM in Kibana]
+
+TIP: To use a custom index pattern,
+adjust Kibana's <<apm-settings-in-kibana,settings>> or use the <<api-create-apm-index-pattern,Kibana API>>.
+
+[float]
+[[apm-getting-started-next]]
+=== Next steps
+
+No further configuration in the APM app is required.
+Install an APM Agent library in your service to begin visualizing and analyzing your data!

@@ -1,0 +1,21 @@
+{
+  "id": "watcher",
+  "configPath": ["xpack", "watcher"],
+  "version": "kibana",
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": [
+    "home",
+    "licensing",
+    "licenseApiGuard",
+    "management",
+    "charts",
+    "data",
+    "features"
+  ],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["esUiShared", "kibanaReact", "fieldFormats"]
+}

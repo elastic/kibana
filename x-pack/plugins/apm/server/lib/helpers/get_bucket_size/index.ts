@@ -1,30 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
-// @ts-ignore
+// @ts-expect-error
 import { calculateAuto } from './calculate_auto';
-// @ts-ignore
-import { unitToSeconds } from './unit_to_seconds';
 
-export function getBucketSize(start: number, end: number, interval: string) {
+export function getBucketSize({
+  start,
+  end,
+  numBuckets = 50,
+  minBucketSize,
+}: {
+  start: number;
+  end: number;
+  numBuckets?: number;
+  minBucketSize?: number;
+}) {
   const duration = moment.duration(end - start, 'ms');
-  const bucketSize = Math.max(calculateAuto.near(100, duration).asSeconds(), 1);
-  const intervalString = `${bucketSize}s`;
-  const matches = interval && interval.match(/^([\d]+)([shmdwMy]|ms)$/);
-  const minBucketSize = matches
-    ? Number(matches[1]) * unitToSeconds(matches[2])
-    : 0;
+  const bucketSize = Math.max(
+    calculateAuto.near(numBuckets, duration).asSeconds(),
+    minBucketSize || 1
+  );
 
-  if (bucketSize < minBucketSize) {
-    return {
-      bucketSize: minBucketSize,
-      intervalString: interval
-    };
-  }
-
-  return { bucketSize, intervalString };
+  return { bucketSize, intervalString: `${bucketSize}s` };
 }

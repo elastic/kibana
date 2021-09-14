@@ -1,77 +1,118 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import Boom from 'boom';
-import { noop } from 'lodash';
-import { Lifecycle, Request, ResponseToolkit } from 'hapi';
 
-enum ResultType {
+import { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
+import { Logger } from '../../logging';
+import {
+  HapiResponseAdapter,
+  KibanaRequest,
+  IKibanaResponse,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
+  isKibanaResponse,
+  ResponseHeaders,
+} from '../router';
+
+/** @public */
+export enum AuthResultType {
   authenticated = 'authenticated',
+  notHandled = 'notHandled',
   redirected = 'redirected',
-  rejected = 'rejected',
 }
 
-interface Authenticated {
-  type: ResultType.authenticated;
-  state: object;
+/** @public */
+export interface Authenticated extends AuthResultParams {
+  type: AuthResultType.authenticated;
 }
 
-interface Redirected {
-  type: ResultType.redirected;
-  url: string;
+/** @public */
+export interface AuthNotHandled {
+  type: AuthResultType.notHandled;
 }
 
-interface Rejected {
-  type: ResultType.rejected;
-  error: Error;
-  statusCode?: number;
+/** @public */
+export interface AuthRedirected extends AuthRedirectedParams {
+  type: AuthResultType.redirected;
 }
 
-type AuthResult = Authenticated | Rejected | Redirected;
+/** @public */
+export type AuthResult = Authenticated | AuthNotHandled | AuthRedirected;
 
 const authResult = {
-  authenticated(state: object = {}): AuthResult {
-    return { type: ResultType.authenticated, state };
+  authenticated(data: AuthResultParams = {}): AuthResult {
+    return {
+      type: AuthResultType.authenticated,
+      state: data.state,
+      requestHeaders: data.requestHeaders,
+      responseHeaders: data.responseHeaders,
+    };
   },
-  redirected(url: string): AuthResult {
-    return { type: ResultType.redirected, url };
+  notHandled(): AuthResult {
+    return {
+      type: AuthResultType.notHandled,
+    };
   },
-  rejected(error: Error, options: { statusCode?: number } = {}): AuthResult {
-    return { type: ResultType.rejected, error, statusCode: options.statusCode };
-  },
-  isValid(candidate: any): candidate is AuthResult {
-    return (
-      candidate &&
-      (candidate.type === ResultType.authenticated ||
-        candidate.type === ResultType.rejected ||
-        candidate.type === ResultType.redirected)
-    );
+  redirected(headers: { location: string } & ResponseHeaders): AuthResult {
+    return {
+      type: AuthResultType.redirected,
+      headers,
+    };
   },
   isAuthenticated(result: AuthResult): result is Authenticated {
-    return result.type === ResultType.authenticated;
+    return result?.type === AuthResultType.authenticated;
   },
-  isRedirected(result: AuthResult): result is Redirected {
-    return result.type === ResultType.redirected;
+  isNotHandled(result: AuthResult): result is AuthNotHandled {
+    return result?.type === AuthResultType.notHandled;
   },
-  isRejected(result: AuthResult): result is Rejected {
-    return result.type === ResultType.rejected;
+  isRedirected(result: AuthResult): result is AuthRedirected {
+    return result?.type === AuthResultType.redirected;
   },
 };
+
+/**
+ * Auth Headers map
+ * @public
+ */
+
+export type AuthHeaders = Record<string, string | string[]>;
+
+/**
+ * Result of successful authentication.
+ * @public
+ */
+export interface AuthResultParams {
+  /**
+   * Data to associate with an incoming request. Any downstream plugin may get access to the data.
+   */
+  state?: Record<string, any>;
+  /**
+   * Auth specific headers to attach to a request object.
+   * Used to perform a request to Elasticsearch on behalf of an authenticated user.
+   */
+  requestHeaders?: AuthHeaders;
+  /**
+   * Auth specific headers to attach to a response object.
+   * Used to send back authentication mechanism related headers to a client when needed.
+   */
+  responseHeaders?: AuthHeaders;
+}
+
+/**
+ * Result of auth redirection.
+ * @public
+ */
+export interface AuthRedirectedParams {
+  /**
+   * Headers to attach for auth redirect.
+   * Must include "location" header
+   */
+  headers: { location: string } & ResponseHeaders;
+}
 
 /**
  * @public
@@ -79,52 +120,91 @@ const authResult = {
  */
 export interface AuthToolkit {
   /** Authentication is successful with given credentials, allow request to pass through */
-  authenticated: (state?: object) => AuthResult;
-  /** Authentication requires to interrupt request handling and redirect to a configured url */
-  redirected: (url: string) => AuthResult;
-  /** Authentication is unsuccessful, fail the request with specified error. */
-  rejected: (error: Error, options?: { statusCode?: number }) => AuthResult;
+  authenticated: (data?: AuthResultParams) => AuthResult;
+  /**
+   * User has no credentials.
+   * Allows user to access a resource when authRequired is 'optional'
+   * Rejects a request when authRequired: true
+   * */
+  notHandled: () => AuthResult;
+  /**
+   * Redirects user to another location to complete authentication when authRequired: true
+   * Allows user to access a resource without redirection when authRequired: 'optional'
+   * */
+  redirected: (headers: { location: string } & ResponseHeaders) => AuthResult;
 }
 
 const toolkit: AuthToolkit = {
   authenticated: authResult.authenticated,
+  notHandled: authResult.notHandled,
   redirected: authResult.redirected,
-  rejected: authResult.rejected,
 };
 
-/** @public */
+/**
+ * See {@link AuthToolkit}.
+ * @public
+ */
 export type AuthenticationHandler = (
-  request: Readonly<Request>,
-  t: AuthToolkit
-) => AuthResult | Promise<AuthResult>;
+  request: KibanaRequest,
+  response: LifecycleResponseFactory,
+  toolkit: AuthToolkit
+) => AuthResult | IKibanaResponse | Promise<AuthResult | IKibanaResponse>;
 
 /** @public */
 export function adoptToHapiAuthFormat(
   fn: AuthenticationHandler,
-  onSuccess: (req: Request, state: unknown) => void = noop
+  log: Logger,
+  onAuth: (request: Request, data: AuthResultParams) => void = () => undefined
 ) {
   return async function interceptAuth(
-    req: Request,
-    h: ResponseToolkit
+    request: Request,
+    responseToolkit: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
+    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
+    const kibanaRequest = KibanaRequest.from(request, undefined, false);
+
     try {
-      const result = await fn(req, toolkit);
-      if (!authResult.isValid(result)) {
-        throw new Error(
-          `Unexpected result from Authenticate. Expected AuthResult, but given: ${result}.`
+      const result = await fn(kibanaRequest, lifecycleResponseFactory, toolkit);
+
+      if (isKibanaResponse(result)) {
+        return hapiResponseAdapter.handle(result);
+      }
+
+      if (authResult.isAuthenticated(result)) {
+        onAuth(request, {
+          state: result.state,
+          requestHeaders: result.requestHeaders,
+          responseHeaders: result.responseHeaders,
+        });
+        return responseToolkit.authenticated({ credentials: result.state || {} });
+      }
+
+      if (authResult.isRedirected(result)) {
+        // we cannot redirect a user when resources with optional auth requested
+        if (kibanaRequest.route.options.authRequired === 'optional') {
+          return responseToolkit.continue;
+        }
+
+        return hapiResponseAdapter.handle(
+          lifecycleResponseFactory.redirected({
+            // hapi doesn't accept string[] as a valid header
+            headers: result.headers as any,
+          })
         );
       }
-      if (authResult.isAuthenticated(result)) {
-        onSuccess(req, result.state);
-        return h.authenticated({ credentials: result.state });
+
+      if (authResult.isNotHandled(result)) {
+        if (kibanaRequest.route.options.authRequired === 'optional') {
+          return responseToolkit.continue;
+        }
+        return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());
       }
-      if (authResult.isRedirected(result)) {
-        return h.redirect(result.url).takeover();
-      }
-      const { error, statusCode } = result;
-      return Boom.boomify(error, { statusCode });
+      throw new Error(
+        `Unexpected result from Authenticate. Expected AuthResult or KibanaResponse, but given: ${result}.`
+      );
     } catch (error) {
-      return Boom.internal(error.message, { statusCode: 500 });
+      log.error(error);
+      return hapiResponseAdapter.toInternalError();
     }
   };
 }

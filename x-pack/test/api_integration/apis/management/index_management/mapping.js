@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,12 +12,8 @@ import { registerHelpers } from './mapping.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
 
-  const {
-    createIndex,
-    cleanUp: cleanUpEsResources
-  } = initElasticsearchHelpers(es);
+  const { createIndex, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(getService);
 
   const { getIndexMapping } = registerHelpers({ supertest });
 
@@ -26,16 +23,16 @@ export default function ({ getService }) {
     it('should fetch the index mapping', async () => {
       const mappings = {
         properties: {
-          total: { type: 'long'  },
-          tag: { type: 'keyword'  },
-          createdAt: { type: 'date'  },
-        }
+          total: { type: 'long' },
+          tag: { type: 'keyword' },
+          createdAt: { type: 'date' },
+        },
       };
       const index = await createIndex(undefined, { mappings });
 
       const { body } = await getIndexMapping(index).expect(200);
 
-      expect(body.mapping).to.eql(mappings);
+      expect(body.mappings).to.eql(mappings);
     });
   });
 }

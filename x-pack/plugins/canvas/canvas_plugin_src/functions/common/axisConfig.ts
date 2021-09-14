@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable, Position } from '../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Position } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   show: boolean;
@@ -21,7 +22,12 @@ interface AxisConfig extends Arguments {
   type: 'axisConfig';
 }
 
-export function axisConfig(): ExpressionFunction<'axisConfig', Datatable, Arguments, AxisConfig> {
+export function axisConfig(): ExpressionFunctionDefinition<
+  'axisConfig',
+  null,
+  Arguments,
+  AxisConfig
+> {
   const { help, args: argHelp } = getFunctionHelp().axisConfig;
   const errors = getFunctionErrors().axisConfig;
 
@@ -29,15 +35,16 @@ export function axisConfig(): ExpressionFunction<'axisConfig', Datatable, Argume
     name: 'axisConfig',
     aliases: [],
     type: 'axisConfig',
-    context: {
-      types: ['datatable'],
-    },
+    inputTypes: ['null'],
     help,
     args: {
-      show: {
-        types: ['boolean'],
-        help: argHelp.show,
-        default: true,
+      max: {
+        types: ['number', 'string', 'null'],
+        help: argHelp.max,
+      },
+      min: {
+        types: ['number', 'string', 'null'],
+        help: argHelp.min,
       },
       position: {
         types: ['string'],
@@ -45,20 +52,17 @@ export function axisConfig(): ExpressionFunction<'axisConfig', Datatable, Argume
         options: Object.values(Position),
         default: 'left',
       },
-      min: {
-        types: ['number', 'date', 'string', 'null'],
-        help: argHelp.min,
-      },
-      max: {
-        types: ['number', 'date', 'string', 'null'],
-        help: argHelp.max,
+      show: {
+        types: ['boolean'],
+        help: argHelp.show,
+        default: true,
       },
       tickSize: {
         types: ['number', 'null'],
         help: argHelp.tickSize,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const { position, min, max, ...rest } = args;
 
       if (!Object.values(Position).includes(position)) {

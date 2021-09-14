@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { PureComponent, Fragment } from 'react';
@@ -35,19 +36,10 @@ export class FormEntryRow extends PureComponent {
     type: PropTypes.string,
     onValueUpdate: PropTypes.func.isRequired,
     field: PropTypes.string.isRequired,
-    value: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number
-    ]).isRequired,
-    defaultValue: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number
-    ]),
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     isLoading: PropTypes.bool,
-    error: PropTypes.oneOfType([
-      PropTypes.node,
-      PropTypes.object,
-    ]),
+    error: PropTypes.oneOfType([PropTypes.node, PropTypes.object]),
     disabled: PropTypes.bool,
     areErrorsVisible: PropTypes.bool.isRequired,
     testSubj: PropTypes.string,
@@ -64,7 +56,7 @@ export class FormEntryRow extends PureComponent {
     }
 
     onValueUpdate({ [field]: valueParsed });
-  }
+  };
 
   renderField = (isInvalid) => {
     const { value, type, disabled, isLoading, testSubj } = this.props;
@@ -74,7 +66,7 @@ export class FormEntryRow extends PureComponent {
           <EuiFieldNumber
             isInvalid={isInvalid}
             value={value}
-            onChange={e => this.onFieldChange(e.target.value)}
+            onChange={(e) => this.onFieldChange(e.target.value)}
             disabled={disabled === true}
             isLoading={isLoading}
             fullWidth
@@ -86,7 +78,7 @@ export class FormEntryRow extends PureComponent {
           <EuiFieldText
             isInvalid={isInvalid}
             value={value}
-            onChange={e => this.onFieldChange(e.target.value)}
+            onChange={(e) => this.onFieldChange(e.target.value)}
             disabled={disabled === true}
             isLoading={isLoading}
             fullWidth
@@ -94,7 +86,7 @@ export class FormEntryRow extends PureComponent {
           />
         );
     }
-  }
+  };
 
   render() {
     const {
@@ -132,16 +124,11 @@ export class FormEntryRow extends PureComponent {
     );
 
     return (
-      <EuiDescribedFormGroup
-        title={title}
-        description={description}
-        fullWidth
-        key={field}
-      >
+      <EuiDescribedFormGroup title={title} description={description} fullWidth key={field}>
         <EuiFormRow
           label={label}
           helpText={fieldHelpText}
-          error={(error && error.message) ? error.message : error}
+          error={error && error.message ? error.message : error}
           isInvalid={isInvalid}
           fullWidth
         >

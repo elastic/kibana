@@ -1,45 +1,49 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
-import { Space } from '../../../../common/model/space';
+import { schema } from '@kbn/config-schema';
+
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
+import type { Space } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
-import { SpacesClient } from '../../../lib/spaces_client';
+import { createLicensedRouteHandler } from '../../lib';
+import type { ExternalRouteDeps } from './';
 
-export function initPutSpacesApi(server: any, routePreCheckLicenseFn: any) {
-  server.route({
-    method: 'PUT',
-    path: '/api/spaces/space/{id}',
-    async handler(request: any) {
-      const { SavedObjectsClient } = server.savedObjects;
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
+export function initPutSpacesApi(deps: ExternalRouteDeps) {
+  const { externalRouter, getSpacesService } = deps;
 
-      const space: Space = request.payload;
+  externalRouter.put(
+    {
+      path: '/api/spaces/space/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: spaceSchema,
+      },
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      const spacesClient = getSpacesService().createSpacesClient(request);
+
+      const space = request.body;
       const id = request.params.id;
 
       let result: Space;
       try {
         result = await spacesClient.update(id, { ...space });
       } catch (error) {
-        if (SavedObjectsClient.errors.isNotFoundError(error)) {
-          return Boom.notFound();
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          return response.notFound();
         }
-        return wrapError(error);
+        return response.customError(wrapError(error));
       }
 
-      return result;
-    },
-    config: {
-      validate: {
-        payload: spaceSchema,
-      },
-      pre: [routePreCheckLicenseFn],
-    },
-  });
+      return response.ok({ body: result });
+    })
+  );
 }

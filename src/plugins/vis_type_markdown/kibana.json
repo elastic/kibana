@@ -1,0 +1,13 @@
+{
+  "id": "visTypeMarkdown",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "description": "Adds a markdown visualization type",
+  "version": "kibana",
+  "ui": true,
+  "server": true,
+  "requiredPlugins": ["expressions", "visualizations"],
+  "requiredBundles": ["expressions", "kibanaReact", "visDefaultEditor", "visualizations"]
+}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { compose, withState, lifecycle } from 'recompose';
@@ -21,7 +22,7 @@ export const ESFieldsSelect = compose(
       if (this.props.index !== index) {
         getFields(this.props.index).then((fields = []) => {
           setFields(fields);
-          onChange(selected.filter(option => fields.includes(option)));
+          onChange(selected.filter((option) => fields.includes(option)));
         });
       }
     },

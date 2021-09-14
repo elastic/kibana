@@ -1,7 +1,5 @@
 # Kibana RFCs
 
-> We are currently trialing a new RFC process for the Kibana Core team at this time.
-
 Many changes, including small to medium features, fixes, and documentation 
 improvements can be implemented and reviewed via the normal GitHub pull request 
 workflow.
@@ -33,7 +31,7 @@ You should consider using this process if you intend to make "substantial"
 changes to Kibana or its documentation. Some examples that would benefit
 from an RFC are:
 
-   - A new feature that creates new API surface area, such as a new core
+   - A new feature that creates new API surface area, such as a new
      service available to plugins.
    - The removal of features that already shipped as part of a release.
    - The introduction of new idiomatic usage or conventions, even if they
@@ -60,9 +58,9 @@ Some changes do not require an RFC:
 
 ## What the process is
 
-In short, to get a major feature added to Kibana Core, one usually first gets
-the RFC merged into the RFC tree as a markdown file. At that point the RFC
-is 'active' and may be implemented with the goal of eventual inclusion
+In short, to get a major feature added to the Kibana codebase, one usually
+first gets the RFC merged into the RFC tree as a markdown file. At that point
+the RFC is 'active' and may be implemented with the goal of eventual inclusion
 into Kibana.
 
 * Fork the Kibana repo http://github.com/elastic/kibana
@@ -98,8 +96,8 @@ become 'active'.
 Once an RFC becomes active, then authors may implement it and submit the
 feature as a pull request to the Kibana repo. Becoming 'active' is not a rubber
 stamp, and in particular still does not mean the feature will ultimately
-be merged; it does mean that the core team has agreed to it in principle
-and are amenable to merging it.
+be merged; it does mean that the team in ownership of the feature has agreed to
+it in principle and are amenable to merging it.
 
 Furthermore, the fact that a given RFC has been accepted and is
 'active' implies nothing about what priority is assigned to its
@@ -129,8 +127,9 @@ feel free to ask (e.g. by leaving a comment on the associated issue).
 Each week the team will attempt to review some set of open RFC
 pull requests.
 
-Every accepted feature should have a core team champion,
-who will represent the feature and its progress.
+Every accepted feature should have a champion from the team which will
+ultimately maintain the feature long-term. The champion will represent the
+feature and its progress.
 
 **Kibana's RFC process owes its inspiration to the [React RFC process], [Yarn RFC process], [Rust RFC process], and [Ember RFC process]**
 

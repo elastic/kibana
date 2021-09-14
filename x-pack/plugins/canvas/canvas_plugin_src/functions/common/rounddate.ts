@@ -1,27 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
-interface Arguments {
+export interface Arguments {
   format: string;
 }
 
-export function rounddate(): ExpressionFunction<'rounddate', number, Arguments, number> {
+export function rounddate(): ExpressionFunctionDefinition<'rounddate', number, Arguments, number> {
   const { help, args: argHelp } = getFunctionHelp().rounddate;
 
   return {
     name: 'rounddate',
     type: 'number',
     help,
-    context: {
-      types: ['number'],
-    },
+    inputTypes: ['number'],
     args: {
       format: {
         aliases: ['_'],
@@ -29,11 +28,11 @@ export function rounddate(): ExpressionFunction<'rounddate', number, Arguments, 
         help: argHelp.format,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.format) {
-        return context;
+        return input;
       }
-      return moment.utc(moment.utc(context).format(args.format), args.format).valueOf();
+      return moment.utc(moment.utc(input).format(args.format), args.format).valueOf();
     },
   };
 }

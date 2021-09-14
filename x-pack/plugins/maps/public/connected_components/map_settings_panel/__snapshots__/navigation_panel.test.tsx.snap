@@ -1,0 +1,370 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render 1`] = `
+<EuiPanel>
+  <EuiTitle
+    size="xs"
+  >
+    <h5>
+      <FormattedMessage
+        defaultMessage="Navigation"
+        id="xpack.maps.mapSettingsPanel.navigationTitle"
+        values={Object {}}
+      />
+    </h5>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      compressed={true}
+      data-test-subj="autoFitToDataBoundsSwitch"
+      label="Auto fit map to data bounds"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
+  <ValidatedDualRange
+    allowEmptyRange={false}
+    compressed={true}
+    formRowDisplay="columnCompressed"
+    fullWidth={false}
+    label="Zoom range"
+    max={24}
+    min={0}
+    onChange={[Function]}
+    showInput="inputWithPopover"
+    showLabels={true}
+    showRange={true}
+    value={
+      Array [
+        0,
+        24,
+      ]
+    }
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Initial map location"
+    labelType="label"
+  >
+    <EuiRadioGroup
+      idSelected="LAST_SAVED_LOCATION"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "id": "LAST_SAVED_LOCATION",
+            "label": "Map location at save",
+          },
+          Object {
+            "id": "AUTO_FIT_TO_BOUNDS",
+            "label": "Auto fit map to data bounds",
+          },
+          Object {
+            "id": "FIXED_LOCATION",
+            "label": "Fixed location",
+          },
+          Object {
+            "id": "BROWSER_LOCATION",
+            "label": "Browser location",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+</EuiPanel>
+`;
+
+exports[`should render browser location form when initialLocation is BROWSER_LOCATION 1`] = `
+<EuiPanel>
+  <EuiTitle
+    size="xs"
+  >
+    <h5>
+      <FormattedMessage
+        defaultMessage="Navigation"
+        id="xpack.maps.mapSettingsPanel.navigationTitle"
+        values={Object {}}
+      />
+    </h5>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      compressed={true}
+      data-test-subj="autoFitToDataBoundsSwitch"
+      label="Auto fit map to data bounds"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
+  <ValidatedDualRange
+    allowEmptyRange={false}
+    compressed={true}
+    formRowDisplay="columnCompressed"
+    fullWidth={false}
+    label="Zoom range"
+    max={24}
+    min={0}
+    onChange={[Function]}
+    showInput="inputWithPopover"
+    showLabels={true}
+    showRange={true}
+    value={
+      Array [
+        0,
+        24,
+      ]
+    }
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Initial map location"
+    labelType="label"
+  >
+    <EuiRadioGroup
+      idSelected="BROWSER_LOCATION"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "id": "LAST_SAVED_LOCATION",
+            "label": "Map location at save",
+          },
+          Object {
+            "id": "AUTO_FIT_TO_BOUNDS",
+            "label": "Auto fit map to data bounds",
+          },
+          Object {
+            "id": "FIXED_LOCATION",
+            "label": "Fixed location",
+          },
+          Object {
+            "id": "BROWSER_LOCATION",
+            "label": "Browser location",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Initial zoom"
+    labelType="label"
+  >
+    <ValidatedRange
+      compressed={true}
+      max={24}
+      min={0}
+      onChange={[Function]}
+      showInput={true}
+      showRange={true}
+      step={1}
+      value={2}
+    />
+  </EuiFormRow>
+</EuiPanel>
+`;
+
+exports[`should render fixed location form when initialLocation is FIXED_LOCATION 1`] = `
+<EuiPanel>
+  <EuiTitle
+    size="xs"
+  >
+    <h5>
+      <FormattedMessage
+        defaultMessage="Navigation"
+        id="xpack.maps.mapSettingsPanel.navigationTitle"
+        values={Object {}}
+      />
+    </h5>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      compressed={true}
+      data-test-subj="autoFitToDataBoundsSwitch"
+      label="Auto fit map to data bounds"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
+  <ValidatedDualRange
+    allowEmptyRange={false}
+    compressed={true}
+    formRowDisplay="columnCompressed"
+    fullWidth={false}
+    label="Zoom range"
+    max={24}
+    min={0}
+    onChange={[Function]}
+    showInput="inputWithPopover"
+    showLabels={true}
+    showRange={true}
+    value={
+      Array [
+        0,
+        24,
+      ]
+    }
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Initial map location"
+    labelType="label"
+  >
+    <EuiRadioGroup
+      idSelected="FIXED_LOCATION"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "id": "LAST_SAVED_LOCATION",
+            "label": "Map location at save",
+          },
+          Object {
+            "id": "AUTO_FIT_TO_BOUNDS",
+            "label": "Auto fit map to data bounds",
+          },
+          Object {
+            "id": "FIXED_LOCATION",
+            "label": "Fixed location",
+          },
+          Object {
+            "id": "BROWSER_LOCATION",
+            "label": "Browser location",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Initial latitude"
+    labelType="label"
+  >
+    <EuiFieldNumber
+      compressed={true}
+      onChange={[Function]}
+      value={0}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Initial longitude"
+    labelType="label"
+  >
+    <EuiFieldNumber
+      compressed={true}
+      onChange={[Function]}
+      value={0}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Initial zoom"
+    labelType="label"
+  >
+    <ValidatedRange
+      compressed={true}
+      max={24}
+      min={0}
+      onChange={[Function]}
+      showInput={true}
+      showRange={true}
+      step={1}
+      value={2}
+    />
+  </EuiFormRow>
+  <EuiFlexGroup
+    justifyContent="flexEnd"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Set to current view"
+          id="xpack.maps.mapSettingsPanel.useCurrentViewBtnLabel"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;

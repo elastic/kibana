@@ -1,0 +1,29 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {},
+    "index": "histogram-test",
+    "mappings": {
+      "properties": {
+        "histogram-title": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "histogram-content": {
+          "type": "histogram"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

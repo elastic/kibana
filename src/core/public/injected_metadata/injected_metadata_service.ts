@@ -1,36 +1,29 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
+import { deepFreeze } from '@kbn/std';
 import { DiscoveredPlugin, PluginName } from '../../server';
-import { UiSettingsState } from '../ui_settings';
-import { deepFreeze } from '../../utils/';
-import { Capabilities } from '..';
+import {
+  EnvironmentMode,
+  IExternalUrlPolicy,
+  PackageInfo,
+  UiSettingsParams,
+  UserProvidedValues,
+} from '../../server/types';
+import { AppCategory } from '../';
 
-/** @public */
-export interface LegacyNavLink {
-  id: string;
-  title: string;
-  order: number;
-  url: string;
-  icon?: string;
-  euiIconType?: string;
+export interface InjectedPluginMetadata {
+  id: PluginName;
+  plugin: DiscoveredPlugin;
+  config?: {
+    [key: string]: unknown;
+  };
 }
 
 /** @internal */
@@ -38,33 +31,30 @@ export interface InjectedMetadataParams {
   injectedMetadata: {
     version: string;
     buildNumber: number;
+    branch: string;
     basePath: string;
+    serverBasePath: string;
+    publicBaseUrl: string;
+    category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
+    };
+    externalUrl: {
+      policy: IExternalUrlPolicy[];
     };
     vars: {
       [key: string]: unknown;
     };
-    uiPlugins: Array<{
-      id: PluginName;
-      plugin: DiscoveredPlugin;
-    }>;
-    capabilities: Capabilities;
+    env: {
+      mode: Readonly<EnvironmentMode>;
+      packageInfo: Readonly<PackageInfo>;
+    };
+    uiPlugins: InjectedPluginMetadata[];
+    anonymousStatusPage: boolean;
     legacyMetadata: {
-      app: unknown;
-      translations: unknown;
-      bundleId: string;
-      nav: LegacyNavLink[];
-      version: string;
-      branch: string;
-      buildNum: number;
-      buildSha: string;
-      basePath: string;
-      serverName: string;
-      devMode: boolean;
       uiSettings: {
-        defaults: UiSettingsState;
-        user?: UiSettingsState;
+        defaults: Record<string, UiSettingsParams>;
+        user?: Record<string, UserProvidedValues>;
       };
     };
   };
@@ -95,16 +85,28 @@ export class InjectedMetadataService {
         return this.state.basePath;
       },
 
+      getServerBasePath: () => {
+        return this.state.serverBasePath;
+      },
+
+      getPublicBaseUrl: () => {
+        return this.state.publicBaseUrl;
+      },
+
+      getAnonymousStatusPage: () => {
+        return this.state.anonymousStatusPage;
+      },
+
       getKibanaVersion: () => {
         return this.state.version;
       },
 
-      getCapabilities: () => {
-        return this.state.capabilities;
-      },
-
       getCspConfig: () => {
         return this.state.csp;
+      },
+
+      getExternalUrlConfig: () => {
+        return this.state.externalUrl;
       },
 
       getPlugins: () => {
@@ -126,6 +128,10 @@ export class InjectedMetadataService {
       getKibanaBuildNumber: () => {
         return this.state.buildNumber;
       },
+
+      getKibanaBranch: () => {
+        return this.state.branch;
+      },
     };
   }
 }
@@ -137,34 +143,26 @@ export class InjectedMetadataService {
  */
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
+  getServerBasePath: () => string;
+  getPublicBaseUrl: () => string;
   getKibanaBuildNumber: () => number;
+  getKibanaBranch: () => string;
   getKibanaVersion: () => string;
-  getCapabilities: () => Capabilities;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
+  };
+  getExternalUrlConfig: () => {
+    policy: IExternalUrlPolicy[];
   };
   /**
    * An array of frontend plugins in topological order.
    */
-  getPlugins: () => Array<{
-    id: string;
-    plugin: DiscoveredPlugin;
-  }>;
+  getPlugins: () => InjectedPluginMetadata[];
+  getAnonymousStatusPage: () => boolean;
   getLegacyMetadata: () => {
-    app: unknown;
-    translations: unknown;
-    bundleId: string;
-    nav: LegacyNavLink[];
-    version: string;
-    branch: string;
-    buildNum: number;
-    buildSha: string;
-    basePath: string;
-    serverName: string;
-    devMode: boolean;
     uiSettings: {
-      defaults: UiSettingsState;
-      user?: UiSettingsState | undefined;
+      defaults: Record<string, UiSettingsParams>;
+      user?: Record<string, UserProvidedValues> | undefined;
     };
   };
   getInjectedVar: (name: string, defaultValue?: any) => unknown;

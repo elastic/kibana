@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { darken, transparentize } from 'polished';
 import React, { useMemo, useState, useCallback } from 'react';
 
-import euiStyled, { css } from '../../../../../../common/eui_styled_components';
+import { euiStyled, css } from '../../../../../../../src/plugins/kibana_react/common';
 import { TextScale } from '../../../../common/log_text_scale';
 
+export type WrapMode = 'none' | 'pre-wrapped' | 'long';
+
 export const monospaceTextStyle = (scale: TextScale) => css`
-  font-family: ${props => props.theme.eui.euiCodeFontFamily};
-  font-size: ${props => {
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+  font-size: ${(props) => {
     switch (scale) {
       case 'large':
         return props.theme.eui.euiFontSizeM;
@@ -23,15 +25,32 @@ export const monospaceTextStyle = (scale: TextScale) => css`
       default:
         return props.theme.eui.euiFontSize;
     }
-  }}
-  line-height: ${props => props.theme.eui.euiLineHeight};
+  }};
+  line-height: ${(props) => props.theme.eui.euiLineHeight};
 `;
 
 export const hoveredContentStyle = css`
-  background-color: ${props =>
-    props.theme.darkMode
-      ? transparentize(0.9, darken(0.05, props.theme.eui.euiColorHighlight))
-      : darken(0.05, props.theme.eui.euiColorHighlight)};
+  background-color: ${(props) => props.theme.eui.euiFocusBackgroundColor};
+`;
+
+export const highlightedContentStyle = css`
+  background-color: ${(props) => props.theme.eui.euiColorHighlight};
+`;
+
+export const longWrappedContentStyle = css`
+  overflow: visible;
+  white-space: pre-wrap;
+  word-break: break-all;
+`;
+
+export const preWrappedContentStyle = css`
+  overflow: hidden;
+  white-space: pre;
+`;
+
+export const unwrappedContentStyle = css`
+  overflow: hidden;
+  white-space: nowrap;
 `;
 
 interface CharacterDimensions {
@@ -59,11 +78,11 @@ export const useMeasuredCharacterDimensions = (scale: TextScale) => {
 
   const CharacterDimensionsProbe = useMemo(
     () => () => (
-      <MonospaceCharacterDimensionsProbe scale={scale} innerRef={measureElement}>
+      <MonospaceCharacterDimensionsProbe scale={scale} ref={measureElement}>
         X
       </MonospaceCharacterDimensionsProbe>
     ),
-    [scale]
+    [measureElement, scale]
   );
 
   return {
@@ -72,11 +91,13 @@ export const useMeasuredCharacterDimensions = (scale: TextScale) => {
   };
 };
 
-const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs<{
+interface MonospaceCharacterDimensionsProbe {
   scale: TextScale;
-}>({
+}
+
+const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs(() => ({
   'aria-hidden': true,
-})`
+}))<MonospaceCharacterDimensionsProbe>`
   visibility: hidden;
   position: absolute;
   height: auto;
@@ -84,5 +105,5 @@ const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs<{
   padding: 0;
   margin: 0;
 
-  ${props => monospaceTextStyle(props.scale)}
+  ${(props) => monospaceTextStyle(props.scale)};
 `;

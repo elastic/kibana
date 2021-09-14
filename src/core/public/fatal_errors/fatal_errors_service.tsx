@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -22,13 +11,13 @@ import { render } from 'react-dom';
 import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
-import { I18nSetup } from '../i18n';
+import { I18nStart } from '../i18n';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { FatalErrorInfo, getErrorInfo } from './get_error_info';
 
 interface Deps {
-  i18n: I18nSetup;
+  i18n: I18nStart;
   injectedMetadata: InjectedMetadataSetup;
 }
 
@@ -54,9 +43,18 @@ export interface FatalErrorsSetup {
   get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
-/** @interal */
+/**
+ * FatalErrors stop the Kibana Public Core and displays a fatal error screen
+ * with details about the Kibana build and the error.
+ *
+ * @public
+ */
+export type FatalErrorsStart = FatalErrorsSetup;
+
+/** @internal */
 export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<FatalErrorInfo>();
+  private fatalErrors?: FatalErrorsSetup;
 
   /**
    *
@@ -76,13 +74,13 @@ export class FatalErrorsService {
         })
       )
       .subscribe({
-        error: error => {
+        error: (error) => {
           // eslint-disable-next-line no-console
           console.error('Uncaught error in fatal error service internals', error);
         },
       });
 
-    const fatalErrorsSetup: FatalErrorsSetup = {
+    this.fatalErrors = {
       add: (error, source?) => {
         const errorInfo = getErrorInfo(error, source);
 
@@ -101,10 +99,20 @@ export class FatalErrorsService {
       },
     };
 
-    return fatalErrorsSetup;
+    this.setupGlobalErrorHandlers(this.fatalErrors!);
+
+    return this.fatalErrors!;
   }
 
-  private renderError(injectedMetadata: InjectedMetadataSetup, i18n: I18nSetup) {
+  public start() {
+    const { fatalErrors } = this;
+    if (!fatalErrors) {
+      throw new Error('FatalErrorsService#setup() must be invoked before start.');
+    }
+    return fatalErrors;
+  }
+
+  private renderError(injectedMetadata: InjectedMetadataSetup, i18n: I18nStart) {
     // delete all content in the rootDomElement
     this.rootDomElement.textContent = '';
 
@@ -122,5 +130,13 @@ export class FatalErrorsService {
       </i18n.Context>,
       container
     );
+  }
+
+  private setupGlobalErrorHandlers(fatalErrorsSetup: FatalErrorsSetup) {
+    if (window.addEventListener) {
+      window.addEventListener('unhandledrejection', function (e) {
+        console.log(`Detected an unhandled Promise rejection.\n${e.reason}`); // eslint-disable-line no-console
+      });
+    }
   }
 }

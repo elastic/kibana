@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { objectToArray, arrayToObject } from './utils';
@@ -11,7 +12,10 @@ describe('utils', () => {
     it('should convert object to an array', () => {
       const item1 = { name: 'foo' };
       const item2 = { name: 'bar' };
-      const expected = [{ ...item1, __id__: 'item1' }, { ...item2, __id__: 'item2' }];
+      const expected = [
+        { ...item1, __id__: 'item1' },
+        { ...item2, __id__: 'item2' },
+      ];
       const output = objectToArray({ item1, item2 });
 
       expect(output).toEqual(expected);

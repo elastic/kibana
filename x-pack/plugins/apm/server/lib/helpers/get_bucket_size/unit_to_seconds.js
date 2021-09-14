@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 const units = {
@@ -12,7 +13,7 @@ const units = {
   d: 86400,
   w: 86400 * 7, // Hum... might be wrong
   M: 86400 * 30, // this too... 29,30,31?
-  y: 86400 * 356 // Leap year?
+  y: 86400 * 356, // Leap year?
 };
 
 export function unitToSeconds(unit) {

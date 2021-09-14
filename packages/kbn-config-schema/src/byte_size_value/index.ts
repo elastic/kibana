@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export type ByteSizeValueUnit = 'b' | 'kb' | 'mb' | 'gb';
@@ -35,9 +24,14 @@ export class ByteSizeValue {
   public static parse(text: string): ByteSizeValue {
     const match = /([1-9][0-9]*)(b|kb|mb|gb)/.exec(text);
     if (!match) {
-      throw new Error(
-        `could not parse byte size value [${text}]. Value must be a safe positive integer.`
-      );
+      const number = Number(text);
+      if (typeof number !== 'number' || isNaN(number)) {
+        throw new Error(
+          `Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] ` +
+            `(e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer.`
+        );
+      }
+      return new ByteSizeValue(number);
     }
 
     const value = parseInt(match[1], 0);
@@ -48,10 +42,7 @@ export class ByteSizeValue {
 
   constructor(private readonly valueInBytes: number) {
     if (!Number.isSafeInteger(valueInBytes) || valueInBytes < 0) {
-      throw new Error(
-        `Value in bytes is expected to be a safe positive integer, ` +
-          `but provided [${valueInBytes}]`
-      );
+      throw new Error(`Value in bytes is expected to be a safe positive integer.`);
     }
   }
 

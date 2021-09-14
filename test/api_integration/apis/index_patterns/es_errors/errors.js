@@ -1,37 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
-import { errors as esErrors } from 'elasticsearch';
-import Boom from 'boom';
+import { errors as esErrors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 
 import {
   isEsIndexNotFoundError,
   createNoMatchingIndicesError,
   isNoMatchingIndicesError,
-  convertEsError
-} from '../../../../../src/legacy/server/index_patterns/service/lib/errors';
+  convertEsError,
+} from '../../../../../src/plugins/data/server/index_patterns/fetcher/lib/errors';
 
-import {
-  getIndexNotFoundError,
-  getDocNotFoundError
-} from './lib';
+import { getIndexNotFoundError, getDocNotFoundError } from './lib';
 
 export default function ({ getService }) {
   const es = getService('es');
@@ -41,12 +27,14 @@ export default function ({ getService }) {
     let indexNotFoundError;
     let docNotFoundError;
     before(async () => {
-      await esArchiver.load('index_patterns/basic_index');
+      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
       indexNotFoundError = await getIndexNotFoundError(es);
       docNotFoundError = await getDocNotFoundError(es);
     });
     after(async () => {
-      await esArchiver.unload('index_patterns/basic_index');
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
     });
 
     describe('isEsIndexNotFoundError()', () => {
@@ -80,7 +68,9 @@ export default function ({ getService }) {
     describe('isNoMatchingIndicesError()', () => {
       it('returns true for errors from createNoMatchingIndicesError()', () => {
         if (!isNoMatchingIndicesError(createNoMatchingIndicesError())) {
-          throw new Error('Expected isNoMatchingIndicesError(createNoMatchingIndicesError()) to be true');
+          throw new Error(
+            'Expected isNoMatchingIndicesError(createNoMatchingIndicesError()) to be true'
+          );
         }
       });
 
@@ -103,22 +93,25 @@ export default function ({ getService }) {
       it('converts indexNotFoundErrors into NoMatchingIndices errors', async () => {
         const converted = convertEsError(indices, indexNotFoundError);
         if (!isNoMatchingIndicesError(converted)) {
-          throw new Error('expected convertEsError(indexNotFoundError) to return NoMatchingIndices error');
+          throw new Error(
+            'expected convertEsError(indexNotFoundError) to return NoMatchingIndices error'
+          );
         }
       });
 
       it('wraps other errors in Boom', async () => {
-        const error = new esErrors.AuthenticationException({
-          root_cause: [
-            {
-              type: 'security_exception',
-              reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]'
-            }
-          ],
-          type: 'security_exception',
-          reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]'
-        }, {
-          statusCode: 403
+        const error = new esErrors.ResponseError({
+          body: {
+            root_cause: [
+              {
+                type: 'security_exception',
+                reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]',
+              },
+            ],
+            type: 'security_exception',
+            reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]',
+          },
+          statusCode: 403,
         });
 
         expect(error).to.not.have.property('isBoom');

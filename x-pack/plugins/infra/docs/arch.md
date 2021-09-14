@@ -7,7 +7,7 @@ In this arch, we use 3 main terms to describe the code:
 - **Libs / Domain Libs** - Business logic & data formatting (though complex formatting might call utils)
 - **Adapters** - code that directly calls 3rd party APIs and data sources, exposing clean easy to stub APIs
 - **Composition Files** - composes adapters into libs based on where the code is running
-- **Implementation layer** - The API such as rest endpoints or graphql schema on the server, and the state management / UI on the client
+- **Implementation layer** - The API such as rest endpoints on the server, and the state management / UI on the client
 
 ## Arch Visual Example
 
@@ -85,7 +85,7 @@ An example structure might be...
     |   |   |   |   |-- kibana_angular // if an adapter has more than one file...
     |   |   |   |   |   |-- index.html
     |   |   |   |   |   |-- index.ts
-    |   |   |   |   |  
+    |   |   |   |   |
     |   |   |   |   |-- ui_harness.ts
     |   |   |   |
     |   |   |-- domains

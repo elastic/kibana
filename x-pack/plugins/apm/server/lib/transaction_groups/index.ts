@@ -1,20 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { StringMap } from '../../../typings/common';
-import { Setup } from '../helpers/setup_request';
-import { transactionGroupsFetcher } from './fetcher';
-import { transactionGroupsTransformer } from './transform';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { topTransactionGroupsFetcher, TopTraceOptions } from './fetcher';
 
-export async function getTransactionGroups(setup: Setup, bodyQuery: StringMap) {
-  const { start, end } = setup;
-  const response = await transactionGroupsFetcher(setup, bodyQuery);
-  return transactionGroupsTransformer({
-    response,
-    start,
-    end
-  });
+export async function getTopTransactionGroupList(
+  options: TopTraceOptions,
+  setup: Setup & SetupTimeRange
+) {
+  return await topTransactionGroupsFetcher(options, setup);
 }

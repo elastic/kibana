@@ -1,0 +1,188 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
+<Fragment>
+  <header
+    indexPatternId=""
+  />
+  <call-outs
+    deprecatedLangsInUse={
+      Array [
+        "somethingElse",
+      ]
+    }
+    painlessDocLink="painlessDoc"
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "lang": "painless",
+          "name": "ScriptedField",
+          "script": "x++",
+        },
+        Object {
+          "lang": "painless",
+          "name": "JustATest",
+          "script": "z++",
+        },
+      ]
+    }
+  />
+</Fragment>
+`;
+
+exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
+<Fragment>
+  <header
+    indexPatternId=""
+  />
+  <call-outs
+    deprecatedLangsInUse={Array []}
+    painlessDocLink="painlessDoc"
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "lang": "painless",
+          "name": "JustATest",
+          "script": "z++",
+        },
+      ]
+    }
+  />
+</Fragment>
+`;
+
+exports[`ScriptedFieldsTable should hide the table if there are no scripted fields 1`] = `
+<Fragment>
+  <header
+    indexPatternId=""
+  />
+  <call-outs
+    deprecatedLangsInUse={Array []}
+    painlessDocLink="painlessDoc"
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
+      }
+    }
+    items={Array []}
+  />
+</Fragment>
+`;
+
+exports[`ScriptedFieldsTable should render normally 1`] = `
+<Fragment>
+  <header
+    indexPatternId=""
+  />
+  <call-outs
+    deprecatedLangsInUse={Array []}
+    painlessDocLink="painlessDoc"
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "lang": "painless",
+          "name": "ScriptedField",
+          "script": "x++",
+        },
+        Object {
+          "lang": "painless",
+          "name": "JustATest",
+          "script": "z++",
+        },
+      ]
+    }
+  />
+</Fragment>
+`;
+
+exports[`ScriptedFieldsTable should show a delete modal 1`] = `
+<Fragment>
+  <header
+    indexPatternId=""
+  />
+  <call-outs
+    deprecatedLangsInUse={Array []}
+    painlessDocLink="painlessDoc"
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "lang": "painless",
+          "name": "ScriptedField",
+          "script": "x++",
+        },
+        Object {
+          "lang": "painless",
+          "name": "JustATest",
+          "script": "z++",
+        },
+      ]
+    }
+  />
+  <DeleteScritpedFieldConfirmationModal
+    deleteField={[Function]}
+    field={
+      Object {
+        "lang": "",
+        "name": "ScriptedField",
+        "script": "",
+      }
+    }
+    hideDeleteConfirmationModal={[Function]}
+  />
+</Fragment>
+`;

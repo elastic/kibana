@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,14 +13,10 @@ import { getRandomString } from './lib';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
 
-  const {
-    createIndexWithMappings,
-    getJobPayload,
-    createJob,
-    cleanUp,
-  } = registerHelpers({ supertest, es });
+  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } = registerHelpers(
+    getService
+  );
 
   describe('search', () => {
     const URI = `${API_BASE_PATH}/search`;
@@ -28,7 +25,7 @@ export default function ({ getService }) {
       const { body } = await supertest
         .post(URI)
         .set('kbn-xsrf', 'xxx')
-        .send([{ index: 'unknown', query: {} } ])
+        .send([{ index: 'unknown', query: {} }])
         .expect(404);
 
       expect(body.message).to.contain('no such index [unknown]');
@@ -43,7 +40,7 @@ export default function ({ getService }) {
       const { body } = await supertest
         .post(URI)
         .set('kbn-xsrf', 'xxx')
-        .send([{ index: rollupIndex, query: { size: 0 } } ])
+        .send([{ index: rollupIndex, query: { size: 0 } }])
         .expect(200);
 
       // make sure total hits is an integer and not an object

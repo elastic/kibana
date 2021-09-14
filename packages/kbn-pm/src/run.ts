@@ -1,82 +1,116 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
-import indentString from 'indent-string';
-import wrapAnsi from 'wrap-ansi';
+import { CiStatsReporter } from '@kbn/dev-utils/ci_stats_reporter';
 
 import { ICommand, ICommandConfig } from './commands';
-import { getProjectPaths, IProjectPathOptions } from './config';
 import { CliError } from './utils/errors';
 import { log } from './utils/log';
-import { buildProjectGraph, getProjects } from './utils/projects';
+import { buildProjectGraph } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
+import { Kibana } from './utils/kibana';
 
-export async function runCommand(command: ICommand, config: ICommandConfig) {
+export async function runCommand(command: ICommand, config: Omit<ICommandConfig, 'kbn'>) {
+  const runStartTime = Date.now();
+  let kbn;
+
   try {
-    log.write(
-      chalk.bold(
-        `Running [${chalk.green(command.name)}] command from [${chalk.yellow(config.rootPath)}]:\n`
-      )
-    );
+    log.debug(`Running [${command.name}] command from [${config.rootPath}]`);
 
-    const projectPaths = getProjectPaths(config.rootPath, config.options as IProjectPathOptions);
-
-    const projects = await getProjects(config.rootPath, projectPaths, {
+    kbn = await Kibana.loadFrom(config.rootPath);
+    const projects = kbn.getFilteredProjects({
+      skipKibanaPlugins: Boolean(config.options['skip-kibana-plugins']),
+      ossOnly: Boolean(config.options.oss),
       exclude: toArray(config.options.exclude),
       include: toArray(config.options.include),
     });
 
     if (projects.size === 0) {
-      log.write(
-        chalk.red(
-          `There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`
-        )
+      log.error(
+        `There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.`
       );
       return process.exit(1);
     }
 
     const projectGraph = buildProjectGraph(projects);
 
-    log.write(chalk.bold(`Found [${chalk.green(projects.size.toString())}] projects:\n`));
-    log.write(renderProjectsTree(config.rootPath, projects));
+    log.debug(`Found ${projects.size.toString()} projects`);
+    log.debug(renderProjectsTree(config.rootPath, projects));
 
-    await command.run(projects, projectGraph, config);
-  } catch (e) {
-    log.write(chalk.bold.red(`\n[${command.name}] failed:\n`));
+    await command.run(projects, projectGraph, {
+      ...config,
+      kbn,
+    });
 
-    if (e instanceof CliError) {
-      const msg = chalk.red(`CliError: ${e.message}\n`);
-      log.write(wrapAnsi(msg, 80));
+    if (command.reportTiming) {
+      const reporter = CiStatsReporter.fromEnv(log);
+      await reporter.timings({
+        upstreamBranch: kbn.kibanaProject.json.branch,
+        // prevent loading @kbn/utils by passing null
+        kibanaUuid: kbn.getUuid() || null,
+        timings: [
+          {
+            group: command.reportTiming.group,
+            id: command.reportTiming.id,
+            ms: Date.now() - runStartTime,
+            meta: {
+              success: true,
+            },
+          },
+        ],
+      });
+    }
+  } catch (error) {
+    if (command.reportTiming) {
+      // if we don't have a kbn object then things are too broken to report on
+      if (kbn) {
+        try {
+          const reporter = CiStatsReporter.fromEnv(log);
+          await reporter.timings({
+            upstreamBranch: kbn.kibanaProject.json.branch,
+            // prevent loading @kbn/utils by passing null
+            kibanaUuid: kbn.getUuid() || null,
+            timings: [
+              {
+                group: command.reportTiming.group,
+                id: command.reportTiming.id,
+                ms: Date.now() - runStartTime,
+                meta: {
+                  success: false,
+                },
+              },
+            ],
+          });
+        } catch (e) {
+          // prevent hiding bootstrap errors
+          log.error('failed to report timings:');
+          log.error(e);
+        }
+      }
+    }
 
-      const keys = Object.keys(e.meta);
-      if (keys.length > 0) {
-        const metaOutput = keys.map(key => {
-          const value = e.meta[key];
-          return `${key}: ${value}`;
-        });
+    log.error(`[${command.name}] failed:`);
 
-        log.write('Additional debugging info:\n');
-        log.write(indentString(metaOutput.join('\n'), 3));
+    if (error instanceof CliError) {
+      log.error(error.message);
+
+      const metaOutput = Object.entries(error.meta)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('\n');
+
+      if (metaOutput) {
+        log.info('Additional debugging info:\n');
+        log.indent(2);
+        log.info(metaOutput);
+        log.indent(-2);
       }
     } else {
-      log.write(e.stack);
+      log.error(error);
     }
 
     process.exit(1);

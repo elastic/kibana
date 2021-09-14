@@ -1,32 +1,29 @@
-# Documentation for APM UI
+# Documentation for APM UI developers
 
-Note: Run the following commands from `kibana/x-pack`.
+## Local environment setup
 
-### Run tests
+[Local setup documentation](./dev_docs/local_setup.md)
+
+## Testing
+
+[Testing documentation](./dev_docs/testing.md)
+
+## Linting
+
+[Linting documentation](./dev_docs/linting.md)
+
+## Storybook
+
+**Start**
 ```
-node scripts/jest.js plugins/apm --watch
-```
-
-### Update snapshots
-```
-node scripts/jest.js plugins/apm --updateSnapshot
-```
----
-
-Note: Run the following commands from `kibana/`.
-
-### Prettier
-
-```
-yarn prettier  "./x-pack/plugins/apm/**/*.{tsx,ts,js}" --write
+yarn storybook apm
 ```
 
-### ESLint
-```
-yarn eslint ./x-pack/plugins/apm --fix
-```
+All files with a .stories.tsx extension will be loaded. You can access the development environment at http://localhost:9001.
 
-### Ensure everything from master has been backported to 6.x
-```
-git fetch origin && git checkout 6.x && git diff origin/6.x..origin/master ./plugins/apm | git apply
-```
+## Further resources
+- [VSCode setup instructions](./dev_docs/vscode_setup.md)
+- [Github PR commands](./dev_docs/github_commands.md)
+- [Routing and Linking](./dev_docs/routing_and_linking.md)
+- [Telemetry](./dev_docs/telemetry.md)
+- [Features flags](./dev_docs/feature_flags.md)

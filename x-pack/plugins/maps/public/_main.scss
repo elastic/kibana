@@ -1,15 +1,13 @@
-@import '@elastic/eui/src/components/header/variables';
+@import '../../../../src/core/public/mixins';
 
+// sass-lint:disable no-ids
 #maps-plugin {
+  @include kibanaFullBodyHeight();
+
   display: flex;
   flex-direction: column;
-  height: calc(100vh - #{$euiHeaderChildSize});
   width: 100%;
   overflow: hidden;
-}
-
-.mapFullScreen {
-  height: 100vh !important;
 }
 
 #react-maps-root {

@@ -1,66 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { MonitoringTimeseriesContainer } from '../../chart';
-import {
-  EuiSpacer,
-  EuiPage,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageBody,
-  EuiPanel,
-  EuiPageContent
-} from '@elastic/eui';
-import { Status } from '../instances/status';
+import { i18n } from '@kbn/i18n';
+import { ApmMetrics } from '../apm_metrics';
 
-export function ApmOverview({
-  stats,
-  metrics,
-  ...props
-}) {
+const title = i18n.translate('xpack.monitoring.apm.overview.panels.title', {
+  defaultMessage: 'APM Server - Metrics',
+});
+
+export function ApmOverview(props) {
+  const { metrics } = props;
   const seriesToShow = [
     metrics.apm_responses_valid,
     metrics.apm_responses_errors,
-
     metrics.apm_output_events_rate_success,
     metrics.apm_output_events_rate_failure,
-
     metrics.apm_requests,
     metrics.apm_transformations,
-
-
-    metrics.apm_cpu,
-    metrics.apm_memory,
-
-    metrics.apm_os_load,
   ];
 
-  const charts = seriesToShow.map((data, index) => (
-    <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
-      <EuiPanel>
-        <MonitoringTimeseriesContainer
-          series={data}
-          {...props}
-        />
-      </EuiPanel>
-    </EuiFlexItem>
-  ));
-
-  return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageContent>
-          <Status stats={stats}/>
-          <EuiSpacer size="s"/>
-          <EuiFlexGroup wrap>
-            {charts}
-          </EuiFlexGroup>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
-  );
+  const metricProps = { ...props, title, seriesToShow };
+  return <ApmMetrics {...metricProps} />;
 }

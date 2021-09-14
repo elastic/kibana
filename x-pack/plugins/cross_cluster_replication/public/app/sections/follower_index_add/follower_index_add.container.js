@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { connect } from 'react-redux';
@@ -18,12 +19,9 @@ const mapStateToProps = (state) => ({
   apiError: getApiError(`${scope}-save`)(state),
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   saveFollowerIndex: (id, followerIndex) => dispatch(saveFollowerIndex(id, followerIndex)),
   clearApiError: () => dispatch(clearApiError(`${scope}-save`)),
 });
 
-export const FollowerIndexAdd = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(FollowerIndexAddView);
+export const FollowerIndexAdd = connect(mapStateToProps, mapDispatchToProps)(FollowerIndexAddView);

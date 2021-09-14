@@ -1,0 +1,24 @@
+get:
+  summary: Package categories
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                title:
+                  type: string
+                count:
+                  type: number
+              required:
+                - id
+                - title
+                - count
+  operationId: get-package-categories

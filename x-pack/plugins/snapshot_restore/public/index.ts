@@ -1,11 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { Plugin as SnapshotRestorePlugin } from './plugin';
-import { createShim } from './shim';
 
-const { core, plugins } = createShim();
-const snapshotRestorePlugin = new SnapshotRestorePlugin();
-snapshotRestorePlugin.start(core, plugins);
+import { PluginInitializerContext } from 'src/core/public';
+
+import './application/index.scss';
+import { SnapshotRestoreUIPlugin } from './plugin';
+
+/** @public */
+export const plugin = (ctx: PluginInitializerContext) => {
+  return new SnapshotRestoreUIPlugin(ctx);
+};

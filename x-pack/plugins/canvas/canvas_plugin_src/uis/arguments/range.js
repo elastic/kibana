@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiRange } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../../i18n';
+
+const { Range: strings } = ArgumentStrings;
 
 const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
   const { min, max, step } = typeInstance.options;
-  const handleChange = ev => {
+  const handleChange = (ev) => {
     return onValueChange(Number(ev.target.value));
   };
 
@@ -44,7 +48,7 @@ RangeArgInput.propTypes = {
 
 export const range = () => ({
   name: 'range',
-  displayName: 'Range',
-  help: 'Slider for values within a range',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(RangeArgInput),
 });

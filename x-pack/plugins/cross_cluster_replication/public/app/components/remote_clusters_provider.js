@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { PureComponent } from 'react'; // eslint-disable-line no-unused-vars
@@ -11,33 +12,36 @@ export class RemoteClustersProvider extends PureComponent {
   state = {
     isLoading: true,
     error: null,
-    remoteClusters: []
-  }
+    remoteClusters: [],
+  };
 
   componentDidMount() {
     this.loadRemoteClusters();
   }
 
   loadRemoteClusters() {
-    const sortClusterByName = (remoteClusters) => (
+    const sortClusterByName = (remoteClusters) =>
       remoteClusters.sort((a, b) => {
-        if(a.name < b.name) { return -1; }
-        if(a.name > b.name) { return 1; }
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
         return 0;
-      })
-    );
+      });
     loadRemoteClusters()
       .then(sortClusterByName)
       .then((remoteClusters) => {
         this.setState({
           isLoading: false,
-          remoteClusters
+          remoteClusters,
         });
       })
       .catch((error) => {
         this.setState({
           isLoading: false,
-          error
+          error,
         });
       });
   }

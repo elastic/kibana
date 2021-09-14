@@ -1,32 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { KibanaRequest } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
-  InfraMetric,
-  InfraMetricData,
-  InfraNodeType,
-  InfraTimerangeInput,
-} from '../../../graphql/types';
-
+  NodeDetailsRequest,
+  NodeDetailsMetricData,
+} from '../../../../common/http_api/node_details_api';
+import { InventoryMetric } from '../../../../common/inventory_models/types';
 import { InfraSourceConfiguration } from '../../sources';
-import { InfraFrameworkRequest } from '../framework';
 
-export interface InfraMetricsRequestOptions {
-  nodeId: string;
-  nodeType: InfraNodeType;
+export interface InfraMetricsRequestOptions
+  extends Omit<NodeDetailsRequest, 'sourceId' | 'nodeId' | 'cloudId'> {
+  nodeIds: {
+    nodeId: string;
+    cloudId?: string | null;
+  };
   sourceConfiguration: InfraSourceConfiguration;
-  timerange: InfraTimerangeInput;
-  metrics: InfraMetric[];
 }
 
 export interface InfraMetricsAdapter {
   getMetrics(
-    req: InfraFrameworkRequest,
-    options: InfraMetricsRequestOptions
-  ): Promise<InfraMetricData[]>;
+    requestContext: InfraPluginRequestHandlerContext,
+    options: InfraMetricsRequestOptions,
+    request: KibanaRequest
+  ): Promise<NodeDetailsMetricData[]>;
+}
+
+export enum InfraMetricModelQueryType {
+  lucene = 'lucene',
+  kuery = 'kuery',
 }
 
 export enum InfraMetricModelMetricType {
@@ -35,14 +42,16 @@ export enum InfraMetricModelMetricType {
   min = 'min',
   calculation = 'calculation',
   cardinality = 'cardinality',
-  series_agg = 'series_agg', // eslint-disable-line @typescript-eslint/camelcase
-  positive_only = 'positive_only', // eslint-disable-line @typescript-eslint/camelcase
+  series_agg = 'series_agg',
+  positive_only = 'positive_only',
   derivative = 'derivative',
   count = 'count',
+  sum = 'sum',
+  cumulative_sum = 'cumulative_sum',
 }
 
 export interface InfraMetricModel {
-  id: string;
+  id: InventoryMetric;
   requires: string[];
   index_pattern: string | string[];
   interval: string;
@@ -51,6 +60,7 @@ export interface InfraMetricModel {
   series: InfraMetricModelSeries[];
   filter?: string;
   map_field_to?: string;
+  id_type?: 'cloud' | 'node';
 }
 
 export interface InfraMetricModelSeries {
@@ -60,6 +70,7 @@ export interface InfraMetricModelSeries {
   terms_field?: string;
   terms_size?: number;
   terms_order_by?: string;
+  filter?: { query: string; language: InfraMetricModelQueryType };
 }
 
 export interface InfraMetricModelBasicMetric {
@@ -71,7 +82,7 @@ export interface InfraMetricModelBasicMetric {
 export interface InfraMetricModelSeriesAgg {
   id: string;
   function: string;
-  type: InfraMetricModelMetricType.series_agg; // eslint-disable-line @typescript-eslint/camelcase
+  type: InfraMetricModelMetricType.series_agg;
 }
 
 export interface InfraMetricModelDerivative {

@@ -1,36 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  OBSERVER_VERSION_MAJOR,
-  PROCESSOR_EVENT
-} from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../helpers/setup_request';
+import { rangeQuery } from '../../../../../observability/server';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { OBSERVER_VERSION_MAJOR } from '../../../../common/elasticsearch_fieldnames';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 // returns true if 6.x data is found
-export async function getLegacyDataStatus(setup: Setup) {
-  const { client, config } = setup;
+export async function getLegacyDataStatus(setup: Setup & SetupTimeRange) {
+  const { apmEventClient, start, end } = setup;
 
   const params = {
     terminateAfter: 1,
-    index: [config.get<string>('apm_oss.transactionIndices')],
+    apm: {
+      events: [ProcessorEvent.transaction],
+      includeLegacyData: true,
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
-            { range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } }
-          ]
-        }
-      }
-    }
+            { range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } },
+            ...rangeQuery(start, end),
+          ],
+        },
+      },
+    },
   };
 
-  const resp = await client.search(params, { includeLegacyData: true });
-  const hasLegacyData = resp.hits.total > 0;
+  const resp = await apmEventClient.search('get_legacy_data_status', params);
+  const hasLegacyData = resp.hits.total.value > 0;
   return hasLegacyData;
 }

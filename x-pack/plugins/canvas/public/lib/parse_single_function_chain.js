@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, mapValues, map } from 'lodash';
@@ -17,7 +18,7 @@ export function parseSingleFunctionChain(filterString) {
     throw new Error('Could not find function name in chain');
   }
 
-  const args = mapValues(get(ast, 'chain[0].arguments'), val => {
+  const args = mapValues(get(ast, 'chain[0].arguments'), (val) => {
     // TODO Check for literals only
     return map(val, 'value');
   });

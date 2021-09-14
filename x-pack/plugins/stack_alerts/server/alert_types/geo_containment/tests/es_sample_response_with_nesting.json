@@ -1,0 +1,172 @@
+{
+  "body": {
+    "took" : 2760,
+    "timed_out" : false,
+    "_shards" : {
+      "total" : 1,
+      "successful" : 1,
+      "skipped" : 0,
+      "failed" : 0
+    },
+    "hits" : {
+      "total" : {
+        "value" : 10000,
+        "relation" : "gte"
+      },
+      "max_score" : 0.0,
+      "hits" : []
+    },
+    "aggregations" : {
+      "shapes" : {
+        "meta" : { },
+        "buckets" : {
+          "0DrJu3QB6yyY-xQxv6Ip" : {
+            "doc_count" : 1047,
+            "entitySplit" : {
+              "doc_count_error_upper_bound" : 0,
+              "sum_other_doc_count" : 957,
+              "buckets" : [
+                {
+                  "key" : "936",
+                  "doc_count" : 9,
+                  "entityHits" : {
+                    "hits" : {
+                      "total" : {
+                        "value" : 9,
+                        "relation" : "eq"
+                      },
+                      "max_score" : null,
+                      "hits" : [
+                        {
+                          "_index" : "flight_tracks",
+                          "_id" : "N-ng1XQB6yyY-xQxnGSM",
+                          "_score" : null,
+                          "fields" : {
+                            "time_data.@timestamp" : [
+                              "2020-09-28T18:01:41.190Z"
+                            ],
+                            "geo.coords.location" : [
+                              "40.62806099653244, -82.8814151789993"
+                            ],
+                            "entity_id" : [
+                              "936"
+                            ]
+                          },
+                          "sort" : [
+                            1601316101190
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key" : "AAL2019",
+                  "doc_count" : 9,
+                  "entityHits" : {
+                    "hits" : {
+                      "total" : {
+                        "value" : 9,
+                        "relation" : "eq"
+                      },
+                      "max_score" : null,
+                      "hits" : [
+                        {
+                          "_index" : "flight_tracks",
+                          "_id" : "iOng1XQB6yyY-xQxnGSM",
+                          "_score" : null,
+                          "fields" : {
+                            "time_data.@timestamp" : [
+                              "2020-09-28T18:01:41.191Z"
+                            ],
+                            "geo.coords.location" : [
+                              "39.006176185794175, -82.22068064846098"
+                            ],
+                            "entity_id" : [
+                              "AAL2019"
+                            ]
+                          },
+                          "sort" : [
+                            1601316101191
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key" : "AAL2323",
+                  "doc_count" : 9,
+                  "entityHits" : {
+                    "hits" : {
+                      "total" : {
+                        "value" : 9,
+                        "relation" : "eq"
+                      },
+                      "max_score" : null,
+                      "hits" : [
+                        {
+                          "_index" : "flight_tracks",
+                          "_id" : "n-ng1XQB6yyY-xQxnGSM",
+                          "_score" : null,
+                          "fields" : {
+                            "time_data.@timestamp" : [
+                              "2020-09-28T18:01:41.191Z"
+                            ],
+                            "geo.coords.location" : [
+                              "41.6677269525826, -84.71324851736426"
+                            ],
+                            "entity_id" : [
+                              "AAL2323"
+                            ]
+                          },
+                          "sort" : [
+                            1601316101191
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key" : "ABD5250",
+                  "doc_count" : 9,
+                  "entityHits" : {
+                    "hits" : {
+                      "total" : {
+                        "value" : 9,
+                        "relation" : "eq"
+                      },
+                      "max_score" : null,
+                      "hits" : [
+                        {
+                          "_index" : "flight_tracks",
+                          "_id" : "GOng1XQB6yyY-xQxnGWM",
+                          "_score" : null,
+                          "fields" : {
+                            "time_data.@timestamp" : [
+                              "2020-09-28T18:01:41.192Z"
+                            ],
+                            "geo.coords.location" : [
+                              "39.07997465226799, 6.073727197945118"
+                            ],
+                            "entity_id" : [
+                              "ABD5250"
+                            ]
+                          },
+                          "sort" : [
+                            1601316101192
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

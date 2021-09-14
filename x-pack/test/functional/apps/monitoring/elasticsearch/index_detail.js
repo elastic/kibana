@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,9 +15,8 @@ export default function ({ getService, getPageObjects }) {
   const indexDetail = getService('monitoringElasticsearchIndexDetail');
 
   describe('Elasticsearch index detail', () => {
-
     afterEach(async () => {
-      await PageObjects.monitoring.clickBreadcrumb('breadcrumbEsIndices'); // return back for next test
+      await PageObjects.monitoring.clickBreadcrumb('~breadcrumbEsIndices'); // return back for next test
       await indicesList.clearFilter();
     });
 
@@ -24,10 +24,15 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: '2017-10-05 20:31:48.354',
-          to: '2017-10-05 20:35:12.176'
-        });
+        await setup(
+          'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
+          {
+            from: 'Oct 5, 2017 @ 20:31:48.354',
+            to: 'Oct 5, 2017 @ 20:35:12.176',
+          }
+        );
+
+        await overview.closeAlertsModal();
 
         // go to indices listing
         await overview.clickEsIndices();
@@ -45,8 +50,8 @@ export default function ({ getService, getPageObjects }) {
           dataSize: 'Total\n8.8 MB',
           dataSizePrimaries: 'Primaries\n4.4 MB',
           documentCount: 'Documents\n628',
-          totalShards: 'Total Shards\n10',
-          unassignedShards: 'Unassigned Shards\n0',
+          totalShards: 'Total shards\n10',
+          unassignedShards: 'Unassigned shards\n0',
           health: 'Health: green',
         });
       });
@@ -58,8 +63,8 @@ export default function ({ getService, getPageObjects }) {
           dataSize: 'Total\n4.8 KB',
           dataSizePrimaries: 'Primaries\n4.8 KB',
           documentCount: 'Documents\n1',
-          totalShards: 'Total Shards\n1',
-          unassignedShards: 'Unassigned Shards\n0',
+          totalShards: 'Total shards\n1',
+          unassignedShards: 'Unassigned shards\n0',
           health: 'Health: green',
         });
       });
@@ -71,45 +76,11 @@ export default function ({ getService, getPageObjects }) {
           dataSize: 'Total\n1.2 MB',
           dataSizePrimaries: 'Primaries\n657.6 KB',
           documentCount: 'Documents\n10',
-          totalShards: 'Total Shards\n10',
-          unassignedShards: 'Unassigned Shards\n1',
+          totalShards: 'Total shards\n10',
+          unassignedShards: 'Unassigned shards\n1',
           health: 'Health: yellow',
         });
       });
     });
-
-    describe('Deleted Index', () => {
-      const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
-
-      before(async () => {
-        await setup('monitoring/singlecluster-red-platinum', {
-          from: '2017-10-06 19:53:06.748',
-          to: '2017-10-06 20:15:30.212'
-        });
-
-        // go to indices listing
-        await overview.clickEsIndices();
-        expect(await indicesList.isOnListing()).to.be(true);
-      });
-
-      after(async () => {
-        await tearDown();
-      });
-
-      it.skip('should have an index summary with NA for deleted index', async () => {
-        await indicesList.setFilter('deleted');
-        await indicesList.clickRowByName('many-0001_clruksahirti');
-
-        expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total:\n3.6 KB',
-          dataSizePrimaries: 'Primaries:\n3.6 KB',
-          documentCount: 'Documents:\n1',
-          totalShards: 'Total Shards:\nN/A',
-          unassignedShards: 'Unassigned Shards:\nN/A',
-          health: 'Health: Not Available',
-        });
-      });
-    });
-
   });
 }

@@ -15,9 +15,9 @@
         class="kuiInfoPanelBody__message"
         i18n-id="xpack.monitoring.accessDenied.notAuthorizedDescription"
         i18n-default-message="You are not authorized to access Monitoring. To use Monitoring, you
-        need the privileges granted by both the `{kibanaUser}` and
+        need the privileges granted by both the `{kibanaAdmin}` and
         `{monitoringUser}` roles."
-        i18n-values="{ kibanaUser: 'kibana_user', monitoringUser: 'monitoring_user' }"
+        i18n-values="{ kibanaAdmin: 'kibana_admin', monitoringUser: 'monitoring_user' }"
       ></div>
 
       <div
@@ -30,12 +30,13 @@
 
       <div class="kuiInfoPanelBody__message">
         <div class="kuiButtonGroup">
-          <button
-            ng-click="accessDenied.goToKibana();"
-            class="kuiButton kuiButton--primary"
-            i18n-id="xpack.monitoring.accessDenied.backToKibanaButtonLabel"
-            i18n-default-message="Back to Kibana"
-          ></button>
+          <a ng-href="{{ accessDenied.goToKibanaURL }}">
+            <button
+              class="kuiButton kuiButton--primary"
+              i18n-id="xpack.monitoring.accessDenied.backToKibanaButtonLabel"
+              i18n-default-message="Back to Kibana"
+            ></button>
+          </a>
         </div>
       </div>
     </div>

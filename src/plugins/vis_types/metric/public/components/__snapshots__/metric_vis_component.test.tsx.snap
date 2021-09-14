@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MetricVisComponent should render correct structure for multi-value metrics 1`] = `
+Array [
+  <MetricVisValue
+    key="0"
+    metric={
+      Object {
+        "bgColor": undefined,
+        "color": undefined,
+        "label": "1st percentile of bytes",
+        "lightText": false,
+        "rowIndex": 0,
+        "value": 182,
+      }
+    }
+    showLabel={true}
+  />,
+  <MetricVisValue
+    key="1"
+    metric={
+      Object {
+        "bgColor": undefined,
+        "color": undefined,
+        "label": "99th percentile of bytes",
+        "lightText": false,
+        "rowIndex": 0,
+        "value": 445842.4634666484,
+      }
+    }
+    showLabel={true}
+  />,
+]
+`;
+
+exports[`MetricVisComponent should render correct structure for single metric 1`] = `
+<MetricVisValue
+  key="0"
+  metric={
+    Object {
+      "bgColor": undefined,
+      "color": undefined,
+      "label": "Count",
+      "lightText": false,
+      "rowIndex": 0,
+      "value": 4301021,
+    }
+  }
+  showLabel={true}
+/>
+`;

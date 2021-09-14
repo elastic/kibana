@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { toByteArray } from 'base64-js';
 import fileSaver from 'file-saver';
 import PropTypes from 'prop-types';
 import React, { ReactElement } from 'react';
-import { parseDataUrl } from '../../../common/lib/dataurl';
+import { parseDataUrl } from '../../../../../../src/plugins/presentation_util/public';
 
 interface Props {
   children: ReactElement<any>;

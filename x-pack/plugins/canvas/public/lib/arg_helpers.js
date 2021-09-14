@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { includes } from 'lodash';
@@ -19,7 +20,7 @@ import { getType } from '@kbn/interpreter/common';
 const allowedTypes = ['string', 'number', 'boolean'];
 const badType = () => new Error(`Arg setting helpers only support ${allowedTypes.join(',')}`);
 
-const isAllowed = type => includes(allowedTypes, type);
+const isAllowed = (type) => includes(allowedTypes, type);
 
 export function validateArg(value) {
   const type = getType(value);
@@ -33,7 +34,7 @@ export function getSimpleArg(name, args) {
   if (!args[name]) {
     return [];
   }
-  return args[name].map(astVal => {
+  return args[name].map((astVal) => {
     if (!isAllowed(getType(astVal))) {
       throw badType();
     }

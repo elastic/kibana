@@ -1,26 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
-  FindResponse,
-  SavedObjectsClient,
-} from 'src/legacy/server/saved_objects/service/saved_objects_client';
+  SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+} from 'src/core/server';
 import {
   IndexGroup,
   REINDEX_OP_TYPE,
   ReindexOperation,
+  ReindexOptions,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
+import { versionService } from '../version';
 import { generateNewIndexName } from './index_settings';
-import { FlatSettings } from './types';
+import { FlatSettings, FlatSettingsWithTypeName } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
@@ -38,8 +41,9 @@ export interface ReindexActions {
   /**
    * Creates a new reindexOp, does not perform any pre-flight checks.
    * @param indexName
+   * @param opts Additional options when creating the reindex operation
    */
-  createReindexOp(indexName: string): Promise<ReindexSavedObject>;
+  createReindexOp(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 
   /**
    * Deletes a reindexOp.
@@ -71,7 +75,7 @@ export interface ReindexActions {
    * Finds the reindex operation saved object for the given index.
    * @param indexName
    */
-  findReindexOperations(indexName: string): Promise<FindResponse<ReindexOperation>>;
+  findReindexOperations(indexName: string): Promise<SavedObjectsFindResponse<ReindexOperation>>;
 
   /**
    * Returns an array of all reindex operations that have a status.
@@ -82,7 +86,7 @@ export interface ReindexActions {
    * Retrieve index settings (in flat, dot-notation style) and mappings.
    * @param indexName
    */
-  getFlatSettings(indexName: string): Promise<FlatSettings | null>;
+  getFlatSettings(indexName: string): Promise<FlatSettings | FlatSettingsWithTypeName | null>;
 
   // ----- Functions below are for enforcing locks around groups of indices like ML or Watcher
 
@@ -113,8 +117,8 @@ export interface ReindexActions {
 }
 
 export const reindexActionsFactory = (
-  client: SavedObjectsClient,
-  callCluster: CallCluster
+  client: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
 ): ReindexActions => {
   // ----- Internal functions
   const isLocked = (reindexOp: ReindexSavedObject) => {
@@ -154,7 +158,7 @@ export const reindexActionsFactory = (
 
   // ----- Public interface
   return {
-    async createReindexOp(indexName: string) {
+    async createReindexOp(indexName: string, opts?: ReindexOptions) {
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
         newIndexName: generateNewIndexName(indexName),
@@ -165,6 +169,7 @@ export const reindexActionsFactory = (
         reindexTaskPercComplete: null,
         errorMessage: null,
         runningReindexCount: null,
+        reindexOptions: opts,
       });
     },
 
@@ -233,15 +238,33 @@ export const reindexActionsFactory = (
     },
 
     async getFlatSettings(indexName: string) {
-      const flatSettings = (await callCluster('transport.request', {
-        path: `/${encodeURIComponent(indexName)}?flat_settings=true&include_type_name=false`,
-      })) as { [indexName: string]: FlatSettings };
+      let flatSettings;
 
-      if (!flatSettings[indexName]) {
+      if (versionService.getMajorVersion() === 7) {
+        // On 7.x, we need to get index settings with mapping type
+        flatSettings = await esClient.indices.get<{
+          [indexName: string]: FlatSettingsWithTypeName;
+        }>({
+          index: indexName,
+          flat_settings: true,
+          // This @ts-ignore is needed on master since the flag is deprecated on >7.x
+          // @ts-ignore
+          include_type_name: true,
+        });
+      } else {
+        flatSettings = await esClient.indices.get<{
+          [indexName: string]: FlatSettings;
+        }>({
+          index: indexName,
+          flat_settings: true,
+        });
+      }
+
+      if (!flatSettings.body[indexName]) {
         return null;
       }
 
-      return flatSettings[indexName];
+      return flatSettings.body[indexName];
     },
 
     async _fetchAndLockIndexGroupDoc(indexGroup) {
@@ -250,7 +273,7 @@ export const reindexActionsFactory = (
           // The IndexGroup enum value (a string) serves as the ID of the lock doc
           return await client.get<ReindexOperation>(REINDEX_OP_TYPE, indexGroup);
         } catch (e) {
-          if (e.isBoom && e.output.statusCode === 404) {
+          if (client.errors.isNotFoundError(e)) {
             return await client.create<ReindexOperation>(
               REINDEX_OP_TYPE,
               {
@@ -281,7 +304,7 @@ export const reindexActionsFactory = (
             throw new Error(`Could not acquire lock for ML jobs`);
           }
 
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
           return lockDoc(attempt + 1);
         }
       };
@@ -290,7 +313,7 @@ export const reindexActionsFactory = (
     },
 
     async incrementIndexGroupReindexes(indexGroup) {
-      this.runWhileIndexGroupLocked(indexGroup, lockDoc =>
+      this.runWhileIndexGroupLocked(indexGroup, (lockDoc) =>
         this.updateReindexOp(lockDoc, {
           runningReindexCount: lockDoc.attributes.runningReindexCount! + 1,
         })
@@ -298,7 +321,7 @@ export const reindexActionsFactory = (
     },
 
     async decrementIndexGroupReindexes(indexGroup) {
-      this.runWhileIndexGroupLocked(indexGroup, lockDoc =>
+      this.runWhileIndexGroupLocked(indexGroup, (lockDoc) =>
         this.updateReindexOp(lockDoc, {
           runningReindexCount: lockDoc.attributes.runningReindexCount! - 1,
         })

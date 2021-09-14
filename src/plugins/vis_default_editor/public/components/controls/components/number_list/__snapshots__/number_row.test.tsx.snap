@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NumberRow should be rendered with default set of props 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem>
+    <EuiFieldNumber
+      aria-labelledby="numberList"
+      autoFocus={false}
+      compressed={true}
+      fullWidth={true}
+      isInvalid={false}
+      max={10}
+      min={1}
+      onBlur={[MockFunction]}
+      onChange={[Function]}
+      placeholder="Enter a value"
+      value={1}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiButtonIcon
+      aria-label="Remove the rank value of 1"
+      color="danger"
+      disabled={false}
+      iconType="trash"
+      onClick={[Function]}
+      title="Remove the rank value of 1"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

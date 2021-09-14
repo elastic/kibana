@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,14 +13,10 @@ describe('Latest Versions', () => {
   test('that latest active component renders normally', () => {
     const latestVersions = [
       { version: '6.3.1', count: 8 },
-      { version: '6.3.0', count: 2 }
+      { version: '6.3.0', count: 2 },
     ];
 
-    const component = shallow(
-      <LatestVersions
-        latestVersions={latestVersions}
-      />
-    );
+    const component = shallow(<LatestVersions latestVersions={latestVersions} />);
 
     expect(component).toMatchSnapshot();
   });

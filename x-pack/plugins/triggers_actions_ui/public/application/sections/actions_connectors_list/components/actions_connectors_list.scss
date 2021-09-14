@@ -1,0 +1,11 @@
+.actConnectorsList__tableRowDisabled {
+  background-color: $euiColorLightestShade;
+
+  .actConnectorsList__tableCellDisabled {
+    color: $euiColorDarkShade;
+  }
+
+  .euiLink + .euiToolTipAnchor {
+    margin-left: $euiSizeXS;
+  }
+}

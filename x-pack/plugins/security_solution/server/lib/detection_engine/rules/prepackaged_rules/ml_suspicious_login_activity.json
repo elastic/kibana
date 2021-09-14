@@ -1,0 +1,30 @@
+{
+  "anomaly_threshold": 50,
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies an unusually high number of authentication attempts.",
+  "false_positives": [
+    "Security audits may trigger this alert. Conditions that generate bursts of failed logins, such as misconfigured applications or account lockouts could trigger this alert."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "suspicious_login_activity_ecs",
+  "name": "Unusual Login Activity",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "4330272b-9724-4bc6-a3ca-f1532b81e5c2",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 4
+}

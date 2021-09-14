@@ -1,25 +1,11 @@
 {
   "name": "@elastic/datemath",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "description": "elasticsearch datemath parser, used in kibana",
   "license": "Apache-2.0",
-  "main": "target/index.js",
-  "typings": "target/index.d.ts",
-  "scripts": {
-    "build": "babel src --out-dir target --copy-files",
-    "kbn:bootstrap": "yarn build --quiet",
-    "kbn:watch": "yarn build --watch"
-  },
-  "devDependencies": {
-    "@babel/cli": "7.4.4",
-    "@babel/preset-env": "7.4.5",
-    "babel-plugin-add-module-exports": "1.0.2",
-    "moment": "^2.13.0"
-  },
-  "dependencies": {
-    "tslib": "^1.9.3"
-  },
+  "main": "./target_node/index.js",
+  "types": "./target_types/index.d.ts",
   "peerDependencies": {
-    "moment": "^2.13.0"
+    "moment": "^2.24.0"
   }
 }

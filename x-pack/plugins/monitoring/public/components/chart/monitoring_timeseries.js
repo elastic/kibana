@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,8 +12,8 @@ import { getColor } from './get_color';
 import { TimeseriesVisualization } from './timeseries_visualization';
 
 function formatTicksFor(series) {
-  const format = get(series, '.metric.format', '0,0.0');
-  const units = get(series, '.metric.units', '');
+  const format = get(series, 'metric.format', '0,0.0');
+  const units = get(series, 'metric.units', '');
 
   return function formatTicks(val) {
     let formatted = numeral(val).format(format);
@@ -31,7 +32,7 @@ export function MonitoringTimeseries({ series, onBrush }) {
     return {
       color: getColor(s.metric.app, index),
       data: s.data,
-      label: s.metric.label
+      label: s.metric.label,
     };
   });
   const firstSeries = first(series);

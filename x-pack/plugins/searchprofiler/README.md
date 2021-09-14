@@ -1,26 +1,34 @@
-# Profiler
+# Search Profiler
 
-A UI for the query and aggregation profiler in Elasticsearch
+## About
 
-## Development
+The search profiler consumes the [Profile API](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-profile.html)
+by sending a `search` API with `profile: true` enabled in the request body. The response contains
+detailed information on how Elasticsearch executed the search request. People use this information
+to understand why a search request might be slow.
 
-Assuming you've checked out x-plugins next to kibana...
+## How to test
 
-- Run `yarn kbn bootstrap`
-- Run `yarn start` to watch for and sync files on change
-- Open a new terminal to run Kibana - use `yarn start` to launch it in dev mode
-  - Kibana will automatically restart as files are synced
-  - If you need debugging output, run `DEBUG=reporting yarn start` instead
+### Query profile
 
-If you have installed this somewhere other than via x-plugins, and next to the kibana repo, you'll need to change the `pathToKibana` setting in `gulpfile.js`
+Execute the default query to generate results in the Query profile tab.
 
-## Testing
-
-To run the server tests, change into `x-plugins/kibana` and run:
-
-```bash
-mocha --debug --compilers js:@babel/register plugins/profiler/**/__tests__/**/*.js
+```json
+{
+  "query":{
+    "match_all" : {}
+  }
+}
 ```
 
+### Aggregation profile
 
---kbnServer.tests_bundle.pluginId
+Execute an aggregation query to generate results in the Aggregation profile tab.
+
+```json
+{
+  "aggs": {
+    "avg_grade": { "avg": { "field": "grade" } }
+  }
+}
+```

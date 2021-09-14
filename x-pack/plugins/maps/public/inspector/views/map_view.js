@@ -1,18 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
-import { InspectorView } from 'ui/inspector';
 import { MapDetails } from './map_details';
 import { i18n } from '@kbn/i18n';
 
 class MapViewComponent extends Component {
-
   constructor(props) {
     super(props);
     props.adapters.map.on('change', this._onMapChange);
@@ -30,7 +28,7 @@ class MapViewComponent extends Component {
       stats,
       mapStyle: style,
     });
-  }
+  };
 
   componentWillUnmount() {
     this.props.adapters.map.removeListener('change', this._onMapChange);
@@ -38,14 +36,12 @@ class MapViewComponent extends Component {
 
   render() {
     return (
-      <InspectorView>
-        <MapDetails
-          centerLon={this.state.stats.center[0]}
-          centerLat={this.state.stats.center[1]}
-          zoom={this.state.stats.zoom}
-          mapStyle={this.state.mapStyle}
-        />
-      </InspectorView>
+      <MapDetails
+        centerLon={this.state.stats.center[0]}
+        centerLat={this.state.stats.center[1]}
+        zoom={this.state.stats.zoom}
+        mapStyle={this.state.mapStyle}
+      />
     );
   }
 }
@@ -56,16 +52,16 @@ MapViewComponent.propTypes = {
 
 const MapView = {
   title: i18n.translate('xpack.maps.inspector.mapDetailsViewTitle', {
-    defaultMessage: 'Map details'
+    defaultMessage: 'Map details',
   }),
   order: 30,
   help: i18n.translate('xpack.maps.inspector.mapDetailsViewHelpText', {
-    defaultMessage: 'View the map state'
+    defaultMessage: 'View the map state',
   }),
   shouldShow(adapters) {
     return Boolean(adapters.map);
   },
-  component: MapViewComponent
+  component: MapViewComponent,
 };
 
 export { MapView };

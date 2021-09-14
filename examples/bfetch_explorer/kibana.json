@@ -1,0 +1,14 @@
+{
+  "id": "bfetchExplorer",
+  "kibanaVersion": "kibana",
+  "version": "0.0.1",
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "requiredPlugins": ["bfetch", "developerExamples"],
+  "optionalPlugins": [],
+  "requiredBundles": ["kibanaReact"]
+}

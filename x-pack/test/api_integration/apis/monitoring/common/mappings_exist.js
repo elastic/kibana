@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -19,27 +20,27 @@ export default function ({ getService }) {
     {
       metrics: esMetrics.metrics,
       name: 'es metrics',
-      indexTemplate: '.monitoring-es'
+      indexTemplate: '.monitoring-es',
     },
     {
       metrics: kibanaMetrics.metrics,
       name: 'kibana metrics',
-      indexTemplate: '.monitoring-kibana'
+      indexTemplate: '.monitoring-kibana',
     },
     {
       metrics: logstashMetrics.metrics,
       name: 'logstash metrics',
-      indexTemplate: '.monitoring-logstash'
+      indexTemplate: '.monitoring-logstash',
     },
     {
       metrics: beatsMetrics.metrics,
       name: 'beats metrics',
-      indexTemplate: '.monitoring-beats'
+      indexTemplate: '.monitoring-beats',
     },
     {
       metrics: apmMetrics.metrics,
       name: 'apm metrics',
-      indexTemplate: '.monitoring-beats' // apm uses the same as beats
+      indexTemplate: '.monitoring-beats', // apm uses the same as beats
     },
   ];
 
@@ -48,19 +49,24 @@ export default function ({ getService }) {
       let mappings;
 
       before('load mappings', async () => {
-        const template = await es.indices.getTemplate({ name: indexTemplate });
+        const { body: template } = await es.indices.getTemplate({ name: indexTemplate });
         mappings = get(template, [indexTemplate, 'mappings', 'properties']);
       });
 
-      describe(`for ${name}`, () => { // eslint-disable-line no-loop-func
+      describe(`for ${name}`, () => {
+        // eslint-disable-line no-loop-func
         for (const metric of Object.values(metrics)) {
           for (const field of metric.getFields()) {
-            it(`${field} should exist in the mappings`, () => { // eslint-disable-line no-loop-func
-              const propertyGetter = field.split('.').reduce((list, field) => {
-                list.push(field);
-                list.push('properties');
-                return list;
-              }, []).slice(0, -1); // Remove the trailing 'properties'
+            // eslint-disable-next-line no-loop-func
+            it(`${field} should exist in the mappings`, () => {
+              const propertyGetter = field
+                .split('.')
+                .reduce((list, field) => {
+                  list.push(field);
+                  list.push('properties');
+                  return list;
+                }, [])
+                .slice(0, -1); // Remove the trailing 'properties'
 
               const foundMapping = get(mappings, propertyGetter, null);
               expect(foundMapping).to.not.equal(null);

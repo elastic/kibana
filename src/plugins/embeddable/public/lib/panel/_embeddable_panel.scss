@@ -1,0 +1,167 @@
+.embPanel {
+  z-index: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: $euiSizeL + 2px; // + 2px to account for border
+  position: relative;
+
+  &-isLoading {
+    // completely center the loading indicator
+    justify-content: center;
+    align-items: center;
+  }
+
+  // SASSTODO: The inheritence factor stemming from embeddables makes this class hard to change
+  .embPanel__content {
+    display: flex;
+    flex: 1 1 100%;
+    z-index: 1;
+    min-height: 0; // Absolute must for Firefox to scroll contents
+  }
+
+  // SASSTODO: Pretty sure this doesn't do anything since the flex-basis 100%,
+  // but it MIGHT be fixing IE
+  .embPanel__content--fullWidth {
+    width: 100%;
+  }
+}
+
+// HEADER
+
+.embPanel__header {
+  flex: 0 0 auto;
+  display: flex;
+  // ensure menu button is on the right even if the title doesn't exist
+  justify-content: flex-end;
+}
+
+.embPanel__title {
+  @include euiTitle('xxxs');
+  overflow: hidden;
+  line-height: 1.5;
+  flex-grow: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  &:not(:empty) {
+    line-height: $euiSizeL;
+    padding-left: $euiSizeS;
+  }
+
+  .embPanel__titleInner {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding-right: $euiSizeS;
+  }
+
+  .embPanel__titleTooltipAnchor {
+    max-width: 100%;
+  }
+
+  .embPanel__titleText {
+    @include euiTextTruncate;
+    font-weight: $euiFontWeightBold;
+  }
+
+  .embPanel__placeholderTitleText {
+    color: $euiColorMediumShade;
+    font-weight: $euiFontWeightRegular;
+  }
+}
+
+.embPanel__dragger:not(.embPanel__title) {
+  flex-grow: 1;
+}
+
+.embPanel__header--floater {
+  position: absolute;
+  right: 0;
+  top: 0;
+  left: 0;
+  z-index: $euiZLevel1;
+}
+
+// OPTIONS MENU
+
+/**
+  * 1. Use opacity to make this element accessible to screen readers and keyboard.
+  * 2. Show on focus to enable keyboard accessibility.
+  * 3. Always show in editing mode
+  */
+
+.embPanel__optionsMenuButton {
+  background-color: transparentize($euiColorDarkestShade, .9);
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 0;
+
+  &:focus {
+    background-color: $euiFocusBackgroundColor;
+  }
+}
+
+.embPanel .embPanel__optionsMenuButton {
+  opacity: 0; /* 1 */
+
+  &:focus {
+    opacity: 1; /* 2 */
+  }
+}
+
+.embPanel:hover {
+  .embPanel__optionsMenuButton {
+    opacity: 1;
+  }
+}
+
+// EDITING MODE
+
+.embPanel--editing {
+  border-style: dashed !important;
+  border-color: $euiColorMediumShade !important;
+  transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+  border-width: $euiBorderWidthThin;
+
+  &:hover,
+  &:focus {
+    @include euiSlightShadowHover;
+  }
+
+  .embPanel__dragger {
+    transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
+
+    &:hover {
+      background-color: $embEditingModeHoverColor;
+      cursor: move;
+    }
+  }
+
+  .embPanel__optionsMenuButton {
+    opacity: 1; /* 3 */
+  }
+}
+
+// LOADING and ERRORS
+
+.embPanel--loading {
+  .embPanel__title {
+    color: $euiTextSubduedColor;
+  }
+}
+
+.embPanel__error {
+  text-align: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: auto;
+  padding: $euiSizeS;
+}
+
+.embPanel__label {
+  position: absolute;
+  padding-left: $euiSizeS;
+  z-index: $euiZLevel1;
+}

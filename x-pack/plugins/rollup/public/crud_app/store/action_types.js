@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // Detail panel
@@ -15,6 +16,10 @@ export const LOAD_JOBS_FAILURE = 'LOAD_JOBS_FAILURE';
 
 // Refresh jobs
 export const REFRESH_JOBS_SUCCESS = 'REFRESH_JOBS_SUCCESS';
+
+// Clone job
+export const CLONE_JOB_START = 'CLONE_JOB_START';
+export const CLONE_JOB_CLEAR = 'CLONE_JOB_CLEAR';
 
 // Create job
 export const CREATE_JOB_START = 'CREATE_JOB_START';

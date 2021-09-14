@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DeleteSpacesButton renders as expected 1`] = `
+<Fragment>
+  <EuiButton
+    aria-label="Delete this space"
+    color="danger"
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Delete space"
+      id="xpack.spaces.management.deleteSpacesButton.deleteSpaceButtonLabel"
+      values={Object {}}
+    />
+  </EuiButton>
+</Fragment>
+`;

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -15,9 +16,10 @@ import {
   EuiFlexItem,
   EuiText,
   EuiLoadingSpinner,
+  EuiCheckbox,
 } from '@elastic/eui';
 
-const NavigationUi = ({
+export const Navigation = ({
   isSaving,
   hasNextStep,
   hasPreviousStep,
@@ -25,12 +27,14 @@ const NavigationUi = ({
   goToPreviousStep,
   save,
   canGoToNextStep,
+  onClickToggleStart,
+  startJobAfterCreation,
 }) => {
   if (isSaving) {
     return (
       <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l"/>
+          <EuiLoadingSpinner size="l" />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -52,10 +56,7 @@ const NavigationUi = ({
         onClick={goToPreviousStep}
         data-test-subj="rollupJobBackButton"
       >
-        <FormattedMessage
-          id="xpack.rollupJobs.create.backButton.label"
-          defaultMessage="Back"
-        />
+        <FormattedMessage id="xpack.rollupJobs.create.backButton.label" defaultMessage="Back" />
       </EuiButtonEmpty>
     </EuiFlexItem>
   );
@@ -66,14 +67,11 @@ const NavigationUi = ({
         iconType="arrowRight"
         iconSide="right"
         onClick={goToNextStep}
-        isDisabled={!canGoToNextStep}
+        disabled={!canGoToNextStep}
         fill
         data-test-subj="rollupJobNextButton"
       >
-        <FormattedMessage
-          id="xpack.rollupJobs.create.nextButton.label"
-          defaultMessage="Next"
-        />
+        <FormattedMessage id="xpack.rollupJobs.create.nextButton.label" defaultMessage="Next" />
       </EuiButton>
     </EuiFlexItem>
   );
@@ -87,11 +85,25 @@ const NavigationUi = ({
         fill
         data-test-subj="rollupJobSaveButton"
       >
-        <FormattedMessage
-          id="xpack.rollupJobs.create.saveButton.label"
-          defaultMessage="Save"
-        />
+        <FormattedMessage id="xpack.rollupJobs.create.saveButton.label" defaultMessage="Save" />
       </EuiButton>
+    </EuiFlexItem>
+  );
+
+  const startAfterCreateCheckbox = (
+    <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
+      <EuiCheckbox
+        id="rollupJobToggleJobStartAfterCreation"
+        data-test-subj="rollupJobToggleJobStartAfterCreation"
+        checked={startJobAfterCreation}
+        label={
+          <FormattedMessage
+            id="xpack.rollupJobs.create.startJobLabel"
+            defaultMessage="Start job now"
+          />
+        }
+        onChange={onClickToggleStart}
+      />
     </EuiFlexItem>
   );
 
@@ -99,12 +111,17 @@ const NavigationUi = ({
     <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
       {hasPreviousStep && previousStepButton}
       {hasNextStep && nextStepButton}
-      {!hasNextStep && saveButton}
+      {!hasNextStep && (
+        <Fragment>
+          {saveButton}
+          {startAfterCreateCheckbox}
+        </Fragment>
+      )}
     </EuiFlexGroup>
   );
 };
 
-NavigationUi.propTypes = {
+Navigation.propTypes = {
   hasNextStep: PropTypes.bool.isRequired,
   hasPreviousStep: PropTypes.bool.isRequired,
   isSaving: PropTypes.bool.isRequired,
@@ -113,5 +130,3 @@ NavigationUi.propTypes = {
   save: PropTypes.func.isRequired,
   canGoToNextStep: PropTypes.bool.isRequired,
 };
-
-export const Navigation = injectI18n(NavigationUi);

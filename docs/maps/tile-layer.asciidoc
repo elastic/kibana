@@ -2,18 +2,20 @@
 [[tile-layer]]
 == Tile layer
 
-The tile layer displays image tiles served from a tile server.
+Tile layers display image tiles served from a tile server.
 
 [role="screenshot"]
 image::maps/images/tile_layer.png[]
 
-You can create a tile layer from the following data sources:
+To add a tile layer to your map, click *Add layer*, then select one of the following:
 
-*Custom Tile Map Service*:: Map tiles configured in kibana.yml.
+*Configured Tile Map Service*:: Tile map service configured in kibana.yml.
 See map.tilemap.url in <<settings>> for details.
 
-*Tiles*:: Map tiles from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
+*EMS Basemaps*:: Tile map service from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
 
-*Tile Map Service from URL*:: Map tiles from a URL that includes the XYZ coordinates.
+*Tile Map Service*:: Tile map service configured in interface.
+
+*Vector tiles*:: Data service implementing the Mapbox vector tile specification.
 
 *Web Map Service*:: Maps from OGC Standard WMS.

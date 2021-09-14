@@ -1,0 +1,68 @@
+@import '@elastic/eui/src/global_styling/variables/size';
+@import '../shared';
+
+.pipelineProcessorsEditor__tree {
+  &__container {
+    padding: $euiSizeS;
+  }
+
+  &__dropZoneContainer {
+    position: relative;
+    margin: 2px;
+    visibility: hidden;
+    background-color: transparent;
+    height: 2px;
+
+    &--visible {
+      &:hover {
+        background-color: $euiColorPrimary;
+      }
+      visibility: visible;
+    }
+
+    &--unavailable {
+      &:hover {
+        background-color: $euiColorMediumShade;
+      }
+    }
+
+    &__toolTip {
+      pointer-events: none;
+    }
+  }
+  $dropZoneButtonHeight: 60px;
+  $dropZoneButtonOffsetY: $dropZoneButtonHeight * .5;
+
+  &__dropZoneButton {
+    position: absolute;
+    padding: 0;
+    height: $dropZoneButtonHeight;
+    margin-top: -$dropZoneButtonOffsetY;
+    width: 100%;
+    text-decoration: none !important;
+    z-index: $dropZoneZIndex;
+
+    &--visible {
+      pointer-events: visible !important;
+      &:hover {
+        transform: none !important;
+      }
+    }
+
+    &--compressed {
+      height: $dropZoneButtonOffsetY;
+    }
+  }
+
+  &__addProcessorButton {
+    width: fit-content;
+  }
+
+  &__onFailureHandlerContainer {
+    margin-top: $euiSizeS;
+    margin-bottom: $euiSizeS;
+    & > * {
+      overflow: visible;
+    }
+  }
+}

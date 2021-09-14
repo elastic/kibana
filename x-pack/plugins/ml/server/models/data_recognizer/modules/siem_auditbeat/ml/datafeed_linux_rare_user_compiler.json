@@ -1,0 +1,22 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "max_empty_searches": 10,
+    "query": {
+        "bool": {
+            "filter": [{"term": {"event.action": "executed"}}],
+            "must": [
+              {"bool": {
+                  "should": [
+                    {"term": {"process.name": "compile"}},
+                    {"term": {"process.name": "gcc"}},
+                    {"term": {"process.name": "make"}},
+                    {"term": {"process.name": "yasm"}}
+                  ]
+                }}
+            ]
+        }
+    }
+}

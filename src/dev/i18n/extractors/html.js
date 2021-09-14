@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import cheerio from 'cheerio';
@@ -33,7 +22,7 @@ import {
   extractDescriptionValueFromNode,
 } from '../utils';
 import { DEFAULT_MESSAGE_KEY, DESCRIPTION_KEY, VALUES_KEY } from '../constants';
-import { createFailError, isFailError } from '../../run';
+import { createFailError, isFailError } from '@kbn/dev-utils';
 
 /**
  * Find all substrings of "{{ any text }}" pattern allowing '{' and '}' chars in single quote strings
@@ -68,7 +57,7 @@ function parseExpression(expression) {
  */
 function parseFilterObjectExpression(expression, messageId) {
   const ast = parseExpression(expression);
-  const objectExpressionNode = [...traverseNodes(ast.program.body)].find(node =>
+  const objectExpressionNode = [...traverseNodes(ast.program.body)].find((node) =>
     isObjectExpression(node)
   );
 
@@ -80,7 +69,9 @@ function parseFilterObjectExpression(expression, messageId) {
     DEFAULT_MESSAGE_KEY,
     DESCRIPTION_KEY,
     VALUES_KEY,
-  ].map(key => objectExpressionNode.properties.find(property => isPropertyWithKey(property, key)));
+  ].map((key) =>
+    objectExpressionNode.properties.find((property) => isPropertyWithKey(property, key))
+  );
 
   const message = messageProperty
     ? formatJSString(extractMessageValueFromNode(messageProperty.value, messageId))
@@ -99,7 +90,7 @@ function parseFilterObjectExpression(expression, messageId) {
 
 function parseIdExpression(expression) {
   const ast = parseExpression(expression);
-  const stringNode = [...traverseNodes(ast.program.body)].find(node => isStringLiteral(node));
+  const stringNode = [...traverseNodes(ast.program.body)].find((node) => isStringLiteral(node));
 
   if (!stringNode) {
     throw createFailError(`Message id should be a string literal, but got: \n${expression}`);
@@ -131,15 +122,13 @@ function trimOneTimeBindingOperator(string) {
 }
 
 function* extractExpressions(htmlContent) {
-  const elements = cheerio
-    .load(htmlContent)('*')
-    .toArray();
+  const elements = cheerio.load(htmlContent)('*').toArray();
 
   for (const element of elements) {
     for (const node of element.children) {
       if (node.type === 'text') {
         yield* (node.data.match(ANGULAR_EXPRESSION_REGEX) || [])
-          .filter(expression => expression.includes(I18N_FILTER_MARKER))
+          .filter((expression) => expression.includes(I18N_FILTER_MARKER))
           .map(trimCurlyBraces);
       }
     }
@@ -232,7 +221,7 @@ function* getDirectiveMessages(htmlContent, reporter) {
     try {
       if (element.values) {
         const ast = parseExpression(element.values);
-        const valuesObjectNode = [...traverseNodes(ast.program.body)].find(node =>
+        const valuesObjectNode = [...traverseNodes(ast.program.body)].find((node) =>
           isObjectExpression(node)
         );
         const valuesKeys = extractValuesKeysFromNode(valuesObjectNode);

@@ -1,21 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext } from 'react';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { SourceQuery, UpdateSourceInput } from '../../graphql/types';
+import { IIndexPattern } from 'src/plugins/data/public';
+import {
+  MetricsSourceConfigurationProperties,
+  PartialMetricsSourceConfigurationProperties,
+} from '../../../common/metrics_sources';
 import { RendererFunction } from '../../utils/typed_react';
-import { Source } from '../source';
+import { Source } from '../metrics_source';
 
 interface WithSourceProps {
   children: RendererFunction<{
-    configuration?: SourceQuery.Query['source']['configuration'];
-    create: (sourceProperties: UpdateSourceInput) => Promise<any> | undefined;
-    derivedIndexPattern: StaticIndexPattern;
+    configuration?: MetricsSourceConfigurationProperties;
+    create: (
+      sourceProperties: PartialMetricsSourceConfigurationProperties
+    ) => Promise<any> | undefined;
+    createDerivedIndexPattern: (type: 'metrics') => IIndexPattern;
     exists?: boolean;
     hasFailed: boolean;
     isLoading: boolean;
@@ -25,7 +31,9 @@ interface WithSourceProps {
     metricAlias?: string;
     metricIndicesExist?: boolean;
     sourceId: string;
-    update: (sourceProperties: UpdateSourceInput) => Promise<any> | undefined;
+    update: (
+      sourceProperties: PartialMetricsSourceConfigurationProperties
+    ) => Promise<any> | undefined;
     version?: string;
   }>;
 }
@@ -33,12 +41,11 @@ interface WithSourceProps {
 export const WithSource: React.FunctionComponent<WithSourceProps> = ({ children }) => {
   const {
     createSourceConfiguration,
-    derivedIndexPattern,
+    createDerivedIndexPattern,
     source,
     sourceExists,
     sourceId,
     metricIndicesExist,
-    logIndicesExist,
     isLoading,
     loadSource,
     hasFailedLoadingSource,
@@ -50,13 +57,12 @@ export const WithSource: React.FunctionComponent<WithSourceProps> = ({ children 
   return children({
     create: createSourceConfiguration,
     configuration: source && source.configuration,
-    derivedIndexPattern,
+    createDerivedIndexPattern,
     exists: sourceExists,
     hasFailed: hasFailedLoadingSource,
     isLoading,
     lastFailureMessage: loadSourceFailureMessage,
     load: loadSource,
-    logIndicesExist,
     metricIndicesExist,
     sourceId,
     update: updateSourceConfiguration,

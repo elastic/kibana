@@ -1,92 +1,89 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { services as commonServiceProviders } from '../../common/services';
 
-import { AppsMenuProvider } from './apps_menu';
-import { BrowserProvider } from './browser';
-import { ComboBoxProvider } from './combo_box';
+import { AppsMenuService } from './apps_menu';
 import {
-  DashboardAddPanelProvider,
-  DashboardExpectProvider,
-  DashboardPanelActionsProvider,
-  DashboardVisualizationProvider,
-  // @ts-ignore not TS yet
+  BrowserProvider,
+  FailureDebuggingProvider,
+  FindProvider,
+  ScreenshotsService,
+  SnapshotsService,
+  TestSubjects,
+} from './common';
+import { ComboBoxService } from './combo_box';
+import {
+  DashboardAddPanelService,
+  DashboardReplacePanelService,
+  DashboardExpectService,
+  DashboardPanelActionsService,
+  DashboardVisualizationsService,
 } from './dashboard';
-// @ts-ignore not TS yet
-import { DocTableProvider } from './doc_table';
-// @ts-ignore not TS yet
-import { EmbeddingProvider } from './embedding';
-// @ts-ignore not TS yet
-import { FailureDebuggingProvider } from './failure_debugging';
-// @ts-ignore not TS yet
-import { FilterBarProvider } from './filter_bar';
-import { FindProvider } from './find';
-// @ts-ignore not TS yet
-import { FlyoutProvider } from './flyout';
-// @ts-ignore not TS yet
-import { GlobalNavProvider } from './global_nav';
-// @ts-ignore not TS yet
-import { InspectorProvider } from './inspector';
-// @ts-ignore not TS yet
-import { QueryBarProvider } from './query_bar';
+import { DocTableService } from './doc_table';
+import { EmbeddingService } from './embedding';
+import { FilterBarService } from './filter_bar';
+import { FlyoutService } from './flyout';
+import { GlobalNavService } from './global_nav';
+import { InspectorService } from './inspector';
+import { FieldEditorService } from './field_editor';
+import { ManagementMenuService } from './management';
+import { QueryBarService } from './query_bar';
 import { RemoteProvider } from './remote';
-// @ts-ignore not TS yet
-import { RenderableProvider } from './renderable';
-import { ScreenshotsProvider } from './screenshots';
-// @ts-ignore not TS yet
-import { SnapshotsProvider } from './snapshots';
-// @ts-ignore not TS yet
-import { TableProvider } from './table';
-import { TestSubjectsProvider } from './test_subjects';
-import { ToastsProvider } from './toasts';
-// @ts-ignore not TS yet
-import { PieChartProvider } from './visualizations';
-// @ts-ignore not TS yet
-import { VisualizeListingTableProvider } from './visualize_listing_table';
+import { RenderableService } from './renderable';
+import { ToastsService } from './toasts';
+import { DataGridService } from './data_grid';
+import {
+  PieChartService,
+  ElasticChartService,
+  VegaDebugInspectorViewService,
+} from './visualizations';
+import { ListingTableService } from './listing_table';
+import { SavedQueryManagementComponentService } from './saved_query_management_component';
+import { KibanaSupertestProvider } from './supertest';
+import { MenuToggleService } from './menu_toggle';
+import { MonacoEditorService } from './monaco_editor';
 
 export const services = {
   ...commonServiceProviders,
 
   __webdriver__: RemoteProvider,
-  filterBar: FilterBarProvider,
-  queryBar: QueryBarProvider,
+  filterBar: FilterBarService,
+  queryBar: QueryBarService,
   find: FindProvider,
-  testSubjects: TestSubjectsProvider,
-  docTable: DocTableProvider,
-  screenshots: ScreenshotsProvider,
-  snapshots: SnapshotsProvider,
-  dashboardVisualizations: DashboardVisualizationProvider,
-  dashboardExpect: DashboardExpectProvider,
+  testSubjects: TestSubjects,
+  docTable: DocTableService,
+  screenshots: ScreenshotsService,
+  snapshots: SnapshotsService,
   failureDebugging: FailureDebuggingProvider,
-  visualizeListingTable: VisualizeListingTableProvider,
-  dashboardAddPanel: DashboardAddPanelProvider,
-  dashboardPanelActions: DashboardPanelActionsProvider,
-  flyout: FlyoutProvider,
-  comboBox: ComboBoxProvider,
-  embedding: EmbeddingProvider,
-  renderable: RenderableProvider,
-  table: TableProvider,
+  listingTable: ListingTableService,
+  dashboardVisualizations: DashboardVisualizationsService,
+  dashboardExpect: DashboardExpectService,
+  dashboardAddPanel: DashboardAddPanelService,
+  dashboardReplacePanel: DashboardReplacePanelService,
+  dashboardPanelActions: DashboardPanelActionsService,
+  flyout: FlyoutService,
+  comboBox: ComboBoxService,
+  dataGrid: DataGridService,
+  embedding: EmbeddingService,
+  renderable: RenderableService,
   browser: BrowserProvider,
-  pieChart: PieChartProvider,
-  inspector: InspectorProvider,
-  appsMenu: AppsMenuProvider,
-  globalNav: GlobalNavProvider,
-  toasts: ToastsProvider,
+  pieChart: PieChartService,
+  inspector: InspectorService,
+  fieldEditor: FieldEditorService,
+  vegaDebugInspector: VegaDebugInspectorViewService,
+  appsMenu: AppsMenuService,
+  globalNav: GlobalNavService,
+  toasts: ToastsService,
+  savedQueryManagementComponent: SavedQueryManagementComponentService,
+  elasticChart: ElasticChartService,
+  supertest: KibanaSupertestProvider,
+  managementMenu: ManagementMenuService,
+  monacoEditor: MonacoEditorService,
+  menuToggle: MenuToggleService,
 };

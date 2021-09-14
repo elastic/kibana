@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const clusterList = getService('monitoringClusterList');
   const clusterOverview = getService('monitoringClusterOverview');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['monitoring', 'header']);
+  const PageObjects = getPageObjects(['monitoring', 'header', 'common']);
 
   describe('Cluster listing', () => {
     describe('with trial license clusters', () => {
@@ -20,10 +21,12 @@ export default function ({ getService, getPageObjects }) {
       const UNSUPPORTED_CLUSTER_UUID = '6d-9tDFTRe-qT5GoBytdlQ';
 
       before(async () => {
-        await setup('monitoring/multicluster', {
-          from: '2017-08-15 21:00:00.000',
-          to: '2017-08-16 00:00:00.000',
+        await setup('x-pack/test/functional/es_archives/monitoring/multicluster', {
+          from: 'Aug 15, 2017 @ 21:00:00.000',
+          to: 'Aug 16, 2017 @ 00:00:00.000',
         });
+
+        await clusterList.closeAlertsModal();
 
         await clusterList.assertDefaults();
       });
@@ -58,7 +61,9 @@ export default function ({ getService, getPageObjects }) {
         it('clicking the basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-          expect(await testSubjects.exists('monitoringLicenseWarning', { timeout: 2000 })).to.be(true);
+          expect(await testSubjects.exists('monitoringLicenseWarning', { timeout: 2000 })).to.be(
+            true
+          );
         });
 
         /*
@@ -75,10 +80,12 @@ export default function ({ getService, getPageObjects }) {
       const SUPPORTED_CLUSTER_UUID = 'NDKg6VXAT6-TaGzEK2Zy7g';
 
       before(async () => {
-        await setup('monitoring/multi-basic', {
-          from: '2017-09-07 20:12:04.011',
-          to: '2017-09-07 20:18:55.733',
+        await setup('x-pack/test/functional/es_archives/monitoring/multi_basic', {
+          from: 'Sep 7, 2017 @ 20:12:04.011',
+          to: 'Sep 7, 2017 @ 20:18:55.733',
         });
+
+        await clusterList.closeAlertsModal();
 
         await clusterList.assertDefaults();
       });
@@ -99,18 +106,23 @@ export default function ({ getService, getPageObjects }) {
           expect(await clusterList.getClusterDataSize(UNSUPPORTED_CLUSTER_UUID)).to.be('-');
           expect(await clusterList.getClusterLogstashCount(UNSUPPORTED_CLUSTER_UUID)).to.be('-');
           expect(await clusterList.getClusterKibanaCount(UNSUPPORTED_CLUSTER_UUID)).to.be('-');
-          expect(await clusterList.getClusterLicense(UNSUPPORTED_CLUSTER_UUID)).to.be('Basic\nExpires 29 Aug 30');
+          expect(await clusterList.getClusterLicense(UNSUPPORTED_CLUSTER_UUID)).to.be(
+            'Basic\nExpires 29 Aug 30'
+          );
         });
 
         it('primary basic cluster shows cluster metrics', async () => {
+          // PageObjects.common.sleep(10000)
           expect(await clusterList.getClusterName(SUPPORTED_CLUSTER_UUID)).to.be('production');
-          expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('N/A');
+          expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('Clear');
           expect(await clusterList.getClusterNodesCount(SUPPORTED_CLUSTER_UUID)).to.be('2');
           expect(await clusterList.getClusterIndicesCount(SUPPORTED_CLUSTER_UUID)).to.be('4');
           expect(await clusterList.getClusterDataSize(SUPPORTED_CLUSTER_UUID)).to.be('1.6 MB');
           expect(await clusterList.getClusterLogstashCount(SUPPORTED_CLUSTER_UUID)).to.be('2');
           expect(await clusterList.getClusterKibanaCount(SUPPORTED_CLUSTER_UUID)).to.be('1');
-          expect(await clusterList.getClusterLicense(SUPPORTED_CLUSTER_UUID)).to.be('Basic\nExpires 29 Aug 30');
+          expect(await clusterList.getClusterLicense(SUPPORTED_CLUSTER_UUID)).to.be(
+            'Basic\nExpires 29 Aug 30'
+          );
         });
       });
 
@@ -121,7 +133,9 @@ export default function ({ getService, getPageObjects }) {
         it('clicking the non-primary basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-          expect(await testSubjects.exists('monitoringLicenseWarning', { timeout: 2000 })).to.be(true);
+          expect(await testSubjects.exists('monitoringLicenseWarning', { timeout: 2000 })).to.be(
+            true
+          );
         });
 
         it('clicking the primary basic cluster goes to overview', async function () {
@@ -130,10 +144,10 @@ export default function ({ getService, getPageObjects }) {
 
           expect(await clusterOverview.isOnClusterOverview()).to.be(true);
           expect(await clusterOverview.getClusterName()).to.be('production');
+          await PageObjects.monitoring.closeAlertsModal();
 
-          await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters'); // reset for next test
+          await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters'); // reset for next test
         });
-
       });
     });
   });

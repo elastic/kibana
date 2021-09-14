@@ -1,84 +1,41 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { deepFreeze, RecursiveReadonly } from '../../../utils';
-import { MixedApp } from '../application_service';
-import { InjectedMetadataStart } from '../../injected_metadata';
+import { RecursiveReadonly } from '@kbn/utility-types';
+import { deepFreeze } from '@kbn/std';
+
+import { Capabilities } from '../../../types/capabilities';
+import { HttpStart } from '../../http';
 
 interface StartDeps {
-  apps: ReadonlyArray<MixedApp>;
-  injectedMetadata: InjectedMetadataStart;
-}
-
-/**
- * The read-only set of capabilities available for the current UI session.
- * Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID,
- * and the boolean is a flag indicating if the capability is enabled or disabled.
- *
- * @public
- */
-export interface Capabilities {
-  /** Navigation link capabilities. */
-  navLinks: Record<string, boolean>;
-
-  /** Management section capabilities. */
-  management: {
-    [sectionId: string]: Record<string, boolean>;
-  };
-
-  /** Catalogue capabilities. Catalogue entries drive the visibility of the Kibana homepage options. */
-  catalogue: Record<string, boolean>;
-
-  /** Custom capabilities, registered by plugins. */
-  [key: string]: Record<string, boolean | Record<string, boolean>>;
-}
-
-/**
- * Capabilities Setup.
- * @public
- */
-export interface CapabilitiesStart {
-  /**
-   * Gets the read-only capabilities.
-   */
-  capabilities: RecursiveReadonly<Capabilities>;
-
-  /**
-   * Apps available based on the current capabilities. Should be used
-   * to show navigation links and make routing decisions.
-   */
-  availableApps: ReadonlyArray<MixedApp>;
+  appIds: string[];
+  http: HttpStart;
 }
 
 /** @internal */
+export interface CapabilitiesStart {
+  capabilities: RecursiveReadonly<Capabilities>;
+}
 
 /**
  * Service that is responsible for UI Capabilities.
+ * @internal
  */
 export class CapabilitiesService {
-  public async start({ apps, injectedMetadata }: StartDeps): Promise<CapabilitiesStart> {
-    const capabilities = deepFreeze(injectedMetadata.getCapabilities());
-    const availableApps = apps.filter(app => capabilities.navLinks[app.id]);
+  public async start({ appIds, http }: StartDeps): Promise<CapabilitiesStart> {
+    const useDefaultCapabilities = http.anonymousPaths.isAnonymous(window.location.pathname);
+    const capabilities = await http.post<Capabilities>('/api/core/capabilities', {
+      query: useDefaultCapabilities ? { useDefaultCapabilities } : undefined,
+      body: JSON.stringify({ applications: appIds }),
+    });
 
     return {
-      availableApps,
-      capabilities,
+      capabilities: deepFreeze(capabilities),
     };
   }
 }

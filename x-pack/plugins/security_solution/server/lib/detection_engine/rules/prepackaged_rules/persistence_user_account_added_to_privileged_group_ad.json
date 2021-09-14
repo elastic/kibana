@@ -1,0 +1,56 @@
+{
+  "author": [
+    "Elastic",
+    "Skoetting"
+  ],
+  "description": "Identifies a user being added to a privileged group in Active Directory. Privileged accounts and groups in Active Directory are those to which powerful rights, privileges, and permissions are granted that allow them to perform nearly any action in Active Directory and on domain-joined systems.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "User Added to Privileged Group in Active Directory",
+  "query": "iam where event.action == \"added-member-to-group\" and\n  group.name : (\"Admin*\",\n                \"Local Administrators\",\n                \"Domain Admins\",\n                \"Enterprise Admins\",\n                \"Backup Admins\",\n                \"Schema Admins\",\n                \"DnsAdmins\",\n                \"Exchange Organization Administrators\")\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-b--privileged-accounts-and-groups-in-active-directory"
+  ],
+  "risk_score": 47,
+  "rule_id": "5cd8e1f7-0050-4afc-b2df-904e40b2f5ae",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1136",
+          "name": "Create Account",
+          "reference": "https://attack.mitre.org/techniques/T1136/",
+          "subtechnique": [
+            {
+              "id": "T1136.001",
+              "name": "Local Account",
+              "reference": "https://attack.mitre.org/techniques/T1136/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 2
+}

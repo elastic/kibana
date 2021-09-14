@@ -1,0 +1,12 @@
+{
+  "id": "translations",
+  "owner": {
+      "name": "Kibana Localization",
+      "githubTeam": "kibana-localization"
+    },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["x-pack", "translations"],
+  "server": true,
+  "ui": false
+}

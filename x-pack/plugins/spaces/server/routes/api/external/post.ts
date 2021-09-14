@@ -1,43 +1,48 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
+
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
-import { SpacesClient } from '../../../lib/spaces_client';
+import { createLicensedRouteHandler } from '../../lib';
+import type { ExternalRouteDeps } from './';
 
-export function initPostSpacesApi(server: any, routePreCheckLicenseFn: any) {
-  server.route({
-    method: 'POST',
-    path: '/api/spaces/space',
-    async handler(request: any) {
-      server.log(['spaces', 'debug'], `Inside POST /api/spaces/space`);
-      const { SavedObjectsClient } = server.savedObjects;
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
+export function initPostSpacesApi(deps: ExternalRouteDeps) {
+  const { externalRouter, log, getSpacesService } = deps;
 
-      const space = request.payload;
+  externalRouter.post(
+    {
+      path: '/api/spaces/space',
+      validate: {
+        body: spaceSchema,
+      },
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      log.debug(`Inside POST /api/spaces/space`);
+      const spacesClient = getSpacesService().createSpacesClient(request);
+
+      const space = request.body;
 
       try {
-        server.log(['spaces', 'debug'], `Attempting to create space`);
-        return await spacesClient.create(space);
+        log.debug(`Attempting to create space`);
+        const createdSpace = await spacesClient.create(space);
+        return response.ok({ body: createdSpace });
       } catch (error) {
-        if (SavedObjectsClient.errors.isConflictError(error)) {
-          return Boom.conflict(`A space with the identifier ${space.id} already exists.`);
+        if (SavedObjectsErrorHelpers.isConflictError(error)) {
+          const { body } = wrapError(
+            Boom.conflict(`A space with the identifier ${space.id} already exists.`)
+          );
+          return response.conflict({ body });
         }
-        server.log(['spaces', 'debug'], `Error creating space: ${error}`);
-        return wrapError(error);
+        log.debug(`Error creating space: ${error}`);
+        return response.customError(wrapError(error));
       }
-    },
-    config: {
-      validate: {
-        payload: spaceSchema,
-      },
-      pre: [routePreCheckLicenseFn],
-    },
-  });
+    })
+  );
 }

@@ -1,85 +1,184 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-jest.mock('../../../lib/route_pre_check_license', () => {
-  return {
-    routePreCheckLicense: () => (request: any, h: any) => h.continue,
-  };
-});
+import * as Rx from 'rxjs';
 
-jest.mock('../../../../../../server/lib/get_client_shield', () => {
-  return {
-    getClient: () => {
-      return {
-        callWithInternalUser: jest.fn(() => {
-          return;
-        }),
-      };
-    },
-  };
-});
-import Boom from 'boom';
-import { createTestHandler, RequestRunner, TeardownFn } from '../__fixtures__';
+import type { ObjectType } from '@kbn/config-schema';
+import type { RouteValidatorConfig } from 'src/core/server';
+import { kibanaResponseFactory, SavedObjectsErrorHelpers } from 'src/core/server';
+import {
+  coreMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from 'src/core/server/mocks';
+
+import { spacesConfig } from '../../../lib/__fixtures__';
+import { SpacesClientService } from '../../../spaces_client';
+import { SpacesService } from '../../../spaces_service';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
+import {
+  createMockSavedObjectsRepository,
+  createSpaces,
+  mockRouteContext,
+  mockRouteContextWithInvalidLicense,
+} from '../__fixtures__';
 import { initDeleteSpacesApi } from './delete';
 
 describe('Spaces Public API', () => {
-  let request: RequestRunner;
-  let teardowns: TeardownFn[];
+  const spacesSavedObjects = createSpaces();
 
-  beforeEach(() => {
-    const setup = createTestHandler(initDeleteSpacesApi);
+  const setup = async () => {
+    const httpService = httpServiceMock.createSetupContract();
+    const router = httpService.createRouter();
 
-    request = setup.request;
-    teardowns = setup.teardowns;
-  });
+    const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-  afterEach(async () => {
-    await Promise.all(teardowns.splice(0).map(fn => fn()));
-  });
+    const log = loggingSystemMock.create().get('spaces');
 
-  test(`'DELETE spaces/{id}' deletes the space`, async () => {
-    const { response } = await request('DELETE', '/api/spaces/space/a-space');
+    const coreStart = coreMock.createStart();
 
-    const { statusCode } = response;
+    const clientService = new SpacesClientService(jest.fn());
+    clientService
+      .setup({ config$: Rx.of(spacesConfig) })
+      .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
-    expect(statusCode).toEqual(204);
-  });
-
-  test(`returns result of routePreCheckLicense`, async () => {
-    const { response } = await request('DELETE', '/api/spaces/space/a-space', {
-      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
-      expectSpacesClientCall: false,
+    const service = new SpacesService();
+    service.setup({
+      basePath: httpService.basePath,
     });
 
-    const { statusCode, payload } = response;
+    const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    expect(statusCode).toEqual(403);
-    expect(JSON.parse(payload)).toMatchObject({
-      message: 'test forbidden message',
+    const clientServiceStart = clientService.start(coreStart);
+
+    const spacesServiceStart = service.start({
+      basePath: coreStart.http.basePath,
+      spacesClientService: clientServiceStart,
+    });
+
+    initDeleteSpacesApi({
+      externalRouter: router,
+      getStartServices: async () => [coreStart, {}, {}],
+      log,
+      getSpacesService: () => spacesServiceStart,
+      usageStatsServicePromise,
+    });
+
+    const [routeDefinition, routeHandler] = router.delete.mock.calls[0];
+
+    return {
+      routeValidation: routeDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
+      routeHandler,
+      savedObjectsRepositoryMock,
+    };
+  };
+
+  it('requires a space id as part of the path', async () => {
+    const { routeValidation } = await setup();
+    expect(() =>
+      (routeValidation.params as ObjectType).validate({})
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[id]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
+  it(`deletes the space`, async () => {
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'a-space',
+      },
+      method: 'delete',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    const { status } = response;
+
+    expect(status).toEqual(204);
+  });
+
+  it(`returns http/403 when the license is invalid`, async () => {
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'a-space',
+      },
+      method: 'delete',
+    });
+
+    const response = await routeHandler(
+      mockRouteContextWithInvalidLicense,
+      request,
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toEqual(403);
+    expect(response.payload).toEqual({
+      message: 'License is invalid for spaces',
     });
   });
 
-  test('DELETE spaces/{id} throws when deleting a non-existent space', async () => {
-    const { response } = await request('DELETE', '/api/spaces/space/not-a-space');
+  it('throws when deleting a non-existent space', async () => {
+    const { routeHandler } = await setup();
 
-    const { statusCode } = response;
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'not-a-space',
+      },
+      method: 'delete',
+    });
 
-    expect(statusCode).toEqual(404);
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    const { status } = response;
+
+    expect(status).toEqual(404);
   });
 
-  test(`'DELETE spaces/{id}' cannot delete reserved spaces`, async () => {
-    const { response } = await request('DELETE', '/api/spaces/space/default');
+  it(`returns http/400 when scripts cannot be executed in Elasticsearch`, async () => {
+    const { routeHandler, savedObjectsRepositoryMock } = await setup();
 
-    const { statusCode, payload } = response;
-
-    expect(statusCode).toEqual(400);
-    expect(JSON.parse(payload)).toEqual({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'This Space cannot be deleted because it is reserved.',
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'a-space',
+      },
+      method: 'delete',
     });
+    // @ts-ignore
+    savedObjectsRepositoryMock.deleteByNamespace.mockRejectedValue(
+      SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(new Error())
+    );
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    const { status, payload } = response;
+
+    expect(status).toEqual(400);
+    expect(payload.message).toEqual('Cannot execute script in Elasticsearch query');
+  });
+
+  it(`DELETE spaces/{id}' cannot delete reserved spaces`, async () => {
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'default',
+      },
+      method: 'delete',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    const { status, payload } = response;
+
+    expect(status).toEqual(400);
+    expect(payload.message).toEqual('The default space cannot be deleted because it is reserved.');
   });
 });

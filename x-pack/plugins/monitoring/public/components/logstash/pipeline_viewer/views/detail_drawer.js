@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -26,26 +27,21 @@ import {
 import { Sparkline } from '../../../sparkline';
 import { formatMetric } from '../../../../lib/format_number';
 import { FormattedMessage } from '@kbn/i18n/react';
+import './detail_drawer.scss';
 
 function renderIcon(vertex) {
-  return (
-    <EuiIcon
-      type={vertex.iconType}
-      className="lspvDetailDrawerIcon"
-    />
-  );
+  return <EuiIcon type={vertex.iconType} className="lspvDetailDrawerIcon" />;
 }
 
 function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
-
   const eventsLatencyValueFormatter = (value) => formatMetric(value, '0.[00]a', 'ms/e');
   const latestEventsLatency =
-    Array.isArray(vertex.stats.millis_per_event.data) && vertex.stats.millis_per_event.data.length > 0
+    Array.isArray(vertex.stats.millis_per_event.data) &&
+    vertex.stats.millis_per_event.data.length > 0
       ? last(vertex.stats.millis_per_event.data)[1]
       : null;
-  const eventsLatencyRow = vertex.pluginType === 'input'
-    ? null
-    : (
+  const eventsLatencyRow =
+    vertex.pluginType === 'input' ? null : (
       <EuiTableRow key="events_latency">
         <EuiTableRowCell>
           <FormattedMessage
@@ -61,14 +57,12 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
               tooltip={{
                 enabled: true,
                 xValueFormatter: timeseriesTooltipXValueFormatter,
-                yValueFormatter: eventsLatencyValueFormatter
+                yValueFormatter: eventsLatencyValueFormatter,
               }}
             />
           </div>
         </EuiTableRowCell>
-        <EuiTableRowCell>
-          { eventsLatencyValueFormatter(latestEventsLatency) }
-        </EuiTableRowCell>
+        <EuiTableRowCell>{eventsLatencyValueFormatter(latestEventsLatency)}</EuiTableRowCell>
       </EuiTableRow>
     );
 
@@ -89,14 +83,12 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
             tooltip={{
               enabled: true,
               xValueFormatter: timeseriesTooltipXValueFormatter,
-              yValueFormatter: eventsOutRateValueFormatter
+              yValueFormatter: eventsOutRateValueFormatter,
             }}
           />
         </div>
       </EuiTableRowCell>
-      <EuiTableRowCell>
-        { eventsOutRateValueFormatter(vertex.latestEventsPerSecond) }
-      </EuiTableRowCell>
+      <EuiTableRowCell>{eventsOutRateValueFormatter(vertex.latestEventsPerSecond)}</EuiTableRowCell>
     </EuiTableRow>
   );
 
@@ -106,9 +98,8 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
       ? last(vertex.stats.events_in.data)[1]
       : null;
 
-  const eventsInRow = vertex.pluginType === 'input'
-    ? null
-    : (
+  const eventsInRow =
+    vertex.pluginType === 'input' ? null : (
       <EuiTableRow key="events_in">
         <EuiTableRowCell>
           <FormattedMessage
@@ -124,14 +115,12 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
               tooltip={{
                 enabled: true,
                 xValueFormatter: timeseriesTooltipXValueFormatter,
-                yValueFormatter: eventsInValueFormatter
+                yValueFormatter: eventsInValueFormatter,
               }}
             />
           </div>
         </EuiTableRowCell>
-        <EuiTableRowCell>
-          { eventsInValueFormatter(latestEventsIn) }
-        </EuiTableRowCell>
+        <EuiTableRowCell>{eventsInValueFormatter(latestEventsIn)}</EuiTableRowCell>
       </EuiTableRow>
     );
 
@@ -156,30 +145,28 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
             tooltip={{
               enabled: true,
               xValueFormatter: timeseriesTooltipXValueFormatter,
-              yValueFormatter: eventsOutValueFormatter
+              yValueFormatter: eventsOutValueFormatter,
             }}
           />
         </div>
       </EuiTableRowCell>
-      <EuiTableRowCell>
-        { eventsOutValueFormatter(latestEventsOut) }
-      </EuiTableRowCell>
+      <EuiTableRowCell>{eventsOutValueFormatter(latestEventsOut)}</EuiTableRowCell>
     </EuiTableRow>
   );
 
   return (
     <EuiTable>
       <EuiTableBody>
-        { eventsLatencyRow }
-        { eventsOutRateRow }
-        { eventsInRow }
-        { eventsOutRow }
+        {eventsLatencyRow}
+        {eventsOutRateRow}
+        {eventsInRow}
+        {eventsOutRow}
       </EuiTableBody>
     </EuiTable>
   );
 }
 
-function renderIfBasicStats(_vertex) {
+function renderIfBasicStats() {
   return (
     <p>
       <FormattedMessage
@@ -190,7 +177,7 @@ function renderIfBasicStats(_vertex) {
   );
 }
 
-function renderQueueBasicStats(_vertex) {
+function renderQueueBasicStats() {
   return (
     <p>
       <FormattedMessage
@@ -222,7 +209,7 @@ function renderPluginBasicInfo(vertex) {
         <FormattedMessage
           id="xpack.monitoring.logstash.pipeline.detailDrawer.vertexIdDescription"
           defaultMessage="This {vertexType}&#39;s ID is {vertexId}."
-          values={{ vertexType: vertex.typeString, vertexId: (<EuiBadge>{ vertex.id }</EuiBadge>) }}
+          values={{ vertexType: vertex.typeString, vertexId: <EuiBadge>{vertex.id}</EuiBadge> }}
         />
       </p>
     );
@@ -239,7 +226,8 @@ function renderPluginBasicInfo(vertex) {
         />
       </p>
       <EuiCodeBlock>
-        {vertex.name} {`{
+        {vertex.name}{' '}
+        {`{
   id => "mySpecialId"
 }`}
       </EuiCodeBlock>
@@ -261,13 +249,13 @@ function renderIfBasicInfo(vertex) {
           defaultMessage="This is a conditional statement in your pipeline."
         />
       </p>
-      <EuiCodeBlock>{ ifCode }</EuiCodeBlock>
+      <EuiCodeBlock>{ifCode}</EuiCodeBlock>
       <EuiSpacer />
     </div>
   );
 }
 
-function renderQueueBasicInfo(_vertex) {
+function renderQueueBasicInfo() {
   return (
     <p>
       <FormattedMessage
@@ -307,29 +295,21 @@ function renderTitle(vertex) {
 
 export function DetailDrawer({ vertex, onHide, timeseriesTooltipXValueFormatter }) {
   return (
-    <EuiFlyout
-      size="s"
-      onClose={onHide}
-    >
+    <EuiFlyout size="s" onClose={onHide}>
       <EuiFlyoutHeader>
-        <EuiFlexGroup
-          alignItems="baseline"
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false}>
-            { renderIcon(vertex) }
-          </EuiFlexItem>
+        <EuiFlexGroup alignItems="baseline" gutterSize="s">
+          <EuiFlexItem grow={false}>{renderIcon(vertex)}</EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle>
-              <h2>{ renderTitle(vertex) }</h2>
+              <h2>{renderTitle(vertex)}</h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiText>
-          { renderBasicInfo(vertex) }
-          { renderBasicStats(vertex, timeseriesTooltipXValueFormatter) }
+          {renderBasicInfo(vertex)}
+          {renderBasicStats(vertex, timeseriesTooltipXValueFormatter)}
         </EuiText>
       </EuiFlyoutBody>
     </EuiFlyout>

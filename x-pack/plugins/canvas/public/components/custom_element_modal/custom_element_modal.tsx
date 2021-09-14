@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-/* eslint-disable react/forbid-elements */
 import React, { PureComponent } from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
-  // @ts-ignore hasn't been converted to TypeScript yet
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,14 +26,57 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-// @ts-ignore converting /libs/constants to TS breaks CI
+import { i18n } from '@kbn/i18n';
+
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
-import { encode } from '../../../common/lib/dataurl';
+import { encode } from '../../../../../../src/plugins/presentation_util/public';
 import { ElementCard } from '../element_card';
 
 const MAX_NAME_LENGTH = 40;
 const MAX_DESCRIPTION_LENGTH = 100;
 
+const strings = {
+  getCancelButtonLabel: () =>
+    i18n.translate('xpack.canvas.customElementModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+  getCharactersRemainingDescription: (numberOfRemainingCharacter: number) =>
+    i18n.translate('xpack.canvas.customElementModal.remainingCharactersDescription', {
+      defaultMessage: '{numberOfRemainingCharacter} characters remaining',
+      values: {
+        numberOfRemainingCharacter,
+      },
+    }),
+  getDescriptionInputLabel: () =>
+    i18n.translate('xpack.canvas.customElementModal.descriptionInputLabel', {
+      defaultMessage: 'Description',
+    }),
+  getElementPreviewTitle: () =>
+    i18n.translate('xpack.canvas.customElementModal.elementPreviewTitle', {
+      defaultMessage: 'Element preview',
+    }),
+  getImageFilePickerPlaceholder: () =>
+    i18n.translate('xpack.canvas.customElementModal.imageFilePickerPlaceholder', {
+      defaultMessage: 'Select or drag and drop an image',
+    }),
+  getImageInputDescription: () =>
+    i18n.translate('xpack.canvas.customElementModal.imageInputDescription', {
+      defaultMessage:
+        'Take a screenshot of your element and upload it here. This can also be done after saving.',
+    }),
+  getImageInputLabel: () =>
+    i18n.translate('xpack.canvas.customElementModal.imageInputLabel', {
+      defaultMessage: 'Thumbnail image',
+    }),
+  getNameInputLabel: () =>
+    i18n.translate('xpack.canvas.customElementModal.nameInputLabel', {
+      defaultMessage: 'Name',
+    }),
+  getSaveButtonLabel: () =>
+    i18n.translate('xpack.canvas.customElementModal.saveButtonLabel', {
+      defaultMessage: 'Save',
+    }),
+};
 interface Props {
   /**
    * initial value of the name of the custom element
@@ -97,8 +139,9 @@ export class CustomElementModal extends PureComponent<Props, State> {
     this.setState({ [type]: value });
   };
 
-  private _handleUpload = (files: File[]) => {
-    const [file] = files;
+  private _handleUpload = (files: FileList | null) => {
+    if (files == null) return;
+    const file = files[0];
     const [type, subtype] = get(file, 'type', '').split('/');
     if (type === 'image' && VALID_IMAGE_TYPES.indexOf(subtype) >= 0) {
       encode(file).then((dataurl: string) => this._handleChange('image', dataurl));
@@ -126,50 +169,51 @@ export class CustomElementModal extends PureComponent<Props, State> {
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
             <EuiFlexItem className="canvasCustomElementForm" grow={2}>
               <EuiFormRow
-                label="Name"
-                helpText={`${MAX_NAME_LENGTH - name.length} characters remaining`}
-                compressed
+                label={strings.getNameInputLabel()}
+                helpText={strings.getCharactersRemainingDescription(MAX_NAME_LENGTH - name.length)}
+                display="rowCompressed"
               >
                 <EuiFieldText
                   value={name}
                   className="canvasCustomElementForm__name"
-                  onChange={e =>
+                  onChange={(e) =>
                     e.target.value.length <= MAX_NAME_LENGTH &&
                     this._handleChange('name', e.target.value)
                   }
                   required
+                  data-test-subj="canvasCustomElementForm-name"
                 />
               </EuiFormRow>
               <EuiFormRow
-                label="Description"
-                helpText={`${MAX_DESCRIPTION_LENGTH - description.length} characters remaining`}
+                label={strings.getDescriptionInputLabel()}
+                helpText={strings.getCharactersRemainingDescription(
+                  MAX_DESCRIPTION_LENGTH - description.length
+                )}
               >
                 <EuiTextArea
                   value={description}
                   rows={2}
-                  onChange={e =>
+                  onChange={(e) =>
                     e.target.value.length <= MAX_DESCRIPTION_LENGTH &&
                     this._handleChange('description', e.target.value)
                   }
+                  data-test-subj="canvasCustomElementForm-description"
                 />
               </EuiFormRow>
               <EuiFormRow
                 className="canvasCustomElementForm__thumbnail"
-                label="Thumbnail image"
-                compressed
+                label={strings.getImageInputLabel()}
+                display="rowCompressed"
               >
                 <EuiFilePicker
-                  initialPromptText="Select or drag and drop an image"
+                  initialPromptText={strings.getImageFilePickerPlaceholder()}
                   onChange={this._handleUpload}
                   className="canvasImageUpload"
                   accept="image/*"
                 />
               </EuiFormRow>
               <EuiText className="canvasCustomElementForm__thumbnailHelp" size="xs">
-                <p>
-                  Take a screenshot of your element and upload it here. This can also be done after
-                  saving.
-                </p>
+                <p>{strings.getImageInputDescription()}</p>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem
@@ -177,7 +221,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
               grow={1}
             >
               <EuiTitle size="xxxs">
-                <h4>Element preview</h4>
+                <h4>{strings.getElementPreviewTitle()}</h4>
               </EuiTitle>
               <EuiSpacer size="s" />
               <ElementCard title={name} description={description} image={image} />
@@ -187,7 +231,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
         <EuiModalFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
+              <EuiButtonEmpty onClick={onCancel}>{strings.getCancelButtonLabel()}</EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
@@ -195,8 +239,9 @@ export class CustomElementModal extends PureComponent<Props, State> {
                 onClick={() => {
                   onSave(name, description, image);
                 }}
+                data-test-subj="canvasCustomElementForm-submit"
               >
-                Save
+                {strings.getSaveButtonLabel()}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

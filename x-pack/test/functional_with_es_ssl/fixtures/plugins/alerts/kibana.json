@@ -1,0 +1,10 @@
+{
+  "id": "alertingFixture",
+  "owner": { "name": "Alerting Services", "githubTeam": "kibana-alerting-services" },
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack"],
+  "requiredPlugins": ["alerting", "triggersActionsUi", "features"],
+  "server": true,
+  "ui": true
+}

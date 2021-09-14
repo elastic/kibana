@@ -1,95 +1,103 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { compose, withProps, withPropsOnChange } from 'recompose';
-import { EuiForm, EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
-import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 
-export const AdvancedFailureComponent = props => {
-  const {
-    onValueChange,
-    defaultValue,
-    argExpression,
-    updateArgExpression,
-    resetErrorState,
-    valid,
-    argId,
-  } = props;
+const strings = {
+  getApplyButtonLabel: () =>
+    i18n.translate('xpack.canvas.argFormAdvancedFailure.applyButtonLabel', {
+      defaultMessage: 'Apply',
+    }),
+  getResetButtonLabel: () =>
+    i18n.translate('xpack.canvas.argFormAdvancedFailure.resetButtonLabel', {
+      defaultMessage: 'Reset',
+    }),
+  getRowErrorMessage: () =>
+    i18n.translate('xpack.canvas.argFormAdvancedFailure.rowErrorMessage', {
+      defaultMessage: 'Invalid Expression',
+    }),
+};
 
-  const valueChange = ev => {
+const isValid = (argExpression) => {
+  try {
+    fromExpression(argExpression, 'argument');
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+export const AdvancedFailure = (props) => {
+  const { onValueChange, defaultValue, argValue, resetErrorState, argId } = props;
+
+  const [argExpression, setArgExpression] = useState(toExpression(argValue, 'argument'));
+  const [valid, setValid] = useState(isValid(argExpression));
+
+  useEffect(() => {
+    const argExpr = toExpression(argValue, 'argument');
+    setArgExpression(argExpr);
+    setValid(isValid(argExpr));
+  }, [argValue]);
+
+  const valueChange = (ev) => {
     ev.preventDefault();
-
     resetErrorState(); // when setting a new value, attempt to reset the error state
-
     if (valid) {
       return onValueChange(fromExpression(argExpression.trim(), 'argument'));
     }
   };
 
-  const confirmReset = ev => {
+  const confirmReset = (ev) => {
     ev.preventDefault();
     resetErrorState(); // when setting a new value, attempt to reset the error state
     onValueChange(fromExpression(defaultValue, 'argument'));
   };
 
   return (
-    <EuiForm>
-      <EuiFormRow id={argId} isInvalid={!valid} error="Invalid Expression">
+    <div>
+      <EuiFormRow
+        display="rowCompressed"
+        id={argId}
+        isInvalid={!valid}
+        error={strings.getRowErrorMessage()}
+      >
         <EuiTextArea
           id={argId}
           isInvalid={!valid}
           value={argExpression}
-          onChange={updateArgExpression}
+          compressed
+          onChange={(ev) => setArgExpression(ev.target.value)}
           rows={3}
         />
       </EuiFormRow>
+      <EuiSpacer size="s" />
       <div>
-        <EuiButton disabled={!valid} onClick={e => valueChange(e)} size="s" type="submit">
-          Apply
+        <EuiButton disabled={!valid} onClick={(e) => valueChange(e)} size="s" type="submit">
+          {strings.getApplyButtonLabel()}
         </EuiButton>
         {defaultValue && defaultValue.length && (
           <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
-            Reset
+            {strings.getResetButtonLabel()}
           </EuiButtonEmpty>
         )}
       </div>
-    </EuiForm>
+      <EuiSpacer size="s" />
+    </div>
   );
 };
 
-AdvancedFailureComponent.propTypes = {
+AdvancedFailure.propTypes = {
   defaultValue: PropTypes.string,
   onValueChange: PropTypes.func.isRequired,
-  argExpression: PropTypes.string.isRequired,
-  updateArgExpression: PropTypes.func.isRequired,
   resetErrorState: PropTypes.func.isRequired,
-  valid: PropTypes.bool.isRequired,
   argId: PropTypes.string.isRequired,
-};
-
-export const AdvancedFailure = compose(
-  withProps(({ argValue }) => ({
-    argExpression: toExpression(argValue, 'argument'),
-  })),
-  createStatefulPropHoc('argExpression', 'updateArgExpression'),
-  withPropsOnChange(['argExpression'], ({ argExpression }) => ({
-    valid: (function() {
-      try {
-        fromExpression(argExpression, 'argument');
-        return true;
-      } catch (e) {
-        return false;
-      }
-    })(),
-  }))
-)(AdvancedFailureComponent);
-
-AdvancedFailure.propTypes = {
   argValue: PropTypes.any.isRequired,
 };

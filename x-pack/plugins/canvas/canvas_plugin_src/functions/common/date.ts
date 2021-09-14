@@ -1,33 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
-  value: string | null;
+  value: string;
   format: string;
 }
 
-export function date(): ExpressionFunction<'date', null, Arguments, number> {
+export function date(): ExpressionFunctionDefinition<'date', null, Arguments, number> {
   const { help, args: argHelp } = getFunctionHelp().date;
   const errors = getFunctionErrors().date;
 
   return {
     name: 'date',
     type: 'number',
-    context: {
-      types: ['null'],
-    },
     help,
+    inputTypes: ['null'],
     args: {
       value: {
         aliases: ['_'],
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.value,
       },
       format: {
@@ -35,7 +34,7 @@ export function date(): ExpressionFunction<'date', null, Arguments, number> {
         help: argHelp.format,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const { value: argDate, format } = args;
 
       const outputDate =

@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parseFiltersMap provides values from valid filter string 1`] = `
+Object {
+  "locations": Array [
+    "us-east-2",
+  ],
+  "ports": Array [
+    "5601",
+    "80",
+  ],
+  "schemes": Array [
+    "http",
+    "tcp",
+  ],
+  "tags": Array [],
+}
+`;
+
+exports[`parseFiltersMap returns an empty object for invalid filter 1`] = `"Unable to parse invalid filter string"`;

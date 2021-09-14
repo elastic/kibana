@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-
-import { AutocompleteSuggestion, getAutocompleteProvider } from 'ui/autocomplete_providers';
-import { StaticIndexPattern } from 'ui/index_patterns';
-
+import { QuerySuggestion, IIndexPattern, DataPublicPluginStart } from 'src/plugins/data/public';
+import {
+  withKibana,
+  KibanaReactContextValue,
+  KibanaServices,
+} from '../../../../../src/plugins/kibana_react/public';
 import { RendererFunction } from '../utils/typed_react';
 
 interface WithKueryAutocompletionLifecycleProps {
+  kibana: KibanaReactContextValue<{ data: DataPublicPluginStart } & KibanaServices>;
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
-    suggestions: AutocompleteSuggestion[];
+    suggestions: QuerySuggestion[];
   }>;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 }
 
 interface WithKueryAutocompletionLifecycleState {
@@ -27,10 +31,10 @@ interface WithKueryAutocompletionLifecycleState {
     expression: string;
     cursorPosition: number;
   } | null;
-  suggestions: AutocompleteSuggestion[];
+  suggestions: QuerySuggestion[];
 }
 
-export class WithKueryAutocompletion extends React.Component<
+class WithKueryAutocompletionComponent extends React.Component<
   WithKueryAutocompletionLifecycleProps,
   WithKueryAutocompletionLifecycleState
 > {
@@ -52,23 +56,18 @@ export class WithKueryAutocompletion extends React.Component<
   private loadSuggestions = async (
     expression: string,
     cursorPosition: number,
-    maxSuggestions?: number
+    maxSuggestions?: number,
+    transformSuggestions?: (s: QuerySuggestion[]) => QuerySuggestion[]
   ) => {
     const { indexPattern } = this.props;
-    const autocompletionProvider = getAutocompleteProvider('kuery');
-    const config = {
-      get: () => true,
-    };
+    const language = 'kuery';
+    const hasQuerySuggestions = this.props.kibana.services.data?.autocomplete.hasQuerySuggestions(
+      language
+    );
 
-    if (!autocompletionProvider) {
+    if (!hasQuerySuggestions) {
       return;
     }
-
-    const getSuggestions = autocompletionProvider({
-      config,
-      indexPatterns: [indexPattern],
-      boolFilter: [],
-    });
 
     this.setState({
       currentRequest: {
@@ -78,13 +77,21 @@ export class WithKueryAutocompletion extends React.Component<
       suggestions: [],
     });
 
-    const suggestions = await getSuggestions({
-      query: expression,
-      selectionStart: cursorPosition,
-      selectionEnd: cursorPosition,
-    });
+    const suggestions =
+      (await this.props.kibana.services.data.autocomplete.getQuerySuggestions({
+        language,
+        query: expression,
+        selectionStart: cursorPosition,
+        selectionEnd: cursorPosition,
+        indexPatterns: [indexPattern],
+        boolFilter: [],
+      })) || [];
 
-    this.setState(state =>
+    const transformedSuggestions = transformSuggestions
+      ? transformSuggestions(suggestions)
+      : suggestions;
+
+    this.setState((state) =>
       state.currentRequest &&
       state.currentRequest.expression !== expression &&
       state.currentRequest.cursorPosition !== cursorPosition
@@ -92,8 +99,14 @@ export class WithKueryAutocompletion extends React.Component<
         : {
             ...state,
             currentRequest: null,
-            suggestions: maxSuggestions ? suggestions.slice(0, maxSuggestions) : suggestions,
+            suggestions: maxSuggestions
+              ? transformedSuggestions.slice(0, maxSuggestions)
+              : transformedSuggestions,
           }
     );
   };
 }
+
+export const WithKueryAutocompletion = withKibana<WithKueryAutocompletionLifecycleProps>(
+  WithKueryAutocompletionComponent
+);

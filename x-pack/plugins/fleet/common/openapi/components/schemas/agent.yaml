@@ -1,0 +1,44 @@
+title: Agent
+type: object
+properties:
+  type:
+    $ref: ./agent_type.yaml
+  active:
+    type: boolean
+  enrolled_at:
+    type: string
+  unenrolled_at:
+    type: string
+  unenrollment_started_at:
+    type: string
+  shared_id:
+    type: string
+    deprecated: true
+  access_api_key_id:
+    type: string
+  default_api_key_id:
+    type: string
+  policy_id:
+    type: string
+  policy_revision:
+    type: number
+  last_checkin:
+    type: string
+  user_provided_metadata:
+    $ref: ./agent_metadata.yaml
+  local_metadata:
+    $ref: ./agent_metadata.yaml
+  id:
+    type: string
+  access_api_key:
+    type: string
+  status:
+    $ref: ./agent_status.yaml
+  default_api_key:
+    type: string
+required:
+  - type
+  - active
+  - enrolled_at
+  - id
+  - status

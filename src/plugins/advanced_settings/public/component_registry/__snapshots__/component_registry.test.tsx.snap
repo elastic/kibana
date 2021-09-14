@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ComponentRegistry register should disallow registering a component with a duplicate id 1`] = `"Component with id advanced_settings_page_title is already registered."`;

@@ -1,29 +1,60 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const pageObjects = getPageObjects(['uptime']);
-  const archive = 'uptime/full_heartbeat';
+  const uptimeService = getService('uptime');
+  const { uptime } = getPageObjects(['uptime']);
+  const archive = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
-  describe('monitor page', () => {
+  describe('monitor page', function () {
+    this.tags(['skipFirefox']);
+    const dateStart = 'Sep 10, 2019 @ 12:40:08.078';
+    const dateEnd = 'Sep 11, 2019 @ 19:40:08.078';
+    const monitorId = '0000-intermittent';
+
     before(async () => {
-      await esArchiver.load(archive);
+      await esArchiver.loadIfNeeded(archive);
+      await uptimeService.navigation.goToUptime();
     });
-    after(async () => await esArchiver.unload(archive));
-    it('loads and displays uptime data based on date range', async () => {
-      await pageObjects.uptime.loadDataAndGoToMonitorPage(
-        '2019-01-28 12:40:08.078',
-        '2019-01-29 12:40:08.078',
-        'auto-http-0X131221E73F825974',
-        'auto-http-0X131221E73F825974'
-      );
+
+    after(async () => {
+      await esArchiver.unload(archive);
+    });
+
+    describe('navigation to monitor page', () => {
+      before(async () => {
+        await uptime.loadDataAndGoToMonitorPage(dateStart, dateEnd, monitorId);
+      });
+
+      it('should select the ping list location filter', async () => {
+        await uptimeService.common.selectFilterItem('location', 'mpls');
+      });
+
+      it('should set the status filter', async () => {
+        await uptimeService.common.setStatusFilterUp();
+      });
+
+      it('displays ping data as expected', async () => {
+        await uptime.checkPingListInteractions([
+          'XZtoHm0B0I9WX_CznN-6',
+          '7ZtoHm0B0I9WX_CzJ96M',
+          'pptnHm0B0I9WX_Czst5X',
+          'I5tnHm0B0I9WX_CzPd46',
+          'y5tmHm0B0I9WX_Czx93x',
+          'XZtmHm0B0I9WX_CzUt3H',
+          '-JtlHm0B0I9WX_Cz3dyX',
+          'k5tlHm0B0I9WX_CzaNxm',
+          'NZtkHm0B0I9WX_Cz89w9',
+          'zJtkHm0B0I9WX_CzftsN',
+        ]);
+      });
     });
   });
 };

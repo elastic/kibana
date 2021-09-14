@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export function MonitoringBeatsListingProvider({ getService, getPageObjects }) {
@@ -13,12 +14,11 @@ export function MonitoringBeatsListingProvider({ getService, getPageObjects }) {
 
   const SUBJ_NO_RECENT_ACTIVITY_MESSAGE = 'noRecentActivityMessage';
 
-  const SUBJ_TABLE_CONTAINER   = 'beatsTableContainer';
-  const SUBJ_SEARCH_BAR        = `${SUBJ_TABLE_CONTAINER} monitoringTableToolBar`;
-  const SUBJ_INDEX_LINK_PREFIX = `${SUBJ_TABLE_CONTAINER} beatLink-`;
+  const SUBJ_TABLE_CONTAINER = 'beatsTableContainer';
+  const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} > monitoringTableToolBar`;
+  const SUBJ_INDEX_LINK_PREFIX = `${SUBJ_TABLE_CONTAINER} > beatLink-`;
 
-  return new class BeatsListing {
-
+  return new (class BeatsListing {
     async isOnListing() {
       const pageId = await retry.try(() => testSubjects.find(SUBJ_LISTING_PAGE));
       return pageId !== null;
@@ -39,6 +39,5 @@ export function MonitoringBeatsListingProvider({ getService, getPageObjects }) {
     clickRowByName(beatName) {
       return testSubjects.click(SUBJ_INDEX_LINK_PREFIX + beatName);
     }
-
-  };
+  })();
 }

@@ -1,0 +1,27 @@
+{
+  "nodeVersion": "system",
+  "baseUrl": "http://localhost:5701",
+  "trashAssetsBeforeRuns": false,
+  "fileServerFolder": "../",
+  "fixturesFolder": "./cypress/fixtures",
+  "integrationFolder": "./cypress/integration",
+  "pluginsFile": "./cypress/plugins/index.js",
+  "screenshotsFolder": "./cypress/screenshots",
+  "supportFile": "./cypress/support/index.ts",
+  "video": true,
+  "videoCompression": false,
+  "videosFolder": "./cypress/videos",
+  "useRelativeSnapshots": true,
+  "reporter": "junit",
+  "reporterOptions": {
+    "mochaFile": "./cypress/test-results/[hash]-e2e-tests.xml",
+    "toConsole": false
+  },
+  "testFiles": "**/*.{feature,features}",
+  "env": {
+    "elasticsearch_username": "admin",
+    "elasticsearch_password": "changeme"
+  },
+  "viewportWidth": 1920,
+  "viewportHeight": 1080
+}

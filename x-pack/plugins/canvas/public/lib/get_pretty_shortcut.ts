@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const getPrettyShortcut = (shortcut: string): string => {
@@ -16,6 +17,8 @@ export const getPrettyShortcut = (shortcut: string): string => {
   result = result.replace(/right/i, '→');
   result = result.replace(/up/i, '↑');
   result = result.replace(/down/i, '↓');
+  result = result.replace(/plus/i, '+');
+  result = result.replace(/minus/i, '-');
 
   return result;
 };

@@ -1,0 +1,105 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "search:cd43f5c2-h761-13f6-9486-733b1ac9221a",
+    "index": ".kibana",
+    "source": {
+      "search": {
+        "columns": [
+          "_source"
+        ],
+        "description": "Existing Saved Search",
+        "hits": 4,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\n \"index\": \"test-index-unmapped-fields\",\n \"highlightAll\": true,\n \"filter\": [],\n \"query\": {\n \"query_string\": {\n \"query\": \"*\",\n \"analyze_wildcard\": true\n }\n }\n}"
+        },
+        "sort": [
+          "@timestamp",
+          "desc"
+        ],
+        "title": "Existing Saved Search",
+        "version": 1
+      },
+      "type": "search"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:test-index-unmapped-fields",
+    "index": ".kibana",
+    "source": {
+      "index-pattern": {
+        "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"timestamp\",\"type\":\"date\",\"esTypes\":[\"date\"],\"count\":4,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+        "timeFieldName": "timestamp",
+        "title": "test-index-unmapped-fields",
+        "fieldFormatMap": "{\"timestamp\":{\"id\":\"date\"}}"
+      },
+      "type": "index-pattern"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "test-index-unmapped-fields",
+    "source": {
+      "timestamp": "2021-01-21T12:00:00.000Z",
+      "message": "Something bad is coming",
+      "address": "Elm Street 1"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "test-index-unmapped-fields",
+    "source": {
+      "timestamp": "2021-01-22T12:00:00.000Z",
+      "message": "We have a new case",
+      "address": "221b Baker Street"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "test-index-unmapped-fields",
+    "source": {
+      "timestamp": "2021-01-23T12:00:00.000Z",
+      "message": "We have a new case",
+      "address": "221b Baker Street",
+      "sender": "John Doe",
+      "receiver": "Sherlock Holmes"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4",
+    "index": "test-index-unmapped-fields",
+    "source": {
+      "timestamp": "2021-01-24T12:00:00.000Z",
+      "message": "I am coming for you",
+      "address": "13 Elm Street",
+      "sender": "Freddy Krueger",
+      "receiver": "Nancy Thompson"
+    },
+    "type": "_doc"
+  }
+}
+

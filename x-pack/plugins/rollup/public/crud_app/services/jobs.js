@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 function removeEmptyValues(object) {
-  Object.keys(object).forEach(key => {
+  Object.keys(object).forEach((key) => {
     if (object[key] == null || object[key].trim() === '') {
       delete object[key];
     }
@@ -97,9 +98,7 @@ export function deserializeJob(job) {
         histogram,
       },
     },
-    status: {
-      job_state: status,
-    },
+    status: { job_state: status },
     stats: {
       documents_processed: documentsProcessed,
       pages_processed: pagesProcessed,
@@ -144,17 +143,17 @@ export function deserializeJob(job) {
   }
 
   if (terms) {
-    deserializedJob.terms = terms.fields.map(name => ({ name }));
+    deserializedJob.terms = terms.fields.map((name) => ({ name }));
   }
 
   if (histogram) {
-    deserializedJob.histogram = histogram.fields.map(name => ({ name }));
+    deserializedJob.histogram = histogram.fields.map((name) => ({ name }));
     deserializedJob.histogramInterval = histogram.interval;
   }
 
   return deserializedJob;
 }
 
-export function deserializeJobs(jobs) {
+export function deserializeJobs(jobs = []) {
   return jobs.map(deserializeJob);
 }

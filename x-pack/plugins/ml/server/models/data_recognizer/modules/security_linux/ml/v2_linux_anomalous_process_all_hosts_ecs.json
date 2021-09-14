@@ -1,0 +1,54 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "This is a new refactored job which works on ECS compatible events across multiple indices. Security: Linux - Looks for processes that are unusual to all Linux hosts. Such unusual processes may indicate unauthorized services, malware, or persistence mechanisms.",
+  "groups": [
+    "security",
+    "auditbeat",
+    "endpoint",
+    "linux",
+    "process"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "rare by \"process.name\"",
+        "function": "rare",
+        "by_field_name": "process.name"
+      }
+    ],
+    "influencers": [
+      "host.name",
+      "process.name",
+      "user.name"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "512mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-linux",
+    "custom_urls": [
+      {
+        "url_name": "Host Details by process name",
+        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      },
+      {
+        "url_name": "Host Details by user name",
+        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      },
+      {
+        "url_name": "Hosts Overview by process name",
+        "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      },
+      {
+        "url_name": "Hosts Overview by user name",
+        "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      }
+    ]
+  }
+}

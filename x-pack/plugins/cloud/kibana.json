@@ -1,0 +1,13 @@
+{
+  "id": "cloud",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "cloud"],
+  "optionalPlugins": ["usageCollection", "home", "security"],
+  "server": true,
+  "ui": true
+}

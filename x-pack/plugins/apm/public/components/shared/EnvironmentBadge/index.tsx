@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,11 +12,11 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 interface Props {
   environments: string[];
 }
-export const EnvironmentBadge: React.FC<Props> = ({ environments = [] }) => {
-  if (environments.length < 3) {
+export function EnvironmentBadge({ environments = [] }: Props) {
+  if (environments.length < 2) {
     return (
       <>
-        {environments.map(env => (
+        {environments.map((env) => (
           <EuiBadge color="hollow" key={env}>
             {env}
           </EuiBadge>
@@ -26,7 +27,7 @@ export const EnvironmentBadge: React.FC<Props> = ({ environments = [] }) => {
   return (
     <EuiToolTip
       position="right"
-      content={environments.map(env => (
+      content={environments.map((env) => (
         <React.Fragment key={env}>
           {env}
           <br />
@@ -37,9 +38,9 @@ export const EnvironmentBadge: React.FC<Props> = ({ environments = [] }) => {
         {i18n.translate('xpack.apm.servicesTable.environmentCount', {
           values: { environmentCount: environments.length },
           defaultMessage:
-            '{environmentCount, plural, one {1 environment} other {# environments}}'
+            '{environmentCount, plural, one {1 environment} other {# environments}}',
         })}
       </EuiBadge>
     </EuiToolTip>
   );
-};
+}

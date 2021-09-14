@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { duplicatePage } from '../actions/pages';
@@ -11,7 +12,7 @@ import { getWorkpadName, isWriteable } from '../selectors/workpad';
 import { getWindow } from '../../lib/get_window';
 import { setDocTitle } from '../../lib/doc_title';
 
-export const workpadUpdate = ({ dispatch, getState }) => next => action => {
+export const workpadUpdate = ({ dispatch, getState }) => (next) => (action) => {
   const oldIsWriteable = isWriteable(getState());
   const oldName = getWorkpadName(getState());
 

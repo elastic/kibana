@@ -1,69 +1,162 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import Path from 'path';
 import { Observable } from 'rxjs';
-import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
+import { concatMap, filter, first, map, tap, toArray } from 'rxjs/operators';
+import { getFlattenedObject, pick } from '@kbn/std';
+
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-import { ElasticsearchServiceSetup } from '../elasticsearch/elasticsearch_service';
-import { HttpServiceSetup } from '../http/http_service';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
-import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
+import { PluginWrapper } from './plugin';
+import {
+  DiscoveredPlugin,
+  InternalPluginInfo,
+  PluginConfigDescriptor,
+  PluginDependencies,
+  PluginName,
+  PluginType,
+} from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
+import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
+import { IConfigService } from '../config';
+import { InternalEnvironmentServicePreboot } from '../environment';
 
-/** @public */
-export interface PluginsServiceSetup {
-  contracts: Map<PluginName, unknown>;
-  uiPlugins: {
-    public: Map<PluginName, DiscoveredPlugin>;
-    internal: Map<PluginName, DiscoveredPluginInternal>;
+/** @internal */
+export type DiscoveredPlugins = {
+  [key in PluginType]: {
+    pluginTree: PluginDependencies;
+    pluginPaths: string[];
+    uiPlugins: UiPlugins;
   };
-}
+};
 
-/** @public */
-export interface PluginsServiceStart {
+/** @internal */
+export interface PluginsServiceSetup {
+  /** Indicates whether or not plugins were initialized. */
+  initialized: boolean;
+  /** Setup contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;
 }
 
 /** @internal */
-export interface PluginsServiceSetupDeps {
-  elasticsearch: ElasticsearchServiceSetup;
-  http: HttpServiceSetup;
+export interface UiPlugins {
+  /**
+   * Paths to all discovered ui plugin entrypoints on the filesystem, even if
+   * disabled.
+   */
+  internal: Map<PluginName, InternalPluginInfo>;
+
+  /**
+   * Information needed by client-side to load plugins and wire dependencies.
+   */
+  public: Map<PluginName, DiscoveredPlugin>;
+
+  /**
+   * Configuration for plugins to be exposed to the client-side.
+   */
+  browserConfigs: Map<PluginName, Observable<unknown>>;
 }
 
 /** @internal */
-export interface PluginsServiceStartDeps {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface PluginsServiceStart {
+  /** Start contracts returned by plugins. */
+  contracts: Map<PluginName, unknown>;
+}
+
+/** @internal */
+export type PluginsServicePrebootSetupDeps = InternalCorePreboot;
+
+/** @internal */
+export type PluginsServiceSetupDeps = InternalCoreSetup;
+
+/** @internal */
+export type PluginsServiceStartDeps = InternalCoreStart;
+
+/** @internal */
+export interface PluginsServiceDiscoverDeps {
+  environment: InternalEnvironmentServicePreboot;
+}
 
 /** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
-  private readonly pluginsSystem: PluginsSystem;
+  private readonly prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
+  private arePrebootPluginsStopped = false;
+  private readonly prebootUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
+  private readonly standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
+  private readonly standardUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
+  private readonly configService: IConfigService;
   private readonly config$: Observable<PluginsConfig>;
+  private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
+  private readonly pluginConfigUsageDescriptors = new Map<string, Record<string, any | any[]>>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
-    this.pluginsSystem = new PluginsSystem(coreContext);
+    this.configService = coreContext.configService;
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
-      .pipe(map(rawConfig => new PluginsConfig(rawConfig, coreContext.env)));
+      .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
+  }
+
+  public async discover({ environment }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
+    const config = await this.config$.pipe(first()).toPromise();
+
+    const { error$, plugin$ } = discover(config, this.coreContext, {
+      uuid: environment.instanceUuid,
+    });
+
+    await this.handleDiscoveryErrors(error$);
+    await this.handleDiscoveredPlugins(plugin$);
+
+    const prebootUiPlugins = this.prebootPluginsSystem.uiPlugins();
+    const standardUiPlugins = this.standardPluginsSystem.uiPlugins();
+    return {
+      preboot: {
+        pluginPaths: this.prebootPluginsSystem.getPlugins().map((plugin) => plugin.path),
+        pluginTree: this.prebootPluginsSystem.getPluginDependencies(),
+        uiPlugins: {
+          internal: this.prebootUiPluginInternalInfo,
+          public: prebootUiPlugins,
+          browserConfigs: this.generateUiPluginsConfigs(prebootUiPlugins),
+        },
+      },
+      standard: {
+        pluginPaths: this.standardPluginsSystem.getPlugins().map((plugin) => plugin.path),
+        pluginTree: this.standardPluginsSystem.getPluginDependencies(),
+        uiPlugins: {
+          internal: this.standardUiPluginInternalInfo,
+          public: standardUiPlugins,
+          browserConfigs: this.generateUiPluginsConfigs(standardUiPlugins),
+        },
+      },
+    };
+  }
+
+  public getExposedPluginConfigsToUsage() {
+    return this.pluginConfigUsageDescriptors;
+  }
+
+  public async preboot(deps: PluginsServicePrebootSetupDeps) {
+    this.log.debug('Prebooting plugins service');
+
+    const config = await this.config$.pipe(first()).toPromise();
+    if (config.initialize) {
+      await this.prebootPluginsSystem.setupPlugins(deps);
+      this.registerPluginStaticDirs(deps, this.prebootUiPluginInternalInfo);
+    } else {
+      this.log.info(
+        'Skipping `setup` for `preboot` plugins since plugin initialization is disabled.'
+      );
+    }
   }
 
   public async setup(deps: PluginsServiceSetupDeps) {
@@ -71,33 +164,81 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    const { error$, plugin$ } = discover(config, this.coreContext);
-    await this.handleDiscoveryErrors(error$);
-    await this.handleDiscoveredPlugins(plugin$);
-
-    if (!config.initialize || this.coreContext.env.isDevClusterMaster) {
-      this.log.info('Plugin initialization disabled.');
-      return {
-        contracts: new Map(),
-        uiPlugins: this.pluginsSystem.uiPlugins(),
-      };
+    let contracts = new Map<PluginName, unknown>();
+    if (config.initialize) {
+      contracts = await this.standardPluginsSystem.setupPlugins(deps);
+      this.registerPluginStaticDirs(deps, this.standardUiPluginInternalInfo);
+    } else {
+      this.log.info(
+        'Skipping `setup` for `standard` plugins since plugin initialization is disabled.'
+      );
     }
 
     return {
-      contracts: await this.pluginsSystem.setupPlugins(deps),
-      uiPlugins: this.pluginsSystem.uiPlugins(),
+      initialized: config.initialize,
+      contracts,
     };
   }
 
   public async start(deps: PluginsServiceStartDeps) {
     this.log.debug('Plugins service starts plugins');
-    const contracts = await this.pluginsSystem.startPlugins(deps);
+
+    const config = await this.config$.pipe(first()).toPromise();
+    if (!config.initialize) {
+      this.log.info(
+        'Skipping `start` for `standard` plugins since plugin initialization is disabled.'
+      );
+      return { contracts: new Map() };
+    }
+
+    await this.prebootPluginsSystem.stopPlugins();
+    this.arePrebootPluginsStopped = true;
+
+    const contracts = await this.standardPluginsSystem.startPlugins(deps);
     return { contracts };
   }
 
   public async stop() {
     this.log.debug('Stopping plugins service');
-    await this.pluginsSystem.stopPlugins();
+
+    if (!this.arePrebootPluginsStopped) {
+      this.arePrebootPluginsStopped = false;
+      await this.prebootPluginsSystem.stopPlugins();
+    }
+
+    await this.standardPluginsSystem.stopPlugins();
+  }
+
+  private generateUiPluginsConfigs(
+    uiPlugins: Map<string, DiscoveredPlugin>
+  ): Map<PluginName, Observable<unknown>> {
+    return new Map(
+      [...uiPlugins]
+        .filter(([pluginId, _]) => {
+          const configDescriptor = this.pluginConfigDescriptors.get(pluginId);
+          return (
+            configDescriptor &&
+            configDescriptor.exposeToBrowser &&
+            Object.values(configDescriptor?.exposeToBrowser).some((exposed) => exposed)
+          );
+        })
+        .map(([pluginId, plugin]) => {
+          const configDescriptor = this.pluginConfigDescriptors.get(pluginId)!;
+          return [
+            pluginId,
+            this.configService.atPath(plugin.configPath).pipe(
+              map((config: any) =>
+                pick(
+                  config || {},
+                  Object.entries(configDescriptor.exposeToBrowser!)
+                    .filter(([_, exposed]) => exposed)
+                    .map(([key, _]) => key)
+                )
+              )
+            ),
+          ];
+        })
+    );
   }
 
   private async handleDiscoveryErrors(error$: Observable<PluginDiscoveryError>) {
@@ -111,14 +252,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
     const errors = await error$
       .pipe(
-        filter(error => errorTypesToReport.includes(error.type)),
-        tap(pluginError => this.log.error(pluginError)),
+        filter((error) => errorTypesToReport.includes(error.type)),
+        tap((pluginError) => this.log.error(pluginError)),
         toArray()
       )
       .toPromise();
     if (errors.length > 0) {
       throw new Error(
-        `Failed to initialize plugins:${errors.map(err => `\n\t${err.message}`).join('')}`
+        `Failed to initialize plugins:${errors.map((err) => `\n\t${err.message}`).join('')}`
       );
     }
   }
@@ -130,15 +271,41 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     >();
     await plugin$
       .pipe(
-        mergeMap(async plugin => {
-          const schema = plugin.getConfigSchema();
-          if (schema) {
-            await this.coreContext.configService.setSchema(plugin.configPath, schema);
+        concatMap(async (plugin) => {
+          const configDescriptor = plugin.getConfigDescriptor();
+          if (configDescriptor) {
+            this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
+            if (configDescriptor.deprecations) {
+              this.coreContext.configService.addDeprecationProvider(
+                plugin.configPath,
+                configDescriptor.deprecations
+              );
+            }
+            if (configDescriptor.exposeToUsage) {
+              this.pluginConfigUsageDescriptors.set(
+                Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
+                getFlattenedObject(configDescriptor.exposeToUsage)
+              );
+            }
+            this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
           }
           const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
 
           if (pluginEnableStatuses.has(plugin.name)) {
             throw new Error(`Plugin with id "${plugin.name}" is already registered!`);
+          }
+
+          if (plugin.includesUiPlugin) {
+            const uiPluginInternalInfo =
+              plugin.manifest.type === PluginType.preboot
+                ? this.prebootUiPluginInternalInfo
+                : this.standardUiPluginInternalInfo;
+            uiPluginInternalInfo.set(plugin.name, {
+              requiredBundles: plugin.requiredBundles,
+              version: plugin.manifest.version,
+              publicTargetDir: Path.resolve(plugin.path, 'target/public'),
+              publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
+            });
           }
 
           pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
@@ -147,11 +314,21 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .toPromise();
 
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
-      if (this.shouldEnablePlugin(pluginName, pluginEnableStatuses)) {
-        this.pluginsSystem.addPlugin(plugin);
+      this.validatePluginDependencies(plugin, pluginEnableStatuses);
+
+      const pluginEnablement = this.shouldEnablePlugin(pluginName, pluginEnableStatuses);
+
+      if (pluginEnablement.enabled) {
+        if (plugin.manifest.type === PluginType.preboot) {
+          this.prebootPluginsSystem.addPlugin(plugin);
+        } else {
+          this.standardPluginsSystem.addPlugin(plugin);
+        }
       } else if (isEnabled) {
         this.log.info(
-          `Plugin "${pluginName}" has been disabled since some of its direct or transitive dependencies are missing or disabled.`
+          `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [${pluginEnablement.missingOrIncompatibleDependencies.join(
+            ', '
+          )}]`
         );
       } else {
         this.log.info(`Plugin "${pluginName}" is disabled.`);
@@ -161,17 +338,93 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.log.debug(`Discovered ${pluginEnableStatuses.size} plugins.`);
   }
 
+  /** Throws an error if the plugin's dependencies are invalid. */
+  private validatePluginDependencies(
+    plugin: PluginWrapper,
+    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>
+  ) {
+    const { name, manifest, requiredBundles, requiredPlugins } = plugin;
+
+    // validate that `requiredBundles` ids point to a discovered plugin which `includesUiPlugin`
+    for (const requiredBundleId of requiredBundles) {
+      if (!pluginEnableStatuses.has(requiredBundleId)) {
+        throw new Error(
+          `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" but it is missing.`
+        );
+      }
+
+      const requiredPlugin = pluginEnableStatuses.get(requiredBundleId)!.plugin;
+      if (!requiredPlugin.includesUiPlugin) {
+        throw new Error(
+          `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" but it doesn't have a UI bundle.`
+        );
+      }
+
+      if (requiredPlugin.manifest.type !== plugin.manifest.type) {
+        throw new Error(
+          `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" and expected to have "${manifest.type}" type, but its type is "${requiredPlugin.manifest.type}".`
+        );
+      }
+    }
+
+    // validate that OSS plugins do not have required dependencies on X-Pack plugins
+    if (plugin.source === 'oss') {
+      for (const id of [...requiredPlugins, ...requiredBundles]) {
+        const requiredPlugin = pluginEnableStatuses.get(id);
+        if (requiredPlugin && requiredPlugin.plugin.source === 'x-pack') {
+          throw new Error(
+            `X-Pack plugin or bundle with id "${id}" is required by OSS plugin "${name}", which is prohibited. Consider making this an optional dependency instead.`
+          );
+        }
+      }
+    }
+  }
+
   private shouldEnablePlugin(
     pluginName: PluginName,
-    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>
-  ): boolean {
+    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>,
+    parents: PluginName[] = []
+  ): { enabled: true } | { enabled: false; missingOrIncompatibleDependencies: string[] } {
     const pluginInfo = pluginEnableStatuses.get(pluginName);
-    return (
-      pluginInfo !== undefined &&
-      pluginInfo.isEnabled &&
-      pluginInfo.plugin.requiredPlugins.every(dependencyName =>
-        this.shouldEnablePlugin(dependencyName, pluginEnableStatuses)
-      )
-    );
+
+    if (pluginInfo === undefined || !pluginInfo.isEnabled) {
+      return {
+        enabled: false,
+        missingOrIncompatibleDependencies: [],
+      };
+    }
+
+    const missingOrIncompatibleDependencies = pluginInfo.plugin.requiredPlugins
+      .filter((dep) => !parents.includes(dep))
+      .filter(
+        (dependencyName) =>
+          pluginEnableStatuses.get(dependencyName)?.plugin.manifest.type !==
+            pluginInfo.plugin.manifest.type ||
+          !this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
+            .enabled
+      );
+
+    if (missingOrIncompatibleDependencies.length === 0) {
+      return {
+        enabled: true,
+      };
+    }
+
+    return {
+      enabled: false,
+      missingOrIncompatibleDependencies,
+    };
+  }
+
+  private registerPluginStaticDirs(
+    deps: PluginsServiceSetupDeps | PluginsServicePrebootSetupDeps,
+    uiPluginInternalInfo: Map<PluginName, InternalPluginInfo>
+  ) {
+    for (const [pluginName, pluginInfo] of uiPluginInternalInfo) {
+      deps.http.registerStaticDir(
+        `/plugins/${pluginName}/assets/{path*}`,
+        pluginInfo.publicAssetsDir
+      );
+    }
   }
 }

@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`entity_draggable renders correctly against snapshot 1`] = `
+<DraggableWrapper
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "entity-draggable-id-prefix-entity-name-entity-value",
+      "kqlQuery": "",
+      "name": "entity-value",
+      "queryMatch": Object {
+        "field": "entity-name",
+        "operator": ":",
+        "value": "entity-value",
+      },
+    }
+  }
+  key="entity-draggable-id-prefix-entity-name-entity-value"
+  render={[Function]}
+/>
+`;

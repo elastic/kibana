@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { handleActions } from 'redux-actions';
-import { set, del } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
 import { flushContext, flushContextAfterIndex } from '../actions/elements';
 import { setWorkpad } from '../actions/workpad';
 
+const { set, del } = immutable;
 /*
   Resolved args are a way to handle async values. They track the status, value, and error
   state thgouh the lifecycle of the request, and are an object that looks like this:
@@ -101,11 +103,11 @@ export const resolvedArgsReducer = handleActions(
       }, transientState);
     },
 
-    [actions.inFlightActive]: transientState => {
+    [actions.inFlightActive]: (transientState) => {
       return set(transientState, 'inFlight', true);
     },
 
-    [actions.inFlightComplete]: transientState => {
+    [actions.inFlightComplete]: (transientState) => {
       return set(transientState, 'inFlight', false);
     },
 

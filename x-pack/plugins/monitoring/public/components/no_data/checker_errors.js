@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -16,19 +17,27 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const ErrorList = ({ errors }) => {
-  return errors.map((error, errorIndex) => {
-    const { message, statusCode, error: friendlyName } = error;
-    return (
-      <Fragment key={`checker-error-${errorIndex}`}>
-        <EuiDescriptionListTitle>
-          {statusCode} {friendlyName}
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          {message}
-        </EuiDescriptionListDescription>
-      </Fragment>
-    );
-  });
+  const errorsMap = {};
+  return errors
+    .filter((err) => {
+      const { statusCode, error, message } = err;
+      const key = `${statusCode}${error}${message}`;
+      if (!errorsMap[key]) {
+        errorsMap[key] = true;
+        return true;
+      }
+    })
+    .map((error, errorIndex) => {
+      const { message, statusCode, error: friendlyName } = error;
+      return (
+        <Fragment key={`checker-error-${errorIndex}`}>
+          <EuiDescriptionListTitle>
+            {statusCode} {friendlyName}
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>{message}</EuiDescriptionListDescription>
+        </Fragment>
+      );
+    });
 };
 
 export function CheckerErrors(props) {
@@ -39,11 +48,7 @@ export function CheckerErrors(props) {
   return (
     <Fragment>
       <EuiSpacer />
-      <EuiCallOut
-        title="Errors found"
-        color="danger"
-        className="eui-textLeft"
-      >
+      <EuiCallOut title="Errors found" color="danger" className="eui-textLeft">
         <p>
           <FormattedMessage
             id="xpack.monitoring.noData.checkerErrors.checkEsSettingsErrorMessage"
@@ -62,5 +67,5 @@ export function CheckerErrors(props) {
 }
 
 CheckerErrors.propTypes = {
-  errors: PropTypes.array
+  errors: PropTypes.array,
 };

@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`create_influencers renders correctly against snapshot 1`] = `
+<span>
+  <EuiFlexItem
+    grow={false}
+    key="host.name: \\"zeek-iowa\\""
+  >
+    host.name: "zeek-iowa"
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+    key="process.name: \\"du\\""
+  >
+    process.name: "du"
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+    key="user.name: \\"root\\""
+  >
+    user.name: "root"
+  </EuiFlexItem>
+</span>
+`;

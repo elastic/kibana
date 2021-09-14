@@ -1,35 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { Toast } from '@elastic/eui';
-import { I18nSetup, I18nStart } from '../../i18n';
-import { UiSettingsSetup } from '../../ui_settings';
+import { I18nStart } from '../../i18n';
+import { IUiSettingsClient } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
-import { ToastsApi } from './toasts_api';
+import { ToastsApi, IToasts } from './toasts_api';
 import { OverlayStart } from '../../overlays';
 
 interface SetupDeps {
-  i18n: I18nSetup;
-  uiSettings: UiSettingsSetup;
+  uiSettings: IUiSettingsClient;
 }
 
 interface StartDeps {
@@ -38,29 +25,35 @@ interface StartDeps {
   targetDomElement: HTMLElement;
 }
 
-/** @public */
-export type ToastsSetup = Pick<ToastsApi, Exclude<keyof ToastsApi, 'registerOverlays'>>;
+/**
+ * {@link IToasts}
+ * @public
+ */
+export type ToastsSetup = IToasts;
 
-/** @public */
-export type ToastsStart = ToastsSetup;
+/**
+ * {@link IToasts}
+ * @public
+ */
+export type ToastsStart = IToasts;
 
 export class ToastsService {
   private api?: ToastsApi;
   private targetDomElement?: HTMLElement;
 
-  public setup({ i18n, uiSettings }: SetupDeps) {
-    this.api = new ToastsApi({ i18n, uiSettings });
+  public setup({ uiSettings }: SetupDeps) {
+    this.api = new ToastsApi({ uiSettings });
     return this.api!;
   }
 
   public start({ i18n, overlays, targetDomElement }: StartDeps) {
-    this.api!.registerOverlays(overlays);
+    this.api!.start({ overlays, i18n });
     this.targetDomElement = targetDomElement;
 
     render(
       <i18n.Context>
         <GlobalToastList
-          dismissToast={(toast: Toast) => this.api!.remove(toast)}
+          dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={this.api!.get$()}
         />
       </i18n.Context>,

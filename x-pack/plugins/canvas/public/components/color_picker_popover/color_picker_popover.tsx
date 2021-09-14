@@ -1,25 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiLink, PopoverAnchorPosition } from '@elastic/eui';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
+import { EuiLink, PopoverAnchorPosition } from '@elastic/eui';
+import tinycolor from 'tinycolor2';
+import { Popover } from '../popover';
 import { ColorDot } from '../color_dot';
 import { ColorPicker, Props as ColorPickerProps } from '../color_picker';
-// @ts-ignore
-import { Popover } from '../popover';
 
 export interface Props extends ColorPickerProps {
-  anchorPosition: PopoverAnchorPosition;
+  anchorPosition?: PopoverAnchorPosition;
+  ariaLabel?: string;
 }
 
-export const ColorPickerPopover: FunctionComponent<Props> = (props: Props) => {
-  const { value, anchorPosition, ...rest } = props;
-  const button = (handleClick: () => void) => (
-    <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
+export const ColorPickerPopover: FC<Props> = (props: Props) => {
+  const { value, anchorPosition, ariaLabel, ...rest } = props;
+  const button = (handleClick: React.MouseEventHandler<HTMLButtonElement>) => (
+    <EuiLink
+      aria-label={`${ariaLabel} ${tinycolor(value).toName() || value}`}
+      style={{ fontSize: 0 }}
+      onClick={handleClick}
+    >
       <ColorDot value={value} />
     </EuiLink>
   );

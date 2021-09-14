@@ -1,0 +1,11 @@
+.mlDataGrid {
+  .euiDataGridRowCell--boolean {
+    text-transform: none;
+  }
+
+  // Override to align the sorting arrow at the bottom when histogram charts are enabled
+  .euiDataGridHeaderCell .euiDataGridHeaderCell__sortingArrow {
+    margin-top: auto;
+    margin-bottom: 0;
+  }
+}

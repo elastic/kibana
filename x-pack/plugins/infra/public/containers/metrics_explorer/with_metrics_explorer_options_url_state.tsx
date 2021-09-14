@@ -1,30 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { set, values } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import React, { useContext, useMemo } from 'react';
-import * as t from 'io-ts';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
-import { MetricsExplorerColor } from '../../../common/color_palette';
 import { UrlStateContainer } from '../../utils/url_state';
 import {
   MetricsExplorerOptions,
   MetricsExplorerOptionsContainer,
   MetricsExplorerTimeOptions,
-} from './use_metrics_explorer_options';
+  MetricsExplorerChartOptions,
+  metricExplorerOptionsRT,
+  metricsExplorerChartOptionsRT,
+  metricsExplorerTimeOptionsRT,
+} from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 interface MetricsExplorerUrlState {
   timerange?: MetricsExplorerTimeOptions;
   options?: MetricsExplorerOptions;
+  chartOptions?: MetricsExplorerChartOptions;
 }
 
 export const WithMetricsExplorerOptionsUrlState = () => {
-  const { options, currentTimerange, setOptions: setRawOptions, setTimeRange } = useContext(
-    MetricsExplorerOptionsContainer.Context
-  );
+  const {
+    options,
+    chartOptions,
+    setChartOptions,
+    currentTimerange,
+    setOptions: setRawOptions,
+    setTimeRange,
+  } = useContext(MetricsExplorerOptionsContainer.Context);
 
   const setOptions = (value: MetricsExplorerOptions) => {
     setRawOptions(value);
@@ -33,64 +42,49 @@ export const WithMetricsExplorerOptionsUrlState = () => {
   const urlState = useMemo(
     () => ({
       options,
+      chartOptions,
       timerange: currentTimerange,
     }),
-    [options, currentTimerange]
+    [options, chartOptions, currentTimerange]
   );
+
+  const handleChange = (newUrlState: MetricsExplorerUrlState | undefined) => {
+    if (newUrlState && newUrlState.options) {
+      setOptions(newUrlState.options);
+    }
+    if (newUrlState && newUrlState.timerange) {
+      setTimeRange(newUrlState.timerange);
+    }
+    if (newUrlState && newUrlState.chartOptions) {
+      setChartOptions(newUrlState.chartOptions);
+    }
+  };
 
   return (
     <UrlStateContainer
       urlState={urlState}
       urlStateKey="metricsExplorer"
       mapToUrlState={mapToUrlState}
-      onChange={newUrlState => {
-        if (newUrlState && newUrlState.options) {
-          setOptions(newUrlState.options);
-        }
-        if (newUrlState && newUrlState.timerange) {
-          setTimeRange(newUrlState.timerange);
-        }
-      }}
-      onInitialize={newUrlState => {
-        if (newUrlState && newUrlState.options) {
-          setOptions(newUrlState.options);
-        }
-        if (newUrlState && newUrlState.timerange) {
-          setTimeRange(newUrlState.timerange);
-        }
-      }}
+      onChange={handleChange}
+      onInitialize={handleChange}
+      populateWithInitialState={true}
     />
   );
 };
 
 function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOptions {
-  const MetricRequired = t.type({
-    aggregation: t.string,
-  });
+  const result = metricExplorerOptionsRT.decode(subject);
 
-  const MetricOptional = t.partial({
-    field: t.string,
-    rate: t.boolean,
-    color: t.union(values(MetricsExplorerColor).map(c => t.literal(c as string))),
-    label: t.string,
-  });
+  try {
+    ThrowReporter.report(result);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
-  const Metric = t.intersection([MetricRequired, MetricOptional]);
-
-  const OptionsRequired = t.type({
-    aggregation: t.string,
-    metrics: t.array(Metric),
-  });
-
-  const OptionsOptional = t.partial({
-    limit: t.number,
-    groupBy: t.string,
-    filterQuery: t.string,
-  });
-
-  const Options = t.intersection([OptionsRequired, OptionsOptional]);
-
-  const result = Options.decode(subject);
+function isMetricExplorerChartOptions(subject: any): subject is MetricsExplorerChartOptions {
+  const result = metricsExplorerChartOptionsRT.decode(subject);
 
   try {
     ThrowReporter.report(result);
@@ -101,12 +95,7 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
 }
 
 function isMetricExplorerTimeOption(subject: any): subject is MetricsExplorerTimeOptions {
-  const TimeRange = t.type({
-    from: t.string,
-    to: t.string,
-    interval: t.string,
-  });
-  const result = TimeRange.decode(subject);
+  const result = metricsExplorerTimeOptionsRT.decode(subject);
   try {
     ThrowReporter.report(result);
     return true;
@@ -115,14 +104,18 @@ function isMetricExplorerTimeOption(subject: any): subject is MetricsExplorerTim
   }
 }
 
-const mapToUrlState = (value: any): MetricsExplorerUrlState | undefined => {
+export const mapToUrlState = (value: any): MetricsExplorerUrlState | undefined => {
   const finalState = {};
   if (value) {
     if (value.options && isMetricExplorerOptions(value.options)) {
+      value.options.source = 'url';
       set(finalState, 'options', value.options);
     }
     if (value.timerange && isMetricExplorerTimeOption(value.timerange)) {
       set(finalState, 'timerange', value.timerange);
+    }
+    if (value.chartOptions && isMetricExplorerChartOptions(value.chartOptions)) {
+      set(finalState, 'chartOptions', value.chartOptions);
     }
     return finalState;
   }

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
@@ -21,17 +22,17 @@ export function kibanaOverviewRoute(server) {
     path: '/api/monitoring/v1/clusters/{clusterUuid}/kibana',
     config: {
       validate: {
-        params: Joi.object({
-          clusterUuid: Joi.string().required()
+        params: schema.object({
+          clusterUuid: schema.string(),
         }),
-        payload: Joi.object({
-          ccs: Joi.string().optional(),
-          timeRange: Joi.object({
-            min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+        payload: schema.object({
+          ccs: schema.maybe(schema.string()),
+          timeRange: schema.object({
+            min: schema.string(),
+            max: schema.string(),
+          }),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -40,18 +41,27 @@ export function kibanaOverviewRoute(server) {
       const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
 
       try {
-        const [ clusterStatus, metrics ] = await Promise.all([
+        const [clusterStatus, metrics] = await Promise.all([
           getKibanaClusterStatus(req, kbnIndexPattern, { clusterUuid }),
-          getMetrics(req, kbnIndexPattern, metricSet),
+          getMetrics(req, kbnIndexPattern, metricSet, [
+            {
+              bool: {
+                should: [
+                  { term: { type: 'kibana_stats' } },
+                  { term: { 'metricset.name': 'stats' } },
+                ],
+              },
+            },
+          ]),
         ]);
 
         return {
           clusterStatus,
           metrics,
         };
-      } catch(err) {
+      } catch (err) {
         throw handleError(err, req);
       }
-    }
+    },
   });
 }

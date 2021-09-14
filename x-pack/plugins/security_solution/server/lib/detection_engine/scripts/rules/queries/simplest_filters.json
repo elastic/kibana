@@ -1,0 +1,16 @@
+{
+  "name": "Simplest Filter",
+  "description": "Simplest filter with the least amount of fields required",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "query",
+  "filters": [
+    {
+      "query": {
+        "match_phrase": {
+          "host.name": "siem-windows"
+        }
+      }
+    }
+  ]
+}

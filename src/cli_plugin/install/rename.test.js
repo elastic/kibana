@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import sinon from 'sinon';
 import fs from 'fs';
+
+import sinon from 'sinon';
 
 import { renamePlugin } from './rename';
 
@@ -36,15 +26,14 @@ describe('plugin folder rename', function () {
   it('should rethrow any exceptions', function () {
     renameStub = sinon.stub(fs, 'rename').callsFake((from, to, cb) => {
       cb({
-        code: 'error'
+        code: 'error',
       });
     });
 
-    return renamePlugin('/foo/bar', '/bar/foo')
-      .catch(function (err) {
-        expect(err.code).toBe('error');
-        expect(renameStub.callCount).toBe(1);
-      });
+    return renamePlugin('/foo/bar', '/bar/foo').catch(function (err) {
+      expect(err.code).toBe('error');
+      expect(renameStub.callCount).toBe(1);
+    });
   });
 
   it('should resolve if there are no errors', function () {
@@ -57,7 +46,7 @@ describe('plugin folder rename', function () {
         expect(renameStub.callCount).toBe(1);
       })
       .catch(function () {
-        throw new Error('We shouldn\'t have any errors');
+        throw new Error("We shouldn't have any errors");
       });
   });
 
@@ -66,7 +55,7 @@ describe('plugin folder rename', function () {
     beforeEach(function () {
       platform = Object.getOwnPropertyDescriptor(process, 'platform');
       Object.defineProperty(process, 'platform', {
-        value: 'win32'
+        value: 'win32',
       });
     });
     afterEach(function () {
@@ -76,14 +65,13 @@ describe('plugin folder rename', function () {
     it('should retry on Windows EPERM errors for up to 3 seconds', function () {
       renameStub = sinon.stub(fs, 'rename').callsFake((from, to, cb) => {
         cb({
-          code: 'EPERM'
+          code: 'EPERM',
         });
       });
-      return renamePlugin('/foo/bar', '/bar/foo')
-        .catch(function (err) {
-          expect(err.code).toBe('EPERM');
-          expect(renameStub.callCount).toBeGreaterThan(1);
-        });
+      return renamePlugin('/foo/bar', '/bar/foo').catch(function (err) {
+        expect(err.code).toBe('EPERM');
+        expect(renameStub.callCount).toBeGreaterThan(1);
+      });
     }, 5000);
   });
 });

@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiBasicTable,
-} from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 
 export function LatestVersions({ latestVersions }) {
   return (
@@ -23,15 +22,17 @@ export function LatestVersions({ latestVersions }) {
           field: 'count',
           dataType: 'number',
           name: '',
-        }
+        },
       ]}
     />
   );
 }
 
 LatestVersions.propTypes = {
-  latestVersions: PropTypes.arrayOf(PropTypes.shape({
-    version: PropTypes.string.isRequired,
-    count: PropTypes.number.isRequired,
-  })).isRequired,
+  latestVersions: PropTypes.arrayOf(
+    PropTypes.shape({
+      version: PropTypes.string.isRequired,
+      count: PropTypes.number.isRequired,
+    })
+  ).isRequired,
 };

@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+.activity {
+  display: flex;
+  justify-content: space-between;
+  padding: $euiSizeM;
+  font-size: $euiFontSizeS;
+
+  &--error {
+    font-weight: $euiFontWeightSemiBold;
+    color: $euiColorDanger;
+    background: rgba($euiColorDanger, .1);
+
+    &__label {
+      margin-left: $euiSizeS * 1.75;
+      font-weight: $euiFontWeightRegular;
+      text-decoration: underline;
+      opacity: .7;
+    }
+  }
+
+  &__message {
+    flex-grow: 1;
+  }
+
+  &__date {
+    flex-grow: 0;
+  }
+
+  & + & {
+    border-top: $euiBorderThin;
+  }
+}

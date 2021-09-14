@@ -1,54 +1,57 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Legacy } from 'kibana';
+import { SavedObjectsServiceStart } from 'src/core/server';
 import {
   UIOpen,
   UIOpenOption,
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,
-  UpgradeAssistantTelemetryServer,
 } from '../../../common/types';
 
-async function incrementUIOpenOptionCounter(
-  server: UpgradeAssistantTelemetryServer,
-  uiOpenOptionCounter: UIOpenOption
-) {
-  const { getSavedObjectsRepository } = server.savedObjects;
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-  const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-
-  await internalRepository.incrementCounter(
-    UPGRADE_ASSISTANT_TYPE,
-    UPGRADE_ASSISTANT_DOC_ID,
-    `ui_open.${uiOpenOptionCounter}`
-  );
+interface IncrementUIOpenDependencies {
+  uiOpenOptionCounter: UIOpenOption;
+  savedObjects: SavedObjectsServiceStart;
 }
 
-export async function upsertUIOpenOption(
-  server: UpgradeAssistantTelemetryServer,
-  req: Legacy.Request
-): Promise<UIOpen> {
-  const { overview, cluster, indices } = req.payload as UIOpen;
+async function incrementUIOpenOptionCounter({
+  savedObjects,
+  uiOpenOptionCounter,
+}: IncrementUIOpenDependencies) {
+  const internalRepository = savedObjects.createInternalRepository();
 
+  await internalRepository.incrementCounter(UPGRADE_ASSISTANT_TYPE, UPGRADE_ASSISTANT_DOC_ID, [
+    `ui_open.${uiOpenOptionCounter}`,
+  ]);
+}
+
+type UpsertUIOpenOptionDependencies = UIOpen & { savedObjects: SavedObjectsServiceStart };
+
+export async function upsertUIOpenOption({
+  overview,
+  elasticsearch,
+  savedObjects,
+  kibana,
+}: UpsertUIOpenOptionDependencies): Promise<UIOpen> {
   if (overview) {
-    await incrementUIOpenOptionCounter(server, 'overview');
+    await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'overview' });
   }
 
-  if (cluster) {
-    await incrementUIOpenOptionCounter(server, 'cluster');
+  if (elasticsearch) {
+    await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'elasticsearch' });
   }
 
-  if (indices) {
-    await incrementUIOpenOptionCounter(server, 'indices');
+  if (kibana) {
+    await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'kibana' });
   }
 
   return {
     overview,
-    cluster,
-    indices,
+    elasticsearch,
+    kibana,
   };
 }

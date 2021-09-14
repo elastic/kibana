@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-// @ts-ignore
-import { loadingCount } from 'ui/chrome';
+import * as Rx from 'rxjs';
+import { CoreStart } from 'src/core/public';
 
 let isActive = false;
 
@@ -14,17 +15,22 @@ export interface LoadingIndicatorInterface {
   hide: () => void;
 }
 
+const loadingCount$ = new Rx.BehaviorSubject(0);
+
+export const initLoadingIndicator = (addLoadingCount: CoreStart['http']['addLoadingCountSource']) =>
+  addLoadingCount(loadingCount$);
+
 export const loadingIndicator = {
   show: () => {
     if (!isActive) {
-      loadingCount.increment();
       isActive = true;
+      loadingCount$.next(1);
     }
   },
   hide: () => {
     if (isActive) {
-      loadingCount.decrement();
       isActive = false;
+      loadingCount$.next(0);
     }
   },
 };

@@ -17,7 +17,7 @@
     opacity: 0;
     transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
     transition-delay: $euiAnimSpeedNormal;
-    background: transparentize($euiColorGhost, 0.5);
+    background: transparentize($euiColorGhost, .5);
     border-radius: $euiBorderRadius;
   }
 }
@@ -25,7 +25,7 @@
 .canvasElementCard {
   .euiCard__top {
     text-align: center;
-    width: calc(100% + #{$euiSize}* 2);
+    width: calc(100% + #{$euiSize} * 2);
     height: 85px;
     margin: calc(-1 * #{$euiSize}) calc(-1 * #{$euiSize}) 0;
   }

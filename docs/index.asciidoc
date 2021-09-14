@@ -1,89 +1,36 @@
 [[kibana-guide]]
-= Kibana User Guide
+= Kibana Guide
 
 :include-xpack:  true
 :lang:           en
-:kib-repo-dir:   {docdir}
-:blog-ref:       https://www.elastic.co/blog/
-:wikipedia:      https://en.wikipedia.org/wiki
+:kib-repo-dir:   {kibana-root}/docs
 
-include::{asciidoc-dir}/../../shared/versions.asciidoc[]
+include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 
-:docker-repo:    docker.elastic.co/kibana/kibana
-:docker-image:   docker.elastic.co/kibana/kibana:{version}
-:repo:           https://github.com/elastic/kibana/
-:issue:          {repo}issues/
-:pull:           {repo}pull/
-:commit:         {repo}commit/
-:blob:           {repo}blob/{branch}/
-:security-ref:   https://www.elastic.co/community/security/
+:docker-repo:     docker.elastic.co/kibana/kibana
+:docker-image:    {docker-repo}:{version}
+:es-docker-repo:  docker.elastic.co/elasticsearch/elasticsearch
+:es-docker-image: {es-docker-repo}:{version}
+:blob:            {kib-repo}blob/{branch}/
+:security-ref:    https://www.elastic.co/community/security/
+:Data-Sources:    Data Views
+:Data-source:     Data view
+:data-source:     data view
+:Data-sources:    Data views
+:data-sources:    data views
+:A-data-source:   A data view
+:a-data-source:   a data view
 
-include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
+include::{docs-root}/shared/attributes.asciidoc[]
 
-include::introduction.asciidoc[]
+include::user/index.asciidoc[]
 
-include::setup.asciidoc[]
-
-include::monitoring/configuring-monitoring.asciidoc[]
-
-include::security/securing-kibana.asciidoc[]
-
-include::getting-started.asciidoc[]
-
-include::discover.asciidoc[]
-
-include::visualize.asciidoc[]
-
-include::dashboard.asciidoc[]
-
-include::timelion.asciidoc[]
-
-include::canvas.asciidoc[]
-
-include::ml/index.asciidoc[]
-
-include::maps/index.asciidoc[]
-
-include::infrastructure/index.asciidoc[]
-
-include::logs/index.asciidoc[]
-
-include::apm/index.asciidoc[]
-
-include::uptime/index.asciidoc[]
-
-include::graph/index.asciidoc[]
-
-include::dev-tools.asciidoc[]
-
-include::monitoring/index.asciidoc[]
-
-include::management.asciidoc[]
-
-include::spaces/index.asciidoc[]
-
-include::security/index.asciidoc[]
-
-include::management/watcher-ui/index.asciidoc[]
-
-include::management/upgrade-assistant/index.asciidoc[]
-
-include::management/dashboard_only_mode/index.asciidoc[]
-
-include::reporting/index.asciidoc[]
-
-include::api.asciidoc[]
-
-include::plugins.asciidoc[]
-
-include::development.asciidoc[]
-
-include::limitations.asciidoc[]
-
-include::release-notes/highlights.asciidoc[]
+include::accessibility.asciidoc[]
 
 include::migration.asciidoc[]
 
 include::CHANGELOG.asciidoc[]
+
+include::developer/index.asciidoc[]
 
 include::redirects.asciidoc[]

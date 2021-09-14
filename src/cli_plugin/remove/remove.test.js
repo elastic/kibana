@@ -1,35 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import { join } from 'path';
+import { writeFileSync, existsSync, mkdirSync } from 'fs';
 
 import sinon from 'sinon';
 import glob from 'glob-all';
-import rimraf from 'rimraf';
-import mkdirp from 'mkdirp';
-import Logger from '../lib/logger';
-import remove from './remove';
-import { join } from 'path';
-import { writeFileSync, existsSync } from 'fs';
+import del from 'del';
+
+import { Logger } from '../lib/logger';
+import { remove } from './remove';
 
 describe('kibana cli', function () {
-
   describe('plugin remover', function () {
-
     const pluginDir = join(__dirname, '.test.data.remove');
     let processExitStub;
     let logger;
@@ -41,15 +29,15 @@ describe('kibana cli', function () {
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      rimraf.sync(pluginDir);
-      mkdirp.sync(pluginDir);
+      del.sync(pluginDir);
+      mkdirSync(pluginDir, { recursive: true });
     });
 
     afterEach(function () {
       processExitStub.restore();
       logger.log.restore();
       logger.error.restore();
-      rimraf.sync(pluginDir);
+      del.sync(pluginDir);
     });
 
     it('throw an error if the plugin is not installed.', function () {
@@ -72,7 +60,7 @@ describe('kibana cli', function () {
     it('remove x-pack if it exists', () => {
       settings.pluginPath = join(pluginDir, 'x-pack');
       settings.plugin = 'x-pack';
-      mkdirp.sync(join(pluginDir, 'x-pack'));
+      mkdirSync(join(pluginDir, 'x-pack'), { recursive: true });
       expect(existsSync(settings.pluginPath)).toEqual(true);
       remove(settings, logger);
       expect(existsSync(settings.pluginPath)).toEqual(false);
@@ -83,13 +71,15 @@ describe('kibana cli', function () {
       settings.plugin = 'x-pack';
       expect(existsSync(settings.pluginPath)).toEqual(false);
       remove(settings, logger);
-      expect(logger.error.getCall(0).args[0]).toMatch(/Please install the OSS-only distribution to remove X-Pack features/);
+      expect(logger.error.getCall(0).args[0]).toMatch(
+        /Please install the OSS-only distribution to remove X-Pack features/
+      );
     });
 
     it('delete the specified folder.', function () {
       settings.pluginPath = join(pluginDir, 'foo');
-      mkdirp.sync(join(pluginDir, 'foo'));
-      mkdirp.sync(join(pluginDir, 'bar'));
+      mkdirSync(join(pluginDir, 'foo'), { recursive: true });
+      mkdirSync(join(pluginDir, 'bar'), { recursive: true });
 
       remove(settings, logger);
 
@@ -97,7 +87,5 @@ describe('kibana cli', function () {
       const expected = ['bar'];
       expect(files.sort()).toEqual(expected.sort());
     });
-
   });
-
 });

@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { ContainerStyle } from '../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
-// @ts-ignore untyped local
-import { isValidUrl } from '../../../common/lib/url';
 
-interface Return extends ContainerStyle {
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
+import { isValidUrl } from '../../../../../../src/plugins/presentation_util/common/lib';
+
+interface Output extends ContainerStyle {
   type: 'containerStyle';
 }
 
-export function containerStyle(): ExpressionFunction<
+export function containerStyle(): ExpressionFunctionDefinition<
   'containerStyle',
   null,
   ContainerStyle,
-  Return
+  Output
 > {
   const { help, args: argHelp } = getFunctionHelp().containerStyle;
   const errors = getFunctionErrors().containerStyle;
@@ -25,60 +26,59 @@ export function containerStyle(): ExpressionFunction<
   return {
     name: 'containerStyle',
     aliases: [],
-    context: {
-      types: ['null'],
-    },
     type: 'containerStyle',
+    inputTypes: ['null'],
     help,
     args: {
-      border: {
-        types: ['string', 'null'],
-        help: argHelp.border,
-      },
-      borderRadius: {
-        types: ['string', 'null'],
-        help: argHelp.borderRadius,
-      },
-      padding: {
-        types: ['string', 'null'],
-        help: argHelp.padding,
-      },
       backgroundColor: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.backgroundColor,
       },
       backgroundImage: {
-        types: ['string', 'null'],
-        help: argHelp.backgroundImage,
-      },
-      backgroundSize: {
         types: ['string'],
-        help: argHelp.backgroundSize,
-        default: 'contain',
-        options: ['contain', 'cover', 'auto'],
+        help: argHelp.backgroundImage,
       },
       backgroundRepeat: {
         types: ['string'],
         help: argHelp.backgroundRepeat,
         default: 'no-repeat',
-        options: ['repeat-x', 'repeat', 'space', 'round', 'no-repeat', 'space'],
+        options: Object.values(BackgroundRepeat),
+      },
+      backgroundSize: {
+        types: ['string'],
+        help: argHelp.backgroundSize,
+        default: 'contain',
+        options: Object.values(BackgroundSize),
+      },
+      border: {
+        types: ['string'],
+        help: argHelp.border,
+      },
+      borderRadius: {
+        types: ['string'],
+        help: argHelp.borderRadius,
       },
       opacity: {
-        types: ['number', 'null'],
+        types: ['number'],
         help: argHelp.opacity,
       },
       overflow: {
         types: ['string'],
         help: argHelp.overflow,
-        options: ['visible', 'hidden', 'scroll', 'auto'],
+        options: Object.values(Overflow),
+        default: 'hidden',
+      },
+      padding: {
+        types: ['string'],
+        help: argHelp.padding,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const { backgroundImage, backgroundSize, backgroundRepeat, ...remainingArgs } = args;
       const style = {
         type: 'containerStyle',
         ...remainingArgs,
-      } as Return;
+      } as Output;
 
       if (backgroundImage) {
         if (!isValidUrl(backgroundImage)) {

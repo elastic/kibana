@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`SortIndicator rendering renders correctly against snapshot 1`] = `
-<Component
-  sortDirection="desc"
-/>
-`;

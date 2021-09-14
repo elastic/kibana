@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -20,10 +21,15 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: '2017-10-05 20:28:28.475',
-          to: '2017-10-05 20:34:38.341',
-        });
+        await setup(
+          'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
+          {
+            from: 'Oct 5, 2017 @ 20:28:28.475',
+            to: 'Oct 5, 2017 @ 20:34:38.341',
+          }
+        );
+
+        await overview.closeAlertsModal();
 
         // go to nodes listing
         await overview.clickEsNodes();
@@ -38,9 +44,9 @@ export default function ({ getService, getPageObjects }) {
         expect(await esClusterSummaryStatus.getContent()).to.eql({
           nodesCount: 'Nodes\n2',
           indicesCount: 'Indices\n20',
-          memory: 'Memory\n696.6 MB / 1.3 GB',
-          totalShards: 'Total Shards\n79',
-          unassignedShards: 'Unassigned Shards\n7',
+          memory: 'JVM Heap\n696.6 MB / 1.3 GB',
+          totalShards: 'Total shards\n79',
+          unassignedShards: 'Unassigned shards\n7',
           documentCount: 'Documents\n25,758',
           dataSize: 'Data\n100.0 MB',
           health: 'Health: yellow',
@@ -60,19 +66,34 @@ export default function ({ getService, getPageObjects }) {
             {
               name: 'whatever-01',
               status: 'Status: Online',
-              cpu: '0% \n3% max\n0% min',
-              load: '3.28 \n3.71 max\n2.19 min',
-              memory: '39% \n52% max\n25% min',
-              disk: '173.9 GB \n173.9 GB max\n173.9 GB min',
+              cpu: '0%',
+              cpuText: 'Trending\nup\nMax value\n3%\nMin value\n0%\nApplies to current time period',
+              load: '3.28',
+              loadText:
+                'Trending\nup\nMax value\n3.71\nMin value\n2.19\nApplies to current time period',
+              memory: '39%',
+              memoryText:
+                'Trending\ndown\nMax value\n52%\nMin value\n25%\nApplies to current time period',
+              disk: '173.9 GB',
+              diskText:
+                'Trending\ndown\nMax value\n173.9 GB\nMin value\n173.9 GB\nApplies to current time period',
               shards: '38',
             },
             {
               name: 'whatever-02',
               status: 'Status: Online',
-              cpu: '2% \n3% max\n0% min',
-              load: '3.28 \n3.73 max\n2.29 min',
-              memory: '25% \n49% max\n25% min',
-              disk: '173.9 GB \n173.9 GB max\n173.9 GB min',
+              cpu: '2%',
+              cpuText:
+                'Trending\ndown\nMax value\n3%\nMin value\n0%\nApplies to current time period',
+              load: '3.28',
+              loadText:
+                'Trending\nup\nMax value\n3.73\nMin value\n2.29\nApplies to current time period',
+              memory: '25%',
+              memoryText:
+                'Trending\ndown\nMax value\n49%\nMin value\n25%\nApplies to current time period',
+              disk: '173.9 GB',
+              diskText:
+                'Trending\ndown\nMax value\n173.9 GB\nMin value\n173.9 GB\nApplies to current time period',
               shards: '38',
             },
             { name: 'whatever-03', status: 'Status: Offline' },
@@ -81,9 +102,13 @@ export default function ({ getService, getPageObjects }) {
             expect(nodesAll[node].name).to.be(tableData[node].name);
             expect(nodesAll[node].status).to.be(tableData[node].status);
             expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
+            expect(nodesAll[node].cpuText).to.be(tableData[node].cpuText);
             expect(nodesAll[node].load).to.be(tableData[node].load);
+            expect(nodesAll[node].loadText).to.be(tableData[node].loadText);
             expect(nodesAll[node].memory).to.be(tableData[node].memory);
+            expect(nodesAll[node].memoryText).to.be(tableData[node].memoryText);
             expect(nodesAll[node].disk).to.be(tableData[node].disk);
+            expect(nodesAll[node].diskText).to.be(tableData[node].diskText);
             expect(nodesAll[node].shards).to.be(tableData[node].shards);
           });
         });
@@ -93,9 +118,21 @@ export default function ({ getService, getPageObjects }) {
           await nodesList.clickCpuCol();
 
           const nodesAll = await nodesList.getNodesAll();
-          const tableData = [{ cpu: '2% \n3% max\n0% min' }, { cpu: '0% \n3% max\n0% min' }, { cpu: undefined }];
+          const tableData = [
+            {
+              cpu: '2%',
+              cpuText:
+                'Trending\ndown\nMax value\n3%\nMin value\n0%\nApplies to current time period',
+            },
+            {
+              cpu: '0%',
+              cpuText: 'Trending\nup\nMax value\n3%\nMin value\n0%\nApplies to current time period',
+            },
+            { cpu: undefined, cpuText: undefined },
+          ];
           nodesAll.forEach((obj, node) => {
             expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
+            expect(nodesAll[node].cpuText).to.be(tableData[node].cpuText);
           });
         });
 
@@ -105,12 +142,21 @@ export default function ({ getService, getPageObjects }) {
 
           const nodesAll = await nodesList.getNodesAll();
           const tableData = [
-            { load: '3.28 \n3.71 max\n2.19 min' },
-            { load: '3.28 \n3.73 max\n2.29 min' },
+            {
+              load: '3.28',
+              loadText:
+                'Trending\nup\nMax value\n3.71\nMin value\n2.19\nApplies to current time period',
+            },
+            {
+              load: '3.28',
+              loadText:
+                'Trending\nup\nMax value\n3.73\nMin value\n2.29\nApplies to current time period',
+            },
             { load: undefined },
           ];
           nodesAll.forEach((obj, node) => {
             expect(nodesAll[node].load).to.be(tableData[node].load);
+            expect(nodesAll[node].loadText).to.be(tableData[node].loadText);
           });
         });
       });
@@ -151,12 +197,21 @@ export default function ({ getService, getPageObjects }) {
 
         const nodesAll = await nodesList.getNodesAll();
         const tableData = [
-          { memory: '39% \n52% max\n25% min' },
-          { memory: '25% \n49% max\n25% min' },
-          { memory: undefined },
+          {
+            memory: '39%',
+            memoryText:
+              'Trending\ndown\nMax value\n52%\nMin value\n25%\nApplies to current time period',
+          },
+          {
+            memory: '25%',
+            memoryText:
+              'Trending\ndown\nMax value\n49%\nMin value\n25%\nApplies to current time period',
+          },
+          { memory: undefined, memoryText: undefined },
         ];
         nodesAll.forEach((obj, node) => {
           expect(nodesAll[node].memory).to.be(tableData[node].memory);
+          expect(nodesAll[node].memoryText).to.be(tableData[node].memoryText);
         });
       });
 
@@ -166,12 +221,21 @@ export default function ({ getService, getPageObjects }) {
 
         const nodesAll = await nodesList.getNodesAll();
         const tableData = [
-          { disk: '173.9 GB \n173.9 GB max\n173.9 GB min' },
-          { disk: '173.9 GB \n173.9 GB max\n173.9 GB min' },
+          {
+            disk: '173.9 GB',
+            diskText:
+              'Trending\ndown\nMax value\n173.9 GB\nMin value\n173.9 GB\nApplies to current time period',
+          },
+          {
+            disk: '173.9 GB',
+            diskText:
+              'Trending\ndown\nMax value\n173.9 GB\nMin value\n173.9 GB\nApplies to current time period',
+          },
           { disk: undefined },
         ];
         nodesAll.forEach((obj, node) => {
           expect(nodesAll[node].disk).to.be(tableData[node].disk);
+          expect(nodesAll[node].diskText).to.be(tableData[node].diskText);
         });
       });
 
@@ -180,25 +244,25 @@ export default function ({ getService, getPageObjects }) {
         await nodesList.clickShardsCol();
 
         const nodesAll = await nodesList.getNodesAll();
-        const tableData = [
-          { shards: '38' },
-          { shards: '38' },
-          { shards: undefined },
-        ];
+        const tableData = [{ shards: '38' }, { shards: '38' }, { shards: undefined }];
         nodesAll.forEach((obj, node) => {
           expect(nodesAll[node].shards).to.be(tableData[node].shards);
         });
       });
     });
 
-    describe('with only online nodes', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/100438
+    describe.skip('with only online nodes', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: '2017-10-05 20:31:48.354',
-          to: '2017-10-05 20:35:12.176',
-        });
+        await setup(
+          'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
+          {
+            from: 'Oct 5, 2017 @ 20:31:48.354',
+            to: 'Oct 5, 2017 @ 20:35:12.176',
+          }
+        );
 
         // go to nodes listing
         await overview.clickEsNodes();
@@ -213,17 +277,16 @@ export default function ({ getService, getPageObjects }) {
         expect(await esClusterSummaryStatus.getContent()).to.eql({
           nodesCount: 'Nodes\n3',
           indicesCount: 'Indices\n20',
-          memory: 'Memory\n575.3 MB / 2.0 GB',
-          totalShards: 'Total Shards\n80',
-          unassignedShards: 'Unassigned Shards\n5',
+          memory: 'JVM Heap\n575.3 MB / 2.0 GB',
+          totalShards: 'Total shards\n80',
+          unassignedShards: 'Unassigned shards\n5',
           documentCount: 'Documents\n25,927',
           dataSize: 'Data\n101.6 MB',
           health: 'Health: yellow',
         });
       });
 
-      // Skip until https://github.com/elastic/eui/issues/1318 is implemented
-      it.skip('should filter for specific indices', async () => {
+      it('should filter for specific indices', async () => {
         await nodesList.setFilter('01');
         const rows = await nodesList.getRows();
         expect(rows.length).to.be(1);
@@ -237,5 +300,4 @@ export default function ({ getService, getPageObjects }) {
       });
     });
   });
-
 }

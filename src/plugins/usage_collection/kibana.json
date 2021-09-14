@@ -1,0 +1,14 @@
+{
+  "id": "usageCollection",
+  "owner": {
+      "name": "Kibana Core",
+      "githubTeam": "kibana-core"
+    },
+  "configPath": ["usageCollection"],
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredBundles": [
+    "kibanaUtils"
+  ]
+}

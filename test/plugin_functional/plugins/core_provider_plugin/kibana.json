@@ -1,0 +1,12 @@
+{
+  "id": "coreProviderPlugin",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "optionalPlugins": ["corePluginA", "corePluginB", "coreHttp", "licensing", "globalSearchTest"],
+  "server": false,
+  "ui": true
+}

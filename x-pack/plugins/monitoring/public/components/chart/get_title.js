@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { chain } from 'lodash';
@@ -11,9 +12,11 @@ import { chain } from 'lodash';
  * Use title if found, otherwise use label
  */
 export function getTitle(series = []) {
-  return chain(series.map((s) => {
-    return s.metric.title || s.metric.label;
-  }))
+  return chain(
+    series.map((s) => {
+      return s.metric.title || s.metric.label;
+    })
+  )
     .first()
     .value();
 }

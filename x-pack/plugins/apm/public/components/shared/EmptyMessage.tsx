@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiEmptyPrompt, EuiEmptyPromptProps } from '@elastic/eui';
@@ -14,15 +15,15 @@ interface Props {
   hideSubheading?: boolean;
 }
 
-const EmptyMessage: React.SFC<Props> = ({
+function EmptyMessage({
   heading = i18n.translate('xpack.apm.emptyMessage.noDataFoundLabel', {
-    defaultMessage: 'No data found.'
+    defaultMessage: 'No data found.',
   }),
   subheading = i18n.translate('xpack.apm.emptyMessage.noDataFoundDescription', {
-    defaultMessage: 'Try another time range or reset the search filter.'
+    defaultMessage: 'Try another time range or reset the search filter.',
   }),
-  hideSubheading = false
-}) => {
+  hideSubheading = false,
+}: Props) {
   return (
     <EuiEmptyPrompt
       titleSize="s"
@@ -30,6 +31,6 @@ const EmptyMessage: React.SFC<Props> = ({
       body={!hideSubheading && subheading}
     />
   );
-};
+}
 
 export { EmptyMessage };

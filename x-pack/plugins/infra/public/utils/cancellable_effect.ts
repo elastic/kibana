@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DependencyList, useEffect } from 'react';
@@ -27,5 +28,8 @@ export const useCancellableEffect = (
     effect(() => cancellationSignal.isCancelled);
 
     return cancellationSignal.cancel;
+
+    // the dependencies are managed externally
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 };

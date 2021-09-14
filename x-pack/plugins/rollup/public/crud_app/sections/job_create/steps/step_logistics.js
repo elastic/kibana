@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -24,15 +25,17 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
-import { logisticalDetailsUrl, cronUrl } from '../../../services';
-import { CronEditor, StepError } from './components';
+import { CronEditor } from '../../../../../../../../src/plugins/es_ui_shared/public';
+import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
-const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
-const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+import { indices } from '../../../../shared_imports';
+import { documentationLinks } from '../../../services/documentation_links';
+import { StepError } from './components';
 
-export class StepLogisticsUi extends Component {
+const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+const indexIllegalCharacters = indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+
+export class StepLogistics extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -42,9 +45,11 @@ export class StepLogisticsUi extends Component {
     isValidatingIndexPattern: PropTypes.bool.isRequired,
     hasMatchingIndices: PropTypes.bool.isRequired,
     indexPatternAsyncErrors: PropTypes.array,
-  }
+  };
+  state = { cronFocus: false };
 
   showAdvancedCron = () => {
+    this.setState({ cronFocus: true });
     const { onFieldsChange } = this.props;
 
     onFieldsChange({
@@ -53,6 +58,7 @@ export class StepLogisticsUi extends Component {
   };
 
   hideAdvancedCron = () => {
+    this.setState({ cronFocus: true });
     const { onFieldsChange, fields } = this.props;
     const { simpleRollupCron } = fields;
 
@@ -64,12 +70,9 @@ export class StepLogisticsUi extends Component {
   };
 
   renderIndexPatternHelpText() {
-    const {
-      isValidatingIndexPattern,
-      hasMatchingIndices,
-    } = this.props;
+    const { isValidatingIndexPattern, hasMatchingIndices } = this.props;
 
-    if(!isValidatingIndexPattern && hasMatchingIndices) {
+    if (!isValidatingIndexPattern && hasMatchingIndices) {
       return (
         <EuiTextColor color="secondary" data-test-subj="fieldIndexPatternSuccessMessage">
           <p>
@@ -126,56 +129,47 @@ export class StepLogisticsUi extends Component {
   }
 
   renderCronEditor() {
-    const {
-      fields,
-      onFieldsChange,
-      areStepErrorsVisible,
-      fieldErrors,
-    } = this.props;
+    const { fields, onFieldsChange, areStepErrorsVisible, fieldErrors } = this.props;
 
-    const {
-      rollupCron,
-      cronFrequency,
-      isAdvancedCronVisible,
-      fieldToPreferredValueMap,
-    } = fields;
+    const { rollupCron, cronFrequency, isAdvancedCronVisible, fieldToPreferredValueMap } = fields;
 
-    const {
-      rollupCron: errorRollupCron,
-    } = fieldErrors;
+    const { rollupCron: errorRollupCron } = fieldErrors;
 
     if (isAdvancedCronVisible) {
       return (
         <Fragment>
           <EuiFormRow
-            label={(
+            label={
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.fieldCronLabel"
                 defaultMessage="Cron expression"
               />
-            )}
+            }
             error={errorRollupCron}
             isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
-            helpText={(
+            helpText={
               <p>
-                <EuiLink href={cronUrl} target="_blank">
+                <EuiLink href={documentationLinks.apis.cronExpressions} target="_blank">
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLinkLabel"
                     defaultMessage="Learn more about cron expressions"
                   />
                 </EuiLink>
               </p>
-            )}
+            }
             fullWidth
           >
             <EuiFieldText
+              autoFocus={this.state.cronFocus}
               value={rollupCron}
-              onChange={e => onFieldsChange({ rollupCron: e.target.value })}
+              onChange={(e) => onFieldsChange({ rollupCron: e.target.value })}
               isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
               fullWidth
               data-test-subj="rollupAdvancedCron"
             />
           </EuiFormRow>
+
+          <EuiSpacer size="m" />
 
           <EuiText size="s">
             <EuiLink onClick={this.hideAdvancedCron}>
@@ -192,20 +186,21 @@ export class StepLogisticsUi extends Component {
     return (
       <Fragment>
         <CronEditor
+          autoFocus={this.state.cronFocus}
           fieldToPreferredValueMap={fieldToPreferredValueMap}
           cronExpression={rollupCron}
           frequency={cronFrequency}
-          onChange={({
-            cronExpression,
-            frequency,
-            fieldToPreferredValueMap,
-          }) => onFieldsChange({
-            rollupCron: cronExpression,
-            simpleRollupCron: cronExpression,
-            cronFrequency: frequency,
-            fieldToPreferredValueMap,
-          })}
+          onChange={({ cronExpression, frequency, fieldToPreferredValueMap }) =>
+            onFieldsChange({
+              rollupCron: cronExpression,
+              simpleRollupCron: cronExpression,
+              cronFrequency: frequency,
+              fieldToPreferredValueMap,
+            })
+          }
         />
+
+        <EuiSpacer size="s" />
 
         <EuiText size="s">
           <EuiLink onClick={this.showAdvancedCron} data-test-subj="rollupShowAdvancedCronLink">
@@ -214,7 +209,7 @@ export class StepLogisticsUi extends Component {
               defaultMessage="Create cron expression"
             />
           </EuiLink>
-        </EuiText >
+        </EuiText>
       </Fragment>
     );
   }
@@ -229,13 +224,7 @@ export class StepLogisticsUi extends Component {
       indexPatternAsyncErrors,
     } = this.props;
 
-    const {
-      id,
-      indexPattern,
-      rollupIndex,
-      rollupPageSize,
-      rollupDelay,
-    } = fields;
+    const { id, indexPattern, rollupIndex, rollupPageSize, rollupDelay } = fields;
 
     const {
       id: errorId,
@@ -250,12 +239,12 @@ export class StepLogisticsUi extends Component {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle data-test-subj="rollupJobCreateLogisticsTitle">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepLogisticsTitle"
                   defaultMessage="Logistics"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
 
             <EuiSpacer size="s" />
@@ -274,7 +263,7 @@ export class StepLogisticsUi extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={logisticalDetailsUrl}
+              href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateLogisticsDocsButton"
@@ -291,31 +280,31 @@ export class StepLogisticsUi extends Component {
 
         <EuiForm>
           <EuiDescribedFormGroup
-            title={(
+            title={
               <EuiTitle size="s">
-                <h4>
+                <h3>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionIdTitle"
                     defaultMessage="Name"
                   />
-                </h4>
+                </h3>
               </EuiTitle>
-            )}
-            description={(
+            }
+            description={
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionIdDescription"
                 defaultMessage="This name will be used as a unique identifier for this rollup job."
               />
-            )}
+            }
             fullWidth
           >
             <EuiFormRow
-              label={(
+              label={
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepLogistics.fieldIdLabel"
                   defaultMessage="Name"
                 />
-              )}
+              }
               error={errorId}
               isInvalid={Boolean(areStepErrorsVisible && errorId)}
               fullWidth
@@ -323,7 +312,7 @@ export class StepLogisticsUi extends Component {
               <EuiFieldText
                 isInvalid={Boolean(areStepErrorsVisible && errorId)}
                 value={id}
-                onChange={e => onFieldsChange({ id: e.target.value })}
+                onChange={(e) => onFieldsChange({ id: e.target.value })}
                 fullWidth
                 data-test-subj="rollupJobName"
               />
@@ -331,40 +320,48 @@ export class StepLogisticsUi extends Component {
           </EuiDescribedFormGroup>
 
           <EuiDescribedFormGroup
-            title={(
+            title={
               <EuiTitle size="s">
-                <h4>
+                <h3>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionDataFlowTitle"
                     defaultMessage="Data flow"
                   />
-                </h4>
+                </h3>
               </EuiTitle>
-            )}
-            description={(
+            }
+            description={
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionDataFlowDescription"
                 defaultMessage="Which indices do you want to roll up and where do you want to store the data?"
               />
-            )}
+            }
             fullWidth
           >
             <EuiFormRow
-              label={(
+              label={
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepLogistics.fieldIndexPatternLabel"
                   defaultMessage="Index pattern"
                 />
-              )}
-              error={isValidatingIndexPattern ? undefined : (errorIndexPattern || indexPatternAsyncErrors)}
-              isInvalid={Boolean((areStepErrorsVisible && errorIndexPattern)) || Boolean(indexPatternAsyncErrors)}
+              }
+              error={
+                isValidatingIndexPattern ? undefined : errorIndexPattern || indexPatternAsyncErrors
+              }
+              isInvalid={
+                Boolean(areStepErrorsVisible && errorIndexPattern) ||
+                Boolean(indexPatternAsyncErrors)
+              }
               helpText={this.renderIndexPatternHelpText()}
               fullWidth
             >
               <EuiFieldText
                 value={indexPattern}
-                onChange={e => onFieldsChange({ indexPattern: e.target.value })}
-                isInvalid={Boolean(areStepErrorsVisible && errorIndexPattern) || Boolean(indexPatternAsyncErrors)}
+                onChange={(e) => onFieldsChange({ indexPattern: e.target.value })}
+                isInvalid={
+                  Boolean(areStepErrorsVisible && errorIndexPattern) ||
+                  Boolean(indexPatternAsyncErrors)
+                }
                 isLoading={isValidatingIndexPattern}
                 fullWidth
                 data-test-subj="rollupIndexPattern"
@@ -372,26 +369,26 @@ export class StepLogisticsUi extends Component {
             </EuiFormRow>
 
             <EuiFormRow
-              label={(
+              label={
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepLogistics.fieldRollupIndexLabel"
                   defaultMessage="Rollup index name"
                 />
-              )}
+              }
               error={errorRollupIndex}
               isInvalid={Boolean(areStepErrorsVisible && errorRollupIndex)}
-              helpText={(
+              helpText={
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepLogistics.fieldRollupIndex.helpDisallowLabel"
                   defaultMessage="Spaces, commas, and the characters {characterList} are not allowed."
                   values={{ characterList: <strong>{indexIllegalCharacters}</strong> }}
                 />
-              )}
+              }
               fullWidth
             >
               <EuiFieldText
                 value={rollupIndex}
-                onChange={e => onFieldsChange({ rollupIndex: e.target.value })}
+                onChange={(e) => onFieldsChange({ rollupIndex: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupIndex)}
                 fullWidth
                 data-test-subj="rollupIndexName"
@@ -400,60 +397,60 @@ export class StepLogisticsUi extends Component {
           </EuiDescribedFormGroup>
 
           <EuiDescribedFormGroup
-            title={(
+            title={
               <EuiTitle size="s">
-                <h4>
+                <h3>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionScheduleTitle"
                     defaultMessage="Schedule"
                   />
-                </h4>
+                </h3>
               </EuiTitle>
-            )}
-            description={(
+            }
+            description={
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionScheduleDescription"
                 defaultMessage="How often do you want to roll up the data?"
               />
-            )}
+            }
             fullWidth
           >
             {this.renderCronEditor()}
           </EuiDescribedFormGroup>
 
           <EuiDescribedFormGroup
-            title={(
+            title={
               <EuiTitle size="xs">
-                <h5>
+                <h4>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeTitle"
                     defaultMessage="How many documents do you want to roll up at a time?"
                   />
-                </h5>
+                </h4>
               </EuiTitle>
-            )}
-            description={(
+            }
+            description={
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeDescription"
                 defaultMessage="A larger page size will roll up data quicker, but requires more memory."
               />
-            )}
+            }
             fullWidth
           >
             <EuiFormRow
-              label={(
+              label={
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepLogistics.fieldPageSizeLabel"
                   defaultMessage="Page size"
                 />
-              )}
+              }
               error={errorRollupPageSize}
               isInvalid={Boolean(areStepErrorsVisible && errorRollupPageSize)}
               fullWidth
             >
               <EuiFieldNumber
                 value={rollupPageSize ? Number(rollupPageSize) : ''}
-                onChange={e => onFieldsChange({ rollupPageSize: e.target.value })}
+                onChange={(e) => onFieldsChange({ rollupPageSize: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupPageSize)}
                 fullWidth
                 min={0}
@@ -463,36 +460,36 @@ export class StepLogisticsUi extends Component {
           </EuiDescribedFormGroup>
 
           <EuiDescribedFormGroup
-            title={(
+            title={
               <EuiTitle size="xs">
-                <h5>
+                <h4>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionDelayTitle"
                     defaultMessage="How long should the rollup job wait before rolling up new data?"
                   />
-                </h5>
+                </h4>
               </EuiTitle>
-            )}
-            description={(
+            }
+            description={
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionDelayDescription"
                 defaultMessage="A latency buffer will delay rolling up data. This will yield a
                   higher-fidelity rollup by allowing for variable ingest latency. By default, the
                   rollup job attempts to roll up all data that is available."
               />
-            )}
+            }
             fullWidth
           >
             <EuiFormRow
-              label={(
+              label={
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepDateHistogram.fieldDelayLabel"
                   defaultMessage="Latency buffer (optional)"
                 />
-              )}
+              }
               error={errorRollupDelay}
               isInvalid={Boolean(areStepErrorsVisible && errorRollupDelay)}
-              helpText={(
+              helpText={
                 <Fragment>
                   <p>
                     <FormattedMessage
@@ -501,12 +498,12 @@ export class StepLogisticsUi extends Component {
                     />
                   </p>
                 </Fragment>
-              )}
+              }
               fullWidth
             >
               <EuiFieldText
                 value={rollupDelay || ''}
-                onChange={e => onFieldsChange({ rollupDelay: e.target.value })}
+                onChange={(e) => onFieldsChange({ rollupDelay: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupDelay)}
                 fullWidth
                 data-test-subj="rollupDelay"
@@ -528,7 +525,5 @@ export class StepLogisticsUi extends Component {
     }
 
     return <StepError />;
-  }
+  };
 }
-
-export const StepLogistics = injectI18n(StepLogisticsUi);

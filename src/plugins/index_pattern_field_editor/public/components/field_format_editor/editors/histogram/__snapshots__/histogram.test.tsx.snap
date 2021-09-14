@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HistogramFormatEditor should render normally 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Aggregated number format"
+    labelType="label"
+  >
+    <EuiSelect
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Number",
+            "value": "number",
+          },
+          Object {
+            "text": "Bytes",
+            "value": "bytes",
+          },
+          Object {
+            "text": "Percentage",
+            "value": "percent",
+          },
+        ]
+      }
+      value="number"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <span>
+        <EuiLink
+          href="https://adamwdraper.github.io/Numeral-js/"
+          target="_blank"
+        >
+          <FormattedMessage
+            defaultMessage="Documentation"
+            id="indexPatternFieldEditor.number.documentationLabel"
+            values={Object {}}
+          />
+           
+          <EuiIcon
+            type="link"
+          />
+        </EuiLink>
+      </span>
+    }
+    isInvalid={false}
+    label="Numeral format pattern (optional)"
+    labelType="label"
+  >
+    <EuiFieldText
+      isInvalid={false}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    sampleType="text"
+    samples={Array []}
+  />
+</Fragment>
+`;

@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { i18n } from '@kbn/i18n';
 import path from 'path';
 
+import { createFailError } from '@kbn/dev-utils';
 import {
   accessAsync,
   checkValuesProperty,
@@ -30,17 +20,17 @@ import {
   normalizePath,
   readFileAsync,
   writeFileAsync,
-  // @ts-ignore
+  verifyICUMessage,
 } from './utils';
 
-import { createFailError } from '../run';
 import { I18nConfig } from './config';
 import { serializeToJson } from './serializers';
 
-interface IntegrateOptions {
+export interface IntegrateOptions {
   sourceFileName: string;
   targetFileName?: string;
   dryRun: boolean;
+  ignoreMalformed: boolean;
   ignoreIncompatible: boolean;
   ignoreUnused: boolean;
   ignoreMissing: boolean;
@@ -105,6 +95,23 @@ export function verifyMessages(
     }
   }
 
+  for (const messageId of localizedMessagesIds) {
+    const defaultMessage = defaultMessagesMap.get(messageId);
+    if (defaultMessage) {
+      try {
+        const message = localizedMessagesMap.get(messageId)!;
+        verifyICUMessage(typeof message === 'string' ? message : message?.text);
+      } catch (err) {
+        if (options.ignoreMalformed) {
+          localizedMessagesMap.delete(messageId);
+          options.log.warning(`Malformed translation ignored (${messageId}): ${err}`);
+        } else {
+          errorMessage += `\nMalformed translation (${messageId}): ${err}\n`;
+        }
+      }
+    }
+  }
+
   if (errorMessage) {
     throw createFailError(errorMessage);
   }
@@ -116,7 +123,7 @@ function groupMessagesByNamespace(
 ) {
   const localizedMessagesByNamespace = new Map();
   for (const [messageId, messageValue] of localizedMessagesMap) {
-    const namespace = knownNamespaces.find(key => messageId.startsWith(`${key}.`));
+    const namespace = knownNamespaces.find((key) => messageId.startsWith(`${key}.`));
     if (!namespace) {
       throw createFailError(`Unknown namespace in id ${messageId}.`);
     }
@@ -160,17 +167,19 @@ async function writeMessages(
   // Use basename of source file name to write the same locale name as the source file has.
   const fileName = path.basename(options.sourceFileName);
   for (const [namespace, messages] of localizedMessagesByNamespace) {
-    const destPath = path.resolve(options.config.paths[namespace], 'translations');
+    for (const namespacedPath of options.config.paths[namespace]) {
+      const destPath = path.resolve(namespacedPath, 'translations');
 
-    try {
-      await accessAsync(destPath);
-    } catch (_) {
-      await makeDirAsync(destPath);
+      try {
+        await accessAsync(destPath);
+      } catch (_) {
+        await makeDirAsync(destPath);
+      }
+
+      const writePath = path.resolve(destPath, fileName);
+      await writeFileAsync(writePath, serializeToJson(messages, formats));
+      options.log.success(`Translations have been integrated to ${normalizePath(writePath)}`);
     }
-
-    const writePath = path.resolve(destPath, fileName);
-    await writeFileAsync(writePath, serializeToJson(messages, formats));
-    options.log.success(`Translations have been integrated to ${normalizePath(writePath)}`);
   }
 }
 

@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { get, map, forEach, max } from 'lodash';
-import { badRequest } from 'boom';
+import { get, map, forEach, maxBy } from 'lodash';
+import { badRequest } from '@hapi/boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { ActionStatus } from '../action_status';
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
@@ -14,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 function getActionStatusTotals(watchStatus) {
   const result = {};
 
-  forEach(ACTION_STATES, state => {
+  forEach(ACTION_STATES, (state) => {
     result[state] = 0;
   });
   forEach(watchStatus.actionStatuses, (actionStatus) => {
@@ -43,6 +44,7 @@ export class WatchStatus {
         id,
         actionStatusJson,
         errors: this.watchErrors.actions && this.watchErrors.actions[id],
+        lastCheckedRawFormat: get(this.watchStatusJson, 'last_checked'),
       };
       return ActionStatus.fromUpstreamJson(json);
     });
@@ -67,8 +69,10 @@ export class WatchStatus {
       return WATCH_STATES.CONFIG_ERROR;
     }
 
-    const firingTotal = totals[ACTION_STATES.FIRING] + totals[ACTION_STATES.ACKNOWLEDGED] +
-                              totals[ACTION_STATES.THROTTLED];
+    const firingTotal =
+      totals[ACTION_STATES.FIRING] +
+      totals[ACTION_STATES.ACKNOWLEDGED] +
+      totals[ACTION_STATES.THROTTLED];
 
     if (firingTotal > 0) {
       return WATCH_STATES.FIRING;
@@ -82,23 +86,25 @@ export class WatchStatus {
     const totalActions = this.actionStatuses.length;
     let result = WATCH_STATE_COMMENTS.OK;
 
-    if ((totals[ACTION_STATES.THROTTLED] > 0) &&
-      (totals[ACTION_STATES.THROTTLED] < totalActions)) {
+    if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] < totalActions) {
       result = WATCH_STATE_COMMENTS.PARTIALLY_THROTTLED;
     }
 
-    if ((totals[ACTION_STATES.THROTTLED] > 0) &&
-      (totals[ACTION_STATES.THROTTLED] === totalActions)) {
+    if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] === totalActions) {
       result = WATCH_STATE_COMMENTS.THROTTLED;
     }
 
-    if ((totals[ACTION_STATES.ACKNOWLEDGED] > 0) &&
-      (totals[ACTION_STATES.ACKNOWLEDGED] < totalActions)) {
+    if (
+      totals[ACTION_STATES.ACKNOWLEDGED] > 0 &&
+      totals[ACTION_STATES.ACKNOWLEDGED] < totalActions
+    ) {
       result = WATCH_STATE_COMMENTS.PARTIALLY_ACKNOWLEDGED;
     }
 
-    if ((totals[ACTION_STATES.ACKNOWLEDGED] > 0) &&
-      (totals[ACTION_STATES.ACKNOWLEDGED] === totalActions)) {
+    if (
+      totals[ACTION_STATES.ACKNOWLEDGED] > 0 &&
+      totals[ACTION_STATES.ACKNOWLEDGED] === totalActions
+    ) {
       result = WATCH_STATE_COMMENTS.ACKNOWLEDGED;
     }
 
@@ -114,7 +120,7 @@ export class WatchStatus {
   }
 
   get lastFired() {
-    const actionStatus = max(this.actionStatuses, 'lastExecution');
+    const actionStatus = maxBy(this.actionStatuses, 'lastExecution');
     if (actionStatus) {
       return actionStatus.lastExecution;
     }
@@ -130,7 +136,7 @@ export class WatchStatus {
       lastChecked: this.lastChecked,
       lastMetCondition: this.lastMetCondition,
       lastFired: this.lastFired,
-      actionStatuses: map(this.actionStatuses, actionStatus => actionStatus.downstreamJson)
+      actionStatuses: map(this.actionStatuses, (actionStatus) => actionStatus.downstreamJson),
     };
 
     return json;
@@ -141,21 +147,24 @@ export class WatchStatus {
     if (!json.id) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.watchStatus.idPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {id} property',
+          defaultMessage: 'JSON argument must contain an {id} property',
           values: {
-            id: 'id'
-          }
-        }),
+            id: 'id',
+          },
+        })
       );
     }
     if (!json.watchStatusJson) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watchStatus.watchStatusJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain a {watchStatusJson} property',
-          values: {
-            watchStatusJson: 'watchStatusJson'
+        i18n.translate(
+          'xpack.watcher.models.watchStatus.watchStatusJsonPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain a {watchStatusJson} property',
+            values: {
+              watchStatusJson: 'watchStatusJson',
+            },
           }
-        }),
+        )
       );
     }
 
@@ -190,5 +199,4 @@ export class WatchStatus {
     "last_met_condition": "2017-03-02T14:25:31.139Z"
   }
   */
-
 }

@@ -1,41 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
 
-type Context = boolean | number | string | null;
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
+
+type Input = number | string;
 
 interface Arguments {
-  value: Context;
+  value: Input;
 }
 
-export function gte(): ExpressionFunction<'gte', Context, Arguments, boolean> {
+export function gte(): ExpressionFunctionDefinition<'gte', Input, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().gte;
 
   return {
     name: 'gte',
     type: 'boolean',
+    inputTypes: ['number', 'string'],
     help,
     args: {
       value: {
         aliases: ['_'],
-        types: ['boolean', 'number', 'string', 'null'],
+        types: ['number', 'string'],
         required: true,
         help: argHelp.value,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const { value } = args;
 
-      if (typeof context !== typeof value) {
+      if (typeof input !== typeof value) {
         return false;
       }
 
-      // @ts-ignore #35433 This is a wonky comparison for nulls
-      return context >= value;
+      return input >= value;
     },
   };
 }

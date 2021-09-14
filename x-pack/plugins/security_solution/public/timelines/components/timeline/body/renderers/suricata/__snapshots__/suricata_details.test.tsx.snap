@@ -1,0 +1,102 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = `
+<Details>
+  <SuricataSignature
+    contextId="suricata-signature-test-4"
+    id="4"
+    signature="ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)"
+    signatureId={4}
+  />
+  <SuricataRefs
+    signatureId={4}
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <NetflowRenderer
+    data={
+      Object {
+        "_id": "4",
+        "destination": Object {
+          "ip": Array [
+            "192.168.0.3",
+          ],
+          "port": Array [
+            6343,
+          ],
+        },
+        "event": Object {
+          "category": Array [
+            "Attempted Administrator Privilege Gain",
+          ],
+          "id": Array [
+            "4",
+          ],
+          "module": Array [
+            "suricata",
+          ],
+          "severity": Array [
+            1,
+          ],
+          "type": Array [
+            "Alert",
+          ],
+        },
+        "geo": Object {
+          "country_iso_code": Array [
+            "xx",
+          ],
+          "region_name": Array [
+            "xx",
+          ],
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": Array [
+            "suricata",
+          ],
+        },
+        "source": Object {
+          "ip": Array [
+            "192.168.0.3",
+          ],
+          "port": Array [
+            53,
+          ],
+        },
+        "suricata": Object {
+          "eve": Object {
+            "alert": Object {
+              "signature": Array [
+                "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+              ],
+              "signature_id": Array [
+                4,
+              ],
+            },
+            "flow_id": Array [
+              4,
+            ],
+            "proto": Array [
+              "",
+            ],
+          },
+        },
+        "timestamp": "2018-11-08T19:03:25.937Z",
+        "user": Object {
+          "id": Array [
+            "4",
+          ],
+          "name": Array [
+            "jenny.jones",
+          ],
+        },
+      }
+    }
+    timelineId="test"
+  />
+</Details>
+`;

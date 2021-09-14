@@ -1,23 +1,57 @@
 [[access]]
-== Accessing Kibana
+== Access {kib}
 
-Kibana is a web application that you access through port 5601. All you need to do is point your web browser at the
-machine where Kibana is running and specify the port number. For example, `localhost:5601` or
-`http://YOURDOMAIN.com:5601`.
+The fastest way to access {kib} is to use our hosted {es} Service. If you <<install, installed {kib} on your own>>, access {kib} through the web application.
 
-When you access Kibana, the <<discover,Discover>> page loads by default with the default index pattern selected. The
-time filter is set to the last 15 minutes and the search query is set to match-all (\*).
+[float]
+=== Set up on cloud
 
-If you don't see any documents, try setting the time filter to a wider time range.
-If you still don't see any results, it's possible that you don't *have* any documents.
+include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
+
+[float]
+[[log-on-to-the-web-application]]
+=== Log on to the web application
+
+If you are using a self-managed deployment, access {kib} through the web application on port 5601.
+
+. Point your web browser to the machine where you are running {kib} and specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
++
+To remotely connect to {kib}, set <server-host,server.host>> to a non-loopback address.
+
+. Log on to your account.
+
+. Go to the home page, then click *{kib}*.
+
+. To make the {kib} page your landing page, click *Make this my landing page*.
 
 [float]
 [[status]]
-=== Checking Kibana Status
+=== Check the {kib} status
 
-You can reach the Kibana server's status page by navigating to `localhost:5601/status`. The status page displays
-information about the server's resource usage and lists the installed plugins.
+The status page displays information about the server resource usage and installed plugins.
 
-image::images/kibana-status-page.png[]
+To view the {kib} status page, use the status endpoint. For example, `localhost:5601/status`. 
 
-NOTE: For JSON-formatted server status details, use the API endpoint at `localhost:5601/api/status`
+[role="screenshot"]
+image::images/kibana-status-page-7_14_0.png[Kibana server status page]
+
+For JSON-formatted server status details, use the `localhost:5601/api/status` API endpoint. 
+
+[float]
+[[not-ready]]
+=== {kib} not ready
+
+If you receive an error that the {kib} `server is not ready`, check the following:
+
+* The {es} connectivity: 
++
+[source,sh]
+----
+`curl -XGET elasticsearch_ip_or_hostname:9200/`
+----
+* The {kib} logs:
+** Linux, DEB or RPM package: `/var/log/kibana/kibana.log`
+** Linux, tar.gz package: `$KIBANA_HOME/log/kibana.log`
+** Windows: `$KIBANA_HOME\log\kibana.log`
+* The health status of `.kibana*` indices
+

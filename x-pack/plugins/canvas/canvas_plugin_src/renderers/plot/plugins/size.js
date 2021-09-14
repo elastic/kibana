@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { min, max, map, flatten } from 'lodash';
@@ -94,7 +95,7 @@ function init(plot) {
         const size = point[2].size;
 
         const delta = maxPoint - minPoint;
-        const radius = (function() {
+        const radius = (function () {
           if (size == null) {
             return 0;
           } // If there is no size, draw nothing
@@ -115,7 +116,7 @@ function init(plot) {
         seriesBubbleDrawFn(ctx, series, x, y, radius, color);
       }
 
-      series.data.forEach(point => drawPoint(point));
+      series.data.forEach((point) => drawPoint(point));
     }
   }
 }

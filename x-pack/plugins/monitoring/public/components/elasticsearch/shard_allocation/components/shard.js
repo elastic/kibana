@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-
-
 import React from 'react';
+import { get } from 'lodash';
 import { calculateClass } from '../lib/calculate_class';
 import { vents } from '../lib/vents';
 import { i18n } from '@kbn/i18n';
@@ -44,9 +44,12 @@ function getColor(classes) {
 }
 
 export class Shard extends React.Component {
-  static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.shardDisplayName', {
-    defaultMessage: 'Shard',
-  });
+  static displayName = i18n.translate(
+    'xpack.monitoring.elasticsearch.shardAllocation.shardDisplayName',
+    {
+      defaultMessage: 'Shard',
+    }
+  );
   state = { tooltipVisible: false };
 
   componentDidMount() {
@@ -63,9 +66,11 @@ export class Shard extends React.Component {
 
   generateKey = (relocating) => {
     const shard = this.props.shard;
-    const shardType = shard.primary ? 'primary' : 'replica';
-    const additionId = shard.state === 'UNASSIGNED' ? Math.random() : '';
-    const node = relocating ? shard.relocating_node : shard.node;
+    const shardType = get(shard, 'shard.primary', shard.primary) ? 'primary' : 'replica';
+    const additionId = get(shard, 'shard.state', shard.state) === 'UNASSIGNED' ? Math.random() : '';
+    const node = relocating
+      ? get(shard, 'relocation_node.uuid', shard.relocating_node)
+      : get(shard, 'shard.name', shard.node);
     return shard.index + '.' + node + '.' + shardType + '.' + shard.shard + additionId;
   };
 
@@ -80,7 +85,7 @@ export class Shard extends React.Component {
 
   toggle = (event) => {
     if (this.props.shard.tooltip_message) {
-      const action = (event.type === 'mouseenter') ? 'show' : 'hide';
+      const action = event.type === 'mouseenter' ? 'show' : 'hide';
       const key = this.generateKey(true);
       this.setState({ tooltipVisible: action === 'show' });
       vents.trigger(key, action);
@@ -91,17 +96,17 @@ export class Shard extends React.Component {
     const shard = this.props.shard;
     const classes = calculateClass(shard);
     const color = getColor(classes);
-    const classification = classes + ' ' + shard.shard;
+    const classification = classes + ' ' + get(shard, 'shard.number', shard.shard);
 
-    let shardUi = (
-      <EuiBadge color={color}>
-        {shard.shard}
-      </EuiBadge>
-    );
-
+    let shardUi = <EuiBadge color={color}>{get(shard, 'shard.number', shard.shard)}</EuiBadge>;
+    const tooltipContent =
+      shard.tooltip_message ||
+      i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.shardDisplayName', {
+        defaultMessage: 'Shard',
+      });
     if (this.state.tooltipVisible) {
       shardUi = (
-        <EuiToolTip content={this.props.shard.tooltip_message} position="bottom" data-test-subj="shardTooltip">
+        <EuiToolTip content={tooltipContent} position="bottom" data-test-subj="shardTooltip">
           <p>{shardUi}</p>
         </EuiToolTip>
       );
@@ -113,7 +118,7 @@ export class Shard extends React.Component {
         onMouseEnter={this.toggle}
         onMouseLeave={this.toggle}
         className={classes}
-        data-shard-tooltip={this.props.shard.tooltip_message}
+        data-shard-tooltip={tooltipContent}
         data-shard-classification={classification}
         data-test-subj="shardIcon"
       >

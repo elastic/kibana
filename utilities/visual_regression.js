@@ -1,31 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import bluebird, {
-  fromNode,
-  promisify,
-} from 'bluebird';
+import bluebird, { promisify } from 'bluebird';
 import Handlebars from 'handlebars';
 import fs from 'fs';
 import path from 'path';
-import imageDiff from 'image-diff';
-import mkdirp from 'mkdirp';
+import { PNG } from 'pngjs';
+import pixelmatch from 'pixelmatch';
 import moment from 'moment';
 import SimpleGit from 'simple-git';
 
@@ -52,9 +38,13 @@ async function buildGallery(comparisons) {
   const asyncBranch = promisify(simpleGit.branch, simpleGit);
   const branch = await asyncBranch();
 
-  const template = Handlebars.compile(await readFileAsync(
-    path.resolve('./utilities/templates/visual_regression_gallery.handlebars')
-    , 'utf8'), { knownHelpersOnly: true });
+  const template = Handlebars.compile(
+    await readFileAsync(
+      path.resolve('./utilities/templates/visual_regression_gallery.handlebars'),
+      'utf8'
+    ),
+    { knownHelpersOnly: true }
+  );
 
   const html = template({
     date: moment().format('MMMM Do YYYY, h:mm:ss a'),
@@ -77,13 +67,13 @@ async function compareScreenshots() {
   const SESSION_SCREENSHOTS_DIR = path.resolve(SCREENSHOTS_DIR, 'session');
 
   // We don't need to create the baseline dir because it's committed.
-  mkdirp.sync(DIFF_SCREENSHOTS_DIR);
-  mkdirp.sync(SESSION_SCREENSHOTS_DIR);
+  fs.mkdirSync(DIFF_SCREENSHOTS_DIR, { recursive: true });
+  fs.mkdirSync(SESSION_SCREENSHOTS_DIR, { recursive: true });
   const files = await readDirAsync(SESSION_SCREENSHOTS_DIR);
-  const screenshots = files.filter(file => file.indexOf('.png') !== -1);
+  const screenshots = files.filter((file) => file.indexOf('.png') !== -1);
 
   // We'll use this data to build a screenshot gallery in HTML.
-  return await bluebird.map(screenshots, async screenshot => {
+  return await bluebird.map(screenshots, async (screenshot) => {
     // We're going to load image data and cache it in this object.
     const comparison = {
       name: screenshot,
@@ -93,62 +83,59 @@ async function compareScreenshots() {
         session: undefined,
         baseline: undefined,
         diff: undefined,
-      }
+      },
     };
 
-    const sessionImagePath = path.resolve(
-      SESSION_SCREENSHOTS_DIR,
-      screenshot
+    const sessionImagePath = path.resolve(SESSION_SCREENSHOTS_DIR, screenshot);
+
+    const baselineImagePath = path.resolve(BASELINE_SCREENSHOTS_DIR, screenshot);
+
+    const diffImagePath = path.resolve(DIFF_SCREENSHOTS_DIR, screenshot);
+
+    const sessionImage = PNG.sync.read(await readFileAsync(sessionImagePath));
+    const baselineImage = PNG.sync.read(await readFileAsync(baselineImagePath));
+    const { width, height } = sessionImage;
+    const diff = new PNG({ width, height });
+
+    const numDiffPixels = pixelmatch(
+      sessionImage.data,
+      baselineImage.data,
+      diff.data,
+      width,
+      height,
+      { threshold: 0 }
     );
 
-    const baselineImagePath = path.resolve(
-      BASELINE_SCREENSHOTS_DIR,
-      screenshot
-    );
+    await writeFileAsync(diffImagePath, PNG.sync.write(diff));
 
-    const diffImagePath = path.resolve(
-      DIFF_SCREENSHOTS_DIR,
-      screenshot
-    );
-
-    // Diff the images asynchronously.
-    const diffResult = await fromNode((cb) => {
-      imageDiff.getFullResult({
-        actualImage: sessionImagePath,
-        expectedImage: baselineImagePath,
-        diffImage: diffImagePath,
-        shadow: true,
-      }, cb);
-    });
-
-    const change = diffResult.percentage;
+    const change = numDiffPixels / (width * height);
     const changePercentage = (change * 100).toFixed(2);
     console.log(`(${changePercentage}%) ${screenshot}`);
     comparison.percentage = changePercentage;
     comparison.change = change;
 
     // Once the images have been diffed, we can load and store the image data.
-    comparison.imageData.session =
-      await readFileAsync(sessionImagePath, 'base64');
+    comparison.imageData.session = await readFileAsync(sessionImagePath, 'base64');
 
-    comparison.imageData.baseline =
-      await readFileAsync(baselineImagePath, 'base64');
+    comparison.imageData.baseline = await readFileAsync(baselineImagePath, 'base64');
 
-    comparison.imageData.diff =
-      await readFileAsync(diffImagePath, 'base64');
+    comparison.imageData.diff = await readFileAsync(diffImagePath, 'base64');
 
     return comparison;
   });
 }
 
 export function run(done) {
-  compareScreenshots().then(screenshotComparisons => {
-    // Once all of the data has been loaded, we can build the gallery.
-    buildGallery(screenshotComparisons).then(() => {
-      done();
-    });
-  }, error => {
-    console.error(error);
-    done(false);
-  });
+  compareScreenshots().then(
+    (screenshotComparisons) => {
+      // Once all of the data has been loaded, we can build the gallery.
+      buildGallery(screenshotComparisons).then(() => {
+        done();
+      });
+    },
+    (error) => {
+      console.error(error);
+      done(false);
+    }
+  );
 }

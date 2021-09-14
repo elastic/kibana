@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -46,6 +47,12 @@ export const NANMATRIX: TransformMatrix3d = [
 ];
 
 export const ORIGIN: Vector3d = [0, 0, 0, 1];
+export const RIGHT: Vector3d = [1, 0, 0, 1];
+export const UP: Vector3d = [0, 1, 0, 1];
+export const TOP_LEFT: Vector3d = [-1, 1, 0, 1];
+export const TOP_RIGHT: Vector3d = [1, 1, 0, 1];
+export const BOTTOM_LEFT: Vector3d = [-1, -1, 0, 1];
+export const BOTTOM_RIGHT: Vector3d = [1, -1, 0, 1];
 
 // prettier-ignore
 export const translate = (x: number, y: number, z: number): TransformMatrix3d =>
@@ -275,6 +282,13 @@ export const subtract = (
     o - O,
     p - P,
   ];
+
+export const componentProduct = ([a, b, c, d]: Vector3d, [A, B, C, D]: Vector3d): Vector3d => [
+  a * A,
+  b * B,
+  c * C,
+  d * D,
+];
 
 export const reduceTransforms = (transforms: TransformMatrix3d[]): TransformMatrix3d =>
   transforms.length === 1

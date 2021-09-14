@@ -1,25 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Datatable } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
-export function rowCount(): ExpressionFunction<'rowCount', Datatable, {}, number> {
+export function rowCount(): ExpressionFunctionDefinition<'rowCount', Datatable, {}, number> {
   const { help } = getFunctionHelp().rowCount;
 
   return {
     name: 'rowCount',
     aliases: [],
     type: 'number',
-    context: {
-      types: ['datatable'],
-    },
+    inputTypes: ['datatable'],
     help,
     args: {},
-    fn: context => context.rows.length,
+    fn: (input) => input.rows.length,
   };
 }

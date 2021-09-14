@@ -1,0 +1,24 @@
+:global .kbnCanvas :local .root {
+  position: relative;
+  overflow: hidden;
+  transition: height 1s;
+}
+
+.container {
+  composes: canvas from global;
+  composes: canvasContainer from global;
+}
+
+:global .kbnCanvas :local .container {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+:global .kbnCanvas :local .page {
+  position: absolute;
+  transform-origin: left top;
+  top: 0;
+  left: 0;
+}

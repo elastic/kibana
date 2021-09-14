@@ -1,25 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-
-
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSwitch,
-} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 class IndexLabel extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
-      showSystemIndices: props.scope.showSystemIndices
+      showSystemIndices: props.scope.showSystemIndices,
     };
     this.toggleShowSystemIndicesState = this.toggleShowSystemIndicesState.bind(this);
   }
@@ -36,9 +31,7 @@ class IndexLabel extends React.Component {
   render() {
     return (
       <EuiFlexGroup>
-        <EuiFlexItem
-          grow={false}
-        >
+        <EuiFlexItem grow={false}>
           <FormattedMessage
             id="xpack.monitoring.elasticsearch.shardAllocation.tableHead.indicesLabel"
             defaultMessage="Indices"
@@ -46,7 +39,12 @@ class IndexLabel extends React.Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSwitch
-            label="System indices"
+            label={i18n.translate(
+              'xpack.monitoring.elasticsearch.shardAllocation.tableHead.filterSystemIndices',
+              {
+                defaultMessage: 'Filter for system indices',
+              }
+            )}
             onChange={this.toggleShowSystemIndicesState}
             checked={this.state.showSystemIndices}
             data-test-subj="shardShowSystemIndices"
@@ -55,47 +53,50 @@ class IndexLabel extends React.Component {
       </EuiFlexGroup>
     );
   }
-
 }
 
-export class TableHead extends React.Component { // eslint-disable-line react/no-multi-comp
-
+// eslint-disable-next-line react/no-multi-comp
+export class TableHead extends React.Component {
   constructor(props) {
     super(props);
   }
 
   createColumn({ key, content }) {
     return (
-      <th scope="col" key={key} colSpan={1}>{ content }</th>
+      <th scope="col" key={key} colSpan={1}>
+        {content}
+      </th>
     );
   }
 
   render() {
     const propLabels = this.props.scope.labels || [];
-    const labelColumns = propLabels.map((label) => {
-      const column = {
-        key: label.content.toLowerCase()
-      };
+    const labelColumns = propLabels
+      .map((label) => {
+        const column = {
+          key: label.content.toLowerCase(),
+        };
 
-      if (label.showToggleSystemIndicesComponent) {
-        // override text label content with a JSX component
-        column.content = (
-          <IndexLabel scope={this.props.scope} toggleShowSystemIndices={this.props.toggleShowSystemIndices} />
-        );
-      } else {
-        column.content = label.content;
-      }
+        if (label.showToggleSystemIndicesComponent) {
+          // override text label content with a JSX component
+          column.content = (
+            <IndexLabel
+              scope={this.props.scope}
+              toggleShowSystemIndices={this.props.toggleShowSystemIndices}
+            />
+          );
+        } else {
+          column.content = label.content;
+        }
 
-      return column;
-    })
+        return column;
+      })
       .map(this.createColumn);
-
 
     return (
       <thead>
-        <tr>{ labelColumns }</tr>
+        <tr>{labelColumns}</tr>
       </thead>
     );
   }
-
 }
