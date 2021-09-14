@@ -7,7 +7,8 @@
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, merge, Subject } from 'rxjs';
-import { debounceTime, filter, skip, tap } from 'rxjs/operators';
+import { debounceTime, filter, skip, startWith, tap } from 'rxjs/operators';
+import { isEqual } from 'lodash';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { SearchSource } from '../../../../../../data/common';
@@ -164,9 +165,11 @@ export const useSavedSearch = ({
       searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
     ).pipe(debounceTime(100));
 
-    // skip initial fetch when discover:searchOnPageLoad disabled
+    /**
+     * Skip initial fetch when discover:searchOnPageLoad is disabled.
+     */
     if (initialFetchStatus === FetchStatus.UNINITIALIZED) {
-      fetch$ = fetch$.pipe(skip(1));
+      fetch$ = fetch$.pipe(startWith()).pipe(skip(1));
     }
 
     const subscription = fetch$.subscribe((val) => {
