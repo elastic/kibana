@@ -2683,6 +2683,7 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
     isExportable?: SavedObjectsExportablePredicate<Attributes>;
     onExport?: SavedObjectsExportTransform<Attributes>;
     onImport?: SavedObjectsImportHook<Attributes>;
+    visibleInManagement?: boolean;
 }
 
 // @public
