@@ -32,11 +32,11 @@ const mockTableExpression = {
   toAst: jest.fn(),
 };
 
-jest.mock('../../visualizations/public', () => ({
+jest.mock('../../../visualizations/public', () => ({
   getVisSchemas: () => mockSchemas,
 }));
 
-jest.mock('../../expressions/public', () => ({
+jest.mock('../../../expressions/public', () => ({
   buildExpression: jest.fn(() => mockTableExpression),
   buildExpressionFunction: jest.fn(() => mockTableExpressionFunction),
 }));
