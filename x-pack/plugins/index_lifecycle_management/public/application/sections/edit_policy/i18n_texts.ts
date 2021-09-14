@@ -12,20 +12,16 @@ export const i18nTexts = {
     shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.enableShrinkLabel', {
       defaultMessage: 'Shrink index',
     }),
-    shrinkCountOrSizeTooltip: i18n.translate('xpack.indexLifecycleMgmt.shrink.countOrSizeTooltip', {
-      defaultMessage:
-        'Set a number of shards or the maximum primary shard size for the target index.',
-    }),
     shrinkCountLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardCountLabel',
       {
-        defaultMessage: 'Configure the number of primary shards',
+        defaultMessage: 'Configure shard count',
       }
     ),
     shrinkSizeLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardSizeLabel',
       {
-        defaultMessage: 'Configure maximum shard size',
+        defaultMessage: 'Configure shard size',
       }
     ),
     rolloverOffsetsHotPhaseTiming: i18n.translate(
