@@ -17,7 +17,7 @@ export const getFilter = (
 ) => {
   const alertTypeFilter = isRuleRegistryEnabled
     ? `(${Object.values(ruleTypeMappings)
-        .map((type) => (type !== SIGNALS_ID ? `alert.attributes.alertTypeId: ${type}` : undefined))
+        .map((type) => `alert.attributes.alertTypeId: ${type}`)
         .filter((type) => type != null)
         .join(' OR ')})`
     : `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
