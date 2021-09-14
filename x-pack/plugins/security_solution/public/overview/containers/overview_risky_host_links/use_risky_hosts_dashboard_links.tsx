@@ -5,16 +5,9 @@
  * 2.0.
  */
 import { useState, useEffect } from 'react';
-import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useKibana } from '../../../common/lib/kibana';
 import { LinkPanelListItem } from '../../components/link_panel';
-
-const DASHBOARD_REQUEST_BODY_SEARCH = '"Drilldown of Host Risk Score"';
-export const DASHBOARD_REQUEST_BODY = {
-  type: 'dashboard',
-  search: DASHBOARD_REQUEST_BODY_SEARCH,
-  fields: ['title'],
-};
+import { useRiskyHostsDashboardId } from './use_risky_hosts_dashboard_id';
 
 export const useRiskyHostsDashboardLinks = (
   to: string,
@@ -22,52 +15,49 @@ export const useRiskyHostsDashboardLinks = (
   listItems: LinkPanelListItem[]
 ) => {
   const createDashboardUrl = useKibana().services.dashboard?.dashboardUrlGenerator?.createUrl;
-  const savedObjectsClient = useKibana().services.savedObjects.client;
-
-  const [listItemsWithLinks, setListItemsWithLinks] = useState(listItems);
+  const dashboardId = useRiskyHostsDashboardId();
+  const [listItemsWithLinks, setListItemsWithLinks] = useState<LinkPanelListItem[]>([]);
 
   useEffect(() => {
-    if (createDashboardUrl && savedObjectsClient) {
-      savedObjectsClient.find<SavedObjectAttributes>(DASHBOARD_REQUEST_BODY).then(
-        async (DashboardsSO?: {
-          savedObjects?: Array<{
-            attributes?: SavedObjectAttributes;
-            id?: string;
-          }>;
-        }) => {
-          if (DashboardsSO?.savedObjects?.length) {
-            const drilldownDashboardId = DashboardsSO.savedObjects[0].id;
-            const dashboardUrls = await Promise.all(
-              listItems.map((listItem) =>
-                createDashboardUrl({
-                  dashboardId: drilldownDashboardId,
-                  timeRange: {
-                    to,
-                    from,
+    let cancelled = false;
+    const createLinks = async () => {
+      if (createDashboardUrl && dashboardId) {
+        const dashboardUrls = await Promise.all(
+          listItems.map((listItem) =>
+            createDashboardUrl({
+              dashboardId,
+              timeRange: {
+                to,
+                from,
+              },
+              filters: [
+                {
+                  meta: {
+                    alias: null,
+                    disabled: false,
+                    negate: false,
                   },
-                  filters: [
-                    {
-                      meta: {
-                        alias: null,
-                        disabled: false,
-                        negate: false,
-                      },
-                      query: { match_phrase: { 'host.name': listItem.title } },
-                    },
-                  ],
-                })
-              )
-            );
-            setListItemsWithLinks(
-              listItems.map((item, i) => ({ ...item, path: dashboardUrls[i] }))
-            );
-          }
+                  query: { match_phrase: { 'host.name': listItem.title } },
+                },
+              ],
+            })
+          )
+        );
+        if (!cancelled) {
+          setListItemsWithLinks(
+            listItems.map((item, i) => ({
+              ...item,
+              path: (dashboardUrls[i] as unknown) as string,
+            }))
+          );
         }
-      );
-    }
-  }, [createDashboardUrl, from, savedObjectsClient, to, setListItemsWithLinks, listItems]);
+      }
+    };
+    createLinks();
+    return () => {
+      cancelled = true;
+    };
+  }, [createDashboardUrl, dashboardId, from, listItems, to]);
 
-  return {
-    listItemsWithLinks,
-  };
+  return { listItemsWithLinks };
 };
