@@ -16,9 +16,10 @@ import {
 } from '../../../../../../../src/plugins/data/common';
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
-import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
+import { EventOutcome } from '../../../../common/event_outcome';
+import type { SearchStrategyServerParams } from '../../../../common/search_strategies/types';
 import type {
-  FailedTransactionsCorrelationsParams,
+  FailedTransactionsCorrelationsRequestParams,
   FailedTransactionsCorrelationsRawResponse,
 } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
@@ -26,6 +27,9 @@ import { searchServiceLogProvider } from '../search_service_log';
 import {
   fetchFailedTransactionsCorrelationPValues,
   fetchTransactionDurationFieldCandidates,
+  fetchTransactionDurationPercentiles,
+  fetchTransactionDurationRanges,
+  fetchTransactionDurationHistogramRangeSteps,
 } from '../queries';
 import type { SearchServiceProvider } from '../search_strategy_provider';
 
@@ -34,19 +38,19 @@ import { failedTransactionsCorrelationsSearchServiceStateProvider } from './fail
 import { ERROR_CORRELATION_THRESHOLD } from '../constants';
 
 export type FailedTransactionsCorrelationsSearchServiceProvider = SearchServiceProvider<
-  FailedTransactionsCorrelationsParams,
+  FailedTransactionsCorrelationsRequestParams,
   FailedTransactionsCorrelationsRawResponse
 >;
 
 export type FailedTransactionsCorrelationsSearchStrategy = ISearchStrategy<
-  IKibanaSearchRequest<FailedTransactionsCorrelationsParams>,
+  IKibanaSearchRequest<FailedTransactionsCorrelationsRequestParams>,
   IKibanaSearchResponse<FailedTransactionsCorrelationsRawResponse>
 >;
 
 export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransactionsCorrelationsSearchServiceProvider = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
-  searchServiceParams: FailedTransactionsCorrelationsParams,
+  searchServiceParams: FailedTransactionsCorrelationsRequestParams,
   includeFrozen: boolean
 ) => {
   const { addLogMessage, getLogMessages } = searchServiceLogProvider();
@@ -56,11 +60,65 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
   async function fetchErrorCorrelations() {
     try {
       const indices = await getApmIndices();
-      const params: SearchStrategyParams = {
+      const params: FailedTransactionsCorrelationsRequestParams &
+        SearchStrategyServerParams = {
         ...searchServiceParams,
         index: indices['apm_oss.transactionIndices'],
         includeFrozen,
       };
+
+      // 95th percentile to be displayed as a marker in the log log chart
+      const {
+        totalDocs,
+        percentiles: percentilesResponseThresholds,
+      } = await fetchTransactionDurationPercentiles(
+        esClient,
+        params,
+        params.percentileThreshold ? [params.percentileThreshold] : undefined
+      );
+      const percentileThresholdValue =
+        percentilesResponseThresholds[`${params.percentileThreshold}.0`];
+      state.setPercentileThresholdValue(percentileThresholdValue);
+
+      addLogMessage(
+        `Fetched ${params.percentileThreshold}th percentile value of ${percentileThresholdValue} based on ${totalDocs} documents.`
+      );
+
+      // finish early if we weren't able to identify the percentileThresholdValue.
+      if (percentileThresholdValue === undefined) {
+        addLogMessage(
+          `Abort service since percentileThresholdValue could not be determined.`
+        );
+        state.setProgress({
+          loadedFieldCandidates: 1,
+          loadedErrorCorrelations: 1,
+          loadedOverallHistogram: 1,
+          loadedFailedTransactionsCorrelations: 1,
+        });
+        state.setIsRunning(false);
+        return;
+      }
+
+      const histogramRangeSteps = await fetchTransactionDurationHistogramRangeSteps(
+        esClient,
+        params
+      );
+
+      const overallLogHistogramChartData = await fetchTransactionDurationRanges(
+        esClient,
+        params,
+        histogramRangeSteps
+      );
+      const errorLogHistogramChartData = await fetchTransactionDurationRanges(
+        esClient,
+        params,
+        histogramRangeSteps,
+        [{ fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure }]
+      );
+
+      state.setProgress({ loadedOverallHistogram: 1 });
+      state.setErrorHistogram(errorLogHistogramChartData);
+      state.setOverallHistogram(overallLogHistogramChartData);
 
       const {
         fieldCandidates: candidates,
@@ -82,6 +140,7 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
                 fetchFailedTransactionsCorrelationPValues(
                   esClient,
                   params,
+                  histogramRangeSteps,
                   fieldName
                 )
               )
@@ -139,7 +198,15 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
   fetchErrorCorrelations();
 
   return () => {
-    const { ccsWarning, error, isRunning, progress } = state.getState();
+    const {
+      ccsWarning,
+      error,
+      isRunning,
+      overallHistogram,
+      errorHistogram,
+      percentileThresholdValue,
+      progress,
+    } = state.getState();
 
     return {
       cancel: () => {
@@ -158,6 +225,9 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
         log: getLogMessages(),
         took: Date.now() - progress.started,
         failedTransactionsCorrelations: state.getFailedTransactionsCorrelationsSortedByScore(),
+        overallHistogram,
+        errorHistogram,
+        percentileThresholdValue,
       },
     };
   };
