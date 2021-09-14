@@ -7,10 +7,15 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import {
+  EuiButtonGroup,
+  EuiButtonProps,
   EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSelectable,
   EuiSelectableProps,
+  EuiSpacer,
   EuiSwitch,
   EuiSwitchProps,
   EuiText,
@@ -70,6 +75,25 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
 
     const getTestId = useTestIdGenerator(dataTestSubj);
 
+    const toggleGlobal = [
+      {
+        id: 'globalPolicy',
+        label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.global', {
+          defaultMessage: 'Global',
+        }),
+        iconType: isGlobal ? 'checkInCircleFilled' : '',
+        iconSide: 'left',
+      },
+      {
+        id: 'perPolicy',
+        label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.perPolicy', {
+          defaultMessage: 'Per Policy',
+        }),
+        iconType: !isGlobal ? 'checkInCircleFilled' : '',
+        iconSide: 'left',
+      },
+    ];
+
     const selectableOptions: EffectedPolicyOption[] = useMemo(() => {
       const isPolicySelected = new Set<string>(selected.map((policy) => policy.id));
 
@@ -127,6 +151,16 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       [onChange, selected]
     );
 
+    const handleGlobalButtonChange = useCallback(
+      (selectedId) => {
+        onChange({
+          isGlobal: selectedId === 'globalPolicy',
+          selected,
+        });
+      },
+      [onChange, selected]
+    );
+
     const listBuilderCallback: EuiSelectableProps['children'] = useCallback((list, search) => {
       return (
         <>
@@ -136,21 +170,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       );
     }, []);
 
-    return (
-      <EffectivePolicyFormContainer>
-        <EuiFormRow
-          fullWidth
-          label={
-            <EuiText size="s">
-              <h3>
-                <FormattedMessage
-                  id="xpack.securitySolution.trustedapps.policySelect.globalSectionTitle"
-                  defaultMessage="Assignment"
-                />
-              </h3>
-            </EuiText>
-          }
-        >
+    /*
           <EuiSwitch
             label={i18n.translate(
               'xpack.securitySolution.trustedapps.policySelect.globalSwitchTitle',
@@ -162,24 +182,57 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             onChange={handleGlobalSwitchChange}
             data-test-subj={getTestId('globalSwitch')}
           />
-        </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('xpack.securitySolution.policySelect.policySpecificSectionTitle', {
-            defaultMessage: 'Apply to specific endpoint policies',
-          })}
-        >
-          <EuiSelectable<OptionPolicyData>
-            {...otherSelectableProps}
-            options={selectableOptions}
-            listProps={listProps || DEFAULT_LIST_PROPS}
-            onChange={handleOnPolicySelectChange}
-            searchable={true}
-            data-test-subj={getTestId('policiesSelectable')}
-          >
-            {listBuilderCallback}
-          </EuiSelectable>
-        </EuiFormRow>
+     */
+    return (
+      <EffectivePolicyFormContainer>
+        <EuiText size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.securitySolution.trustedapps.policySelect.assignmentSectionTitle"
+              defaultMessage="Assignment"
+            />
+          </h3>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={2}>
+            <EuiText size="s">
+              <p>
+                {i18n.translate('xpack.securitySolution.trustedApps.assignmentSectionDescription', {
+                  defaultMessage:
+                    'You can assign this trusted application globally across all policies or assign it to specific policies.',
+                })}
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiFormRow fullWidth>
+              <EuiButtonGroup
+                legend="Global Policy Toggle"
+                options={toggleGlobal}
+                idSelected={isGlobal ? 'globalPolicy' : 'perPolicy'}
+                onChange={handleGlobalButtonChange}
+                color="primary"
+                isFullWidth
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        {!isGlobal && (
+          <EuiFormRow fullWidth>
+            <EuiSelectable<OptionPolicyData>
+              {...otherSelectableProps}
+              options={selectableOptions}
+              listProps={listProps || DEFAULT_LIST_PROPS}
+              onChange={handleOnPolicySelectChange}
+              searchable={true}
+              data-test-subj={getTestId('policiesSelectable')}
+            >
+              {listBuilderCallback}
+            </EuiSelectable>
+          </EuiFormRow>
+        )}
       </EffectivePolicyFormContainer>
     );
   }
