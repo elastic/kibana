@@ -92,9 +92,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
             // We shouldn't expect any data for the last 15 minutes
             await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
+            await observability.alerts.getNoDataStateOrFail();
+            await pageObjects.common.waitUntilUrlIncludes('rangeFrom=now-15m&rangeTo=now');
           });
-          await observability.alerts.getNoDataStateOrFail();
-          await pageObjects.common.waitUntilUrlIncludes('rangeFrom=now-15m&rangeTo=now');
         });
       });
 
