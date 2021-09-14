@@ -404,6 +404,19 @@ describe('rules_schema', () => {
       expect(message.schema).toEqual(expected);
     });
 
+    test('it should validate a namespace as string', () => {
+      const payload = {
+        ...getRulesSchemaMock(),
+        namespace: 'a namespace',
+      };
+      const dependents = getDependents(payload);
+      const decoded = dependents.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
     test('it should NOT validate invalid_data for the type', () => {
       const payload: Omit<RulesSchema, 'type'> & { type: string } = getRulesSchemaMock();
       payload.type = 'invalid_data';
