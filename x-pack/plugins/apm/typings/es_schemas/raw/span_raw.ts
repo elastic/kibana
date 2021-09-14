@@ -18,7 +18,7 @@ interface Processor {
 export interface SpanRaw extends APMBaseDoc {
   processor: Processor;
   trace: { id: string }; // trace is required
-  event: { outcome: EventOutcome };
+  event?: { outcome?: EventOutcome };
   service: {
     name: string;
     environment?: string;

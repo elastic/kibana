@@ -29,7 +29,7 @@ export interface TransactionRaw extends APMBaseDoc {
   processor: Processor;
   timestamp: TimestampUs;
   trace: { id: string }; // trace is required
-  event: { outcome: EventOutcome };
+  event?: { outcome?: EventOutcome };
   transaction: {
     duration: { us: number };
     id: string;
