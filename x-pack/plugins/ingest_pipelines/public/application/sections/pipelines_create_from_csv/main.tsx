@@ -151,11 +151,13 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
         ]}
       /> 
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="xl" />
 
       <Instructions />
 
       {hasError && <Error errorTitle={errorTitle} errorDetails={errorDetails} />}
+
+      <EuiSpacer size="xl" />
 
       {(!isUploaded || hasError) && (
         <PipelinesCsvUploader
@@ -168,8 +170,6 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           hasFile={!!file && file.length > 0}
         />
       )}
-
-      <EuiSpacer size="m" />
 
       {isUploaded && (
         <PipelinesPreview

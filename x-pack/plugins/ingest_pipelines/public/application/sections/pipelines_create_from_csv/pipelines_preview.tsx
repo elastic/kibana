@@ -112,10 +112,10 @@ export const PipelinesPreview: FC<Props> = ({
           </Fragment>
         </EuiFormRow>
 
-        <EuiSpacer size="xl" />
+        <EuiSpacer size="m" />
 
         {
-          <EuiFlexGroup responsive={false} gutterSize="l" alignItems="center">
+          <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill

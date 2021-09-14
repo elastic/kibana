@@ -12,41 +12,43 @@ import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from 
 export const Instructions: FC = () => {
 
   return (
-    <EuiFlexGroup gutterSize="xl" alignItems="center">
-      <EuiFlexItem>
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.ecsMapper.file.informational.welcome"
-              defaultMessage="ECS Mapper turns your mapping CSV into a starter ingest pipeline. Reference&nbsp;{templateLink} for more information."
-              values={{
-                templateLink: (
-                  <EuiLink
-                    href="https://docs.google.com/spreadsheets/d/1m5JiOTeZtUueW3VOVqS8bFYqNGEEyp0jAsgO12NFkNM/edit#gid=0"
-                    target="_blank"
-                  >
-                    sample mapping templates
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiText>
-          <p>
-            Two headers are required: <EuiCode>source_field</EuiCode> and <EuiCode>destination_field</EuiCode>, but please see the linked template for more header information.
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiText>
-          <p>
-            Please note that this tool generates starter pipelines. It will only perform field <strong>rename</strong> and <strong>copy</strong> operations, as well as some field format adjustments. 
-            It's up to you to integrate them in a complete pipeline that ingests and outputs the data however you need.
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.ecsMapper.file.informational.welcome"
+                defaultMessage="Map your CSV into a starter ingest pipeline. Reference&nbsp;{templateLink} for more information."
+                values={{
+                  templateLink: (
+                    <EuiLink
+                      href="https://docs.google.com/spreadsheets/d/1m5JiOTeZtUueW3VOVqS8bFYqNGEEyp0jAsgO12NFkNM/edit#gid=0"
+                      target="_blank"
+                    >
+                      sample mapping templates
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiText>
+            <p>
+              Two headers are required: <EuiCode>source_field</EuiCode> and <EuiCode>destination_field</EuiCode>, but please see the linked template for more header information.
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiText>
+            <p>
+              Please note that this tool generates starter pipelines. It will only perform field <strong>rename</strong> and <strong>copy</strong> operations, as well as some field format adjustments. 
+              It's up to you to integrate them in a complete pipeline that ingests and outputs the data however you need.
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 };
