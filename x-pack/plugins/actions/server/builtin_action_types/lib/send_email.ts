@@ -59,16 +59,22 @@ export interface Content {
   message: string;
 }
 
-// send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
-  const { transport, routing, content, configurationUtilities, hasAuth } = options;
-  const { service, clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
-  const { from, to, cc, bcc } = routing;
-  const { subject, message } = content;
-
+  const { transport, content } = options;
+  const { message } = content;
   const messageHTML = htmlFromMarkdown(logger, message);
 
-  if (service === AdditionalEmailServices.EXCHANGE) {
+  if (transport.service === AdditionalEmailServices.EXCHANGE) {
+    return await sendEmailWithExchange(logger, options, messageHTML);
+  } else {
+    return await sendEmailWithNodemailer(logger, options, messageHTML);
+  }
+}
+
+// send an email using MS Exchange Graph API
+async function sendEmailWithExchange(logger: Logger, options: SendEmailOptions, messageHTML: string): Promise<unknown> {
+  const { transport, configurationUtilities } = options;
+  const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
     // request access token for microsoft exchange online server with Graph API scope
 
     const tokenResult = await requestOAuthClientCredentialsToken(
@@ -95,7 +101,14 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       logger.warn(`error thrown sending Microsoft Exchange email: ${err.message}`);
       throw err;
     }
-  }
+}
+
+// send an email using nodemailer
+async function sendEmailWithNodemailer(logger: Logger, options: SendEmailOptions, messageHTML: string): Promise<unknown> {
+  const { transport, routing, content, configurationUtilities, hasAuth } = options;
+  const { service } = transport;
+  const { from, to, cc, bcc } = routing;
+  const { subject, message } = content;
 
   const email = {
     // email routing
@@ -166,7 +179,8 @@ function getTransportConfig(
   if (service === JSON_TRANSPORT_SERVICE) {
     transportConfig.jsonTransport = true;
     delete transportConfig.auth;
-    return transportConfig;
+  } else if (service != null) {
+    transportConfig.service = service;
   } else {
     transportConfig.host = host;
     transportConfig.port = port;

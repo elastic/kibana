@@ -41,8 +41,7 @@ export enum AdditionalEmailServices {
 }
 
 // these values for `service` require users to fill in host/port/secure
-export const CUSTOM_CONFIG_SERVICES: string[] = [
-  AdditionalEmailServices.EXCHANGE,
+export const CUSTOM_HOST_PORT_SERVICES: string[] = [
   AdditionalEmailServices.OTHER,
 ];
 
@@ -92,7 +91,7 @@ function validateConfig(
     if (config.tenantId == null) {
       return '[tenantId] is required';
     }
-  } else if (CUSTOM_CONFIG_SERVICES.indexOf(config.service) >= 0) {
+  } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
     // If configured `service` requires custom host/port/secure settings, validate that they are set
     if (config.host == null && config.port == null) {
       return '[host]/[port] is required';
@@ -245,7 +244,7 @@ async function executor(
     transport.clientId = config.clientId!;
     transport.tenantId = config.tenantId!;
     transport.service = config.service;
-  } else if (CUSTOM_CONFIG_SERVICES.indexOf(config.service) >= 0) {
+  } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
     // use configured host/port/secure values
     // already validated service or host/port is not null ...
     transport.host = config.host!;
