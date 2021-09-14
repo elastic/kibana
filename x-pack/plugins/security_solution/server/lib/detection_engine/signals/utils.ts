@@ -18,6 +18,7 @@ import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import {
+  EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
@@ -1007,16 +1008,4 @@ export const getField = <T extends SearchTypes>(event: SimpleHit, field: string)
   } else if (isWrappedEventHit(event)) {
     return get(event._source, field) as T;
   }
-};
-
-/**
- * Maps legacy rule types to RAC rule type IDs.
- */
-export const ruleTypeMappings = {
-  eql: SIGNALS_ID,
-  machine_learning: ML_RULE_TYPE_ID,
-  query: QUERY_RULE_TYPE_ID,
-  saved_query: SIGNALS_ID,
-  threat_match: INDICATOR_RULE_TYPE_ID,
-  threshold: THRESHOLD_RULE_TYPE_ID,
 };

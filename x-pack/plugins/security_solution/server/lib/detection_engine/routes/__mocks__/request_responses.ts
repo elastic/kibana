@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+
 import { SavedObjectsFindResponse, SavedObjectsFindResult } from 'kibana/server';
+
 import { ActionResult } from '../../../../../../actions/server';
 import { SignalSearchResponse } from '../../signals/types';
 import {
@@ -39,7 +42,6 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { FindBulkExecutionLogResponse } from '../../rule_execution_log/types';
-import { ruleTypeMappings } from '../../signals/utils';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],

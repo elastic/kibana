@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 
-import { SIGNALS_ID } from '@kbn/securitysolution-rules';
+import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import {
   normalizeMachineLearningJobIds,
@@ -39,7 +39,6 @@ import {
   transformToAlertThrottle,
   transformToNotifyWhen,
 } from '../rules/utils';
-import { ruleTypeMappings } from '../signals/utils';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
