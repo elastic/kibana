@@ -59,7 +59,7 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
     fromRoot('x-pack/plugins/reporting/chromium'),
     fromRoot('x-pack/plugins/security_solution/cypress'),
     fromRoot('x-pack/plugins/apm/e2e'),
-    fromRoot('x-pack/plugins/apm/scripts'),
+    fromRoot('x-pack/plugins/apm/ftr_e2e'),
     fromRoot('x-pack/plugins/canvas/canvas_plugin_src'), // prevents server from restarting twice for Canvas plugin changes,
     fromRoot('x-pack/plugins/cases/server/scripts'),
     fromRoot('x-pack/plugins/lists/scripts'),
