@@ -9,6 +9,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import apm from 'elastic-apm-node';
+import minimatch from 'minimatch';
 import { Subject, Observable, from, of } from 'rxjs';
 import { map, mergeScan } from 'rxjs/operators';
 import { difference, partition, groupBy, mapValues, countBy, pick, isPlainObject } from 'lodash';
@@ -57,6 +58,7 @@ export interface TaskClaimingOpts {
   definitions: TaskTypeDictionary;
   taskStore: TaskStore;
   maxAttempts: number;
+  excludedTaskTypes: string[];
   getCapacity: (taskType?: string) => number;
 }
 
@@ -115,6 +117,7 @@ export class TaskClaiming {
   private logger: Logger;
   private readonly taskClaimingBatchesByType: TaskClaimingBatches;
   private readonly taskMaxAttempts: Record<string, number>;
+  private readonly excludedTaskTypes: string[];
 
   /**
    * Constructs a new TaskStore.
@@ -130,6 +133,7 @@ export class TaskClaiming {
     this.logger = opts.logger;
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
+    this.excludedTaskTypes = opts.excludedTaskTypes;
 
     this.events$ = new Subject<TaskClaim>();
   }
@@ -354,6 +358,16 @@ export class TaskClaiming {
     };
   };
 
+  private isTaskTypeExcluded(taskType: string) {
+    for (const excludedType of this.excludedTaskTypes) {
+      if (minimatch(taskType, excludedType)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   private async markAvailableTasksAsClaimed({
     claimOwnershipUntil,
     claimTasksById,
@@ -362,9 +376,11 @@ export class TaskClaiming {
   }: OwnershipClaimingOpts): Promise<UpdateByQueryResult> {
     const { taskTypesToSkip = [], taskTypesToClaim = [] } = groupBy(
       this.definitions.getAllTypes(),
-      (type) => (taskTypes.has(type) ? 'taskTypesToClaim' : 'taskTypesToSkip')
+      (type) =>
+        taskTypes.has(type) && !this.isTaskTypeExcluded(type)
+          ? 'taskTypesToClaim'
+          : 'taskTypesToSkip'
     );
-
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
@@ -382,6 +398,23 @@ export class TaskClaiming {
       sort.unshift('_score');
     }
 
+    const query = matchesClauses(
+      claimTasksById && claimTasksById.length
+        ? mustBeAllOf(asPinnedQuery(claimTasksById, queryForScheduledTasks))
+        : queryForScheduledTasks,
+      filterDownBy(InactiveTasks)
+    );
+    const script = updateFieldsAndMarkAsFailed(
+      {
+        ownerId: this.taskStore.taskManagerId,
+        retryAt: claimOwnershipUntil,
+      },
+      claimTasksById || [],
+      taskTypesToClaim,
+      taskTypesToSkip,
+      pick(this.taskMaxAttempts, taskTypesToClaim)
+    );
+
     const apmTrans = apm.startTransaction(
       'markAvailableTasksAsClaimed',
       `taskManager markAvailableTasksAsClaimed`
@@ -389,22 +422,8 @@ export class TaskClaiming {
     try {
       const result = await this.taskStore.updateByQuery(
         {
-          query: matchesClauses(
-            claimTasksById && claimTasksById.length
-              ? mustBeAllOf(asPinnedQuery(claimTasksById, queryForScheduledTasks))
-              : queryForScheduledTasks,
-            filterDownBy(InactiveTasks)
-          ),
-          script: updateFieldsAndMarkAsFailed(
-            {
-              ownerId: this.taskStore.taskManagerId,
-              retryAt: claimOwnershipUntil,
-            },
-            claimTasksById || [],
-            taskTypesToClaim,
-            taskTypesToSkip,
-            pick(this.taskMaxAttempts, taskTypesToClaim)
-          ),
+          query,
+          script,
           sort,
         },
         {

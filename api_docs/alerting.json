@@ -35,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "alerting",
-            "id": "def-public.alert",
+            "id": "def-public.AlertNavigationHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "alert",
@@ -1425,7 +1425,7 @@
             "children": [
               {
                 "parentPluginId": "alerting",
-                "id": "def-server.options",
+                "id": "def-server.AlertType.executor.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
