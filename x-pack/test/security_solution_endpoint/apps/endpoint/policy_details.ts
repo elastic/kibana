@@ -307,7 +307,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   behavior_protection: {
                     enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                    message: 'Elastic Security {action} {rule}',
                   },
                 },
               },
@@ -323,7 +323,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   behavior_protection: {
                     enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                    message: 'Elastic Security {action} {rule}',
                   },
                 },
               },
@@ -349,11 +349,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   memory_protection: {
                     enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                    message: 'Elastic Security {action} {rule}',
                   },
                   behavior_protection: {
                     enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                    message: 'Elastic Security {action} {rule}',
                   },
                   ransomware: {
                     enabled: true,
@@ -531,7 +531,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   behavior_protection: {
                     enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                    message: 'Elastic Security {action} {rule}',
                   },
                 },
               },
@@ -547,7 +547,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   behavior_protection: {
                     enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                    message: 'Elastic Security {action} {rule}',
                   },
                 },
               },
@@ -573,11 +573,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   memory_protection: {
                     enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                    message: 'Elastic Security {action} {rule}',
                   },
                   behavior_protection: {
                     enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                    message: 'Elastic Security {action} {rule}',
                   },
                   ransomware: {
                     enabled: true,
@@ -752,7 +752,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   behavior_protection: {
                     enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                    message: 'Elastic Security {action} {rule}',
                   },
                 },
               },
@@ -768,7 +768,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   behavior_protection: {
                     enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                    message: 'Elastic Security {action} {rule}',
                   },
                 },
               },
@@ -794,11 +794,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   },
                   memory_protection: {
                     enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                    message: 'Elastic Security {action} {rule}',
                   },
                   behavior_protection: {
                     enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                    message: 'Elastic Security {action} {rule}',
                   },
                   ransomware: {
                     enabled: true,

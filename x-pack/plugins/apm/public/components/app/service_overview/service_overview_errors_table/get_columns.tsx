@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { unit } from '../../../../utils/style';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
@@ -58,11 +57,14 @@ export function getColumns({
           defaultMessage: 'Last seen',
         }
       ),
+      align: RIGHT_ALIGNMENT,
       render: (_, { lastSeen }) => {
-        return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
+        return (
+          <span style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
+            <TimestampTooltip time={lastSeen} timeUnit="minutes" />
+          </span>
+        );
       },
-      width: `${unit * 9}px`,
-      align: 'right',
     },
     {
       field: 'occurrences',
@@ -72,7 +74,7 @@ export function getColumns({
           defaultMessage: 'Occurrences',
         }
       ),
-      width: `${unit * 12}px`,
+      align: RIGHT_ALIGNMENT,
       render: (_, { occurrences, group_id: errorGroupId }) => {
         const currentPeriodTimeseries =
           errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]
