@@ -237,17 +237,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // issue #111104
     it('should add a Lens heatmap to the dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
-
-      await PageObjects.dashboard.saveDashboard('My Wonderful Heatmap dashboard');
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await listingTable.searchAndExpectItemsCount(
-        'dashboard',
-        'My Wonderful Heatmap dashboard',
-        1
-      );
-
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -274,14 +263,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.lens.save(
-        'New Lens Heatmap',
-        false,
-        false,
-        true,
-        'existing',
-        'My Wonderful Heatmap dashboard'
-      );
+      await PageObjects.lens.save('New Lens Heatmap', false, false, true, 'new');
 
       await PageObjects.dashboard.waitForRenderComplete();
 
