@@ -15,7 +15,7 @@ import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/
 import {
   fields,
   getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+} from '../../../../../../../src/plugins/data/common/data_views/fields/fields.mocks';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getEmptyValue } from '../../../common/empty_value';

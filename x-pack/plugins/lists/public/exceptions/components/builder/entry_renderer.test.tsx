@@ -25,7 +25,7 @@ import { FieldSpec } from 'src/plugins/data/common';
 import {
   fields,
   getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+} from '../../../../../../../src/plugins/data/common/data_views/fields/fields.mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';

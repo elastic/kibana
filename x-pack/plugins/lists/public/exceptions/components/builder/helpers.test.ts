@@ -60,7 +60,7 @@ import { getExceptionListItemSchemaMock } from '../../../../common/schemas/respo
 import {
   fields,
   getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+} from '../../../../../../../src/plugins/data/common/data_views/fields/fields.mocks';
 import { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import { getEntryNestedMock } from '../../../../common/schemas/types/entry_nested.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
