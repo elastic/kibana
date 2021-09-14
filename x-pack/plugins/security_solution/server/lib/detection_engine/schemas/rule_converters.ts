@@ -291,6 +291,7 @@ export const internalRuleToAPIResponse = (
   return {
     // saved object properties
     outcome: isResolvedRule(rule) ? rule.outcome : undefined,
+    alias_target_id: isResolvedRule(rule) ? rule.alias_target_id : undefined,
     // Alerting framework params
     id: rule.id,
     updated_at: rule.updatedAt.toISOString(),

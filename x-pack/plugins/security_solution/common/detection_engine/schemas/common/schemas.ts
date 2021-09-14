@@ -44,6 +44,9 @@ export const outcome = t.union([
 ]);
 export type Outcome = t.TypeOf<typeof outcome>;
 
+export const alias_target_id = t.string;
+export type AliasTargetId = t.TypeOf<typeof alias_target_id>;
+
 export const enabled = t.boolean;
 export type Enabled = t.TypeOf<typeof enabled>;
 
