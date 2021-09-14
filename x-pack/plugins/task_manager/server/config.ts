@@ -128,6 +128,10 @@ export const configSchema = schema.object(
         max: DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY,
       }),
     }),
+    /* These are not designed to be used by most users. Please use caution when changing these */
+    unsafe: schema.object({
+      exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    }),
   },
   {
     validate: (config) => {
