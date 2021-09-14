@@ -85,8 +85,8 @@
           'xml-crypto', '@types/xml-crypto'
         ],
         reviewers: ['team:kibana-security'],
-        matchBaseBranches: ['master', '7.x'],
-        labels: ['Team:Security'],
+        matchBaseBranches: ['master'],
+        labels: ['Team:Security', 'release_note:skip', 'auto-backport'],
         enabled: true,
       },
     ],
