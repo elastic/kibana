@@ -16,14 +16,6 @@ import {
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
 export const configSchema = schema.object({
-  /**
-   * Flipping this to "false" will disable the legacy action side car migration checks at startup.
-   * By default this is "true" and migrations will be attempted on each and every restart of Kibana.
-   * Once the deletion_migration.ts is removed because we find a better way or we are on 8.0.0+ where
-   * this code is removed, then this flag can also be removed.
-   * See the file: security_solution/server/lib/detection_engine/rule_actions/deletion_migration.ts
-   */
-  enableLegacySideCarActionMigration: schema.boolean({ defaultValue: true }),
   enabled: schema.boolean({ defaultValue: true }),
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
   maxRuleImportPayloadBytes: schema.number({ defaultValue: 10485760 }),

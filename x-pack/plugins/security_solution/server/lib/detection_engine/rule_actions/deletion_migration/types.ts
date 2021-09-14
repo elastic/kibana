@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+// We import this restricted area so we can get access to the SO "Raw" types from alerting
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { RawAlertAction, RawAlert } from '../../../../../../alerting/server/types';
+
 /**
- * NOTE: I intentionally do _NOT_ use other types from other parts of the system such as
- * Kibana alerting because as those types evolve and change this structure will not. This is
- * migration code which should feel like it is written in "stone" and not actively maintained.
- * Once "dangerousWorkaroundToMigrateActionsSideCarSavedObjects" is removed, this should be too.
+ * This is the legacy Actions type.
  * This type should _never_ be used outside of this one use case.
- * @deprecated Remove this once "dangerousWorkaroundToMigrateActionsSideCarSavedObjects" is removed.
+ * @deprecated Remove this once we have no more migrations for "legacy actions" left.
  */
 export interface Actions {
   id: string;
@@ -23,50 +24,10 @@ export interface Actions {
 }
 
 /**
- * This is technically the current alerting actions from kibana-alerting.
- * TODO: Can we use the regular one from their side? This can be updated.
- */
-export interface AlertingActions {
-  params: {
-    message: string;
-  };
-  actionTypeId: string;
-  group: string;
-  actionRef: string;
-}
-
-/**
- * This is technically the current alerting shape.
- * TODO: Can we use their regular type here instead? This can be updated.
- */
-export interface Alerting {
-  name: string;
-  actions: AlertingActions[];
-  alertTypeId: string;
-  updatedBy: string;
-  apiKey: string | null;
-  apiKeyOwner: string;
-  notifyWhen: string | null;
-  throttle: string | null;
-  muteAll: boolean;
-}
-
-/**
- * TODO: Can we use the regular kibana-core reference from somewhere? This will need to be updated
- */
-export interface Reference {
-  id: string;
-  name: string;
-  type: string;
-}
-
-/**
- * NOTE: I intentionally do _NOT_ use other types from other parts of the system such as
- * Kibana alerting because as those types evolve and change this structure will not. This is
- * migration code which should feel like it is written in "stone" and not actively maintained.
- * Once "dangerousWorkaroundToMigrateActionsSideCarSavedObjects" is removed, this should be too.
+ * This is the legacy Actions side car type.
+ * NOTE: I intentionally do _NOT_ use other types from other parts of the system.
  * This type should _never_ be used outside of this one use case.
- * @deprecated Remove this once "dangerousWorkaroundToMigrateActionsSideCarSavedObjects" is removed.
+ * @deprecated Remove this once we no longer need this migration and this code is all deleted
  */
 export interface SideCarAction {
   ruleAlertId: string;
@@ -74,3 +35,15 @@ export interface SideCarAction {
   ruleThrottle: string;
   alertThrottle: string;
 }
+
+/**
+ * We carefully pull in this one restricted path and the RawAlertAction to use within this part of our migration code.
+ * @deprecated Remove this once we no longer need this migration code.
+ */
+export type AlertingActions = RawAlertAction;
+
+/**
+ * We carefully pull in this one restricted path and the RawAlertAction to use within this part of our migration code.
+ * @deprecated Remove this once we no longer need this migration code.
+ */
+export type Alerting = RawAlert;

@@ -29,7 +29,6 @@ export const createMockConfig = (): ConfigType => ({
   alertIgnoreFields: [],
   prebuiltRulesFromFileSystem: true,
   prebuiltRulesFromSavedObjects: false,
-  enableLegacySideCarActionMigration: true,
 });
 
 export const mockGetCurrentUser = {
