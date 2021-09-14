@@ -94,7 +94,6 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
           >
             <EsDeprecationsTableCells
               fieldName={field}
-              isResolved={status.statusType === 'complete'}
               openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
               resolutionTableCell={<IndexSettingsResolutionCell status={status} />}

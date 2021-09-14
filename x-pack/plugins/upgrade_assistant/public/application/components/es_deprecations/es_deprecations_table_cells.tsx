@@ -17,7 +17,6 @@ interface Props {
   resolutionTableCell?: React.ReactNode;
   fieldName: DeprecationTableColumns;
   deprecation: EnrichedDeprecationInfo;
-  isResolved: boolean;
   openFlyout: () => void;
 }
 
@@ -41,11 +40,10 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
   fieldName,
   deprecation,
   openFlyout,
-  isResolved,
 }) => {
   // "Status column"
   if (fieldName === 'isCritical') {
-    return <DeprecationBadge isCritical={deprecation.isCritical} isResolved={isResolved} />;
+    return <DeprecationBadge isCritical={deprecation.isCritical} />;
   }
 
   // "Issue" column

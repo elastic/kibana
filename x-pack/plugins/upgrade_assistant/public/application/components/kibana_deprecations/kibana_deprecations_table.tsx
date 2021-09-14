@@ -102,16 +102,8 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       width: '5%',
       truncateText: true,
       sortable: true,
-      render: (level: KibanaDeprecationDetails['level'], deprecation) => {
-        const isCurrent = deprecationResolutionState?.id === deprecation.id;
-        const isResolved = deprecationResolutionState?.resolveDeprecationStatus === 'ok';
-
-        return (
-          <DeprecationBadge
-            isCritical={level === 'critical'}
-            isResolved={isCurrent && isResolved}
-          />
-        );
+      render: (level: KibanaDeprecationDetails['level']) => {
+        return <DeprecationBadge isCritical={level === 'critical'} />;
       },
     },
     {

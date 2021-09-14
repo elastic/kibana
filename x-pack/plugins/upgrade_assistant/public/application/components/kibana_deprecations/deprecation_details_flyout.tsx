@@ -132,7 +132,7 @@ export const DeprecationDetailsFlyout = ({
 }: DeprecationDetailsFlyoutProps) => {
   const { documentationUrl, message, correctiveActions, title } = deprecation;
   const isCurrent = deprecationResolutionState?.id === deprecation.id;
-  const isResolved = deprecationResolutionState?.resolveDeprecationStatus === 'ok';
+  const isResolved = isCurrent && deprecationResolutionState?.resolveDeprecationStatus === 'ok';
 
   return (
     <>
@@ -142,7 +142,7 @@ export const DeprecationDetailsFlyout = ({
             <div>
               <DeprecationBadge
                 isCritical={deprecation.level === 'critical'}
-                isResolved={isCurrent && isResolved}
+                isResolved={isResolved}
               />
             </div>
           </EuiFlexItem>
@@ -229,7 +229,7 @@ export const DeprecationDetailsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          {/* Only show the "Quick resolve" button if deprecation supports it */}
+          {/* Only show the "Quick resolve" button if deprecation supports it and deprecation is not yet resolved */}
           {correctiveActions.api && !isResolved && (
             <EuiFlexItem grow={false}>
               <EuiButton

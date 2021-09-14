@@ -47,7 +47,7 @@ describe('Index settings deprecation flyout', () => {
   });
 
   it('removes deprecated index settings', async () => {
-    const { find, actions, exists, table } = testBed;
+    const { find, actions, exists } = testBed;
 
     httpRequestsMockHelpers.setUpdateIndexSettingsResponse({
       acknowledged: true,
@@ -79,9 +79,6 @@ describe('Index settings deprecation flyout', () => {
     expect(find('indexSettingsDetails.deleteSettingsButton').length).toEqual(0);
     // Verify the badge got marked as resolved
     expect(exists('indexSettingsDetails.resolvedDeprecationBadge')).toBe(true);
-    // Verify table row badge got marked as resolved
-    const { rows } = table.getMetaData('esDeprecationsTable');
-    expect(find('resolvedDeprecationBadge', rows[2].reactWrapper).text()).toBe('Resolved');
   });
 
   it('handles failure', async () => {

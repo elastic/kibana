@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
-import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../common/types';
+import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import { DeprecationTableColumns } from '../../../types';
@@ -84,7 +84,6 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
             data-test-subj={`reindexTableCell-${field}`}
           >
             <EsDeprecationsTableCells
-              isResolved={reindexState.reindexState.status === ReindexStatus.completed}
               fieldName={field}
               openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}

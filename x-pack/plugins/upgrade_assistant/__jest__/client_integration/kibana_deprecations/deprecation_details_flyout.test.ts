@@ -61,7 +61,7 @@ describe('Kibana deprecation details flyout', () => {
 
   describe('Deprecation with automatic resolution', () => {
     test('resolves deprecation successfully', async () => {
-      const { find, exists, actions, table } = testBed;
+      const { find, exists, actions } = testBed;
       const quickResolveDeprecation = mockedKibanaDeprecations[0];
 
       await actions.table.clickDeprecationAt(0);
@@ -92,9 +92,6 @@ describe('Kibana deprecation details flyout', () => {
       expect(exists('resolveButton')).toBe(false);
       // Badge should be updated in flyout title
       expect(exists('kibanaDeprecationDetails.resolvedDeprecationBadge')).toBe(true);
-      // Table row badge should also reflect the resolved state
-      const { rows } = table.getMetaData('kibanaDeprecationsTable');
-      expect(find('resolvedDeprecationBadge', rows[0].reactWrapper).text()).toBe('Resolved');
     });
 
     test('handles resolve failure', async () => {

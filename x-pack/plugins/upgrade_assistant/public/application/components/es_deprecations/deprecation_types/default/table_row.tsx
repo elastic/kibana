@@ -63,7 +63,6 @@ export const DefaultTableRow: React.FunctionComponent<Props> = ({ rowFieldNames,
           >
             <EsDeprecationsTableCells
               fieldName={field}
-              isResolved={false}
               deprecation={deprecation}
               openFlyout={() => setShowFlyout(true)}
             />
