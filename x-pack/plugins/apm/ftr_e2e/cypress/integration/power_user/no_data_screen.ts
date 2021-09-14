@@ -5,42 +5,60 @@
  * 2.0.
  */
 /* eslint-disable @typescript-eslint/naming-convention */
+
+const apmIndicesSaveURL =
+  'http://apm_power_user:changeme@localhost:5620/api/apm/settings/apm-indices/save';
+
 describe('No data screen', () => {
-  beforeEach(() => {
-    cy.loginAsPowerUser();
-  });
-  it('bypasses no data screen on settings pages', () => {
-    cy.visit('/app/apm/settings/apm-indices');
-    [
-      'apm_oss.sourcemapIndices',
-      'apm_oss.errorIndices',
-      'apm_oss.onboardingIndices',
-      'apm_oss.spanIndices',
-      'apm_oss.transactionIndices',
-      'apm_oss.metricsIndices',
-    ].map((fieldName) => {
-      cy.get(`input[name="${fieldName}"]`).type('foo-*');
+  describe('bypass no data screen on settings pages', () => {
+    beforeEach(() => {
+      cy.loginAsPowerUser();
     });
-    cy.contains('Apply changes').click();
-    cy.contains('Indices applied');
-    cy.visit('/app/apm/');
-    cy.contains('Welcome to Elastic Observability!');
-    cy.contains('Settings').click();
-    cy.contains('Welcome to Elastic Observability!').should('not.exist');
-    cy.request({
-      url: '/api/apm/settings/apm-indices/save',
-      method: 'POST',
-      body: {
-        'apm_oss.sourcemapIndices': '',
-        'apm_oss.errorIndices': '',
-        'apm_oss.onboardingIndices': '',
-        'apm_oss.spanIndices': '',
-        'apm_oss.transactionIndices': '',
-        'apm_oss.metricsIndices': '',
-      },
-      headers: {
-        'kbn-xsrf': true,
-      },
+
+    before(() => {
+      // Change default indices
+      cy.request({
+        url: apmIndicesSaveURL,
+        method: 'POST',
+        body: {
+          'apm_oss.sourcemapIndices': 'foo-*',
+          'apm_oss.errorIndices': 'foo-*',
+          'apm_oss.onboardingIndices': 'foo-*',
+          'apm_oss.spanIndices': 'foo-*',
+          'apm_oss.transactionIndices': 'foo-*',
+          'apm_oss.metricsIndices': 'foo-*',
+        },
+        headers: {
+          'kbn-xsrf': true,
+        },
+      });
+    });
+
+    it('shows no data screen instead of service inventory', () => {
+      cy.visit('/app/apm/');
+      cy.contains('Welcome to Elastic Observability!');
+    });
+    it('shows settings page', () => {
+      cy.visit('/app/apm/settings');
+      cy.contains('Welcome to Elastic Observability!').should('not.exist');
+      cy.get('h1').contains('Settings');
+    });
+
+    after(() => {
+      // reset to default indices
+      cy.request({
+        url: apmIndicesSaveURL,
+        method: 'POST',
+        body: {
+          'apm_oss.sourcemapIndices': '',
+          'apm_oss.errorIndices': '',
+          'apm_oss.onboardingIndices': '',
+          'apm_oss.spanIndices': '',
+          'apm_oss.transactionIndices': '',
+          'apm_oss.metricsIndices': '',
+        },
+        headers: { 'kbn-xsrf': true },
+      });
     });
   });
 });
