@@ -7,15 +7,16 @@
  */
 
 import { Subject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
 } from '../../../../usage_collection/server/mocks';
 
-import { registerOpsStatsCollector } from './';
+import { registerOpsStatsCollector } from '.';
 import { OpsMetrics } from '../../../../../core/server';
-import { loggingSystemMock } from '../../../../../core/server/mocks';
+import { loggingSystemMock, metricsServiceMock } from '../../../../../core/server/mocks';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -23,6 +24,8 @@ describe('telemetry_ops_stats', () => {
   let collector: Collector<unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
+  const metricsServiceSetupMock = metricsServiceMock.createInternalSetupContract();
+
   usageCollectionMock.makeStatsCollector.mockImplementation((config) => {
     collector = new Collector(logger, config);
     return createUsageCollectionSetupMock().makeStatsCollector(config);
@@ -30,45 +33,6 @@ describe('telemetry_ops_stats', () => {
 
   const metrics$ = new Subject<OpsMetrics>();
   const mockedFetchContext = createCollectorFetchContextMock();
-
-  const metric: OpsMetrics = {
-    collected_at: new Date('2020-01-01 01:00:00'),
-    process: {
-      memory: {
-        heap: {
-          total_in_bytes: 0,
-          used_in_bytes: 0,
-          size_limit: 0,
-        },
-        resident_set_size_in_bytes: 0,
-      },
-      event_loop_delay: 10,
-      pid: 10,
-      uptime_in_millis: 1000,
-    },
-    os: {
-      platform: 'darwin',
-      platformRelease: 'test',
-      load: {
-        '1m': 0.5,
-        '5m': 1,
-        '15m': 3,
-      },
-      memory: {
-        total_in_bytes: 10,
-        free_in_bytes: 10,
-        used_in_bytes: 10,
-      },
-      uptime_in_millis: 1000,
-    },
-    response_times: { avg_in_millis: 100, max_in_millis: 200 },
-    requests: {
-      disconnects: 10,
-      total: 100,
-      statusCodes: { 200: 100 },
-    },
-    concurrent_connections: 20,
-  };
 
   beforeAll(() => registerOpsStatsCollector(usageCollectionMock, metrics$));
   afterAll(() => jest.clearAllTimers());
@@ -83,45 +47,18 @@ describe('telemetry_ops_stats', () => {
   });
 
   test('should return something when there is a metric', async () => {
-    metrics$.next(metric);
+    const opsMetrics = await metricsServiceSetupMock.getOpsMetrics$().pipe(take(1)).toPromise();
+    metrics$.next(opsMetrics);
     expect(collector.isReady()).toBe(true);
     expect(await collector.fetch(mockedFetchContext)).toMatchSnapshot({
-      concurrent_connections: 20,
-      os: {
-        load: {
-          '15m': 3,
-          '1m': 0.5,
-          '5m': 1,
-        },
-        memory: {
-          free_in_bytes: 10,
-          total_in_bytes: 10,
-          used_in_bytes: 10,
-        },
-        platform: 'darwin',
-        platformRelease: 'test',
-        uptime_in_millis: 1000,
-      },
       process: {
-        event_loop_delay: 10,
-        memory: {
-          heap: {
-            size_limit: 0,
-            total_in_bytes: 0,
-            used_in_bytes: 0,
-          },
-          resident_set_size_in_bytes: 0,
+        event_loop_delay_histogram: expect.any(Object),
+      },
+      processes: [
+        {
+          event_loop_delay_histogram: expect.any(Object),
         },
-        uptime_in_millis: 1000,
-      },
-      requests: {
-        disconnects: 10,
-        total: 100,
-      },
-      response_times: {
-        average: 100,
-        max: 200,
-      },
+      ],
       timestamp: expect.any(String),
     });
   });
