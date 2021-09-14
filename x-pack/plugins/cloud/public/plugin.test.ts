@@ -90,7 +90,7 @@ describe('Cloud Plugin', () => {
           '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',
           {
             version_str: 'version',
-            version_major_int: 'version',
+            version_major_int: -1,
             version_minor_int: -1,
             version_patch_int: -1,
           }
@@ -99,7 +99,7 @@ describe('Cloud Plugin', () => {
 
       it('calls FS.setUserVars everytime an app changes', async () => {
         const currentAppId$ = new Subject<string | undefined>();
-        await setupPlugin({
+        const { plugin } = await setupPlugin({
           config: { full_story: { enabled: true, org_id: 'foo' } },
           currentUserProps: {
             username: '1234',
@@ -110,17 +110,21 @@ describe('Cloud Plugin', () => {
         expect(fullStoryApiMock.setUserVars).not.toHaveBeenCalled();
         currentAppId$.next('App1');
         expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
-          appId: 'App1',
+          app_id_str: 'App1',
         });
         currentAppId$.next();
         expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
-          appId: 'unknown',
+          app_id_str: 'unknown',
         });
 
         currentAppId$.next('App2');
         expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
-          appId: 'App2',
+          app_id_str: 'App2',
         });
+
+        expect(currentAppId$.observers.length).toBe(1);
+        plugin.stop();
+        expect(currentAppId$.observers.length).toBe(0);
       });
 
       it('does not call FS.identify when security is not available', async () => {

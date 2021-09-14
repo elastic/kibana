@@ -15,6 +15,8 @@ import {
   ApplicationStart,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
+import { Subscription } from 'rxjs';
+import parse from 'semver/functions/parse';
 import type {
   AuthenticatedUser,
   SecurityPluginSetup,
@@ -60,9 +62,14 @@ export interface CloudSetup {
   isCloudEnabled: boolean;
 }
 
+interface SetupFullstoryDeps extends CloudSetupDependencies {
+  basePath: IBasePath;
+}
+
 export class CloudPlugin implements Plugin<CloudSetup> {
   private config!: CloudConfigType;
   private isCloudEnabled: boolean;
+  private appSubscription: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
@@ -143,6 +150,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       .catch(() => setLinks(true));
   }
 
+  public stop() {
+    this.appSubscription?.unsubscribe();
+  }
+
   /**
    * Determines if the current user should see links back to Cloud.
    * This isn't a true authorization check, but rather a heuristic to
@@ -169,11 +180,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     return user?.roles.includes('superuser') ?? true;
   }
 
-  private async setupFullstory({
-    basePath,
-    security,
-    application,
-  }: CloudSetupDependencies & { basePath: IBasePath }) {
+  private async setupFullstory({ basePath, security, application }: SetupFullstoryDeps) {
     const { enabled, org_id: orgId } = this.config.full_story;
     if (!enabled || !orgId) {
       return; // do not load any fullstory code in the browser if not enabled
@@ -204,21 +211,31 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       if (userId) {
         // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
         const hashedId = sha256(userId.toString());
-        const kibanaVer = this.initializerContext.env.packageInfo.version.split('.');
         application?.then(async () => {
-          const appStart = await application;
-          appStart.currentAppId$.subscribe((appId) => {
-            // Update the current application every time it changes
-            fullStory.setUserVars({
-              appId: appId ?? 'unknown',
+          try {
+            const appStart = await application;
+            this.appSubscription = appStart.currentAppId$.subscribe((appId) => {
+              // Update the current application every time it changes
+              fullStory.setUserVars({
+                app_id_str: appId ?? 'unknown',
+              });
             });
-          });
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(
+              `[cloud.full_story] Could not retrieve application service due to error: ${e.toString()}`,
+              e
+            );
+          }
         });
+        const kibanaVer = this.initializerContext.env.packageInfo.version ?? null;
+        const parsedVer = parse(kibanaVer);
+        // `str` suffix is required for evn vars, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
         fullStory.identify(hashedId, {
-          version_str: this.initializerContext.env.packageInfo.version,
-          version_major_int: kibanaVer[0] || -1,
-          version_minor_int: kibanaVer[1] || -1,
-          version_patch_int: kibanaVer[2] || -1,
+          version_str: kibanaVer,
+          version_major_int: parsedVer?.major ?? -1,
+          version_minor_int: parsedVer?.minor ?? -1,
+          version_patch_int: parsedVer?.patch ?? -1,
         });
       }
     } catch (e) {
