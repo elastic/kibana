@@ -8,13 +8,17 @@
 import { isEmpty } from 'lodash/fp';
 import { AuthenticatedUser } from '../../../../../../security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
+import {
+  TimelineType,
+  TimelineStatus,
+  SavedTimelineWithSavedObjectId,
+} from '../../../../../common/types/timeline';
 
 export const pickSavedTimeline = (
   timelineId: string | null,
-  savedTimelineRt: SavedTimeline & { savedObjectId?: string | null },
+  savedTimelineRt: SavedTimelineWithSavedObjectId,
   userInfo: AuthenticatedUser | null
-): Omit<SavedTimeline, 'dataViewId'> & { savedObjectId?: string | null } => {
+): Omit<SavedTimelineWithSavedObjectId, 'dataViewId'> => {
   // dataViewId is saved in references as it is a reference to a data view saved object id
   const { dataViewId, ...savedTimeline } = savedTimelineRt;
 

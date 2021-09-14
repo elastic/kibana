@@ -15,6 +15,8 @@ import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
 import { extractFieldLabel } from '../../../common/fields_utils';
+import { isAggSupported } from './helpers/check_aggs';
+import { isEntireTimeRangeMode } from './helpers/get_timerange_mode';
 
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -71,6 +73,12 @@ export async function getTableData(
   const handleError = handleErrorResponse(panel);
 
   try {
+    if (isEntireTimeRangeMode(panel)) {
+      panel.series.forEach((column) => {
+        isAggSupported(column.metrics);
+      });
+    }
+
     const body = await buildTableRequest({
       req,
       panel,

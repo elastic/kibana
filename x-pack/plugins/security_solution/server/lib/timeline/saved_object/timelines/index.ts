@@ -7,12 +7,11 @@
 
 import { getOr } from 'lodash/fp';
 
-import { SavedObjectsFindOptions } from '../../../../../../../../src/core/server';
 import {
-  DEFAULT_DATA_VIEW_ID,
-  defaultDataViewRef,
-  UNAUTHENTICATED_USER,
-} from '../../../../../common/constants';
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+} from '../../../../../../../../src/core/server';
+import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import { NoteSavedObject } from '../../../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
 import {
@@ -30,6 +29,7 @@ import {
   TimelineType,
   TimelineStatus,
   TimelineResult,
+  TimelineWithoutExternalRefs,
 } from '../../../../../common/types/timeline';
 import { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
@@ -40,6 +40,7 @@ import { timelineSavedObjectType } from '../../saved_object_mappings/';
 import { draftTimelineDefaults } from '../../utils/default_timeline';
 import { AuthenticatedUser } from '../../../../../../security/server';
 import { Maybe } from '../../../../../common/search_strategy';
+import { timelineFieldsMigrator } from './field_migrator';
 export { pickSavedTimeline } from './pick_saved_timeline';
 export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 
@@ -391,40 +392,17 @@ export const persistTimeline = async (
   const userInfo = isImmutable ? ({ username: 'Elastic' } as AuthenticatedUser) : request.user;
   try {
     if (timelineId == null) {
-      // Create new timeline
-      const newTimeline = convertSavedObjectToSavedTimeline(
-        await savedObjectsClient.create(
-          timelineSavedObjectType,
-          pickSavedTimeline(timelineId, timeline, userInfo),
-          {
-            references: [
-              { ...defaultDataViewRef, id: timeline.dataViewId || DEFAULT_DATA_VIEW_ID },
-            ],
-          }
-        )
-      );
-      return {
-        code: 200,
-        message: 'success',
-        timeline: newTimeline,
-      };
+      return await createTimeline({ timelineId, timeline, userInfo, savedObjectsClient });
     }
-    // Update Timeline
-    await savedObjectsClient.update(
-      timelineSavedObjectType,
-      timelineId,
-      pickSavedTimeline(timelineId, timeline, userInfo),
-      {
-        version: version || undefined,
-        references: [{ ...defaultDataViewRef, id: timeline.dataViewId || DEFAULT_DATA_VIEW_ID }],
-      }
-    );
 
-    return {
-      code: 200,
-      message: 'success',
-      timeline: await getSavedTimeline(request, timelineId),
-    };
+    return await updateTimeline({
+      request,
+      timelineId,
+      timeline,
+      userInfo,
+      savedObjectsClient,
+      version,
+    });
   } catch (err) {
     if (timelineId != null && savedObjectsClient.errors.isConflictError(err)) {
       return {
@@ -448,6 +426,86 @@ export const persistTimeline = async (
   }
 };
 
+const createTimeline = async ({
+  timelineId,
+  timeline,
+  savedObjectsClient,
+  userInfo,
+}: {
+  timelineId: string | null;
+  timeline: SavedTimeline;
+  savedObjectsClient: SavedObjectsClientContract;
+  userInfo: AuthenticatedUser | null;
+}) => {
+  const {
+    transformedFields: migratedAttributes,
+    references,
+  } = timelineFieldsMigrator.extractFieldsToReferences<TimelineWithoutExternalRefs>({
+    data: pickSavedTimeline(timelineId, timeline, userInfo),
+  });
+
+  const createdTimeline = await savedObjectsClient.create<TimelineWithoutExternalRefs>(
+    timelineSavedObjectType,
+    migratedAttributes,
+    {
+      references,
+    }
+  );
+
+  const repopulatedSavedObject = timelineFieldsMigrator.populateFieldsFromReferences(
+    createdTimeline
+  );
+
+  // Create new timeline
+  const newTimeline = convertSavedObjectToSavedTimeline(repopulatedSavedObject);
+  return {
+    code: 200,
+    message: 'success',
+    timeline: newTimeline,
+  };
+};
+
+const updateTimeline = async ({
+  request,
+  timelineId,
+  timeline,
+  savedObjectsClient,
+  userInfo,
+  version,
+}: {
+  request: FrameworkRequest;
+  timelineId: string;
+  timeline: SavedTimeline;
+  savedObjectsClient: SavedObjectsClientContract;
+  userInfo: AuthenticatedUser | null;
+  version: string | null;
+}) => {
+  const rawTimelineSavedObject = await savedObjectsClient.get<TimelineWithoutExternalRefs>(
+    timelineSavedObjectType,
+    timelineId
+  );
+
+  const {
+    transformedFields: migratedPatchAttributes,
+    references,
+  } = timelineFieldsMigrator.extractFieldsToReferences<TimelineWithoutExternalRefs>({
+    data: pickSavedTimeline(timelineId, timeline, userInfo),
+    existingReferences: rawTimelineSavedObject.references,
+  });
+
+  // Update Timeline
+  await savedObjectsClient.update(timelineSavedObjectType, timelineId, migratedPatchAttributes, {
+    version: version || undefined,
+    references,
+  });
+
+  return {
+    code: 200,
+    message: 'success',
+    timeline: await getSavedTimeline(request, timelineId),
+  };
+};
+
 const updatePartialSavedTimeline = async (
   request: FrameworkRequest,
   timelineId: string,
@@ -459,19 +517,38 @@ const updatePartialSavedTimeline = async (
     timelineId
   );
 
-  return savedObjectsClient.update(
+  const {
+    transformedFields,
+    references,
+  } = timelineFieldsMigrator.extractFieldsToReferences<TimelineWithoutExternalRefs>({
+    data: timeline,
+    existingReferences: currentSavedTimeline.references,
+  });
+
+  const timelineUpdateAttributes = pickSavedTimeline(
+    null,
+    {
+      ...transformedFields,
+      dateRange: currentSavedTimeline.attributes.dateRange,
+    },
+    request.user
+  );
+
+  const updatedTimeline = await savedObjectsClient.update<TimelineWithoutExternalRefs>(
     timelineSavedObjectType,
     timelineId,
-    pickSavedTimeline(
-      null,
-      {
-        ...timeline,
-        dateRange: currentSavedTimeline.attributes.dateRange,
-      },
-      request.user
-    ),
-    { references: [{ ...defaultDataViewRef, id: timeline.dataViewId || DEFAULT_DATA_VIEW_ID }] }
+    timelineUpdateAttributes,
+    { references }
   );
+
+  const populatedTimeline = timelineFieldsMigrator.populateFieldsFromReferencesForPatch<TimelineWithoutExternalRefs>(
+    {
+      dataBeforeRequest: timelineUpdateAttributes,
+      dataReturnedFromRequest: updatedTimeline,
+    }
+  );
+
+  return populatedTimeline;
 };
 
 export const resetTimeline = async (
@@ -517,17 +594,21 @@ export const deleteTimeline = async (request: FrameworkRequest, timelineIds: str
 
 const getBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
-  const savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
+  const savedObject = await savedObjectsClient.get<TimelineWithoutExternalRefs>(
+    timelineSavedObjectType,
+    timelineId
+  );
 
-  return convertSavedObjectToSavedTimeline(savedObject);
+  const populatedTimeline = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
+
+  return convertSavedObjectToSavedTimeline(populatedTimeline);
 };
 
 const getSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
 
-  const savedObjectsClient = request.context.core.savedObjects.client;
-  const savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
-  const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
+  const timelineSaveObject = await getBasicSavedTimeline(request, timelineId);
+
   const timelineWithNotesAndPinnedEvents = await Promise.all([
     note.getNotesByTimelineId(request, timelineSaveObject.savedObjectId),
     pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineSaveObject.savedObjectId),
@@ -548,14 +629,18 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
     }`;
   }
 
-  const savedObjects = await savedObjectsClient.find(options);
+  const savedObjects = await savedObjectsClient.find<TimelineWithoutExternalRefs>(options);
+
   const timelinesWithNotesAndPinnedEvents = await Promise.all(
     savedObjects.saved_objects.map(async (savedObject) => {
-      const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
+      const migratedSO = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
+
+      const timelineSaveObject = convertSavedObjectToSavedTimeline(migratedSO);
+
       return Promise.all([
         note.getNotesByTimelineId(request, timelineSaveObject.savedObjectId),
         pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineSaveObject.savedObjectId),
-        Promise.resolve(timelineSaveObject),
+        timelineSaveObject,
       ]);
     })
   );
@@ -617,7 +702,7 @@ export const getSelectedTimelines = async (
   }
 
   const savedObjects = await Promise.resolve(
-    savedObjectsClient.bulkGet(
+    savedObjectsClient.bulkGet<TimelineWithoutExternalRefs>(
       exportedIds?.reduce(
         (acc, timelineId) => [...acc, { id: timelineId, type: timelineSavedObjectType }],
         [] as Array<{ id: string; type: string }>
@@ -630,12 +715,16 @@ export const getSelectedTimelines = async (
     errors: ExportTimelineNotFoundError[];
   } = savedObjects.saved_objects.reduce(
     (acc, savedObject) => {
-      return savedObject.error == null
-        ? {
-            errors: acc.errors,
-            timelines: [...acc.timelines, convertSavedObjectToSavedTimeline(savedObject)],
-          }
-        : { errors: [...acc.errors, savedObject.error], timelines: acc.timelines };
+      if (savedObject.error == null) {
+        const populatedTimeline = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
+
+        return {
+          errors: acc.errors,
+          timelines: [...acc.timelines, convertSavedObjectToSavedTimeline(populatedTimeline)],
+        };
+      }
+
+      return { errors: [...acc.errors, savedObject.error], timelines: acc.timelines };
     },
     {
       timelines: [] as TimelineSavedObject[],

@@ -47,7 +47,7 @@ export const createSourcererDataViewRoute = (
           context.core.elasticsearch.client.asInternalUser
         );
 
-        const allDataViews = await dataViewService.getIdsWithTitle();
+        let allDataViews = await dataViewService.getIdsWithTitle();
         const patternId = DEFAULT_DATA_VIEW_ID;
         const { patternList } = request.body;
         const siemDataView = allDataViews.find((v) => v.id === patternId);
@@ -60,7 +60,7 @@ export const createSourcererDataViewRoute = (
             title: patternListAsTitle,
             timeFieldName: DEFAULT_TIME_FIELD,
           });
-          // type thing here, should never happen
+          // ?? patternId -> type thing here, should never happen
           allDataViews.push({ ...defaultDataView, id: defaultDataView.id ?? patternId });
         } else {
           defaultDataView = { ...siemDataView, id: siemDataView.id ?? '' };
@@ -68,6 +68,10 @@ export const createSourcererDataViewRoute = (
             const wholeDataView = await dataViewService.get(defaultDataView.id);
             wholeDataView.title = patternListAsTitle;
             await dataViewService.updateSavedObject(wholeDataView);
+            // update the data view in allDataViews
+            allDataViews = allDataViews.map((v) =>
+              v.id === patternId ? { ...v, title: patternListAsTitle } : v
+            );
           }
         }
 
@@ -78,8 +82,10 @@ export const createSourcererDataViewRoute = (
           )
         );
         const activePatternLists = patternLists.map((pl, i) =>
-          pl.filter((pattern, j) => activePatternBools[i][j])
+          // also remove duplicates from active
+          pl.filter((pattern, j, self) => self.indexOf(pattern) === j && activePatternBools[i][j])
         );
+
         const kibanaDataViews = allDataViews.map((kip, i) => ({
           ...kip,
           patternList: activePatternLists[i],

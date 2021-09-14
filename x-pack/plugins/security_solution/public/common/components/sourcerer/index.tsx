@@ -57,7 +57,13 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const { patternList, selectablePatterns } = useMemo(() => {
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
     return theDataView != null
-      ? { patternList: theDataView.title.split(','), selectablePatterns: theDataView.patternList }
+      ? {
+          patternList: theDataView.title
+            .split(',')
+            // remove duplicates patterns from selector
+            .filter((pattern, i, self) => self.indexOf(pattern) === i),
+          selectablePatterns: theDataView.patternList,
+        }
       : { patternList: [], selectablePatterns: [] };
   }, [kibanaDataViews, dataViewId]);
 

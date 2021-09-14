@@ -36,6 +36,17 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
   }))
   .case(setSelectedDataView, (state, payload) => {
     const { id, eventType, ...rest } = payload;
+    const pattern = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
+    // TODO: Steph/sourcerer needs unit tests
+    const selectedPatterns =
+      rest.selectedPatterns != null && pattern != null
+        ? rest.selectedPatterns.filter(
+            // ensures all selected patterns are selectable
+            // and no patterns are duplicated
+            (value, index, self) =>
+              self.indexOf(value) === index && pattern.patternList.includes(value)
+          )
+        : [];
     return {
       ...state,
       sourcererScopes: {
@@ -43,7 +54,8 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
         [id]: {
           ...state.sourcererScopes[id],
           ...rest,
-          ...(isEmpty(payload.selectedPatterns)
+          selectedPatterns,
+          ...(isEmpty(selectedPatterns) || pattern == null
             ? defaultDataViewByEventType({ state, eventType })
             : {}),
         },

@@ -19,7 +19,8 @@ import {
 } from '../../../../../common/types/timeline';
 import { DEFAULT_DATA_VIEW_ID, defaultDataViewRef } from '../../../../../common/constants';
 
-export const TimelineSavedObjectWithDraftRuntimeType = intersection([
+// TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
+const TimelineSavedObjectWithDraftRuntime = intersection([
   type({
     id: string,
     version: string,
@@ -62,7 +63,7 @@ const getTimelineTypeAndStatus = (
 
 export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
   const timeline = pipe(
-    TimelineSavedObjectWithDraftRuntimeType.decode(savedObject),
+    TimelineSavedObjectWithDraftRuntime.decode(savedObject),
     map((savedTimeline) => {
       const attributes = {
         ...savedTimeline.attributes,
