@@ -6,7 +6,9 @@
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { licensingMock } from '../../../../licensing/server/mocks';
+import { securityMock } from '../../../../security/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
 
@@ -35,6 +37,8 @@ import { IndexGroup, ReindexSavedObject, ReindexStatus } from '../../../common/t
 import { credentialStoreFactory } from '../../lib/reindexing/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
 
+const logMock = loggingSystemMock.create().get();
+
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
  * to ensure they're wired up to the lib functions correctly. Business logic is tested
@@ -44,7 +48,7 @@ describe('reindex API', () => {
   let routeDependencies: any;
   let mockRouter: MockRouter;
 
-  const credentialStore = credentialStoreFactory();
+  const credentialStore = credentialStoreFactory(logMock);
   const worker = {
     includes: jest.fn(),
     forceRefresh: jest.fn(),
@@ -56,6 +60,7 @@ describe('reindex API', () => {
       credentialStore,
       router: mockRouter,
       licensing: licensingMock.createSetup(),
+      getSecurityPlugin: () => securityMock.createStart(),
     };
     registerReindexIndicesRoutes(routeDependencies, () => worker);
 
