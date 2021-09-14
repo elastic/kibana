@@ -873,4 +873,14 @@ export class VisualBuilderPageObject extends FtrService {
     const areas = (await this.getChartItems(chartData)) as DebugState['areas'];
     return areas?.[nth]?.lines.y1.points.map(({ x, y }) => [x, y]);
   }
+
+  public async getVisualizeError() {
+    const visError = await this.testSubjects.find(`visualization-error`);
+    const errorSpans = await visError.findAllByClassName('euiText--extraSmall');
+    return await errorSpans[0].getVisibleText();
+  }
+
+  public async checkInvalidAggComponentIsPresent() {
+    await this.testSubjects.existOrFail(`invalid_agg`);
+  }
 }
