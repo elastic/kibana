@@ -26,7 +26,9 @@ describe('getStateDefaults', () => {
         "columns": Array [
           "default_column",
         ],
+        "discoverViewMode": "discoverViewOptionDocument",
         "filters": undefined,
+        "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "index": "index-pattern-with-timefield-id",
         "interval": "auto",
@@ -54,7 +56,9 @@ describe('getStateDefaults', () => {
         "columns": Array [
           "default_column",
         ],
+        "discoverViewMode": "discoverViewOptionDocument",
         "filters": undefined,
+        "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "index": "the-index-pattern-id",
         "interval": "auto",

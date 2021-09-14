@@ -204,6 +204,10 @@ export function DiscoverSidebar({
     return result;
   }, [fields]);
 
+  const showFieldStats = useMemo(() => discoverViewMode === DISCOVER_VIEW_MODE.DOCUMENT_LEVEL, [
+    discoverViewMode,
+  ]);
+
   const calculateMultiFields = () => {
     if (!useNewFieldsApi || !fields) {
       return undefined;
@@ -405,6 +409,7 @@ export function DiscoverSidebar({
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
                                 onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                                showFieldStats={showFieldStats}
                               />
                             </li>
                           );
@@ -464,9 +469,7 @@ export function DiscoverSidebar({
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
                                 onDeleteField={canEditIndexPatternField ? deleteField : undefined}
-                                showFieldStats={
-                                  discoverViewMode === DISCOVER_VIEW_MODE.DOCUMENT_LEVEL
-                                }
+                                showFieldStats={showFieldStats}
                               />
                             </li>
                           );
@@ -495,7 +498,7 @@ export function DiscoverSidebar({
                             multiFields={multiFields?.get(field.name)}
                             onEditField={canEditIndexPatternField ? editField : undefined}
                             onDeleteField={canEditIndexPatternField ? deleteField : undefined}
-                            showFieldStats={discoverViewMode === DISCOVER_VIEW_MODE.DOCUMENT_LEVEL}
+                            showFieldStats={showFieldStats}
                           />
                         </li>
                       );
