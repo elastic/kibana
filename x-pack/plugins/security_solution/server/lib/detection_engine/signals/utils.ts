@@ -67,6 +67,7 @@ import {
   ML_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
   SIGNALS_ID,
+  THRESHOLD_RULE_TYPE_ID,
 } from '../../../../common/constants';
 
 interface SortExceptionsReturn {
@@ -1018,5 +1019,5 @@ export const ruleTypeMappings = {
   query: QUERY_RULE_TYPE_ID,
   saved_query: SIGNALS_ID,
   threat_match: INDICATOR_RULE_TYPE_ID,
-  threshold: SIGNALS_ID,
+  threshold: THRESHOLD_RULE_TYPE_ID,
 };
