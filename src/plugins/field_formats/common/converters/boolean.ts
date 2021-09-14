@@ -20,7 +20,7 @@ export class BoolFormat extends FieldFormat {
   });
   static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
 
-  textConvert: TextContextTypeConvert = (value) => {
+  textConvert: TextContextTypeConvert = (value: string | number | boolean) => {
     if (typeof value === 'string') {
       value = value.trim().toLowerCase();
     }
