@@ -135,9 +135,10 @@ export const transformFindAlerts = (
 
 export const transform = (
   alert: PartialAlert<RuleParams>,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
+  isRuleRegistryEnabled?: boolean
 ): Partial<RulesSchema> | null => {
-  if (isAlertType(alert)) {
+  if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
     return transformAlertToRule(
       alert,
       isRuleStatusSavedObjectType(ruleStatus) ? ruleStatus : undefined
@@ -150,9 +151,10 @@ export const transform = (
 export const transformOrBulkError = (
   ruleId: string,
   alert: PartialAlert<RuleParams>,
-  ruleStatus?: unknown
+  ruleStatus?: unknown,
+  isRuleRegistryEnabled?: boolean
 ): Partial<RulesSchema> | BulkError => {
-  if (isAlertType(alert)) {
+  if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
     if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
       return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
     } else {
@@ -170,9 +172,10 @@ export const transformOrBulkError = (
 export const transformOrImportError = (
   ruleId: string,
   alert: PartialAlert<RuleParams>,
-  existingImportSuccessError: ImportSuccessError
+  existingImportSuccessError: ImportSuccessError,
+  isRuleRegistryEnabled: boolean
 ): ImportSuccessError => {
-  if (isAlertType(alert)) {
+  if (isAlertType(isRuleRegistryEnabled, alert)) {
     return createSuccessObject(existingImportSuccessError);
   } else {
     return createImportErrorObject({

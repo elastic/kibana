@@ -33,13 +33,24 @@ const idToUrlMap = {
   SNAPSHOT_RESTORE_LOCATOR: 'snapshotAndRestoreUrl',
   DISCOVER_APP_LOCATOR: 'discoverUrl',
 };
+type IdKey = keyof typeof idToUrlMap;
+
+const stringifySearchParams = (params: Record<string, any>) => {
+  const stringifiedParams = Object.keys(params).reduce((list, key) => {
+    const value = typeof params[key] === 'object' ? JSON.stringify(params[key]) : params[key];
+
+    return { ...list, [key]: value };
+  }, {});
+
+  return new URLSearchParams(stringifiedParams).toString();
+};
 
 const shareMock = sharePluginMock.createSetupContract();
-shareMock.url.locators.get = (id) => ({
-  // @ts-expect-error This object is missing some properties that we're not using in the UI
+// @ts-expect-error This object is missing some properties that we're not using in the UI
+shareMock.url.locators.get = (id: IdKey) => ({
   useUrl: (): string | undefined => idToUrlMap[id],
-  // @ts-expect-error This object is missing some properties that we're not using in the UI
-  getUrl: (): string | undefined => idToUrlMap[id],
+  getUrl: (params: Record<string, any>): string | undefined =>
+    `${idToUrlMap[id]}?${stringifySearchParams(params)}`,
 });
 
 export const getAppContextMock = () => ({

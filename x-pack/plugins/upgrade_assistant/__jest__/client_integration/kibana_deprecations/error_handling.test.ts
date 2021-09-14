@@ -20,14 +20,32 @@ describe('Error handling', () => {
     server.restore();
   });
 
-  test('handles plugin error', async () => {
+  test('handles plugin errors', async () => {
     await act(async () => {
       kibanaDeprecationsServiceHelpers.setLoadDeprecations({
         deprecationService,
         response: [
           ...kibanaDeprecationsServiceHelpers.defaultMockedResponses.mockedKibanaDeprecations,
           {
-            domainId: 'failed_plugin_id',
+            domainId: 'failed_plugin_id_1',
+            title: 'Failed to fetch deprecations for "failed_plugin_id"',
+            message: `Failed to get deprecations info for plugin "failed_plugin_id".`,
+            level: 'fetch_error',
+            correctiveActions: {
+              manualSteps: ['Check Kibana server logs for error message.'],
+            },
+          },
+          {
+            domainId: 'failed_plugin_id_1',
+            title: 'Failed to fetch deprecations for "failed_plugin_id"',
+            message: `Failed to get deprecations info for plugin "failed_plugin_id".`,
+            level: 'fetch_error',
+            correctiveActions: {
+              manualSteps: ['Check Kibana server logs for error message.'],
+            },
+          },
+          {
+            domainId: 'failed_plugin_id_2',
             title: 'Failed to fetch deprecations for "failed_plugin_id"',
             message: `Failed to get deprecations info for plugin "failed_plugin_id".`,
             level: 'fetch_error',
@@ -53,7 +71,7 @@ describe('Error handling', () => {
 
     expect(exists('kibanaDeprecationErrors')).toBe(true);
     expect(find('kibanaDeprecationErrors').text()).toContain(
-      'Deprecation warnings may be incomplete'
+      'Failed to get deprecation issues for these plugins: failed_plugin_id_1, failed_plugin_id_2.'
     );
   });
 
@@ -78,6 +96,8 @@ describe('Error handling', () => {
     component.update();
 
     expect(exists('kibanaRequestError')).toBe(true);
-    expect(find('kibanaRequestError').text()).toContain('Could not retrieve Kibana deprecations');
+    expect(find('kibanaRequestError').text()).toContain(
+      'Could not retrieve Kibana deprecation issues'
+    );
   });
 });
