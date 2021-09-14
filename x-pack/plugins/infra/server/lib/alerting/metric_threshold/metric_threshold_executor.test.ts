@@ -165,7 +165,7 @@ describe('The metric threshold alert type', () => {
     const execute = (
       comparator: Comparator,
       threshold: number[],
-      groupBy: string = 'something',
+      groupBy: string[] = ['something'],
       metric?: string,
       state?: any
     ) =>
@@ -210,15 +210,15 @@ describe('The metric threshold alert type', () => {
     test('reports previous groups and the groupBy parameter in its state', async () => {
       const stateResult = await execute(Comparator.GT, [0.75]);
       expect(stateResult.groups).toEqual(expect.arrayContaining(['a', 'b']));
-      expect(stateResult.groupBy).toBe('something');
+      expect(stateResult.groupBy).toEqual(['something']);
     });
     test('persists previous groups that go missing, until the groupBy param changes', async () => {
-      const stateResult1 = await execute(Comparator.GT, [0.75], 'something', 'test.metric.2');
+      const stateResult1 = await execute(Comparator.GT, [0.75], ['something'], 'test.metric.2');
       expect(stateResult1.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
       const stateResult2 = await execute(
         Comparator.GT,
         [0.75],
-        'something',
+        ['something'],
         'test.metric.1',
         stateResult1
       );
@@ -226,7 +226,7 @@ describe('The metric threshold alert type', () => {
       const stateResult3 = await execute(
         Comparator.GT,
         [0.75],
-        'something-else',
+        ['something', 'something-else'],
         'test.metric.1',
         stateResult2
       );
