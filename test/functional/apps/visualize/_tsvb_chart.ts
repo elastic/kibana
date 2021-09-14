@@ -103,6 +103,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(kibanaIndexPatternModeValue).to.eql('32,212,254,720');
       });
 
+      it('should show error if we use parent pipeline aggregations in entire time range mode', async () => {
+        await visualBuilder.selectAggType('Max');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+        await visualBuilder.createNewAgg();
+        await visualBuilder.selectAggType('derivative', 1);
+        await visualBuilder.setFieldForAggregation('Max of machine.ram', 1);
+
+        const value = await visualBuilder.getMetricValue();
+
+        expect(value).to.eql('0');
+
+        await visualBuilder.clickPanelOptions('metric');
+        await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
+        await visualBuilder.clickDataTab('metric');
+        await visualBuilder.checkInvalidAggComponentIsPresent();
+        const error = await visualBuilder.getVisualizeError();
+
+        expect(error).to.eql(
+          'The aggregation derivative is not supported in entire_time_range mode'
+        );
+      });
+
       describe('Color rules', () => {
         beforeEach(async () => {
           await visualBuilder.selectAggType('Min');
@@ -162,6 +184,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickPanelOptions('gauge');
         await visualBuilder.checkSelectedDataTimerangeMode('Entire time range');
         await visualBuilder.clickDataTab('gauge');
+      });
+
+      it('should show error if we use parent pipeline aggregations in entire time range mode', async () => {
+        await visualBuilder.clickPanelOptions('gauge');
+        await visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await visualBuilder.clickDataTab('gauge');
+        await visualBuilder.selectAggType('Max');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+        await visualBuilder.createNewAgg();
+        await visualBuilder.selectAggType('derivative', 1);
+        await visualBuilder.setFieldForAggregation('Max of machine.ram', 1);
+
+        const value = await visualBuilder.getGaugeCount();
+
+        expect(value).to.eql('0');
+
+        await visualBuilder.clickPanelOptions('gauge');
+        await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
+        await visualBuilder.clickDataTab('gauge');
+        await visualBuilder.checkInvalidAggComponentIsPresent();
+        const error = await visualBuilder.getVisualizeError();
+
+        expect(error).to.eql(
+          'The aggregation derivative is not supported in entire_time_range mode'
+        );
       });
 
       it('should verify gauge label and count display', async () => {
@@ -294,6 +341,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(firstTopNBarStyle).to.contain('background-color: rgb(229, 255, 207);');
         expect(secondTopNBarStyle).to.contain('background-color: rgb(128, 224, 138);');
+      });
+
+      it('should show error if we use parent pipeline aggregations in entire time range mode', async () => {
+        await visualBuilder.selectAggType('Max');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+        await visualBuilder.createNewAgg();
+        await visualBuilder.selectAggType('derivative', 1);
+        await visualBuilder.setFieldForAggregation('Max of machine.ram', 1);
+
+        const value = await visualBuilder.getTopNCount();
+
+        expect(value).to.eql('0');
+
+        await visualBuilder.clickPanelOptions('topN');
+        await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
+        await visualBuilder.clickDataTab('topN');
+        await visualBuilder.checkInvalidAggComponentIsPresent();
+        const error = await visualBuilder.getVisualizeError();
+
+        expect(error).to.eql(
+          'The aggregation derivative is not supported in entire_time_range mode'
+        );
       });
 
       describe('Color rules', () => {

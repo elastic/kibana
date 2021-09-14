@@ -7,13 +7,12 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiTitle } from '@elastic/eui';
 import { AggRow } from './agg_row';
 import type { Metric } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
 
-interface UnsupportedAggProps {
+interface InvalidAggProps {
   disableDelete: boolean;
   model: Metric;
   siblings: Metric[];
@@ -22,7 +21,9 @@ interface UnsupportedAggProps {
   onDelete: () => void;
 }
 
-export function UnsupportedAgg(props: UnsupportedAggProps) {
+export const getInvalidAggComponent = (message: JSX.Element | string) => (
+  props: InvalidAggProps
+) => {
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -32,15 +33,9 @@ export function UnsupportedAgg(props: UnsupportedAggProps) {
       siblings={props.siblings}
       dragHandleProps={props.dragHandleProps}
     >
-      <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
-        <span>
-          <FormattedMessage
-            id="visTypeTimeseries.unsupportedAgg.aggIsNotSupportedDescription"
-            defaultMessage="The {modelType} aggregation is no longer supported."
-            values={{ modelType: <EuiCode>{props.model.type}</EuiCode> }}
-          />
-        </span>
+      <EuiTitle className="tvbAggRow__unavailable" size="xxxs" data-test-subj="invalid_agg">
+        <span>{message}</span>
       </EuiTitle>
     </AggRow>
   );
-}
+};
