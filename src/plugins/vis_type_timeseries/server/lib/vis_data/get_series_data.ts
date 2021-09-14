@@ -13,6 +13,8 @@ import { getAnnotations } from './get_annotations';
 import { handleResponseBody } from './series/handle_response_body';
 import { getSeriesRequestParams } from './series/get_request_params';
 import { getActiveSeries } from './helpers/get_active_series';
+import { isAggSupported } from './helpers/check_aggs';
+import { isEntireTimeRangeMode } from './helpers/get_timerange_mode';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
@@ -27,13 +29,16 @@ export async function getSeriesData(
   panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
+  const {
+    cachedIndexPatternFetcher,
+    searchStrategyRegistry,
+    indexPatternsService,
+    fieldFormatService,
+  } = services;
 
-  const strategy = await services.searchStrategyRegistry.getViableStrategy(
-    requestContext,
-    req,
-    panelIndex
-  );
+  const panelIndex = await cachedIndexPatternFetcher(panel.index_pattern);
+
+  const strategy = await searchStrategyRegistry.getViableStrategy(requestContext, req, panelIndex);
 
   if (!strategy) {
     throw new Error(
@@ -52,19 +57,30 @@ export async function getSeriesData(
   const handleError = handleErrorResponse(panel);
 
   try {
-    const bodiesPromises = getActiveSeries(panel).map((series) =>
-      getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services)
+    const bodiesPromises = getActiveSeries(panel).map((series) => {
+      if (isEntireTimeRangeMode(panel, series)) {
+        isAggSupported(series.metrics);
+      }
+
+      return getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services);
+    });
+
+    const fieldFetchServices = {
+      indexPatternsService,
+      cachedIndexPatternFetcher,
+      searchStrategy,
+      capabilities,
+    };
+
+    const handleResponseBodyFn = handleResponseBody(
+      panel,
+      req,
+      fieldFetchServices,
+      fieldFormatService
     );
 
     const searches = await Promise.all(bodiesPromises);
     const data = await searchStrategy.search(requestContext, req, searches);
-
-    const handleResponseBodyFn = handleResponseBody(panel, req, {
-      indexPatternsService: services.indexPatternsService,
-      cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
-      searchStrategy,
-      capabilities,
-    });
 
     const series = await Promise.all(
       data.map(
