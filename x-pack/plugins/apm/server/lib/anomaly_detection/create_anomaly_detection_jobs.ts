@@ -11,13 +11,8 @@ import { snakeCase } from 'lodash';
 import Boom from '@hapi/boom';
 import moment from 'moment';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Setup } from '../helpers/setup_request';
-import {
-  TRANSACTION_DURATION,
-  PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
@@ -50,7 +45,7 @@ export async function createAnomalyDetectionJobs(
       `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`
     );
 
-    const indexPatternName = indices['apm_oss.transactionIndices'];
+    const indexPatternName = indices['apm_oss.metricsIndices'];
     const responses = await Promise.all(
       uniqueMlJobEnvs.map((environment) =>
         createAnomalyDetectionJob({ ml, environment, indexPatternName })
@@ -91,11 +86,7 @@ async function createAnomalyDetectionJob({
       start: moment().subtract(4, 'weeks').valueOf(),
       query: {
         bool: {
-          filter: [
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-            { exists: { field: TRANSACTION_DURATION } },
-            ...environmentQuery(environment),
-          ],
+          filter: [...environmentQuery(environment)],
         },
       },
       startDatafeed: true,
@@ -105,7 +96,7 @@ async function createAnomalyDetectionJob({
             job_tags: {
               environment,
               // identifies this as an APM ML job & facilitates future migrations
-              apm_ml_version: 2,
+              apm_ml_version: 3,
             },
           },
         },
