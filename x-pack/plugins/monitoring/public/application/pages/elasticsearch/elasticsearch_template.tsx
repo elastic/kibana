@@ -25,7 +25,6 @@ export const ElasticsearchTemplate: React.FC<ElasticsearchTemplateProps> = ({
       label: i18n.translate('xpack.monitoring.esNavigation.overviewLinkText', {
         defaultMessage: 'Overview',
       }),
-      disabled: false,
       route: '/elasticsearch',
     },
     {
@@ -33,7 +32,6 @@ export const ElasticsearchTemplate: React.FC<ElasticsearchTemplateProps> = ({
       label: i18n.translate('xpack.monitoring.esNavigation.nodesLinkText', {
         defaultMessage: 'Nodes',
       }),
-      disabled: false,
       route: '/elasticsearch/nodes',
     },
     {
@@ -41,7 +39,6 @@ export const ElasticsearchTemplate: React.FC<ElasticsearchTemplateProps> = ({
       label: i18n.translate('xpack.monitoring.esNavigation.indicesLinkText', {
         defaultMessage: 'Indices',
       }),
-      disabled: false,
       route: '/elasticsearch/indices',
     },
   ];
@@ -52,7 +49,6 @@ export const ElasticsearchTemplate: React.FC<ElasticsearchTemplateProps> = ({
       label: i18n.translate('xpack.monitoring.esNavigation.jobsLinkText', {
         defaultMessage: 'Machine learning jobs',
       }),
-      disabled: false,
       route: '/elasticsearch/ml_jobs',
     });
   }
@@ -63,7 +59,6 @@ export const ElasticsearchTemplate: React.FC<ElasticsearchTemplateProps> = ({
       label: i18n.translate('xpack.monitoring.esNavigation.ccrLinkText', {
         defaultMessage: 'CCR',
       }),
-      disabled: false,
       route: '/elasticsearch/ccr',
     });
   }

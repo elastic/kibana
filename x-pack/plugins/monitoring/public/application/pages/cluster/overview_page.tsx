@@ -51,7 +51,6 @@ export const ClusterOverview: React.FC<{}> = () => {
       {
         id: 'clusterName',
         label: clusters[0].cluster_name,
-        disabled: false,
         testSubj: 'clusterName',
         route: '/overview',
       },

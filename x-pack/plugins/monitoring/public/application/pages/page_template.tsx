@@ -18,7 +18,6 @@ import { SetupModeFeature } from '../../../common/enums';
 export interface TabMenuItem {
   id: string;
   label: string;
-  disabled: boolean;
   testSubj?: string;
   route: string;
 }
