@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const fieldEditor = getService('fieldEditor');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -32,11 +33,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('allows adding custom label to existing fields', async function () {
