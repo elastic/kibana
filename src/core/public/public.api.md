@@ -1254,6 +1254,20 @@ export interface SavedObjectsBulkCreateOptions {
 }
 
 // @public (undocumented)
+export interface SavedObjectsBulkResolveObject {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkResolveResponse<T = unknown> {
+    // (undocumented)
+    resolved_objects: Array<SavedObjectsResolveResponse<T>>;
+}
+
+// @public (undocumented)
 export interface SavedObjectsBulkUpdateObject<T = unknown> {
     // (undocumented)
     attributes: T;
@@ -1279,6 +1293,10 @@ export class SavedObjectsClient {
     constructor(http: HttpSetup);
     bulkCreate: (objects?: SavedObjectsBulkCreateObject[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>;
     bulkGet: (objects?: Array<{
+        id: string;
+        type: string;
+    }>) => Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkResolve: (objects?: Array<{
         id: string;
         type: string;
     }>) => Promise<SavedObjectsBatchResponse<unknown>>;

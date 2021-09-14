@@ -52,6 +52,8 @@ import {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
   SavedObjectsResolveResponse,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -1065,6 +1067,49 @@ export class SavedObjectsRepository {
         return getSavedObjectFromSource(this._registry, type, id, doc);
       }),
     };
+  }
+
+  /**
+   * Resolves an array of objects by id, using any legacy URL aliases if they exists
+   *
+   * @param {array} objects - an array of objects containing id, type
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
+   * @returns {promise} - { resolved_objects: [{ saved_object, outcome }] }
+   * @example
+   *
+   * bulkResolve([
+   *   { id: 'one', type: 'config' },
+   *   { id: 'foo', type: 'index-pattern' }
+   * ])
+   */
+  async bulkResolve<T = unknown>(
+    objects: SavedObjectsBulkResolveObject[],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsBulkResolveResponse<T>> {
+    const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
+      registry: this._registry,
+      allowedTypes: this._allowedTypes,
+      client: this.client,
+      serializer: this._serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      incrementCounterInternal: this.incrementCounterInternal.bind(this),
+      objects,
+      options,
+    });
+    const resolvedObjects = bulkResults.map<SavedObjectsResolveResponse<T>>((result) => {
+      // extract payloads from saved object errors
+      if ((result as InternalBulkResolveError).error) {
+        const errorResult = result as InternalBulkResolveError;
+        const { type, id, error } = errorResult;
+        return {
+          saved_object: ({ type, id, error: errorContent(error) } as unknown) as SavedObject<T>,
+          outcome: 'exactMatch',
+        };
+      }
+      return result as SavedObjectsResolveResponse<T>;
+    });
+    return { resolved_objects: resolvedObjects };
   }
 
   /**

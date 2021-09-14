@@ -330,6 +330,14 @@ export interface SavedObjectsBulkResolveObject {
  *
  * @public
  */
+export interface SavedObjectsBulkResolveResponse<T = unknown> {
+  resolved_objects: Array<SavedObjectsResolveResponse<T>>;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsResolveResponse<T = unknown> {
   /**
    * The saved object that was found.
@@ -510,6 +518,24 @@ export class SavedObjectsClient {
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T>> {
     return await this._repository.get(type, id, options);
+  }
+
+  /**
+   * Resolves an array of objects by id, using any legacy URL aliases if they exists
+   *
+   * @param objects - an array of objects containing id, type
+   * @example
+   *
+   * bulkResolve([
+   *   { id: 'one', type: 'config' },
+   *   { id: 'foo', type: 'index-pattern' }
+   * ])
+   */
+  async bulkResolve<T = unknown>(
+    objects: SavedObjectsBulkResolveObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsBulkResolveResponse<T>> {
+    return await this._repository.bulkResolve(objects, options);
   }
 
   /**

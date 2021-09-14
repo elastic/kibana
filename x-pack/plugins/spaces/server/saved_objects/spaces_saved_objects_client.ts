@@ -13,6 +13,7 @@ import type {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
+  SavedObjectsBulkResolveObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
@@ -305,6 +306,18 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.get<T>(type, id, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  public async bulkResolve<T = unknown>(
+    objects: SavedObjectsBulkResolveObject[],
+    options: SavedObjectsBaseOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+
+    return await this.client.bulkResolve<T>(objects, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });

@@ -9,10 +9,10 @@ import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_objec
 import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  resolveTestSuiteFactory,
+  bulkResolveTestSuiteFactory,
   TEST_CASES as CASES,
-  ResolveTestDefinition,
-} from '../../common/suites/resolve';
+  BulkResolveTestDefinition,
+} from '../../common/suites/bulk_resolve';
 
 const { fail400, fail404 } = testCaseFailures;
 
@@ -35,23 +35,23 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { addTests, createTestDefinitions } = resolveTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = bulkResolveTestSuiteFactory(esArchiver, supertest);
   const createTests = () => {
     const { normalTypes, hiddenType, allTypes } = createTestCases();
     return {
       unauthorized: createTestDefinitions(allTypes, true),
       authorized: [
-        createTestDefinitions(normalTypes, false),
+        createTestDefinitions(normalTypes, false, { singleRequest: true }),
         createTestDefinitions(hiddenType, true),
       ].flat(),
-      superuser: createTestDefinitions(allTypes, false),
+      superuser: createTestDefinitions(allTypes, false, { singleRequest: true }),
     };
   };
 
-  describe('_resolve', () => {
+  describe('_bulk_resolve', () => {
     getTestScenarios().security.forEach(({ users }) => {
       const { unauthorized, authorized, superuser } = createTests();
-      const _addTests = (user: TestUser, tests: ResolveTestDefinition[]) => {
+      const _addTests = (user: TestUser, tests: BulkResolveTestDefinition[]) => {
         addTests(user.description, { user, tests });
       };
 

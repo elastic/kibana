@@ -8,7 +8,7 @@
 import { SPACES } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { resolveTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/resolve';
+import { bulkResolveTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/bulk_resolve';
 
 const {
   SPACE_1: { spaceId: SPACE_1_ID },
@@ -33,13 +33,13 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const { addTests, createTestDefinitions } = resolveTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = bulkResolveTestSuiteFactory(esArchiver, supertest);
   const createTests = (spaceId: string) => {
     const testCases = createTestCases(spaceId);
-    return createTestDefinitions(testCases, false, { spaceId });
+    return createTestDefinitions(testCases, false, { spaceId, singleRequest: true });
   };
 
-  describe('_resolve', () => {
+  describe('_bulk_resolve', () => {
     getTestScenarios().spaces.forEach(({ spaceId }) => {
       const tests = createTests(spaceId);
       addTests(`within the ${spaceId} space`, { spaceId, tests });

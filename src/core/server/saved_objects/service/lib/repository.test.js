@@ -1283,6 +1283,59 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
+  describe('#bulkResolve', () => {
+    afterEach(() => {
+      mockInternalBulkResolve.mockReset();
+    });
+
+    it('passes arguments to the internalBulkResolve module and returns the expected results', async () => {
+      mockInternalBulkResolve.mockResolvedValue({
+        resolved_objects: [
+          { saved_object: 'mock-object', outcome: 'exactMatch' },
+          {
+            type: 'obj-type',
+            id: 'obj-id-2',
+            error: SavedObjectsErrorHelpers.createGenericNotFoundError('obj-type', 'obj-id-2'),
+          },
+        ],
+      });
+
+      const objects = [
+        { type: 'obj-type', id: 'obj-id-1' },
+        { type: 'obj-type', id: 'obj-id-2' },
+      ];
+      await expect(savedObjectsRepository.bulkResolve(objects)).resolves.toEqual({
+        resolved_objects: [
+          {
+            saved_object: 'mock-object',
+            outcome: 'exactMatch',
+          },
+          {
+            saved_object: {
+              type: 'obj-type',
+              id: 'obj-id-2',
+              error: {
+                error: 'Not Found',
+                message: 'Saved object [obj-type/obj-id-2] not found',
+                statusCode: 404,
+              },
+            },
+            outcome: 'exactMatch',
+          },
+        ],
+      });
+      expect(mockInternalBulkResolve).toHaveBeenCalledTimes(1);
+      expect(mockInternalBulkResolve).toHaveBeenCalledWith(expect.objectContaining({ objects }));
+    });
+
+    it('throws when internalBulkResolve throws', async () => {
+      const error = new Error('Oh no!');
+      mockInternalBulkResolve.mockRejectedValue(error);
+
+      await expect(savedObjectsRepository.resolve()).rejects.toEqual(error);
+    });
+  });
+
   describe('#bulkUpdate', () => {
     const obj1 = {
       type: 'config',

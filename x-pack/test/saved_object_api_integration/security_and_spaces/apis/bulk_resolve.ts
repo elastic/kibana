@@ -10,10 +10,10 @@ import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_objec
 import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  resolveTestSuiteFactory,
+  bulkResolveTestSuiteFactory,
   TEST_CASES as CASES,
-  ResolveTestDefinition,
-} from '../../common/suites/resolve';
+  BulkResolveTestDefinition,
+} from '../../common/suites/bulk_resolve';
 
 const {
   SPACE_1: { spaceId: SPACE_1_ID },
@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { addTests, createTestDefinitions } = resolveTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = bulkResolveTestSuiteFactory(esArchiver, supertest);
   const createTests = (spaceId: string) => {
     const { normalTypes, hiddenType, allTypes } = createTestCases(spaceId);
     // use singleRequest to reduce execution time and/or test combined cases
@@ -56,11 +56,11 @@ export default function ({ getService }: FtrProviderContext) {
     };
   };
 
-  describe('_resolve', () => {
+  describe('_bulk_resolve', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
       const { unauthorized, authorized, superuser } = createTests(spaceId);
-      const _addTests = (user: TestUser, tests: ResolveTestDefinition[]) => {
+      const _addTests = (user: TestUser, tests: BulkResolveTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
 
