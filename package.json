@@ -389,7 +389,7 @@
     "safe-squel": "^5.12.5",
     "seedrandom": "^3.0.5",
     "semver": "^7.3.2",
-    "set-value": "^3.0.2",
+    "set-value": "^4.1.0",
     "source-map-support": "^0.5.19",
     "stats-lite": "^2.2.0",
     "strip-ansi": "^6.0.0",
