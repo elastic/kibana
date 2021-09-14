@@ -36,7 +36,6 @@
           "siem-ui-timeline-pinned-event": "20638091112f0e14f0e443d512301c29",
           "space": "c5ca8acafa0beaa4d08d014a97b6bc6b",
           "telemetry": "e1c8bc94e443aefd9458932cc0697a4d",
-          "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
           "type": "2f4316de49999235636386fe51dc06c1",
           "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
           "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
@@ -1119,47 +1118,6 @@
           "properties": {
             "enabled": {
               "type": "boolean"
-            }
-          }
-        },
-        "timelion-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timelion_chart_height": {
-              "type": "integer"
-            },
-            "timelion_columns": {
-              "type": "integer"
-            },
-            "timelion_interval": {
-              "type": "keyword"
-            },
-            "timelion_other_interval": {
-              "type": "keyword"
-            },
-            "timelion_rows": {
-              "type": "integer"
-            },
-            "timelion_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
             }
           }
         },

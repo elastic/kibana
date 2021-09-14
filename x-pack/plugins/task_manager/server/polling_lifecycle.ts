@@ -126,6 +126,7 @@ export class TaskPollingLifecycle {
     this.taskClaiming = new TaskClaiming({
       taskStore,
       maxAttempts: config.max_attempts,
+      excludedTaskTypes: config.unsafe.exclude_task_types,
       definitions,
       logger: this.logger,
       getCapacity: (taskType?: string) =>
