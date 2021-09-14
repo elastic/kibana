@@ -13,6 +13,7 @@ import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common'
 
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import type { LatencyCorrelationsParams } from '../../../common/search_strategies/latency_correlations/types';
+import type { SearchStrategyClientParams } from '../../../common/search_strategies/types';
 
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
@@ -124,7 +125,9 @@ describe('APM Correlations search strategy', () => {
     let mockGetApmIndicesMock: jest.Mock;
     let mockDeps: SearchStrategyDependencies;
     let params: Required<
-      IKibanaSearchRequest<LatencyCorrelationsParams>
+      IKibanaSearchRequest<
+        LatencyCorrelationsParams & SearchStrategyClientParams
+      >
     >['params'];
 
     beforeEach(() => {
