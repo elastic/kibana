@@ -34,13 +34,7 @@ import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { ControlGroupContainer } from '../embeddable/control_group_container';
 import { PresentationOverlaysService } from '../../../../services/overlays';
 import { toMountPoint } from '../../../../../../kibana_react/public';
-import { ControlWidth } from '../control_group_constants';
-
-export interface InputControlMeta {
-  id: string;
-  width: ControlWidth;
-  title: string;
-}
+import { ControlWidth } from '../../types';
 
 interface ControlGroupProps {
   openFlyout: PresentationOverlaysService['openFlyout'];
@@ -72,8 +66,6 @@ export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroup
     );
     return () => subscription.unsubscribe();
   }, [controlGroupContainer]);
-
-  // const [controlStyle, setControlStyle] = useState<ControlStyle>('oneLine');
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
@@ -121,13 +113,13 @@ export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroup
               >
                 {controlIds.map((controlId, index) => (
                   <SortableControl
-                    onEdit={() => openFlyout(toMountPoint(<div>TEST EDITING {controlId}</div>))}
+                    onEdit={() => controlGroupContainer.editControl(controlId)}
                     onRemove={() => controlGroupContainer.removeEmbeddable(controlId)}
                     dragInfo={{ index, draggingIndex }}
                     container={controlGroupContainer}
-                    controlStyle={'oneLine'}
+                    controlStyle={controlGroupContainer.getInput().controlStyle}
                     embeddableId={controlId}
-                    width={'auto'}
+                    width={controlGroupContainer.getInput().panels[controlId].width}
                     key={controlId}
                   />
                 ))}

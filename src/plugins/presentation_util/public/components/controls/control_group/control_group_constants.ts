@@ -6,7 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { ControlGroupStrings } from './control_group_strings';
+
 export const CONTROL_GROUP_TYPE = 'control_group';
 
-export type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
-export type ControlStyle = 'twoLine' | 'oneLine';
+export const widthOptions = [
+  {
+    id: `auto`,
+    label: ControlGroupStrings.management.controlWidth.getAutoWidthTitle(),
+  },
+  {
+    id: `small`,
+    label: ControlGroupStrings.management.controlWidth.getSmallWidthTitle(),
+  },
+  {
+    id: `medium`,
+    label: ControlGroupStrings.management.controlWidth.getMediumWidthTitle(),
+  },
+  {
+    id: `large`,
+    label: ControlGroupStrings.management.controlWidth.getLargeWidthTitle(),
+  },
+];

@@ -17,7 +17,13 @@ import { esFilters } from '../../../../../../data/public';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
 import { Embeddable } from '../../../../../../embeddable/public';
-import { InputControlInput, InputControlOutput } from '../../types';
+import {
+  GetControlEditorProps,
+  IEditableControlEmbeddable,
+  InputControlInput,
+  InputControlOutput,
+} from '../../types';
+import { OptionsListEditor } from './options_list_editor';
 
 const toggleAvailableOptions = (
   indices: number[],
@@ -50,6 +56,9 @@ interface OptionsListDataFetchProps {
   timeRange?: InputControlInput['timeRange'];
 }
 
+export type OptionsListIndexPatternFetcher = () => Promise<string[]>; // TODO: use the proper types here.
+export type OptionsListFieldFetcher = (indexPattern: string) => Promise<string[]>; // TODO: use the proper types here.
+
 export type OptionsListDataFetcher = (
   props: OptionsListDataFetchProps
 ) => Promise<EuiSelectableOption[]>;
@@ -61,14 +70,11 @@ export interface OptionsListEmbeddableInput extends InputControlInput {
   singleSelect?: boolean;
   defaultSelections?: string[];
 }
-export class OptionsListEmbeddable extends Embeddable<
-  OptionsListEmbeddableInput,
-  InputControlOutput
-> {
+export class OptionsListEmbeddable
+  extends Embeddable<OptionsListEmbeddableInput, InputControlOutput>
+  implements IEditableControlEmbeddable<OptionsListEmbeddableInput> {
   public readonly type = OPTIONS_LIST_CONTROL;
-
   private node?: HTMLElement;
-  private fetchData: OptionsListDataFetcher;
 
   // internal state for this input control.
   private selectedOptions: Set<string>;
@@ -87,10 +93,14 @@ export class OptionsListEmbeddable extends Embeddable<
   constructor(
     input: OptionsListEmbeddableInput,
     output: InputControlOutput,
-    fetchData: OptionsListDataFetcher
+    private fetchIndexPatterns: OptionsListIndexPatternFetcher,
+    private fetchFields: OptionsListFieldFetcher,
+    private fetchData: OptionsListDataFetcher
   ) {
     super(input, output);
     this.fetchData = fetchData;
+    this.fetchIndexPatterns = fetchIndexPatterns;
+    this.fetchFields = fetchFields;
 
     // populate default selections from input
     this.selectedOptions = new Set<string>(input.defaultSelections ?? []);
@@ -203,6 +213,16 @@ export class OptionsListEmbeddable extends Embeddable<
         componentStateSubject={this.componentStateSubject$}
       />,
       node
+    );
+  };
+
+  public getControlEditor = ({ onChange }: GetControlEditorProps<OptionsListEmbeddableInput>) => {
+    return (
+      <OptionsListEditor
+        onChange={onChange}
+        fetchFields={this.fetchFields}
+        fetchIndexPatterns={this.fetchIndexPatterns}
+      />
     );
   };
 }

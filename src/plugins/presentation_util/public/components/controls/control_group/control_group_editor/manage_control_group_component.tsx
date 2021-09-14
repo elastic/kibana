@@ -24,25 +24,6 @@ import {
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlStyle, ControlWidth, InputControlMeta } from '../component/control_group_component';
 
-export const widthOptions = [
-  {
-    id: `auto`,
-    label: ControlGroupStrings.management.controlWidth.getAutoWidthTitle(),
-  },
-  {
-    id: `small`,
-    label: ControlGroupStrings.management.controlWidth.getSmallWidthTitle(),
-  },
-  {
-    id: `medium`,
-    label: ControlGroupStrings.management.controlWidth.getMediumWidthTitle(),
-  },
-  {
-    id: `large`,
-    label: ControlGroupStrings.management.controlWidth.getLargeWidthTitle(),
-  },
-];
-
 interface ManageControlGroupProps {
   controlStyle: ControlStyle;
   controlMeta: InputControlMeta[];

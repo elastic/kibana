@@ -15,7 +15,6 @@ import {
   IEmbeddable,
   PanelState,
 } from '../../../../embeddable/public';
-import { ControlWidth } from './control_group/control_group_constants';
 
 export type InputControlFactory = EmbeddableFactory<
   InputControlInput,
@@ -43,11 +42,27 @@ export type InputControlEmbeddable<
   TInputControlEmbeddableOutput extends InputControlOutput = InputControlOutput
 > = IEmbeddable<TInputControlEmbeddableInput, TInputControlEmbeddableOutput>;
 
+export interface GetControlEditorProps<T extends InputControlInput = InputControlInput> {
+  onChange: (partial: Partial<T>) => void;
+}
+
+export type GetControlEditor<T extends InputControlInput = InputControlInput> = (
+  props: GetControlEditorProps<T>
+) => JSX.Element;
+
+export interface IEditableControlEmbeddable<T extends InputControlInput = InputControlInput>
+  extends InputControlEmbeddable {
+  getControlEditor: GetControlEditor<T>;
+}
+
 export interface ControlPanelState<TEmbeddableInput extends InputControlInput = InputControlInput>
   extends PanelState<TEmbeddableInput> {
   order: number;
   width: ControlWidth;
 }
+
+export type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
+export type ControlStyle = 'twoLine' | 'oneLine';
 
 export interface ControlGroupInput
   extends EmbeddableInput,
@@ -57,6 +72,7 @@ export interface ControlGroupInput
     useQuery: boolean;
     useTimerange: boolean;
   };
+  controlStyle: ControlStyle;
   panels: {
     [panelId: string]: ControlPanelState;
   };

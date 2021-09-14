@@ -19,6 +19,20 @@ export const ControlGroupStrings = {
         defaultMessage: 'Remove control',
       }),
   },
+  manageControl: {
+    getFlyoutTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.flyoutTitle', {
+        defaultMessage: 'Manage control',
+      }),
+    getTitleInputTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.titleInputTitle', {
+        defaultMessage: 'Title',
+      }),
+    getWidthInputTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.widthInputTitle', {
+        defaultMessage: 'Control width',
+      }),
+  },
   management: {
     getManageButtonTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.buttonTitle', {

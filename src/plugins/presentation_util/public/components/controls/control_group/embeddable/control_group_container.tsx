@@ -21,9 +21,12 @@ import {
   InputControlInput,
   InputControlOutput,
   ControlPanelState,
+  IEditableControlEmbeddable,
 } from '../../types';
 import { ControlsService } from '../../controlsService';
 import { PresentationOverlaysService } from '../../../../services/overlays';
+import { toMountPoint } from '../../../../../../kibana_react/public';
+import { ManageControlComponent } from '../control_group_editor/manage_control';
 
 export class ControlGroupContainer extends Container<InputControlInput, ControlGroupInput> {
   public readonly type = CONTROL_GROUP_TYPE;
@@ -46,6 +49,7 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
     const panelState = super.createNewPanelState(factory, partial);
     return {
       order: 1,
+      width: 'auto',
       ...panelState,
     } as ControlPanelState<TEmbeddableInput>;
   }
@@ -69,6 +73,36 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
       const explicitInput = await factory.getExplicitInput();
       await this.addNewEmbeddable(type, explicitInput);
     }
+  };
+
+  public editControl = async (embeddableId: string) => {
+    const panel = this.getInput().panels[embeddableId];
+    const embeddable = (await this.untilEmbeddableLoaded(
+      embeddableId
+    )) as IEditableControlEmbeddable;
+
+    const flyoutInstance = this.openFlyout(
+      toMountPoint(
+        <ManageControlComponent
+          panel={panel}
+          title={embeddable.getTitle()}
+          controlEditor={embeddable.getControlEditor?.({
+            onChange: (partialInput) => embeddable.updateInput(partialInput),
+          })}
+          onClose={() => flyoutInstance.close()}
+          removeControl={() => this.removeEmbeddable(embeddableId)}
+          updateTitle={(newTitle) => embeddable.updateInput({ title: newTitle })}
+          updatePanel={(partialPanel) =>
+            this.updateInput({
+              panels: {
+                ...this.getInput().panels,
+                [embeddableId]: { ...this.getInput().panels[embeddableId], ...partialPanel },
+              },
+            })
+          }
+        />
+      )
+    );
   };
 
   public render(dom: HTMLElement) {

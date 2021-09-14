@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
   EuiButtonIcon,
@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import { ControlGroupContainer } from '../control_group/embeddable/control_group_container';
 import { ControlGroupStrings } from '../control_group/control_group_strings';
-import { ControlStyle } from '../control_group/control_group_constants';
 import { useChildEmbeddable } from '../hooks/use_child_embeddable';
+import { ControlStyle } from '../types';
 
 export interface ControlFrameProps {
   container: ControlGroupContainer;
@@ -42,12 +42,16 @@ export const ControlFrame = ({
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const embeddable = useChildEmbeddable({ container, embeddableId });
 
+  const [title, setTitle] = useState<string>();
+
   const usingTwoLineLayout = controlStyle === 'twoLine';
 
   useEffect(() => {
     if (embeddableRoot.current && embeddable) {
       embeddable.render(embeddableRoot.current);
     }
+    const subscription = embeddable?.getInput$().subscribe((newInput) => setTitle(newInput.title));
+    return () => subscription?.unsubscribe();
   }, [embeddable, embeddableRoot]);
 
   const floatingActions = (
@@ -84,7 +88,7 @@ export const ControlFrame = ({
         <>
           {customPrepend ?? null}
           {usingTwoLineLayout ? undefined : (
-            <EuiFormLabel htmlFor={embeddableId}>{embeddable?.getInput().title}</EuiFormLabel>
+            <EuiFormLabel htmlFor={embeddableId}>{title}</EuiFormLabel>
           )}
         </>
       }
@@ -103,7 +107,7 @@ export const ControlFrame = ({
   return (
     <>
       {enableActions && floatingActions}
-      <EuiFormRow fullWidth label={usingTwoLineLayout ? embeddable?.getInput().title : undefined}>
+      <EuiFormRow fullWidth label={usingTwoLineLayout ? title : undefined}>
         {form}
       </EuiFormRow>
     </>

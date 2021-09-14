@@ -14,6 +14,8 @@ import {
   OptionsListDataFetcher,
   OptionsListEmbeddable,
   OptionsListEmbeddableInput,
+  OptionsListFieldFetcher,
+  OptionsListIndexPatternFetcher,
   OPTIONS_LIST_CONTROL,
 } from './options_list_embeddable';
 
@@ -22,14 +24,26 @@ export class OptionsListEmbeddableFactory implements EmbeddableFactoryDefinition
 
   constructor(
     private fetchData: OptionsListDataFetcher,
+    private fetchIndexPatterns: OptionsListIndexPatternFetcher,
+    private fetchFields: OptionsListFieldFetcher,
     private openFlyout: PresentationOverlaysService['openFlyout']
   ) {
-    this.fetchData = fetchData;
+    this.fetchIndexPatterns = fetchIndexPatterns;
+    this.fetchFields = fetchFields;
     this.openFlyout = openFlyout;
+    this.fetchData = fetchData;
   }
 
   public create(initialInput: OptionsListEmbeddableInput) {
-    return Promise.resolve(new OptionsListEmbeddable(initialInput, {}, this.fetchData));
+    return Promise.resolve(
+      new OptionsListEmbeddable(
+        initialInput,
+        {},
+        this.fetchIndexPatterns,
+        this.fetchFields,
+        this.fetchData
+      )
+    );
   }
 
   public async getExplicitInput(): Promise<Omit<OptionsListEmbeddableInput, 'id'>> {

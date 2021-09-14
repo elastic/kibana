@@ -14,63 +14,126 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  EuiFlyoutHeader,
+  EuiButtonGroup,
+  EuiFlyoutBody,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonGroup,
-  EuiButtonIcon,
-  EuiFlyout,
-  EuiFlyoutHeader,
   EuiTitle,
-  EuiFlyoutBody,
+  EuiFieldText,
+  EuiFlyoutFooter,
+  EuiButton,
+  EuiFormRow,
+  EuiForm,
+  EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
+
 import { ControlGroupStrings } from '../control_group_strings';
-import { InputControlMeta, ControlWidth } from '../component/control_group_component';
-import { widthOptions } from './manage_control_group_component';
+import { widthOptions } from '../control_group_constants';
+import { ControlPanelState, ControlWidth } from '../../types';
 
 interface ManageControlProps {
+  title?: string;
   onClose: () => void;
-  controlMeta: InputControlMeta;
-  setControlMeta: React.Dispatch<React.SetStateAction<InputControlMeta[]>>;
-  index: number;
+  panel: ControlPanelState;
+  removeControl: () => void;
+  controlEditor?: JSX.Element;
+  updateTitle: (title: string) => void;
+  updatePanel: (partial: Partial<ControlPanelState>) => void;
 }
 
 export const ManageControlComponent = ({
-  controlMeta,
-  setControlMeta,
+  controlEditor,
+  removeControl,
+  updateTitle,
+  updatePanel,
   onClose,
-  index,
+  title,
+  panel,
 }: ManageControlProps) => {
-  const { title, width } = controlMeta;
+  const [currentTitle, setCurrentTitle] = useState(title);
+  const [currentWidth, setCurrentWidth] = useState(panel.width);
+
   return (
-    <EuiFlyout ownFocus onClose={onClose} aria-labelledby="flyoutTitle">
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="flyoutTitle">Edit {title}</h2>
+          <h2 id="flyoutTitle">{ControlGroupStrings.manageControl.getFlyoutTitle()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem grow={false}>
+        <EuiForm>
+          <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
+            <EuiFieldText
+              placeholder="Placeholder text"
+              value={currentTitle}
+              onChange={(e) => {
+                updateTitle(e.target.value);
+                setCurrentTitle(e.target.value);
+              }}
+              aria-label="Use aria labels when no actual label is in use"
+            />
+          </EuiFormRow>
+          <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
             <EuiButtonGroup
               buttonSize="compressed"
               legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
               options={widthOptions}
-              idSelected={width}
-              onChange={(newWidth: string) =>
-                setControlMeta((currentControls) => {
-                  currentControls[index].width = newWidth as ControlWidth;
-                  return [...currentControls];
-                })
-              }
+              idSelected={currentWidth}
+              onChange={(newWidth: string) => {
+                setCurrentWidth(newWidth as ControlWidth);
+                updatePanel({ width: newWidth as ControlWidth });
+              }}
             />
+          </EuiFormRow>
+
+          <EuiButton
+            aria-label={`delete-${title}`}
+            iconType="trash"
+            color="danger"
+            onClick={() => {
+              onClose();
+              removeControl();
+            }}
+          >
+            {ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
+          </EuiButton>
+        </EuiForm>
+        <EuiSpacer size="l" />
+        {controlEditor && controlEditor}
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              aria-label={`delete-${title}`}
+              iconType="cross"
+              onClick={() => {
+                onClose();
+                removeControl();
+              }}
+            >
+              Cancel
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon aria-label={`delete-${title}`} iconType="trash" color="danger" />
+            <EuiButton
+              aria-label={`delete-${title}`}
+              iconType="check"
+              color="primary"
+              onClick={() => {
+                onClose();
+                removeControl();
+              }}
+            >
+              Save and Close
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlyoutBody>
-    </EuiFlyout>
+      </EuiFlyoutFooter>
+    </>
   );
 };

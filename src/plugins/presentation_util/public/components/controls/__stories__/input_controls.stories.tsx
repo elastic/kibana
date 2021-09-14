@@ -24,7 +24,6 @@ export default {
 const ControlGroupStoryComponent = () => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const { controlsServiceStub, openFlyout } = getControlsServiceStub();
-  console.log(controlsServiceStub);
 
   useEffect(() => {
     (async () => {
@@ -35,8 +34,9 @@ const ControlGroupStoryComponent = () => {
           useFilters: false,
           useTimerange: false,
         },
-        panels: {},
+        controlStyle: 'oneLine',
         id: uuid.v4(),
+        panels: {},
       });
       if (controlGroupContainerEmbeddable && embeddableRoot.current) {
         controlGroupContainerEmbeddable.render(embeddableRoot.current);

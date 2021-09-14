@@ -7,7 +7,7 @@
  */
 
 import { ControlsService } from '../controlsService';
-import { getEuiSelectableOptions } from './flights';
+import { flightFields, getEuiSelectableOptions } from './flights';
 import { OptionsListEmbeddableFactory } from '../control_types/options_list';
 import { InputControlFactory } from '../types';
 import { providers } from '../../../services/stub';
@@ -20,6 +20,8 @@ export const getControlsServiceStub = () => {
   const optionsListFactoryStub = new OptionsListEmbeddableFactory(
     ({ field, search }) =>
       new Promise((r) => setTimeout(() => r(getEuiSelectableOptions(field, search)), 500)),
+    () => Promise.resolve(['demo data flights']),
+    () => Promise.resolve(flightFields),
     openFlyout
   );
 
