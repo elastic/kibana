@@ -19,7 +19,7 @@ export const Error: FC<Props> = ({ errorTitle, errorDetails }) => {
     <EuiCallOut title={errorTitle} color="danger" iconType="alert">
       <p>
         <FormattedMessage
-          id="xpack.ecsMapper.results.errorMessage"
+          id="xpack.ingestPipelines.createFromCsv.errorMessage"
           defaultMessage="{errorDetails}"
           values={{ errorDetails }}
         />

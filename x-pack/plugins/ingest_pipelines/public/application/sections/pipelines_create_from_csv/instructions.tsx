@@ -18,7 +18,7 @@ export const Instructions: FC = () => {
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.ecsMapper.file.informational.welcome"
+                id="xpack.ingestPipelines.createFromCsv.instructions.link"
                 defaultMessage="Map your CSV into a starter ingest pipeline. Reference&nbsp;{templateLink} for more information."
                 values={{
                   templateLink: (

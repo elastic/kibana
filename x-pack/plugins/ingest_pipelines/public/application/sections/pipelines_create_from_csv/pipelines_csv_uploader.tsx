@@ -61,7 +61,7 @@ export const PipelinesCsvUploader: FC<Props> = ({ actionOptions, onFilePickerCha
           fullWidth
           label={
             <FormattedMessage
-              id="xpack.ecsMapper.file.upload.filePickerTitle"
+              id="xpack.ingestPipelines.createFromCsv.fileUpload.filePickerTitle"
               defaultMessage="Upload file (up to {maxFileSize})"
                 values={{ maxFileSize }}
             />
@@ -70,13 +70,12 @@ export const PipelinesCsvUploader: FC<Props> = ({ actionOptions, onFilePickerCha
           <EuiFilePicker
             id="filePicker"
             initialPromptText={i18n.translate(
-              'xpack.ecsMapper.fileUpload.selectOrDragAndDropFileDescription',
+              'xpack.ingestPipelines.createFromCsv.fileUpload.selectOrDragAndDropFileDescription',
               {
                 defaultMessage: 'Select or drag and drop a CSV file',
               }
             )}
             onChange={onFilePickerChange}
-            className="ecs-mapper-file-picker"
             accept=".csv"
           />
         </EuiFormRow>
@@ -92,7 +91,7 @@ export const PipelinesCsvUploader: FC<Props> = ({ actionOptions, onFilePickerCha
                 content="This is the default action for field renames, and will only be utilized if not provided for a field in the uploaded CSV."
                 position="right"
               >
-                <EuiIcon type="info"/>
+                <EuiIcon type="iInCircle"/>
               </EuiIconTip>
             </p>
           }
@@ -109,7 +108,6 @@ export const PipelinesCsvUploader: FC<Props> = ({ actionOptions, onFilePickerCha
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
-            className="prfDevTool__profileButtonContainer"
             gutterSize="none"
             direction="row"
           >
@@ -118,10 +116,10 @@ export const PipelinesCsvUploader: FC<Props> = ({ actionOptions, onFilePickerCha
                 onClick={() => onFileUpload(action)}
                 isLoading={isLoading}
                 isDisabled={!hasFile || isUploaded || hasError}
-                data-test-subj="ecsMapperProcessFileButton"
+                data-test-subj="processFileButton"
                 fill
               >
-                <FormattedMessage id="xpack.ecsMapper.file.process.button" defaultMessage="Process CSV" />
+                <FormattedMessage id="xpack.ingestPipelines.createFromCsv.fileUpload.processButton" defaultMessage="Process CSV" />
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={9}>

@@ -115,11 +115,11 @@ export const PipelineTable: FunctionComponent<Props> = ({
               fill
               iconSide="right"
               iconType="arrowDown"
-              data-test-subj="createPipelineButton"
-              key="createPipelineButton"
+              data-test-subj="createPipelineDropdown"
+              key="createPipelineDropdown"
               onClick={() => setShowPopover((previousBool) => !previousBool)}
             >
-              {i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
+              {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {
                 defaultMessage: 'Create pipeline',
                 })
               }

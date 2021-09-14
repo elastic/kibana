@@ -47,7 +47,7 @@ export function mapToIngestPipeline(file: string, copyAction: FieldCopyAction) {
     const required = REQUIRED_CSV_HEADERS.join(', ');
 
     throw new Error(
-      i18n.translate('xpack.ecsMapper.mapToIngestPipeline.error.missingHeaders', {
+      i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.missingHeaders', {
         defaultMessage: 'Required headers are missing: Required {required} missing in CSV',
         values: { required },
       })
@@ -95,7 +95,7 @@ function convertCsvToMapping(rows: any[], copyFieldAction: FieldCopyAction) {
     if (formatAction && !ACCEPTED_FORMAT_ACTIONS.includes(formatAction)) {
       const accepted = ACCEPTED_FORMAT_ACTIONS.join(', ');
       throw new Error(
-        i18n.translate('xpack.ecsMapper.mapToIngestPipeline.error.missingHeaders', {
+        i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.unacceptedFormatAction', {
           defaultMessage: 'Unaccepted format action: Acceptable actions {accepted}',
           values: { accepted },
         })

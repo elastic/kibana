@@ -65,7 +65,7 @@ export const PipelinesPreview: FC<Props> = ({
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.ecsMapper.preview.jsonMapSuccessful"
+                  id="xpack.ingestPipelines.createFromCsv.preview.jsonMapSuccessful"
                   defaultMessage="Your CSV mappings have been processed as JSON which you may modify below."
                 />
               </p>
@@ -79,13 +79,13 @@ export const PipelinesPreview: FC<Props> = ({
           isInvalid={!isValidJson}
           error={
             !isValidJson
-              ? i18n.translate('xpack.ecsMapper.preview.invalidJson', {
+              ? i18n.translate('xpack.ingestPipelines.createFromCsv.preview.invalidJson', {
                   defaultMessage: 'Invalid JSON.',
                 })
               : null
           }
           fullWidth
-          data-test-subj="roleMappingsJSONEditor"
+          data-test-subj="pipelineMappingsJSONEditor"
         >
           <Fragment>
             <CodeEditorField
@@ -122,7 +122,7 @@ export const PipelinesPreview: FC<Props> = ({
                 onClick={onClickToCreatePipeline}
               >
                 <FormattedMessage
-                  id="xpack.ecsMapper.preview.createPipeline"
+                  id="xpack.ingestPipelines.createFromCsv.preview.createPipeline"
                   defaultMessage="Continue to create ingest node pipeline"
                 />
               </EuiButton>  
@@ -133,7 +133,7 @@ export const PipelinesPreview: FC<Props> = ({
                 {(copy: () => void) => (
                   <EuiButtonEmpty iconType="copy" size="s" onClick={copy}>
                     <FormattedMessage
-                        id="xpack.ecsMapper.preview.copy"
+                        id="xpack.ingestPipelines.createFromCsv.preview.copy"
                         defaultMessage="Copy JSON to clipboard"
                       />
                   </EuiButtonEmpty>
@@ -144,7 +144,7 @@ export const PipelinesPreview: FC<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="download" size="s" onClick={onDownload}>
                 <FormattedMessage
-                    id="xpack.ecsMapper.preview.download"
+                    id="xpack.ingestPipelines.createFromCsv.preview.download"
                     defaultMessage="Download JSON"
                   />
               </EuiButtonEmpty>

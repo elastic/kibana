@@ -76,12 +76,12 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
         setIsLoading(false);
         setIsUploaded(false);
         setErrorTitle(
-          i18n.translate('xpack.ecsMapper.fetchPipeline.unexpectedErrorTitle', {
+          i18n.translate('xpack.ingestPipelines.createFromCsv.processFile.unexpectedErrorTitle', {
             defaultMessage: 'Something went wrong'
           })
         );
         setErrorDetails(
-          i18n.translate('xpack.ecsMapper.createIngestNodePipeline.unexpectedError', {
+          i18n.translate('xpack.ingestPipelines.createFromCsv.processFile.unexpectedError', {
             defaultMessage: 'Unexpected error {e}',
             values: { e },
           })
@@ -106,12 +106,12 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
         setErrorDetails(errorParts[1]);
       } catch (e) {
         setErrorTitle(
-          i18n.translate('xpack.ecsMapper.fetchPipeline.unexpectedErrorTitle', {
+          i18n.translate('xpack.ingestPipelines.createFromCsv.fetchPipeline.unexpectedErrorTitle', {
             defaultMessage: 'Something went wrong'
           })
         );
         setErrorDetails(
-          i18n.translate('xpack.ecsMapper.fetchPipeline.unexpectedErrorDetails', {
+          i18n.translate('xpack.ingestPipelines.createFromCsv.fetchPipeline.unexpectedErrorDetails', {
             defaultMessage: 'Unexpected error {e}',
             values: { e },
           })
