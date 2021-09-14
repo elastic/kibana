@@ -44,7 +44,6 @@ export interface CloudConfigType {
 interface CloudSetupDependencies {
   home?: HomePublicPluginSetup;
   security?: Pick<SecurityPluginSetup, 'authc'>;
-  application?: Promise<ApplicationStart>;
 }
 
 interface CloudStartDependencies {
@@ -63,13 +62,14 @@ export interface CloudSetup {
 }
 
 interface SetupFullstoryDeps extends CloudSetupDependencies {
+  application?: Promise<ApplicationStart>;
   basePath: IBasePath;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
   private config!: CloudConfigType;
   private isCloudEnabled: boolean;
-  private appSubscription: Subscription;
+  private appSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
@@ -211,8 +211,8 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       if (userId) {
         // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
         const hashedId = sha256(userId.toString());
-        application?.then(async () => {
-          try {
+        application
+          ?.then(async () => {
             const appStart = await application;
             this.appSubscription = appStart.currentAppId$.subscribe((appId) => {
               // Update the current application every time it changes
@@ -220,15 +220,15 @@ export class CloudPlugin implements Plugin<CloudSetup> {
                 app_id_str: appId ?? 'unknown',
               });
             });
-          } catch (e) {
+          })
+          .catch((e) => {
             // eslint-disable-next-line no-console
             console.error(
               `[cloud.full_story] Could not retrieve application service due to error: ${e.toString()}`,
               e
             );
-          }
-        });
-        const kibanaVer = this.initializerContext.env.packageInfo.version ?? null;
+          });
+        const kibanaVer = this.initializerContext.env.packageInfo.version;
         const parsedVer = parse(kibanaVer);
         // `str` suffix is required for evn vars, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
         fullStory.identify(hashedId, {
