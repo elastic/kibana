@@ -10,8 +10,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { IFieldType } from 'src/plugins/data/public';
+
 import { decorators } from './decorators';
-import { getEuiSelectableOptions, flightFields, flightFieldLabels, FlightField } from './flights';
+import { getFlightSearchOptions, flightFields, flightFieldLabels, FlightField } from './flights';
 import { OptionsListEmbeddableFactory, OptionsListEmbeddable } from '../control_types/options_list';
 import { ControlFrame } from '../control_frame/control_frame';
 
@@ -22,13 +24,34 @@ export default {
 };
 
 interface OptionsListStorybookArgs {
-  fields: string[];
+  fields: IFieldType[];
   twoLine: boolean;
 }
 
 const storybookArgs = {
   twoLine: false,
-  fields: ['OriginCityName', 'OriginWeather', 'DestCityName', 'DestWeather'],
+  fields: [
+    {
+      name: 'OriginCityName',
+      type: 'string',
+      aggregatable: true,
+    },
+    {
+      name: 'OriginWeather',
+      type: 'string',
+      aggregatable: true,
+    },
+    {
+      name: 'DestCityName',
+      type: 'string',
+      aggregatable: true,
+    },
+    {
+      name: 'DestWeather',
+      type: 'string',
+      aggregatable: true,
+    },
+  ],
 };
 
 const storybookArgTypes = {
@@ -50,7 +73,7 @@ const OptionsListStoryComponent = ({ fields, twoLine }: OptionsListStorybookArgs
     () =>
       new OptionsListEmbeddableFactory(
         ({ field, search }) =>
-          new Promise((r) => setTimeout(() => r(getEuiSelectableOptions(field, search)), 500))
+          new Promise((r) => setTimeout(() => r(getFlightSearchOptions(field.name, search)), 500))
       ),
     []
   );
@@ -60,10 +83,13 @@ const OptionsListStoryComponent = ({ fields, twoLine }: OptionsListStorybookArgs
       return optionsListEmbeddableFactory.create({
         field,
         id: '',
-        indexPattern: '',
+        indexPattern: {
+          title: '',
+          fields,
+        },
         multiSelect: true,
         twoLineLayout: twoLine,
-        title: flightFieldLabels[field as FlightField],
+        title: flightFieldLabels[field.name as FlightField],
       });
     });
     Promise.all(embeddableCreatePromises).then((newEmbeddables) => setEmbeddables(newEmbeddables));
@@ -72,7 +98,7 @@ const OptionsListStoryComponent = ({ fields, twoLine }: OptionsListStorybookArgs
   return (
     <EuiFlexGroup alignItems="center" wrap={true} gutterSize={'s'}>
       {embeddables.map((embeddable) => (
-        <EuiFlexItem key={embeddable.getInput().field}>
+        <EuiFlexItem key={embeddable.getInput().field.name}>
           <ControlFrame twoLine={twoLine} embeddable={embeddable} />
         </EuiFlexItem>
       ))}

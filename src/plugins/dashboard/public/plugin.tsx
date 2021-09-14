@@ -12,6 +12,10 @@ import { filter, map } from 'rxjs/operators';
 
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import {
+  OptionsListEmbeddableFactory,
+  OptionsListDataFetchProps,
+} from '../../presentation_util/public';
 import { APP_WRAPPER_CLASS } from '../../../core/public';
 import {
   App,
@@ -187,6 +191,7 @@ export class DashboardPlugin
         return <ExitFullScreenButtonUi {...props} chrome={coreStart.chrome} />;
       };
       return {
+        autocomplete: deps.data.autocomplete,
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
         showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
         notifications: coreStart.notifications,
@@ -265,6 +270,39 @@ export class DashboardPlugin
         dashboardContainerFactory.type,
         dashboardContainerFactory
       );
+
+      /*
+      interface ValueSuggestionsGetFnArgs {
+  indexPattern: IIndexPattern;
+  field: IFieldType;
+  query: string;
+  useTimeRange?: boolean;
+  boolFilter?: any[];
+  signal?: AbortSignal;
+  method?: ValueSuggestionsMethod;
+}
+export interface OptionsListDataFetchProps {
+  field: string;
+  search?: string;
+  indexPattern: string;
+  query?: InputControlInput['query'];
+  filters?: InputControlInput['filters'];
+  timeRange?: InputControlInput['timeRange'];
+}
+*/
+
+      const fetchControlOptions = (args: OptionsListDataFetchProps) => {
+        const { indexPattern, field, search } = args;
+
+        return coreStart.autocomplete.getValueSuggestions({
+          indexPattern,
+          field,
+          query: search || '',
+        });
+      };
+
+      const optionControlFactory = new OptionsListEmbeddableFactory(fetchControlOptions);
+      embeddable.registerEmbeddableFactory(optionControlFactory.type, optionControlFactory);
     });
 
     const placeholderFactory = new PlaceholderEmbeddableFactory();

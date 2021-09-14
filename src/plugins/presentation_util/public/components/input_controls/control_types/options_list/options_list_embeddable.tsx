@@ -13,11 +13,23 @@ import deepEqual from 'fast-deep-equal';
 import { EuiSelectableOption } from '@elastic/eui';
 import { tap, debounceTime, map, distinctUntilChanged } from 'rxjs/operators';
 
-import { esFilters } from '../../../../../../data/public';
+import { esFilters, IIndexPattern, IFieldType } from '../../../../../../data/public';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
 import { Embeddable } from '../../../../../../embeddable/public';
 import { InputControlInput, InputControlOutput } from '../../embeddable/types';
+
+// TEMPORARY CONSTANT VALUES
+const TEMP_FIELD = {
+  name: 'data_stream.dataset',
+  type: 'string',
+  aggregatable: true,
+};
+
+const TEMP_INDEX_PATTERN = {
+  title: 'ecomm',
+  fields: [TEMP_FIELD],
+};
 
 const toggleAvailableOptions = (
   indices: number[],
@@ -41,26 +53,34 @@ const diffDataFetchProps = (
   return true;
 };
 
-interface OptionsListDataFetchProps {
-  field: string;
+export interface OptionsListDataFetchProps {
+  field: IFieldType;
   search?: string;
-  indexPattern: string;
+  indexPattern: IIndexPattern;
   query?: InputControlInput['query'];
   filters?: InputControlInput['filters'];
   timeRange?: InputControlInput['timeRange'];
 }
 
-export type OptionsListDataFetcher = (
-  props: OptionsListDataFetchProps
-) => Promise<EuiSelectableOption[]>;
+export type OptionsListDataFetcher = (props: OptionsListDataFetchProps) => Promise<string[]>;
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 export interface OptionsListEmbeddableInput extends InputControlInput {
-  field: string;
-  indexPattern: string;
+  field: IFieldType;
+  indexPattern: IIndexPattern;
   multiSelect: boolean;
   defaultSelections?: string[];
 }
+
+export const getEuiSelectableOptions = (results: string[]): EuiSelectableOption[] => {
+  const options = results.map((option) => ({
+    label: option + '',
+    searchableLabel: option + '',
+  }));
+  if (options.length > 10) options.length = 10;
+  return options;
+};
+
 export class OptionsListEmbeddable extends Embeddable<
   OptionsListEmbeddableInput,
   InputControlOutput
@@ -135,7 +155,7 @@ export class OptionsListEmbeddable extends Embeddable<
     this.updateComponentState({ loading: true });
 
     const { indexPattern, timeRange, filters, field, query } = this.getInput();
-    let newOptions = await this.fetchData({
+    const results = await this.fetchData({
       search: this.searchString,
       indexPattern,
       timeRange,
@@ -143,6 +163,9 @@ export class OptionsListEmbeddable extends Embeddable<
       field,
       query,
     });
+
+    // Take the result set of values and convert it to a list of options for dropdown
+    let newOptions = getEuiSelectableOptions(results);
 
     // We now have new 'availableOptions', we need to ensure the selected options are still selected in the new list.
     const enabledIndices: number[] = [];
