@@ -325,7 +325,7 @@ export function TransactionsTable({
                     })
                   : ''
               }
-              items={[]}
+              items={transactionGroups}
               columns={columns}
               pagination={pagination}
               sorting={{ sort: { field, direction } }}
