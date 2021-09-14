@@ -81,7 +81,7 @@ function createData(seriesData) {
   buildYAxis = function (params) {
     const visConfig = new VisConfig(
       {
-        type: 'histogram',
+        type: 'heatmap',
       },
       data,
       mockUiState,

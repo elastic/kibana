@@ -54,4 +54,16 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
       }
     },
   ],
+  exposeToUsage: {
+    capture: {
+      maxAttempts: true,
+      timeouts: { openUrl: true, renderComplete: true, waitForElements: true },
+      networkPolicy: false, // show as [redacted]
+      zoom: true,
+    },
+    csv: { maxSizeBytes: true, scroll: { size: true, duration: true } },
+    kibanaServer: false, // show as [redacted]
+    queue: { indexInterval: true, pollEnabled: true, timeout: true },
+    roles: { enabled: true },
+  },
 };
