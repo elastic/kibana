@@ -74,6 +74,21 @@
         labels: ['Feature:Vega', 'Team:VisEditors'],
         enabled: true,
       },
+      {
+        groupName: 'platform security modules',
+        packageNames: [
+          'broadcast-channel', 
+          'jsonwebtoken', '@types/jsonwebtoken', 
+          'node-forge', '@types/node-forge', 
+          'require-in-the-middle', 
+          'tough-cookie', '@types/tough-cookie',
+          'xml-crypto', '@types/xml-crypto'
+        ],
+        reviewers: ['team:kibana-security'],
+        matchBaseBranches: ['master', '7.x'],
+        labels: ['Team:Security'],
+        enabled: true,
+      },
     ],
   },
 }
