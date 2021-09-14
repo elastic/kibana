@@ -6,8 +6,9 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
+import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+
 import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { INDICATOR_RULE_TYPE_ID } from '../../../../../common/constants';
 import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';

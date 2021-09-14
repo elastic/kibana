@@ -185,22 +185,6 @@ export const defaultTransformsSetting: TransformConfigSchema = {
 export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSetting, null, 2);
 
 /**
- * Id for the signals alerting type
- */
-export const SIGNALS_ID = `siem.signals` as const;
-
-/**
- * IDs for RAC rule types
- */
-const RULE_TYPE_PREFIX = `siem` as const;
-export const EQL_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.eqlRule` as const;
-export const INDICATOR_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.indicatorRule` as const;
-export const ML_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.mlRule` as const;
-export const QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.queryRule` as const;
-export const SAVED_QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.savedQueryRule` as const;
-export const THRESHOLD_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.thresholdRule` as const;
-
-/**
  * Id for the notifications alerting type
  */
 export const NOTIFICATIONS_ID = `siem.notifications`;

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { SIGNALS_ID } from '@kbn/securitysolution-rules';
+
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
-import { SIGNALS_ID } from '../../../common/constants';
 import { isElasticRule } from './index';
 import {
   AlertsAggregationResponse,

@@ -6,8 +6,9 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
+import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+
 import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { EQL_RULE_TYPE_ID } from '../../../../../common/constants';
 import { eqlRuleParams, EqlRuleParams } from '../../schemas/rule_schemas';
 import { eqlExecutor } from '../../signals/executors/eql';
 import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';

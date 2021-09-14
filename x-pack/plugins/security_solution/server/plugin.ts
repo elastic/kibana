@@ -8,6 +8,13 @@
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
 import { estypes } from '@elastic/elasticsearch';
+import {
+  SIGNALS_ID,
+  QUERY_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
 
 import {
   CoreSetup,
@@ -63,17 +70,7 @@ import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import {
-  APP_ID,
-  SERVER_APP_ID,
-  SIGNALS_ID,
-  NOTIFICATIONS_ID,
-  QUERY_RULE_TYPE_ID,
-  DEFAULT_SPACE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-} from '../common/constants';
+import { APP_ID, DEFAULT_SPACE_ID, NOTIFICATIONS_ID, SERVER_APP_ID } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';

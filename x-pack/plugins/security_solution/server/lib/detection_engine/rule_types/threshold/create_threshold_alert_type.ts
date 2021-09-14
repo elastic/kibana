@@ -6,9 +6,9 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
+import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { THRESHOLD_RULE_TYPE_ID } from '../../../../../common/constants';
 import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { thresholdExecutor } from '../../signals/executors/threshold';
 import { ThresholdAlertState } from '../../signals/types';

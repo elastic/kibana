@@ -14,12 +14,9 @@ import { flow } from 'fp-ts/lib/function';
 import * as t from 'io-ts';
 import { validateNonExact, parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { toError, toPromise } from '@kbn/securitysolution-list-api';
+import { SIGNALS_ID } from '@kbn/securitysolution-rules';
 
-import {
-  SIGNALS_ID,
-  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
-  SERVER_APP_ID,
-} from '../../../../common/constants';
+import { DEFAULT_SEARCH_AFTER_PAGE_SIZE, SERVER_APP_ID } from '../../../../common/constants';
 import { isMlRule } from '../../../../common/machine_learning/helpers';
 import {
   isThresholdRule,

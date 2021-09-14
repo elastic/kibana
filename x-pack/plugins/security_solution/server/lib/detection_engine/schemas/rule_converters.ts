@@ -6,6 +6,9 @@
  */
 
 import uuid from 'uuid';
+
+import { SIGNALS_ID } from '@kbn/securitysolution-rules';
+
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
@@ -25,7 +28,7 @@ import {
 } from '../../../../common/detection_engine/schemas/request';
 import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
-import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
+import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { SanitizedAlert } from '../../../../../alerting/common';
 import { IRuleStatusSOAttributes } from '../rules/types';

@@ -17,6 +17,13 @@ import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-i
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import {
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SIGNALS_ID,
+  THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
 
 import {
   TimestampOverrideOrUndefined,
@@ -62,14 +69,6 @@ import {
 import { WrappedRACAlert } from '../rule_types/types';
 import { SearchTypes } from '../../../../common/detection_engine/types';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
-import {
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SIGNALS_ID,
-  THRESHOLD_RULE_TYPE_ID,
-} from '../../../../common/constants';
-
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
   exceptionsWithoutValueLists: ExceptionListItemSchema[];

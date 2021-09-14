@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isString } from 'lodash/fp';
 import {
   LogMeta,
@@ -52,7 +53,7 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAl
   );
 
 export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
-  doc.attributes.alertTypeId === 'siem.signals';
+  doc.attributes.alertTypeId === 'siem.signals'; // deprecated in 7.16
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
@@ -602,12 +603,13 @@ function setLegacyId(
 function addRACRuleTypes(
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ): SavedObjectUnsanitizedDoc<RawAlert> {
-  return isSecuritySolutionRule(doc)
+  const ruleType = doc.attributes.params.type;
+  return isSecuritySolutionRule(doc) && isRuleType(ruleType)
     ? {
         ...doc,
         attributes: {
           ...doc.attributes,
-          alertTypeId: doc.attributes.params.type as string,
+          alertTypeId: ruleTypeMappings[ruleType],
         },
       }
     : doc;

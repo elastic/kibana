@@ -14,6 +14,7 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from 'kibana/server';
+
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -45,6 +46,7 @@ import type {
   ThrottleOrNull,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
+import { SIGNALS_ID } from '@kbn/securitysolution-rules';
 
 import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
@@ -106,7 +108,6 @@ import {
 
 import { RulesClient, PartialAlert } from '../../../../../alerting/server';
 import { Alert, SanitizedAlert } from '../../../../../alerting/common';
-import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';

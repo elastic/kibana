@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { SIGNALS_ID } from '@kbn/securitysolution-rules';
+
 import { FindResult } from '../../../../../alerting/server';
-import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleParams } from '../schemas/rule_schemas';
 import { ruleTypeMappings } from '../signals/utils';
 import { FindRuleOptions } from './types';
