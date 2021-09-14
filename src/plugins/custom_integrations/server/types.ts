@@ -18,6 +18,7 @@ export interface CustomIntegrationsPluginSetup {
 export interface CustomIntegrationsPluginStart {}
 
 export interface CustomIntegration {
+  id: string;
   title: string;
   name: string;
   description: string;

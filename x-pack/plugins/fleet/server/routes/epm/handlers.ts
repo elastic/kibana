@@ -56,9 +56,6 @@ import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import type { CustomIntegrationsPluginSetup } from '../../../../../../src/plugins/custom_integrations/server';
 import type { CategoryCount } from '../../../../../../src/plugins/custom_integrations/server/custom_integration_registry';
-import { merge } from '../../../../../../packages/kbn-std/src/merge';
-import type { CustomIntegration } from '../../../../../../src/plugins/custom_integrations/server';
-import { PackageListItem } from '../../../common';
 import type { PackageList } from '../../../common';
 
 interface EPMCategoryCount {
@@ -97,7 +94,6 @@ export const getCategoriesHandler: RequestHandler<
     const categoriesFromEpm = await getCategories(request.query);
     const categoriesFromCustom = customIntegrations.getNonBeatsCategories();
     const mergedCategories = mergeCategoryCounts(categoriesFromEpm, categoriesFromCustom);
-    console.log('cats after merging', mergedCategories);
     const body: GetCategoriesResponse = {
       response: mergedCategories,
     };
@@ -112,13 +108,12 @@ export const getListHandler: RequestHandler<
   TypeOf<typeof GetPackagesRequestSchema.query>
 > = async (customIntegrations: CustomIntegrationsPluginSetup, context, request, response) => {
   try {
-    console.log('get all the packages', request.query);
     const savedObjectsClient = context.core.savedObjects.client;
     const res = await getPackages({
       savedObjectsClient,
       ...request.query,
     });
-    console.log('all pacjkages', res);
+    // console.log('all pacjkages', res);
 
     const integrations = customIntegrations.getNonBeatsCustomIntegrations();
     const merged: PackageList = res.concat(integrations);

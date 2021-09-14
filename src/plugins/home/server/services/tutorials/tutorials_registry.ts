@@ -26,10 +26,9 @@ function registerTutorialWithCustomIntegrations(
   provider: TutorialProvider
 ) {
   const tutorial = provider(emptyContext);
-  console.log('REGISTER TUTORIAl', tutorial);
-
   customIntegrations.registerCustomIntegration({
     name: tutorial.id,
+    id: tutorial.name,
     title: tutorial.name,
     categories: [tutorial.category],
     type: 'ui_link',
@@ -50,19 +49,12 @@ export class TutorialsRegistry {
       { path: '/api/kibana/home/tutorials', validate: false },
       async (context, req, res) => {
         const initialContext = {};
-
-        console.log('get tutorials!');
-        console.log(this.scopedTutorialContextFactories);
-
         const scopedContext = this.scopedTutorialContextFactories.reduce(
           (accumulatedContext, contextFactory) => {
             return { ...accumulatedContext, ...contextFactory(req) };
           },
           initialContext
         );
-
-        console.log('scoped context', scopedContext);
-
         return res.ok({
           body: this.tutorialProviders.map((tutorialProvider) => {
             console.log('map utotrial', tutorialProvider);
@@ -73,7 +65,6 @@ export class TutorialsRegistry {
     );
     return {
       registerTutorial: (specProvider: TutorialProvider) => {
-        console.log('REGISTER TUTORIAl', specProvider);
         registerTutorialWithCustomIntegrations(customIntegrations, specProvider);
         try {
           tutorialSchema.validate(specProvider(emptyContext));
@@ -106,7 +97,6 @@ export class TutorialsRegistry {
 
   public start() {
     // pre-populate with built in tutorials
-    console.log('ADD ALL THE BUILT IN TUTORIALS!', builtInTutorials);
     this.tutorialProviders.push(...builtInTutorials);
     return {};
   }

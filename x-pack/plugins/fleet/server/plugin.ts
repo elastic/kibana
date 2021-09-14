@@ -194,9 +194,6 @@ export class FleetPlugin
     this.cloud = deps.cloud;
     const config = this.configInitialValue;
 
-    console.log('INTEGRATIOPNS DEP');
-    console.log(deps.customIntegrations);
-
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 

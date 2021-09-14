@@ -236,7 +236,7 @@ export type CategorySummaryList = CategorySummaryItem[];
 export type CategoryId = string;
 export interface CategorySummaryItem {
   id: CategoryId;
-  title: string;
+  title?: string;
   count: number;
 }
 

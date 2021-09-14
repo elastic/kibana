@@ -79,7 +79,6 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
   const registryUrl = getRegistryUrl();
-  console.log('get resgis', registryUrl);
   const url = new URL(`${registryUrl}/search`);
   if (params) {
     if (params.category) {

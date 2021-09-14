@@ -76,12 +76,16 @@ export function PackageListGrid({
     gridContent = <Loading />;
   } else {
     const filteredList = searchTerm
-      ? list.filter((item) =>
-          (localSearchRef.current!.search(searchTerm) as PackageList)
-            .map((match) => match[searchIdField])
-            .includes(item[searchIdField])
-        )
+      ? list.filter((item) => {
+          const matched = (localSearchRef.current!.search(searchTerm) as PackageList)
+            .map((match) => {
+              return match[searchIdField]
+            })
+            .includes(item[searchIdField]);
+          return matched;
+        })
       : list;
+
     gridContent = (
       <GridColumn
         list={filteredList}

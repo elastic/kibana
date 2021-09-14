@@ -35,7 +35,7 @@ export function CategoryFacets({
             quantity={category.count}
             onClick={() => onCategoryChange(category)}
           >
-            {category.title}
+            {category.title || category.id}
           </EuiFacetButton>
         ))
       )}
