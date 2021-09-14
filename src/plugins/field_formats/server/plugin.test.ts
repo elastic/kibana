@@ -7,17 +7,20 @@
  */
 
 import { DateFormat } from './lib/converters/date_server';
-import { coreMock } from '../../../core/server/mocks';
+import { coreMock, httpServerMock } from '../../../core/server/mocks';
 import { FieldFormatsPlugin } from './plugin';
 
 describe('FieldFormats registry server plugin', () => {
   test('DateFormat is server version', async () => {
     const plugin = new FieldFormatsPlugin(coreMock.createPluginInitializerContext());
     const pluginStart = await plugin.start(coreMock.createStart());
-    const uiSettings = coreMock.createStart().uiSettings.asScopedToClient({} as any);
+    const soClient = coreMock
+      .createStart()
+      .savedObjects.getScopedClient(httpServerMock.createKibanaRequest());
+    const uiSettings = coreMock.createStart().uiSettings.asScopedToClient(soClient);
     const fieldFormatsRegistry = await pluginStart.fieldFormatServiceFactory(uiSettings);
-    const DateFormatFromRegsitry = fieldFormatsRegistry.getTypeWithoutMetaParams('date');
+    const DateFormatFromRegistry = fieldFormatsRegistry.getTypeWithoutMetaParams('date');
 
-    expect(DateFormatFromRegsitry).toEqual(DateFormat);
+    expect(DateFormatFromRegistry).toEqual(DateFormat);
   });
 });

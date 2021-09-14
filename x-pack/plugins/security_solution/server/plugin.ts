@@ -48,8 +48,12 @@ import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { createQueryAlertType } from './lib/detection_engine/rule_types';
-import { createMlAlertType } from './lib/detection_engine/rule_types/ml/create_ml_alert_type';
+import {
+  createEqlAlertType,
+  createIndicatorMatchAlertType,
+  createMlAlertType,
+  createQueryAlertType,
+} from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
@@ -67,6 +71,7 @@ import {
   DEFAULT_SPACE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -96,7 +101,6 @@ import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rule
 import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
-import { createIndicatorMatchAlertType } from './lib/detection_engine/rule_types/indicator_match/create_indicator_match_alert_type';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
 
@@ -259,6 +263,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
       };
 
+      this.setupPlugins.alerting.registerType(createEqlAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createMlAlertType(createRuleOptions));
@@ -282,7 +287,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerTrustedAppsRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
-    const racRuleTypes = [QUERY_RULE_TYPE_ID, INDICATOR_RULE_TYPE_ID, ML_RULE_TYPE_ID];
+    const racRuleTypes = [
+      EQL_RULE_TYPE_ID,
+      QUERY_RULE_TYPE_ID,
+      INDICATOR_RULE_TYPE_ID,
+      ML_RULE_TYPE_ID,
+    ];
     const ruleTypes = [
       SIGNALS_ID,
       NOTIFICATIONS_ID,
