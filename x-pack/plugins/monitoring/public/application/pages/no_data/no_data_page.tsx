@@ -31,6 +31,17 @@ interface SettingsChecker {
   next?: SettingsChecker;
 }
 
+const clusterCheckers: SettingsChecker[] = [
+  {
+    message: 'Checking cluster settings API on production cluster',
+    api: '../api/monitoring/v1/elasticsearch_settings/check/cluster',
+  },
+  {
+    message: 'Checking nodes settings API on production cluster',
+    api: '../api/monitoring/v1/elasticsearch_settings/check/nodes',
+  },
+];
+
 export const NoDataPage = () => {
   const title = i18n.translate('xpack.monitoring.noData.routeTitle', {
     defaultMessage: 'Setup Monitoring',
@@ -56,19 +67,8 @@ export const NoDataPage = () => {
       text: 'Clusters',
       href: '#/home',
       ignoreGlobalState: true,
-    }
+    },
   ]);
-
-  const checkers: SettingsChecker[] = [
-    {
-      message: 'Checking cluster settings API on production cluster',
-      api: '../api/monitoring/v1/elasticsearch_settings/check/cluster',
-    },
-    {
-      message: 'Checking nodes settings API on production cluster',
-      api: '../api/monitoring/v1/elasticsearch_settings/check/nodes',
-    },
-  ];
 
   // From x-pack/plugins/monitoring/public/views/no_data/model_updater.js
   const updateModel = useCallback(
@@ -96,14 +96,13 @@ export const NoDataPage = () => {
       const clusters = await getClusters(services);
 
       if (clusters && clusters.length) {
-        // updateModel({ isLoading: false });
         setShouldRedirect(true);
         return;
       }
 
       // TODO this check might be required for internal collection enablement to work smoothly
       // if (!model.isCollectionEnabledUpdating && !model.isCollectionIntervalUpdating) {
-      await startChecks(checkers, services.http, updateModel);
+      await startChecks(clusterCheckers, services.http, updateModel);
     } catch (err) {
       // TODO something useful with the error reason
       // if (err && err.status === 503) {
@@ -113,7 +112,7 @@ export const NoDataPage = () => {
       //   };
       // }
     }
-  }, [checkers, services, updateModel]);
+  }, [services, updateModel]);
 
   const enabler = new Enabler(services.http, updateModel);
 
