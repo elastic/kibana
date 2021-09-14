@@ -81,8 +81,6 @@ describe('VegaVisualizations', () => {
       mockWidth.mockRestore();
       mockHeight.mockRestore();
     });
-
-    // SKIP: https://github.com/elastic/kibana/issues/83385
     test('should show vegalite graph and update on resize (may fail in dev env)', async () => {
       let vegaVis;
       try {
@@ -115,7 +113,6 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    // SKIP: https://github.com/elastic/kibana/issues/83385
     test('should show vega graph (may fail in dev env)', async () => {
       let vegaVis;
       try {
