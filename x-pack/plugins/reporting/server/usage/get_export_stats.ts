@@ -56,6 +56,7 @@ export const getExportStats = (
     _all: rangeAll,
     status: rangeStatus,
     statuses: rangeStatusByApp,
+    output_size: outputSize,
     ...rangeStats
   } = rangeStatsInput;
 
@@ -84,6 +85,7 @@ export const getExportStats = (
     _all: rangeAll || 0,
     status: { completed: 0, failed: 0, ...rangeStatus },
     statuses: rangeStatusByApp,
+    output_size: outputSize,
   } as RangeStats;
 
   return resultStats;

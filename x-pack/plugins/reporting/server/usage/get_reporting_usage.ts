@@ -33,6 +33,10 @@ const OBJECT_TYPES_FIELD = 'meta.objectType.keyword';
 const STATUS_TYPES_KEY = 'statusTypes';
 const STATUS_BY_APP_KEY = 'statusByApp';
 const STATUS_TYPES_FIELD = 'status';
+const OUTPUT_SIZE_MIN_KEY = 'sizeMin';
+const OUTPUT_SIZE_MAX_KEY = 'sizeMax';
+const OUTPUT_SIZE_AVG_KEY = 'sizeAvg';
+const OUTPUT_SIZE_FIELD = 'output.size';
 
 const DEFAULT_TERMS_SIZE = 10;
 const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
@@ -97,7 +101,17 @@ function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
     statusByApp = getAppStatuses(statusAppBuckets);
   }
 
-  return { _all: all, status: statusTypes, statuses: statusByApp, ...jobTypes };
+  return {
+    _all: all,
+    status: statusTypes,
+    statuses: statusByApp,
+    output_size: {
+      max: get(aggs[OUTPUT_SIZE_MAX_KEY], 'value'),
+      min: get(aggs[OUTPUT_SIZE_MIN_KEY], 'value'),
+      avg: get(aggs[OUTPUT_SIZE_AVG_KEY], 'value'),
+    },
+    ...jobTypes,
+  };
 }
 
 type RangeStatSets = Partial<RangeStats> & {
@@ -161,7 +175,7 @@ export async function getReportingUsage(
                 jobTypes: {
                   terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE },
                   aggs: {
-                    appNames: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } }, // NOTE Discover/CSV export is missing the 'meta.objectType' field, so Discover/CSV results are missing for this agg
+                    appNames: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
                   },
                 },
               },
@@ -173,6 +187,15 @@ export async function getReportingUsage(
             [LAYOUT_TYPES_KEY]: {
               filter: { term: { jobtype: PRINTABLE_PDF_JOBTYPE } },
               aggs: { pdf: { terms: { field: LAYOUT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } } },
+            },
+            [OUTPUT_SIZE_MIN_KEY]: {
+              min: { field: OUTPUT_SIZE_FIELD },
+            },
+            [OUTPUT_SIZE_MAX_KEY]: {
+              max: { field: OUTPUT_SIZE_FIELD },
+            },
+            [OUTPUT_SIZE_AVG_KEY]: {
+              avg: { field: OUTPUT_SIZE_FIELD },
             },
           },
         },

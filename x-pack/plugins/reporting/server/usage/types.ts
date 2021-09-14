@@ -44,6 +44,9 @@ export interface AggregationResultBuckets {
     buckets: StatusByAppBucket[];
   };
   doc_count: number;
+  sizeMin: { value: number };
+  sizeMax: { value: number };
+  sizeAvg: { value: number };
 }
 
 export interface SearchResponse {
@@ -110,7 +113,12 @@ type StatusByAppCounts = {
 export type RangeStats = JobTypes & {
   _all: number;
   status: StatusCounts;
-  statuses: StatusByAppCounts;
+  statuses?: StatusByAppCounts;
+  output_size?: {
+    max: number;
+    min: number;
+    avg: number;
+  };
 };
 
 export type ReportingUsageType = RangeStats & {
