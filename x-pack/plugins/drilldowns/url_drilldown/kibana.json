@@ -7,6 +7,7 @@
     "name": "App Services",
     "githubTeam": "kibana-app-services"
   },
+  "description": "Adds drilldown implementations to Kibana",
   "requiredPlugins": ["embeddable", "uiActions", "uiActionsEnhanced"],
   "requiredBundles": ["kibanaUtils", "kibanaReact"]
 }

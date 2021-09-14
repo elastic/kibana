@@ -6,18 +6,18 @@
  */
 
 import { mountWithIntl } from '@kbn/test/jest';
-import { SearchBar, OuterSearchBarProps } from './search_bar';
-import React, { ReactElement } from 'react';
+import { SearchBar, SearchBarProps } from './search_bar';
+import React, { Component, ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
 import { act } from 'react-dom/test-utils';
 import { IndexPattern, QueryStringInput } from '../../../../../src/plugins/data/public';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider, InjectedIntl } from '@kbn/i18n/react';
 
 import { openSourceModal } from '../services/source_modal';
 
-import { GraphStore, setDatasource } from '../state_management';
+import { GraphStore, setDatasource, submitSearchSaga } from '../state_management';
 import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
@@ -26,7 +26,7 @@ jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
 const waitForIndexPatternFetch = () => new Promise((r) => setTimeout(r));
 
-function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
+function wrapSearchBarInContext(testProps: SearchBarProps) {
   const services = {
     uiSettings: {
       get: (key: string) => {
@@ -67,21 +67,34 @@ function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
 }
 
 describe('search_bar', () => {
+  let dispatchSpy: jest.Mock;
+  let instance: ReactWrapper<
+    SearchBarProps & { intl: InjectedIntl },
+    Readonly<{}>,
+    Component<{}, {}, any>
+  >;
+  let store: GraphStore;
   const defaultProps = {
     isLoading: false,
-    onQuerySubmit: jest.fn(),
     indexPatternProvider: {
       get: jest.fn(() => Promise.resolve(({ fields: [] } as unknown) as IndexPattern)),
     },
     confirmWipeWorkspace: (callback: () => void) => {
       callback();
     },
+    onIndexPatternChange: (indexPattern?: IndexPattern) => {
+      instance.setProps({
+        ...defaultProps,
+        currentIndexPattern: indexPattern,
+      });
+    },
   };
-  let instance: ReactWrapper;
-  let store: GraphStore;
 
   beforeEach(() => {
-    store = createMockGraphStore({}).store;
+    store = createMockGraphStore({
+      sagas: [submitSearchSaga],
+    }).store;
+
     store.dispatch(
       setDatasource({
         type: 'indexpattern',
@@ -89,14 +102,21 @@ describe('search_bar', () => {
         title: 'test-index',
       })
     );
+
+    dispatchSpy = jest.fn(store.dispatch);
+    store.dispatch = dispatchSpy;
   });
 
   async function mountSearchBar() {
     jest.clearAllMocks();
-    const wrappedSearchBar = wrapSearchBarInContext({ ...defaultProps });
+    const searchBarTestRoot = React.createElement((updatedProps: SearchBarProps) => (
+      <Provider store={store}>
+        {wrapSearchBarInContext({ ...defaultProps, ...updatedProps })}
+      </Provider>
+    ));
 
     await act(async () => {
-      instance = mountWithIntl(<Provider store={store}>{wrappedSearchBar}</Provider>);
+      instance = mountWithIntl(searchBarTestRoot);
     });
   }
 
@@ -119,7 +139,10 @@ describe('search_bar', () => {
       instance.find('form').simulate('submit', { preventDefault: () => {} });
     });
 
-    expect(defaultProps.onQuerySubmit).toHaveBeenCalledWith('testQuery');
+    expect(dispatchSpy).toHaveBeenCalledWith({
+      type: 'x-pack/graph/workspace/SUBMIT_SEARCH',
+      payload: 'testQuery',
+    });
   });
 
   it('should translate kql query into JSON dsl', async () => {
@@ -135,7 +158,7 @@ describe('search_bar', () => {
       instance.find('form').simulate('submit', { preventDefault: () => {} });
     });
 
-    const parsedQuery = JSON.parse(defaultProps.onQuerySubmit.mock.calls[0][0]);
+    const parsedQuery = JSON.parse(dispatchSpy.mock.calls[0][0].payload);
     expect(parsedQuery).toEqual({
       bool: { should: [{ match: { test: 'abc' } }], minimum_should_match: 1 },
     });

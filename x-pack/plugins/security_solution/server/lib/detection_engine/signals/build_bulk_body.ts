@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SavedObject } from 'src/core/types';
 import { getMergeStrategy } from './source_fields_merging/strategies';
 import {
@@ -37,9 +38,10 @@ export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit,
   mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields'],
   buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
-  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
+  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
   const timestamp = new Date().toISOString();
   const reason = buildReasonMessage({ mergedDoc, rule });
@@ -56,7 +58,7 @@ export const buildBulkBody = (
   };
   const signalHit: SignalHit = {
     ...filteredSource,
-    '@timestamp': timestamp,
+    [TIMESTAMP]: timestamp,
     event,
     signal,
   };
@@ -76,11 +78,19 @@ export const buildSignalGroupFromSequence = (
   ruleSO: SavedObject<AlertAttributes>,
   outputIndex: string,
   mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields'],
   buildReasonMessage: BuildReasonMessage
 ): WrappedSignalHit[] => {
   const wrappedBuildingBlocks = wrapBuildingBlocks(
     sequence.events.map((event) => {
-      const signal = buildSignalFromEvent(event, ruleSO, false, mergeStrategy, buildReasonMessage);
+      const signal = buildSignalFromEvent(
+        event,
+        ruleSO,
+        false,
+        mergeStrategy,
+        ignoreFields,
+        buildReasonMessage
+      );
       signal.signal.rule.building_block_type = 'default';
       return signal;
     }),
@@ -121,13 +131,12 @@ export const buildSignalFromSequence = (
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
   const timestamp = new Date().toISOString();
-
-  const reason = buildReasonMessage({ rule });
-  const signal: Signal = buildSignal(events, rule, reason);
   const mergedEvents = objectArrayIntersection(events.map((event) => event._source));
+  const reason = buildReasonMessage({ rule, mergedDoc: mergedEvents as SignalSourceHit });
+  const signal: Signal = buildSignal(events, rule, reason);
   return {
     ...mergedEvents,
-    '@timestamp': timestamp,
+    [TIMESTAMP]: timestamp,
     event: {
       kind: 'signal',
     },
@@ -147,9 +156,10 @@ export const buildSignalFromEvent = (
   ruleSO: SavedObject<AlertAttributes>,
   applyOverrides: boolean,
   mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields'],
   buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
-  const mergedEvent = getMergeStrategy(mergeStrategy)({ doc: event });
+  const mergedEvent = getMergeStrategy(mergeStrategy)({ doc: event, ignoreFields });
   const rule = applyOverrides
     ? buildRuleWithOverrides(ruleSO, mergedEvent._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);
@@ -167,7 +177,7 @@ export const buildSignalFromEvent = (
   // TODO: better naming for SignalHit - it's really a new signal to be inserted
   const signalHit: SignalHit = {
     ...filteredSource,
-    '@timestamp': timestamp,
+    [TIMESTAMP]: timestamp,
     event: eventFields,
     signal,
   };

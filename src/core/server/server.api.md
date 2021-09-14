@@ -293,6 +293,7 @@ export interface CoreConfigUsageData {
         };
         apiVersion: string;
         healthCheckDelayMs: number;
+        principal: 'elastic_user' | 'kibana_user' | 'kibana_system_user' | 'other_user' | 'kibana_service_account' | 'unknown';
     };
     // (undocumented)
     http: {
@@ -358,6 +359,16 @@ export interface CoreEnvironmentUsageData {
 // @internal (undocumented)
 export type CoreId = symbol;
 
+// @internal
+export interface CoreIncrementCounterParams {
+    counterName: string;
+    counterType?: string;
+    incrementBy?: number;
+}
+
+// @internal
+export type CoreIncrementUsageCounter = (params: CoreIncrementCounterParams) => void;
+
 // @public
 export interface CorePreboot {
     // (undocumented)
@@ -394,6 +405,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
+    // @internal (undocumented)
+    coreUsageData: CoreUsageDataSetup;
     // (undocumented)
     deprecations: DeprecationsServiceSetup;
     // (undocumented)
@@ -449,6 +462,12 @@ export interface CoreStatus {
 }
 
 // @internal
+export interface CoreUsageCounter {
+    // (undocumented)
+    incrementCounter: CoreIncrementUsageCounter;
+}
+
+// @internal
 export interface CoreUsageData extends CoreUsageStats {
     // (undocumented)
     config: CoreConfigUsageData;
@@ -456,6 +475,11 @@ export interface CoreUsageData extends CoreUsageStats {
     environment: CoreEnvironmentUsageData;
     // (undocumented)
     services: CoreServicesUsageData;
+}
+
+// @internal
+export interface CoreUsageDataSetup {
+    registerUsageCounter: (usageCounter: CoreUsageCounter) => void;
 }
 
 // @internal
@@ -467,6 +491,34 @@ export interface CoreUsageDataStart {
 
 // @internal
 export interface CoreUsageStats {
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.total'?: number;
     // (undocumented)
     'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no'?: number;
     // (undocumented)
@@ -754,10 +806,10 @@ export interface DeprecationsDetails {
     // (undocumented)
     documentationUrl?: string;
     level: 'warning' | 'critical' | 'fetch_error';
-    // (undocumented)
     message: string;
     // (undocumented)
     requireRestart?: boolean;
+    title: string;
 }
 
 // @public
@@ -884,6 +936,16 @@ export { EnvironmentMode }
 export interface ErrorHttpResponseOptions {
     body?: ResponseError;
     headers?: ResponseHeaders;
+}
+
+// Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class EventLoopDelaysMonitor {
+    constructor();
+    collect(): IntervalHistogram;
+    reset(): void;
+    stop(): void;
 }
 
 // @public (undocumented)
@@ -1117,6 +1179,31 @@ export interface IKibanaSocket {
         rejectUnauthorized?: boolean;
         requestCert?: boolean;
     }): Promise<void>;
+}
+
+// @public
+export interface IntervalHistogram {
+    // (undocumented)
+    exceeds: number;
+    // (undocumented)
+    fromTimestamp: string;
+    // (undocumented)
+    lastUpdatedAt: string;
+    // (undocumented)
+    max: number;
+    // (undocumented)
+    mean: number;
+    // (undocumented)
+    min: number;
+    // (undocumented)
+    percentiles: {
+        50: number;
+        75: number;
+        95: number;
+        99: number;
+    };
+    // (undocumented)
+    stddev: number;
 }
 
 // @public (undocumented)
@@ -1404,7 +1491,9 @@ export interface OpsMetrics {
     collected_at: Date;
     concurrent_connections: OpsServerMetrics['concurrent_connections'];
     os: OpsOsMetrics;
+    // @deprecated
     process: OpsProcessMetrics;
+    processes: OpsProcessMetrics[];
     requests: OpsServerMetrics['requests'];
     response_times: OpsServerMetrics['response_times'];
 }
@@ -1445,6 +1534,7 @@ export interface OpsOsMetrics {
 // @public
 export interface OpsProcessMetrics {
     event_loop_delay: number;
+    event_loop_delay_histogram: IntervalHistogram;
     memory: {
         heap: {
             total_in_bytes: number;

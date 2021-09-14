@@ -7,8 +7,9 @@
  */
 
 import React, { Fragment } from 'react';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../../../../common';
-import { getServices, IndexPattern } from '../../../../../../kibana_services';
+import { getServices } from '../../../../../../kibana_services';
 
 interface Props {
   defPairs: Array<[string, unknown]>;
@@ -72,7 +73,7 @@ export const formatTopLevelObject = (
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const formatter = field
       ? indexPattern.getFormatterForField(field)
-      : { convert: (v: string, ...rest: unknown[]) => String(v) };
+      : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
     if (!values.map) return;
     const formatted = values
       .map((val: unknown) =>

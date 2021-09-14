@@ -7,15 +7,13 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
-import { useGetUserAlertsPermissions } from '@kbn/alerts';
 
 import { securityNavGroup } from '../../../../app/home/home_navigations';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
-import { useGetUserCasesPermissions, useKibana } from '../../../lib/kibana';
+import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
 import { NavTab } from '../types';
-import { SERVER_APP_ID } from '../../../../../common/constants';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -63,9 +61,7 @@ export const usePrimaryNavigationItems = ({
 };
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
-  const uiCapabilities = useKibana().services.application.capabilities;
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
-  const hasAlertsReadPermissions = useGetUserAlertsPermissions(uiCapabilities, SERVER_APP_ID);
   return useMemo(
     () => [
       {
@@ -75,9 +71,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       },
       {
         ...securityNavGroup.detect,
-        items: hasAlertsReadPermissions.read
-          ? [navTabs.alerts, navTabs.rules, navTabs.exceptions]
-          : [navTabs.rules, navTabs.exceptions],
+        items: [navTabs.alerts, navTabs.rules, navTabs.exceptions],
       },
       {
         ...securityNavGroup.explore,
@@ -92,6 +86,6 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
         items: [navTabs.endpoints, navTabs.trusted_apps, navTabs.event_filters],
       },
     ],
-    [navTabs, hasCasesReadPermissions, hasAlertsReadPermissions]
+    [navTabs, hasCasesReadPermissions]
   );
 }

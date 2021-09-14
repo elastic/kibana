@@ -91,7 +91,7 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
             color="hollow"
             isDisabled={excludeFleetServer && pkg.name === FLEET_SERVER_PACKAGE}
           >
-            <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+            <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <PackageIcon
                   packageName={pkg.name}

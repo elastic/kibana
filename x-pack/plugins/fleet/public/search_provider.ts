@@ -4,21 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup, CoreStart, ApplicationStart } from 'src/core/public';
+import type { CoreSetup, CoreStart, ApplicationStart, IBasePath } from 'src/core/public';
 
 import type { Observable } from 'rxjs';
 import { from, of, combineLatest } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
+
+import { ICON_TYPES } from '@elastic/eui';
 
 import type {
   GlobalSearchResultProvider,
   GlobalSearchProviderResult,
 } from '../../global_search/public';
 
-import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import { epmRouteService, INTEGRATIONS_PLUGIN_ID } from '../common';
 
 import { sendGetPackages } from './hooks';
-import type { GetPackagesResponse } from './types';
+import type { GetPackagesResponse, PackageListItem } from './types';
 import { pagePathGetters } from './constants';
 
 const packageType = 'integration';
@@ -34,16 +36,31 @@ const createPackages$ = () =>
     shareReplay(1)
   );
 
-const toSearchResult = (
-  pkg: GetPackagesResponse['response'][number],
-  application: ApplicationStart
-) => {
+const getEuiIconType = (pkg: PackageListItem, basePath: IBasePath): string | undefined => {
+  const pkgIcon = pkg.icons?.find((icon) => icon.type === 'image/svg+xml');
+  if (!pkgIcon) {
+    // If no valid SVG is available, attempt to fallback to built-in EUI icons
+    return ICON_TYPES.find((key) => key.toLowerCase() === `logo${pkg.name}`);
+  }
+
+  return basePath.prepend(
+    epmRouteService.getFilePath(`/package/${pkg.name}/${pkg.version}${pkgIcon.src}`)
+  );
+};
+
+/** Exported for testing only @internal */
+export const toSearchResult = (
+  pkg: PackageListItem,
+  application: ApplicationStart,
+  basePath: IBasePath
+): GlobalSearchProviderResult => {
   const pkgkey = `${pkg.name}-${pkg.version}`;
   return {
     id: pkgkey,
     type: packageType,
     title: pkg.title,
     score: 80,
+    icon: getEuiIconType(pkg, basePath),
     url: {
       // prettier-ignore
       path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}${pagePathGetters.integration_details_overview({ pkgkey })[1]}`,
@@ -95,13 +112,13 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
         return packagesResponse
           .flatMap(
             includeAllPackages
-              ? (pkg) => toSearchResult(pkg, coreStart.application)
+              ? (pkg) => toSearchResult(pkg, coreStart.application, coreStart.http.basePath)
               : (pkg) => {
                   if (!term || !pkg.title.toLowerCase().includes(term)) {
                     return [];
                   }
 
-                  return toSearchResult(pkg, coreStart.application);
+                  return toSearchResult(pkg, coreStart.application, coreStart.http.basePath);
                 }
           )
           .slice(0, maxResults);
