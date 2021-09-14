@@ -119,7 +119,7 @@ export class SavedObjectEdition extends Component<
           )}
           {object && (
             <EuiFlexItem grow={true}>
-              <Inspect object={object} data-test-subject="savedObjects-objectView-inspect" />
+              <Inspect object={object} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

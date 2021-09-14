@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'error', 'savedObjects']);
   let version: string = '';
+  const find = getService('find');
 
   describe('feature controls saved objects management', () => {
     before(async () => {
@@ -109,12 +110,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(actual).to.be(true);
         });
       });
-
-      describe('edit visualization', () => {
+      // From https://github.com/elastic/kibana/issues/59588 edit view became read-only json view
+      // test description changed from "edit" to "inspect"
+      // Skipping the test to allow code owners to delete or modify the test.
+      describe('inspect visualization', () => {
         before(async () => {
           await PageObjects.common.navigateToUrl(
             'management',
-            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+            'kibana/objects/visualization/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               shouldLoginIfPrompted: false,
               shouldUseHashForSubUrl: false,
@@ -126,11 +129,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('savedObjectEditDelete');
         });
 
-        it('shows save button', async () => {
+        // no longer a feature
+        it.skip('shows save button', async () => {
           await testSubjects.existOrFail('savedObjectEditSave');
         });
 
-        it('has inputs without readonly attributes', async () => {
+        // no longer a feature
+        it.skip('has inputs without readonly attributes', async () => {
           const form = await testSubjects.find('savedObjectEditForm');
           const inputs = await form.findAllByCssSelector('input');
           expect(inputs.length).to.be.greaterThan(0);
@@ -224,17 +229,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      describe('edit visualization', () => {
+      // From https://github.com/elastic/kibana/issues/59588 edit view became read-only json view
+      // test description changed from "edit" to "inspect"
+      // Skipping the test to allow code owners to delete or modify the test.
+      describe('inspect visualization', () => {
         before(async () => {
+          await PageObjects.settings.navigateTo();
+          await PageObjects.settings.clickKibanaSavedObjects();
+          const objects = await PageObjects.savedObjects.getRowTitles();
+          expect(objects.includes('A Pie')).to.be(true);
+          await PageObjects.savedObjects.clickInspectByTitle('A Pie');
           await PageObjects.common.navigateToUrl(
             'management',
-            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+            'kibana/objects/visualization/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               shouldLoginIfPrompted: false,
               shouldUseHashForSubUrl: false,
             }
           );
-          await testSubjects.existOrFail('savedObjectsEdit');
+        });
+
+        it('allows viewing the object', async () => {
+          const inspectContainer = await find.byClassName('kibanaCodeEditor');
+          const visibleContainerText = await inspectContainer.getVisibleText();
+          expect(visibleContainerText.includes('A Pie'));
         });
 
         it('does not show delete button', async () => {
@@ -245,7 +263,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.missingOrFail('savedObjectEditSave');
         });
 
-        it('has inputs with only readonly attributes', async () => {
+        // No longer a feature
+        it.skip('has inputs with only readonly attributes', async () => {
           const form = await testSubjects.find('savedObjectEditForm');
           const inputs = await form.findAllByCssSelector('input');
           expect(inputs.length).to.be.greaterThan(0);
@@ -310,11 +329,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      describe('edit visualization', () => {
+      describe('inspect visualization', () => {
         it('redirects to management home', async () => {
           await PageObjects.common.navigateToUrl(
             'management',
-            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+            'kibana/objects/visualization/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               shouldLoginIfPrompted: false,
               ensureCurrentUrl: false,
