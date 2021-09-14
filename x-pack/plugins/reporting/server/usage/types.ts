@@ -36,14 +36,14 @@ export interface StatusByAppBucket {
 }
 
 export interface AggregationResultBuckets extends SizeStats {
-  jobTypes: AggregationBuckets;
+  jobTypes?: AggregationBuckets;
   layoutTypes: {
     doc_count: number;
-    pdf: AggregationBuckets;
+    pdf?: AggregationBuckets;
   };
   objectTypes: {
     doc_count: number;
-    pdf: AggregationBuckets;
+    pdf?: AggregationBuckets;
   };
   statusTypes: AggregationBuckets;
   statusByApp: {

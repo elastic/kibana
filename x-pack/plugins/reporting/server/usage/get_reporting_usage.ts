@@ -13,6 +13,7 @@ import type { GetLicense } from './';
 import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import type {
+  AggregationBuckets,
   AggregationResultBuckets,
   AvailableTotal,
   FeatureAvailabilityMap,
@@ -68,7 +69,7 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
   }, {});
 
 function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
-  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY];
+  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
     const { key, doc_count: count, isDeprecated, sizeMax, sizeMin, sizeAvg } = bucket;
     const deprecatedCount = isDeprecated?.doc_count;
@@ -76,9 +77,9 @@ function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
       total: count,
       deprecated: deprecatedCount,
       output_size: {
-        max: sizeMax.value,
-        min: sizeMin.value,
-        avg: sizeAvg.value,
+        max: sizeMax?.value ?? null,
+        min: sizeMin?.value ?? null,
+        avg: sizeAvg?.value ?? null,
       },
     };
     return { ...accum, [key]: total };
@@ -111,9 +112,9 @@ function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
     status: statusTypes,
     statuses: statusByApp,
     output_size: {
-      max: get(aggs[OUTPUT_SIZE_MAX_KEY], 'value'),
-      min: get(aggs[OUTPUT_SIZE_MIN_KEY], 'value'),
-      avg: get(aggs[OUTPUT_SIZE_AVG_KEY], 'value'),
+      max: get(aggs[OUTPUT_SIZE_MAX_KEY], 'value') ?? null,
+      min: get(aggs[OUTPUT_SIZE_MIN_KEY], 'value') ?? null,
+      avg: get(aggs[OUTPUT_SIZE_AVG_KEY], 'value') ?? null,
     },
     ...jobTypes,
   };
