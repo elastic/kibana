@@ -106,8 +106,12 @@ export const getUnknownTypesDeprecations = async (
       }),
       message: i18n.translate('core.savedObjects.deprecations.unknownTypes.message', {
         defaultMessage:
-          'Upgrades will fail for 8.0+ because documents were found for unknown saved object types.' +
+          '{objectCount, plural, one {# object} other {# objects}} with unknown types {objectCount, plural, one {was} other {were}} found in Kibana system indices. ' +
+          'Upgrading with unknown savedObject types is no longer supported. ' +
           `To ensure that upgrades will succeed in the future, either re-enable plugins or delete these documents from the Kibana indices`,
+        values: {
+          objectCount: unknownDocs.length,
+        },
       }),
       level: 'critical',
       requireRestart: false,
