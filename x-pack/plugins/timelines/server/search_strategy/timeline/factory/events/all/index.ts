@@ -27,11 +27,7 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     const { fieldRequested, ...queryOptions } = cloneDeep(options);
-    console.log('HHHHHHHEEEEERE 7');
-
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
-    console.log('HHHHHHHEEEEERE 8');
-
     return buildTimelineEventsAllQuery({ ...queryOptions, authFilter });
   },
   parse: async (

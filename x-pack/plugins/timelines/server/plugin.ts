@@ -39,7 +39,6 @@ export class TimelinesPlugin
     defineRoutes(router);
 
     // Register search strategy
-    // Need to pass in security.audit.asScoped
     core.getStartServices().then(([_, depsStart]) => {
       const TimelineSearchStrategy = timelineSearchStrategyProvider(
         depsStart.data,

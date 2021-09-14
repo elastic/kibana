@@ -112,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   });
 
-  describe.only('Timeline - Events', () => {
+  describe('Timeline - Events', () => {
     const logFilePath = Path.resolve(__dirname, '../../../common/fixtures/audit/audit.log');
     const logFile = new FileWrapper(logFilePath);
     const retry = getService('retry');
