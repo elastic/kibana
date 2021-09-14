@@ -1969,7 +1969,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.input",
+                "id": "def-public.ExpressionFunction.fn.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "input",
@@ -1982,7 +1982,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.params",
+                "id": "def-public.ExpressionFunction.fn.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -1995,7 +1995,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.handlers",
+                "id": "def-public.ExpressionFunction.fn.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "handlers",
@@ -2082,7 +2082,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.state",
+                "id": "def-public.ExpressionFunction.telemetry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -2103,7 +2103,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.telemetryData",
+                "id": "def-public.ExpressionFunction.telemetry.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "telemetryData",
@@ -2150,7 +2150,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.state",
+                "id": "def-public.ExpressionFunction.extract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -2205,7 +2205,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.state",
+                "id": "def-public.ExpressionFunction.inject.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -2226,7 +2226,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.references",
+                "id": "def-public.ExpressionFunction.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
@@ -2621,7 +2621,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.domNode",
+                "id": "def-public.ExpressionRenderer.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "domNode",
@@ -2634,7 +2634,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.config",
+                "id": "def-public.ExpressionRenderer.render.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -2647,7 +2647,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.handlers",
+                "id": "def-public.ExpressionRenderer.render.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "handlers",
@@ -2982,7 +2982,7 @@
                 "id": "def-public.ExpressionRenderHandler.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      hasCompatibleActions = async () => false,\n    }",
+                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      interactive,\n      hasCompatibleActions = async () => false,\n    }",
                 "description": [],
                 "signature": [
                   "ExpressionRenderHandlerParams"
@@ -3212,7 +3212,7 @@
             "section": "def-common.ExpressionsService",
             "text": "ExpressionsService"
           },
-          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
+          ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -3286,7 +3286,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+              ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "path": "src/plugins/expressions/public/plugin.ts",
             "deprecated": false,
@@ -3415,7 +3415,7 @@
             "section": "def-common.ExpressionsService",
             "text": "ExpressionsService"
           },
-          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
+          ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -3489,7 +3489,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+              ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "path": "src/plugins/expressions/public/plugin.ts",
             "deprecated": false,
@@ -4230,7 +4230,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.ast",
+                "id": "def-public.ExpressionsService.execute.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "ast",
@@ -4250,7 +4250,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.input",
+                "id": "def-public.ExpressionsService.execute.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "input",
@@ -4263,7 +4263,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.params",
+                "id": "def-public.ExpressionsService.execute.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -4603,7 +4603,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+              ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -4732,7 +4732,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-public.type",
+                "id": "def-public.ExpressionType.validate.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "type",
@@ -9169,6 +9169,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.interactive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "interactive",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.IExpressionLoaderParams.onRenderError",
             "type": "Function",
             "tags": [],
@@ -9202,7 +9215,7 @@
             "label": "renderMode",
             "description": [],
             "signature": [
-              "\"display\" | \"noInteractivity\" | \"edit\" | \"preview\" | undefined"
+              "\"edit\" | \"preview\" | \"view\" | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
             "deprecated": false
@@ -9466,6 +9479,23 @@
                 "section": "def-common.RenderMode",
                 "text": "RenderMode"
               }
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IInterpreterRenderHandlers.isInteractive",
+            "type": "Function",
+            "tags": [],
+            "label": "isInteractive",
+            "description": [
+              "\nThe chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing."
+            ],
+            "signature": [
+              "() => boolean"
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false,
@@ -10228,7 +10258,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -10458,7 +10488,7 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-public.props",
+            "id": "def-public.ExpressionRendererComponent.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -10471,7 +10501,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-public.context",
+            "id": "def-public.ExpressionRendererComponent.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -10529,7 +10559,7 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-public.input",
+            "id": "def-public.ExpressionValueConverter.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "input",
@@ -10542,7 +10572,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-public.availableTypes",
+            "id": "def-public.ExpressionValueConverter.$2",
             "type": "Object",
             "tags": [],
             "label": "availableTypes",
@@ -10979,7 +11009,43 @@
         "\nExpressions public setup contract, extends {@link ExpressionsServiceSetup}"
       ],
       "signature": [
-        "{ readonly getType: (name: string) => ",
+        "{ readonly inject: (state: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        ", references: ",
+        "SavedObjectReference",
+        "[]) => ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        "; readonly extract: (state: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        ") => { state: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        "; references: ",
+        "SavedObjectReference",
+        "[]; }; readonly getType: (name: string) => ",
         {
           "pluginId": "expressions",
           "scope": "common",
@@ -11230,7 +11296,7 @@
           "children": [
             {
               "parentPluginId": "expressions",
-              "id": "def-public.element",
+              "id": "def-public.ExpressionsStart.loader.$1",
               "type": "Object",
               "tags": [],
               "label": "element",
@@ -11243,7 +11309,7 @@
             },
             {
               "parentPluginId": "expressions",
-              "id": "def-public.expression",
+              "id": "def-public.ExpressionsStart.loader.$2",
               "type": "CompoundType",
               "tags": [],
               "label": "expression",
@@ -11263,7 +11329,7 @@
             },
             {
               "parentPluginId": "expressions",
-              "id": "def-public.params",
+              "id": "def-public.ExpressionsStart.loader.$3",
               "type": "Object",
               "tags": [],
               "label": "params",
@@ -11306,7 +11372,7 @@
           "children": [
             {
               "parentPluginId": "expressions",
-              "id": "def-public.__0",
+              "id": "def-public.ExpressionsStart.ReactExpressionRenderer.$1",
               "type": "Object",
               "tags": [],
               "label": "__0",
@@ -11350,7 +11416,7 @@
           "children": [
             {
               "parentPluginId": "expressions",
-              "id": "def-public.element",
+              "id": "def-public.ExpressionsStart.render.$1",
               "type": "Object",
               "tags": [],
               "label": "element",
@@ -11363,7 +11429,7 @@
             },
             {
               "parentPluginId": "expressions",
-              "id": "def-public.data",
+              "id": "def-public.ExpressionsStart.render.$2",
               "type": "Any",
               "tags": [],
               "label": "data",
@@ -11376,7 +11442,7 @@
             },
             {
               "parentPluginId": "expressions",
-              "id": "def-public.options",
+              "id": "def-public.ExpressionsStart.render.$3",
               "type": "Object",
               "tags": [],
               "label": "options",
@@ -13172,7 +13238,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.input",
+                "id": "def-server.ExpressionFunction.fn.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "input",
@@ -13185,7 +13251,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.params",
+                "id": "def-server.ExpressionFunction.fn.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -13198,7 +13264,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.handlers",
+                "id": "def-server.ExpressionFunction.fn.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "handlers",
@@ -13285,7 +13351,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.state",
+                "id": "def-server.ExpressionFunction.telemetry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -13306,7 +13372,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.telemetryData",
+                "id": "def-server.ExpressionFunction.telemetry.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "telemetryData",
@@ -13353,7 +13419,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.state",
+                "id": "def-server.ExpressionFunction.extract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -13408,7 +13474,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.state",
+                "id": "def-server.ExpressionFunction.inject.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -13429,7 +13495,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.references",
+                "id": "def-server.ExpressionFunction.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
@@ -13824,7 +13890,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.domNode",
+                "id": "def-server.ExpressionRenderer.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "domNode",
@@ -13837,7 +13903,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.config",
+                "id": "def-server.ExpressionRenderer.render.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -13850,7 +13916,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.handlers",
+                "id": "def-server.ExpressionRenderer.render.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "handlers",
@@ -14124,7 +14190,7 @@
             "section": "def-common.ExpressionsService",
             "text": "ExpressionsService"
           },
-          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
+          ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -14217,7 +14283,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+              ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "path": "src/plugins/expressions/server/plugin.ts",
             "deprecated": false,
@@ -14346,7 +14412,7 @@
             "section": "def-common.ExpressionsService",
             "text": "ExpressionsService"
           },
-          ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
+          ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -14439,7 +14505,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+              ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "path": "src/plugins/expressions/server/plugin.ts",
             "deprecated": false,
@@ -14587,7 +14653,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-server.type",
+                "id": "def-server.ExpressionType.validate.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "type",
@@ -18414,6 +18480,23 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.IInterpreterRenderHandlers.isInteractive",
+            "type": "Function",
+            "tags": [],
+            "label": "isInteractive",
+            "description": [
+              "\nThe chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.IInterpreterRenderHandlers.isSyncColorsEnabled",
             "type": "Function",
             "tags": [],
@@ -18889,7 +18972,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -19139,7 +19222,7 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-server.input",
+            "id": "def-server.ExpressionValueConverter.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "input",
@@ -19152,7 +19235,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-server.availableTypes",
+            "id": "def-server.ExpressionValueConverter.$2",
             "type": "Object",
             "tags": [],
             "label": "availableTypes",
@@ -19557,7 +19640,43 @@
       "label": "ExpressionsServerSetup",
       "description": [],
       "signature": [
-        "{ readonly getType: (name: string) => ",
+        "{ readonly inject: (state: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        ", references: ",
+        "SavedObjectReference",
+        "[]) => ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        "; readonly extract: (state: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        ") => { state: ",
+        {
+          "pluginId": "expressions",
+          "scope": "common",
+          "docId": "kibExpressionsPluginApi",
+          "section": "def-common.ExpressionAstExpression",
+          "text": "ExpressionAstExpression"
+        },
+        "; references: ",
+        "SavedObjectReference",
+        "[]; }; readonly getType: (name: string) => ",
         {
           "pluginId": "expressions",
           "scope": "common",
@@ -21703,7 +21822,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.input",
+                "id": "def-common.ExpressionFunction.fn.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "input",
@@ -21716,7 +21835,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.params",
+                "id": "def-common.ExpressionFunction.fn.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -21729,7 +21848,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.handlers",
+                "id": "def-common.ExpressionFunction.fn.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "handlers",
@@ -21816,7 +21935,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExpressionFunction.telemetry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -21837,7 +21956,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.telemetryData",
+                "id": "def-common.ExpressionFunction.telemetry.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "telemetryData",
@@ -21884,7 +22003,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExpressionFunction.extract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -21939,7 +22058,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.state",
+                "id": "def-common.ExpressionFunction.inject.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -21960,7 +22079,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.references",
+                "id": "def-common.ExpressionFunction.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
@@ -22355,7 +22474,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.domNode",
+                "id": "def-common.ExpressionRenderer.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "domNode",
@@ -22368,7 +22487,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.config",
+                "id": "def-common.ExpressionRenderer.render.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -22381,7 +22500,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.handlers",
+                "id": "def-common.ExpressionRenderer.render.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "handlers",
@@ -23333,7 +23452,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.ast",
+                "id": "def-common.ExpressionsService.execute.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "ast",
@@ -23353,7 +23472,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.input",
+                "id": "def-common.ExpressionsService.execute.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "input",
@@ -23366,7 +23485,7 @@
               },
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.params",
+                "id": "def-common.ExpressionsService.execute.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -23706,7 +23825,7 @@
                 "section": "def-common.ExpressionsService",
                 "text": "ExpressionsService"
               },
-              ", \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
+              ", \"inject\" | \"extract\" | \"getType\" | \"registerType\" | \"getFunction\" | \"getFunctions\" | \"getRenderer\" | \"getRenderers\" | \"getTypes\" | \"registerFunction\" | \"registerRenderer\" | \"run\" | \"fork\">"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -23835,7 +23954,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.type",
+                "id": "def-common.ExpressionType.validate.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "type",
@@ -25083,7 +25202,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-common.buildResultColumns.$5.options",
+            "id": "def-common.buildResultColumns.$5",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -25093,7 +25212,7 @@
             "children": [
               {
                 "parentPluginId": "expressions",
-                "id": "def-common.buildResultColumns.$5.options.allowColumnOverwrite",
+                "id": "def-common.buildResultColumns.$5.allowColumnOverwrite",
                 "type": "boolean",
                 "tags": [],
                 "label": "allowColumnOverwrite",
@@ -26487,7 +26606,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false
@@ -30317,6 +30436,23 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.IInterpreterRenderHandlers.isInteractive",
+            "type": "Function",
+            "tags": [],
+            "label": "isInteractive",
+            "description": [
+              "\nThe chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.IInterpreterRenderHandlers.isSyncColorsEnabled",
             "type": "Function",
             "tags": [],
@@ -31111,7 +31247,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -31898,7 +32034,43 @@
           "\nThe public contract that `ExpressionsService` provides to other plugins\nin Kibana Platform in *setup* life-cycle."
         ],
         "signature": [
-          "{ readonly getType: (name: string) => ",
+          "{ readonly inject: (state: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          ", references: ",
+          "SavedObjectReference",
+          "[]) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          "; readonly extract: (state: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          ") => { state: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          "; references: ",
+          "SavedObjectReference",
+          "[]; }; readonly getType: (name: string) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -32096,7 +32268,7 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-common.input",
+            "id": "def-common.ExpressionValueConverter.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "input",
@@ -32109,7 +32281,7 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-common.availableTypes",
+            "id": "def-common.ExpressionValueConverter.$2",
             "type": "Object",
             "tags": [],
             "label": "availableTypes",
@@ -32575,10 +32747,10 @@
         "tags": [],
         "label": "RenderMode",
         "description": [
-          "\nMode of the expression render environment.\nThis value can be set from a consumer embedding an expression renderer and is accessible\nfrom within the active render function as part of the handlers.\nThe following modes are supported:\n* display (default): The chart is rendered in a container with the main purpose of viewing the chart (e.g. in a container like dashboard or canvas)\n* preview: The chart is rendered in very restricted space (below 100px width and height) and should only show a rough outline\n* edit: The chart is rendered within an editor and configuration elements within the chart should be displayed\n* noInteractivity: The chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing"
+          "\nMode of the expression render environment.\nThis value can be set from a consumer embedding an expression renderer and is accessible\nfrom within the active render function as part of the handlers.\nThe following modes are supported:\n* view (default): The chart is rendered in a container with the main purpose of viewing the chart (e.g. in a container like dashboard or canvas)\n* preview: The chart is rendered in very restricted space (below 100px width and height) and should only show a rough outline\n* edit: The chart is rendered within an editor and configuration elements within the chart should be displayed"
         ],
         "signature": [
-          "\"display\" | \"noInteractivity\" | \"edit\" | \"preview\""
+          "\"edit\" | \"preview\" | \"view\""
         ],
         "path": "src/plugins/expressions/common/expression_renderers/types.ts",
         "deprecated": false,
@@ -35950,7 +36122,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"boolean\" | \"string\" | \"null\")[]"
+                      "(\"number\" | \"string\" | \"boolean\" | \"null\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
                     "deprecated": false

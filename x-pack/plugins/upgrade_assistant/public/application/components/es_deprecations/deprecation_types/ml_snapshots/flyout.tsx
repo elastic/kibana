@@ -169,7 +169,7 @@ export const FixSnapshotsFlyout = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2>{i18nTexts.flyoutTitle}</h2>
+          <h2 id="mlSnapshotDetailsFlyoutTitle">{i18nTexts.flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

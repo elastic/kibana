@@ -126,7 +126,7 @@
               },
               {
                 "parentPluginId": "urlForwarding",
-                "id": "def-public.UrlForwardingPlugin.start.$2.kibanaLegacy",
+                "id": "def-public.UrlForwardingPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "{ kibanaLegacy }",
@@ -136,7 +136,7 @@
                 "children": [
                   {
                     "parentPluginId": "urlForwarding",
-                    "id": "def-public.UrlForwardingPlugin.start.$2.kibanaLegacy.kibanaLegacy",
+                    "id": "def-public.UrlForwardingPlugin.start.$2.kibanaLegacy",
                     "type": "Object",
                     "tags": [],
                     "label": "kibanaLegacy",
