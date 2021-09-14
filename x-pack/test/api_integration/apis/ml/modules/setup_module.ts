@@ -204,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 200,
         jobs: [
           {
-            jobId: 'pf5_high_mean_transaction_duration',
+            jobId: 'pf5_apm_metrics',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
           },

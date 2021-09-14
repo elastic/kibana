@@ -4,12 +4,12 @@
   "description": "Detect anomalies in transactions from your APM services for metric data.",
   "type": "Transaction data",
   "logoFile": "logo.json",
-  "defaultIndexPattern": "apm-*-metric-*",
+  "defaultIndexPattern": "apm-*-metric,metrics-apm*",
   "query": {
     "bool": {
       "filter": [
         { "term": { "processor.event": "metric" } },
-        { "exists": { "field": "transaction.duration.histogram" } }
+        { "term": { "metricset.name": "transaction" } }
       ]
     }
   },
