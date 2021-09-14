@@ -63,7 +63,7 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
         testSubjects.exists('hasWarningsCallout');
       });
 
-      it('Shows shows no warnings callout if there are no deprecations', async () => {
+      it('Shows no warnings callout if there are no deprecations', async () => {
         await PageObjects.upgradeAssistant.clickResetLastCheckpointButton();
         testSubjects.exists('noWarningsCallout');
       });
