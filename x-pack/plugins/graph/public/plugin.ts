@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { SpacesApi } from '../../spaces/public';
 import {
   AppNavLinkStatus,
   AppUpdater,
@@ -44,6 +45,7 @@ export interface GraphPluginStartDependencies {
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
   home?: HomePublicPluginStart;
+  spaces?: SpacesApi;
 }
 
 export class GraphPlugin
@@ -110,6 +112,7 @@ export class GraphPlugin
           overlays: coreStart.overlays,
           savedObjects: pluginsStart.savedObjects,
           uiSettings: core.uiSettings,
+          spaces: pluginsStart.spaces,
         });
       },
     });

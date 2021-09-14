@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { emsWorldLayerId } from '../../../../../common';
+import { emsWorldLayerId } from '../../../../../common/constants';
 
 jest.mock('../../../../kibana_services', () => {
   return {
