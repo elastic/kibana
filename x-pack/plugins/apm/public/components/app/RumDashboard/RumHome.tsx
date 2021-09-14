@@ -29,11 +29,11 @@ export function RumHome() {
 
   const { isSmall, isXXL } = useBreakpoints();
 
-  const rumData = useHasRumData();
+  const { data: rumHasData } = useHasRumData();
 
   const envStyle = isSmall ? {} : { maxWidth: 500 };
 
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !rumData?.hasData
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !rumHasData?.hasData
     ? {
         solution: i18n.translate('xpack.apm.ux.overview.solutionName', {
           defaultMessage: 'Observability',
