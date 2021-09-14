@@ -3,9 +3,3 @@
 .fleet__epm__shiftNavTabs {
   margin-left: $euiSize * 6 + $euiSizeXL * 2 + $euiSizeL;
 }
-
-@media (max-width: 767px) {
-  .header_container .euiFlexItem {
-    margin-bottom: 0 !important;
-  }
-}
