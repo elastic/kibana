@@ -48,9 +48,8 @@ export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ range, setRa
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiDatePickerRange
-          fullWidth
           data-test-subj="enrichment-query-range-picker"
           startDateControl={
             <EuiDatePicker
