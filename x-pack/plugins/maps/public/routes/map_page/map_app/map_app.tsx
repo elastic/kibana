@@ -140,10 +140,10 @@ export class MapApp extends React.Component<Props, State> {
     //   this._updateStateFromSavedQuery(initialSavedQuery as SavedQuery);
     // }
 
-    this._initMap();
+    await this._initMap();
 
     this.props.onAppLeave((actions) => {
-      if (this.props.savedMap.hasUnsavedChanges()) {
+      if (this.props.savedMap.getMapInitialized() && this.props.savedMap.hasUnsavedChanges()) {
         return actions.confirm(unsavedChangesWarning, unsavedChangesTitle);
       }
       return actions.default() as AppLeaveAction;

@@ -59,6 +59,7 @@ export class SavedMap {
   private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
   private _tags: string[] = [];
+  private _mapInitialized: boolean = false;
 
   constructor({
     defaultLayers = [],
@@ -173,11 +174,14 @@ export class SavedMap {
       this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
     }
     this._initialLayerListConfig = copyPersistentState(layerList);
+    this._mapInitialized = true;
   }
+
+  getMapInitialized = () => this._mapInitialized;
 
   hasUnsavedChanges = () => {
     if (!this._attributes) {
-      return false;
+      throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
     }
 
     const savedLayerList = this._attributes.layerListJSON
