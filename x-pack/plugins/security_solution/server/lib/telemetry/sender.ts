@@ -630,6 +630,7 @@ const allowlistEventFields: AllowlistFields = {
   events: allowlistBaseEventFields,
   // behavioral protection re-nests some field sets under Events.* (>=7.15)
   Events: allowlistBaseEventFields,
+  Responses: true,
   rule: {
     id: true,
     name: true,
