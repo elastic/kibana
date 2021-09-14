@@ -187,7 +187,7 @@ function getTransportConfig(
   if (service === JSON_TRANSPORT_SERVICE) {
     transportConfig.jsonTransport = true;
     delete transportConfig.auth;
-  } else if (service != null) {
+  } else if (service != null && service !== AdditionalEmailServices.OTHER) {
     transportConfig.service = service;
   } else {
     transportConfig.host = host;

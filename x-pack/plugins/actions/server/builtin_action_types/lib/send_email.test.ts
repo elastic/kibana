@@ -105,7 +105,7 @@ describe('send_email module', () => {
     await sendEmail(mockLogger, sendEmailOptions);
     expect(requestOAuthClientCredentialsTokenMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "login.microsoftonline.com/undefined/oauth2/v2.0/token",
+        "https://login.microsoftonline.com/undefined/oauth2/v2.0/token",
         Object {
           "context": Array [],
           "debug": [MockFunction],
