@@ -51,8 +51,12 @@ import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { createQueryAlertType } from './lib/detection_engine/rule_types';
-import { createMlAlertType } from './lib/detection_engine/rule_types/ml/create_ml_alert_type';
+import {
+  createEqlAlertType,
+  createIndicatorMatchAlertType,
+  createMlAlertType,
+  createQueryAlertType,
+} from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
@@ -66,10 +70,11 @@ import {
   SERVER_APP_ID,
   SIGNALS_ID,
   NOTIFICATIONS_ID,
-  QUERY_ALERT_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
   DEFAULT_SPACE_ID,
-  INDICATOR_ALERT_TYPE_ID,
-  ML_ALERT_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -99,7 +104,6 @@ import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rule
 import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
-import { createIndicatorMatchAlertType } from './lib/detection_engine/rule_types/indicator_match/create_indicator_match_alert_type';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
 import { runMigrationsTask } from './lib/startup_migrations/run_migrations_task';
@@ -269,6 +273,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
       };
 
+      this.setupPlugins.alerting.registerType(createEqlAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createMlAlertType(createRuleOptions));
@@ -282,7 +287,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.security,
       plugins.ml,
       ruleDataService,
-      ruleDataClient
+      isRuleRegistryEnabled
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
@@ -291,7 +296,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerTrustedAppsRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
-    const racRuleTypes = [QUERY_ALERT_TYPE_ID, INDICATOR_ALERT_TYPE_ID, ML_ALERT_TYPE_ID];
+    const racRuleTypes = [
+      EQL_RULE_TYPE_ID,
+      QUERY_RULE_TYPE_ID,
+      INDICATOR_RULE_TYPE_ID,
+      ML_RULE_TYPE_ID,
+    ];
     const ruleTypes = [
       SIGNALS_ID,
       NOTIFICATIONS_ID,
@@ -391,7 +401,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               taskManager,
             });
           } else {
-            logger.debug('User artifacts task not available.');
+            logger.error(new Error('User artifacts task not available.'));
           }
         });
       });

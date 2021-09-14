@@ -244,3 +244,4 @@ export const policyFactoryWithSupportedFeatures = (
  * Reflects what string the Endpoint will use when message field is default/empty
  */
 export const DefaultPolicyNotificationMessage = 'Elastic Security {action} {filename}';
+export const DefaultPolicyRuleNotificationMessage = 'Elastic Security {action} {rule}';
