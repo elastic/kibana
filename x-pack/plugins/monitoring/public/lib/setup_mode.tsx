@@ -17,6 +17,7 @@ import { SetupModeFeature } from '../../common/enums';
 import { ISetupModeContext } from '../components/setup_mode/setup_mode_context';
 import * as setupModeReact from '../application/setup_mode/setup_mode';
 import { isReactMigrationEnabled } from '../external_config';
+import { toggleSetupMode as toggleReactSetupMode } from '../application/setup_mode/setup_mode';
 
 function isOnPage(hash: string) {
   return includes(window.location.hash, hash);
@@ -159,18 +160,23 @@ export const disableElasticsearchInternalCollection = async () => {
 };
 
 export const toggleSetupMode = (inSetupMode: boolean) => {
-  checkAngularState();
+  try {
+    checkAngularState();
 
-  const globalState = angularState.injector.get('globalState');
-  setupModeState.enabled = inSetupMode;
-  globalState.inSetupMode = inSetupMode;
-  globalState.save();
-  setSetupModeMenuItem();
-  notifySetupModeDataChange();
+    const globalState = angularState.injector.get('globalState');
+    setupModeState.enabled = inSetupMode;
+    globalState.inSetupMode = inSetupMode;
+    globalState.save();
+    setSetupModeMenuItem();
+    notifySetupModeDataChange();
 
-  if (inSetupMode) {
-    // Intentionally do not await this so we don't block UI operations
-    updateSetupModeData();
+    if (inSetupMode) {
+      // Intentionally do not await this so we don't block UI operations
+      updateSetupModeData();
+    }
+  } catch (err) {
+    // TODO figure out how to initSetupModeState from NoDataPage
+    // toggleReactSetupMode();
   }
 };
 
