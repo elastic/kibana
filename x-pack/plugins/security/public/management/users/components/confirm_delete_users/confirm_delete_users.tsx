@@ -100,7 +100,7 @@ export class ConfirmDeleteUsers extends Component<Props, unknown> {
           )
         );
       }
-
+    }).then(() => {
       if (callback) {
         callback(usersToDelete, errors);
       }
