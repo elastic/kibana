@@ -64,7 +64,7 @@ describe('Cases privileges', () => {
   });
 
   for (const user of [secAllUser, secReadCasesAllUser]) {
-    it.only(`User ${user.username} with role(s) ${user.roles.join()} can create a case`, () => {
+    it(`User ${user.username} with role(s) ${user.roles.join()} can create a case`, () => {
       loginWithUserAndWaitForPageWithoutDateRange(CASES_URL, user);
       goToCreateNewCase();
       fillCasesMandatoryfields(testCase);

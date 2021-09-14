@@ -43,7 +43,7 @@ describe('Alerts timeline', () => {
       loadDetectionsPage(ROLES.reader);
     });
 
-    it.only('should not allow user with read only privileges to attach alerts to cases', () => {
+    it('should not allow user with read only privileges to attach alerts to cases', () => {
       cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
       cy.get(ATTACH_ALERT_TO_CASE_BUTTON).should('not.exist');
     });
