@@ -19,18 +19,6 @@ import { OptionsListComponent, OptionsListComponentState } from './options_list_
 import { Embeddable } from '../../../../../../embeddable/public';
 import { InputControlInput, InputControlOutput } from '../../embeddable/types';
 
-// TEMPORARY CONSTANT VALUES
-const TEMP_FIELD = {
-  name: 'data_stream.dataset',
-  type: 'string',
-  aggregatable: true,
-};
-
-const TEMP_INDEX_PATTERN = {
-  title: 'ecomm',
-  fields: [TEMP_FIELD],
-};
-
 const toggleAvailableOptions = (
   indices: number[],
   availableOptions: EuiSelectableOption[],

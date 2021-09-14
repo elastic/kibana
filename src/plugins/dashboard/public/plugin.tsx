@@ -271,26 +271,6 @@ export class DashboardPlugin
         dashboardContainerFactory
       );
 
-      /*
-      interface ValueSuggestionsGetFnArgs {
-  indexPattern: IIndexPattern;
-  field: IFieldType;
-  query: string;
-  useTimeRange?: boolean;
-  boolFilter?: any[];
-  signal?: AbortSignal;
-  method?: ValueSuggestionsMethod;
-}
-export interface OptionsListDataFetchProps {
-  field: string;
-  search?: string;
-  indexPattern: string;
-  query?: InputControlInput['query'];
-  filters?: InputControlInput['filters'];
-  timeRange?: InputControlInput['timeRange'];
-}
-*/
-
       const fetchControlOptions = (args: OptionsListDataFetchProps) => {
         const { indexPattern, field, search } = args;
 
