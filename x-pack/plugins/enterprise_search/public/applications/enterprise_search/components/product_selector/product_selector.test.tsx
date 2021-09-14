@@ -11,6 +11,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
+
 import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
@@ -18,10 +20,15 @@ import { TrialCallout } from '../trial_callout';
 
 import { ProductSelector } from './';
 
+const props = {
+  access: {},
+  isWorkplaceSearchAdmin: true,
+};
+
 describe('ProductSelector', () => {
   it('renders the overview page, product cards, & setup guide CTAs with no host set', () => {
     setMockValues({ config: { host: '' } });
-    const wrapper = shallow(<ProductSelector access={{}} />);
+    const wrapper = shallow(<ProductSelector {...props} />);
 
     expect(wrapper.find(ProductCard)).toHaveLength(2);
     expect(wrapper.find(SetupGuideCta)).toHaveLength(1);
@@ -30,10 +37,19 @@ describe('ProductSelector', () => {
 
   it('renders the license and trial callouts', () => {
     setMockValues({ config: { host: 'localhost' } });
-    const wrapper = shallow(<ProductSelector access={{}} />);
+    const wrapper = shallow(<ProductSelector {...props} />);
 
     expect(wrapper.find(TrialCallout)).toHaveLength(1);
     expect(wrapper.find(LicenseCallout)).toHaveLength(1);
+  });
+
+  it('passes correct URL when Workplace Search user is not an admin', () => {
+    setMockValues({ config: { host: '' } });
+    const wrapper = shallow(<ProductSelector {...props} isWorkplaceSearchAdmin={false} />);
+
+    expect(wrapper.find(ProductCard).last().prop('url')).toEqual(
+      WORKPLACE_SEARCH_PLUGIN.NON_ADMIN_URL
+    );
   });
 
   describe('access checks when host is set', () => {
@@ -43,7 +59,10 @@ describe('ProductSelector', () => {
 
     it('does not render the App Search card if the user does not have access to AS', () => {
       const wrapper = shallow(
-        <ProductSelector access={{ hasAppSearchAccess: false, hasWorkplaceSearchAccess: true }} />
+        <ProductSelector
+          {...props}
+          access={{ hasAppSearchAccess: false, hasWorkplaceSearchAccess: true }}
+        />
       );
 
       expect(wrapper.find(ProductCard)).toHaveLength(1);
@@ -52,7 +71,10 @@ describe('ProductSelector', () => {
 
     it('does not render the Workplace Search card if the user does not have access to WS', () => {
       const wrapper = shallow(
-        <ProductSelector access={{ hasAppSearchAccess: true, hasWorkplaceSearchAccess: false }} />
+        <ProductSelector
+          {...props}
+          access={{ hasAppSearchAccess: true, hasWorkplaceSearchAccess: false }}
+        />
       );
 
       expect(wrapper.find(ProductCard)).toHaveLength(1);
@@ -60,7 +82,7 @@ describe('ProductSelector', () => {
     });
 
     it('does not render any cards if the user does not have access', () => {
-      const wrapper = shallow(<ProductSelector access={{}} />);
+      const wrapper = shallow(<ProductSelector {...props} />);
 
       expect(wrapper.find(ProductCard)).toHaveLength(0);
     });
