@@ -198,7 +198,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const kqlQuery: {
     query: string;
     language: KueryFilterQueryKind;
-  } = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [kqlQueryExpression]);
+  } = useMemo(() => ({ query: kqlQueryExpression.trim(), language: 'kuery' }), [
+    kqlQueryExpression,
+  ]);
 
   const combinedQueries = combineQueries({
     config: esQueryConfig,
