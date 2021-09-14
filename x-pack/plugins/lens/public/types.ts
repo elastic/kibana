@@ -351,6 +351,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   isFullscreen: boolean;
   layerType: LayerType | undefined;
   supportStaticValue: boolean;
+  supportFieldFormat?: boolean;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -665,7 +666,11 @@ export interface Visualization<T = unknown> {
    */
   getConfiguration: (
     props: VisualizationConfigProps<T>
-  ) => { groups: VisualizationDimensionGroupConfig[]; supportStaticValue?: boolean };
+  ) => {
+    groups: VisualizationDimensionGroupConfig[];
+    supportStaticValue?: boolean;
+    supportFieldFormat?: boolean;
+  };
 
   /**
    * Header rendered as layer title This can be used for both static and dynamic content lioke

@@ -342,6 +342,7 @@ export const getXyVisualization = ({
         frame.datasourceLayers
       );
       return {
+        supportFieldFormat: false,
         supportStaticValue: true,
         // Each thresholds layer panel will have sections for each available axis
         // (horizontal axis, vertical axis left, vertical axis right).

@@ -125,7 +125,7 @@ export function LayerPanel(
     dateRange,
   };
 
-  const { groups, supportStaticValue } = useMemo(
+  const { groups, supportStaticValue, supportFieldFormat = true } = useMemo(
     () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -558,6 +558,7 @@ export function LayerPanel(
                   isFullscreen,
                   setState: updateDataLayerState,
                   supportStaticValue: Boolean(supportStaticValue),
+                  supportFieldFormat: Boolean(supportFieldFormat),
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
                 }}
               />
