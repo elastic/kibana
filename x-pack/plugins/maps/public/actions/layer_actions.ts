@@ -528,7 +528,7 @@ function updateStyleProperties(layerId: string, previousFields: IField[]) {
       return;
     }
 
-    const style = targetLayer.getCurrentStyle();
+    const style = targetLayer!.getCurrentStyle();
     if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
       return;
     }
