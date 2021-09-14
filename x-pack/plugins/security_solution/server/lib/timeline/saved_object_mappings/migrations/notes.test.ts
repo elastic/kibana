@@ -19,7 +19,7 @@ describe('notes migrations', () => {
 
       expect(migratedDoc.attributes).toEqual({});
       expect(migratedDoc.references).toEqual([
-        // importing the timeline saved objec type from the timeline saved object causes a circular import and causes the jest tests to fail
+        // importing the timeline saved object type from the timeline saved object causes a circular import and causes the jest tests to fail
         { id: '123', name: TIMELINE_ID_REF_NAME, type: 'siem-ui-timeline' },
       ]);
     });
