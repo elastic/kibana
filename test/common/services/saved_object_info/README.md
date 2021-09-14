@@ -1,4 +1,4 @@
-# JQ Tips
+# Tips for using the SO INFO SVC CLI with JQ
 
 ## Myriad ways to use jq to discern discrete info from the svc
 Below, I will leave out the so types call, which is:
