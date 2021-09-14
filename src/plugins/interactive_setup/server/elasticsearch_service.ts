@@ -7,7 +7,7 @@
  */
 
 import type { ApiResponse } from '@elastic/elasticsearch';
-import { errors } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
 import { from, of, timer } from 'rxjs';
@@ -290,6 +290,7 @@ export class ElasticsearchService {
       ssl: { verificationMode: 'none' },
     });
 
+    this.logger.debug(`Connecting to host "${host}"`);
     let authRequired = false;
     try {
       await client.asInternalUser.ping();
@@ -308,6 +309,7 @@ export class ElasticsearchService {
       await client.close();
     }
 
+    this.logger.debug(`Fetching certificate chain from host "${host}"`);
     let certificateChain: Certificate[] | undefined;
     const { protocol, hostname, port } = new URL(host);
     if (protocol === 'https:') {
@@ -322,6 +324,35 @@ export class ElasticsearchService {
         );
         throw error;
       }
+    }
+
+    // This check is a security requirement - Do not remove it!
+    this.logger.debug(`Verifying that host "${host}" responds with Elastic product header`);
+
+    // Using native Client for this check instead of Kibana's `elasticsearch.createClient()` wrapper
+    // since it throws `NoLivingConnectionsError` when sending an OPTIONS request. We can't use a
+    // GET request either since we don't have valid credentials yet and the product header isn't
+    // returned for unauthenticated requests.
+    const verifyClient = new Client({
+      node: host,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    try {
+      const response = await verifyClient.transport.request({
+        method: 'OPTIONS',
+        path: '/',
+      });
+      if (response.headers?.['x-elastic-product'] !== 'Elasticsearch') {
+        throw new Error('Host did not respond with valid Elastic product header.');
+      }
+    } catch (error) {
+      this.logger.error(
+        `Host "${host}" is not a valid Elasticsearch cluster: ${getDetailedErrorMessage(error)}`
+      );
+      throw error;
     }
 
     return {

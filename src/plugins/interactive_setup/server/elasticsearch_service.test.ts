@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import tls from 'tls';
 
 import { nextTick } from '@kbn/test/jest';
@@ -19,8 +19,19 @@ import { ElasticsearchService } from './elasticsearch_service';
 import { interactiveSetupMock } from './mocks';
 
 jest.mock('tls');
+jest.mock('@elastic/elasticsearch', () => ({
+  ...jest.requireActual('@elastic/elasticsearch'),
+  Client: jest.fn().mockImplementation(() => ({
+    transport: {
+      request: jest.fn().mockReturnValue({
+        headers: { 'x-elastic-product': 'Elasticsearch' },
+      }),
+    },
+  })),
+}));
 
 const tlsConnectMock = tls.connect as jest.MockedFunction<typeof tls.connect>;
+const ClientMock = Client as jest.MockedClass<typeof Client>;
 
 describe('ElasticsearchService', () => {
   let service: ElasticsearchService;
@@ -534,6 +545,24 @@ some weird+ca/with
 
         await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[ProductNotSupportedError: The client noticed that the server is not Elasticsearch and we do not support this unknown product.]`
+        );
+      });
+
+      it('fails if host is not Elasticsearch', async () => {
+        mockPingClient.asInternalUser.ping.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
+        );
+
+        ClientMock.mockReturnValueOnce(({
+          transport: {
+            request: jest.fn().mockReturnValue({
+              headers: {},
+            }),
+          },
+        } as unknown) as Client);
+
+        await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
+          `[Error: Host did not respond with valid Elastic product header.]`
         );
       });
 
