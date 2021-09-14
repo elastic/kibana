@@ -34,6 +34,7 @@ import { useSourcererScope } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { stopPropagationAndPreventDefault } from '../../../../../timelines/public';
 import { TooltipWithKeyboardShortcut } from '../accessibility';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 export const AdditionalContent = styled.div`
   padding: 2px;
@@ -104,7 +105,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   value,
 }) => {
   const kibana = useKibana();
-  const { timelines } = kibana.services;
+  const { timelines, uiSettings } = kibana.services;
   const { startDragToTimeline } = timelines.getUseAddToTimeline()({
     draggableId,
     fieldName: field,
@@ -120,8 +121,11 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   const filterManager = useMemo(
-    () => (timelineId === TimelineId.active ? activeFilterMananager : filterManagerBackup),
-    [timelineId, activeFilterMananager, filterManagerBackup]
+    () =>
+      timelineId === TimelineId.active
+        ? activeFilterMananager ?? new FilterManager(uiSettings)
+        : filterManagerBackup,
+    [uiSettings, timelineId, activeFilterMananager, filterManagerBackup]
   );
 
   //  Regarding data from useManageTimeline:
