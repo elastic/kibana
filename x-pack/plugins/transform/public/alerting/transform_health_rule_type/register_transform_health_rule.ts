@@ -6,15 +6,13 @@
  */
 
 import { lazy } from 'react';
-import { i18n } from '../../../../../../../../../../private/var/tmp/_bazel_darnautov/1afe62330ff0d9ae1ca2013aad33fd76/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-i18n';
-import type { TriggersAndActionsUIPublicPluginSetup } from '../../../../triggers_actions_ui/public';
-import { TRANSFORM_RULE_TYPE } from '../../../common/constants';
+import { i18n } from '@kbn/i18n';
+import { TRANSFORM_RULE_TYPE } from '../../../common';
 import type { TransformHealthRuleParams } from '../../../common/types/alerting';
+import type { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 
-export function registerTransformHealthRule(
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup
-) {
-  triggersActionsUi.ruleTypeRegistry.register({
+export function createTransformHealthRuleType(): AlertTypeModel<TransformHealthRuleParams> {
+  return {
     id: TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
     description: i18n.translate('xpack.transform.alertingRuleTypes.transformHealth.description', {
       defaultMessage: 'Alert when transform jobs experience operational issues.',
@@ -35,7 +33,7 @@ export function registerTransformHealthRule(
     },
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(
-      'xpack.ml.alertTypes.jobsHealthAlertingRule.defaultActionMessage',
+      'xpack.transform.alertTypes.transformHealth.defaultActionMessage',
       {
         defaultMessage: `[\\{\\{rule.name\\}\\}] Transforms health check result:
 \\{\\{context.message\\}\\}
@@ -52,5 +50,5 @@ export function registerTransformHealthRule(
 `,
       }
     ),
-  });
+  };
 }

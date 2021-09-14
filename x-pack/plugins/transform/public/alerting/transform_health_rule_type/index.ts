@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerTransformHealthRule } from './register_transform_health_rule';
+export { createTransformHealthRuleType } from './register_transform_health_rule';

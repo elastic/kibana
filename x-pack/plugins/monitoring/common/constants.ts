@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CommonAlertParamDetail } from './types/alerts';
 import { AlertParamType } from './enums';
+import { TRANSFORM_RULE_TYPE } from '../../transform/common';
 
 /**
  * Helper string to add as a tag in every logging call
@@ -538,7 +539,8 @@ export const RULES = [
   RULE_THREAD_POOL_WRITE_REJECTIONS,
   RULE_CCR_READ_EXCEPTIONS,
   RULE_LARGE_SHARD_SIZE,
-];
+  TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
+] as const;
 
 /**
  * A list of all legacy rules, which means they are powered by watcher

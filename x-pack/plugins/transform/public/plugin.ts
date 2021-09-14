@@ -16,7 +16,6 @@ import type { SharePluginStart } from 'src/plugins/share/public';
 import { registerFeature } from './register_feature';
 import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
-import { registerAlertingRules } from './alerting';
 
 export interface PluginsDependencies {
   data: DataPublicPluginStart;
@@ -30,7 +29,7 @@ export interface PluginsDependencies {
 
 export class TransformUiPlugin {
   public setup(coreSetup: CoreSetup<PluginsDependencies>, pluginsSetup: PluginsDependencies): void {
-    const { management, home, alerting, triggersActionsUi } = pluginsSetup;
+    const { management, home } = pluginsSetup;
 
     // Register management section
     const esSection = management.sections.section.data;
@@ -46,11 +45,6 @@ export class TransformUiPlugin {
       },
     });
     registerFeature(home);
-
-    // TODO add capability for creating alerting rules for transform
-    if (triggersActionsUi) {
-      registerAlertingRules(triggersActionsUi, alerting);
-    }
   }
 
   public start() {}

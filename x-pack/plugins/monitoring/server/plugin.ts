@@ -51,6 +51,7 @@ import {
   PluginsStart,
   RequestHandlerContextMonitoringPlugin,
 } from './types';
+import { getTransformHealthRuleType } from '../../transform/server';
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
@@ -127,6 +128,8 @@ export class MonitoringPlugin
     for (const alert of alerts) {
       plugins.alerting?.registerType(alert.getRuleType());
     }
+    plugins.alerting?.registerType(getTransformHealthRuleType());
+
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
 
     // Register collector objects for stats to show up in the APIs
