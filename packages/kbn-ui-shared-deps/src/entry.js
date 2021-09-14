@@ -57,3 +57,4 @@ export const SaferLodashSet = require('@elastic/safer-lodash-set');
 export const RisonNode = require('rison-node');
 export const History = require('history');
 export const Classnames = require('classnames');
+export const KbnFieldTypes = require('@kbn/field-types');

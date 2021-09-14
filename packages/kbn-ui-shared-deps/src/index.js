@@ -102,6 +102,7 @@ exports.externals = {
   'rison-node': '__kbnSharedDeps__.RisonNode',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
+  '@kbn/field-types': '__kbnSharedDeps__.KbnFieldTypes',
 };
 
 /**
