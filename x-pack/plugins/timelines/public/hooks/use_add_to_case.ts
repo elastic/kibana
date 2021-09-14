@@ -8,7 +8,7 @@ import { get, isEmpty } from 'lodash/fp';
 import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { ALERT_RULE_ID, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Case, SubCase } from '../../../cases/common';
 import { TimelinesStartServices } from '../types';
@@ -243,15 +243,12 @@ export const useAddToCase = ({
 };
 
 export function normalizedEventFields(event?: TimelineItem) {
-  const ruleId = event && event.data.find(({ field }) => field === ALERT_RULE_ID);
   const ruleUuid = event && event.data.find(({ field }) => field === ALERT_RULE_UUID);
   const ruleName = event && event.data.find(({ field }) => field === ALERT_RULE_NAME);
-  const ruleIdValue = ruleId && ruleId.value && ruleId.value[0];
   const ruleUuidValue = ruleUuid && ruleUuid.value && ruleUuid.value[0];
   const ruleNameValue = ruleName && ruleName.value && ruleName.value[0];
-  const idToUse = ruleIdValue ? ruleIdValue : ruleUuidValue;
   const id =
-    idToUse ??
+    ruleUuidValue ??
     get(`ecs.${ALERT_RULE_UUID}[0]`, event) ??
     get(`ecs.signal.rule.id[0]`, event) ??
     null;

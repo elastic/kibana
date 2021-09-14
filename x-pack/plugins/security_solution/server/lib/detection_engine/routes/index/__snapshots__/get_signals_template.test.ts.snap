@@ -1829,10 +1829,6 @@ Object {
           "path": "signal.rule.from",
           "type": "alias",
         },
-        "kibana.alert.rule.id": Object {
-          "path": "signal.rule.id",
-          "type": "alias",
-        },
         "kibana.alert.rule.immutable": Object {
           "path": "signal.rule.immutable",
           "type": "alias",
@@ -2015,6 +2011,10 @@ Object {
         },
         "kibana.alert.rule.updated_by": Object {
           "path": "signal.rule.updated_by",
+          "type": "alias",
+        },
+        "kibana.alert.rule.uuid": Object {
+          "path": "signal.rule.id",
           "type": "alias",
         },
         "kibana.alert.rule.version": Object {
