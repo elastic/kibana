@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import { last } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { DataFormatPicker } from './data_format_picker';
-import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
+import { checkIfNumericMetric } from './lib/check_if_numeric_metric';
 import { YesNo } from './yes_no';
 import { IndexPattern } from './index_pattern';
 import {
@@ -24,34 +25,34 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from './series_config_query_bar_with_ignore_global_filter';
+import { DATA_FORMATTERS } from '../../../common/enums';
 
 export const SeriesConfig = (props) => {
-  const defaults = { offset_time: '', value_template: '' };
+  const defaults = { offset_time: '', value_template: '{{value}}' };
   const model = { ...defaults, ...props.model };
-  const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const htmlId = htmlIdGenerator();
   const seriesIndexPattern = props.model.override_index_pattern
     ? props.model.series_index_pattern
     : props.indexPatternForQuery;
 
+  const changeModelFormatter = useCallback((formatter) => props.onChange({ formatter }), [props]);
+  const isNumericMetric = useMemo(
+    () => checkIfNumericMetric(last(model.metrics), props.fields, seriesIndexPattern),
+    [model.metrics, props.fields, seriesIndexPattern]
+  );
+  const isKibanaIndexPattern = props.panel.use_kibana_indexes || seriesIndexPattern === '';
+
   return (
     <div className="tvbAggRow">
-      <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
-
-      <EuiHorizontalRule margin="s" />
-
-      <SeriesConfigQueryBarWithIgnoreGlobalFilter
-        model={model}
-        onChange={props.onChange}
-        panel={props.panel}
-        indexPatternForQuery={seriesIndexPattern}
-      />
-
-      <EuiHorizontalRule margin="s" />
-
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
+        <DataFormatPicker
+          formatterValue={model.formatter}
+          changeModelFormatter={changeModelFormatter}
+          shouldIncludeDefaultOption={isKibanaIndexPattern}
+          shouldIncludeNumberOptions={isNumericMetric}
+        />
+        <EuiFlexItem grow={3}>
           <EuiFormRow
             id={htmlId('template')}
             label={
@@ -74,10 +75,25 @@ export const SeriesConfig = (props) => {
             <EuiFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
+              disabled={model.formatter === DATA_FORMATTERS.DEFAULT}
               fullWidth
             />
           </EuiFormRow>
         </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule margin="s" />
+
+      <SeriesConfigQueryBarWithIgnoreGlobalFilter
+        model={model}
+        onChange={props.onChange}
+        panel={props.panel}
+        indexPatternForQuery={seriesIndexPattern}
+      />
+
+      <EuiHorizontalRule margin="s" />
+
+      <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('offsetSeries')}
