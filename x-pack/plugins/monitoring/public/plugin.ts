@@ -196,24 +196,26 @@ export class MonitoringPlugin
       triggersActionsUi: { ruleTypeRegistry },
     } = plugins;
     ruleTypeRegistry.register(createCpuUsageAlertType(config));
-    ruleTypeRegistry.register(createDiskUsageAlertType());
-    ruleTypeRegistry.register(createMemoryUsageAlertType());
+    ruleTypeRegistry.register(createDiskUsageAlertType(config));
+    ruleTypeRegistry.register(createMemoryUsageAlertType(config));
     ruleTypeRegistry.register(createMissingMonitoringDataAlertType());
     ruleTypeRegistry.register(
       createThreadPoolRejectionsAlertType(
         RULE_THREAD_POOL_SEARCH_REJECTIONS,
-        RULE_DETAILS[RULE_THREAD_POOL_SEARCH_REJECTIONS]
+        RULE_DETAILS[RULE_THREAD_POOL_SEARCH_REJECTIONS],
+        config
       )
     );
     ruleTypeRegistry.register(
       createThreadPoolRejectionsAlertType(
         RULE_THREAD_POOL_WRITE_REJECTIONS,
-        RULE_DETAILS[RULE_THREAD_POOL_WRITE_REJECTIONS]
+        RULE_DETAILS[RULE_THREAD_POOL_WRITE_REJECTIONS],
+        config
       )
     );
-    ruleTypeRegistry.register(createCCRReadExceptionsAlertType());
-    ruleTypeRegistry.register(createLargeShardSizeAlertType());
-    const legacyAlertTypes = createLegacyAlertTypes();
+    ruleTypeRegistry.register(createCCRReadExceptionsAlertType(config));
+    ruleTypeRegistry.register(createLargeShardSizeAlertType(config));
+    const legacyAlertTypes = createLegacyAlertTypes(config);
     for (const legacyAlertType of legacyAlertTypes) {
       ruleTypeRegistry.register(legacyAlertType);
     }

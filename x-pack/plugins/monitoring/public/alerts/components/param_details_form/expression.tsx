@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { EuiForm, EuiSpacer } from '@elastic/eui';
+import React, { Fragment, useCallback } from 'react';
+import { EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { debounce } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { CommonAlertParamDetails } from '../../../../common/types/alerts';
 import { AlertParamDuration } from '../../flyout_expressions/alert_param_duration';
 import { AlertParamType } from '../../../../common/enums';
@@ -16,6 +18,10 @@ import { AlertParamNumber } from '../../flyout_expressions/alert_param_number';
 import { AlertParamTextField } from '../../flyout_expressions/alert_param_textfield';
 import { MonitoringConfig } from '../../../types';
 import { useDerivedIndexPattern } from './use_derived_index_pattern';
+import { KueryBar } from '../../../components/kuery_bar';
+import { convertKueryToElasticSearchQuery } from '../../../lib/kuery';
+
+const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 export interface Props {
   alertParams: { [property: string]: any };
@@ -30,7 +36,7 @@ export interface Props {
 export const Expression: React.FC<Props> = (props) => {
   const { alertParams, paramDetails, setAlertParams, errors, config, data } = props;
 
-  const { loading, derivedIndexPattern } = useDerivedIndexPattern(data, config);
+  const { derivedIndexPattern } = useDerivedIndexPattern(data, config);
 
   const alertParamsUi = Object.keys(paramDetails).map((alertParamName) => {
     const details = paramDetails[alertParamName];
@@ -84,10 +90,44 @@ export const Expression: React.FC<Props> = (props) => {
     }
   });
 
+  const onFilterChange = useCallback(
+    (filter: string) => {
+      setAlertParams('filterQueryText', filter);
+      setAlertParams(
+        'filterQuery',
+        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
+      );
+    },
+    [setAlertParams, derivedIndexPattern]
+  );
+
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
+    onFilterChange,
+  ]);
+
   return (
     <Fragment>
-      <EuiForm component="form">{alertParamsUi}</EuiForm>
-      <EuiSpacer />
+      <EuiForm component="form">
+        {alertParamsUi}
+        <EuiSpacer />
+        <EuiFormRow
+          label={i18n.translate('xpack.monitoring.alerts.filterLable', {
+            defaultMessage: 'Filter',
+          })}
+          helpText={i18n.translate('xpack.monitoring.alerts.filterHelpText', {
+            defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
+          })}
+        >
+          <KueryBar
+            value={alertParams.filterQueryText}
+            derivedIndexPattern={derivedIndexPattern}
+            onSubmit={onFilterChange}
+            onChange={debouncedOnFilterChange}
+          />
+        </EuiFormRow>
+        <EuiSpacer />
+      </EuiForm>
     </Fragment>
   );
 };
