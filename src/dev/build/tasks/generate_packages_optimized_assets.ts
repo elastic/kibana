@@ -24,7 +24,6 @@ import terser from 'terser';
 import vfs from 'vinyl-fs';
 import globby from 'globby';
 import del from 'del';
-import normalizePath from 'normalize-path';
 
 import { Task, write } from '../lib';
 
@@ -96,11 +95,11 @@ const getCategory = (relative: string) => {
     return 'asyncChunk';
   }
 
-  if (relative.includes('/kbn-ui-shared-deps-npm/')) {
+  if (relative.includes('kbn-ui-shared-deps-npm')) {
     return 'npm';
   }
 
-  if (relative.includes('/kbn-ui-shared-deps-src/')) {
+  if (relative.includes('kbn-ui-shared-deps-src')) {
     return 'src';
   }
 
@@ -117,7 +116,7 @@ function categorizeAssets(assetDirs: string[]) {
       })
       .map((path): { path: string; category: Category } => ({
         path,
-        category: getCategory(normalizePath(Path.relative(assetDir, path))),
+        category: getCategory(Path.relative(assetDir, path)),
       }))
   );
 
