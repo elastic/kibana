@@ -321,6 +321,7 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe('querying with the p99 aggregator', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
@@ -346,6 +347,7 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe('querying with the p95 aggregator', () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
@@ -372,6 +374,7 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe("querying a metric that hasn't reported data", () => {
+    afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
       executor({
@@ -397,6 +400,49 @@ describe('The metric threshold alert type', () => {
     test('does not send a No Data alert when not configured to do so', async () => {
       await execute(false);
       expect(mostRecentAction(instanceID)).toBe(undefined);
+    });
+  });
+
+  describe('querying a groupBy alert that starts reporting no data, and then later reports data', () => {
+    afterAll(() => clearInstances());
+    const instanceID = '*';
+    const instanceIdA = 'a';
+    const instanceIdB = 'b';
+    const execute = (metric: string, state?: any) =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          groupBy: 'something',
+          sourceId: 'default',
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator: Comparator.GT,
+              threshold: [0],
+              metric,
+            },
+          ],
+          alertOnNoData: true,
+        },
+        state: state ?? mockOptions.state.wrapped,
+      });
+    let resultState: any[] = [];
+    test('first sends a No Data alert with the * group, but then reports groups when data is available', async () => {
+      resultState.push(await execute('test.metric.3'));
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      resultState.push(await execute('test.metric.3', resultState.pop()));
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      resultState.push(await execute('test.metric.1', resultState.pop()));
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+      expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+    });
+    test('sends No Data alerts for the previously detected groups when they stop reporting data, but not the * group', async () => {
+      await execute('test.metric.3', resultState.pop());
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+      expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
     });
   });
 
@@ -540,6 +586,13 @@ services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: a
   const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
   if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse(from);
   const metric = params?.body.query.bool.filter[1]?.exists.field;
+  if (metric === 'test.metric.3') {
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      params?.body.aggs.aggregatedIntervals?.aggregations.aggregatedValueMax
+        ? mocks.emptyRateResponse
+        : mocks.emptyMetricResponse
+    );
+  }
   if (params?.body.aggs.groupings) {
     if (params?.body.aggs.groupings.composite.after) {
       return elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -558,12 +611,6 @@ services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: a
   if (metric === 'test.metric.2') {
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
       mocks.alternateMetricResponse()
-    );
-  } else if (metric === 'test.metric.3') {
-    return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      params?.body.aggs.aggregatedIntervals.aggregations.aggregatedValueMax
-        ? mocks.emptyRateResponse
-        : mocks.emptyMetricResponse
     );
   }
   return elasticsearchClientMock.createSuccessTransportRequestPromise(mocks.basicMetricResponse());

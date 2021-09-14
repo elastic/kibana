@@ -24,6 +24,7 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
+import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { createFormatter } from '../../../../common/formatters';
 import { AlertStates, Comparator } from './types';
 import { evaluateAlert, EvaluatedAlertParams } from './lib/evaluate_alert';
@@ -85,7 +86,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const config = source.configuration;
 
     const previousGroupBy = state.groupBy;
-    const prevGroups = isEqual(previousGroupBy, params.groupBy) ? state.groups ?? [] : [];
+    const prevGroups = isEqual(previousGroupBy, params.groupBy)
+      ? // Filter out the * key from the previous groups, only include it if it's one of
+        // the current groups. In case of a groupBy alert that starts out with no data and no
+        // groups, we don't want to persist the existence of the * alert instance
+        state.groups?.filter((g) => g !== UNGROUPED_FACTORY_KEY) ?? []
+      : [];
 
     const alertResults = await evaluateAlert(
       services.scopedClusterClient.asCurrentUser,
