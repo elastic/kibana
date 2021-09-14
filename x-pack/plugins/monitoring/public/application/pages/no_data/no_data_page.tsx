@@ -113,7 +113,7 @@ export const NoDataPage = () => {
       //   };
       // }
     }
-  }, [services, updateModel]);
+  }, [checkers, services, updateModel]);
 
   const enabler = new Enabler(services.http, updateModel);
 
