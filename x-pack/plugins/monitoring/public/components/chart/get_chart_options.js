@@ -14,8 +14,12 @@ export async function getChartOptions(axisOptions) {
   try {
     const $injector = Legacy.shims.getAngularInjector();
     timezone = $injector.get('config').get('dateFormat:tz');
-  } catch {
-    timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');
+  } catch (error) {
+    if (error.message === 'Angular has been removed.') {
+      timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');
+    } else {
+      throw error;
+    }
   }
   const opts = {
     legend: {
