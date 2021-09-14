@@ -16,7 +16,7 @@ type GetActionFactory = (id: string) => undefined | ActionFactory;
 const factories: Record<string, ActionFactory> = {
   FACTORY_ID_1: ({
     id: 'FACTORY_ID_1',
-    telemetry: jest.fn((state: DynamicActionsState, stats: Record<string, any>) => {
+    telemetry: jest.fn((state: DynamicActionsState, stats: Record<string, number>) => {
       stats.myStat_1 = 1;
       stats.myStat_2 = 123;
       return stats;
@@ -24,11 +24,11 @@ const factories: Record<string, ActionFactory> = {
   } as unknown) as ActionFactory,
   FACTORY_ID_2: ({
     id: 'FACTORY_ID_2',
-    telemetry: jest.fn((state: DynamicActionsState, stats: Record<string, any>) => stats),
+    telemetry: jest.fn((state: DynamicActionsState, stats: Record<string, number>) => stats),
   } as unknown) as ActionFactory,
   FACTORY_ID_3: ({
     id: 'FACTORY_ID_3',
-    telemetry: jest.fn((state: DynamicActionsState, stats: Record<string, any>) => {
+    telemetry: jest.fn((state: DynamicActionsState, stats: Record<string, number | string>) => {
       stats.myStat_1 = 2;
       stats.stringStat = 'abc';
       return stats;

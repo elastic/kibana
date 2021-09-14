@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreStart, CoreSetup } from 'kibana/public';
-import { ConfigSchema } from '../config';
+import { CoreStart, CoreSetup } from 'kibana/public';
 import { injectHeaderStyle } from './utils/inject_header_style';
 
 export class KibanaLegacyPlugin {
-  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
-
   public setup(core: CoreSetup<{}, KibanaLegacyStart>) {
     return {};
   }
 
-  public start({ application, http: { basePath }, uiSettings }: CoreStart) {
+  public start({ uiSettings }: CoreStart) {
     injectHeaderStyle(uiSettings);
     return {
       /**
@@ -35,11 +32,6 @@ export class KibanaLegacyPlugin {
         const { initAngularBootstrap } = await import('./angular_bootstrap');
         initAngularBootstrap();
       },
-      /**
-       * @deprecated
-       * Just exported for wiring up with dashboard mode, should not be used.
-       */
-      config: this.initializerContext.config.get(),
     };
   }
 }

@@ -36,7 +36,7 @@ import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
-import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
+import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { getEmptyValue } from '../empty_value';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
@@ -117,6 +117,7 @@ const getDescription = ({
   data,
   eventId,
   fieldFromBrowserField,
+  isDraggable,
   linkValue,
   timelineId,
   values,
@@ -133,6 +134,7 @@ const getDescription = ({
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
+        isDraggable={isDraggable}
         values={values}
       />
       <ActionCell
@@ -181,11 +183,13 @@ export const getSummaryRows = ({
   browserFields,
   timelineId,
   eventId,
+  isDraggable = false,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   timelineId: string;
   eventId: string;
+  isDraggable?: boolean;
 }) => {
   const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
 
@@ -206,6 +210,7 @@ export const getSummaryRows = ({
         const initialDescription = {
           contextId: timelineId,
           eventId,
+          isDraggable,
           value: null,
           fieldType: 'string',
           linkValue: undefined,
@@ -244,7 +249,7 @@ export const getSummaryRows = ({
           fieldFromBrowserField: browserField,
         };
 
-        if (item.id === 'agent.id' && !endpointAlertCheck({ data })) {
+        if (item.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
           return acc;
         }
 
@@ -304,15 +309,14 @@ const AlertSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   eventId: string;
+  isDraggable?: boolean;
   timelineId: string;
   title?: string;
-}> = ({ browserFields, data, eventId, timelineId, title }) => {
-  const summaryRows = useMemo(() => getSummaryRows({ browserFields, data, eventId, timelineId }), [
-    browserFields,
-    data,
-    eventId,
-    timelineId,
-  ]);
+}> = ({ browserFields, data, eventId, isDraggable, timelineId, title }) => {
+  const summaryRows = useMemo(
+    () => getSummaryRows({ browserFields, data, eventId, isDraggable, timelineId }),
+    [browserFields, data, eventId, isDraggable, timelineId]
+  );
 
   const ruleId = useMemo(() => {
     const item = data.find((d) => d.field === 'signal.rule.id');

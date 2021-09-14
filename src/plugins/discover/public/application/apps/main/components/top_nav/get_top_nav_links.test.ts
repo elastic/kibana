@@ -35,6 +35,7 @@ test('getTopNavLinks result', () => {
     services,
     state,
     searchSource: {} as ISearchSource,
+    onOpenSavedSearch: () => {},
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [

@@ -45,7 +45,7 @@ const useLogEntryUIProps = (
     if (logEntry.type === 'action') {
       avatarSize = 'm';
       commentType = 'regular';
-      commentText = logEntry.item.data.data.comment ?? '';
+      commentText = logEntry.item.data.data.comment?.trim() ?? '';
       displayResponseEvent = false;
       iconType = 'lockOpen';
       username = logEntry.item.data.user_id;
@@ -55,7 +55,7 @@ const useLogEntryUIProps = (
           iconType = 'lock';
           isIsolateAction = true;
         }
-        if (data.comment) {
+        if (commentText) {
           displayComment = true;
         }
       }
@@ -144,9 +144,7 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
     <StyledEuiComment
       type={(commentType ?? 'regular') as EuiCommentProps['type']}
       username={username}
-      timestamp={FormattedRelativePreferenceDate({
-        value: logEntry.item.data['@timestamp'],
-      })}
+      timestamp={<FormattedRelativePreferenceDate value={logEntry.item.data['@timestamp']} />}
       event={<b>{displayResponseEvent ? responseEventTitle : actionEventTitle}</b>}
       timelineIcon={
         <LogEntryTimelineIcon {...{ avatarSize, iconType, isResponseEvent, isSuccessful }} />
@@ -154,7 +152,7 @@ export const LogEntry = memo(({ logEntry }: { logEntry: Immutable<ActivityLogEnt
       data-test-subj="timelineEntry"
     >
       {displayComment ? (
-        <EuiText size="s">
+        <EuiText size="s" data-test-subj="activityLogCommentText">
           <p>{commentText}</p>
         </EuiText>
       ) : undefined}
