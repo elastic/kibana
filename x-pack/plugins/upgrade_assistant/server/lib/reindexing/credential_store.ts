@@ -153,6 +153,7 @@ export const credentialStoreFactory = (logger: Logger): CredentialStore => {
         const apiKeyId = apiKeysMap.get(reindexOp.id);
         if (apiKeyId) {
           await invalidateApiKey({ apiKeyId, security, log });
+          apiKeysMap.delete(reindexOp.id);
           return;
         }
       }
