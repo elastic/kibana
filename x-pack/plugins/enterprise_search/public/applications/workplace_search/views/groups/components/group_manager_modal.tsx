@@ -89,8 +89,7 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
   const { contentSources } = useValues(GroupsLogic);
 
   const allSelected = numSelected === allItems.length;
-  const isSources = label === 'shared content sources';
-  const showEmptyState = isSources && contentSources.length < 1;
+  const showEmptyState = contentSources.length < 1;
   const handleClose = () => hideModal(group);
   const handleSelectAll = () => selectAll(allSelected ? [] : allItems);
 
