@@ -13,6 +13,7 @@ const jobTypeIsDeprecated = (jobType: string) => DEPRECATED_JOB_TYPES.includes(j
 const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> = {
   total: 0,
   deprecated: 0,
+  output_size: { min: null, max: null, avg: null },
   app: { 'canvas workpad': 0, search: 0, visualization: 0, dashboard: 0 },
   layout: { canvas: 0, print: 0, preserve_layout: 0 },
 };
@@ -27,12 +28,14 @@ function getAvailableTotalForFeature(
 ): AvailableTotal {
   // if the type itself is deprecated, all jobs are deprecated, otherwise only some of them might be
   const deprecated = jobTypeIsDeprecated(typeKey) ? jobType.total : jobType.deprecated || 0;
+  const { max: sizeMax, min: sizeMin, avg: sizeAvg } = jobType.output_size;
 
   // merge the additional stats for the jobType
   const availableTotal = {
     available: isAvailable(featureAvailability, typeKey),
     total: jobType.total,
     deprecated,
+    output_size: { min: sizeMin, max: sizeMax, avg: sizeAvg },
     app: { ...defaultTotalsForFeature.app, ...jobType.app },
     layout: { ...defaultTotalsForFeature.layout, ...jobType.layout },
   };

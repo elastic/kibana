@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export interface KeyCountBucket {
+interface SizeStats {
+  sizeMin: { value: number | null };
+  sizeMax: { value: number | null };
+  sizeAvg: { value: number | null };
+}
+
+export interface KeyCountBucket extends SizeStats {
   key: string;
   doc_count: number;
   isDeprecated?: {
@@ -29,7 +35,7 @@ export interface StatusByAppBucket {
   };
 }
 
-export interface AggregationResultBuckets {
+export interface AggregationResultBuckets extends SizeStats {
   jobTypes: AggregationBuckets;
   layoutTypes: {
     doc_count: number;
@@ -44,9 +50,6 @@ export interface AggregationResultBuckets {
     buckets: StatusByAppBucket[];
   };
   doc_count: number;
-  sizeMin: { value: number | null };
-  sizeMax: { value: number | null };
-  sizeAvg: { value: number | null };
 }
 
 export interface SearchResponse {
@@ -64,6 +67,11 @@ export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
+  output_size: {
+    max: number | null;
+    min: number | null;
+    avg: number | null;
+  };
   app?: {
     search?: number;
     dashboard?: number;
