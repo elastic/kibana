@@ -245,6 +245,7 @@ export function getPipelineVertexStatsAggregation({
     vertexId,
     timeSeriesIntervalInSeconds,
     // @ts-ignore not undefined, need to get correct config
+    // https://github.com/elastic/kibana/issues/112146
     maxBucketSize: config.get('monitoring.ui.max_bucket_size'),
     callWithRequest,
     req,
