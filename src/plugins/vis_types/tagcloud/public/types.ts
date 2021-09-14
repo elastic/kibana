@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 import type { ChartsPluginSetup, PaletteOutput } from '../../../charts/public';
-import type { SerializedFieldFormat } from '../../../expressions/public';
-
-interface Dimension {
-  accessor: number;
-  format: {
-    id?: string;
-    params?: SerializedFieldFormat<object>;
-  };
-}
+import { ExpressionValueVisDimension } from '../../../visualizations/public';
 
 interface TagCloudCommonParams {
   scale: 'linear' | 'log' | 'square root';
@@ -26,8 +18,8 @@ interface TagCloudCommonParams {
 
 export interface TagCloudVisParams extends TagCloudCommonParams {
   palette: PaletteOutput;
-  metric: Dimension;
-  bucket?: Dimension;
+  metric: ExpressionValueVisDimension;
+  bucket?: ExpressionValueVisDimension;
 }
 
 export interface TagCloudTypeProps {

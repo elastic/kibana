@@ -13,8 +13,17 @@ import {
 } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
+jest.mock('./crawler_logic', () => ({
+  CrawlerLogic: {
+    actions: {
+      fetchCrawlerData: jest.fn(),
+    },
+  },
+}));
+
 import { nextTick } from '@kbn/test/jest';
 
+import { CrawlerLogic } from './crawler_logic';
 import { CrawlerSingleDomainLogic, CrawlerSingleDomainValues } from './crawler_single_domain_logic';
 import { CrawlerDomain, CrawlerPolicies, CrawlerRules } from './types';
 
@@ -150,6 +159,7 @@ describe('CrawlerSingleDomainLogic', () => {
   describe('listeners', () => {
     describe('deleteDomain', () => {
       it('flashes a success toast and redirects the user to the crawler overview on success', async () => {
+        jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
         const { navigateToUrl } = mockKibanaValues;
 
         http.delete.mockReturnValue(Promise.resolve());
@@ -158,9 +168,10 @@ describe('CrawlerSingleDomainLogic', () => {
         await nextTick();
 
         expect(http.delete).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/crawler/domains/1234'
+          '/internal/app_search/engines/some-engine/crawler/domains/1234'
         );
 
+        expect(CrawlerLogic.actions.fetchCrawlerData).toHaveBeenCalled();
         expect(flashSuccessToast).toHaveBeenCalled();
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/crawler');
       });
@@ -194,7 +205,7 @@ describe('CrawlerSingleDomainLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/crawler/domains/507f1f77bcf86cd799439011'
+          '/internal/app_search/engines/some-engine/crawler/domains/507f1f77bcf86cd799439011'
         );
         expect(CrawlerSingleDomainLogic.actions.onReceiveDomainData).toHaveBeenCalledWith({
           id: '507f1f77bcf86cd799439011',
@@ -242,7 +253,7 @@ describe('CrawlerSingleDomainLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/crawler/domains/507f1f77bcf86cd799439011',
+          '/internal/app_search/engines/some-engine/crawler/domains/507f1f77bcf86cd799439011',
           {
             body: JSON.stringify({ deduplication_enabled: true, deduplication_fields: ['title'] }),
           }
