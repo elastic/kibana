@@ -89,4 +89,3 @@ After you add your data, you're required to create an <<index-patterns,index pat
 
 * To add data for Elastic Observability, refer to {observability-guide}/add-observability-data.html[Send data to Elasticsearch].
 * To add data for Elastic Security, refer to https://www.elastic.co/guide/en/security/current/ingest-data.html[Ingest data to Elastic Security].
-* beta[] To add data from Elastic Enterprise Search, refer to link:https://www.elastic.co/guide/en/enterprise-search/7.15/user-interfaces.html#user-interfaces-kibana[Enterprise Search in {kib}]
