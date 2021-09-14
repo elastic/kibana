@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
@@ -16,6 +16,8 @@ import { getAggsByType, getAggsByPredicate } from '../../../../common/agg_utils'
 import type { Agg } from '../../../../common/agg_utils';
 import type { Metric } from '../../../../common/types';
 import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
+import { PanelModelContext } from '../../contexts/panel_model_context';
+import { PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 
 type AggSelectOption = EuiComboBoxOptionOption;
 
@@ -35,16 +37,35 @@ function filterByPanelType(panelType: string) {
     panelType === 'table' ? agg.value !== TSVB_METRIC_TYPES.SERIES_AGG : true;
 }
 
+export function isMetricAvailableForPanel(
+  aggId: string,
+  panelType: string,
+  timeRangeMode?: string
+) {
+  if (
+    panelType !== PANEL_TYPES.TIMESERIES &&
+    timeRangeMode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
+  ) {
+    return (
+      !pipelineAggs.some((agg) => agg.value === aggId) && aggId !== TSVB_METRIC_TYPES.SERIES_AGG
+    );
+  }
+
+  return true;
+}
+
 interface AggSelectUiProps {
   id: string;
   panelType: string;
   siblings: Metric[];
   value: string;
   uiRestrictions?: TimeseriesUIRestrictions;
+  timeRangeMode?: string;
   onChange: (currentlySelectedOptions: AggSelectOption[]) => void;
 }
 
 export function AggSelect(props: AggSelectUiProps) {
+  const panelModel = useContext(PanelModelContext);
   const { siblings, panelType, value, onChange, uiRestrictions, ...rest } = props;
 
   const selectedOptions = allAggOptions.filter((option) => {
@@ -69,7 +90,10 @@ export function AggSelect(props: AggSelectUiProps) {
   } else {
     const disableSiblingAggs = (agg: AggSelectOption) => ({
       ...agg,
-      disabled: !enablePipelines || !isMetricEnabled(agg.value, uiRestrictions),
+      disabled:
+        !enablePipelines ||
+        !isMetricEnabled(agg.value, uiRestrictions) ||
+        !isMetricAvailableForPanel(agg.value as string, panelType, panelModel?.time_range_mode),
     });
 
     options = [

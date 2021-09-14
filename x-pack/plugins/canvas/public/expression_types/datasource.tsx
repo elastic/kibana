@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useRef, useCallback } from 'react';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { Ast } from '@kbn/interpreter/common';
 import { RenderToDom } from '../components/render_to_dom';
 import { BaseForm, BaseFormProps } from './base_form';
@@ -62,10 +63,11 @@ const DatasourceWrapper: React.FunctionComponent<DatasourceWrapperProps> = (prop
 
   useEffect(() => {
     callRenderFn();
-    return () => {
-      handlers.destroy();
-    };
-  }, [callRenderFn, handlers, props]);
+  }, [callRenderFn, props]);
+
+  useEffectOnce(() => () => {
+    handlers.destroy();
+  });
 
   return (
     <RenderToDom
