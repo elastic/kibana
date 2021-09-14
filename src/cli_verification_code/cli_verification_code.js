@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson, getConfigDirectory } from '@kbn/utils';
+import { kibanaPackageJson, getDataPath } from '@kbn/utils';
 import path from 'path';
 import fs from 'fs';
 import chalk from 'chalk';
@@ -19,7 +19,7 @@ program
   .version(kibanaPackageJson.version)
   .description('Tool to get Kibana verification code')
   .action(() => {
-    const fpath = path.join(getConfigDirectory(), '.code');
+    const fpath = path.join(getDataPath(), 'verification_code');
     try {
       const code = fs.readFileSync(fpath).toString();
       console.log(

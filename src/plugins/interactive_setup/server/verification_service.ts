@@ -9,7 +9,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { getConfigDirectory } from '@kbn/utils';
+import { getDataPath } from '@kbn/utils';
 import type { Logger } from 'src/core/server';
 
 import { getDetailedErrorMessage } from './errors';
@@ -19,7 +19,7 @@ export class VerificationService {
   private fileName: string;
 
   constructor(private readonly logger: Logger) {
-    this.fileName = path.join(getConfigDirectory(), '.code');
+    this.fileName = path.join(getDataPath(), 'verification_code');
   }
 
   public setup() {

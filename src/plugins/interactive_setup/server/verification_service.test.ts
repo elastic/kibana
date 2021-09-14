@@ -15,7 +15,7 @@ import { VerificationService } from './verification_service';
 
 jest.mock('fs');
 jest.mock('@kbn/utils', () => ({
-  getConfigDirectory: jest.fn().mockReturnValue('/config/'),
+  getDataPath: jest.fn().mockReturnValue('/data/'),
 }));
 
 const loggerMock = loggingSystemMock.createLogger();
@@ -31,7 +31,7 @@ describe('VerificationService', () => {
     it('should write verification code to disk', () => {
       const service = new VerificationService(loggerMock);
       const setup = service.setup()!;
-      expect(fs.writeFileSync).toHaveBeenCalledWith('/config/.code', setup.code);
+      expect(fs.writeFileSync).toHaveBeenCalledWith('/data/verification_code', setup.code);
     });
 
     it('should not return verification code if cannot write to disk', () => {
@@ -40,7 +40,7 @@ describe('VerificationService', () => {
         throw new Error('Write error');
       });
       const setup = service.setup();
-      expect(fs.writeFileSync).toHaveBeenCalledWith('/config/.code', expect.anything());
+      expect(fs.writeFileSync).toHaveBeenCalledWith('/data/verification_code', expect.anything());
       expect(setup).toBeUndefined();
     });
   });
@@ -49,7 +49,7 @@ describe('VerificationService', () => {
     it('should remove verification code from disk', () => {
       const service = new VerificationService(loggerMock);
       service.stop();
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/config/.code');
+      expect(fs.unlinkSync).toHaveBeenCalledWith('/data/verification_code');
     });
   });
 });
