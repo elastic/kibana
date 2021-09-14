@@ -54,25 +54,21 @@ describe('<IndexManagementHome />', () => {
     });
 
     describe('tabs', () => {
-      test('should have 4 tabs', () => {
+      it('should have 4 tabs', () => {
         const { find } = testBed;
-        const allTabs = [
-          { label: 'Index Templates', element: find('templatesTab') },
-          { label: 'Indices', element: find('indicesTab') },
-          { label: 'Data Streams', element: find('data_streamsTab') },
-          { label: 'Component Templates', element: find('component_templatesTab') },
-        ];
+
+        const indexManagementContainer = find('indexManagementHeaderContent');
+        const tabListContainer = indexManagementContainer.find('.euiTabs');
+        const allTabs = tabListContainer.children();
+        const allTabsLabels = ['Indices', 'Data Streams', 'Index Templates', 'Component Templates'];
 
         expect(allTabs.length).toBe(4);
-
-        allTabs.forEach((tab) => {
-          expect(tab.element).toBeTruthy();
-          expect(tab.element.length).toBe(1);
-          expect(tab.element.text()).toEqual(tab.label);
-        });
+        for (let i = 0; i < allTabs.length; i++) {
+          expect(tabListContainer.childAt(i).text()).toEqual(allTabsLabels[i]);
+        }
       });
 
-      test('should navigate to Index Templates tab', async () => {
+      it('should navigate to Index Templates tab', async () => {
         const { exists, actions, component } = testBed;
 
         expect(exists('indicesList')).toBe(true);
@@ -90,13 +86,22 @@ describe('<IndexManagementHome />', () => {
         expect(exists('indicesList')).toBe(false);
         expect(exists('templateList')).toBe(true);
       });
+    });
+    describe('toggles', () => {
+      it('Should show no indices to show when there are no indices ', () => {
+        const { find } = testBed;
 
-      describe('toggles', () => {
-        test('Should show system indices if hidden indices is toggled. ', () => {
-          const { find, actions } = testBed;
+        const indicesListTable = find('indicesList');
+        const noIndicesMessageText = indicesListTable
+          .find('[data-test-subj="noIndicesMessage"]')
+          .text();
+        expect(noIndicesMessageText).toEqual('No indices to show');
+      });
 
-          actions.showHiddenIndices();
-        });
+      it('Should show system indices if hidden indices is toggled. ', () => {
+        const { find, actions } = testBed;
+
+        actions.toggleHiddenIndices();
       });
     });
   });
