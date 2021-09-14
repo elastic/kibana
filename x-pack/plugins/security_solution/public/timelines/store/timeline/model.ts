@@ -86,7 +86,6 @@ export type SubsetTimelineModel = Readonly<
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
     | 'expandedDetail'
-    | 'footerText'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
@@ -104,7 +103,6 @@ export type SubsetTimelineModel = Readonly<
     | 'templateTimelineId'
     | 'templateTimelineVersion'
     | 'loadingEventIds'
-    | 'loadingText'
     | 'noteIds'
     | 'pinnedEventIds'
     | 'pinnedEventsSaveObject'
@@ -117,7 +115,6 @@ export type SubsetTimelineModel = Readonly<
     | 'isSaving'
     | 'isLoading'
     | 'savedObjectId'
-    | 'unit'
     | 'version'
     | 'status'
   >

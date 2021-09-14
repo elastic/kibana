@@ -72,9 +72,5 @@ export const timelineDefaults: SubsetTimelineModel &
     },
   ],
   status: TimelineStatus.draft,
-  footerText: ''
-  , 
-  loadingText: '', 
-  unit: () => {},
   version: null,
 };

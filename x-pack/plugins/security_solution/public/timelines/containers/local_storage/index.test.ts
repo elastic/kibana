@@ -32,10 +32,8 @@ const {
   documentType,
   filterManager,
   isLoading,
-  loadingText,
   queryFields,
   selectAll,
-  unit,
   ...timelineToStore
 } = mockTimelineModel;
 

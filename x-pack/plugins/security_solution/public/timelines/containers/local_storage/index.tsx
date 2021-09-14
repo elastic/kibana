@@ -99,10 +99,8 @@ const cleanStorageTimeline = (timeline: TimelineModel) => {
     documentType,
     filterManager,
     isLoading,
-    loadingText,
     queryFields,
     selectAll,
-    unit,
     ...timelineToStore
   } = timeline;
   return timelineToStore;
