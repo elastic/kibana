@@ -7,7 +7,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiCard } from '@elastic/eui';
+import { EuiCard, EuiIcon } from '@elastic/eui';
 
 import type { PackageListItem } from '../../../types';
 import { useLink } from '../../../hooks';
@@ -32,36 +32,53 @@ export function PackageCard({
   status,
   icons,
   integration,
+  type,
+  uiInternalPath,
+  euiIconType,
   ...restProps
 }: PackageCardProps) {
-  const { getHref } = useLink();
+  const { getHref, getAbsolutePath } = useLink();
+
   let urlVersion = version;
   // if this is an installed package, link to the version installed
   if ('savedObject' in restProps) {
     urlVersion = restProps.savedObject.attributes.version || version;
   }
 
-  return (
-    <Card
-      title={title || ''}
-      description={description}
-      icon={
-        <PackageIcon
-          icons={icons}
-          packageName={name}
-          integrationName={integration}
-          version={version}
-          size="xl"
-        />
-      }
-      href={getHref('integration_details_overview', {
-        pkgkey: `${name}-${urlVersion}`,
-        ...(integration ? { integration } : {}),
-      })}
-      betaBadgeLabel={release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined}
-      betaBadgeTooltipContent={
-        release && release !== 'ga' ? RELEASE_BADGE_DESCRIPTION[release] : undefined
-      }
-    />
-  );
+  if (type === 'ui_link') {
+    // Custom card
+    return (
+      <Card
+        title={title || ''}
+        description={description}
+        icon={<EuiIcon size={'xl'} type={euiIconType} />}
+        href={getAbsolutePath(uiInternalPath)}
+      />
+    );
+  } else {
+    // EPR-integration
+    return (
+      <Card
+        title={title || ''}
+        description={description}
+        icon={
+          <PackageIcon
+            icons={icons}
+            packageName={name}
+            integrationName={integration}
+            version={version}
+            size="xl"
+          />
+        }
+        href={getHref('integration_details_overview', {
+          pkgkey: `${name}-${urlVersion}`,
+          ...(integration ? { integration } : {}),
+        })}
+        betaBadgeLabel={release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined}
+        betaBadgeTooltipContent={
+          release && release !== 'ga' ? RELEASE_BADGE_DESCRIPTION[release] : undefined
+        }
+      />
+    );
+  }
 }

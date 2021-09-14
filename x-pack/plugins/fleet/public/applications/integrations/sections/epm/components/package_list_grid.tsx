@@ -79,7 +79,7 @@ export function PackageListGrid({
       ? list.filter((item) => {
           const matched = (localSearchRef.current!.search(searchTerm) as PackageList)
             .map((match) => {
-              return match[searchIdField]
+              return match[searchIdField];
             })
             .includes(item[searchIdField]);
           return matched;
