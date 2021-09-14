@@ -12,6 +12,11 @@ import {
   SavedObjectAttributes,
 } from '../../../../../../../src/core/server';
 import { IRuleActionsAttributesSavedObjectAttributes } from './types';
+import { MigrationTask } from '../../startup_migrations/types';
+import { ruleActionsSavedObjectType } from './constants';
+import { SideCarAction } from './deletion_migration/types';
+import { updateObjects } from './deletion_migration/update_objects';
+import { join } from './deletion_migration/join';
 
 /**
  * We keep this around to migrate and update data for the old deprecated rule actions saved object mapping but we
@@ -177,5 +182,25 @@ export const ruleActionsSavedObjectMigration = {
       },
       references: doc.references || [],
     };
+  },
+};
+
+/**
+ * This migrates us off of the Legacy Actions that were a "side car". This migrates us
+ * shortly after startup which makes it a bit dangerous. The migrations above and all migrations
+ * of the system have run first before this is run.
+ */
+export const ruleActionsStartupMigration: MigrationTask<SideCarAction> = {
+  name: 'Removal of Legacy Side Car',
+  version: '7.16.0',
+  deleteSavedObjects: [
+    {
+      type: ruleActionsSavedObjectType,
+    },
+  ],
+  defineJoin: {
+    type: ruleActionsSavedObjectType,
+    join,
+    updateObjects,
   },
 };

@@ -43,7 +43,10 @@ import {
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { ListPluginSetup } from '../../lists/server';
-import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
+import {
+  EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
@@ -54,7 +57,7 @@ import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { ManifestTask } from './endpoint/lib/artifacts';
-import { initSavedObjects } from './saved_objects';
+import { initSavedObjects, registerStartupMigrations } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
@@ -99,7 +102,7 @@ import { EndpointMetadataService } from './endpoint/services/metadata';
 import { createIndicatorMatchAlertType } from './lib/detection_engine/rule_types/indicator_match/create_indicator_match_alert_type';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
-import { dangerousWorkaroundToMigrateActionsSideCarSavedObjects } from './lib/detection_engine/rule_actions/deletion_migration/dangerous_workaround';
+import { runMigrationsTask } from './lib/startup_migrations/run_migrations_task';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -111,7 +114,7 @@ export interface SetupPlugins {
   ruleRegistry: RuleRegistryPluginSetupContract;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
-  taskManager?: TaskManagerSetupContract;
+  taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   telemetry?: TelemetryPluginSetup;
 }
@@ -119,10 +122,11 @@ export interface SetupPlugins {
 export interface StartPlugins {
   alerting: AlertPluginStartContract;
   data: DataPluginStart;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   fleet?: FleetStartContract;
   licensing: LicensingPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
-  taskManager?: TaskManagerStartContract;
+  taskManager: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
   security: SecurityPluginStart;
   cases?: CasesPluginStartContract;
@@ -174,6 +178,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
     initSavedObjects(core.savedObjects);
+    registerStartupMigrations({
+      logger: this.logger,
+      taskManager: plugins.taskManager,
+      coreSetup: core,
+    });
     initUiSettings(core.uiSettings, experimentalFeatures);
     const endpointContext: EndpointAppContext = {
       logFactory: this.context.logger,
@@ -351,23 +360,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     this.licensing$ = plugins.licensing.license$;
 
-    if (this.config.enableLegacySideCarActionMigration) {
-      logger.debug(
-        'Legacy alerting side car actions data migration is starting. If you see errors below on each restart, or issues with your actions on your alerts when you are restarting Kibana you can disable this with the config option of "enableLegacySideCarActionMigration: false" in kibana.yml'
-      );
-      dangerousWorkaroundToMigrateActionsSideCarSavedObjects({
-        logger,
-        savedObjectsClient: new SavedObjectsClient(
-          core.savedObjects.createInternalRepository(['alert', 'action'])
-        ),
-      }).then(() => {
-        logger.debug('Legacy side car actions data migration is complete.');
-      });
-    } else {
-      logger.debug(
-        'Legacy side car actions migration is de-activated from the config and did not run'
-      );
-    }
+    runMigrationsTask({ taskManager: plugins.taskManager, logger });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start

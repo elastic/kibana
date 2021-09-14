@@ -7,13 +7,15 @@
 
 import { Actions, AlertingActions } from './types';
 
+export interface TransformActionsOptions {
+  actions: Actions[];
+  actionsCountInReferences: number;
+}
+
 export const transformActions = ({
   actions,
   actionsCountInReferences,
-}: {
-  actions: Actions[];
-  actionsCountInReferences: number;
-}) => {
+}: TransformActionsOptions): AlertingActions[] => {
   return actions.map<AlertingActions>((action, index) => {
     const { action_type_id: actionTypeId, id, ...rest } = action;
     return { ...rest, actionTypeId, actionRef: `action_${actionsCountInReferences + index}` };

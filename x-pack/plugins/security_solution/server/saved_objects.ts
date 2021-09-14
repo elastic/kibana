@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from '../../../../src/core/server';
+import { TaskManagerSetupContract } from '../../task_manager/server';
+import { CoreSetup, Logger } from '../../../../src/core/server';
 
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
 import {
@@ -18,6 +19,11 @@ import {
   exceptionsArtifactType,
   manifestType,
 } from './endpoint/lib/artifacts/saved_object_mappings';
+import { MigrationTask } from './lib/startup_migrations/types';
+import { registerMigrationsTask } from './lib/startup_migrations/register_migrations_task';
+import { PluginStart, StartPlugins } from './plugin';
+import { ruleActionsStartupMigration } from './lib/detection_engine/rule_actions/migrations';
+import { SideCarAction } from './lib/detection_engine/rule_actions/deletion_migration/types';
 
 const types = [
   noteType,
@@ -35,4 +41,25 @@ export const savedObjectTypes = types.map((type) => type.name);
 
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
   types.forEach((type) => savedObjects.registerType(type));
+};
+
+const afterStartupMigrations: Array<MigrationTask<SideCarAction>> = [ruleActionsStartupMigration];
+
+export interface RegisterStartupMigrationsOptions {
+  logger: Logger;
+  coreSetup: CoreSetup<StartPlugins, PluginStart>;
+  taskManager: TaskManagerSetupContract;
+}
+
+export const registerStartupMigrations = ({
+  logger,
+  taskManager,
+  coreSetup,
+}: RegisterStartupMigrationsOptions): void => {
+  registerMigrationsTask({
+    logger,
+    taskManager,
+    coreSetup,
+    migrationTasks: afterStartupMigrations,
+  });
 };

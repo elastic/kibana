@@ -40,8 +40,15 @@ export interface AlertingActions {
  * TODO: Can we use their regular type here instead? This can be updated.
  */
 export interface Alerting {
-  name?: string;
+  name: string;
   actions: AlertingActions[];
+  alertTypeId: string;
+  updatedBy: string;
+  apiKey: string | null;
+  apiKeyOwner: string;
+  notifyWhen: string | null;
+  throttle: string | null;
+  muteAll: boolean;
 }
 
 /**
