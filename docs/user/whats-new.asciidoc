@@ -19,12 +19,6 @@ Other versions: {kibana-ref-all}/7.14/whats-new.html[7.14] | {kibana-ref-all}/7.
 // tag::notable-highlights[]
 
 [float]
-[[alerting-7-15]]
-=== Alerting
-
-TBD
-
-[float]
 [[home-page-7.15]]
 === Simplified home page
 
@@ -36,6 +30,80 @@ In the *Add data* section, we’ve reduced and simplified the available actions 
 
 [role="screenshot"]
 image:images/whats-new_home-page.png[Home page]
+
+[float]
+[[alerting-7-15]]
+=== Alerting
+
+TBD
+
+[float]
+[[visualizations-7-15]]
+=== Dashboard and visualizations&mdash;Heatmap color options, flexible legend options, and more
+
+[float]
+[[heatmap-color-options]]
+==== Heatmap color options
+
+In the drag-and-drop visualization editor, you can now apply color pallettes and custom colors to heatmaps, and fine tune the opacity of individual colors.
+
+[role="screenshot"]
+image:images/whats-new_heatmap-colors.png[Heatmap color options]
+
+[float]
+[[flexible-legend-options]]
+==== Flexible legend options
+
+We've added more options to customize the legends in the drag-and-drop visualization editor, *TSVB*, and the *Aggregation Based* area, line, bar, and pie charts. 
+
+You can choose to view, or not to view, the full name of your data series by enabling legend text truncation. When enabled, you can control the exact number of lines before truncation to make sure your legend isn't cutting off the important part of your data labels.  
+
+[role="screenshot"]
+image:images/whats-new_viz-legend-options.png[Legend menu options for truncating text]
+
+In the drag-and-drop visualization editor, you can save panel space by choosing to embed the legend in the visualization. 
+
+[role="screenshot"]
+image:images/whats-new_embed-legend.png[Drag-and-drop editor visualization with embedded legend]
+
+[float]
+[[synchronized-cursor-hover]]
+==== Synchronized cursor hover
+
+When your dashboard contains time series panels, hovering on one panel also hovers on the same time period as the other panels, regardless of the index pattern. 
+
+When your dashboard contains non-time series panels, hovering on one value now highlights the same value on the other panels, as long as the data is from the same index pattern.
+
+[role="screenshot"]
+image:images/whats-new_Dashboard_synchronized-cursor-hover.gif[Synchronized cursor hover in dashboard panels]
+
+Synchronized cursor hover is supported in the following visualization editors:
+
+* Drag-and-drop *Lens* editor
+
+* *TSVB*
+
+* *Aggregation based* area, line, and bar charts
+
+* *Timelion*
+
+[float]
+[[inspect-multiple-requests]]
+==== Inspect multiple requests for multiple layers
+
+The drag-and-drop *Lens* visualization editor now supports *Inspect*, which allows you to view the data in visualizations that contain multiple index patterns.
+
+[float]
+[[more-axes-configuration-options]]
+==== More axis configuration options
+
+In the drag-and-drop visualization editor, you can now orient your axis. While it's better to rotate your visualization to improve readability, axis orientation can help when you need the extra space on the horizontal axis.
+
+[float]
+[[percentile-aggregation-series-and-colors]]
+==== Percentile aggregation series and colors
+
+In *TSVB*, you can now visualize multiple percentiles as their own sereies, and apply a color to each series to easily distinguish between them.
 
 [float]
 [[maps-7-15]]
@@ -74,78 +142,6 @@ image:images/whats-new_Maps_layer-indicator.png[Indicator for when the layer dat
 image:images/whats-new_discover-no-results.png[No results message in Discover]
 
 [float]
-[[visualizations-7-15]]
-=== Visualizations&mdash;Heatmap color options, flexible legend options, and more
-
-[float]
-[[heatmap-color-options]]
-==== Heatmap color options
-
-In the drag-and-drop visualization editor, you can now apply color pallettes and custom colors to heatmaps, and fine tune the opacity of individual colors.
-
-[role="screenshot"]
-image:images/whats-new_heatmap-colors.png[Heatmap color options]
-
-[float]
-[[flexible-legend-options]]
-==== Flexible legend options
-
-We've added more options to customize the legends in the drag-and-drop visualization editor, *TSVB*, and the *Aggregation Based* area, line, bar, and pie charts. 
-
-You can choose to view, or not to view, the full name of your data series by enabling legend text truncation. When enabled, you can control the exact number of lines before truncation to make sure your legend isn't cutting off the important part of your data labels.  
-
-[role="screenshot"]
-image:images/whats-new_viz-legend-options.png[Legend menu options for truncating text]
-
-In the drag-and-drop visualization editor, you can save panel space by choosing to embed the legend in the visualization. 
-
-[role="screenshot"]
-image:images/whats-new_embed-legend.png[Drag-and-drop editor visualization with embedded legend]
-
-[float]
-[[more-axes-configuration-options]]
-==== More axis configuration options
-
-In the drag-and-drop visualization editor, you can now orient your axis. While it's better to rotate your visualization to improve readability, axis orientation can help when you need the extra space on the horizontal axis.
-
-[float]
-[[percentile-aggregation-series-and-colors]]
-==== Percentile aggregation series and colors
-
-In *TSVB*, you can now visualize multiple percentiles as their own sereies, and apply a color to each series to easily distinguish between them.
-
-[float]
-[[dashboard-7-15]]
-=== Dashboard&mdash;Synchronized cursor hover and inspect multiple requests for multiple layers
-
-[float]
-[[synchronized-cursor-hover]]
-==== Synchronized cursor hover
-
-When your dashboard contains time series panels, hovering on one panel also hovers on the same time period as the other panels, regardless of the index pattern. 
-
-When your dashboard contains non-time series panels, hovering on one value now highlights the same value on the other panels, as long as the data is from the same index pattern.
-
-[role="screenshot"]
-image:images/whats-new_Dashboard_synchronized-cursor-hover.gif[Synchronized cursor hover in dashboard panels]
-
-Synchronized cursor hover is supported in the following visualization editors:
-
-* Drag-and-drop *Lens* editor
-
-* *TSVB*
-
-* *Aggregation based* area, line, and bar charts
-
-* *Timelion*
-
-[float]
-[[inspect-multiple-requests]]
-==== Inspect multiple requests for multiple layers
-
-The drag-and-drop *Lens* visualization editor now supports *Inspect*, which allows you to view the data in visualizations that contain multiple index patterns.
-
-[float]
 [[canvas-7-15]]
 === Canvas
 
@@ -170,8 +166,12 @@ TBD
 TBD
 
 [float]
+[[stack-management-7-15]]
+=== Stack management
+
+[float]
 [[index-lifecycle-policies-7-15]]
-=== View affected index templates
+==== View affected index templates
 
 Multiple index templates can refer to the same index lifecycle policy. This makes editing an index lifecycle policy an uncertain process -- how do you know which index templates will be affected by a change? Now you can answer this question by reviewing a list of the affected index templates directly in the *Index Lifecycle Policies* app. Whenever you edit a policy, you’ll know exactly which index templates will be affected.
 
@@ -180,7 +180,7 @@ image:images/whats-new_index-lifecycle-policies.png[A list of affected index tem
 
 [float]
 [[runtime-fields-7-15]]
-=== Preview runtime field scripts
+==== Preview runtime field scripts
 
 Getting your Painless script just right doesn’t always happen on the first try. The new *Preview* pane in the *Create field* editor provides a real-time preview, and improved error handling to make it easier to troubleshoot as scripts get more complex. Now you can evaluate your script against multiple documents, and browse the available fields without leaving the editor.
 
