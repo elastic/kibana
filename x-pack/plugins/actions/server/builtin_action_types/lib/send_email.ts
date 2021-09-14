@@ -97,7 +97,7 @@ async function sendEmailWithExchange(
   };
   try {
     return await sendEmailGraphApi(
-      { options, headers, messageHTML },
+      { options, headers, messageHTML, graphApiUrl },
       logger,
       configurationUtilities
     );

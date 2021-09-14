@@ -360,6 +360,9 @@ export default function emailTest({ getService }: FtrProviderContext) {
           port: 25,
           secure: null,
           from: 'bob@example.com',
+          clientId: null,
+          oauthTokenUrl: null,
+          tenantId: null,
         },
       });
 
@@ -382,6 +385,9 @@ export default function emailTest({ getService }: FtrProviderContext) {
           host: 'some.non.existent.com',
           port: 25,
           secure: null,
+          clientId: null,
+          oauthTokenUrl: null,
+          tenantId: null,
         },
       });
     });
@@ -418,6 +424,9 @@ export default function emailTest({ getService }: FtrProviderContext) {
           port: null,
           secure: null,
           from: 'bob@example.com',
+          clientId: null,
+          oauthTokenUrl: null,
+          tenantId: null,
         },
       });
 
@@ -440,6 +449,9 @@ export default function emailTest({ getService }: FtrProviderContext) {
           host: null,
           port: null,
           secure: null,
+          clientId: null,
+          oauthTokenUrl: null,
+          tenantId: null,
         },
       });
     });
