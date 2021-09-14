@@ -42,6 +42,7 @@ import * as i18n from '../../../pages/detection_engine/rules/translations';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { convertRulesFilterToKQL } from './utils';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { ResolvedSanitizedRule, SanitizedAlert } from '../../../../../../alerting/common';
 
 /**
  * Create provided Rule
@@ -149,7 +150,10 @@ export const fetchRules = async ({
  *
  * @throws An error if response is not OK
  */
-export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> =>
+export const fetchRuleById = async ({
+  id,
+  signal,
+}: FetchRuleProps): Promise<SanitizedAlert<Rule> | ResolvedSanitizedRule<Rule> | null> =>
   pureFetchRuleById({ id, http: KibanaServices.get().http, signal });
 
 /**
@@ -165,8 +169,10 @@ export const pureFetchRuleById = async ({
   id,
   http,
   signal,
-}: FetchRuleProps & { http: HttpStart }): Promise<Rule> =>
-  http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
+}: FetchRuleProps & { http: HttpStart }): Promise<
+  SanitizedAlert<Rule> | ResolvedSanitizedRule<Rule> | null
+> =>
+  http.fetch(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
     query: { id },
     signal,
