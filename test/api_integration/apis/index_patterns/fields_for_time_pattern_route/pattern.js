@@ -38,6 +38,7 @@ export default function ({ getService }) {
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
+                metadata_field: false,
               },
               {
                 name: 'Jan01',
@@ -46,6 +47,7 @@ export default function ({ getService }) {
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
+                metadata_field: false,
               },
               {
                 name: 'Jan02',
@@ -54,6 +56,7 @@ export default function ({ getService }) {
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
+                metadata_field: false,
               },
             ],
           });
@@ -77,6 +80,7 @@ export default function ({ getService }) {
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
+                metadata_field: false,
               },
               {
                 name: 'Jan02',
@@ -85,6 +89,7 @@ export default function ({ getService }) {
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
+                metadata_field: false,
               },
             ],
           });
@@ -109,6 +114,7 @@ export default function ({ getService }) {
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
+                metadata_field: false,
               },
               {
                 name: 'Jan02',
@@ -117,6 +123,7 @@ export default function ({ getService }) {
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
+                metadata_field: false,
               },
               {
                 name: 'meta1',
@@ -124,6 +131,7 @@ export default function ({ getService }) {
                 aggregatable: false,
                 searchable: false,
                 readFromDocValues: false,
+                metadata_field: true,
               },
               {
                 name: 'meta2',
@@ -131,6 +139,7 @@ export default function ({ getService }) {
                 aggregatable: false,
                 searchable: false,
                 readFromDocValues: false,
+                metadata_field: true,
               },
             ],
           });

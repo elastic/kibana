@@ -6,11 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { IRouter } from 'kibana/server';
 import { ActionsRequestHandlerContext } from '../../types';
 import { ILicenseState } from '../../lib';
 import { BASE_ACTION_API_PATH } from '../../../common';
 import { verifyAccessAndContext } from '../verify_access_and_context';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -21,7 +23,8 @@ export const bodySchema = schema.object({
 
 export const createActionRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
 ) => {
   router.post(
     {
@@ -34,6 +37,7 @@ export const createActionRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = context.actions.getActionsClient();
         const action = req.body;
+        trackLegacyRouteUsage('create', usageCounter);
         return res.ok({
           body: await actionsClient.create({ action }),
         });

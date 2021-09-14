@@ -833,7 +833,7 @@
             "children": [
               {
                 "parentPluginId": "savedObjectsTaggingOss",
-                "id": "def-public.props",
+                "id": "def-public.SavedObjectsTaggingApiUiComponent.TagList.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -846,7 +846,7 @@
               },
               {
                 "parentPluginId": "savedObjectsTaggingOss",
-                "id": "def-public.context",
+                "id": "def-public.SavedObjectsTaggingApiUiComponent.TagList.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "context",
@@ -885,7 +885,7 @@
             "children": [
               {
                 "parentPluginId": "savedObjectsTaggingOss",
-                "id": "def-public.props",
+                "id": "def-public.SavedObjectsTaggingApiUiComponent.TagSelector.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -898,7 +898,7 @@
               },
               {
                 "parentPluginId": "savedObjectsTaggingOss",
-                "id": "def-public.context",
+                "id": "def-public.SavedObjectsTaggingApiUiComponent.TagSelector.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "context",
@@ -937,7 +937,7 @@
             "children": [
               {
                 "parentPluginId": "savedObjectsTaggingOss",
-                "id": "def-public.props",
+                "id": "def-public.SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -950,7 +950,7 @@
               },
               {
                 "parentPluginId": "savedObjectsTaggingOss",
-                "id": "def-public.context",
+                "id": "def-public.SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "context",
@@ -1093,7 +1093,7 @@
         "children": [
           {
             "parentPluginId": "savedObjectsTaggingOss",
-            "id": "def-public.object",
+            "id": "def-public.SavedObjectTagDecoratorTypeGuard.$1",
             "type": "Object",
             "tags": [],
             "label": "object",
