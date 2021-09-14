@@ -16,7 +16,6 @@ import {
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
-import parse from 'semver/functions/parse';
 import type {
   AuthenticatedUser,
   SecurityPluginSetup,
@@ -229,13 +228,16 @@ export class CloudPlugin implements Plugin<CloudSetup> {
             );
           });
         const kibanaVer = this.initializerContext.env.packageInfo.version;
-        const parsedVer = parse(kibanaVer);
+        // TODO: use semver instead
+        const parsedVer = (kibanaVer.indexOf('.') > -1 ? kibanaVer.split('.') : []).map((s) =>
+          parseInt(s, 10)
+        );
         // `str` suffix is required for evn vars, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
         fullStory.identify(hashedId, {
           version_str: kibanaVer,
-          version_major_int: parsedVer?.major ?? -1,
-          version_minor_int: parsedVer?.minor ?? -1,
-          version_patch_int: parsedVer?.patch ?? -1,
+          version_major_int: parsedVer[0] ?? -1,
+          version_minor_int: parsedVer[1] ?? -1,
+          version_patch_int: parsedVer[2] ?? -1,
         });
       }
     } catch (e) {
