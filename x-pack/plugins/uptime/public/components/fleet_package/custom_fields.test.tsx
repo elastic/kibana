@@ -205,7 +205,7 @@ describe('<CustomFields />', () => {
     });
     expect(
       getByText(
-        /Browser monitoring requires using the \"complete\" variant of the elastic–agent docker container./
+        /To create a "Browser" monitor, please ensure you are using the elastic-agent-complete Docker container, which contains the dependencies to run these mon/
       )
     ).toBeInTheDocument();
 
