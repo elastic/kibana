@@ -6,18 +6,22 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'src/core/server';
+import {
+  PluginInitializerContext,
+  PluginConfigDescriptor,
+} from 'src/core/server';
 import { APMOSSConfig } from 'src/plugins/apm_oss/server';
 import { APMPlugin } from './plugin';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 
 // plugin config
-export const config = {
+export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     serviceMapEnabled: true,
     ui: true,
     profilingEnabled: true,
   },
+  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     serviceMapEnabled: schema.boolean({ defaultValue: true }),

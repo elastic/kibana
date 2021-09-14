@@ -26,7 +26,8 @@ export { createReadySignal } from './lib/ready_signal';
 
 export const config: PluginConfigDescriptor<IEventLogConfig> = {
   schema: ConfigSchema,
-  deprecations: () => [
+  deprecations: ({ deprecate }) => [
+    deprecate('enabled', '8.0.0'),
     (settings, fromPath, addDeprecation) => {
       if (
         settings?.xpack?.eventLog?.enabled === false ||

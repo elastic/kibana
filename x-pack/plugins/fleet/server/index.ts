@@ -38,7 +38,8 @@ export const config: PluginConfigDescriptor = {
     epm: true,
     agents: true,
   },
-  deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
+  deprecations: ({ deprecate, renameFromRoot, unused, unusedFromRoot }) => [
+    deprecate('enabled', '8.0.0'),
     // Fleet plugin was named ingestManager before
     renameFromRoot('xpack.ingestManager.enabled', 'xpack.fleet.enabled'),
     renameFromRoot('xpack.ingestManager.registryUrl', 'xpack.fleet.registryUrl'),
