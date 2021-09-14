@@ -263,12 +263,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         capabilities: { actions },
       },
       timelines: timelinesUi,
+      http,
+      spaces: spacesApi,
+      notifications: { toasts },
     },
-    http,
-    notifications: { toasts },
-    spaces: spacesApi,
   } = useKibana();
-  // const { basePath } = http;
+  const { basePath } = http;
   const hasActionsPrivileges = useMemo(() => {
     if (rule?.actions != null && rule?.actions.length > 0 && isBoolean(actions.show)) {
       return actions.show;
@@ -283,25 +283,25 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
   }, [maybeRule]);
 
-  // useEffect(() => {
-  //   if (rule) {
-  //     const outcome = (rule as ResolvedRule).outcome;
-  //     if (spacesApi && outcome === 'aliasMatch') {
-  //       // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
-  //       const path = basePath.prepend(`insightsAndAlerting/triggersActions/rule/${alert.id}`);
-  //       spacesApi.ui.redirectLegacyUrl(
-  //         path,
-  //         i18nTranslate.translate(
-  //           'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
-  //           {
-  //             defaultMessage: 'rule',
-  //           }
-  //         )
-  //       );
-  //     }
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [rule]);
+  useEffect(() => {
+    if (rule) {
+      const outcome = rule.outcome;
+      if (spacesApi && outcome === 'aliasMatch') {
+        // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
+        const path = basePath.prepend(`/rules/id/${rule.id}`);
+        spacesApi.ui.redirectLegacyUrl(
+          path,
+          i18nTranslate.translate(
+            'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
+            {
+              defaultMessage: 'rule',
+            }
+          )
+        );
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rule]);
 
   useEffect(() => console.error('WHAT IS IN THE RULE', JSON.stringify(rule, null, 2)), [rule]);
 
