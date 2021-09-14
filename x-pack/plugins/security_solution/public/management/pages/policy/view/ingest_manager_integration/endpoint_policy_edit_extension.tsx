@@ -117,8 +117,7 @@ const WrappedPolicyDetailsForm = memo<{
         label: i18n.translate(
           'xpack.securitySolution.endpoint.fleetCustomExtension.artifacts.backButtonLabel',
           {
-            defaultMessage: `Back to {name} policy`,
-            values: { name: updatedPolicy?.name },
+            defaultMessage: `Back to Fleet integration policy`,
           }
         ),
         navigateTo: [
@@ -133,7 +132,7 @@ const WrappedPolicyDetailsForm = memo<{
         }),
       },
     };
-  }, [getAppUrl, updatedPolicy, policyId]);
+  }, [getAppUrl, policyId]);
 
   const policyTrustedAppsLink = useMemo(
     () => (

@@ -14,7 +14,7 @@ import { StartPlugins } from '../../../../../types';
 import { managementReducer } from '../../../../store/reducer';
 import { managementMiddlewareFactory } from '../../../../store/middleware';
 import { appReducer } from '../../../../../common/store/app';
-import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
+import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 
 type ComposeType = typeof compose;
 declare global {
@@ -59,7 +59,7 @@ export const withSecurityContext = <P extends {}>({
           management: undefined,
           // @ts-ignore ignore this error as we just need the enableExperimental and it's temporary
           app: {
-            enableExperimental: allowedExperimentalValues,
+            enableExperimental: ExperimentalFeaturesService.get(),
           },
         },
         composeEnhancers(applyMiddleware(...managementMiddlewareFactory(coreStart, depsStart)))

@@ -45,15 +45,18 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
             setStats(response);
           }
         } catch (error) {
-          toasts.addDanger(
-            i18n.translate(
-              'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummaryError',
-              {
-                defaultMessage: 'There was an error trying to fetch trusted apps stats: "{error}"',
-                values: { error },
-              }
-            )
-          );
+          if (isMounted.current) {
+            toasts.addDanger(
+              i18n.translate(
+                'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsSummaryError',
+                {
+                  defaultMessage:
+                    'There was an error trying to fetch trusted apps stats: "{error}"',
+                  values: { error },
+                }
+              )
+            );
+          }
         }
       };
       fetchStats();
@@ -63,7 +66,7 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
     }, [toasts, trustedAppsApi, policyId]);
 
     return (
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" data-test-subj="fleedTrustedAppsCard">
         <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center" cardSize={cardSize}>
           <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
             <EuiText>
