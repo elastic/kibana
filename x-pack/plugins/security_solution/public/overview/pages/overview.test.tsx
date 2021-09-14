@@ -32,6 +32,7 @@ import {
 import { useCtiDashboardLinks } from '../containers/overview_cti_links';
 import { EndpointPrivileges } from '../../common/components/user_privileges/use_endpoint_privileges';
 import { useRiskyHostLinks } from '../containers/overview_risky_host_links/use_risky_host_links';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -92,6 +93,10 @@ useRiskyHostLinksMock.mockReturnValue({
   isModuleEnabled: false,
   listItems: [],
 });
+
+jest.mock('../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
 
 const endpointNoticeMessage = (hasMessageValue: boolean) => {
   return {

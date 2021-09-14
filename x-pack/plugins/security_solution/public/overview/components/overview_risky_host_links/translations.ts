@@ -43,10 +43,9 @@ export const DANGER_BUTTON = i18n.translate(
   }
 );
 
-export const LINK_COPY = i18n.translate(
-  'xpack.securitySolution.overview.riskyHostsSourceDashboard',
-  { defaultMessage: 'View source' }
-);
+export const LINK_COPY = i18n.translate('xpack.securitySolution.overview.riskyHostsSource', {
+  defaultMessage: 'source',
+});
 
 export const PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.overview.riskyHostsDashboardTitle',

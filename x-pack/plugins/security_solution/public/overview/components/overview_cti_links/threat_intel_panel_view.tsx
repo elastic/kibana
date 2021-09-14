@@ -19,7 +19,7 @@ import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/
 import { LINK_COPY } from '../overview_risky_host_links/translations';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
-  { name: 'Name', field: 'title', sortable: true, truncateText: true, width: '50%' },
+  { name: 'Name', field: 'title', sortable: true, truncateText: true, width: '100%' },
   {
     name: 'Indicator',
     field: 'count',
@@ -33,7 +33,7 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     name: '',
     field: 'path',
     truncateText: true,
-    width: '20%',
+    width: '80px',
     // eslint-disable-next-line react/display-name
     render: (path: string) => <Link path={path} copy={LINK_COPY} />,
   },

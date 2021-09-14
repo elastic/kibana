@@ -38,7 +38,7 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     name: '',
     render: (path: string) => (<Link path={path} copy={i18n.LINK_COPY} />) as JSX.Element,
     truncateText: true,
-    width: '15%',
+    width: '80px',
   },
 ];
 
