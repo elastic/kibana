@@ -16,6 +16,18 @@ export const i18nTexts = {
       defaultMessage:
         'Set a number of shards or the maximum primary shard size for the target index.',
     }),
+    shrinkCountLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardCountLabel',
+      {
+        defaultMessage: 'Configure the number of primary shards',
+      }
+    ),
+    shrinkSizeLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardSizeLabel',
+      {
+        defaultMessage: 'Configure maximum shard size',
+      }
+    ),
     rolloverOffsetsHotPhaseTiming: i18n.translate(
       'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescription',
       {

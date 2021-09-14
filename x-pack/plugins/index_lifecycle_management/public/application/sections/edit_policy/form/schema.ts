@@ -109,7 +109,7 @@ const numberOfShardsField = {
 };
 const shardSizeField = {
   label: i18n.translate('xpack.indexLifecycleMgmt.shrink.primaryShardSizeLabel', {
-    defaultMessage: 'Maximum primary shard size',
+    defaultMessage: 'Maximum shard size',
   }),
   validations: [
     {

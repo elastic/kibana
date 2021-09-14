@@ -6,17 +6,22 @@
  */
 
 import { TestBed } from '@kbn/test/jest';
+import { act } from 'react-dom/test-utils';
 import { Phase } from '../../../../common/types';
 import { createFormSetValueAction } from './form_set_value_action';
 
 export const createShrinkActions = (testBed: TestBed, phase: Phase) => {
-  const { exists, form } = testBed;
+  const { exists, form, component, find } = testBed;
   const toggleShrinkSelector = `${phase}-shrinkSwitch`;
   const shrinkSizeSelector = `${phase}-primaryShardSize`;
   const shrinkCountSelector = `${phase}-primaryShardCount`;
 
-  const toggleIsUsingShardCount = async () =>
-    await testBed.find(`${phase}-toggleIsUsingShardSize`).simulate('click');
+  const changeShrinkRadioButton = async (selector: string) => {
+    await act(async () => {
+      await find(selector).find('input').simulate('change');
+    });
+    component.update();
+  };
   return {
     shrinkExists: () => exists(toggleShrinkSelector),
     setShrinkCount: async (value: string) => {
@@ -24,7 +29,7 @@ export const createShrinkActions = (testBed: TestBed, phase: Phase) => {
         await form.toggleEuiSwitch(toggleShrinkSelector);
       }
       if (!exists(shrinkCountSelector)) {
-        await toggleIsUsingShardCount();
+        await changeShrinkRadioButton(`${phase}-configureShardCount`);
       }
       await createFormSetValueAction(testBed, shrinkCountSelector)(value);
     },
@@ -33,10 +38,9 @@ export const createShrinkActions = (testBed: TestBed, phase: Phase) => {
         await form.toggleEuiSwitch(toggleShrinkSelector);
       }
       if (!exists(shrinkSizeSelector)) {
-        await toggleIsUsingShardCount();
+        await changeShrinkRadioButton(`${phase}-configureShardSize`);
       }
       await createFormSetValueAction(testBed, shrinkSizeSelector)(value);
     },
-    toggleIsUsingShardCount,
   };
 };
