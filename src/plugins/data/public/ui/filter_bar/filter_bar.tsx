@@ -55,8 +55,7 @@ function FilterBarUI(props: Props) {
     }
   }
 
-  const onAddFilterClick = () =>
-    setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
+  const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
 
   function renderItems() {
     return props.filters.map((filter, i) => (
