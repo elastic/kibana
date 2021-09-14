@@ -134,28 +134,6 @@ describe('ServiceInventory', () => {
     expect(container.querySelectorAll('.euiTableRow')).toHaveLength(2);
   });
 
-  it('should render getting started message, when list is empty and no historical data is found', async () => {
-    httpGet
-      .mockResolvedValueOnce({ fallbackToTransactions: false })
-      .mockResolvedValueOnce({
-        hasLegacyData: false,
-        hasHistoricalData: false,
-        items: [],
-      });
-
-    const { findByText } = render(<ServiceInventory />, { wrapper });
-
-    // wait for requests to be made
-    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(2));
-
-    // wait for elements to be rendered
-    const gettingStartedMessage = await findByText(
-      "Looks like you don't have any APM services installed. Let's add some!"
-    );
-
-    expect(gettingStartedMessage).not.toBeEmptyDOMElement();
-  });
-
   it('should render empty message, when list is empty and historical data is found', async () => {
     httpGet
       .mockResolvedValueOnce({ fallbackToTransactions: false })

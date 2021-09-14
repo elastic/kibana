@@ -7,7 +7,12 @@
 
 import { createSelector } from 'reselect';
 import { ServerApiError } from '../../../../common/types';
-import { Immutable, NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
+import {
+  Immutable,
+  NewTrustedApp,
+  PolicyData,
+  TrustedApp,
+} from '../../../../../common/endpoint/types';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 
 import {
@@ -225,6 +230,18 @@ export const listOfPolicies: (
 ) => Immutable<GetPolicyListResponse['items']> = createSelector(policiesState, (policies) => {
   return isLoadedResourceState(policies) ? policies.data.items : [];
 });
+
+export const getMapOfPoliciesById: (
+  state: Immutable<TrustedAppsListPageState>
+) => Immutable<Record<string, Immutable<PolicyData>>> = createSelector(
+  listOfPolicies,
+  (policies) => {
+    return policies.reduce<Record<string, Immutable<PolicyData>>>((mapById, policy) => {
+      mapById[policy.id] = policy;
+      return mapById;
+    }, {}) as Immutable<Record<string, Immutable<PolicyData>>>;
+  }
+);
 
 export const isEdit: (state: Immutable<TrustedAppsListPageState>) => boolean = createSelector(
   getCurrentLocation,

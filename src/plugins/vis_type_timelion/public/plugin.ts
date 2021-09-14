@@ -58,16 +58,11 @@ export interface VisTypeTimelionPluginStart {
   getArgValueSuggestions: typeof getArgValueSuggestions;
 }
 
-/** @public */
-export interface VisTypeTimelionPluginSetup {
-  isUiEnabled: boolean;
-}
-
 /** @internal */
 export class TimelionVisPlugin
   implements
     Plugin<
-      VisTypeTimelionPluginSetup,
+      void,
       VisTypeTimelionPluginStart,
       TimelionVisSetupDependencies,
       TimelionVisStartDependencies
@@ -87,10 +82,6 @@ export class TimelionVisPlugin
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
     expressions.registerRenderer(getTimelionVisRenderer(dependencies));
     visualizations.createBaseVisualization(getTimelionVisDefinition(dependencies));
-
-    return {
-      isUiEnabled: this.initializerContext.config.get().ui.enabled,
-    };
   }
 
   public start(core: CoreStart, { data, charts }: TimelionVisStartDependencies) {

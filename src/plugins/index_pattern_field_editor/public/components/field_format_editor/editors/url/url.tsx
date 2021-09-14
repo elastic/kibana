@@ -25,6 +25,7 @@ import { formatId } from './constants';
 
 import { context as contextType } from '../../../../../../kibana_react/public';
 import { FormatEditorProps } from '../types';
+import { UrlFormat } from '../../../../../../field_formats/common';
 
 interface OnChangeParam {
   type: string;
@@ -144,7 +145,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
   };
 
   render() {
-    const { format, formatParams } = this.props;
+    const { formatParams, format } = this.props;
     const { error, samples, sampleConverterType } = this.state;
 
     return (
@@ -157,7 +158,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           <EuiSelect
             data-test-subj="urlEditorType"
             value={formatParams.type}
-            options={format.type.urlTypes.map((type: UrlType) => {
+            options={(format.type as typeof UrlFormat).urlTypes.map((type: UrlType) => {
               return {
                 value: type.kind,
                 text: type.text,

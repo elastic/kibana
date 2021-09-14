@@ -67,7 +67,7 @@ describe('CrawlerOverviewLogic', () => {
         await nextTick();
 
         expect(http.delete).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/crawler/domains/1234',
+          '/internal/app_search/engines/some-engine/crawler/domains/1234',
           {
             query: { respond_with: 'crawler_details' },
           }

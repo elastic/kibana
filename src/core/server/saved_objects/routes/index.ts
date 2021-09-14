@@ -20,11 +20,12 @@ import { registerUpdateRoute } from './update';
 import { registerBulkGetRoute } from './bulk_get';
 import { registerBulkCreateRoute } from './bulk_create';
 import { registerBulkUpdateRoute } from './bulk_update';
-import { registerLogLegacyImportRoute } from './log_legacy_import';
 import { registerExportRoute } from './export';
 import { registerImportRoute } from './import';
 import { registerResolveImportErrorsRoute } from './resolve_import_errors';
 import { registerMigrateRoute } from './migrate';
+import { registerLegacyImportRoute } from './legacy_import_export/import';
+import { registerLegacyExportRoute } from './legacy_import_export/export';
 
 export function registerRoutes({
   http,
@@ -32,12 +33,14 @@ export function registerRoutes({
   logger,
   config,
   migratorPromise,
+  kibanaVersion,
 }: {
   http: InternalHttpServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
   config: SavedObjectConfig;
   migratorPromise: Promise<IKibanaMigrator>;
+  kibanaVersion: string;
 }) {
   const router = http.createRouter('/api/saved_objects/');
 
@@ -50,10 +53,17 @@ export function registerRoutes({
   registerBulkGetRoute(router, { coreUsageData });
   registerBulkCreateRoute(router, { coreUsageData });
   registerBulkUpdateRoute(router, { coreUsageData });
-  registerLogLegacyImportRoute(router, logger);
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });
+
+  const legacyRouter = http.createRouter('');
+  registerLegacyImportRoute(legacyRouter, {
+    maxImportPayloadBytes: config.maxImportPayloadBytes,
+    coreUsageData,
+    logger,
+  });
+  registerLegacyExportRoute(legacyRouter, { kibanaVersion, coreUsageData, logger });
 
   const internalRouter = http.createRouter('/internal/saved_objects/');
 

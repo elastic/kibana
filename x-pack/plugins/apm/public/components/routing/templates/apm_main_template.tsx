@@ -8,8 +8,10 @@
 import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import React from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { getNoDataConfig } from './no_data_config';
 
 /*
  * This template contains:
@@ -31,12 +33,25 @@ export function ApmMainTemplate({
   children: React.ReactNode;
 } & EuiPageTemplateProps) {
   const { services } = useKibana<ApmPluginStartDeps>();
+  const { http, docLinks } = services;
+  const basePath = http?.basePath.get();
 
   const ObservabilityPageTemplate =
     services.observability.navigation.PageTemplate;
 
+  const { data } = useFetcher((callApmApi) => {
+    return callApmApi({ endpoint: 'GET /api/apm/has_data' });
+  }, []);
+
+  const noDataConfig = getNoDataConfig({
+    basePath,
+    docsLink: docLinks!.links.observability.guide,
+    hasData: data?.hasData,
+  });
+
   return (
     <ObservabilityPageTemplate
+      noDataConfig={noDataConfig}
       pageHeader={{
         pageTitle,
         rightSideItems: [<ApmEnvironmentFilter />],
