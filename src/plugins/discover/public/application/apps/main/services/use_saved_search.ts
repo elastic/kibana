@@ -168,7 +168,7 @@ export const useSavedSearch = ({
      * Skip initial fetch when discover:searchOnPageLoad is disabled.
      */
     if (initialFetchStatus === FetchStatus.UNINITIALIZED) {
-      fetch$ = fetch$.pipe(startWith(undefined)).pipe(skip(1));
+      fetch$ = fetch$.pipe(startWith(undefined), skip(1));
     }
 
     const subscription = fetch$.subscribe((val) => {
