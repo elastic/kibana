@@ -57,6 +57,7 @@ import { getPackageUsageStats } from '../../services/epm/packages/get';
 import type { CustomIntegrationsPluginSetup } from '../../../../../../src/plugins/custom_integrations/server';
 import type { CategoryCount } from '../../../../../../src/plugins/custom_integrations/server/custom_integration_registry';
 import type { PackageList } from '../../../common';
+import type { CustomIntegration } from '../../../../../../src/plugins/custom_integrations/server';
 
 interface EPMCategoryCount {
   id: string;
@@ -92,7 +93,7 @@ export const getCategoriesHandler: RequestHandler<
 > = async (customIntegrations: CustomIntegrationsPluginSetup, context, request, response) => {
   try {
     const categoriesFromEpm = await getCategories(request.query);
-    const categoriesFromCustom = customIntegrations.getNonBeatsCategories();
+    const categoriesFromCustom = customIntegrations.getAddableCategories();
     const mergedCategories = mergeCategoryCounts(categoriesFromEpm, categoriesFromCustom);
     const body: GetCategoriesResponse = {
       response: mergedCategories,
@@ -109,14 +110,46 @@ export const getListHandler: RequestHandler<
 > = async (customIntegrations: CustomIntegrationsPluginSetup, context, request, response) => {
   try {
     const savedObjectsClient = context.core.savedObjects.client;
-    const res = await getPackages({
+    const packages = await getPackages({
       savedObjectsClient,
       ...request.query,
     });
-    // console.log('all pacjkages', res);
 
-    const integrations = customIntegrations.getNonBeatsCustomIntegrations();
-    const merged: PackageList = res.concat(integrations);
+    console.log('p', packages);
+
+    const beatsPackages = customIntegrations.getReplaceableCustomIntegrations();
+    // console.log('beats', beatsPackages);
+
+    // console.log('p', packages);
+    const nonGaPackages = packages.filter((p) => p.release !== 'ga');
+    // console.log('nonga', nonGaPackages);
+
+    const gaPackages = packages.filter((p) => p.release === 'ga');
+    // console.log('ga', gaPackages);
+
+    const replacingBeats = beatsPackages.filter((c) => {
+      const matchingPackage = nonGaPackages.find((p) => p.name === c.beatsModuleName);
+      return matchingPackage;
+    });
+
+    // console.log('repl', replacingBeats);
+
+    // const filteredNonGaPackages = nonGaPackages.filter((p) => {
+    //   const matchingCard = beatsPackages.find((c) => c.beatsModuleName === p.name);
+    //   return !matchingCard;
+    // });
+
+    const re = customIntegrations.getAddableCustomIntegrations();
+    const filteredCustomIntegrations = re.filter((integration) => {
+      return !request.query.category || integration.categories.includes(request.query.category);
+    });
+
+    // const merged: PackageList = [...replacingBeats, ...gaPackages, ...filteredCustomIntegrations];
+    const merged: PackageList = [...packages, ...filteredCustomIntegrations];
+
+    merged.sort((packagea, packageb) => {
+      return packagea.title < packageb.title;
+    });
 
     const body: GetPackagesResponse = {
       response: merged,

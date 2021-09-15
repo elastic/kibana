@@ -62,6 +62,7 @@ export const EPMHomePage: React.FC = memo(() => {
 // list of packages by bringing all integrations to top-level so that
 // each integration is displayed as its own tile
 const packageListToIntegrationsList = (packages: PackageList): PackageList => {
+  console.log('package to integratoin list', packages);
   return packages.reduce((acc: PackageList, pkg) => {
     const { policy_templates: policyTemplates = [], ...restOfPackage } = pkg;
     return [
@@ -231,6 +232,7 @@ const AvailablePackages: React.FC = memo(() => {
     []
   );
 
+  // console.log('cateres', categoriesRes);
   const categories = useMemo(
     () => [
       {

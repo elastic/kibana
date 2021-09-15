@@ -17,8 +17,24 @@ import { builtInTutorials } from '../../tutorials/register';
 import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
 
 const emptyContext = {};
-function registerBeatsTutorialsWithCustomIntegrations() {
-
+function registerBeatsTutorialsWithCustomIntegrations(
+  customIntegrations: CustomIntegrationsPluginSetup,
+  provider: TutorialProvider
+) {
+  const tutorial = provider(emptyContext);
+  customIntegrations.registerCustomIntegration({
+    name: tutorial.id,
+    id: tutorial.name,
+    title: tutorial.name,
+    categories: [], // beats packages, we don't know categories
+    type: 'ui_link',
+    uiInternalPath: `/app/home#/tutorial/${tutorial.id}`,
+    isBeats: true,
+    isAPM: !!tutorial.isAPM,
+    description: tutorial.shortDescription,
+    euiIconType: '',
+    beatsModuleName: tutorial.moduleName,
+  });
 }
 
 function registerTutorialWithCustomIntegrations(
@@ -34,6 +50,7 @@ function registerTutorialWithCustomIntegrations(
     type: 'ui_link',
     uiInternalPath: `/app/home#/tutorial/${tutorial.id}`,
     isBeats: false,
+    isAPM: !!tutorial.isAPM,
     description: tutorial.shortDescription,
     euiIconType: tutorial.euiIconType || `logo${name}`,
   });
@@ -95,8 +112,11 @@ export class TutorialsRegistry {
     };
   }
 
-  public start() {
+  public start(customIntegrations: CustomIntegrationsPluginSetup) {
     // pre-populate with built in tutorials
+    builtInTutorials.forEach((provider) => {
+      registerBeatsTutorialsWithCustomIntegrations(customIntegrations, provider);
+    });
     this.tutorialProviders.push(...builtInTutorials);
     return {};
   }

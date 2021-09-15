@@ -83,6 +83,7 @@ export const tutorialProvider = ({
     name: i18n.translate('xpack.apm.tutorial.specProvider.name', {
       defaultMessage: 'APM',
     }),
+    isAPM: true,
     moduleName,
     category: TutorialsCategory.OTHER,
     shortDescription: apmIntro,

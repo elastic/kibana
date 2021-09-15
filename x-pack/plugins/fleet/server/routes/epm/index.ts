@@ -63,7 +63,9 @@ export const registerRoutes = (
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      return await getListHandler(customIntegrations, context, request, response);
+      console.log('GET PACKAGES');
+      const resp = await getListHandler(customIntegrations, context, request, response);
+      return resp;
     }
   );
 

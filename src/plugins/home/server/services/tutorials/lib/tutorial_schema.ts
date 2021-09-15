@@ -112,6 +112,7 @@ export const tutorialSchema = schema.object({
       }
     },
   }),
+  isAPM: schema.maybe(schema.boolean()),
   category: schema.oneOf([
     schema.literal('logging'),
     schema.literal('security'),

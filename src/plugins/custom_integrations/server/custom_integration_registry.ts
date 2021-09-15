@@ -14,6 +14,10 @@ export interface CategoryCount {
   id: string;
 }
 
+function isAddable(integration: CustomIntegration) {
+  return !integration.isBeats && !integration.isAPM;
+}
+
 export class CustomIntegrationRegistry {
   private readonly _integrations: CustomIntegration[];
   private readonly _logger: Logger;
@@ -36,16 +40,18 @@ export class CustomIntegrationRegistry {
     this._integrations.push(customIntegration);
   }
 
-  getNonBeatsCustomIntegrations(): CustomIntegration[] {
-    return this._integrations.filter((integration) => {
-      return !integration.isBeats;
-    });
+  getAddableCustomIntegrations(): CustomIntegration[] {
+    return this._integrations.filter(isAddable);
   }
 
-  getNonBeatsCategories(): CategoryCount[] {
+  getReplaceableCustomIntegrations(): CustomIntegration[] {
+    return this._integrations.filter((integration) => integration.isBeats);
+  }
+
+  getAddableCategories(): CategoryCount[] {
     const categories: Map<string, number> = new Map<string, number>();
     for (let i = 0; i < this._integrations.length; i++) {
-      if (this._integrations[i].isBeats) {
+      if (!isAddable(this._integrations[i])) {
         continue;
       }
       for (let j = 0; j < this._integrations[i].categories.length; j++) {

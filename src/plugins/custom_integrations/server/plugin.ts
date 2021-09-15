@@ -41,17 +41,17 @@ export class CustomIntegrationsPlugin
 
     return {
       registerCustomIntegration: (integration: CustomIntegration) => {
-        console.log('register custom!', integration);
         this.customIngegrationRegistry.registerCustomIntegration(integration);
       },
-      getNonBeatsCustomIntegrations: (): CustomIntegration[] => {
-        console.log('get the interations');
-        return this.customIngegrationRegistry.getNonBeatsCustomIntegrations();
+      getAddableCustomIntegrations: (): CustomIntegration[] => {
+        return this.customIngegrationRegistry.getAddableCustomIntegrations();
       },
 
-      getNonBeatsCategories: (): CategoryCount[] => {
-        console.log('get categories');
-        return this.customIngegrationRegistry.getNonBeatsCategories();
+      getAddableCategories: (): CategoryCount[] => {
+        return this.customIngegrationRegistry.getAddableCategories();
+      },
+      getReplaceableCustomIntegrations: (): CustomIntegration[] => {
+        return this.customIngegrationRegistry.getReplaceableCustomIntegrations();
       },
     } as CustomIntegrationsPluginSetup;
   }

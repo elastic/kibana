@@ -30,6 +30,7 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   constructor(private readonly initContext: PluginInitializerContext) {}
   private readonly tutorialsRegistry = new TutorialsRegistry();
   private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
+  private customIntegrations: CustomIntegrationsPluginSetup | undefined = undefined;
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -40,6 +41,7 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
 
     console.log('HOME SET?UP');
     console.log(plugins.customIntegrations);
+    this.customIntegrations = plugins.customIntegrations;
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core, plugins.customIntegrations) },
       sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usageCollection) },
@@ -47,8 +49,12 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   }
 
   public start(): HomeServerPluginStart {
+    if (!this.customIntegrations) {
+      throw new Error('Canot start home server. CustomIntegrations plugin missing.');
+    }
+
     return {
-      tutorials: { ...this.tutorialsRegistry.start() },
+      tutorials: { ...this.tutorialsRegistry.start(this.customIntegrations) },
       sampleData: { ...this.sampleDataRegistry.start() },
     };
   }

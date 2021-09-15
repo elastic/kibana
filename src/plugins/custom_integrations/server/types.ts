@@ -10,8 +10,9 @@ import { CategoryCount } from './custom_integration_registry';
 
 export interface CustomIntegrationsPluginSetup {
   registerCustomIntegration(customIntegration: CustomIntegration): void;
-  getNonBeatsCustomIntegrations(): CustomIntegration[];
-  getNonBeatsCategories(): CategoryCount[];
+  getAddableCustomIntegrations(): CustomIntegration[];
+  getAddableCategories(): CategoryCount[];
+  getReplaceableCustomIntegrations(): CustomIntegration[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -27,4 +28,6 @@ export interface CustomIntegration {
   euiIconType: string;
   categories: string[];
   isBeats: boolean;
+  isAPM: boolean;
+  beatsModuleName?: string;
 }
