@@ -11,6 +11,14 @@ import { FIELD_FORMAT_IDS, FieldFormatInstanceType } from '../../common';
 
 export const baseFormattersPublic: Array<KbnRegistryItemLoader<FieldFormatInstanceType>> = [
   {
+    id: FIELD_FORMAT_IDS.DATE,
+    load: () => import('./converters').then((m) => m.DateFormat),
+  },
+  {
+    id: FIELD_FORMAT_IDS.DATE_NANOS,
+    load: () => import('./converters').then((m) => m.DateNanosFormat),
+  },
+  {
     id: FIELD_FORMAT_IDS.BOOLEAN,
     load: () => import('../../common/converters').then((m) => m.BoolFormat),
   },
@@ -69,14 +77,5 @@ export const baseFormattersPublic: Array<KbnRegistryItemLoader<FieldFormatInstan
   {
     id: FIELD_FORMAT_IDS.HISTOGRAM,
     load: () => import('../../common/converters').then((m) => m.HistogramFormat),
-  },
-
-  {
-    id: FIELD_FORMAT_IDS.DATE,
-    load: () => import('./converters').then((m) => m.DateFormat),
-  },
-  {
-    id: FIELD_FORMAT_IDS.DATE_NANOS,
-    load: () => import('./converters').then((m) => m.DateNanosFormat),
   },
 ];
