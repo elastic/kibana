@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function paginate({ size, index }, data) {
+export function paginate<T>({ size, index }: { size: number; index: number }, data: T[]): T[] {
   const start = index * size;
   return data.slice(start, start + size);
 }

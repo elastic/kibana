@@ -11,6 +11,16 @@ import { getLogstashPipelineIds } from './get_pipeline_ids';
 import { sortPipelines } from './sort_pipelines';
 import { paginate } from '../pagination/paginate';
 import { getMetrics } from '../details/get_metrics';
+import {
+  LegacyRequest,
+  Pipeline,
+  PipelineMetricKey,
+  PipelineMetricsRes,
+  PipelineNodeCountMetricKey,
+  PipelinesResponse,
+  PipelineThroughputMetricKey,
+  PipelineWithMetrics,
+} from '../../types';
 
 /**
  * This function performs an optimization around the pipeline listing tables in the UI. To avoid
@@ -22,80 +32,109 @@ import { getMetrics } from '../details/get_metrics';
  *
  * @param {*} req - Server request object
  * @param {*} lsIndexPattern - The index pattern to search against (`.monitoring-logstash-*`)
- * @param {*} uuids - The optional `clusterUuid` and `logstashUuid` to filter the results from
- * @param {*} metricSet - The array of metrics that are sortable in the UI
+ * @param {*} clusterUuid -  clusterUuid to filter the results from
+ * @param {*} logstashUuid -  logstashUuid to filter the results from
+ * @param {*} metrics - The array of metrics that are sortable in the UI
  * @param {*} pagination - ({ index, size })
  * @param {*} sort - ({ field, direction })
  * @param {*} queryText - Text that will be used to filter out pipelines
  */
-export async function getPaginatedPipelines(
+
+interface GetPaginatedPipelinesParams {
+  req: LegacyRequest;
+  lsIndexPattern: string;
+  clusterUuid: string;
+  logstashUuid?: string;
+  metrics: {
+    throughputMetric: PipelineThroughputMetricKey;
+    nodesCountMetric: PipelineNodeCountMetricKey;
+  };
+  pagination: { index: number; size: number };
+  sort: { field: PipelineMetricKey | ''; direction: 'asc' | 'desc' };
+  queryText: string;
+}
+export async function getPaginatedPipelines({
   req,
   lsIndexPattern,
-  { clusterUuid, logstashUuid },
-  { throughputMetric, nodesCountMetric },
+  clusterUuid,
+  logstashUuid,
+  metrics,
   pagination,
-  sort = { field: null },
-  queryText
-) {
+  sort = { field: '', direction: 'desc' },
+  queryText,
+}: GetPaginatedPipelinesParams) {
+  const { throughputMetric, nodesCountMetric } = metrics;
   const sortField = sort.field;
   const config = req.server.config();
-  const size = config.get('monitoring.ui.max_bucket_size');
-  const pipelines = await getLogstashPipelineIds(
+  // TODO type config
+  const size = (config.get('monitoring.ui.max_bucket_size') as unknown) as number;
+  let pipelines = await getLogstashPipelineIds({
     req,
     lsIndexPattern,
-    { clusterUuid, logstashUuid },
-    size
-  );
-
+    clusterUuid,
+    logstashUuid,
+    size,
+  });
+  // this is needed for sorting
   if (sortField === throughputMetric) {
-    await getPaginatedThroughputData(pipelines, req, lsIndexPattern, throughputMetric);
+    pipelines = await getPaginatedThroughputData(pipelines, req, lsIndexPattern, throughputMetric);
   } else if (sortField === nodesCountMetric) {
-    await getPaginatedNodesData(pipelines, req, lsIndexPattern, nodesCountMetric);
+    pipelines = await getPaginatedNodesData(pipelines, req, lsIndexPattern, nodesCountMetric);
   }
 
-  // Filtering
   const filteredPipelines = filter(pipelines, queryText, ['id']); // We only support filtering by id right now
 
-  // Sorting
   const sortedPipelines = sortPipelines(filteredPipelines, sort);
 
-  // Pagination
   const pageOfPipelines = paginate(pagination, sortedPipelines);
 
   const response = {
-    pipelines: await getPipelines(
+    pipelines: await getPipelines({
       req,
       lsIndexPattern,
-      pageOfPipelines,
+      pipelines: pageOfPipelines,
       throughputMetric,
-      nodesCountMetric
-    ),
+      nodesCountMetric,
+    }),
     totalPipelineCount: filteredPipelines.length,
   };
 
   return processPipelinesAPIResponse(response, throughputMetric, nodesCountMetric);
 }
 
-function processPipelinesAPIResponse(response, throughputMetricKey, nodesCountMetricKey) {
-  // Clone to avoid mutating original response
-  const processedResponse = cloneDeep(response);
-
+function processPipelinesAPIResponse(
+  response: { pipelines: PipelineWithMetrics[]; totalPipelineCount: number },
+  throughputMetricKey: PipelineThroughputMetricKey,
+  nodeCountMetricKey: PipelineNodeCountMetricKey
+) {
   // Normalize metric names for shared component code
   // Calculate latest throughput and node count for each pipeline
-  processedResponse.pipelines.forEach((pipeline) => {
-    pipeline.metrics = {
-      throughput: pipeline.metrics[throughputMetricKey],
-      nodesCount: pipeline.metrics[nodesCountMetricKey],
-    };
+  const processedResponse = response.pipelines.reduce<PipelinesResponse>(
+    (acc, pipeline) => {
+      acc.pipelines.push({
+        ...pipeline,
+        metrics: {
+          throughput: pipeline.metrics[throughputMetricKey],
+          nodesCount: pipeline.metrics[nodeCountMetricKey],
+        },
+        latestThroughput: (last(pipeline.metrics[throughputMetricKey]?.data) || [])[1],
+        latestNodesCount: (last(pipeline.metrics[nodeCountMetricKey]?.data) || [])[1],
+      });
+      return acc;
+    },
+    { totalPipelineCount: response.totalPipelineCount, pipelines: [] }
+  );
 
-    pipeline.latestThroughput = (last(pipeline.metrics.throughput.data) || [])[1];
-    pipeline.latestNodesCount = (last(pipeline.metrics.nodesCount.data) || [])[1];
-  });
   return processedResponse;
 }
 
-async function getPaginatedThroughputData(pipelines, req, lsIndexPattern, throughputMetric) {
-  const metricSeriesData = Object.values(
+async function getPaginatedThroughputData(
+  pipelines: Pipeline[],
+  req: LegacyRequest,
+  lsIndexPattern: string,
+  throughputMetric: PipelineThroughputMetricKey
+): Promise<Pipeline[]> {
+  const metricSeriesData: any = Object.values(
     await Promise.all(
       pipelines.map((pipeline) => {
         return new Promise(async (resolve, reject) => {
@@ -135,21 +174,33 @@ async function getPaginatedThroughputData(pipelines, req, lsIndexPattern, throug
       })
     )
   );
-
-  for (const pipelineAggregationData of metricSeriesData) {
-    for (const pipeline of pipelines) {
-      if (pipelineAggregationData.id === pipeline.id) {
-        const dataSeries = get(pipelineAggregationData, `metrics.${throughputMetric}.data`, [[]]);
-        if (dataSeries.length === 0) {
-          continue;
-        }
-        pipeline[throughputMetric] = dataSeries.pop()[1];
+  return pipelines.reduce<Pipeline[]>((acc, pipeline) => {
+    const match = metricSeriesData.find((metric: { id: string }) => metric.id === pipeline.id);
+    if (match) {
+      const dataSeries = get(match, `metrics.${throughputMetric}.data`, [[]]);
+      if (dataSeries.length) {
+        const newPipeline = {
+          ...pipeline,
+          [throughputMetric]: dataSeries.pop()[1],
+        };
+        acc.push(newPipeline);
+      } else {
+        acc.push(pipeline);
       }
+    } else {
+      acc.push(pipeline);
     }
-  }
+    return acc;
+  }, []);
 }
 
-async function getPaginatedNodesData(pipelines, req, lsIndexPattern, nodesCountMetric) {
+async function getPaginatedNodesData(
+  pipelines: Pipeline[],
+  req: LegacyRequest,
+  lsIndexPattern: string,
+  nodesCountMetric: PipelineNodeCountMetricKey
+): Promise<Pipeline[]> {
+  const pipelineWithMetrics = cloneDeep(pipelines);
   const metricSeriesData = await getMetrics(
     req,
     lsIndexPattern,
@@ -161,39 +212,71 @@ async function getPaginatedNodesData(pipelines, req, lsIndexPattern, nodesCountM
         },
       },
     ],
-    { pageOfPipelines: pipelines },
+    { pageOfPipelines: pipelineWithMetrics },
     2
   );
   const { data } = metricSeriesData[nodesCountMetric][0] || [[]];
   const pipelinesMap = (data.pop() || [])[1] || {};
   if (!Object.keys(pipelinesMap).length) {
-    return;
+    return pipelineWithMetrics;
   }
-  pipelines.forEach((pipeline) => void (pipeline[nodesCountMetric] = pipelinesMap[pipeline.id]));
+  return pipelineWithMetrics.map((pipeline) => ({
+    ...pipeline,
+    [nodesCountMetric]: pipelinesMap[pipeline.id],
+  }));
 }
 
-async function getPipelines(req, lsIndexPattern, pipelines, throughputMetric, nodesCountMetric) {
+async function getPipelines({
+  req,
+  lsIndexPattern,
+  pipelines,
+  throughputMetric,
+  nodesCountMetric,
+}: {
+  req: LegacyRequest;
+  lsIndexPattern: string;
+  pipelines: Pipeline[];
+  throughputMetric: PipelineThroughputMetricKey;
+  nodesCountMetric: PipelineNodeCountMetricKey;
+}): Promise<PipelineWithMetrics[]> {
   const throughputPipelines = await getThroughputPipelines(
     req,
     lsIndexPattern,
     pipelines,
     throughputMetric
   );
-  const nodePipelines = await getNodePipelines(req, lsIndexPattern, pipelines, nodesCountMetric);
+  const nodeCountPipelines = await getNodePipelines(
+    req,
+    lsIndexPattern,
+    pipelines,
+    nodesCountMetric
+  );
   const finalPipelines = pipelines.map(({ id }) => {
-    const pipeline = {
+    const matchThroughputPipeline = throughputPipelines.find((p) => p.id === id);
+    const matchNodesCountPipeline = nodeCountPipelines.find((p) => p.id === id);
+    return {
       id,
       metrics: {
-        [throughputMetric]: throughputPipelines.find((p) => p.id === id).metrics[throughputMetric],
-        [nodesCountMetric]: nodePipelines.find((p) => p.id === id).metrics[nodesCountMetric],
+        [throughputMetric]:
+          matchThroughputPipeline && throughputMetric in matchThroughputPipeline.metrics
+            ? matchThroughputPipeline.metrics[throughputMetric]
+            : undefined,
+        [nodesCountMetric]:
+          matchNodesCountPipeline && nodesCountMetric in matchNodesCountPipeline.metrics
+            ? matchNodesCountPipeline.metrics[nodesCountMetric]
+            : undefined,
       },
     };
-    return pipeline;
   });
   return finalPipelines;
 }
 
-async function getThroughputPipelines(req, lsIndexPattern, pipelines, throughputMetric) {
+async function getThroughputPipelines(
+  req: LegacyRequest,
+  lsIndexPattern: string,
+  pipelines: Pipeline[],
+  throughputMetric: string
+): Promise<PipelineWithMetrics[]> {
   const metricsResponse = await Promise.all(
     pipelines.map((pipeline) => {
       return new Promise(async (resolve, reject) => {
@@ -231,11 +314,15 @@ async function getThroughputPipelines(req, lsIndexPattern, pipelines, throughput
       });
     })
   );
-
-  return Object.values(metricsResponse);
+  return Object.values(metricsResponse) as PipelineWithMetrics[];
 }
 
-async function getNodePipelines(req, lsIndexPattern, pipelines, nodesCountMetric) {
+async function getNodePipelines(
+  req: LegacyRequest,
+  lsIndexPattern: string,
+  pipelines: Pipeline[],
+  nodesCountMetric: string
+): Promise<PipelineWithMetrics[]> {
   const metricData = await getMetrics(
     req,
     lsIndexPattern,
@@ -252,7 +339,7 @@ async function getNodePipelines(req, lsIndexPattern, pipelines, nodesCountMetric
     }
   );
 
-  const metricObject = metricData[nodesCountMetric][0];
+  const metricObject = metricData[nodesCountMetric][0] as PipelineMetricsRes;
   const pipelinesData = pipelines.map(({ id }) => {
     return {
       id,
@@ -268,10 +355,10 @@ async function getNodePipelines(req, lsIndexPattern, pipelines, nodesCountMetric
   return pipelinesData;
 }
 
-function reduceData({ id }, data) {
+function reduceData(pipeline: Pipeline, data: any) {
   return {
-    id,
-    metrics: Object.keys(data).reduce((accum, metricName) => {
+    id: pipeline.id,
+    metrics: Object.keys(data).reduce<any>((accum, metricName) => {
       accum[metricName] = data[metricName][0];
       return accum;
     }, {}),
