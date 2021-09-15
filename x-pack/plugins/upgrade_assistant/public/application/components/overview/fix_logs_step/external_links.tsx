@@ -105,22 +105,26 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
 };
 
 export const ExternalLinks: FunctionComponent<Props> = ({ checkpoint }) => {
+  const { infra: hasInfraPlugin } = useAppContext().plugins;
+
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiPanel>
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.overview.observe.observabilityDescription"
-                defaultMessage="Get insight into which deprecated APIs are being used and what applications you need to update."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <ObservabilityAppLink checkpoint={checkpoint} />
-        </EuiPanel>
-      </EuiFlexItem>
+      {hasInfraPlugin && (
+        <EuiFlexItem>
+          <EuiPanel>
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.overview.observe.observabilityDescription"
+                  defaultMessage="Get insight into which deprecated APIs are being used and what applications you need to update."
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <ObservabilityAppLink checkpoint={checkpoint} />
+          </EuiPanel>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="s">

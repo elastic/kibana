@@ -198,6 +198,9 @@ describe('Overview - Fix deprecation logs step', () => {
               prepend: (url: string) => url,
             },
           },
+          plugins: {
+            infra: {},
+          },
         });
       });
 
@@ -209,6 +212,14 @@ describe('Overview - Fix deprecation logs step', () => {
       expect(find('viewObserveLogs').props().href).toBe(
         `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}&logPosition=(end:now,start:'${MOCKED_TIME}')`
       );
+    });
+
+    test(`Doesn't show observability app link if infra app is not available`, async () => {
+      const { component, exists } = testBed;
+
+      component.update();
+
+      expect(exists('viewObserveLogs')).toBe(false);
     });
 
     test('Has a link to see logs in discover app', async () => {
