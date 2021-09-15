@@ -69,6 +69,7 @@ export function MathAgg(props) {
             id={htmlId('aggregation')}
             siblings={props.siblings}
             value={model.type}
+            panelType={props.panel.type}
             onChange={handleSelectChange('type')}
           />
         </EuiFlexItem>
