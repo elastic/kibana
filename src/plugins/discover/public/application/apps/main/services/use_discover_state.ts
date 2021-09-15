@@ -29,10 +29,12 @@ export function useDiscoverState({
   services,
   history,
   savedSearch,
+  savedSearchId,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
+  savedSearchId?: string;
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
@@ -96,7 +98,10 @@ export function useDiscoverState({
 
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
-    return () => stopSync();
+
+    return () => {
+      stopSync();
+    };
   }, [stateContainer, filterManager, data, indexPattern]);
 
   /**
@@ -212,13 +217,10 @@ export function useDiscoverState({
    * Initial data fetching, also triggered when index pattern changes
    */
   useEffect(() => {
-    if (!indexPattern) {
-      return;
-    }
     if (initialFetchStatus === FetchStatus.LOADING) {
       refetch$.next();
     }
-  }, [initialFetchStatus, refetch$, indexPattern]);
+  }, [initialFetchStatus, refetch$, savedSearchId]);
 
   return {
     data$,
