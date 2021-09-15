@@ -147,7 +147,7 @@ export const getCertsRequestBody = ({
 };
 
 export const processCertsResult = (result: CertificatesResults): CertResult => {
-  const certs = result?.hits?.hits?.map((hit) => {
+  const certs = result.hits?.hits?.map((hit) => {
     const ping = hit._source;
     const server = ping.tls?.server!;
 
@@ -178,6 +178,6 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       common_name: commonName,
     };
   });
-  const total = result?.aggregations?.total?.value ?? 0;
+  const total = result.aggregations?.total?.value ?? 0;
   return { certs, total };
 };
