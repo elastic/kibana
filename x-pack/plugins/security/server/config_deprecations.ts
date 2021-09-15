@@ -9,9 +9,11 @@ import { i18n } from '@kbn/i18n';
 import type { ConfigDeprecationProvider } from 'src/core/server';
 
 export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
+  deprecate,
   rename,
   unused,
 }) => [
+  deprecate('enabled', '8.0.0'),
   rename('sessionTimeout', 'session.idleTimeout'),
   rename('authProviders', 'authc.providers'),
 

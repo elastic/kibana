@@ -35,8 +35,8 @@ const disabledDeprecation: ConfigDeprecation = (config, fromPath, addDeprecation
   }
 };
 
-export const spacesConfigDeprecationProvider: ConfigDeprecationProvider = () => {
-  return [disabledDeprecation];
+export const spacesConfigDeprecationProvider: ConfigDeprecationProvider = ({ deprecate }) => {
+  return [deprecate('enabled', '8.0.0'), disabledDeprecation];
 };
 
 export type ConfigType = ReturnType<typeof createConfig$> extends Observable<infer P>

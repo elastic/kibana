@@ -56,8 +56,7 @@ export const plugin = (initContext: PluginInitializerContext) => new ActionsPlug
 
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
-  deprecations: ({ deprecate, renameFromRoot, unused }) => [
-    deprecate('enabled', '8.0.0'),
+  deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.actions.whitelistedHosts', 'xpack.actions.allowedHosts'),
     (settings, fromPath, addDeprecation) => {
       const actions = get(settings, fromPath);
