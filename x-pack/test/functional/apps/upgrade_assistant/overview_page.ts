@@ -21,7 +21,7 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
     this.tags('skipFirefox');
 
     before(async () => {
-      await security.testUser.setRoles(['superuser', 'global_upgrade_assistant_role']);
+      await security.testUser.setRoles(['superuser']);
     });
 
     after(async () => {
@@ -46,10 +46,7 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
     describe('fixLogsStep', () => {
       before(async () => {
         // Access to system indices will be deprecated and should generate a deprecation log
-        await es.transport.request({
-          method: 'GET',
-          path: '/.apm-agent-configuration',
-        });
+        await es.indices.get({ index: '.kibana' });
 
         await PageObjects.upgradeAssistant.navigateToPage();
         await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
