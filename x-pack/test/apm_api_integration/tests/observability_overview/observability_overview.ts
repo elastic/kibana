@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
+import { roundNumber } from '../../utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -54,7 +55,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(response.body.serviceCount).toMatchInline(`8`);
 
-        expectSnapshot(response.body.transactionPerMinute.value).toMatchInline(`59.1666666666667`);
+        expectSnapshot(roundNumber(response.body.transactionPerMinute.value)).toMatchInline(
+          `"59.17"`
+        );
         expectSnapshot(response.body.transactionPerMinute.timeseries.length).toMatchInline(`31`);
 
         expectSnapshot(
