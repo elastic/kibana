@@ -9,7 +9,6 @@
 import {
   mockElasticsearchService,
   mockHttpService,
-  mockLegacyService,
   mockPluginsService,
   mockConfigService,
   mockSavedObjectsService,
@@ -95,7 +94,6 @@ test('sets up services on "setup"', async () => {
   expect(mockHttpService.setup).not.toHaveBeenCalled();
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
-  expect(mockLegacyService.setup).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.setup).not.toHaveBeenCalled();
   expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
   expect(mockRenderingService.setup).not.toHaveBeenCalled();
@@ -111,7 +109,6 @@ test('sets up services on "setup"', async () => {
   expect(mockHttpService.setup).toHaveBeenCalledTimes(1);
   expect(mockElasticsearchService.setup).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.setup).toHaveBeenCalledTimes(1);
-  expect(mockLegacyService.setup).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.setup).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.setup).toHaveBeenCalledTimes(1);
   expect(mockRenderingService.setup).toHaveBeenCalledTimes(1);
@@ -199,7 +196,6 @@ test('stops services on "stop"', async () => {
   expect(mockHttpService.stop).not.toHaveBeenCalled();
   expect(mockElasticsearchService.stop).not.toHaveBeenCalled();
   expect(mockPluginsService.stop).not.toHaveBeenCalled();
-  expect(mockLegacyService.stop).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
   expect(mockUiSettingsService.stop).not.toHaveBeenCalled();
   expect(mockMetricsService.stop).not.toHaveBeenCalled();
@@ -211,7 +207,6 @@ test('stops services on "stop"', async () => {
   expect(mockHttpService.stop).toHaveBeenCalledTimes(1);
   expect(mockElasticsearchService.stop).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.stop).toHaveBeenCalledTimes(1);
-  expect(mockLegacyService.stop).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.stop).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.stop).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.stop).toHaveBeenCalledTimes(1);
