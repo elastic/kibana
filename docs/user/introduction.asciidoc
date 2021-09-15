@@ -261,7 +261,7 @@ image::images/tags-search.png[Example of searching for tags]
 [float]
 === View all {kib} has to offer
 
-To view the full list of {kib} apps and features, go https://www.elastic.co/kibana/features[{kib} features].
+To view the full list of {kib} apps and features, go to https://www.elastic.co/kibana/features[{kib} features].
 
 [float]
 [[try-kibana]]
