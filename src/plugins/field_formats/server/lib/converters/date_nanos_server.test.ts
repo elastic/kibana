@@ -11,15 +11,20 @@ import { FieldFormatsGetConfigFn } from '../../../common';
 
 describe('Date Nanos Format: Server side edition', () => {
   let convert: Function;
-  let mockConfig: Record<string, any>;
+  let mockConfig: {
+    dateNanosFormat: string;
+    'dateFormat:tz': string;
+    [other: string]: string;
+  };
   let getConfig: FieldFormatsGetConfigFn;
 
   const dateTime = '2019-05-05T14:04:56.201900001Z';
 
   beforeEach(() => {
-    mockConfig = {};
-    mockConfig.dateNanosFormat = 'MMMM Do YYYY, HH:mm:ss.SSSSSSSSS';
-    mockConfig['dateFormat:tz'] = 'Browser';
+    mockConfig = {
+      dateNanosFormat: 'MMMM Do YYYY, HH:mm:ss.SSSSSSSSS',
+      'dateFormat:tz': 'Browser',
+    };
 
     getConfig = (key: string) => mockConfig[key];
   });

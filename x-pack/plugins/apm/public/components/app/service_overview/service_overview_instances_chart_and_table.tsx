@@ -72,7 +72,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/overview');
+  } = useApmParams('/services/{serviceName}/overview');
 
   const {
     urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
@@ -228,6 +228,7 @@ export function ServiceOverviewInstancesChartAndTable({
             serviceName={serviceName}
             tableOptions={tableOptions}
             isLoading={mainStatsStatus === FETCH_STATUS.LOADING}
+            isNotInitiated={mainStatsStatus === FETCH_STATUS.NOT_INITIATED}
             onChangeTableOptions={(newTableOptions) => {
               setTableOptions({
                 pageIndex: newTableOptions.page?.index ?? 0,

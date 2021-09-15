@@ -74,6 +74,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
         capabilities = new RollupSearchCapabilities(
           {
             maxBucketsLimit: await uiSettings.get(UI_SETTINGS.MAX_BUCKETS_SETTING),
+            panel: req.body.panels ? req.body.panels[0] : null,
           },
           fieldsCapabilities,
           rollupIndex

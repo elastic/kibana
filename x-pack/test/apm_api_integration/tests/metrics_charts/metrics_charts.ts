@@ -18,7 +18,7 @@ interface ChartResponse {
 }
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   registry.when(
     'Metrics charts when data is loaded',

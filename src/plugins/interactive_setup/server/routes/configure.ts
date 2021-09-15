@@ -21,15 +21,13 @@ export function defineConfigureRoute({
   logger,
   kibanaConfigWriter,
   elasticsearch,
+  verificationCode,
   preboot,
 }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/interactive_setup/configure',
       validate: {
-        query: schema.object({
-          code: schema.maybe(schema.string()),
-        }),
         body: schema.object({
           host: schema.uri({ scheme: ['http', 'https'] }),
           username: schema.maybe(
@@ -56,11 +54,16 @@ export function defineConfigureRoute({
             schema.string(),
             schema.never()
           ),
+          code: schema.maybe(schema.string()),
         }),
       },
       options: { authRequired: false },
     },
     async (context, request, response) => {
+      if (!verificationCode.verify(request.body.code)) {
+        return response.forbidden();
+      }
+
       if (!preboot.isSetupOnHold()) {
         logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot stage`);
         return response.badRequest({ body: 'Cannot process request outside of preboot stage.' });

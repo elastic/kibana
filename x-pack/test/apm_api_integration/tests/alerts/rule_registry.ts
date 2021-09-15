@@ -36,7 +36,7 @@ interface Alert {
 }
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestAsApmWriteUser');
+  const supertest = getService('legacySupertestAsApmWriteUser');
   const es = getService('es');
 
   const MAX_POLLS = 10;

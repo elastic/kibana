@@ -30,6 +30,7 @@ export async function getVisData(
 ): Promise<TimeseriesVisData> {
   const uiSettings = requestContext.core.uiSettings.client;
   const esShardTimeout = await framework.getEsShardTimeout();
+  const fieldFormatService = await framework.getFieldFormatsService(uiSettings);
   const indexPatternsService = await framework.getIndexPatternsService(requestContext);
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
@@ -40,6 +41,7 @@ export async function getVisData(
     const services: VisTypeTimeseriesRequestServices = {
       esQueryConfig,
       esShardTimeout,
+      fieldFormatService,
       indexPatternsService,
       uiSettings,
       cachedIndexPatternFetcher,
