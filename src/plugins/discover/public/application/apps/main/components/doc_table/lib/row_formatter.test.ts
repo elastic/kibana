@@ -8,7 +8,7 @@
 
 import ReactDOM from 'react-dom/server';
 import { formatRow, formatTopLevelObject } from './row_formatter';
-import { IndexPattern } from '../../../../../../../../data/common';
+import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns';
 import { fieldFormatsMock } from '../../../../../../../../field_formats/common/mocks';
 import { setServices } from '../../../../../../kibana_services';
 import { DiscoverServices } from '../../../../../../build_services';
