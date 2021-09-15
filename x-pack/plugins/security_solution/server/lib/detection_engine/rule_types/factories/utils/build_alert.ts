@@ -120,7 +120,7 @@ export const buildAlert = (
     []
   );
 
-  const { id, ...mappedRule } = rule;
+  const { id, output_index: outputIndex, ...mappedRule } = rule;
   mappedRule.uuid = id;
 
   return ({
