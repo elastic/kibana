@@ -96,13 +96,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('has the correct number of buckets', () => {
-          expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`31`);
+          expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`61`);
         });
 
         it('has the correct throughput in tpm', () => {
           const avg = mean(throughputResponse.currentPeriod.map((d) => d.y));
-          expectSnapshot(avg).toMatchInline(`6.19354838709677`);
-          expectSnapshot(throughputResponse.throughputUnit).toMatchInline(`"minute"`);
+          expectSnapshot(avg).toMatchInline(`0.124043715846995`);
+          expectSnapshot(throughputResponse.throughputUnit).toMatchInline(`"second"`);
         });
       });
 
@@ -183,31 +183,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('has the correct start date', () => {
         expectSnapshot(
           new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-08-03T07:05:00.000Z"`);
+        ).toMatchInline(`"2021-08-03T07:05:10.000Z"`);
 
         expectSnapshot(
           new Date(first(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-08-03T07:05:00.000Z"`);
+        ).toMatchInline(`"2021-08-03T07:05:10.000Z"`);
       });
 
       it('has the correct end date', () => {
         expectSnapshot(
           new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
+        ).toMatchInline(`"2021-08-03T07:20:10.000Z"`);
 
         expectSnapshot(
           new Date(last(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
-        ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
+        ).toMatchInline(`"2021-08-03T07:20:10.000Z"`);
       });
 
       it('has the correct number of buckets', () => {
-        expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`16`);
-        expectSnapshot(throughputResponse.previousPeriod.length).toMatchInline(`16`);
+        expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`91`);
+        expectSnapshot(throughputResponse.previousPeriod.length).toMatchInline(`91`);
       });
 
       it('has the correct throughput in tpm', () => {
         expectSnapshot(throughputResponse).toMatch();
-        expectSnapshot(throughputResponse.throughputUnit).toMatchInline(`"minute"`);
+        expectSnapshot(throughputResponse.throughputUnit).toMatchInline(`"second"`);
       });
     }
   );
