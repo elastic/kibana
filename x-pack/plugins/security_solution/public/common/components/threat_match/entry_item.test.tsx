@@ -10,10 +10,7 @@ import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { EntryItem } from './entry_item';
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/data_views/fields/fields.mocks';
+import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { IndexPattern } from 'src/plugins/data/public';
 
 jest.mock('../../../common/lib/kibana');
