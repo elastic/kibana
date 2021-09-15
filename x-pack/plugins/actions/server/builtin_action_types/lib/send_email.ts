@@ -95,21 +95,17 @@ async function sendEmailWithExchange(
     'Content-Type': 'application/json',
     Authorization: `${tokenResult.tokenType} ${tokenResult.accessToken}`,
   };
-  try {
-    return await sendEmailGraphApi(
-      {
-        options,
-        headers,
-        messageHTML,
-        graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
-      },
-      logger,
-      configurationUtilities
-    );
-  } catch (err) {
-    logger.warn(`error thrown sending Microsoft Exchange email: ${err.message}`);
-    throw err;
-  }
+
+  return await sendEmailGraphApi(
+    {
+      options,
+      headers,
+      messageHTML,
+      graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
+    },
+    logger,
+    configurationUtilities
+  );
 }
 
 // send an email using nodemailer

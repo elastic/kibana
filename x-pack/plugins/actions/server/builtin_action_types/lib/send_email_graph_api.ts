@@ -30,7 +30,7 @@ export async function sendEmailGraphApi(
   const axiosInstance = axios.create();
 
   // POST /users/{id | userPrincipalName}/sendMail
-  return await request({
+  const res = await request({
     axios: axiosInstance,
     url: `${graphApiUrl ?? MICROSOFT_GRAPH_API_HOST}/users/${options.routing.from}/sendMail`,
     method: 'post',
@@ -40,6 +40,11 @@ export async function sendEmailGraphApi(
     configurationUtilities,
     validateStatus: () => true,
   });
+  if (res.status === 200) {
+    return res;
+  }
+  logger.warn(`error thrown sending Microsoft Exchange email: ${res.data}`);
+  throw new Error(JSON.stringify(res.data));
 }
 
 function getMessage(emailOptions: SendEmailOptions, messageHTML: string) {
