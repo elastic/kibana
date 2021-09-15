@@ -28,14 +28,6 @@ import {
   RULE_THREAD_POOL_WRITE_REJECTIONS,
   RULE_DETAILS,
 } from '../common/constants';
-import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
-import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
-import { createLegacyAlertTypes } from './alerts/legacy_alert';
-import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
-import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
-import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
-import { createCCRReadExceptionsAlertType } from './alerts/ccr_read_exceptions_alert';
-import { createLargeShardSizeAlertType } from './alerts/large_shard_size_alert';
 import { setConfig } from './external_config';
 
 interface MonitoringSetupPluginDependencies {
@@ -49,10 +41,10 @@ const HASH_CHANGE = 'hashchange';
 
 export class MonitoringPlugin
   implements
-    Plugin<boolean, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies> {
+    Plugin<void, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies> {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
-  public setup(
+  public async setup(
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
@@ -85,7 +77,7 @@ export class MonitoringPlugin
       });
     }
 
-    this.registerAlerts(plugins, monitoring);
+    await this.registerAlerts(plugins, monitoring);
 
     const app: App = {
       id,
@@ -151,7 +143,6 @@ export class MonitoringPlugin
     };
 
     core.application.register(app);
-    return true;
   }
 
   public start(core: CoreStart, plugins: any) {}
@@ -191,10 +182,27 @@ export class MonitoringPlugin
     ];
   }
 
-  private registerAlerts(plugins: MonitoringSetupPluginDependencies, config: MonitoringConfig) {
+  private async registerAlerts(
+    plugins: MonitoringSetupPluginDependencies,
+    config: MonitoringConfig
+  ) {
     const {
       triggersActionsUi: { ruleTypeRegistry },
     } = plugins;
+
+    const { createCpuUsageAlertType } = await import('./alerts/cpu_usage_alert');
+    const { createMissingMonitoringDataAlertType } = await import(
+      './alerts/missing_monitoring_data_alert'
+    );
+    const { createLegacyAlertTypes } = await import('./alerts/legacy_alert');
+    const { createDiskUsageAlertType } = await import('./alerts/disk_usage_alert');
+    const { createThreadPoolRejectionsAlertType } = await import(
+      './alerts/thread_pool_rejections_alert'
+    );
+    const { createMemoryUsageAlertType } = await import('./alerts/memory_usage_alert');
+    const { createCCRReadExceptionsAlertType } = await import('./alerts/ccr_read_exceptions_alert');
+    const { createLargeShardSizeAlertType } = await import('./alerts/large_shard_size_alert');
+
     ruleTypeRegistry.register(createCpuUsageAlertType(config));
     ruleTypeRegistry.register(createDiskUsageAlertType(config));
     ruleTypeRegistry.register(createMemoryUsageAlertType(config));
