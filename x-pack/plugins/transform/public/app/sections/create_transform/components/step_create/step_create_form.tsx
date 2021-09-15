@@ -50,7 +50,7 @@ import {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
-import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common/index_patterns';
+import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common';
 import { isPopulatedObject } from '../../../../../../common/shared_imports';
 import { isLatestTransform } from '../../../../../../common/types/transform';
 
