@@ -28,11 +28,14 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese`)
           .set('kbn-xsrf', 'true')
           .send({
-            params: getCertsRequestBody({ pageIndex: 0, size: 10 }),
+            params: {
+              index: 'heartbeat-*',
+              body: getCertsRequestBody({ pageIndex: 0, size: 10 }),
+            },
           });
 
         const result = processCertsResult(apiResponse.body.rawResponse);
-        expect(JSON.stringify(result)).to.eql('{"total":0}');
+        expect(JSON.stringify(result)).to.eql('{"certs":[],"total":0}');
       });
     });
 
@@ -81,7 +84,10 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese`)
           .set('kbn-xsrf', 'true')
           .send({
-            params: getCertsRequestBody({ pageIndex: 0, size: 10 }),
+            params: {
+              index: 'heartbeat-*',
+              body: getCertsRequestBody({ pageIndex: 0, size: 10 }),
+            },
           });
 
         const result = processCertsResult(body.rawResponse);
