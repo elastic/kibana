@@ -12,6 +12,7 @@ import {
   ArtifactEntryCollapsableCardProps,
 } from '../artifact_entry_card';
 import { PaginatedContent as _PaginatedContent, PaginatedContentProps } from '../paginated_content';
+import { GridHeader } from './components/grid_header';
 
 type ArtifactsPaginatedContentProps = PaginatedContentProps<
   AnyArtifact,
@@ -63,13 +64,16 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
     );
 
     return (
-      <PaginatedContent
-        {...paginatedContentProps}
-        items={items}
-        ItemComponent={ArtifactEntryCollapsableCard}
-        itemComponentProps={handleItemComponentProps}
-        onChange={onPageChange}
-      />
+      <>
+        <GridHeader />
+        <PaginatedContent
+          {...paginatedContentProps}
+          items={items}
+          ItemComponent={ArtifactEntryCollapsableCard}
+          itemComponentProps={handleItemComponentProps}
+          onChange={onPageChange}
+        />
+      </>
     );
   }
 );

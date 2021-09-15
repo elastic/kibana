@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { CommonProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { memo, ReactNode, useCallback } from 'react';
+import { CommonProps, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { CardExpandButton } from './card_expand_button';
 import { TextValueDisplay } from './text_value_display';
 import { EffectScope } from './effect_scope';
@@ -77,3 +77,60 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
   }
 );
 CardCompressedHeader.displayName = 'CardCompressedHeader';
+
+/**
+ * Layout used for the compressed card header. Used also in the ArtifactGrid for creating the grid header row
+ */
+export interface CardCompressedHeaderLayoutProps extends Pick<CommonProps, 'data-test-subj'> {
+  expanded: boolean;
+  expandToggle: ReactNode;
+  name: ReactNode;
+  description: ReactNode;
+  effectScope: ReactNode;
+  /** If no menu is shown, but you want the space for it be preserved, set prop to `false` */
+  actionMenu?: ReactNode | false;
+}
+
+export const CardCompressedHeaderLayout = memo<CardCompressedHeaderLayoutProps>(
+  ({
+    expanded,
+    name,
+    expandToggle,
+    effectScope,
+    actionMenu,
+    description,
+    'data-test-subj': dataTestSubj,
+  }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const cssClassNames = useCollapsedCssClassNames(expanded);
+
+    return (
+      <EuiFlexGroup responsive={false} alignItems="center" data-test-subj={dataTestSubj}>
+        <EuiFlexItem grow={false}>{expandToggle}</EuiFlexItem>
+        <EuiFlexItem className={cssClassNames}>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={2} className={cssClassNames} data-test-subj={getTestId('title')}>
+              {name}
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={3}
+              className={cssClassNames}
+              data-test-subj={getTestId('description')}
+            >
+              {description}
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>{effectScope}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {actionMenu === false ? (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="empty" />
+          </EuiFlexItem>
+        ) : (
+          actionMenu
+        )}
+      </EuiFlexGroup>
+    );
+  }
+);
+CardCompressedHeaderLayout.displayName = 'CardCompressedHeaderLayout';
