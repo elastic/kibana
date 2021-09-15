@@ -8,11 +8,16 @@
 import React, { memo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import styled from 'styled-components';
 import { CardCompressedHeaderLayout, CardSectionPanel } from '../../artifact_entry_card';
+
+const GridHeaderContainer = styled(CardSectionPanel)`
+  padding-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
 
 export const GridHeader = memo(() => {
   return (
-    <CardSectionPanel>
+    <GridHeaderContainer>
       <CardCompressedHeaderLayout
         expanded={false}
         expandToggle={<div style={{ width: '24px' }} />}
@@ -48,7 +53,7 @@ export const GridHeader = memo(() => {
         }
         actionMenu={false}
       />
-    </CardSectionPanel>
+    </GridHeaderContainer>
   );
 });
 GridHeader.displayName = 'GridHeader';

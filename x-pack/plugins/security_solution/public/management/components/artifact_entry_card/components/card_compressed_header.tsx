@@ -6,7 +6,8 @@
  */
 
 import React, { memo, ReactNode, useCallback } from 'react';
-import { CommonProps, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { CommonProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { CardExpandButton } from './card_expand_button';
 import { TextValueDisplay } from './text_value_display';
 import { EffectScope } from './effect_scope';
@@ -78,6 +79,12 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
 );
 CardCompressedHeader.displayName = 'CardCompressedHeader';
 
+const ButtonIconPlaceHolder = styled.div`
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+`;
+
 /**
  * Layout used for the compressed card header. Used also in the ArtifactGrid for creating the grid header row
  */
@@ -124,7 +131,7 @@ export const CardCompressedHeaderLayout = memo<CardCompressedHeaderLayoutProps>(
         </EuiFlexItem>
         {actionMenu === false ? (
           <EuiFlexItem grow={false}>
-            <EuiIcon type="empty" />
+            <ButtonIconPlaceHolder />
           </EuiFlexItem>
         ) : (
           actionMenu
