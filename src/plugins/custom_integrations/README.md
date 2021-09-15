@@ -1,6 +1,6 @@
 # customIntegrations
 
-A Kibana plugin
+Register add-data cards
 
 ---
 
