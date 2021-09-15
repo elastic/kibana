@@ -48,7 +48,9 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
         .getTransforms()
         .then((r) => {
           if (!unmounted) {
-            setTransformOptions((r as GetTransformsResponseSchema).transforms.map((v) => v.id));
+            setTransformOptions(
+              (r as GetTransformsResponseSchema).transforms.filter((v) => v.sync).map((v) => v.id)
+            );
           }
         })
         .catch((e) => {
@@ -106,7 +108,7 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
                 defaultMessage="Exclude transforms"
               />
             }
-            options={excludeTransformOptions!}
+            options={excludeTransformOptions ?? []}
             selectedOptions={alertParams.excludeTransforms ?? []}
             onChange={onAlertParamChange('excludeTransforms')}
           />
