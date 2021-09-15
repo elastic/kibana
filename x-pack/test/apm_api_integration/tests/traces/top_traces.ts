@@ -63,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {
-            "averageResponseTime": 1639,
+            "averageResponseTime": 1638,
             "impact": 0,
             "key": Object {
               "service.name": "opbeans-java",
@@ -78,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(lastItem).toMatchInline(`
           Object {
-            "averageResponseTime": 5963775,
+            "averageResponseTime": 5918288.44444444,
             "impact": 100,
             "key": Object {
               "service.name": "opbeans-dotnet",
@@ -87,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "serviceName": "opbeans-dotnet",
             "transactionName": "GET Orders/Get",
             "transactionType": "request",
-            "transactionsPerMinute": 0.633333333333333,
+            "transactionsPerMinute": 0.6,
           }
         `);
 
