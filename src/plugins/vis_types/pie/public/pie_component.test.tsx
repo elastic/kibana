@@ -177,6 +177,8 @@ describe('PieComponent', function () {
     } as unknown) as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
     const component = mount(<PieComponent {...newProps} />);
-    expect(findTestSubject(component, 'pieVisualizationError').length).toBe(1);
+    expect(findTestSubject(component, 'pieVisualizationError').text()).toEqual(
+      "Pie/donut charts can't render with negative values."
+    );
   });
 });
