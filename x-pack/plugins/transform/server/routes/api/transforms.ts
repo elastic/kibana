@@ -60,7 +60,7 @@ import { addBasePath } from '../index';
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { registerTransformNodesRoutes } from './transforms_nodes';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 import { isLatestTransform } from '../../../common/types/transform';
 import { isKeywordDuplicate } from '../../../common/utils/field_utils';
 
