@@ -11,7 +11,7 @@ export const PLUGIN_NAME = 'customIntegrations';
 
 export interface CategoryCount {
   count: number;
-  id: string;
+  id: Category;
 }
 
 export type Category =

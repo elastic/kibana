@@ -39,12 +39,7 @@ import {
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
-function mergeCategoryCounts(countsFromEpm: CategoryCount[], countsFromCustom: CategoryCount[]) {}
-
-export const registerRoutes = (
-  router: IRouter,
-  customIntegrations: CustomIntegrationsPluginSetup
-) => {
+export const registerRoutes = (router: IRouter) => {
   router.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
@@ -52,7 +47,7 @@ export const registerRoutes = (
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      return await getCategoriesHandler(customIntegrations, context, request, response);
+      return await getCategoriesHandler(context, request, response);
     }
   );
 
@@ -64,7 +59,7 @@ export const registerRoutes = (
     },
     async (context, request, response) => {
       console.log('GET PACKAGES');
-      const resp = await getListHandler(customIntegrations, context, request, response);
+      const resp = await getListHandler(context, request, response);
       return resp;
     }
   );

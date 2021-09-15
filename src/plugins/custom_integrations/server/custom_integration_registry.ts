@@ -7,7 +7,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { CustomIntegration, CategoryCount } from '../common';
+import {CustomIntegration, CategoryCount, Category} from '../common';
 
 function isAddable(integration: CustomIntegration) {
   return !integration.isBeats && !integration.isAPM;
@@ -44,7 +44,7 @@ export class CustomIntegrationRegistry {
   }
 
   getAddableCategories(): CategoryCount[] {
-    const categories: Map<string, number> = new Map<string, number>();
+    const categories: Map<Category, number> = new Map<Category, number>();
     for (let i = 0; i < this._integrations.length; i++) {
       if (!isAddable(this._integrations[i])) {
         continue;

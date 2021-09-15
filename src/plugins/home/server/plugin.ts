@@ -21,7 +21,7 @@ import { sampleDataTelemetry } from './saved_objects';
 import { registerRoutes } from './routes';
 import { CustomIntegrationsPluginSetup } from '../../custom_integrations/server';
 
-interface HomeServerPluginSetupDependencies {
+export interface HomeServerPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   customIntegrations: CustomIntegrationsPluginSetup;
 }

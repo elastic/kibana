@@ -46,7 +46,7 @@ function registerTutorialWithCustomIntegrations(
     name: tutorial.id,
     id: tutorial.name,
     title: tutorial.name,
-    categories: [tutorial.category],
+    categories: tutorial.category === 'other' ? [tutorial.category] : [],
     type: 'ui_link',
     uiInternalPath: `/app/home#/tutorial/${tutorial.id}`,
     isBeats: false,

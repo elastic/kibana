@@ -7,8 +7,9 @@
  */
 
 import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
-import { HomeServerPlugin } from './plugin';
+import { HomeServerPlugin, HomeServerPluginSetupDependencies } from './plugin';
 import { coreMock, httpServiceMock } from '../../../core/server/mocks';
+import expect from '../../../../packages/kbn-expect';
 
 describe('HomeServerPlugin', () => {
   beforeEach(() => {
@@ -31,14 +32,18 @@ describe('HomeServerPlugin', () => {
     });
 
     test('wires up tutorials provider service and returns registerTutorial and addScopedTutorialContextFactory', () => {
-      const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
+      const setup = new HomeServerPlugin(initContext).setup(
+        mockCoreSetup,
+        ({} as unknown) as HomeServerPluginSetupDependencies
+      );
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('registerTutorial');
       expect(setup.tutorials).toHaveProperty('addScopedTutorialContextFactory');
     });
 
     test('wires up sample data provider service and returns registerTutorial and addScopedTutorialContextFactory', () => {
-      const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
+      const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup,         ({} as unknown) as HomeServerPluginSetupDependencies
+      );
       expect(setup).toHaveProperty('sampleData');
       expect(setup.sampleData).toHaveProperty('registerSampleDataset');
       expect(setup.sampleData).toHaveProperty('getSampleDatasets');
@@ -48,7 +53,10 @@ describe('HomeServerPlugin', () => {
     });
 
     test('registers the `/api/home/hits_status` route', () => {
-      new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
+      new HomeServerPlugin(initContext).setup(
+        mockCoreSetup,
+        ({} as unknown) as HomeServerPluginSetupDependencies
+      );
 
       expect(routerMock.post).toHaveBeenCalledTimes(1);
       expect(routerMock.post).toHaveBeenCalledWith(

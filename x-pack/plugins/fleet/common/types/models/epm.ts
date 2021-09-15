@@ -18,9 +18,9 @@ import type {
   installationStatuses,
 } from '../../constants';
 import type { ValueOf } from '../../types';
-
-import type { CustomIntegration } from '../../../../../../src/plugins/custom_integrations/server';
 import type { Omit } from '../../../../../../src/plugins/data/server/search/strategies/es_search/elasticsearch';
+
+import type { CustomIntegration } from '../../../../../../src/plugins/custom_integrations/common';
 
 import type {
   PackageSpecManifest,
@@ -366,7 +366,6 @@ export type PackageListItem =
       id: string;
     })
   | CustomIntegration;
-
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>

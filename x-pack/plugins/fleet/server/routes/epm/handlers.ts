@@ -22,7 +22,6 @@ import type {
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
-  RegistrySearchResult,
 } from '../../../common';
 import type {
   GetCategoriesRequestSchema,
@@ -54,9 +53,9 @@ import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
-import type { CustomIntegrationsPluginSetup } from '../../../../../../src/plugins/custom_integrations/server';
 import type { CategoryCount } from '../../../../../../src/plugins/custom_integrations/common';
 import type { PackageList } from '../../../common';
+import { getCustomIntegrations } from '../../services/custom_integrations';
 
 interface EPMCategoryCount {
   id: string;
@@ -89,10 +88,10 @@ function mergeCategoryCounts(
 export const getCategoriesHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetCategoriesRequestSchema.query>
-> = async (customIntegrations: CustomIntegrationsPluginSetup, context, request, response) => {
+> = async (context, request, response) => {
   try {
     const categoriesFromEpm = await getCategories(request.query);
-    const categoriesFromCustom = customIntegrations.getAddableCategories();
+    const categoriesFromCustom = getCustomIntegrations().getAddableCategories();
     const mergedCategories = mergeCategoryCounts(categoriesFromEpm, categoriesFromCustom);
     const body: GetCategoriesResponse = {
       response: mergedCategories,
@@ -106,7 +105,7 @@ export const getCategoriesHandler: RequestHandler<
 export const getListHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetPackagesRequestSchema.query>
-> = async (customIntegrations: CustomIntegrationsPluginSetup, context, request, response) => {
+> = async (context, request, response) => {
   try {
     const savedObjectsClient = context.core.savedObjects.client;
     const packages = await getPackages({
@@ -114,22 +113,18 @@ export const getListHandler: RequestHandler<
       ...request.query,
     });
 
-    console.log('p', packages);
-
-    const beatsPackages = customIntegrations.getReplaceableCustomIntegrations();
+    // const beatsPackages = getCustomIntegrations().getReplaceableCustomIntegrations();
     // console.log('beats', beatsPackages);
 
     // console.log('p', packages);
-    const nonGaPackages = packages.filter((p) => p.release !== 'ga');
-    // console.log('nonga', nonGaPackages);
-
-    const gaPackages = packages.filter((p) => p.release === 'ga');
-    // console.log('ga', gaPackages);
-
-    const replacingBeats = beatsPackages.filter((c) => {
-      const matchingPackage = nonGaPackages.find((p) => p.name === c.beatsModuleName);
-      return matchingPackage;
-    });
+    // const nonGaPackages = packages.filter((p) => p.release !== 'ga');
+    //
+    // const gaPackages = packages.filter((p) => p.release === 'ga');
+    //
+    // const replacingBeats = beatsPackages.filter((c) => {
+    //   const matchingPackage = nonGaPackages.find((p) => p.name === c.beatsModuleName);
+    //   return matchingPackage;
+    // });
 
     // console.log('repl', replacingBeats);
 
@@ -138,7 +133,7 @@ export const getListHandler: RequestHandler<
     //   return !matchingCard;
     // });
 
-    const re = customIntegrations.getAddableCustomIntegrations();
+    const re = getCustomIntegrations().getAddableCustomIntegrations();
     const filteredCustomIntegrations = re.filter((integration) => {
       return !request.query.category || integration.categories.includes(request.query.category);
     });

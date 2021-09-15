@@ -84,6 +84,7 @@ import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
 import { FleetArtifactsClient } from './services/artifacts';
+import {setCustomIntegrations} from "./services/custom_integrations";
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -193,6 +194,7 @@ export class FleetPlugin
 
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
+    setCustomIntegrations(deps.customIntegrations);
 
     // Register feature
     // TODO: Flesh out privileges
@@ -245,7 +247,7 @@ export class FleetPlugin
       registerOutputRoutes(routerSuperuserOnly);
       registerSettingsRoutes(routerSuperuserOnly);
       registerDataStreamRoutes(routerSuperuserOnly);
-      registerEPMRoutes(routerSuperuserOnly, deps.customIntegrations);
+      registerEPMRoutes(routerSuperuserOnly);
       registerPreconfigurationRoutes(routerSuperuserOnly);
 
       // Conditional config routes
