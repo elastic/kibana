@@ -15,14 +15,12 @@ import {
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'trustedApps']);
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const endpointTestResources = getService('endpointTestResources');
 
   describe('When on the Trusted Apps list', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
-        useCreate: true,
-      });
+      await endpointTestResources.loadEndpointData();
       await browser.refresh();
       await pageObjects.trustedApps.navigateToTrustedAppsList();
     });

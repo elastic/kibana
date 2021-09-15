@@ -14,7 +14,6 @@ import {
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const pageObjects = getPageObjects([
     'common',
@@ -26,12 +25,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
+  const endpointTestResources = getService('endpointTestResources');
 
   describe('When on the Endpoint Policy Details Page', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
-        useCreate: true,
-      });
+      await endpointTestResources.loadEndpointData();
       await browser.refresh();
     });
     after(async () => {
