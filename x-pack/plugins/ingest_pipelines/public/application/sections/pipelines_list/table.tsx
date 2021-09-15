@@ -121,8 +121,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
             >
               {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {
                 defaultMessage: 'Create pipeline',
-                })
-              }
+              })}
             </EuiButton>
           }
           panelPaddingSize="none"

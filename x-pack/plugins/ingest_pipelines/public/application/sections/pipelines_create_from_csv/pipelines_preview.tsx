@@ -35,7 +35,7 @@ export const PipelinesPreview: FC<Props> = ({
   onDownload,
   onClickToCreatePipeline,
   onUpdateProcessors,
-  hasError
+  hasError,
 }) => {
   const [isValidJson, setIsValidJson] = useState<boolean>(true);
   const [processorsJson, setProcessorsJson] = useState<string>('');
@@ -117,15 +117,12 @@ export const PipelinesPreview: FC<Props> = ({
         {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={onClickToCreatePipeline}
-              >
+              <EuiButton fill onClick={onClickToCreatePipeline}>
                 <FormattedMessage
                   id="xpack.ingestPipelines.createFromCsv.preview.createPipeline"
                   defaultMessage="Continue to create ingest node pipeline"
                 />
-              </EuiButton>  
+              </EuiButton>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
@@ -133,9 +130,9 @@ export const PipelinesPreview: FC<Props> = ({
                 {(copy: () => void) => (
                   <EuiButtonEmpty iconType="copy" size="s" onClick={copy}>
                     <FormattedMessage
-                        id="xpack.ingestPipelines.createFromCsv.preview.copy"
-                        defaultMessage="Copy JSON to clipboard"
-                      />
+                      id="xpack.ingestPipelines.createFromCsv.preview.copy"
+                      defaultMessage="Copy JSON to clipboard"
+                    />
                   </EuiButtonEmpty>
                 )}
               </EuiCopy>
@@ -144,12 +141,11 @@ export const PipelinesPreview: FC<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="download" size="s" onClick={onDownload}>
                 <FormattedMessage
-                    id="xpack.ingestPipelines.createFromCsv.preview.download"
-                    defaultMessage="Download JSON"
-                  />
+                  id="xpack.ingestPipelines.createFromCsv.preview.download"
+                  defaultMessage="Download JSON"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
-            
           </EuiFlexGroup>
         }
       </EuiFlexItem>

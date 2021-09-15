@@ -13,9 +13,7 @@ import { FieldCopyAction } from '../../../common/types';
 import { mapToIngestPipeline } from '../../services/mapper';
 import { RouteDependencies } from '../../types';
 
-export const registerMapRoute = ({
-  router,
-}: RouteDependencies): void => {
+export const registerMapRoute = ({ router }: RouteDependencies): void => {
   router.post(
     {
       path: `${API_BASE_PATH}/map`,

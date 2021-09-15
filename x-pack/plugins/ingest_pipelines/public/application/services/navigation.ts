@@ -38,7 +38,7 @@ export const ROUTES = {
   edit: _getEditPath(':name', false),
   create: _getCreatePath(),
   clone: _getClonePath(':sourceName', false),
-  createFromCsv: _getCreateFromCsvPath()
+  createFromCsv: _getCreateFromCsvPath(),
 };
 
 export const getListPath = ({

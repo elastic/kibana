@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, useState } from 'react';
-import { useKibana } from '../../../shared_imports';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +18,7 @@ import {
   EuiIconTip,
   EuiRadioGroup,
 } from '@elastic/eui';
+import { useKibana } from '../../../shared_imports';
 import { FieldCopyAction } from '../../../../common/types';
 
 interface Props {
@@ -40,7 +40,15 @@ function getOptions(actions: FieldCopyAction[]) {
   return [...actionOptions];
 }
 
-export const PipelinesCsvUploader: FC<Props> = ({ actionOptions, onFilePickerChange, onFileUpload, isLoading, isUploaded, hasError, hasFile }) => {
+export const PipelinesCsvUploader: FC<Props> = ({
+  actionOptions,
+  onFilePickerChange,
+  onFileUpload,
+  isLoading,
+  isUploaded,
+  hasError,
+  hasFile,
+}) => {
   const [action, setAction] = useState<FieldCopyAction>(FieldCopyAction.Copy);
   const { services } = useKibana();
 
@@ -62,7 +70,7 @@ export const PipelinesCsvUploader: FC<Props> = ({ actionOptions, onFilePickerCha
             <FormattedMessage
               id="xpack.ingestPipelines.createFromCsv.fileUpload.filePickerTitle"
               defaultMessage="Upload file (up to {maxFileSize})"
-                values={{ maxFileSize }}
+              values={{ maxFileSize }}
             />
           }
         >
@@ -103,16 +111,12 @@ export const PipelinesCsvUploader: FC<Props> = ({ actionOptions, onFilePickerCha
             idSelected={action}
             onChange={(id) => setAction(id as FieldCopyAction)}
           />
-
         </EuiFormRow>
 
         <EuiSpacer size="l" />
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            gutterSize="none"
-            direction="row"
-          >
+          <EuiFlexGroup gutterSize="none" direction="row">
             <EuiFlexItem grow={1}>
               <EuiButton
                 onClick={() => onFileUpload(action)}
@@ -121,7 +125,10 @@ export const PipelinesCsvUploader: FC<Props> = ({ actionOptions, onFilePickerCha
                 data-test-subj="processFileButton"
                 fill
               >
-                <FormattedMessage id="xpack.ingestPipelines.createFromCsv.fileUpload.processButton" defaultMessage="Process CSV" />
+                <FormattedMessage
+                  id="xpack.ingestPipelines.createFromCsv.fileUpload.processButton"
+                  defaultMessage="Process CSV"
+                />
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={9}>
@@ -129,7 +136,6 @@ export const PipelinesCsvUploader: FC<Props> = ({ actionOptions, onFilePickerCha
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-
       </EuiFlexItem>
     </EuiFlexGroup>
   );

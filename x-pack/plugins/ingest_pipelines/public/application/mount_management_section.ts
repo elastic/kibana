@@ -35,7 +35,7 @@ export async function mountManagementSection(
     history,
     uiSettings: coreStart.uiSettings,
     urlGenerators: depsStart.share.urlGenerators,
-    fileUpload: depsStart.fileUpload
+    fileUpload: depsStart.fileUpload,
   };
 
   return renderApp(element, I18nContext, services, { http });

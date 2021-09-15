@@ -21,7 +21,13 @@ import {
   SectionLoading,
 } from '../shared_imports';
 
-import { PipelinesList, PipelinesCreate, PipelinesEdit, PipelinesClone, PipelinesCreateFromCsv} from './sections';
+import {
+  PipelinesList,
+  PipelinesCreate,
+  PipelinesEdit,
+  PipelinesClone,
+  PipelinesCreateFromCsv,
+} from './sections';
 import { ROUTES } from './services/navigation';
 
 export const AppWithoutRouter = () => (

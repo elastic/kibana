@@ -63,7 +63,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
     }
 
     return undefined;
-  }
+  };
 
   return (
     <>

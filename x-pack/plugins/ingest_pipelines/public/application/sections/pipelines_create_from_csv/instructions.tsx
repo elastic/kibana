@@ -10,7 +10,6 @@ import React, { FC } from 'react';
 import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 export const Instructions: FC = () => {
-
   return (
     <div>
       <EuiFlexGroup>
@@ -36,14 +35,18 @@ export const Instructions: FC = () => {
           <EuiSpacer size="m" />
           <EuiText>
             <p>
-              Two headers are required: <EuiCode>source_field</EuiCode> and <EuiCode>destination_field</EuiCode>, but please see the linked template for more header information.
+              Two headers are required: <EuiCode>source_field</EuiCode> and{' '}
+              <EuiCode>destination_field</EuiCode>, but please see the linked template for more
+              header information.
             </p>
           </EuiText>
           <EuiSpacer size="m" />
           <EuiText>
             <p>
-              Please note that this tool generates starter pipelines. It will only perform field <strong>rename</strong> and <strong>copy</strong> operations, as well as some field format adjustments. 
-              It's up to you to integrate them in a complete pipeline that ingests and outputs the data however you need.
+              Please note that this tool generates starter pipelines. It will only perform field{' '}
+              <strong>rename</strong> and <strong>copy</strong> operations, as well as some field
+              format adjustments. It&apos;s up to you to integrate them in a complete pipeline that
+              ingests and outputs the data however you need.
             </p>
           </EuiText>
           <EuiSpacer size="m" />

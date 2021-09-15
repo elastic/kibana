@@ -196,7 +196,7 @@ function generatePipeline(mapping: Map<string, Mapping>) {
       processors.push(processor);
     }
   }
-  return {processors: processors} as Pipeline;
+  return { processors } as Pipeline;
 }
 
 function fieldPresencePredicate(field: string) {

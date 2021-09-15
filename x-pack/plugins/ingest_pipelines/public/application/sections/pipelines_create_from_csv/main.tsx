@@ -61,15 +61,15 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
   };
 
   const onClickToCreatePipeline = () => {
-    history.push({pathname: '/create', state: {"sourcePipeline": pipelineProcessors}});
+    history.push({ pathname: '/create', state: { sourcePipeline: pipelineProcessors } });
   };
 
-  const processFile = async (file: File, action: FieldCopyAction) => {
+  const processFile = async (csv: File, action: FieldCopyAction) => {
     const maxBytes = services.fileUpload.getMaxBytes();
 
-    if (file.size <= maxBytes) {
+    if (csv.size <= maxBytes) {
       try {
-        const fileContents = await readFile(file, maxBytes);
+        const fileContents = await readFile(csv, maxBytes);
 
         fetchPipelineFromMapping(fileContents, action);
       } catch (e) {
@@ -77,7 +77,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
         setIsUploaded(false);
         setErrorTitle(
           i18n.translate('xpack.ingestPipelines.createFromCsv.processFile.unexpectedErrorTitle', {
-            defaultMessage: 'Something went wrong'
+            defaultMessage: 'Something went wrong',
           })
         );
         setErrorDetails(
@@ -94,27 +94,33 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
   };
 
   const fetchPipelineFromMapping = async (fileContents: string, action: FieldCopyAction) => {
-    const { error, data: processors } = await services.api.mapToPipeline({file: fileContents, copyAction: action});
+    const { error, data: processors } = await services.api.mapToPipeline({
+      file: fileContents,
+      copyAction: action,
+    });
     setPipelineProcessors(processors);
     setIsLoading(false);
     setIsUploaded(true);
 
     if (!!error) {
       try {
-        const errorParts = error.message.split(":");
+        const errorParts = error.message.split(':');
         setErrorTitle(errorParts[0]);
         setErrorDetails(errorParts[1]);
       } catch (e) {
         setErrorTitle(
           i18n.translate('xpack.ingestPipelines.createFromCsv.fetchPipeline.unexpectedErrorTitle', {
-            defaultMessage: 'Something went wrong'
+            defaultMessage: 'Something went wrong',
           })
         );
         setErrorDetails(
-          i18n.translate('xpack.ingestPipelines.createFromCsv.fetchPipeline.unexpectedErrorDetails', {
-            defaultMessage: 'Unexpected error {e}',
-            values: { e },
-          })
+          i18n.translate(
+            'xpack.ingestPipelines.createFromCsv.fetchPipeline.unexpectedErrorDetails',
+            {
+              defaultMessage: 'Unexpected error {e}',
+              values: { e },
+            }
+          )
         );
       }
       setIsLoading(false);
@@ -149,7 +155,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
             />
           </EuiButtonEmpty>,
         ]}
-      /> 
+      />
 
       <EuiSpacer size="xl" />
 
