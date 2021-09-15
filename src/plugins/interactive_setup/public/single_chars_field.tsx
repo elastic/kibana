@@ -12,6 +12,7 @@ import React, { useEffect, useRef } from 'react';
 import useList from 'react-use/lib/useList';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 export interface SingleCharsFieldProps {
@@ -124,6 +125,10 @@ export const SingleCharsField: FunctionComponent<SingleCharsFieldProps> = ({
           maxLength={1}
           isInvalid={isInvalid}
           style={{ textAlign: 'center' }}
+          aria-label={i18n.translate('interactiveSetup.singleCharsField.digitLabel', {
+            defaultMessage: 'Digit {index}',
+            values: { index: i + 1 },
+          })}
         />
       </EuiFlexItem>
     );
