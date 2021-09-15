@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiButtonGroup,
-  EuiButtonProps,
+  EuiButtonGroupOptionProps,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,8 +16,6 @@ import {
   EuiSelectable,
   EuiSelectableProps,
   EuiSpacer,
-  EuiSwitch,
-  EuiSwitchProps,
   EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -75,14 +73,13 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
 
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const toggleGlobal = [
+    const toggleGlobal: EuiButtonGroupOptionProps[] = [
       {
         id: 'globalPolicy',
         label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.global', {
           defaultMessage: 'Global',
         }),
         iconType: isGlobal ? 'checkInCircleFilled' : '',
-        iconSide: 'left',
       },
       {
         id: 'perPolicy',
@@ -90,7 +87,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           defaultMessage: 'Per Policy',
         }),
         iconType: !isGlobal ? 'checkInCircleFilled' : '',
-        iconSide: 'left',
       },
     ];
 
@@ -141,16 +137,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       [isGlobal, onChange]
     )!;
 
-    const handleGlobalSwitchChange: EuiSwitchProps['onChange'] = useCallback(
-      ({ target: { checked } }) => {
-        onChange({
-          isGlobal: checked,
-          selected,
-        });
-      },
-      [onChange, selected]
-    );
-
     const handleGlobalButtonChange = useCallback(
       (selectedId) => {
         onChange({
@@ -170,19 +156,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       );
     }, []);
 
-    /*
-          <EuiSwitch
-            label={i18n.translate(
-              'xpack.securitySolution.trustedapps.policySelect.globalSwitchTitle',
-              {
-                defaultMessage: 'Apply trusted application globally',
-              }
-            )}
-            checked={isGlobal}
-            onChange={handleGlobalSwitchChange}
-            data-test-subj={getTestId('globalSwitch')}
-          />
-     */
     return (
       <EffectivePolicyFormContainer>
         <EuiText size="xs">
@@ -214,6 +187,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 onChange={handleGlobalButtonChange}
                 color="primary"
                 isFullWidth
+                data-test-subj={getTestId('globalButtonGroup')}
               />
             </EuiFormRow>
           </EuiFlexItem>

@@ -488,7 +488,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             })}
           </h3>
         </EuiText>
-          <EuiSpacer size="xs" />
+        <EuiSpacer size="xs" />
         <EuiText size="s">
           <p>
             {i18n.translate('xpack.securitySolution.trustedApps.conditionsSectionDescription', {
