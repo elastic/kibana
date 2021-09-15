@@ -94,18 +94,6 @@ Before you upgrade to 7.15.0, review the breaking changes, then mitigate the imp
 // tag::notable-breaking-changes[]
       
 [discrete]
-[[breaking-103652]]
-.Migrates machine learning URL generators to locators
-[%collapsible]
-====
-*Details* +
-In *Machine Learning*, *APM*, *Logs*, and *Security*, the machine learning URL generator has been replaced with a machine learning locator. For more information, refer to {kibana-pull}103652[#103652].
-
-*Impact* +
-When you upgrade, the URL generators are automatically migrated to use the new locators. 
-====
-
-[discrete]
 [[breaking-osquery]]
 .New scheduled query action ID format for Osquery Manager
 [%collapsible]
@@ -279,6 +267,8 @@ Use runtime fields. For more information, refer to <<runtime-fields,Explore your
 
 APM::
 * Enables metric-powered UI {kibana-pull}104929[#104929]
+* Replaces error rate table with failed transactions correlations {kibana-pull}108441[#108441]
+* Moves latency correlations from flyout to transactions page {kibana-pull}107266[#107266]
 Data ingest::
 * Adds copy_from to set processor {kibana-pull}104070[#104070]
 * Adds community id processor {kibana-pull}103863[#103863]
@@ -330,6 +320,9 @@ APM::
 * Fleet: APM Integration settings (fleet editor) redesign {kibana-pull}106535[#106535]
 * Adds bulk update route to rule registry and bulk update function to alerts client {kibana-pull}106297[#106297]
 * Enables metric-powered ui {kibana-pull}104929[#104929]
+* Replaces error rate table with failed transactions correlations {kibana-pull}108441[#108441]
+* Moves latency correlations from flyout to transactions page {kibana-pull}107266[#107266]
+* Latency correlations: Field/value candidates prioritization {kibana-pull}107370[#107370]
 Canvas::
 * Expression progress {kibana-pull}104457[#104457]
 * Expression metric {kibana-pull}104390[#104390]
@@ -378,13 +371,10 @@ Logs::
 Machine Learning::
 * Adds support for model_prune_window in job wizard {kibana-pull}108734[#108734]
 * Checks for error messages in the anomaly detection jobs health rule type {kibana-pull}108701[#108701]
-* Replaces APM error rate table with failed transactions correlations {kibana-pull}108441[#108441]
 * Adds initial record score to the anomalies table expanded row content {kibana-pull}108216[#108216]
 * Adds reset anomaly detection jobs link to jobs list {kibana-pull}108039[#108039]
 * Adds evaluation quality metrics to classification exploration view {kibana-pull}107862[#107862]
 * Adds a 30 day model prune window to non-rare security jobs {kibana-pull}107752[#107752]
-* APM latency correlations: Field/value candidates prioritization {kibana-pull}107370[#107370]
-* Moves APM latency correlations from flyout to transactions page {kibana-pull}107266[#107266]
 * Delayed data test for anomaly detection jobs health rule type {kibana-pull}107183[#107183]
 * Model memory state test for anomaly detection jobs health rule type {kibana-pull}106763[#106763]
 * Enables index data visualizer document count chart to update time range query {kibana-pull}106438[#106438]
