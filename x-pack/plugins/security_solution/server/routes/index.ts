@@ -56,6 +56,7 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -74,6 +75,7 @@ export const initRoutes = (
   patchRulesRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesRoute(router, isRuleRegistryEnabled);
   findRulesRoute(router, isRuleRegistryEnabled);
+  previewRulesRoute(router, ml, isRuleRegistryEnabled);
 
   // TODO: pass isRuleRegistryEnabled to all relevant routes
 
