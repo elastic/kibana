@@ -7,7 +7,8 @@
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { AnyArtifact, ArtifactInfo } from '../types';
-import { TrustedApp } from '../../../../../common/endpoint/types';
+import { EffectScope, TrustedApp } from '../../../../../common/endpoint/types';
+import { tagsToEffectScope } from '../../../../../common/endpoint/service/trusted_apps/mapping';
 
 export const toArtifactInfo = (item: AnyArtifact): ArtifactInfo => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -21,7 +22,7 @@ export const toArtifactInfo = (item: AnyArtifact): ArtifactInfo => {
     description,
     entries: (entries as unknown) as ArtifactInfo['entries'],
     os: isTrustedApp(item) ? item.os : getOsFromExceptionItem(item),
-    effectScope: isTrustedApp(item) ? item.effectScope : { type: 'global' },
+    effectScope: isTrustedApp(item) ? item.effectScope : getEffectScopeFromExceptionItem(item),
   };
 };
 
@@ -32,4 +33,8 @@ const isTrustedApp = (item: AnyArtifact): item is TrustedApp => {
 const getOsFromExceptionItem = (item: ExceptionListItemSchema): string => {
   // FYI: Exceptions seem to allow for items to be assigned to more than one OS, unlike Event Filters and Trusted Apps
   return item.os_types.join(', ');
+};
+
+const getEffectScopeFromExceptionItem = (item: ExceptionListItemSchema): EffectScope => {
+  return tagsToEffectScope(item.tags);
 };
