@@ -19,7 +19,12 @@ import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { TGridCellAction, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import {
+  BulkActionsProp,
+  TGridCellAction,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 
 import type {
   CellValueElementProps,
@@ -95,6 +100,7 @@ const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 export interface TGridIntegratedProps {
   additionalFilters: React.ReactNode;
   browserFields: BrowserFields;
+  bulkActions?: BulkActionsProp;
   columns: ColumnHeaderOptions[];
   data?: DataPublicPluginStart;
   dataProviders: DataProvider[];
@@ -135,6 +141,7 @@ export interface TGridIntegratedProps {
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   additionalFilters,
   browserFields,
+  bulkActions = true,
   columns,
   data,
   dataProviders,
@@ -334,6 +341,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                           hasAlertsCrud={hasAlertsCrud}
                           activePage={pageInfo.activePage}
                           browserFields={browserFields}
+                          bulkActions={bulkActions}
                           filterQuery={filterQuery}
                           data={nonDeletedEvents}
                           defaultCellActions={defaultCellActions}
