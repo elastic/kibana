@@ -89,6 +89,13 @@ export const findThresholdSignals = async ({
 
   const thresholdFields = threshold.field;
 
+  // order buckets by cardinality (https://github.com/elastic/kibana/issues/95258)
+  const thresholdFieldCount = thresholdFields.length;
+  const orderByCardinality = (i: number = 0) =>
+    (thresholdFieldCount === 0 || i === thresholdFieldCount - 1) && threshold.cardinality?.length
+      ? { order: { cardinality_count: 'desc' } }
+      : {};
+
   // Generate a nested terms aggregation for each threshold grouping field provided, appending leaf
   // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
   // 2) return the latest hit for each bucket so that we can persist the timestamp of the event in the
@@ -104,6 +111,7 @@ export const findThresholdSignals = async ({
         set(acc, aggPath, {
           terms: {
             field,
+            ...orderByCardinality(i),
             min_doc_count: threshold.value, // not needed on parent agg, but can help narrow down result set
             size: 10000, // max 10k buckets
           },
@@ -121,6 +129,7 @@ export const findThresholdSignals = async ({
               source: '""', // Group everything in the same bucket
               lang: 'painless',
             },
+            ...orderByCardinality(),
             min_doc_count: threshold.value,
           },
           aggs: leafAggs,
