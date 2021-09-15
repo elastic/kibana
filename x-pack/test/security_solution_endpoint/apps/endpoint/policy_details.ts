@@ -8,10 +8,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
-import {
-  deleteMetadataStream,
-  deleteAllDocsFromMetadataCurrentIndex,
-} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
