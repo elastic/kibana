@@ -77,7 +77,7 @@ describe('migrationsStateActionMachine', () => {
     };
   };
 
-  it('logs state transitions, messages in state.logs and action responses', async () => {
+  it('logs state transitions, messages in state.logs and action responses when reaching DONE', async () => {
     await migrationStateActionMachine({
       initialState,
       logger: mockLogger.get(),
@@ -88,71 +88,23 @@ describe('migrationsStateActionMachine', () => {
     const logs = loggingSystemMock.collect(mockLogger);
     const doneLog = logs.info.splice(8, 1)[0][0];
     expect(doneLog).toMatch(/\[.my-so-index\] Migration completed after \d+ms/);
-    expect(logs).toMatchInlineSnapshot(`
-      Object {
-        "debug": Array [
-          Array [
-            "[.my-so-index] INIT RESPONSE",
-            Object {
-              "_tag": "Right",
-              "right": "response",
-            },
-          ],
-          Array [
-            "[.my-so-index] LEGACY_REINDEX RESPONSE",
-            Object {
-              "_tag": "Right",
-              "right": "response",
-            },
-          ],
-          Array [
-            "[.my-so-index] LEGACY_DELETE RESPONSE",
-            Object {
-              "_tag": "Right",
-              "right": "response",
-            },
-          ],
-          Array [
-            "[.my-so-index] LEGACY_DELETE RESPONSE",
-            Object {
-              "_tag": "Right",
-              "right": "response",
-            },
-          ],
-        ],
-        "error": Array [],
-        "fatal": Array [],
-        "info": Array [
-          Array [
-            "[.my-so-index] Log from LEGACY_REINDEX control state",
-          ],
-          Array [
-            "[.my-so-index] INIT -> LEGACY_REINDEX. took: 0ms.",
-          ],
-          Array [
-            "[.my-so-index] Log from LEGACY_DELETE control state",
-          ],
-          Array [
-            "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE. took: 0ms.",
-          ],
-          Array [
-            "[.my-so-index] Log from LEGACY_DELETE control state",
-          ],
-          Array [
-            "[.my-so-index] LEGACY_DELETE -> LEGACY_DELETE. took: 0ms.",
-          ],
-          Array [
-            "[.my-so-index] Log from DONE control state",
-          ],
-          Array [
-            "[.my-so-index] LEGACY_DELETE -> DONE. took: 0ms.",
-          ],
-        ],
-        "log": Array [],
-        "trace": Array [],
-        "warn": Array [],
-      }
-    `);
+    expect(logs).toMatchSnapshot();
+  });
+
+  it('logs state transitions, messages in state.logs and action responses when reaching FATAL', async () => {
+    await migrationStateActionMachine({
+      initialState: {
+        ...initialState,
+        reason: 'the fatal reason',
+        outdatedDocuments: [{ _id: '1234', password: 'sensitive password' }],
+        transformedDocBatches: [[{ _id: '1234', password: 'sensitive transformed password' }]],
+      } as State,
+      logger: mockLogger.get(),
+      model: transitionModel(['LEGACY_DELETE', 'FATAL']),
+      next,
+      client: esClient,
+    }).catch((err) => err);
+    expect(loggingSystemMock.collect(mockLogger)).toMatchSnapshot();
   });
 
   // see https://github.com/elastic/kibana/issues/98406
@@ -196,6 +148,7 @@ describe('migrationsStateActionMachine', () => {
       })
     ).resolves.toEqual(expect.anything());
   });
+
   it('resolves with migrated status if some sourceIndex in the DONE state', async () => {
     await expect(
       migrationStateActionMachine({
@@ -207,6 +160,7 @@ describe('migrationsStateActionMachine', () => {
       })
     ).resolves.toEqual(expect.objectContaining({ status: 'migrated' }));
   });
+
   it('resolves with patched status if none sourceIndex in the DONE state', async () => {
     await expect(
       migrationStateActionMachine({
@@ -218,6 +172,7 @@ describe('migrationsStateActionMachine', () => {
       })
     ).resolves.toEqual(expect.objectContaining({ status: 'patched' }));
   });
+
   it('rejects with error message when reaching the FATAL state', async () => {
     await expect(
       migrationStateActionMachine({
@@ -231,127 +186,8 @@ describe('migrationsStateActionMachine', () => {
       `[Error: Unable to complete saved object migrations for the [.my-so-index] index: the fatal reason]`
     );
   });
-  it('logs all state transitions and action responses when reaching the FATAL state', async () => {
-    await migrationStateActionMachine({
-      initialState: {
-        ...initialState,
-        reason: 'the fatal reason',
-        outdatedDocuments: [{ _id: '1234', password: 'sensitive password' }],
-        transformedDocBatches: [[{ _id: '1234', password: 'sensitive transformed password' }]],
-      } as State,
-      logger: mockLogger.get(),
-      model: transitionModel(['LEGACY_DELETE', 'FATAL']),
-      next,
-      client: esClient,
-    }).catch((err) => err);
-    // Ignore the first 4 log entries that come from our model
-    const executionLogLogs = loggingSystemMock.collect(mockLogger).info.slice(4);
-    expect(executionLogLogs).toEqual([
-      [
-        '[.my-so-index] INIT RESPONSE',
-        {
-          _tag: 'Right',
-          right: 'response',
-        },
-      ],
-      [
-        '[.my-so-index] INIT -> LEGACY_DELETE',
-        {
-          kibana: {
-            migrationState: {
-              batchSize: 1000,
-              maxBatchSizeBytes: 1e8,
-              controlState: 'LEGACY_DELETE',
-              currentAlias: '.my-so-index',
-              excludeFromUpgradeFilterHooks: {},
-              indexPrefix: '.my-so-index',
-              kibanaVersion: '7.11.0',
-              knownTypes: [],
-              legacyIndex: '.my-so-index',
-              logs: [
-                {
-                  level: 'info',
-                  message: 'Log from LEGACY_DELETE control state',
-                },
-              ],
-              outdatedDocuments: [{ _id: '1234' }],
-              outdatedDocumentsQuery: expect.any(Object),
-              preMigrationScript: {
-                _tag: 'None',
-              },
-              reason: 'the fatal reason',
-              retryAttempts: 5,
-              retryCount: 0,
-              retryDelay: 0,
-              targetIndexMappings: {
-                properties: {},
-              },
-              tempIndex: '.my-so-index_7.11.0_reindex_temp',
-              tempIndexMappings: expect.any(Object),
-              transformedDocBatches: [[{ _id: '1234' }]],
-              unusedTypesQuery: expect.any(Object),
-              versionAlias: '.my-so-index_7.11.0',
-              versionIndex: '.my-so-index_7.11.0_001',
-            },
-          },
-        },
-      ],
-      [
-        '[.my-so-index] LEGACY_DELETE RESPONSE',
-        {
-          _tag: 'Right',
-          right: 'response',
-        },
-      ],
-      [
-        '[.my-so-index] LEGACY_DELETE -> FATAL',
-        {
-          kibana: {
-            migrationState: {
-              batchSize: 1000,
-              maxBatchSizeBytes: 1e8,
-              controlState: 'FATAL',
-              currentAlias: '.my-so-index',
-              excludeFromUpgradeFilterHooks: {},
-              indexPrefix: '.my-so-index',
-              kibanaVersion: '7.11.0',
-              knownTypes: [],
-              legacyIndex: '.my-so-index',
-              logs: [
-                {
-                  level: 'info',
-                  message: 'Log from LEGACY_DELETE control state',
-                },
-                {
-                  level: 'info',
-                  message: 'Log from FATAL control state',
-                },
-              ],
-              outdatedDocuments: [{ _id: '1234' }],
-              outdatedDocumentsQuery: expect.any(Object),
-              preMigrationScript: {
-                _tag: 'None',
-              },
-              reason: 'the fatal reason',
-              retryAttempts: 5,
-              retryCount: 0,
-              retryDelay: 0,
-              targetIndexMappings: {
-                properties: {},
-              },
-              tempIndex: '.my-so-index_7.11.0_reindex_temp',
-              tempIndexMappings: expect.any(Object),
-              transformedDocBatches: [[{ _id: '1234' }]],
-              unusedTypesQuery: expect.any(Object),
-              versionAlias: '.my-so-index_7.11.0',
-              versionIndex: '.my-so-index_7.11.0_001',
-            },
-          },
-        },
-      ],
-    ]);
-  });
-  it('rejects and logs the error when an action throws with an ResponseError', async () => {
+
+  it('rejects and logs the error when an action throws with a ResponseError', async () => {
     await expect(
       migrationStateActionMachine({
         initialState: { ...initialState, reason: 'the fatal reason' } as State,
@@ -384,9 +220,6 @@ describe('migrationsStateActionMachine', () => {
           Array [
             "[.my-so-index] Unexpected Elasticsearch ResponseError: statusCode: 200, method: POST, url: /mock error: [snapshot_in_progress_exception]: Cannot delete indices that are being snapshotted,",
           ],
-          Array [
-            "[.my-so-index] migration failed, dumping execution log:",
-          ],
         ],
         "fatal": Array [],
         "info": Array [],
@@ -417,9 +250,6 @@ describe('migrationsStateActionMachine', () => {
           Array [
             [Error: this action throws],
           ],
-          Array [
-            "[.my-so-index] migration failed, dumping execution log:",
-          ],
         ],
         "fatal": Array [],
         "info": Array [],
@@ -428,116 +258,6 @@ describe('migrationsStateActionMachine', () => {
         "warn": Array [],
       }
     `);
-  });
-  it('logs all state transitions and action responses when an action throws', async () => {
-    try {
-      await migrationStateActionMachine({
-        initialState: { ...initialState, reason: 'the fatal reason' } as State,
-        logger: mockLogger.get(),
-        model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
-        next: (state) => {
-          if (state.controlState === 'LEGACY_DELETE') throw new Error('this action throws');
-          return () => Promise.resolve('hello');
-        },
-        client: esClient,
-      });
-    } catch (e) {
-      /** ignore */
-    }
-    // Ignore the first 4 log entries that come from our model
-    const executionLogLogs = loggingSystemMock.collect(mockLogger).info.slice(4);
-    expect(executionLogLogs).toEqual([
-      ['[.my-so-index] INIT RESPONSE', 'hello'],
-      [
-        '[.my-so-index] INIT -> LEGACY_REINDEX',
-        {
-          kibana: {
-            migrationState: {
-              batchSize: 1000,
-              maxBatchSizeBytes: 1e8,
-              controlState: 'LEGACY_REINDEX',
-              currentAlias: '.my-so-index',
-              excludeFromUpgradeFilterHooks: {},
-              indexPrefix: '.my-so-index',
-              kibanaVersion: '7.11.0',
-              knownTypes: [],
-              legacyIndex: '.my-so-index',
-              logs: [
-                {
-                  level: 'info',
-                  message: 'Log from LEGACY_REINDEX control state',
-                },
-              ],
-              outdatedDocuments: [],
-              outdatedDocumentsQuery: expect.any(Object),
-              preMigrationScript: {
-                _tag: 'None',
-              },
-              reason: 'the fatal reason',
-              retryAttempts: 5,
-              retryCount: 0,
-              retryDelay: 0,
-              targetIndexMappings: {
-                properties: {},
-              },
-              tempIndex: '.my-so-index_7.11.0_reindex_temp',
-              tempIndexMappings: expect.any(Object),
-              transformedDocBatches: [],
-              unusedTypesQuery: expect.any(Object),
-              versionAlias: '.my-so-index_7.11.0',
-              versionIndex: '.my-so-index_7.11.0_001',
-            },
-          },
-        },
-      ],
-      ['[.my-so-index] LEGACY_REINDEX RESPONSE', 'hello'],
-      [
-        '[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE',
-        {
-          kibana: {
-            migrationState: {
-              batchSize: 1000,
-              maxBatchSizeBytes: 1e8,
-              controlState: 'LEGACY_DELETE',
-              currentAlias: '.my-so-index',
-              excludeFromUpgradeFilterHooks: {},
-              indexPrefix: '.my-so-index',
-              kibanaVersion: '7.11.0',
-              knownTypes: [],
-              legacyIndex: '.my-so-index',
-              logs: [
-                {
-                  level: 'info',
-                  message: 'Log from LEGACY_REINDEX control state',
-                },
-                {
-                  level: 'info',
-                  message: 'Log from LEGACY_DELETE control state',
-                },
-              ],
-              outdatedDocuments: [],
-              outdatedDocumentsQuery: expect.any(Object),
-              preMigrationScript: {
-                _tag: 'None',
-              },
-              reason: 'the fatal reason',
-              retryAttempts: 5,
-              retryCount: 0,
-              retryDelay: 0,
-              targetIndexMappings: {
-                properties: {},
-              },
-              tempIndex: '.my-so-index_7.11.0_reindex_temp',
-              tempIndexMappings: expect.any(Object),
-              transformedDocBatches: [],
-              unusedTypesQuery: expect.any(Object),
-              versionAlias: '.my-so-index_7.11.0',
-              versionIndex: '.my-so-index_7.11.0_001',
-            },
-          },
-        },
-      ],
-    ]);
   });
   describe('cleanup', () => {
     beforeEach(() => {
