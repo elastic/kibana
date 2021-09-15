@@ -40,7 +40,7 @@ export function logstashClusterPipelineIdsRoute(server) {
       const size = config.get('monitoring.ui.max_bucket_size');
 
       try {
-        const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid }, size);
+        const pipelines = await getLogstashPipelineIds({ req, lsIndexPattern, clusterUuid, size });
         return pipelines;
       } catch (err) {
         throw handleError(err, req);

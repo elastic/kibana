@@ -64,15 +64,16 @@ export function logstashNodePipelinesRoute(server) {
       }
 
       try {
-        const response = await getPaginatedPipelines(
+        const response = await getPaginatedPipelines({
           req,
           lsIndexPattern,
-          { clusterUuid, logstashUuid },
-          { throughputMetric, nodesCountMetric },
+          clusterUuid,
+          logstashUuid,
+          metrics: { throughputMetric, nodesCountMetric },
           pagination,
           sort,
-          queryText
-        );
+          queryText,
+        });
 
         return {
           ...response,
