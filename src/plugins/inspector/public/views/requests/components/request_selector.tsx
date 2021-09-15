@@ -15,6 +15,7 @@ import {
   EuiBadge,
   EuiButtonEmpty,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiFlexGroup,
@@ -35,7 +36,7 @@ interface RequestSelectorState {
 interface RequestSelectorProps {
   requests: Request[];
   selectedRequest: Request;
-  onRequestChanged: Function;
+  onRequestChanged: (request: Request) => void;
 }
 
 export class RequestSelector extends Component<RequestSelectorProps, RequestSelectorState> {
@@ -48,6 +49,15 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
   state = {
     isPopoverOpen: false,
   };
+
+  handleSelected = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    const selectedOption = this.props.requests.find(request => request.id === selectedOptions[0].value);
+    console.log({selectedOptions})
+
+    if(selectedOption) {
+      this.props.onRequestChanged(selectedOption);
+    }
+  }
 
   togglePopover = () => {
     this.setState((prevState: RequestSelectorState) => ({
@@ -98,7 +108,7 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
     );
   };
 
-  renderRequestDropdown() {
+  renderRequestCombobox() {
     // const button = (
     //   <EuiButtonEmpty
     //     iconType="arrowDown"
@@ -113,7 +123,8 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
 
     const options = this.props.requests.map(item => {
       return {
-        label: item.name
+        label: item.name,
+        value: item.id,
       }
     });
 
@@ -134,14 +145,23 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
           />
         </EuiPopover> */}
 
-        <EuiComboBox
-          id="inspectorRequestChooser"
-          isClearable={false}
-          options={options}
-          prepend="Request:"
-          selectedOptions={[options[0]]}
-          singleSelection={{ asPlainText: true }}
-        />
+      <EuiComboBox
+        id="inspectorRequestChooser"
+        isClearable={false}
+        fullWidth={true}
+        onChange={this.handleSelected}
+        options={options}
+        prepend="Request"
+        selectedOptions={
+          [
+            {
+              label: this.props.selectedRequest.name,
+              value: this.props.selectedRequest.id
+            }
+          ]
+        }
+        singleSelection={{ asPlainText: true }}
+      />
       </>
     );
   }
@@ -150,7 +170,7 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
     const { selectedRequest, requests } = this.props;
 
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="xs">
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={true}>
           {/* {requests.length <= 1 && (
             <div
@@ -164,7 +184,7 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
             </div>
           )}
           {requests.length > 1 && this.renderRequestDropdown()} */}
-          {requests.length && this.renderRequestDropdown()}
+          {requests.length && this.renderRequestCombobox()}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {selectedRequest.status !== RequestStatus.PENDING && (
