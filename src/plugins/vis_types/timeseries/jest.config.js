@@ -8,7 +8,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
+  rootDir: '../../../..',
   roots: ['<rootDir>/src/plugins/vis_types/timeseries'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/vis_types/timeseries',
   coverageReporters: ['text', 'html'],
