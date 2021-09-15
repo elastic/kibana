@@ -4,7 +4,7 @@
 
 ## OpsProcessMetrics.event\_loop\_delay property
 
-node event loop delay
+mean event loop delay since last collection
 
 <b>Signature:</b>
 

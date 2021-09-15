@@ -179,7 +179,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
   return (
     <>
       <EuiButtonEmpty
-        flush="left"
+        iconSide="left"
         iconType={isAuthenticationSettingsOpen ? 'arrowDown' : 'arrowRight'}
         onClick={() => setIsAuthenticationSettingsOpen(!isAuthenticationSettingsOpen)}
       >
