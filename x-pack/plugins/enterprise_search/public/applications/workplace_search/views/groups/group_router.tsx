@@ -14,7 +14,7 @@ import { GROUP_SOURCE_PRIORITIZATION_PATH, GROUP_PATH } from '../../routes';
 
 import { GroupOverview } from './components/group_overview';
 import { GroupSourcePrioritization } from './components/group_source_prioritization';
-import { OrgSourcesModal } from './components/shared_sources_modal';
+import { OrgSourcesModal } from './components/org_sources_modal';
 import { GroupLogic } from './group_logic';
 
 export const GroupRouter: React.FC = () => {

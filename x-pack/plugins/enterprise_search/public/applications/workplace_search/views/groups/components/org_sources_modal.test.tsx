@@ -13,7 +13,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { GroupManagerModal } from './group_manager_modal';
-import { OrgSourcesModal } from './shared_sources_modal';
+import { OrgSourcesModal } from './org_sources_modal';
 import { SourcesList } from './sources_list';
 
 const group = groups[0];

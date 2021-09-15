@@ -17,7 +17,7 @@ import { shallow } from 'enzyme';
 
 import { GroupOverview } from './components/group_overview';
 import { GroupSourcePrioritization } from './components/group_source_prioritization';
-import { OrgSourcesModal } from './components/shared_sources_modal';
+import { OrgSourcesModal } from './components/org_sources_modal';
 import { GroupRouter } from './group_router';
 
 describe('GroupRouter', () => {
