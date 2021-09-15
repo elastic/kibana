@@ -29,7 +29,7 @@ import {
 } from '../../../../common/detection_engine/utils';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import { AlertAttributes, SignalRuleAlertTypeDefinition } from './types';
+import { AlertAttributes, SignalRuleAlertTypeDefinition, ThresholdAlertState } from './types';
 import {
   getListsClient,
   getExceptions,
@@ -82,6 +82,7 @@ export const signalRulesAlertType = ({
   ml,
   lists,
   mergeStrategy,
+  ignoreFields,
   ruleDataService,
 }: {
   logger: Logger;
@@ -91,6 +92,7 @@ export const signalRulesAlertType = ({
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  ignoreFields: ConfigType['alertIgnoreFields'];
   ruleDataService: IRuleDataPluginService;
 }): SignalRuleAlertTypeDefinition => {
   return {
@@ -123,6 +125,7 @@ export const signalRulesAlertType = ({
     async executor({
       previousStartedAt,
       startedAt,
+      state,
       alertId,
       services,
       params,
@@ -275,12 +278,14 @@ export const signalRulesAlertType = ({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
           mergeStrategy,
+          ignoreFields,
         });
 
         const wrapSequences = wrapSequencesFactory({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
           mergeStrategy,
+          ignoreFields,
         });
 
         if (isMlRule(type)) {
@@ -312,6 +317,7 @@ export const signalRulesAlertType = ({
               logger,
               buildRuleMessage,
               startedAt,
+              state: state as ThresholdAlertState,
               bulkCreate,
               wrapHits,
             });

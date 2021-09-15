@@ -78,6 +78,7 @@ type Props = OwnProps & PropsFromRedux;
 const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
   columns,
+  defaultColumns,
   dataProviders,
   defaultCellActions,
   deletedEventIds,
@@ -86,6 +87,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   entityType,
   excludedRowRendererIds,
   filters,
+  globalQuery,
   id,
   isLive,
   itemsPerPage,
@@ -101,6 +103,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   scopeId,
   showCheckboxes,
   sort,
+  timelineQuery,
   utilityBar,
   additionalFilters,
   // If truthy, the graph viewer (Resolver) is showing
@@ -128,6 +131,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       createTimeline({
         id,
         columns,
+        defaultColumns,
         excludedRowRendererIds,
         indexNames: selectedPatterns,
         sort,
@@ -145,9 +149,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
   const graphOverlay = useMemo(
     () =>
-      graphEventId != null && graphEventId.length > 0 ? (
-        <GraphOverlay isEventViewer={true} timelineId={id} />
-      ) : null,
+      graphEventId != null && graphEventId.length > 0 ? <GraphOverlay timelineId={id} /> : null,
     [graphEventId, id]
   );
   const setQuery = useCallback(
@@ -156,6 +158,18 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     },
     [dispatch, id]
   );
+
+  const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
+    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+  };
+  const onAlertStatusActionSuccess = useCallback(() => {
+    if (id === TimelineId.active) {
+      refetchQuery([timelineQuery]);
+    } else {
+      refetchQuery(globalQuery);
+    }
+  }, [id, timelineQuery, globalQuery]);
+  const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
 
   return (
     <>
@@ -166,6 +180,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               id,
               type: 'embedded',
               browserFields,
+              bulkActions,
               columns,
               dataProviders: dataProviders!,
               defaultCellActions,
@@ -245,11 +260,14 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getGlobalQueries = inputsSelectors.globalQuery();
+  const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
     const {
       columns,
+      defaultColumns,
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
@@ -263,6 +281,7 @@ const makeMapStateToProps = () => {
 
     return {
       columns,
+      defaultColumns,
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
@@ -278,6 +297,8 @@ const makeMapStateToProps = () => {
       // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
       // `getTimeline` actually returns `TimelineModel | undefined`
       graphEventId,
+      globalQuery: getGlobalQueries(state),
+      timelineQuery: getTimelineQuery(state, id),
     };
   };
   return mapStateToProps;

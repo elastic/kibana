@@ -34,7 +34,7 @@ pageLoadAssetSize:
   indexPatternManagement: 28222
   indexPatternEditor: 25000
   infra: 184320
-  fleet: 465774
+  fleet: 250000
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -70,7 +70,6 @@ pageLoadAssetSize:
   spaces: 57868
   telemetry: 51957
   telemetryManagementSection: 38586
-  timelion: 29920
   transform: 41007
   triggersActionsUi: 100000
   uiActions: 97717
@@ -112,7 +111,7 @@ pageLoadAssetSize:
   expressionImage: 19288
   expressionMetric: 22238
   expressionShape: 34008
-  interactiveSetup: 70000
+  interactiveSetup: 80000
   expressionTagcloud: 27505
   expressions: 239290
   securitySolution: 231753

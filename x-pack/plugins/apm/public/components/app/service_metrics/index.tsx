@@ -16,7 +16,7 @@ import { MetricsChart } from '../../shared/charts/metrics_chart';
 export function ServiceMetrics() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/metrics');
+  } = useApmParams('/services/{serviceName}/metrics');
 
   const { data, status } = useServiceMetricChartsFetcher({
     serviceNodeName: undefined,

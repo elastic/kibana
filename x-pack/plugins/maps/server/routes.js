@@ -7,7 +7,6 @@
 
 import {
   EMS_APP_NAME,
-  EMS_CATALOGUE_PATH,
   EMS_FILES_API_PATH,
   EMS_FILES_CATALOGUE_PATH,
   EMS_FILES_DEFAULT_JSON_PATH,
@@ -19,12 +18,11 @@ import {
   EMS_TILES_VECTOR_STYLE_PATH,
   EMS_TILES_VECTOR_SOURCE_PATH,
   EMS_TILES_VECTOR_TILE_PATH,
-  GIS_API_PATH,
   EMS_SPRITES_PATH,
   INDEX_SETTINGS_API_PATH,
   FONTS_API_PATH,
   API_ROOT_PATH,
-} from '../common';
+} from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
@@ -41,9 +39,6 @@ const EMPTY_EMS_CLIENT = {
   },
   async getTMSServices() {
     return [];
-  },
-  async getMainManifest() {
-    return null;
   },
   async getDefaultFileManifest() {
     return null;
@@ -160,42 +155,6 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
         .replace('{z}', request.query.z);
 
       return await proxyResource({ url, contentType: 'image/png' }, response);
-    }
-  );
-
-  router.get(
-    {
-      path: `${API_ROOT_PATH}/${EMS_CATALOGUE_PATH}`,
-      validate: false,
-    },
-    async (context, request, { ok, badRequest }) => {
-      if (!checkEMSProxyEnabled()) {
-        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
-      }
-
-      const main = await getEMSClient().getMainManifest();
-      const proxiedManifest = {
-        services: [],
-      };
-
-      //rewrite the urls to the submanifest
-      const tileService = main.services.find((service) => service.type === 'tms');
-      const fileService = main.services.find((service) => service.type === 'file');
-      if (tileService) {
-        proxiedManifest.services.push({
-          ...tileService,
-          manifest: `${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}`,
-        });
-      }
-      if (fileService) {
-        proxiedManifest.services.push({
-          ...fileService,
-          manifest: `${GIS_API_PATH}/${EMS_FILES_CATALOGUE_PATH}`,
-        });
-      }
-      return ok({
-        body: proxiedManifest,
-      });
     }
   );
 

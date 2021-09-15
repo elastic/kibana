@@ -47,6 +47,7 @@ import type { UsageCollectionStart } from '../../usage_collection/public';
 
 import { setVisEditorsRegistry, setUISettings, setUsageCollector } from './services';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
+import { VisualizeLocatorDefinition } from '../common/locator';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -92,7 +93,7 @@ export class VisualizePlugin
 
   public setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
-    { home, urlForwarding, data }: VisualizePluginSetupDependencies
+    { home, urlForwarding, data, share }: VisualizePluginSetupDependencies
   ) {
     const {
       appMounted,
@@ -209,6 +210,7 @@ export class VisualizePlugin
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
           presentationUtil: pluginsStart.presentationUtil,
           usageCollection: pluginsStart.usageCollection,
+          getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
         };
 
         params.element.classList.add('visAppWrapper');
@@ -239,6 +241,10 @@ export class VisualizePlugin
         showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
+    }
+
+    if (share) {
+      share.url.locators.create(new VisualizeLocatorDefinition());
     }
 
     return {

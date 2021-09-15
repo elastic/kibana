@@ -55,7 +55,7 @@ jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  config_file = ".babelrc.browser"
+  web = True,
 )
 
 ts_config(

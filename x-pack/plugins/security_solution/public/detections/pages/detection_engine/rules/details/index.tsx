@@ -180,6 +180,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const updatedAt = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
   );
+  const isAlertsLoading = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).isLoading
+  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -284,6 +287,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       setRuleDetailTab(RuleDetailTabs.alerts);
     }
   }, [hasIndexRead]);
+
+  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
 
   const title = useMemo(
     () => (
@@ -695,7 +700,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           enabled={isExistingRule && (rule?.enabled ?? false)}
                           onChange={handleOnChangeEnabledRule}
                         />
-                        <EuiFlexItem>{i18n.ACTIVATED_RULE}</EuiFlexItem>
+                        <EuiFlexItem>{i18n.ACTIVATE_RULE}</EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiToolTip>
                   </EuiFlexItem>
@@ -772,10 +777,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    {timelinesUi.getLastUpdated({
-                      updatedAt: updatedAt || 0,
-                      showUpdating: loading,
-                    })}
+                    {updatedAt &&
+                      timelinesUi.getLastUpdated({
+                        updatedAt: updatedAt || Date.now(),
+                        showUpdating,
+                      })}
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="l" />

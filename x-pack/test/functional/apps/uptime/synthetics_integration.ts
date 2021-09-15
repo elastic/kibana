@@ -72,6 +72,58 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ],
         ...config,
       },
+      ...(monitorType === 'browser'
+        ? [
+            {
+              data_stream: {
+                dataset: 'browser.network',
+                type: 'synthetics',
+              },
+              id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[1]?.id}`,
+              processors: [
+                {
+                  add_observer_metadata: {
+                    geo: {
+                      name: 'Fleet managed',
+                    },
+                  },
+                },
+                {
+                  add_fields: {
+                    fields: {
+                      'monitor.fleet_managed': true,
+                    },
+                    target: '',
+                  },
+                },
+              ],
+            },
+            {
+              data_stream: {
+                dataset: 'browser.screenshot',
+                type: 'synthetics',
+              },
+              id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[2]?.id}`,
+              processors: [
+                {
+                  add_observer_metadata: {
+                    geo: {
+                      name: 'Fleet managed',
+                    },
+                  },
+                },
+                {
+                  add_fields: {
+                    fields: {
+                      'monitor.fleet_managed': true,
+                    },
+                    target: '',
+                  },
+                },
+              ],
+            },
+          ]
+        : []),
     ],
     type: `synthetics/${monitorType}`,
     use_output: 'default',
@@ -93,6 +145,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     const generateTCPorICMPConfig = (host: string) => ({
       ...basicConfig,
       host,
+    });
+
+    const generateBrowserConfig = (config: Record<string, string>): Record<string, string> => ({
+      ...basicConfig,
+      ...config,
     });
 
     describe('displays custom UI', () => {
@@ -435,6 +492,137 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               hosts: config.host,
               'service.name': config.apmServiceName,
               tags: [config.tags],
+            },
+          })
+        );
+      });
+
+      it('allows saving browser monitor', async () => {
+        // This test ensures that updates made to the Synthetics Policy are carried all the way through
+        // to the generated Agent Policy that is dispatch down to the Elastic Agent.
+        const config = generateBrowserConfig({
+          zipUrl: 'http://test.zip',
+          params: JSON.stringify({ url: 'http://localhost:8080' }),
+          folder: 'folder',
+          username: 'username',
+          password: 'password',
+        });
+
+        await uptimePage.syntheticsIntegration.createBasicBrowserMonitorDetails(config);
+        await uptimePage.syntheticsIntegration.confirmAndSave();
+
+        await uptimePage.syntheticsIntegration.isPolicyCreatedSuccessfully();
+
+        const [agentPolicy] = await uptimeService.syntheticsPackage.getAgentPolicyList();
+        const agentPolicyId = agentPolicy.id;
+        const agentFullPolicy = await uptimeService.syntheticsPackage.getFullAgentPolicy(
+          agentPolicyId
+        );
+
+        expect(getSyntheticsPolicy(agentFullPolicy)).to.eql(
+          generatePolicy({
+            agentFullPolicy,
+            version,
+            name: monitorName,
+            monitorType: 'browser',
+            config: {
+              screenshots: 'on',
+              schedule: '@every 3m',
+              timeout: '16s',
+              tags: [config.tags],
+              'service.name': config.apmServiceName,
+              'source.zip_url.url': config.zipUrl,
+              'source.zip_url.folder': config.folder,
+              'source.zip_url.username': config.username,
+              'source.zip_url.password': config.password,
+              params: JSON.parse(config.params),
+            },
+          })
+        );
+      });
+
+      it('allows saving browser monitor with inline script', async () => {
+        // This test ensures that updates made to the Synthetics Policy are carried all the way through
+        // to the generated Agent Policy that is dispatch down to the Elastic Agent.
+        const config = generateBrowserConfig({
+          inlineScript:
+            'step("load homepage", async () => { await page.goto(\'https://www.elastic.co\'); });',
+        });
+
+        await uptimePage.syntheticsIntegration.createBasicBrowserMonitorDetails(config, true);
+        await uptimePage.syntheticsIntegration.confirmAndSave();
+
+        await uptimePage.syntheticsIntegration.isPolicyCreatedSuccessfully();
+
+        const [agentPolicy] = await uptimeService.syntheticsPackage.getAgentPolicyList();
+        const agentPolicyId = agentPolicy.id;
+        const agentFullPolicy = await uptimeService.syntheticsPackage.getFullAgentPolicy(
+          agentPolicyId
+        );
+
+        expect(getSyntheticsPolicy(agentFullPolicy)).to.eql(
+          generatePolicy({
+            agentFullPolicy,
+            version,
+            name: monitorName,
+            monitorType: 'browser',
+            config: {
+              screenshots: 'on',
+              schedule: '@every 3m',
+              timeout: '16s',
+              tags: [config.tags],
+              'service.name': config.apmServiceName,
+              'source.inline.script': config.inlineScript,
+            },
+          })
+        );
+      });
+
+      it('allows saving browser monitor advanced options', async () => {
+        // This test ensures that updates made to the Synthetics Policy are carried all the way through
+        // to the generated Agent Policy that is dispatch down to the Elastic Agent.
+        const config = generateBrowserConfig({
+          zipUrl: 'http://test.zip',
+          params: JSON.stringify({ url: 'http://localhost:8080' }),
+          folder: 'folder',
+          username: 'username',
+          password: 'password',
+        });
+        const advancedConfig = {
+          screenshots: 'off',
+          syntheticsArgs: '-ssBlocks',
+        };
+
+        await uptimePage.syntheticsIntegration.createBasicBrowserMonitorDetails(config);
+        await uptimePage.syntheticsIntegration.configureBrowserAdvancedOptions(advancedConfig);
+        await uptimePage.syntheticsIntegration.confirmAndSave();
+
+        await uptimePage.syntheticsIntegration.isPolicyCreatedSuccessfully();
+
+        const [agentPolicy] = await uptimeService.syntheticsPackage.getAgentPolicyList();
+        const agentPolicyId = agentPolicy.id;
+        const agentFullPolicy = await uptimeService.syntheticsPackage.getFullAgentPolicy(
+          agentPolicyId
+        );
+
+        expect(getSyntheticsPolicy(agentFullPolicy)).to.eql(
+          generatePolicy({
+            agentFullPolicy,
+            version,
+            name: monitorName,
+            monitorType: 'browser',
+            config: {
+              screenshots: advancedConfig.screenshots,
+              schedule: '@every 3m',
+              timeout: '16s',
+              tags: [config.tags],
+              'service.name': config.apmServiceName,
+              'source.zip_url.url': config.zipUrl,
+              'source.zip_url.folder': config.folder,
+              'source.zip_url.username': config.username,
+              'source.zip_url.password': config.password,
+              params: JSON.parse(config.params),
+              synthetics_args: [advancedConfig.syntheticsArgs],
             },
           })
         );
