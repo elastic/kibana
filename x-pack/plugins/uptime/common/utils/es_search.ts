@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { timelinesMigrations } from './timelines';
-export { notesMigrations } from './notes';
+import { estypes } from '@elastic/elasticsearch';
+
+export function createEsQuery<T extends estypes.SearchRequest>(params: T): T {
+  return params;
+}

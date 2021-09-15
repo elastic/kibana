@@ -103,6 +103,7 @@ export async function renderApp(
         originatingApp={originatingApp}
         spacesApi={spacesApi}
         http={http}
+        key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
       />
     );
   }
