@@ -32,6 +32,7 @@ export const {
   submitSuggestion,
   switchDatasource,
   setToggleFullscreen,
+  removeLayers,
 } = lensActions;
 
 export const makeConfigureStore = (

@@ -71,6 +71,7 @@ export const getPreloadedState = ({
 export const setState = createAction<Partial<LensAppState>>('setState');
 export const onActiveDataChange = createAction<TableInspectorAdapter>('onActiveDataChange');
 export const setSaveable = createAction<boolean>('setSaveable');
+export const removeLayers = createAction<string[]>('removeLayers');
 export const updateState = createAction<{
   subType: string;
   updater: (prevState: LensAppState) => LensAppState;
@@ -122,6 +123,7 @@ export const lensActions = {
   updateState,
   updateDatasourceState,
   updateVisualizationState,
+  removeLayers,
   updateLayer,
   switchVisualization,
   selectSuggestion,
@@ -357,6 +359,64 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           },
         },
         activeDatasourceId: payload.newDatasourceId,
+      };
+    },
+    [removeLayers.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: string[];
+      }
+    ) => {
+      if (!state.visualization.activeId) {
+        throw new Error('Invariant: visualization state got updated without active visualization');
+      }
+
+      const activeVisualization =
+        state.visualization.activeId && visualizationMap[state.visualization.activeId];
+
+      let newVisualization = state.visualization;
+      if (activeVisualization && activeVisualization.removeLayer && state.visualization.state) {
+        const updater = payload.reduce(
+          (acc, layerId) =>
+            activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
+          state.visualization.state
+        );
+
+        newVisualization = {
+          ...state.visualization,
+          state:
+            typeof updater === 'function' ? updater(current(state.visualization.state)) : updater,
+        };
+      }
+      let newDatasourceStates = state.datasourceStates;
+      payload.forEach((layerId) => {
+        const [layerDatasourceId] =
+          Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
+            return (
+              state.datasourceStates[datasourceId] &&
+              datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
+            );
+          }) ?? [];
+        if (layerDatasourceId) {
+          newDatasourceStates = {
+            ...newDatasourceStates,
+            [layerDatasourceId]: {
+              ...newDatasourceStates[layerDatasourceId],
+              state: datasourceMap[layerDatasourceId].removeLayer(
+                current(state).datasourceStates[layerDatasourceId].state,
+                layerId
+              ),
+            },
+          };
+        }
+      });
+
+      return {
+        ...state,
+        visualization: newVisualization,
+        // datasourceStates: newDatasourceStates,
       };
     },
     // [navigateAway]: (state) => state,

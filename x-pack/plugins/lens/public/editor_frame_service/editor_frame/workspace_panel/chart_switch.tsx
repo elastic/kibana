@@ -32,7 +32,7 @@ import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   updateLayer,
-  updateVisualizationState,
+  removeLayers,
   useLensDispatch,
   useLensSelector,
   VisualizationState,
@@ -120,41 +120,6 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const visualization = useLensSelector(selectVisualization);
   const datasourceStates = useLensSelector(selectDatasourceStates);
 
-  function removeLayers(layerIds: string[]) {
-    const activeVisualization =
-      visualization.activeId && props.visualizationMap[visualization.activeId];
-    if (activeVisualization && activeVisualization.removeLayer && visualization.state) {
-      dispatchLens(
-        updateVisualizationState({
-          visualizationId: activeVisualization.id,
-          updater: layerIds.reduce(
-            (acc, layerId) =>
-              activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
-            visualization.state
-          ),
-        })
-      );
-    }
-    layerIds.forEach((layerId) => {
-      const [layerDatasourceId] =
-        Object.entries(props.datasourceMap).find(([datasourceId, datasource]) => {
-          return (
-            datasourceStates[datasourceId] &&
-            datasource.getLayers(datasourceStates[datasourceId].state).includes(layerId)
-          );
-        }) ?? [];
-      if (layerDatasourceId) {
-        dispatchLens(
-          updateLayer({
-            layerId,
-            datasourceId: layerDatasourceId,
-            updater: props.datasourceMap[layerDatasourceId].removeLayer,
-          })
-        );
-      }
-    });
-  }
-
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
 
@@ -173,7 +138,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       (!selection.datasourceId && !selection.sameDatasources) ||
       selection.dataLoss === 'everything'
     ) {
-      removeLayers(Object.keys(props.framePublicAPI.datasourceLayers));
+      dispatchLens(removeLayers(Object.keys(props.framePublicAPI.datasourceLayers)));
     }
   };
 
