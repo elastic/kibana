@@ -214,13 +214,13 @@ export function useDiscoverState({
   }, [config, data, savedSearch, reset, stateContainer]);
 
   /**
-   * Initial data fetching, also triggered when index pattern changes
+   * Trigger data fetching on indexPattern or savedSearch changes
    */
   useEffect(() => {
-    if (initialFetchStatus === FetchStatus.LOADING) {
+    if (indexPattern) {
       refetch$.next();
     }
-  }, [initialFetchStatus, refetch$, savedSearchId]);
+  }, [initialFetchStatus, refetch$, indexPattern, savedSearchId]);
 
   return {
     data$,
