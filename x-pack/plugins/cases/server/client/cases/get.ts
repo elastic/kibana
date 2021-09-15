@@ -252,23 +252,23 @@ export const resolve = async (
       );
     }
 
-    const theResolvedCase: SavedObjectsResolveResponse<CaseAttributes> = await caseService.getResolveCase(
-      {
-        unsecuredSavedObjectsClient,
-        id,
-      }
-    );
+    const {
+      saved_object: savedObject,
+      ...resolveData
+    }: SavedObjectsResolveResponse<CaseAttributes> = await caseService.getResolveCase({
+      unsecuredSavedObjectsClient,
+      id,
+    });
 
-    if (theResolvedCase.outcome !== 'exactMatch') {
-      // If it is not an exact match the UI will ignore the `saved_object` data and redirect to the `alias_target_id`.
-      // We can return and omit the rest of the parameters since they will be requested again using the exactMatch ID.
-      return CaseResolveResponseRt.encode({
-        ...theResolvedCase,
-        saved_object: flattenCaseSavedObject({
-          savedObject: theResolvedCase.saved_object,
-        }),
-      });
-    }
+    await authorization.ensureAuthorized({
+      operation: Operations.getCase,
+      entities: [
+        {
+          id: savedObject.id,
+          owner: savedObject.attributes.owner,
+        },
+      ],
+    });
 
     let subCaseIds: string[] = [];
     if (ENABLE_CASE_CONNECTOR) {
@@ -279,21 +279,11 @@ export const resolve = async (
       subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
     }
 
-    await authorization.ensureAuthorized({
-      operation: Operations.getCase,
-      entities: [
-        {
-          id,
-          owner: theResolvedCase.saved_object.attributes.owner,
-        },
-      ],
-    });
-
     if (!includeComments) {
       return CaseResolveResponseRt.encode({
-        ...theResolvedCase,
-        saved_object: flattenCaseSavedObject({
-          savedObject: theResolvedCase.saved_object,
+        ...resolveData,
+        case: flattenCaseSavedObject({
+          savedObject,
           subCaseIds,
         }),
       });
@@ -310,9 +300,9 @@ export const resolve = async (
     });
 
     return CaseResolveResponseRt.encode({
-      ...theResolvedCase,
-      saved_object: flattenCaseSavedObject({
-        savedObject: theResolvedCase.saved_object,
+      ...resolveData,
+      case: flattenCaseSavedObject({
+        savedObject,
         subCaseIds,
         comments: theComments.saved_objects,
         totalComment: theComments.total,

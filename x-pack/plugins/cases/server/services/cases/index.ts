@@ -64,7 +64,6 @@ import {
   transformUpdateResponsesToExternalModels,
   transformBulkResponseToExternalModel,
   transformFindResponseToExternalModel,
-  transformResolveSavedObjectToExternalModel,
 } from './transform';
 import { ESCaseAttributes } from './types';
 
@@ -746,14 +745,17 @@ export class CasesService {
     id: caseId,
   }: GetCaseArgs): Promise<SavedObjectsResolveResponse<CaseAttributes>> {
     try {
-      this.log.debug(`Attempting to GET resolve case ${caseId}`);
-      const resolveCaseSavedObject = await unsecuredSavedObjectsClient.resolve<ESCaseAttributes>(
+      this.log.debug(`Attempting to resolve case ${caseId}`);
+      const resolveCaseResult = await unsecuredSavedObjectsClient.resolve<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         caseId
       );
-      return transformResolveSavedObjectToExternalModel(resolveCaseSavedObject);
+      return {
+        ...resolveCaseResult,
+        saved_object: transformSavedObjectToExternalModel(resolveCaseResult.saved_object),
+      };
     } catch (error) {
-      this.log.error(`Error on GET resolve case ${caseId}: ${error}`);
+      this.log.error(`Error on resolve case ${caseId}: ${error}`);
       throw error;
     }
   }
