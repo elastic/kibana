@@ -6,7 +6,7 @@
  */
 
 import './xy_config_panel.scss';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiIcon, EuiRange } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
@@ -195,7 +195,6 @@ export const ThresholdPanel = (
         <LineThicknessSlider
           value={currentYConfig?.lineWidth || 1}
           onChange={(value) => {
-            // TODO: fix number validation
             setYConfig({ lineWidth: value });
           }}
         />
@@ -263,6 +262,16 @@ export const ThresholdPanel = (
   );
 };
 
+const minRange = 1;
+const maxRange = 10;
+
+function getSafeValue(value: number | '', prevValue: number, min: number, max: number) {
+  if (value === '') {
+    return prevValue;
+  }
+  return Math.max(minRange, Math.min(value, maxRange));
+}
+
 const LineThicknessSlider = ({
   value,
   onChange,
@@ -270,19 +279,35 @@ const LineThicknessSlider = ({
   value: number;
   onChange: (value: number) => void;
 }) => {
-  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
+  const onChangeWrapped = useCallback(
+    (newValue) => {
+      if (Number.isInteger(newValue)) {
+        onChange(getSafeValue(newValue, newValue, minRange, maxRange));
+      }
+    },
+    [onChange]
+  );
+  const { inputValue, handleInputChange } = useDebouncedValue<number | ''>(
+    { value, onChange: onChangeWrapped },
+    { allowFalsyValue: true }
+  );
+
   return (
     <EuiRange
       fullWidth
       data-test-subj="lnsXY_lineThickness"
       value={inputValue}
       showInput
-      min={1}
-      max={10}
+      min={minRange}
+      max={maxRange}
       step={1}
       compressed
       onChange={(e) => {
-        handleInputChange(Number(e.currentTarget.value));
+        const newValue = e.currentTarget.value;
+        handleInputChange(newValue === '' ? '' : Number(newValue));
+      }}
+      onBlur={() => {
+        handleInputChange(getSafeValue(inputValue, value, minRange, maxRange));
       }}
     />
   );
