@@ -115,6 +115,7 @@ export const getTopNavLinks = ({
         state.appStateContainer.getState(),
         services.uiSettings
       );
+
       services.share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: false,
