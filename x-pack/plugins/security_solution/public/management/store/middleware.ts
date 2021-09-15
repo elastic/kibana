@@ -54,7 +54,7 @@ export const managementMiddlewareFactory: SecuritySubPluginMiddlewareFactory = (
     ),
     substateMiddlewareFactory(
       createSubStateSelector(MANAGEMENT_STORE_HOST_ISOLATION_EXCEPTIONS_NAMESPACE),
-      hostIsolationExceptionsMiddlewareFactory(coreStart, depsStart)
+      hostIsolationExceptionsMiddlewareFactory(coreStart)
     ),
   ];
 };

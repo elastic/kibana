@@ -8,9 +8,10 @@
 import { CoreStart, HttpStart } from 'kibana/public';
 import { matchPath } from 'react-router-dom';
 import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
-import { ImmutableMiddleware, ImmutableMiddlewareFactory } from '../../../../common/store';
+import { ImmutableMiddleware, ImmutableMiddlewareAPI } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../common/constants';
+import { getHostIsolationExceptionsList } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
 
 export function hostIsolationExceptionsMiddlewareFactory(coreStart: CoreStart) {
@@ -24,15 +25,23 @@ export const createHostIsolationExceptionsPageMiddleware = (
     next(action);
 
     if (action.type === 'userChangedUrl' && isHostIsolationExceptionsPage(action.payload)) {
-      // todo LOAD the list
-      console.log('welcome to the host list exception page');
-      loadHostIsolationExceptionsList(coreStart.http);
+      loadHostIsolationExceptionsList(store, coreStart.http);
     }
   };
 };
 
-function loadHostIsolationExceptionsList(http: HttpStart) {
-  console.log('load that stuff', http);
+async function loadHostIsolationExceptionsList(
+  store: ImmutableMiddlewareAPI<HostIsolationExceptionsPageState, AppAction>,
+  http: HttpStart
+) {
+  const { dispatch } = store;
+  const entries = await getHostIsolationExceptionsList(http);
+  dispatch({
+    type: 'hostIsolationExceptionsPageDataChanged',
+    payload: entries,
+  });
+  console.log('the data');
+  console.log(entries);
 }
 
 function isHostIsolationExceptionsPage(location: Immutable<AppLocation>) {

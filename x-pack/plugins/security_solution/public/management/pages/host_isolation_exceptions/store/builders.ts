@@ -10,7 +10,7 @@ import { createUninitialisedResourceState } from '../../../state';
 import { HostIsolationExceptionsPageState } from '../types';
 
 export const initialHostIsolationExceptionsPageState = (): HostIsolationExceptionsPageState => ({
-  entries: [],
+  entries: undefined,
   // location: {
   // page_index: MANAGEMENT_DEFAULT_PAGE,
   // page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
