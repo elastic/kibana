@@ -7,11 +7,15 @@
 
 import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { getNoDataConfig } from './no_data_config';
+
+// Paths that must skip the no data screen
+const bypassNoDataScreenPaths = ['/settings'];
 
 /*
  * This template contains:
@@ -32,6 +36,8 @@ export function ApmMainTemplate({
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
 } & EuiPageTemplateProps) {
+  const location = useLocation();
+
   const { services } = useKibana<ApmPluginStartDeps>();
   const { http, docLinks } = services;
   const basePath = http?.basePath.get();
@@ -49,9 +55,13 @@ export function ApmMainTemplate({
     hasData: data?.hasData,
   });
 
+  const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
+    location.pathname.includes(path)
+  );
+
   return (
     <ObservabilityPageTemplate
-      noDataConfig={noDataConfig}
+      noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
       pageHeader={{
         pageTitle,
         rightSideItems: [<ApmEnvironmentFilter />],

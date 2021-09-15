@@ -31,11 +31,11 @@ export class ColorFormat extends FieldFormat {
     };
   }
 
-  findColorRuleForVal(val: any) {
+  findColorRuleForVal(val: string | number) {
     switch (this.param('fieldType')) {
       case 'string':
         return findLast(this.param('colors'), (colorParam: typeof DEFAULT_CONVERTER_COLOR) => {
-          return new RegExp(colorParam.regex).test(val);
+          return new RegExp(colorParam.regex).test(val as string);
         });
 
       case 'number':
@@ -50,7 +50,7 @@ export class ColorFormat extends FieldFormat {
     }
   }
 
-  htmlConvert: HtmlContextTypeConvert = (val) => {
+  htmlConvert: HtmlContextTypeConvert = (val: string | number) => {
     const color = this.findColorRuleForVal(val) as typeof DEFAULT_CONVERTER_COLOR;
 
     const displayVal = escape(asPrettyString(val));
