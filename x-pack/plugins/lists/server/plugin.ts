@@ -38,7 +38,7 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
     this.config = this.initializerContext.config.get<ConfigType>();
   }
 
-  public setup(core: CoreSetup): Promise<ListPluginSetup> {
+  public setup(core: CoreSetup): ListPluginSetup {
     const { config } = this;
 
     initSavedObjects(core.savedObjects);
@@ -68,7 +68,7 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
     };
   }
 
-  public start(core: CoreStart, plugins: PluginsStart): void {
+  public start(core: CoreStart, plugins: PluginsStart): ListsPluginStart {
     this.logger.debug('Starting plugin');
     this.security = plugins.security;
     this.spaces = plugins.spaces?.spacesService;
