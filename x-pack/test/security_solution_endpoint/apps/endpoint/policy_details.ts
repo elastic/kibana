@@ -12,6 +12,7 @@ import {
   deleteMetadataStream,
   deleteAllDocsFromMetadataCurrentIndex,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -28,13 +29,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
 
   describe('When on the Endpoint Policy Details Page', function () {
+    let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
-      await endpointTestResources.loadEndpointData();
+      const endpointPackage = await policyTestResources.getEndpointPackage();
+      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
+      indexedData = await endpointTestResources.loadEndpointData();
       await browser.refresh();
     });
     after(async () => {
-      await deleteMetadataStream(getService);
-      await deleteAllDocsFromMetadataCurrentIndex(getService);
+      await endpointTestResources.unloadEndpointData(indexedData);
     });
     describe('with an invalid policy id', () => {
       it('should display an error', async () => {

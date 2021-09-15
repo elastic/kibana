@@ -17,16 +17,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
+  const policyTestResources = getService('policyTestResources');
 
   describe('When on the Trusted Apps list', function () {
+    let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
-      await endpointTestResources.loadEndpointData();
+      const endpointPackage = await policyTestResources.getEndpointPackage();
+      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
+      indexedData = await endpointTestResources.loadEndpointData();
       await browser.refresh();
       await pageObjects.trustedApps.navigateToTrustedAppsList();
     });
     after(async () => {
-      await deleteMetadataStream(getService);
-      await deleteAllDocsFromMetadataCurrentIndex(getService);
+      await endpointTestResources.unloadEndpointData(indexedData);
     });
 
     it('should show page title', async () => {
