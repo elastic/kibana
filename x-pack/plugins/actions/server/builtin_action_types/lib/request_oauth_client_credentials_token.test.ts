@@ -96,7 +96,7 @@ describe('requestOAuthClientCredentialsToken', () => {
 
   test('throw the exception and log the proper error if token was not get successfuly', async () => {
     const configurationUtilities = actionsConfigMock.create();
-    axiosInstanceMock.mockRejectedValueOnce({
+    axiosInstanceMock.mockReturnValueOnce({
       status: 400,
       data: {
         error: 'invalid_scope',
@@ -105,8 +105,8 @@ describe('requestOAuthClientCredentialsToken', () => {
       },
     });
 
-    expect(
-      await requestOAuthClientCredentialsToken(
+    await expect(
+      requestOAuthClientCredentialsToken(
         'https://test',
         mockLogger,
         {
@@ -116,12 +116,14 @@ describe('requestOAuthClientCredentialsToken', () => {
         },
         configurationUtilities
       )
-    ).toThrowErrorMatchingInlineSnapshot(`
-      error: 'invalid_scope',
-      error_description:
-        "AADSTS70011: The provided value for the input parameter 'scope' is not valid.",
-    }`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"{\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter \'scope\' is not valid.\\"}"'
+    );
+
     expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "error thrown getting the access token from https://test for clientID: 123456: [object Object]",
+      ]
     `);
   });
 });

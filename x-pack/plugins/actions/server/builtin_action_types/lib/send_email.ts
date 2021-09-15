@@ -97,7 +97,12 @@ async function sendEmailWithExchange(
   };
   try {
     return await sendEmailGraphApi(
-      { options, headers, messageHTML, graphApiUrl },
+      {
+        options,
+        headers,
+        messageHTML,
+        graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
+      },
       logger,
       configurationUtilities
     );

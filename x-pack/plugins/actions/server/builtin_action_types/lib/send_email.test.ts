@@ -127,6 +127,17 @@ describe('send_email module', () => {
           "ensureHostnameAllowed": [MockFunction],
           "ensureUriAllowed": [MockFunction],
           "getCustomHostSettings": [MockFunction],
+          "getMicrosoftGraphApiUrl": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
           "getProxySettings": [MockFunction],
           "getResponseSettings": [MockFunction],
           "getSSLSettings": [MockFunction],
@@ -140,6 +151,7 @@ describe('send_email module', () => {
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "graphApiUrl": undefined,
           "headers": Object {
             "Authorization": "undefined undefined",
             "Content-Type": "application/json",
@@ -152,6 +164,17 @@ describe('send_email module', () => {
               "ensureHostnameAllowed": [MockFunction],
               "ensureUriAllowed": [MockFunction],
               "getCustomHostSettings": [MockFunction],
+              "getMicrosoftGraphApiUrl": [MockFunction] {
+                "calls": Array [
+                  Array [],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
               "getProxySettings": [MockFunction],
               "getResponseSettings": [MockFunction],
               "getSSLSettings": [MockFunction],
@@ -200,6 +223,17 @@ describe('send_email module', () => {
           "ensureHostnameAllowed": [MockFunction],
           "ensureUriAllowed": [MockFunction],
           "getCustomHostSettings": [MockFunction],
+          "getMicrosoftGraphApiUrl": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
           "getProxySettings": [MockFunction],
           "getResponseSettings": [MockFunction],
           "getSSLSettings": [MockFunction],
