@@ -93,7 +93,6 @@ export interface State {
   savedQuery?: SavedQuery;
   isRefreshPaused: boolean;
   refreshInterval: number;
-  savedObjectId?: string;
 }
 
 export class MapApp extends React.Component<Props, State> {
@@ -115,7 +114,9 @@ export class MapApp extends React.Component<Props, State> {
     };
   }
 
-  _openMapOperations() {
+  componentDidMount() {
+    this._isMounted = true;
+
     this._autoRefreshSubscription = getTimeFilter()
       .getAutoRefreshFetch$()
       .pipe(
@@ -143,33 +144,20 @@ export class MapApp extends React.Component<Props, State> {
     this._initMap();
 
     this.props.onAppLeave((actions) => {
-      if (this.props.savedMap.getMapInitialized() && this.props.savedMap.hasUnsavedChanges()) {
+      if (this.props.savedMap.hasUnsavedChanges()) {
         return actions.confirm(unsavedChangesWarning, unsavedChangesTitle);
       }
       return actions.default() as AppLeaveAction;
     });
   }
 
-  static getDerivedStateFromProps(props: Props, state: State) {
-    if (state.savedObjectId !== props.savedMap.getSavedObjectId()) {
-      return { initialized: false };
-    }
-    return null;
-  }
-
-  componentDidMount() {
-    this._isMounted = true;
-    this._openMapOperations();
-  }
-
-  componentDidUpdate(prevProps: Props) {
+  componentDidUpdate() {
     this._updateIndexPatterns();
-    if (prevProps.savedMap.getSavedObjectId() !== this.props.savedMap.getSavedObjectId()) {
-      this._openMapOperations();
-    }
   }
 
-  _closeMapOperations() {
+  componentWillUnmount() {
+    this._isMounted = false;
+
     if (this._autoRefreshSubscription) {
       this._autoRefreshSubscription.unsubscribe();
     }
@@ -186,11 +174,6 @@ export class MapApp extends React.Component<Props, State> {
     this.props.onAppLeave((actions) => {
       return actions.default();
     });
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-    this._closeMapOperations();
   }
 
   _updateFromGlobalState = ({
@@ -364,7 +347,6 @@ export class MapApp extends React.Component<Props, State> {
       return;
     }
 
-    this.setState({ savedObjectId: this.props.savedMap.getSavedObjectId() });
     this.props.savedMap.setBreadcrumbs();
     getCoreChrome().docTitle.change(this.props.savedMap.getTitle());
     const savedObjectId = this.props.savedMap.getSavedObjectId();
