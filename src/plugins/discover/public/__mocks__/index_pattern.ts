@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPatternFieldList } from '../../../data/common/index_patterns/fields';
+import { IIndexPatternFieldList } from '../../../data/common';
 import { IndexPattern } from '../../../data/common';
 import { indexPatterns } from '../../../data/public';
 

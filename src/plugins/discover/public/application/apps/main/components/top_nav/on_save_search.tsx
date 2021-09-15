@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectSaveModal, showSaveModal } from '../../../../../../../saved_objects/public';
 import { SavedSearch } from '../../../../../saved_searches';
-import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../data/common';
 import { DiscoverServices } from '../../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../helpers/breadcrumbs';
