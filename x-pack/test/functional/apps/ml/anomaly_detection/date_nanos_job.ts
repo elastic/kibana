@@ -114,7 +114,8 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('job on data set with date_nanos time field', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/112194
+  describe.skip('job on data set with date_nanos time field', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/event_rate_nanos');
