@@ -21,6 +21,7 @@ import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ILicense } from '../../../licensing/public';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID, JOB_STATUSES } from '../../common/constants';
+import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
 import { useIlmPolicyStatus } from '../lib/ilm_policy_status_context';
@@ -39,7 +40,9 @@ import {
   ReportInfoButton,
   ReportStatusIndicator,
   ViewInAppLink,
+  SeeReportInfoToolTip,
 } from './components';
+import { guessAppIconTypeFromObjectType, jobHasIssues } from './utils';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
@@ -269,15 +272,13 @@ class ReportListingUi extends Component<Props, State> {
    * Widths like this are not the best, but the auto-layout does not play well with text in links. We can update
    * this with something that works better on all screen sizes. This works for desktop, mobile fallback is provided on a
    * per column basis.
-   *
-   * Should total 100%.
    */
   private readonly tableColumnWidths = {
-    title: '40%',
-    type: '10%',
-    status: '15%',
-    createdAt: '15%',
-    createdBy: '10%',
+    type: '5%',
+    title: '30%',
+    status: '20%',
+    contentType: '10%',
+    createdAt: '20%',
     actions: '10%',
   };
 
@@ -285,37 +286,45 @@ class ReportListingUi extends Component<Props, State> {
     const { tableColumnWidths } = this;
     const tableColumns: TableColumn[] = [
       {
+        field: 'type',
+        width: tableColumnWidths.type,
+        name: i18n.translate('xpack.reporting.listing.tableColumns.typeTitle', {
+          defaultMessage: 'Type',
+        }),
+        render: (_type: string, job) => {
+          return (
+            <EuiIconTip
+              type={guessAppIconTypeFromObjectType(job.objectType)}
+              size="l"
+              data-test-subj="reportJobType"
+              content={job.objectType}
+            />
+          );
+        },
+        mobileOptions: {
+          show: true,
+          render: (job) => {
+            return <div data-test-subj="reportJobType">{job.objectType}</div>;
+          },
+        },
+      },
+      {
         field: 'title',
         name: i18n.translate('xpack.reporting.listing.tableColumns.reportTitle', {
           defaultMessage: 'Title',
         }),
         width: tableColumnWidths.title,
         render: (objectTitle: string, job) => {
-          const deprecationMessage = job.getDeprecatedMessage();
           return (
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexStart"
-              gutterSize="s"
-              wrap={false}
-              responsive={false}
-              data-test-subj="reportingListItemObjectTitle"
-            >
-              {Boolean(deprecationMessage) && (
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip color="warning" type="alert" content={deprecationMessage} />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <ReportDownloadLink
-                  disabled={
-                    job.status !== JOB_STATUSES.COMPLETED && job.status !== JOB_STATUSES.WARNINGS
-                  }
-                  objectTitle={objectTitle}
-                  job={job}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <div data-test-subj="reportingListItemObjectTitle">
+              <ReportDownloadLink
+                disabled={
+                  job.status !== JOB_STATUSES.COMPLETED && job.status !== JOB_STATUSES.WARNINGS
+                }
+                objectTitle={objectTitle}
+                job={job}
+              />
+            </div>
           );
         },
         mobileOptions: ({
@@ -329,26 +338,41 @@ class ReportListingUi extends Component<Props, State> {
         name: i18n.translate('xpack.reporting.listing.tableColumns.statusTitle', {
           defaultMessage: 'Status',
         }),
-        render: (_status: string, job) => (
-          <div data-test-subj="reportJobStatus">
-            <ReportStatusIndicator job={job} />
-          </div>
-        ),
+        render: (_status: string, job) => {
+          const hasIssues = jobHasIssues(job);
+          return (
+            <div data-test-subj="reportJobStatus">
+              <EuiFlexGroup
+                justifyContent="center"
+                alignItems="center"
+                responsive={false}
+                gutterSize="xs"
+              >
+                <EuiFlexItem grow={false}>
+                  <ReportStatusIndicator hasIssues={hasIssues} job={job} />
+                </EuiFlexItem>
+                {hasIssues && (
+                  <EuiFlexItem grow={false}>
+                    <SeeReportInfoToolTip />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </div>
+          );
+        },
         mobileOptions: {
           show: false,
         },
       },
       {
-        field: 'type',
-        width: tableColumnWidths.type,
-        name: i18n.translate('xpack.reporting.listing.tableColumns.typeTitle', {
-          defaultMessage: 'Type',
+        field: 'contentType',
+        width: tableColumnWidths.contentType,
+        name: i18n.translate('xpack.reporting.listing.tableColumns.contentType', {
+          defaultMessage: 'Content type',
         }),
-        render: (_status: string, job) => (
-          <div data-test-subj="reportJobType">{job.objectType}</div>
-        ),
+        render: (_status: string, job) => prettyPrintJobType(job.jobtype),
         mobileOptions: {
-          show: true,
+          show: false,
         },
       },
       {
@@ -359,19 +383,6 @@ class ReportListingUi extends Component<Props, State> {
         }),
         render: (_createdAt: string, job) => (
           <div data-test-subj="reportJobCreatedAt">{job.getCreatedAtDate()}</div>
-        ),
-        mobileOptions: {
-          show: false,
-        },
-      },
-      {
-        field: 'created_by',
-        width: tableColumnWidths.createdBy,
-        name: i18n.translate('xpack.reporting.listing.tableColumns.createdByTitle', {
-          defaultMessage: 'Created by',
-        }),
-        render: (_createdBy: string, job) => (
-          <div data-test-subj="reportJobCreatedAt">{job.getCreatedBy()}</div>
         ),
         mobileOptions: {
           show: false,

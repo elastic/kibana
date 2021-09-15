@@ -22,7 +22,7 @@ interface Props {
 
 const i18nTexts = {
   label: i18n.translate('xpack.reporting.listing.table.viewInAppLinkIconLabel', {
-    defaultMessage: 'Open this report in the Kibana app that requested it.',
+    defaultMessage: 'Open the Kibana App where this report was generated.',
   }),
 };
 

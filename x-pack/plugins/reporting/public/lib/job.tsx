@@ -260,6 +260,10 @@ export class Job {
     }
   }
 
+  getPrettyStatusTimestamp() {
+    return this.formatDate(this.getStatusTimestamp());
+  }
+
   private formatDate(timestamp: string) {
     try {
       return moment(timestamp).format('YYYY-MM-DD @ hh:mm A');

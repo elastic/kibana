@@ -284,21 +284,13 @@ export class ReportInfoButton extends Component<Props, State> {
       });
     }
 
-    let buttonColor: 'primary' | 'danger' | 'warning' = 'primary';
-    if (job.getWarnings() || job.getError()) {
-      buttonColor = 'danger';
-    }
-    if (job.getWarnings()) {
-      buttonColor = 'warning';
-    }
-
     return (
       <>
         <EuiToolTip position="top" content={message}>
           <EuiButtonIcon
             onClick={this.showFlyout}
             iconType="iInCircle"
-            color={buttonColor}
+            color="primary"
             data-test-subj="reportInfoButton"
             aria-label={i18n.translate('xpack.reporting.listing.table.showReportInfoAriaLabel', {
               defaultMessage: 'Show report info',
