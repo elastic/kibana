@@ -2249,7 +2249,7 @@
             "children": [
               {
                 "parentPluginId": "fieldFormats",
-                "id": "def-common.formatId",
+                "id": "def-common.FieldFormatsRegistry.getInstance.$1",
                 "type": "string",
                 "tags": [],
                 "label": "formatId",
@@ -2259,7 +2259,7 @@
               },
               {
                 "parentPluginId": "fieldFormats",
-                "id": "def-common.params",
+                "id": "def-common.FieldFormatsRegistry.getInstance.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -2469,7 +2469,7 @@
             "children": [
               {
                 "parentPluginId": "fieldFormats",
-                "id": "def-common.fieldType",
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstance.$1",
                 "type": "Enum",
                 "tags": [],
                 "label": "fieldType",
@@ -2482,7 +2482,7 @@
               },
               {
                 "parentPluginId": "fieldFormats",
-                "id": "def-common.esTypes",
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstance.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "esTypes",
@@ -2496,7 +2496,7 @@
               },
               {
                 "parentPluginId": "fieldFormats",
-                "id": "def-common.params",
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstance.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -4178,7 +4178,7 @@
         "children": [
           {
             "parentPluginId": "fieldFormats",
-            "id": "def-common.key",
+            "id": "def-common.FieldFormatsGetConfigFn.$1",
             "type": "string",
             "tags": [],
             "label": "key",
@@ -4188,7 +4188,7 @@
           },
           {
             "parentPluginId": "fieldFormats",
-            "id": "def-common.defaultOverride",
+            "id": "def-common.FieldFormatsGetConfigFn.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "defaultOverride",
@@ -4329,7 +4329,7 @@
         "children": [
           {
             "parentPluginId": "fieldFormats",
-            "id": "def-common.mapping",
+            "id": "def-common.FormatFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "mapping",
@@ -4402,8 +4402,6 @@
           },
           ", metaParamsOptions?: Record<string, any>, defaultFieldConverters?: ",
           "FieldFormatInstanceType",
-          "[]) => void; register: (fieldFormats: ",
-          "FieldFormatInstanceType",
           "[]) => void; deserialize: ",
           {
             "pluginId": "fieldFormats",
@@ -4412,7 +4410,9 @@
             "section": "def-common.FormatFactory",
             "text": "FormatFactory"
           },
-          "; getDefaultConfig: (fieldType: ",
+          "; register: (fieldFormats: ",
+          "FieldFormatInstanceType",
+          "[]) => void; getDefaultConfig: (fieldType: ",
           "KBN_FIELD_TYPES",
           ", esTypes?: ",
           "ES_FIELD_TYPES",

@@ -1085,7 +1085,7 @@
             "children": [
               {
                 "parentPluginId": "ml",
-                "id": "def-public.__0",
+                "id": "def-public.UseIndexDataReturnType.renderCellValue.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -1252,7 +1252,7 @@
         "children": [
           {
             "parentPluginId": "ml",
-            "id": "def-public.__0",
+            "id": "def-public.RenderCellValue.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
