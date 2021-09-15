@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import styled from 'styled-components';
+import useDebounce from 'react-use/lib/useDebounce';
 import * as labels from './translations';
 
 const WrapFieldSearch = styled('div')`
@@ -19,9 +20,19 @@ interface Props {
 }
 
 export const CertificateSearch: React.FC<Props> = ({ setSearch }) => {
+  const [debouncedValue, setDebouncedValue] = useState('');
+
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
+    setDebouncedValue(e.target.value);
   };
+
+  useDebounce(
+    () => {
+      setSearch(debouncedValue);
+    },
+    350,
+    [debouncedValue]
+  );
 
   return (
     <WrapFieldSearch>
