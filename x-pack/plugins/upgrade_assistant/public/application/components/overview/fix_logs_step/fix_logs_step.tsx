@@ -17,6 +17,11 @@ import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { loadLogsCheckpoint, saveLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import type { OverviewStepProps } from '../../types';
+import {
+  WithPrivileges,
+  NotAuthorizedSection,
+  MissingPrivileges,
+} from '../../../../shared_imports';
 
 const i18nTexts = {
   identifyStepTitle: i18n.translate('xpack.upgradeAssistant.overview.identifyStepTitle', {
@@ -51,9 +56,15 @@ const i18nTexts = {
 
 interface Props {
   setIsComplete: OverviewStepProps['setIsComplete'];
+  hasPrivileges: boolean;
+  privilegesMissing: MissingPrivileges;
 }
 
-const FixLogsStep: FunctionComponent<Props> = ({ setIsComplete }) => {
+const FixLogsStep: FunctionComponent<Props> = ({
+  setIsComplete,
+  hasPrivileges,
+  privilegesMissing,
+}) => {
   const state = useDeprecationLogging();
   const [checkpoint, setCheckpoint] = useState(loadLogsCheckpoint());
 
@@ -126,6 +137,16 @@ export const getFixLogsStep = ({ isComplete, setIsComplete }: OverviewStepProps)
     status,
     title: i18nTexts.identifyStepTitle,
     'data-test-subj': `fixLogsStep-${status}`,
-    children: <FixLogsStep setIsComplete={setIsComplete} />,
+    children: (
+      <WithPrivileges privileges={`index.all`}>
+        {({ hasPrivileges, privilegesMissing }) => (
+          <FixLogsStep
+            setIsComplete={setIsComplete}
+            hasPrivileges={hasPrivileges}
+            privilegesMissing={privilegesMissing}
+          />
+        )}
+      </WithPrivileges>
+    ),
   };
 };
