@@ -24,7 +24,7 @@ export function GlobalTimeCheckbox({ applyGlobalTime, label, setApplyGlobalTime 
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.maps.filterEditor.applyGlobalTimeHelp', {
-          defaultMessage: 'When enabled, results narrowed by global time filter',
+          defaultMessage: 'When enabled, results narrowed by global time',
         })}
       >
         <EuiSwitch
