@@ -260,12 +260,6 @@ export const resolve = async (
       id,
     });
 
-    if (id === '0df6b4d0-157d-11ec-9157-7b0438e2cdae') {
-      console.log('hack');
-      resolveData.outcome = 'aliasMatch';
-      resolveData.alias_target_id = 'a857cc50-1625-11ec-8dd3-69bd8521097e';
-    }
-
     await authorization.ensureAuthorized({
       operation: Operations.getCase,
       entities: [
