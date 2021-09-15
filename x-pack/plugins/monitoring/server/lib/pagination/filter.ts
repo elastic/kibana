@@ -7,14 +7,19 @@
 
 import { get } from 'lodash';
 
-function defaultFilterFn(value, query) {
+function defaultFilterFn(value: string, query: string) {
   if (value.toLowerCase().includes(query.toLowerCase())) {
     return true;
   }
   return false;
 }
 
-export function filter(data, queryText, fields, filterFn = defaultFilterFn) {
+export function filter<T>(
+  data: T[],
+  queryText: string,
+  fields: string[],
+  filterFn = defaultFilterFn
+): T[] {
   return data.filter((item) => {
     for (const field of fields) {
       if (filterFn(get(item, field, ''), queryText)) {
