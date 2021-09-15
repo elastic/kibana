@@ -744,7 +744,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -1127,7 +1127,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -1510,7 +1510,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -1893,7 +1893,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -2276,7 +2276,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -2659,7 +2659,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -3042,7 +3042,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -3425,7 +3425,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -3808,7 +3808,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -4191,7 +4191,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -4869,7 +4869,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -5252,7 +5252,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -5635,7 +5635,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -6018,7 +6018,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -6401,7 +6401,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -6784,7 +6784,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -7167,7 +7167,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -7550,7 +7550,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -7933,7 +7933,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -8316,7 +8316,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -8951,7 +8951,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -9334,7 +9334,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -9717,7 +9717,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -10100,7 +10100,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -10483,7 +10483,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -10866,7 +10866,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -11249,7 +11249,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -11632,7 +11632,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -12015,7 +12015,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
@@ -12398,7 +12398,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
             <hr
-              class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginXSmall"
+              class="euiHorizontalRule euiHorizontalRule--full"
             />
             <div
               class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
