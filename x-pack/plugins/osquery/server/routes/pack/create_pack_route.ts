@@ -31,9 +31,9 @@ export const createPackRoute = (router: IRouter) => {
         name: savedQuery.name,
       }));
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const {
         attributes,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         references: _,
         ...restSO
       } = await savedObjectsClient.create(

@@ -118,9 +118,9 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
     [dispatch, sort, type]
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const columns = useMemo(
     () => getUsersColumns(flowTarget, usersTableId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [flowTarget, usersTableId]
   );
 
