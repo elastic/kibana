@@ -68,6 +68,11 @@ export const PROJECTS = [
     disableTypeCheck: true,
   }),
 
+  createProject('x-pack/plugins/uptime/e2e/tsconfig.json', {
+    name: 'uptime/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
+
   ...findProjects('packages/*/tsconfig.json'),
   ...findProjects('src/plugins/*/tsconfig.json'),
   ...findProjects('src/plugins/chart_expressions/*/tsconfig.json'),
