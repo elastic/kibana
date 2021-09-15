@@ -5,17 +5,29 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
+// import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import moment from 'moment';
-import { EuiTabs } from '@elastic/eui';
-import { EuiTab } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCard,
+  EuiIcon,
+  EuiCallOut,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiTabs,
+  EuiTab,
+  EuiSpacer,
+} from '@elastic/eui';
+import { useKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { MLJobsAwaitingNodeWarning } from '../../../../../../../../ml/public';
 import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
 import {
@@ -36,6 +48,7 @@ interface Props {
 
 type Tab = 'jobs' | 'anomalies';
 export const FlyoutHome = (props: Props) => {
+  const { http } = useKibana().services;
   const [tab, setTab] = useState<Tab>('jobs');
   const { goToSetup, closeFlyout } = props;
   const {
@@ -75,6 +88,13 @@ export const FlyoutHome = (props: Props) => {
   }, [fetchK8sJobStatus, fetchHostJobStatus, hasInfraMLReadCapabilities]);
 
   const hasJobs = hostJobSummaries.length > 0 || k8sJobSummaries.length > 0;
+  const jobsAwaitingNodeAssignmentCount = useMemo(() => {
+    return [
+      ...hostJobSummaries.filter((j) => j.awaitingNodeAssignment === true),
+      ...k8sJobSummaries.filter((j) => j.awaitingNodeAssignment === true),
+    ].length;
+  }, [hostJobSummaries, k8sJobSummaries]);
+
   const manageJobsLinkProps = useLinkProps({
     app: 'ml',
     pathname: '/jobs',
@@ -123,14 +143,23 @@ export const FlyoutHome = (props: Props) => {
 
         <EuiFlyoutBody
           banner={
-            tab === 'jobs' &&
-            hasJobs && (
-              <JobsEnabledCallout
-                hasHostJobs={hostJobSummaries.length > 0}
-                hasK8sJobs={k8sJobSummaries.length > 0}
-                jobIds={jobIds}
-              />
-            )
+            <>
+              {tab === 'jobs' && hasJobs && (
+                <>
+                  <JobsEnabledCallout
+                    hasHostJobs={hostJobSummaries.length > 0}
+                    hasK8sJobs={k8sJobSummaries.length > 0}
+                    jobIds={jobIds}
+                  />
+                </>
+              )}
+              {jobsAwaitingNodeAssignmentCount > 0 && (
+                <MLJobsAwaitingNodeWarning
+                  jobCount={jobsAwaitingNodeAssignmentCount}
+                  fetch={http!.fetch}
+                />
+              )}
+            </>
           }
         >
           {tab === 'jobs' && (

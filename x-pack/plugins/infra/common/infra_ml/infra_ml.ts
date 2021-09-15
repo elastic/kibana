@@ -12,15 +12,17 @@ export type JobStatus =
   | 'initializing'
   | 'stopped'
   | 'started'
+  | 'starting'
   | 'finished'
-  | 'failed';
+  | 'failed'
+  | 'awaitingNodeAssignment';
 
 export type SetupStatus =
   | { type: 'initializing' } // acquiring job statuses to determine setup status
   | { type: 'unknown' } // job status could not be acquired (failed request etc)
   | { type: 'required' } // setup required
   | { type: 'pending' } // In the process of setting up the module for the first time or retrying, waiting for response
-  | { type: 'succeeded' } // setup succeeded, notifying user
+  | { type: 'succeeded'; awaitingNodeAssignment: boolean } // setup succeeded, notifying user
   | {
       type: 'failed';
       reasons: string[];

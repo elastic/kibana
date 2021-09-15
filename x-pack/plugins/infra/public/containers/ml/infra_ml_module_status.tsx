@@ -99,7 +99,7 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
       const nextSetupStatus: SetupStatus = Object.values<JobStatus>(nextJobStatus).every(
         (jobState) => jobState === 'started'
       )
-        ? { type: 'succeeded' }
+        ? { type: 'succeeded', awaitingNodeAssignment: false }
         : {
             type: 'failed',
             reasons: [
@@ -225,12 +225,20 @@ const getJobStatus = (jobId: string) => (
             jobSummary.datafeedState === 'stopped'
           ) {
             return 'stopped';
-          } else if (jobSummary.jobState === 'opening') {
+          } else if (
+            jobSummary.jobState === 'opening' &&
+            jobSummary.awaitingNodeAssignment === false
+          ) {
             return 'initializing';
           } else if (jobSummary.jobState === 'opened' && jobSummary.datafeedState === 'started') {
             return 'started';
+          } else if (
+            jobSummary.jobState === 'opening' &&
+            jobSummary.datafeedState === 'starting' &&
+            jobSummary.awaitingNodeAssignment === true
+          ) {
+            return 'awaitingNodeAssignment';
           }
-
           return 'unknown';
         }
       )[0] || 'missing'
@@ -242,7 +250,9 @@ const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, 
 ): SetupStatus => {
   return Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>(
     (setupStatus, [, jobStatus]) => {
-      if (jobStatus === 'missing') {
+      if (jobStatus === 'awaitingNodeAssignment') {
+        return { type: 'succeeded', awaitingNodeAssignment: true };
+      } else if (jobStatus === 'missing') {
         return { type: 'required' };
       } else if (setupStatus.type === 'required' || setupStatus.type === 'succeeded') {
         return setupStatus;
