@@ -23,7 +23,7 @@ export interface BaseResponse {
 }
 
 export interface NotStartedTransformResponse extends BaseResponse {
-  state: string;
+  transform_state: string;
   node_name?: string;
 }
 
