@@ -30,6 +30,7 @@ import {
   postCase,
   postComment,
   pushCase,
+  resolveCase,
 } from './api';
 
 import {
@@ -122,6 +123,34 @@ describe('Case Configuration API', () => {
     test('happy path', async () => {
       const resp = await getCase(data, true, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
+    });
+  });
+
+  describe('resolveCase', () => {
+    const targetAliasId = '12345';
+    const basicResolveCase = {
+      outcome: 'aliasMatch',
+      case: basicCaseSnake,
+    };
+    const caseId = basicCase.id;
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({ ...basicResolveCase, target_alias_id: targetAliasId });
+    });
+
+    test('check url, method, signal', async () => {
+      await resolveCase(caseId, true, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${caseId}/resolve`, {
+        method: 'GET',
+        query: { includeComments: true },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('happy path', async () => {
+      const resp = await resolveCase(caseId, true, abortCtrl.signal);
+      expect(resp).toEqual({ ...basicResolveCase, case: basicCase, targetAliasId });
     });
   });
 

@@ -19,6 +19,7 @@ import {
   CommentResponse,
   CommentType,
   ConnectorTypes,
+  ResolvedCase,
   SECURITY_SOLUTION_OWNER,
   UserAction,
   UserActionField,
@@ -157,6 +158,12 @@ export const basicCase: Case = {
     syncAlerts: true,
   },
   subCaseIds: [],
+};
+
+export const basicResolvedCase: ResolvedCase = {
+  case: basicCase,
+  outcome: 'aliasMatch',
+  aliasTargetId: `${basicCase.id}_2`,
 };
 
 export const collectionCase: Case = {

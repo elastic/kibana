@@ -66,20 +66,20 @@ import {
   decodeCaseResolveResponse,
 } from './utils';
 
-// export const getCase = async (
-//   caseId: string,
-//   includeComments: boolean = true,
-//   signal: AbortSignal
-// ): Promise<Case> => {
-//   const response = await KibanaServices.get().http.fetch<CaseResponse>(getCaseDetailsUrl(caseId), {
-//     method: 'GET',
-//     query: {
-//       includeComments,
-//     },
-//     signal,
-//   });
-//   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
-// };
+export const getCase = async (
+  caseId: string,
+  includeComments: boolean = true,
+  signal: AbortSignal
+): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(getCaseDetailsUrl(caseId), {
+    method: 'GET',
+    query: {
+      includeComments,
+    },
+    signal,
+  });
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
+};
 
 export const resolveCase = async (
   caseId: string,
