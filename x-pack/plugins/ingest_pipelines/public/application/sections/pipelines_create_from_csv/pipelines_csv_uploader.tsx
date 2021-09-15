@@ -17,7 +17,6 @@ import {
   EuiButton,
   EuiFormRow,
   EuiIconTip,
-  EuiIcon,
   EuiRadioGroup,
 } from '@elastic/eui';
 import { FieldCopyAction } from '../../../../common/types';
@@ -88,11 +87,14 @@ export const PipelinesCsvUploader: FC<Props> = ({ actionOptions, onFilePickerCha
             <p>
               Default copy action
               <EuiIconTip
-                content="This is the default action for field renames, and will only be utilized if not provided for a field in the uploaded CSV."
-                position="right"
-              >
-                <EuiIcon type="iInCircle"/>
-              </EuiIconTip>
+                type="iInCircle"
+                content={
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.createFromCsv.fileUpload.settingDescription"
+                    defaultMessage="This is the default action for field renames, and will only be utilized if not provided for a field in the uploaded CSV."
+                  />
+                }
+              />
             </p>
           }
         >
