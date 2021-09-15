@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createReference } from './utils';
+import { createMigratedDoc, createReference } from './utils';
 
 describe('migration utils', () => {
   describe('createReference', () => {
@@ -21,6 +21,54 @@ describe('migration utils', () => {
 
     it('returns an empty array when the id is null', () => {
       expect(createReference(null, 'name', 'type')).toHaveLength(0);
+    });
+  });
+
+  describe('createMigratedDoc', () => {
+    it('overwrites the attributes of the original doc', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          hello: '1',
+        },
+        type: 'yes',
+      };
+
+      expect(
+        createMigratedDoc({ doc, attributes: {}, docReferences: [], migratedReferences: [] })
+      ).toEqual({
+        id: '1',
+        attributes: {},
+        type: 'yes',
+        references: [],
+      });
+    });
+
+    it('combines the references', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          hello: '1',
+        },
+        type: 'yes',
+      };
+
+      expect(
+        createMigratedDoc({
+          doc,
+          attributes: {},
+          docReferences: [{ id: '1', name: 'name', type: 'type' }],
+          migratedReferences: [{ id: '5', name: 'name5', type: 'type5' }],
+        })
+      ).toEqual({
+        id: '1',
+        attributes: {},
+        type: 'yes',
+        references: [
+          { id: '1', name: 'name', type: 'type' },
+          { id: '5', name: 'name5', type: 'type5' },
+        ],
+      });
     });
   });
 });

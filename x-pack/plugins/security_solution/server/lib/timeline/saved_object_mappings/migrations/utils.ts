@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'kibana/server';
+import {
+  SavedObjectReference,
+  SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
+} from 'kibana/server';
 
 export function createReference(
   id: string | null | undefined,
@@ -14,3 +18,21 @@ export function createReference(
 ): SavedObjectReference[] {
   return id != null ? [{ id, name, type }] : [];
 }
+
+export const createMigratedDoc = <T>({
+  doc,
+  attributes,
+  docReferences,
+  migratedReferences,
+}: {
+  doc: SavedObjectUnsanitizedDoc<T>;
+  attributes: object;
+  docReferences: SavedObjectReference[];
+  migratedReferences: SavedObjectReference[];
+}): SavedObjectSanitizedDoc<unknown> => ({
+  ...doc,
+  attributes: {
+    ...attributes,
+  },
+  references: [...docReferences, ...migratedReferences],
+});

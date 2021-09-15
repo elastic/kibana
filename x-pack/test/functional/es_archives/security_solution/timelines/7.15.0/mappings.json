@@ -3,6 +3,8 @@
   "value": {
     "aliases": {
       ".kibana": {
+      },
+      ".kibana_7.15.0": {
       }
     },
     "index": ".kibana_1",

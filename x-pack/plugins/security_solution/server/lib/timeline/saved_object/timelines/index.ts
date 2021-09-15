@@ -426,7 +426,7 @@ export const persistTimeline = async (
   }
 };
 
-const createTimeline = async ({
+export const createTimeline = async ({
   timelineId,
   timeline,
   savedObjectsClient,
