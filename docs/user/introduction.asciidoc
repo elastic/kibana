@@ -135,7 +135,7 @@ image::images/rules-and-connectors.png[Rules and Connectors view]
 [[organize-and-secure]]
 === Organize content
 
-You might be managing tens, hundreds, or even thousands of dashboards, visualizations, and other Kibana assets.
+You might be managing tens, hundreds, or even thousands of dashboards, visualizations, and other {kib} assets.
 {kib} has several features for keeping your content organized.
 
 
