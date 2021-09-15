@@ -2492,7 +2492,6 @@
     "discover.fieldChooser.filter.availableFieldsTitle": "可用字段",
     "discover.fieldChooser.filter.fieldSelectorLabel": "{id} 筛选选项的选择",
     "discover.fieldChooser.filter.filterByTypeLabel": "按类型筛选",
-    "discover.fieldChooser.filter.hideMissingFieldsLabel": "隐藏缺失字段",
     "discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel": "索引和字段",
     "discover.fieldChooser.filter.popularTitle": "常见",
     "discover.fieldChooser.filter.searchableLabel": "可搜索",

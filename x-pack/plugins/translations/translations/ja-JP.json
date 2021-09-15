@@ -2467,7 +2467,6 @@
     "discover.fieldChooser.filter.availableFieldsTitle": "利用可能なフィールド",
     "discover.fieldChooser.filter.fieldSelectorLabel": "{id}フィルターオプションの選択",
     "discover.fieldChooser.filter.filterByTypeLabel": "タイプでフィルタリング",
-    "discover.fieldChooser.filter.hideMissingFieldsLabel": "未入力のフィールドを非表示",
     "discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel": "インデックスとフィールド",
     "discover.fieldChooser.filter.popularTitle": "人気",
     "discover.fieldChooser.filter.searchableLabel": "検索可能",
