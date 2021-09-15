@@ -10,33 +10,34 @@ import {
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from 'kibana/server';
-import { SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
+import { timelineSavedObjectType } from '..';
+import { TIMELINE_ID_REF_NAME } from '../../constants';
 import { createMigratedDoc, createReference } from './utils';
 
-export interface SavedQueryId {
-  savedQueryId?: string | null;
+export interface TimelineId {
+  timelineId?: string | null;
 }
 
-export const migrateSavedQueryIdToReferences = (
-  doc: SavedObjectUnsanitizedDoc<SavedQueryId>
+export const migrateNoteTimelineIdToReferences = (
+  doc: SavedObjectUnsanitizedDoc<TimelineId>
 ): SavedObjectSanitizedDoc<unknown> => {
-  const { savedQueryId, ...restAttributes } = doc.attributes;
+  const { timelineId, ...restAttributes } = doc.attributes;
 
   const { references: docReferences = [] } = doc;
-  const savedQueryIdReferences = createReference(
-    savedQueryId,
-    SAVED_QUERY_ID_REF_NAME,
-    SAVED_QUERY_TYPE
+  const timelineIdReferences = createReference(
+    timelineId,
+    TIMELINE_ID_REF_NAME,
+    timelineSavedObjectType
   );
 
   return createMigratedDoc({
     doc,
     attributes: restAttributes,
     docReferences,
-    migratedReferences: savedQueryIdReferences,
+    migratedReferences: timelineIdReferences,
   });
 };
 
-export const timelinesMigrations: SavedObjectMigrationMap = {
-  '7.16.0': migrateSavedQueryIdToReferences,
+export const notesMigrations: SavedObjectMigrationMap = {
+  '7.16.0': migrateNoteTimelineIdToReferences,
 };
