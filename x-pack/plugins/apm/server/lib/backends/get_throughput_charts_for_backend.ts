@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import {
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-} from '../../../common/elasticsearch_fieldnames';
+import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { calculateThroughput } from '../helpers/calculate_throughput';
 
 export async function getThroughputChartsForBackend({
   backendName,
@@ -64,14 +62,6 @@ export async function getThroughputChartsForBackend({
             end: endWithOffset,
             metricsInterval: 60,
           }),
-          aggs: {
-            throughput: {
-              rate: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-                unit: 'minute',
-              },
-            },
-          },
         },
       },
     },
@@ -81,7 +71,7 @@ export async function getThroughputChartsForBackend({
     response.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key + offsetInMs,
-        y: bucket.throughput.value,
+        y: calculateThroughput({ start, end, value: bucket.doc_count }),
       };
     }) ?? []
   );

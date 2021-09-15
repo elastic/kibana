@@ -17,6 +17,7 @@ import {
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { Setup } from '../helpers/setup_request';
+import { calculateThroughput } from '../helpers/calculate_throughput';
 
 interface Options {
   environment: string;
@@ -28,7 +29,6 @@ interface Options {
   start: number;
   end: number;
   intervalString: string;
-  throughputUnit: 'minute' | 'second';
 }
 
 export async function getThroughput({
@@ -41,7 +41,6 @@ export async function getThroughput({
   start,
   end,
   intervalString,
-  throughputUnit,
 }: Options) {
   const { apmEventClient } = setup;
 
@@ -75,13 +74,6 @@ export async function getThroughput({
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },
-          aggs: {
-            throughput: {
-              rate: {
-                unit: throughputUnit,
-              },
-            },
-          },
         },
       },
     },
@@ -96,7 +88,11 @@ export async function getThroughput({
     response.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key,
-        y: bucket.throughput.value,
+        y: calculateThroughput({
+          start,
+          end,
+          value: bucket.doc_count,
+        }),
       };
     }) ?? []
   );

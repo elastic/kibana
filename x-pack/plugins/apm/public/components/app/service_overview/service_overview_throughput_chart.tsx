@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiPanel,
-  EuiTitle,
-  EuiIconTip,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
+import { asTransactionRate } from '../../../../common/utils/formatters';
 import {
   getComparisonChartTheme,
   getTimeRangeComparison,
@@ -123,31 +117,8 @@ export function ServiceOverviewThroughputChart({
                 'xpack.apm.serviceOverview.throughtputChartTitle',
                 { defaultMessage: 'Throughput' }
               )}
-              {data.throughputUnit === 'second'
-                ? i18n.translate(
-                    'xpack.apm.serviceOverview.throughtputPerSecondChartTitle',
-                    { defaultMessage: ' (per second)' }
-                  )
-                : ''}
             </h2>
           </EuiTitle>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            content={
-              data.throughputUnit === 'minute'
-                ? i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
-                    defaultMessage:
-                      'Throughput is measured in transactions per minute (tpm)',
-                  })
-                : i18n.translate('xpack.apm.serviceOverview.tpsHelp', {
-                    defaultMessage:
-                      'Throughput is measured in transactions per second (tps)',
-                  })
-            }
-            position="right"
-          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -157,7 +128,7 @@ export function ServiceOverviewThroughputChart({
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
-        yLabelFormat={(y) => asExactTransactionRate(y, data.throughputUnit)}
+        yLabelFormat={asTransactionRate}
         customTheme={comparisonChartTheme}
       />
     </EuiPanel>
