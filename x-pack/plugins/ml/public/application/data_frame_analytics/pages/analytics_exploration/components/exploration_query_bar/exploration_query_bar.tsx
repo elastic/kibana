@@ -13,7 +13,7 @@ import { debounce } from 'lodash';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { estypes } from '@elastic/elasticsearch';
 import { Dictionary } from '../../../../../../../common/types/common';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common';
 import { Query, QueryStringInput } from '../../../../../../../../../../src/plugins/data/public';
 
 import {

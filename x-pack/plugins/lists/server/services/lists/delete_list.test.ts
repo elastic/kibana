@@ -61,7 +61,7 @@ describe('delete_list', () => {
     const deleteQuery = {
       id: LIST_ID,
       index: LIST_INDEX,
-      refresh: false,
+      refresh: 'wait_for',
     };
     expect(options.esClient.delete).toHaveBeenNthCalledWith(1, deleteQuery);
   });
