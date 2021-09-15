@@ -15,5 +15,5 @@ import { defaultDataViewRef } from '../../../../../common/constants';
  */
 export const timelineFieldsMigrator = new FieldMigrator([
   { path: 'savedQueryId', type: SAVED_QUERY_TYPE, name: SAVED_QUERY_ID_REF_NAME },
-  { ...defaultDataViewRef, path: 'savedQueryId' },
+  { ...defaultDataViewRef, path: 'dataViewId' },
 ]);

@@ -66,6 +66,15 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.body.data.getOneTimeline.savedQueryId).to.be("It's me");
       });
+
+      it('returns the dataViewId in the response', async () => {
+        const resp = await supertest
+          .get('/api/timeline')
+          .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' })
+          .set('kbn-xsrf', 'true');
+
+        expect(resp.body.data.getOneTimeline.dataViewId).to.be('security-solution');
+      });
     });
   });
 }

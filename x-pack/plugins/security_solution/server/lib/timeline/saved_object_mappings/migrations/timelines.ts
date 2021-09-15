@@ -42,7 +42,6 @@ export const migrateSavedQueryIdToReferences = (
   };
 };
 
-// TODO: Steph/sourcerer write migration tests
 export const migrateDataViewIdToReferences = (
   doc: SavedObjectUnsanitizedDoc<CreateTimelineSchema>
 ): SavedObjectSanitizedDoc<CreateTimelineSchema> => {
