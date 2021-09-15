@@ -42,17 +42,23 @@ export type InputControlEmbeddable<
   TInputControlEmbeddableOutput extends InputControlOutput = InputControlOutput
 > = IEmbeddable<TInputControlEmbeddableInput, TInputControlEmbeddableOutput>;
 
-export interface GetControlEditorProps<T extends InputControlInput = InputControlInput> {
+export interface GetControlEditorComponentProps<T extends InputControlInput = InputControlInput> {
   onChange: (partial: Partial<T>) => void;
+  initialInput?: Partial<T>;
 }
 
-export type GetControlEditor<T extends InputControlInput = InputControlInput> = (
-  props: GetControlEditorProps<T>
-) => JSX.Element;
+export interface ControlEditorProps {
+  setValidState: (valid: boolean) => void;
+}
 
-export interface IEditableControlEmbeddable<T extends InputControlInput = InputControlInput>
-  extends InputControlEmbeddable {
-  getControlEditor: GetControlEditor<T>;
+export type ControlEditorComponent = (props: ControlEditorProps) => JSX.Element;
+
+export type GetControlEditorComponent<T extends InputControlInput = InputControlInput> = (
+  props: GetControlEditorComponentProps<T>
+) => ControlEditorComponent;
+
+export interface IEditableControlFactory<T extends InputControlInput = InputControlInput> {
+  getControlEditor?: GetControlEditorComponent<T>;
 }
 
 export interface ControlPanelState<TEmbeddableInput extends InputControlInput = InputControlInput>

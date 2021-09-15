@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiForm, EuiFormRow, EuiSuperSelect, EuiSuperSelectOption } from '@elastic/eui';
+import { EuiFormRow, EuiSuperSelect, EuiSuperSelectOption } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
-import { GetControlEditorProps } from '../../types';
+import { ControlEditorProps, GetControlEditorComponentProps } from '../../types';
 import {
   OptionsListEmbeddableInput,
   OptionsListFieldFetcher,
@@ -17,12 +17,11 @@ import {
 } from './options_list_embeddable';
 import { OptionsListStrings } from './options_list_strings';
 
-interface OptionsListEditorProps {
-  onChange: GetControlEditorProps<OptionsListEmbeddableInput>['onChange'];
+interface OptionsListEditorProps extends ControlEditorProps {
+  onChange: GetControlEditorComponentProps<OptionsListEmbeddableInput>['onChange'];
   fetchIndexPatterns: OptionsListIndexPatternFetcher;
+  initialInput?: Partial<OptionsListEmbeddableInput>;
   fetchFields: OptionsListFieldFetcher;
-  initialSelectedField?: string;
-  initialSelectedIndexPattern?: string;
 }
 
 interface OptionsListEditorState {
@@ -34,14 +33,14 @@ interface OptionsListEditorState {
 
 export const OptionsListEditor = ({
   onChange,
-  fetchIndexPatterns,
   fetchFields,
-  initialSelectedField,
-  initialSelectedIndexPattern,
+  initialInput,
+  setValidState,
+  fetchIndexPatterns,
 }: OptionsListEditorProps) => {
   const [state, setState] = useState<OptionsListEditorState>({
-    indexPattern: initialSelectedIndexPattern,
-    field: initialSelectedField,
+    indexPattern: initialInput?.indexPattern,
+    field: initialInput?.field,
     availableIndexPatterns: [],
     availableFields: [],
   });
@@ -82,8 +81,14 @@ export const OptionsListEditor = ({
     })();
   }, [state.indexPattern, fetchFields]);
 
+  useEffect(() => setValidState(Boolean(state.field) && Boolean(state.indexPattern)), [
+    state.field,
+    setValidState,
+    state.indexPattern,
+  ]);
+
   return (
-    <EuiForm>
+    <>
       <EuiFormRow label={OptionsListStrings.editor.getIndexPatternTitle()}>
         <EuiSuperSelect
           options={state.availableIndexPatterns}
@@ -93,11 +98,12 @@ export const OptionsListEditor = ({
       </EuiFormRow>
       <EuiFormRow label={OptionsListStrings.editor.getFieldTitle()}>
         <EuiSuperSelect
+          disabled={!state.indexPattern}
           options={state.availableFields}
           onChange={(field) => applySelection({ field })}
           valueOfSelected={state.field}
         />
       </EuiFormRow>
-    </EuiForm>
+    </>
   );
 };

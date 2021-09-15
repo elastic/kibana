@@ -10,7 +10,7 @@ import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
-import { MountPoint, OverlayRef } from '../../../../../core/public';
+import { MountPoint, OverlayFlyoutOpenOptions, OverlayRef } from '../../../../../core/public';
 import { MountWrapper } from '../../../../../core/public/utils';
 import { PluginServiceFactory } from '../create';
 import { PresentationOverlaysService } from '../overlays';
@@ -47,7 +47,7 @@ export const overlaysServiceFactory: OverlaysServiceFactory = () => {
   };
 
   return {
-    openFlyout: (mount: MountPoint) => {
+    openFlyout: (mount: MountPoint, options?: OverlayFlyoutOpenOptions) => {
       if (activeFlyout) {
         activeFlyout.close();
         cleanupDom();
@@ -64,6 +64,10 @@ export const overlaysServiceFactory: OverlaysServiceFactory = () => {
       activeFlyout = flyout;
 
       const onCloseFlyout = () => {
+        if (options?.onClose) {
+          options?.onClose(flyout);
+          return;
+        }
         flyout.close();
       };
 

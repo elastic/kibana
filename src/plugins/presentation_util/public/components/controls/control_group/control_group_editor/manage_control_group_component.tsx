@@ -22,42 +22,24 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlStyle, ControlWidth, InputControlMeta } from '../component/control_group_component';
+import { ControlStyle } from '../../types';
+import { PresentationOverlaysService } from '../../../../services/overlays';
+import { toMountPoint } from '../../../../../../kibana_react/public';
 
 interface ManageControlGroupProps {
   controlStyle: ControlStyle;
-  controlMeta: InputControlMeta[];
-  setControlStyle: React.Dispatch<React.SetStateAction<ControlStyle>>;
-  setControlMeta: React.Dispatch<React.SetStateAction<InputControlMeta[]>>;
+  openFlyout: PresentationOverlaysService['openFlyout'];
+  setControlStyle: (style: ControlStyle) => void;
 }
 
-export const ManageControlGroupComponent = ({
-  controlMeta,
-  setControlMeta,
+const ManageControlGroupFlyout = ({
   controlStyle,
   setControlStyle,
-}: ManageControlGroupProps) => {
-  const [isManagementFlyoutVisible, setIsManagementFlyoutVisible] = useState(false);
+}: Omit<ManageControlGroupProps, 'openFlyout'>) => {
+  const [currentControlStyle, setCurrentControlStyle] = useState<ControlStyle>(controlStyle);
 
-  const manageControlsButton = (
-    <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
-      <EuiButtonIcon
-        size="xs"
-        aria-label={ControlGroupStrings.management.getManageButtonTitle()}
-        iconType="gear"
-        color="text"
-        data-test-subj="inputControlsSortingButton"
-        onClick={() => setIsManagementFlyoutVisible(!isManagementFlyoutVisible)}
-      />
-    </EuiToolTip>
-  );
-
-  const manageControlGroupFlyout = (
-    <EuiFlyout
-      ownFocus
-      onClose={() => setIsManagementFlyoutVisible(false)}
-      aria-labelledby="flyoutTitle"
-    >
+  return (
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="flyoutTitle">{ControlGroupStrings.management.getFlyoutTitle()}</h2>
@@ -80,8 +62,11 @@ export const ManageControlGroupComponent = ({
               label: ControlGroupStrings.management.controlStyle.getTwoLineTitle(),
             },
           ]}
-          idSelected={controlStyle}
-          onChange={(newControlStyle) => setControlStyle(newControlStyle as ControlStyle)}
+          idSelected={currentControlStyle}
+          onChange={(newControlStyle) => {
+            setControlStyle(newControlStyle as ControlStyle);
+            setCurrentControlStyle(newControlStyle as ControlStyle);
+          }}
         />
         <EuiSpacer size="m" />
         <EuiTitle size="s">
@@ -89,46 +74,66 @@ export const ManageControlGroupComponent = ({
         </EuiTitle>
         <EuiSpacer size="s" />
 
-        <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiFormLabel>
-              {ControlGroupStrings.management.controlWidth.getChangeAllControlWidthsTitle()}
-            </EuiFormLabel>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              buttonSize="compressed"
-              idSelected={
-                controlMeta.every((currentMeta) => currentMeta?.width === controlMeta[0]?.width)
-                  ? controlMeta[0]?.width
-                  : ''
-              }
-              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-              options={widthOptions}
-              onChange={(newWidth: string) =>
-                setControlMeta((currentControls) => {
-                  currentControls.forEach((currentMeta) => {
-                    currentMeta.width = newWidth as ControlWidth;
-                  });
-                  return [...currentControls];
-                })
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="trash" color="danger" aria-label={'delete-all'} size="s">
-              {ControlGroupStrings.management.getDeleteAllButtonTitle()}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {/* <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+  <EuiFlexItem grow={false}>
+    <EuiFormLabel>
+      {ControlGroupStrings.management.controlWidth.getChangeAllControlWidthsTitle()}
+    </EuiFormLabel>
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    <EuiButtonGroup
+      buttonSize="compressed"
+      idSelected={
+        controlMeta.every((currentMeta) => currentMeta?.width === controlMeta[0]?.width)
+          ? controlMeta[0]?.width
+          : ''
+      }
+      legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+      options={widthOptions}
+      onChange={(newWidth: string) =>
+        setControlMeta((currentControls) => {
+          currentControls.forEach((currentMeta) => {
+            currentMeta.width = newWidth as ControlWidth;
+          });
+          return [...currentControls];
+        })
+      }
+    />
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    <EuiButtonEmpty iconType="trash" color="danger" aria-label={'delete-all'} size="s">
+      {ControlGroupStrings.management.getDeleteAllButtonTitle()}
+    </EuiButtonEmpty>
+  </EuiFlexItem>
+</EuiFlexGroup> */}
       </EuiFlyoutBody>
-    </EuiFlyout>
-  );
-
-  return (
-    <>
-      {manageControlsButton}
-      {isManagementFlyoutVisible && manageControlGroupFlyout}
     </>
+  );
+};
+
+export const ManageControlGroupComponent = ({
+  controlStyle,
+  openFlyout,
+  setControlStyle,
+}: ManageControlGroupProps) => {
+  return (
+    <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
+      <EuiButtonIcon
+        aria-label={ControlGroupStrings.management.getManageButtonTitle()}
+        iconType="gear"
+        color="text"
+        data-test-subj="inputControlsSortingButton"
+        onClick={() => {
+          openFlyout(
+            toMountPoint(
+              <ManageControlGroupFlyout
+                controlStyle={controlStyle}
+                setControlStyle={setControlStyle}
+              />
+            )
+          );
+        }}
+      />
+    </EuiToolTip>
   );
 };

@@ -27,14 +27,16 @@ import {
 
 import './control_group.scss';
 import classNames from 'classnames';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 import { OPTIONS_LIST_CONTROL } from '../../control_types/options_list/options_list_embeddable';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { ControlGroupContainer } from '../embeddable/control_group_container';
 import { PresentationOverlaysService } from '../../../../services/overlays';
 import { toMountPoint } from '../../../../../../kibana_react/public';
-import { ControlWidth } from '../../types';
+import { ControlStyle, ControlWidth } from '../../types';
+import { ManageControlGroupComponent } from '../control_group_editor/manage_control_group_component';
+import { ControlGroupStrings } from '../control_group_strings';
 
 interface ControlGroupProps {
   openFlyout: PresentationOverlaysService['openFlyout'];
@@ -46,7 +48,7 @@ export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroup
 
   // sync controlIds every time input panels change
   useEffect(() => {
-    const subscription = controlGroupContainer.getInput$().subscribe(() =>
+    const subscription = controlGroupContainer.getInput$().subscribe(() => {
       setControlIds((currentIds) => {
         // sync control Ids with panels from container input.
         const { panels } = controlGroupContainer.getInput();
@@ -62,8 +64,8 @@ export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroup
           }
         });
         return [...currentIds, ...newIds];
-      })
-    );
+      });
+    });
     return () => subscription.unsubscribe();
   }, [controlGroupContainer]);
 
@@ -91,67 +93,70 @@ export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroup
   };
 
   return (
-    <>
-      <EuiFlexGroup wrap={false} direction="row" alignItems="center">
-        <EuiFlexItem>
-          <DndContext
-            onDragStart={({ active }) => setDraggingId(active.id)}
-            onDragEnd={onDragEnd}
-            onDragCancel={() => setDraggingId(null)}
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            layoutMeasuring={{
-              strategy: LayoutMeasuringStrategy.Always,
-            }}
-          >
-            <SortableContext items={controlIds} strategy={rectSortingStrategy}>
-              <EuiFlexGroup
-                className={classNames('controlGroup', { 'controlGroup-isDragging': draggingId })}
-                alignItems="center"
-                gutterSize={'m'}
-                wrap={true}
-              >
-                {controlIds.map((controlId, index) => (
-                  <SortableControl
-                    onEdit={() => controlGroupContainer.editControl(controlId)}
-                    onRemove={() => controlGroupContainer.removeEmbeddable(controlId)}
-                    dragInfo={{ index, draggingIndex }}
-                    container={controlGroupContainer}
-                    controlStyle={controlGroupContainer.getInput().controlStyle}
-                    embeddableId={controlId}
-                    width={controlGroupContainer.getInput().panels[controlId].width}
-                    key={controlId}
-                  />
-                ))}
-              </EuiFlexGroup>
-            </SortableContext>
-            <DragOverlay>
-              {draggingId ? (
-                <ControlClone embeddableId={draggingId} container={controlGroupContainer} />
-              ) : null}
-            </DragOverlay>
-          </DndContext>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {/* <ManageControlGroupComponent
-            controlMeta={controlMeta}
-            controlStyle={controlStyle}
-            setControlMeta={setControlMeta}
-            setControlStyle={setControlStyle}
-          /> */}
-          <EuiButton onClick={() => controlGroupContainer.createNewControl(OPTIONS_LIST_CONTROL)}>
-            create hello
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {/* {!isNil(editingIndex) && (
-        <ManageControlComponent
-          controlMeta={controlMeta[editingIndex]}
-          index={editingIndex}
-          setControlMeta={setControlMeta}
-          onClose={() => setEditingIndex(undefined)}
-        />
-      )} */}
-    </>
+    <EuiFlexGroup wrap={false} direction="row" alignItems="center">
+      <EuiFlexItem>
+        <DndContext
+          onDragStart={({ active }) => setDraggingId(active.id)}
+          onDragEnd={onDragEnd}
+          onDragCancel={() => setDraggingId(null)}
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          layoutMeasuring={{
+            strategy: LayoutMeasuringStrategy.Always,
+          }}
+        >
+          <SortableContext items={controlIds} strategy={rectSortingStrategy}>
+            <EuiFlexGroup
+              className={classNames('controlGroup', { 'controlGroup-isDragging': draggingId })}
+              alignItems="center"
+              gutterSize={'m'}
+              wrap={true}
+            >
+              {controlIds.map((controlId, index) => (
+                <SortableControl
+                  onEdit={() => controlGroupContainer.editControl(controlId)}
+                  onRemove={() => controlGroupContainer.removeEmbeddable(controlId)}
+                  dragInfo={{ index, draggingIndex }}
+                  container={controlGroupContainer}
+                  controlStyle={controlGroupContainer.getInput().controlStyle}
+                  embeddableId={controlId}
+                  width={controlGroupContainer.getInput().panels[controlId].width}
+                  key={controlId}
+                />
+              ))}
+            </EuiFlexGroup>
+          </SortableContext>
+          <DragOverlay>
+            {draggingId ? (
+              <ControlClone embeddableId={draggingId} container={controlGroupContainer} />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
+          <EuiFlexItem>
+            <ManageControlGroupComponent
+              openFlyout={openFlyout}
+              controlStyle={controlGroupContainer.getInput().controlStyle}
+              setControlStyle={(newStyle) =>
+                controlGroupContainer.updateInput({ controlStyle: newStyle })
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
+              <EuiButtonIcon
+                aria-label={ControlGroupStrings.management.getManageButtonTitle()}
+                iconType="plus"
+                color="text"
+                data-test-subj="inputControlsSortingButton"
+                onClick={() => controlGroupContainer.createNewControl(OPTIONS_LIST_CONTROL)} // use popover when there are multiple types of control
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

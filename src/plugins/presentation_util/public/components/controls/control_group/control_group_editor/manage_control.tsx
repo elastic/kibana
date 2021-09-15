@@ -14,7 +14,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlyoutHeader,
   EuiButtonGroup,
@@ -33,29 +33,36 @@ import {
 
 import { ControlGroupStrings } from '../control_group_strings';
 import { widthOptions } from '../control_group_constants';
-import { ControlPanelState, ControlWidth } from '../../types';
+import { ControlEditorComponent, ControlPanelState, ControlWidth } from '../../types';
 
 interface ManageControlProps {
   title?: string;
-  onClose: () => void;
-  panel: ControlPanelState;
-  removeControl: () => void;
-  controlEditor?: JSX.Element;
+  onSave: () => void;
+  width: ControlWidth;
+  onCancel: () => void;
+  removeControl?: () => void;
+  controlEditorComponent?: ControlEditorComponent;
   updateTitle: (title: string) => void;
-  updatePanel: (partial: Partial<ControlPanelState>) => void;
+  updateWidth: (newWidth: ControlWidth) => void;
 }
 
 export const ManageControlComponent = ({
-  controlEditor,
+  controlEditorComponent,
   removeControl,
   updateTitle,
-  updatePanel,
-  onClose,
+  updateWidth,
+  onCancel,
+  onSave,
   title,
-  panel,
+  width,
 }: ManageControlProps) => {
   const [currentTitle, setCurrentTitle] = useState(title);
-  const [currentWidth, setCurrentWidth] = useState(panel.width);
+  const [currentWidth, setCurrentWidth] = useState(width);
+
+  const [controlEditorValid, setControlEditorValid] = useState(false);
+  const [editorValid, setEditorValid] = useState(false);
+
+  useEffect(() => setEditorValid(Boolean(currentTitle)), [currentTitle]);
 
   return (
     <>
@@ -85,25 +92,29 @@ export const ManageControlComponent = ({
               idSelected={currentWidth}
               onChange={(newWidth: string) => {
                 setCurrentWidth(newWidth as ControlWidth);
-                updatePanel({ width: newWidth as ControlWidth });
+                updateWidth(newWidth as ControlWidth);
               }}
             />
           </EuiFormRow>
 
-          <EuiButton
-            aria-label={`delete-${title}`}
-            iconType="trash"
-            color="danger"
-            onClick={() => {
-              onClose();
-              removeControl();
-            }}
-          >
-            {ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
-          </EuiButton>
+          <EuiSpacer size="l" />
+          {controlEditorComponent &&
+            controlEditorComponent({ setValidState: setControlEditorValid })}
+          <EuiSpacer size="l" />
+          {removeControl && (
+            <EuiButton
+              aria-label={`delete-${title}`}
+              iconType="trash"
+              color="danger"
+              onClick={() => {
+                onCancel();
+                removeControl();
+              }}
+            >
+              {ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
+            </EuiButton>
+          )}
         </EuiForm>
-        <EuiSpacer size="l" />
-        {controlEditor && controlEditor}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -112,11 +123,10 @@ export const ManageControlComponent = ({
               aria-label={`delete-${title}`}
               iconType="cross"
               onClick={() => {
-                onClose();
-                removeControl();
+                onCancel();
               }}
             >
-              Cancel
+              {ControlGroupStrings.manageControl.getCancelTitle()}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -124,12 +134,12 @@ export const ManageControlComponent = ({
               aria-label={`delete-${title}`}
               iconType="check"
               color="primary"
+              disabled={!editorValid || !controlEditorValid}
               onClick={() => {
-                onClose();
-                removeControl();
+                onSave();
               }}
             >
-              Save and Close
+              {ControlGroupStrings.manageControl.getSaveChangesTitle()}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

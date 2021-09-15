@@ -8,20 +8,22 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { cloneDeep } from 'lodash';
 import {
   Container,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
 } from '../../../../../../embeddable/public';
 import { ControlGroup } from '../component/control_group_component';
-import { CONTROL_GROUP_TYPE } from '../control_group_constants';
+import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_WIDTH } from '../control_group_constants';
 import {
   ControlGroupInput,
   InputControlEmbeddable,
   InputControlInput,
   InputControlOutput,
   ControlPanelState,
-  IEditableControlEmbeddable,
+  IEditableControlFactory,
+  ControlWidth,
 } from '../../types';
 import { ControlsService } from '../../controlsService';
 import { PresentationOverlaysService } from '../../../../services/overlays';
@@ -30,6 +32,8 @@ import { ManageControlComponent } from '../control_group_editor/manage_control';
 
 export class ControlGroupContainer extends Container<InputControlInput, ControlGroupInput> {
   public readonly type = CONTROL_GROUP_TYPE;
+
+  private nextControlWidth: ControlWidth = DEFAULT_CONTROL_WIDTH;
 
   constructor(
     initialInput: ControlGroupInput,
@@ -49,7 +53,7 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
     const panelState = super.createNewPanelState(factory, partial);
     return {
       order: 1,
-      width: 'auto',
+      width: this.nextControlWidth,
       ...panelState,
     } as ControlPanelState<TEmbeddableInput>;
   }
@@ -66,42 +70,89 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
 
   public createNewControl = async (type: string) => {
     const factory = this.controlsService.getControlFactory(type);
-    if (!factory) {
-      throw new EmbeddableFactoryNotFoundError(type);
-    }
-    if (factory.getExplicitInput) {
-      const explicitInput = await factory.getExplicitInput();
-      await this.addNewEmbeddable(type, explicitInput);
-    }
+    if (!factory) throw new EmbeddableFactoryNotFoundError(type);
+
+    const initialInputPromise = new Promise<Omit<InputControlInput, 'id'>>((resolve, reject) => {
+      let inputToReturn: Partial<InputControlInput> = {};
+
+      const flyoutInstance = this.openFlyout(
+        toMountPoint(
+          <ManageControlComponent
+            width={this.nextControlWidth}
+            updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
+            updateWidth={(newWidth) => (this.nextControlWidth = newWidth)}
+            controlEditorComponent={(factory as IEditableControlFactory).getControlEditor?.({
+              onChange: (partialInput) => {
+                inputToReturn = { ...inputToReturn, ...partialInput };
+              },
+            })}
+            onSave={() => {
+              resolve(inputToReturn);
+              flyoutInstance.close();
+            }}
+            onCancel={() => {
+              reject();
+              flyoutInstance.close();
+            }}
+          />
+        ),
+        {
+          onClose: (flyout) => {
+            reject();
+            flyout.close();
+          },
+        }
+      );
+    });
+    initialInputPromise.then(
+      async (explicitInput) => {
+        await this.addNewEmbeddable(type, explicitInput);
+      },
+      () => {} // swallow promise rejection because it can be part of normal flow
+    );
   };
 
   public editControl = async (embeddableId: string) => {
     const panel = this.getInput().panels[embeddableId];
-    const embeddable = (await this.untilEmbeddableLoaded(
-      embeddableId
-    )) as IEditableControlEmbeddable;
+    const factory = this.getFactory(panel.type);
+    const embeddable = await this.untilEmbeddableLoaded(embeddableId);
+
+    if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
+
+    const initialExplicitInput = cloneDeep(panel.explicitInput);
 
     const flyoutInstance = this.openFlyout(
       toMountPoint(
         <ManageControlComponent
-          panel={panel}
+          width={panel.width}
           title={embeddable.getTitle()}
-          controlEditor={embeddable.getControlEditor?.({
-            onChange: (partialInput) => embeddable.updateInput(partialInput),
-          })}
-          onClose={() => flyoutInstance.close()}
           removeControl={() => this.removeEmbeddable(embeddableId)}
           updateTitle={(newTitle) => embeddable.updateInput({ title: newTitle })}
-          updatePanel={(partialPanel) =>
+          controlEditorComponent={(factory as IEditableControlFactory).getControlEditor?.({
+            onChange: (partialInput) => embeddable.updateInput(partialInput),
+            initialInput: embeddable.getInput(),
+          })}
+          onCancel={() => {
+            embeddable.updateInput(initialExplicitInput);
+            flyoutInstance.close();
+          }}
+          onSave={() => flyoutInstance.close()}
+          updateWidth={(newWidth) =>
             this.updateInput({
               panels: {
                 ...this.getInput().panels,
-                [embeddableId]: { ...this.getInput().panels[embeddableId], ...partialPanel },
+                [embeddableId]: { ...this.getInput().panels[embeddableId], ...{ width: newWidth } },
               },
             })
           }
         />
-      )
+      ),
+      {
+        onClose: (flyout) => {
+          embeddable.updateInput(initialExplicitInput);
+          flyout.close();
+        },
+      }
     );
   };
 

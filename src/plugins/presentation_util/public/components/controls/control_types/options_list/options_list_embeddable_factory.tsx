@@ -8,8 +8,13 @@
 
 import React from 'react';
 import { EmbeddableFactoryDefinition } from '../../../../../../embeddable/public';
-import { toMountPoint } from '../../../../../../kibana_react/public';
 import { PresentationOverlaysService } from '../../../../services/overlays';
+import {
+  ControlEditorProps,
+  GetControlEditorComponentProps,
+  IEditableControlFactory,
+} from '../../types';
+import { OptionsListEditor } from './options_list_editor';
 import {
   OptionsListDataFetcher,
   OptionsListEmbeddable,
@@ -19,7 +24,8 @@ import {
   OPTIONS_LIST_CONTROL,
 } from './options_list_embeddable';
 
-export class OptionsListEmbeddableFactory implements EmbeddableFactoryDefinition {
+export class OptionsListEmbeddableFactory
+  implements EmbeddableFactoryDefinition, IEditableControlFactory {
   public type = OPTIONS_LIST_CONTROL;
 
   constructor(
@@ -35,26 +41,23 @@ export class OptionsListEmbeddableFactory implements EmbeddableFactoryDefinition
   }
 
   public create(initialInput: OptionsListEmbeddableInput) {
-    return Promise.resolve(
-      new OptionsListEmbeddable(
-        initialInput,
-        {},
-        this.fetchIndexPatterns,
-        this.fetchFields,
-        this.fetchData
-      )
-    );
+    return Promise.resolve(new OptionsListEmbeddable(initialInput, {}, this.fetchData));
   }
 
-  public async getExplicitInput(): Promise<Omit<OptionsListEmbeddableInput, 'id'>> {
-    return new Promise<Omit<OptionsListEmbeddableInput, 'id'>>((resolve) => {
-      const overlay = this.openFlyout(toMountPoint(<div>MOUNTEd</div>));
-      setTimeout(() => {
-        overlay.close();
-        resolve({ field: 'DestCountry', title: 'test me', indexPattern: 'none' });
-      }, 1000);
-    });
-  }
+  public getControlEditor = ({
+    onChange,
+    initialInput,
+  }: GetControlEditorComponentProps<OptionsListEmbeddableInput>) => {
+    return ({ setValidState }: ControlEditorProps) => (
+      <OptionsListEditor
+        fetchIndexPatterns={this.fetchIndexPatterns}
+        fetchFields={this.fetchFields}
+        setValidState={setValidState}
+        initialInput={initialInput}
+        onChange={onChange}
+      />
+    );
+  };
 
   public isEditable = () => Promise.resolve(false);
 

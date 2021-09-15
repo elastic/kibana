@@ -32,8 +32,20 @@ export const ControlGroupStrings = {
       i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.widthInputTitle', {
         defaultMessage: 'Control width',
       }),
+    getSaveChangesTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.saveChangesTitle', {
+        defaultMessage: 'Save and close',
+      }),
+    getCancelTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.manageControl.cancelTitle', {
+        defaultMessage: 'Cancel',
+      }),
   },
   management: {
+    getAddControlTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.management.addControl', {
+        defaultMessage: 'Add control',
+      }),
     getManageButtonTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.buttonTitle', {
         defaultMessage: 'Manage controls',

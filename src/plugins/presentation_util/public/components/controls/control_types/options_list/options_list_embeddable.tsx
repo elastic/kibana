@@ -15,15 +15,9 @@ import { tap, debounceTime, map, distinctUntilChanged } from 'rxjs/operators';
 
 import { esFilters } from '../../../../../../data/public';
 import { OptionsListStrings } from './options_list_strings';
-import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
 import { Embeddable } from '../../../../../../embeddable/public';
-import {
-  GetControlEditorProps,
-  IEditableControlEmbeddable,
-  InputControlInput,
-  InputControlOutput,
-} from '../../types';
-import { OptionsListEditor } from './options_list_editor';
+import { InputControlInput, InputControlOutput } from '../../types';
+import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
 
 const toggleAvailableOptions = (
   indices: number[],
@@ -70,9 +64,10 @@ export interface OptionsListEmbeddableInput extends InputControlInput {
   singleSelect?: boolean;
   defaultSelections?: string[];
 }
-export class OptionsListEmbeddable
-  extends Embeddable<OptionsListEmbeddableInput, InputControlOutput>
-  implements IEditableControlEmbeddable<OptionsListEmbeddableInput> {
+export class OptionsListEmbeddable extends Embeddable<
+  OptionsListEmbeddableInput,
+  InputControlOutput
+> {
   public readonly type = OPTIONS_LIST_CONTROL;
   private node?: HTMLElement;
 
@@ -93,14 +88,10 @@ export class OptionsListEmbeddable
   constructor(
     input: OptionsListEmbeddableInput,
     output: InputControlOutput,
-    private fetchIndexPatterns: OptionsListIndexPatternFetcher,
-    private fetchFields: OptionsListFieldFetcher,
     private fetchData: OptionsListDataFetcher
   ) {
     super(input, output);
     this.fetchData = fetchData;
-    this.fetchIndexPatterns = fetchIndexPatterns;
-    this.fetchFields = fetchFields;
 
     // populate default selections from input
     this.selectedOptions = new Set<string>(input.defaultSelections ?? []);
@@ -213,16 +204,6 @@ export class OptionsListEmbeddable
         componentStateSubject={this.componentStateSubject$}
       />,
       node
-    );
-  };
-
-  public getControlEditor = ({ onChange }: GetControlEditorProps<OptionsListEmbeddableInput>) => {
-    return (
-      <OptionsListEditor
-        onChange={onChange}
-        fetchFields={this.fetchFields}
-        fetchIndexPatterns={this.fetchIndexPatterns}
-      />
     );
   };
 }
