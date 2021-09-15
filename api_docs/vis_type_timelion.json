@@ -14,7 +14,7 @@
         "tags": [],
         "label": "_LEGACY_",
         "description": [],
-        "path": "src/plugins/vis_type_timelion/public/index.ts",
+        "path": "src/plugins/vis_types/timelion/public/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -24,7 +24,7 @@
             "tags": [],
             "label": "DEFAULT_TIME_FORMAT",
             "description": [],
-            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "path": "src/plugins/vis_types/timelion/public/index.ts",
             "deprecated": false
           },
           {
@@ -37,7 +37,7 @@
             "signature": [
               "(from: number, to: number, size: number, interval: string, min: string) => string"
             ],
-            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "path": "src/plugins/vis_types/timelion/public/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -48,7 +48,7 @@
                 "tags": [],
                 "label": "from",
                 "description": [],
-                "path": "src/plugins/vis_type_timelion/common/lib/calculate_interval.ts",
+                "path": "src/plugins/vis_types/timelion/common/lib/calculate_interval.ts",
                 "deprecated": false
               },
               {
@@ -58,7 +58,7 @@
                 "tags": [],
                 "label": "to",
                 "description": [],
-                "path": "src/plugins/vis_type_timelion/common/lib/calculate_interval.ts",
+                "path": "src/plugins/vis_types/timelion/common/lib/calculate_interval.ts",
                 "deprecated": false
               },
               {
@@ -68,7 +68,7 @@
                 "tags": [],
                 "label": "size",
                 "description": [],
-                "path": "src/plugins/vis_type_timelion/common/lib/calculate_interval.ts",
+                "path": "src/plugins/vis_types/timelion/common/lib/calculate_interval.ts",
                 "deprecated": false
               },
               {
@@ -78,7 +78,7 @@
                 "tags": [],
                 "label": "interval",
                 "description": [],
-                "path": "src/plugins/vis_type_timelion/common/lib/calculate_interval.ts",
+                "path": "src/plugins/vis_types/timelion/common/lib/calculate_interval.ts",
                 "deprecated": false
               },
               {
@@ -88,7 +88,7 @@
                 "tags": [],
                 "label": "min",
                 "description": [],
-                "path": "src/plugins/vis_type_timelion/common/lib/calculate_interval.ts",
+                "path": "src/plugins/vis_types/timelion/common/lib/calculate_interval.ts",
                 "deprecated": false
               }
             ]
@@ -105,7 +105,7 @@
               "ParsedExpression",
               ">"
             ],
-            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "path": "src/plugins/vis_types/timelion/public/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -116,7 +116,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "path": "src/plugins/vis_type_timelion/common/parser_async.ts",
+                "path": "src/plugins/vis_types/timelion/common/parser_async.ts",
                 "deprecated": false
               }
             ]
@@ -137,7 +137,7 @@
               "LegacyAxis",
               "): string; }"
             ],
-            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "path": "src/plugins/vis_types/timelion/public/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -160,7 +160,7 @@
               },
               ") => string"
             ],
-            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "path": "src/plugins/vis_types/timelion/public/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -180,7 +180,7 @@
                     "text": "IUiSettingsClient"
                   }
                 ],
-                "path": "src/plugins/vis_type_timelion/public/helpers/get_timezone.ts",
+                "path": "src/plugins/vis_types/timelion/public/helpers/get_timezone.ts",
                 "deprecated": false
               }
             ]
@@ -203,7 +203,7 @@
               },
               ") => (esInterval: any) => any"
             ],
-            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "path": "src/plugins/vis_types/timelion/public/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -223,7 +223,7 @@
                     "text": "IUiSettingsClient"
                   }
                 ],
-                "path": "src/plugins/vis_type_timelion/public/helpers/xaxis_formatter.ts",
+                "path": "src/plugins/vis_types/timelion/public/helpers/xaxis_formatter.ts",
                 "deprecated": false
               }
             ]
@@ -240,7 +240,7 @@
               "IAxis",
               ") => number[]"
             ],
-            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "path": "src/plugins/vis_types/timelion/public/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -256,7 +256,7 @@
       "tags": [],
       "label": "VisTypeTimelionPluginStart",
       "description": [],
-      "path": "src/plugins/vis_type_timelion/public/plugin.ts",
+      "path": "src/plugins/vis_types/timelion/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -275,7 +275,7 @@
             "TimelionFunctionArgsSuggestion",
             "[]; }"
           ],
-          "path": "src/plugins/vis_type_timelion/public/plugin.ts",
+          "path": "src/plugins/vis_types/timelion/public/plugin.ts",
           "deprecated": false,
           "returnComment": [],
           "children": []
@@ -291,7 +291,7 @@
       "tags": [],
       "label": "VisTypeTimelionPluginSetup",
       "description": [],
-      "path": "src/plugins/vis_type_timelion/public/plugin.ts",
+      "path": "src/plugins/vis_types/timelion/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -301,7 +301,7 @@
           "tags": [],
           "label": "isUiEnabled",
           "description": [],
-          "path": "src/plugins/vis_type_timelion/public/plugin.ts",
+          "path": "src/plugins/vis_types/timelion/public/plugin.ts",
           "deprecated": false
         }
       ],
@@ -322,7 +322,7 @@
         "description": [
           "\nDescribes public Timelion plugin contract returned at the `setup` stage."
         ],
-        "path": "src/plugins/vis_type_timelion/server/plugin.ts",
+        "path": "src/plugins/vis_types/timelion/server/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -332,7 +332,7 @@
             "tags": [],
             "label": "uiEnabled",
             "description": [],
-            "path": "src/plugins/vis_type_timelion/server/plugin.ts",
+            "path": "src/plugins/vis_types/timelion/server/plugin.ts",
             "deprecated": false
           }
         ],

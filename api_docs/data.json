@@ -5004,11 +5004,11 @@
           },
           {
             "plugin": "visTypeTable",
-            "path": "src/plugins/vis_type_table/public/legacy/table_vis_controller.test.ts"
+            "path": "src/plugins/vis_types/table/public/legacy/table_vis_controller.test.ts"
           },
           {
             "plugin": "visTypeTable",
-            "path": "src/plugins/vis_type_table/public/legacy/table_vis_controller.test.ts"
+            "path": "src/plugins/vis_types/table/public/legacy/table_vis_controller.test.ts"
           },
           {
             "plugin": "visTypeVega",
@@ -16631,11 +16631,11 @@
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/timelion_request_handler.ts"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/timelion_request_handler.ts"
           },
           {
             "plugin": "visualize",
@@ -16671,11 +16671,11 @@
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/timelion_vis_fn.ts"
+            "path": "src/plugins/vis_types/timelion/public/timelion_vis_fn.ts"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/timelion_vis_fn.ts"
+            "path": "src/plugins/vis_types/timelion/public/timelion_vis_fn.ts"
           },
           {
             "plugin": "dashboard",
@@ -18119,11 +18119,11 @@
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/plugin_services.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/plugin_services.ts"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/plugin_services.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/plugin_services.ts"
           },
           {
             "plugin": "indexPatternManagement",
@@ -18135,11 +18135,11 @@
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/components/timelion_expression_input_helpers.test.ts"
+            "path": "src/plugins/vis_types/timelion/public/components/timelion_expression_input_helpers.test.ts"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/components/timelion_expression_input_helpers.test.ts"
+            "path": "src/plugins/vis_types/timelion/public/components/timelion_expression_input_helpers.test.ts"
           },
           {
             "plugin": "discover",
@@ -19008,27 +19008,27 @@
         "references": [
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/components/timelion_vis_component.tsx"
+            "path": "src/plugins/vis_types/timelion/public/components/timelion_vis_component.tsx"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/components/timelion_vis_component.tsx"
+            "path": "src/plugins/vis_types/timelion/public/components/timelion_vis_component.tsx"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/timelion_vis_renderer.tsx"
+            "path": "src/plugins/vis_types/timelion/public/timelion_vis_renderer.tsx"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/timelion_vis_renderer.tsx"
+            "path": "src/plugins/vis_types/timelion/public/timelion_vis_renderer.tsx"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/legacy/timelion_vis_component.tsx"
+            "path": "src/plugins/vis_types/timelion/public/legacy/timelion_vis_component.tsx"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/legacy/timelion_vis_component.tsx"
+            "path": "src/plugins/vis_types/timelion/public/legacy/timelion_vis_component.tsx"
           }
         ],
         "initialIsOpen": false
@@ -21706,15 +21706,15 @@
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/timelion_request_handler.ts"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/timelion_request_handler.ts"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/timelion_request_handler.ts"
           },
           {
             "plugin": "visTypeVega",
@@ -24261,7 +24261,7 @@
             },
             {
               "plugin": "visTypeTimelion",
-              "path": "src/plugins/vis_type_timelion/public/plugin.ts"
+              "path": "src/plugins/vis_types/timelion/public/plugin.ts"
             },
             {
               "plugin": "visTypeTimeseries",
@@ -24479,7 +24479,7 @@
             },
             {
               "plugin": "visTypeTable",
-              "path": "src/plugins/vis_type_table/public/plugin.ts"
+              "path": "src/plugins/vis_types/table/public/plugin.ts"
             },
             {
               "plugin": "visTypeTimeseries",
@@ -27306,11 +27306,11 @@
           },
           {
             "plugin": "visTypeTable",
-            "path": "src/plugins/vis_type_table/public/legacy/table_vis_controller.test.ts"
+            "path": "src/plugins/vis_types/table/public/legacy/table_vis_controller.test.ts"
           },
           {
             "plugin": "visTypeTable",
-            "path": "src/plugins/vis_type_table/public/legacy/table_vis_controller.test.ts"
+            "path": "src/plugins/vis_types/table/public/legacy/table_vis_controller.test.ts"
           },
           {
             "plugin": "visTypeVega",
@@ -32208,11 +32208,11 @@
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/timelion_request_handler.ts"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/timelion_request_handler.ts"
           },
           {
             "plugin": "visualize",
@@ -32248,11 +32248,11 @@
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/timelion_vis_fn.ts"
+            "path": "src/plugins/vis_types/timelion/public/timelion_vis_fn.ts"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/timelion_vis_fn.ts"
+            "path": "src/plugins/vis_types/timelion/public/timelion_vis_fn.ts"
           },
           {
             "plugin": "dashboard",
@@ -38924,11 +38924,11 @@
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/timelion_request_handler.ts"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/timelion_request_handler.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/timelion_request_handler.ts"
           },
           {
             "plugin": "visualize",
@@ -38964,11 +38964,11 @@
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/timelion_vis_fn.ts"
+            "path": "src/plugins/vis_types/timelion/public/timelion_vis_fn.ts"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/timelion_vis_fn.ts"
+            "path": "src/plugins/vis_types/timelion/public/timelion_vis_fn.ts"
           },
           {
             "plugin": "dashboard",
@@ -39892,27 +39892,27 @@
         "references": [
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/components/timelion_vis_component.tsx"
+            "path": "src/plugins/vis_types/timelion/public/components/timelion_vis_component.tsx"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/components/timelion_vis_component.tsx"
+            "path": "src/plugins/vis_types/timelion/public/components/timelion_vis_component.tsx"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/timelion_vis_renderer.tsx"
+            "path": "src/plugins/vis_types/timelion/public/timelion_vis_renderer.tsx"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/timelion_vis_renderer.tsx"
+            "path": "src/plugins/vis_types/timelion/public/timelion_vis_renderer.tsx"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/legacy/timelion_vis_component.tsx"
+            "path": "src/plugins/vis_types/timelion/public/legacy/timelion_vis_component.tsx"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/legacy/timelion_vis_component.tsx"
+            "path": "src/plugins/vis_types/timelion/public/legacy/timelion_vis_component.tsx"
           }
         ],
         "initialIsOpen": false
