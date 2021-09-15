@@ -28,7 +28,6 @@ import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../.
 import { PolicyArtifactsList } from '../../artifacts/list';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
-  // const history = useHistory();
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const policyItem = usePolicyDetailsSelector(policyDetails);
 
