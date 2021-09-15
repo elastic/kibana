@@ -3,5 +3,5 @@
 .rowFormatter__value img {
   vertical-align: middle;
   max-height: lineHeightFromBaseline(2) !important;
-  max-width: 500px !important;
+  max-width: ($euiSizeXXL * 12.5) !important;
 }

@@ -99,7 +99,7 @@
     // For most width-height-ratios that will never be hit, because we'd usually limit
     // it by the way smaller height. But images with very large width and very small height
     // might be limited by that.
-    max-width: 500px !important;
+    max-width: ($euiSizeXXL * 12.5) !important;
   }
 }
 
