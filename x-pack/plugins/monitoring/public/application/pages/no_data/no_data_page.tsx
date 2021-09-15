@@ -17,6 +17,8 @@ import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../
 import { Legacy } from '../../../legacy_shims';
 import { Enabler } from './enabler';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { initSetupModeState } from '../../setup_mode/setup_mode';
+import { GlobalStateContext } from '../../global_state_context';
 
 const CODE_PATHS = [CODE_PATH_LICENSE];
 
@@ -69,6 +71,9 @@ export const NoDataPage = () => {
       ignoreGlobalState: true,
     },
   ]);
+
+  const globalState = useContext(GlobalStateContext);
+  initSetupModeState(globalState, services.http);
 
   // From x-pack/plugins/monitoring/public/views/no_data/model_updater.js
   const updateModel = useCallback(
