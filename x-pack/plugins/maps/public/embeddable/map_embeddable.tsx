@@ -72,7 +72,7 @@ import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
-import { getMapAttributeService } from '../map_attribute_service';
+import { getMapAttributeService, resolveSavedObject } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 
@@ -148,6 +148,23 @@ export class MapEmbeddable
     this._initializeStore();
     try {
       await this._initializeOutput();
+    } catch (e) {
+      this.onFatalError(e);
+      return;
+    }
+    try {
+      await this._initializeOutput();
+      const savedObjectId = this._savedMap.getSavedObjectId();
+      if (savedObjectId) {
+        const { resolvedSavedObject } = await resolveSavedObject(savedObjectId);
+        if (resolvedSavedObject?.outcome === 'conflict') {
+          const currentObjectId = resolvedSavedObject.saved_object.id;
+          const otherObjectId = resolvedSavedObject.alias_target_id!;
+          throw new Error(
+            `This object ${currentObjectId} has the same URL as a legacy alias ${otherObjectId}. Disable the alias to resolve this error. Reference: https://www.elastic.co/guide/en/kibana/master/legacy-url-aliases.html}`
+          );
+        }
+      }
     } catch (e) {
       this.onFatalError(e);
       return;
