@@ -252,7 +252,7 @@ export interface SavedObjectsRepositoryFactory {
 export interface SavedObjectsSetupDeps {
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
-  coreUsageData: InternalCoreUsageDataSetup;
+  coreUsageData: CoreUsageDataSetup;
   deprecations: InternalDeprecationsServiceSetup;
 }
 
