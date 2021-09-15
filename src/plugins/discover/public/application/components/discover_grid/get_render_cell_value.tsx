@@ -110,6 +110,9 @@ export const getRenderCellValueFn = (
     });
 
     return (
+      // If you change the styling of this list (specifically something that will change the line-height)
+      // make sure to adjust the img overwrites attached to dscDiscoverGrid__descriptionListDescription
+      // in discover_grid.scss
       <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
         {[...highlightPairs, ...sourcePairs].slice(0, maxDocFieldsDisplayed).map(([key, value]) => (
           <Fragment key={key}>
