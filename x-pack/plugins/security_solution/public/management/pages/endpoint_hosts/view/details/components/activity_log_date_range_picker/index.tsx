@@ -17,14 +17,14 @@ import { getActivityLogDataPaging } from '../../../../store/selectors';
 
 const DatePickerWrapper = styled.div`
   width: ${(props) => props.theme.eui.fractions.single.percentage};
-  background: white;
+  max-width: 350px;
 `;
 const StickyFlexItem = styled(EuiFlexItem)`
-  max-width: 350px;
+  background: ${(props) => `${props.theme.eui.euiHeaderBackgroundColor}`};
   position: sticky;
-  top: ${(props) => props.theme.eui.euiSizeM};
+  top: 0;
   z-index: 1;
-  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.m}`};
+  padding: ${(props) => `${props.theme.eui.paddingSizes.m}`};
 `;
 
 export const DateRangePicker = memo(() => {
@@ -67,7 +67,7 @@ export const DateRangePicker = memo(() => {
 
   return (
     <StickyFlexItem grow={false}>
-      <EuiFlexGroup justifyContent="flexEnd" responsive>
+      <EuiFlexGroup justifyContent="flexStart" responsive>
         <DatePickerWrapper>
           <EuiFlexItem>
             <EuiDatePickerRange
