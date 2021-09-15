@@ -7,8 +7,13 @@
  */
 
 module.exports = {
-  timelion_chain: {
-    src: 'src/plugins/vis_types/timelion/common/chain.peg',
-    dest: 'src/plugins/vis_types/timelion/common/_generated_/chain.js',
-  },
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/plugins/vis_types/table'],
+  testRunner: 'jasmine2',
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/vis_types/table',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/plugins/vis_types/table/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
 };
