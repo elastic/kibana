@@ -235,7 +235,7 @@ export const Overview: React.FC = () => {
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiPanel color="subdued">
-        <EuiListGroup flush={true} maxWidth={false} data-test-subj="GroupsSummary">
+        <EuiListGroup flush maxWidth={false} data-test-subj="GroupsSummary">
           {groups.map((group, index) => (
             <EuiListGroupItemTo
               label={group.name}
