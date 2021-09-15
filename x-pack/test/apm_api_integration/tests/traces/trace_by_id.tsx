@@ -61,8 +61,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expectSnapshot(
         response.body.traceDocs.map((doc) =>
           doc.processor.event === 'transaction'
-            ? `${doc.transaction.name} (transaction)`
-            : `${doc.span.name} (span)`
+            ? // @ts-expect-error
+              `${doc.transaction.name} (transaction)`
+            : // @ts-expect-error
+              `${doc.span.name} (span)`
         )
       ).toMatchInline(`
         Array [

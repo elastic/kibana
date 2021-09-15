@@ -29,7 +29,7 @@ describe('ML - data recognizer', () => {
       bulkCreate: jest.fn(),
     } as unknown) as SavedObjectsClientContract,
     {} as JobSavedObjectService,
-    { headers: { authorization: '' } } as KibanaRequest
+    ({ headers: { authorization: '' } } as unknown) as KibanaRequest
   );
 
   describe('jobOverrides', () => {
