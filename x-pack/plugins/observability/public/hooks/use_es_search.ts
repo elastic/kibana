@@ -12,7 +12,7 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { isCompleteResponse } from '../../../../../src/plugins/data/common';
 import { useFetcher } from './use_fetcher';
 
-export const useEsSearch = <TParams extends estypes.SearchRequest>(
+export const useEsSearch = <DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
   params: TParams,
   fnDeps: any[]
 ) => {
@@ -43,7 +43,7 @@ export const useEsSearch = <TParams extends estypes.SearchRequest>(
 
   const { rawResponse } = response as any;
 
-  return { data: rawResponse as ESSearchResponse<unknown, TParams>, loading };
+  return { data: rawResponse as ESSearchResponse<DocumentSource, TParams>, loading };
 };
 
 export function createEsParams<T extends estypes.SearchRequest>(params: T): T {

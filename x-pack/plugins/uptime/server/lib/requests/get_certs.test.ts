@@ -94,7 +94,7 @@ describe('getCerts', () => {
 
     const result = await getCerts({
       uptimeEsClient,
-      index: 1,
+      pageIndex: 1,
       from: 'now-2d',
       to: 'now+1h',
       search: 'my_common_name',

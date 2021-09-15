@@ -10,7 +10,7 @@ import { GetPingHistogramParams, HistogramResult } from '../../../common/runtime
 import { QUERY } from '../../../common/constants';
 import { getHistogramInterval } from '../helper/get_histogram_interval';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { createEsQuery } from '../lib';
+import { createEsQuery } from '../../../common/utils/es_search';
 
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,

@@ -9,10 +9,7 @@ import * as t from 'io-ts';
 
 export const GetCertsParamsType = t.intersection([
   t.type({
-    index: t.number,
-    size: t.number,
-    sortBy: t.string,
-    direction: t.string,
+    pageIndex: t.number,
   }),
   t.partial({
     search: t.string,
@@ -20,6 +17,9 @@ export const GetCertsParamsType = t.intersection([
     notValidAfter: t.string,
     from: t.string,
     to: t.string,
+    sortBy: t.string,
+    direction: t.string,
+    size: t.number,
   }),
 ]);
 

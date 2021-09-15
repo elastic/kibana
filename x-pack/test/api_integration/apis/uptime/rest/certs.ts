@@ -9,9 +9,12 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { CertType } from '../../../../../plugins/uptime/common/runtime_types';
 import { makeChecksWithStatus } from './helper/make_checks';
+import {
+  processCertsResult,
+  getCertsRequestBody,
+} from '../../../../../plugins/uptime/common/requests/get_certs_request_body';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -21,8 +24,18 @@ export default function ({ getService }: FtrProviderContext) {
   describe('certs api', () => {
     describe('empty index', async () => {
       it('returns empty array for no data', async () => {
-        const apiResponse = await supertest.get(API_URLS.CERTS);
-        expect(JSON.stringify(apiResponse.body)).to.eql('{"certs":[],"total":0}');
+        const apiResponse = await supertest
+          .post(`/internal/search/ese`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            params: {
+              index: 'heartbeat-*',
+              body: getCertsRequestBody({ pageIndex: 0, size: 10 }),
+            },
+          });
+
+        const result = processCertsResult(apiResponse.body.rawResponse);
+        expect(JSON.stringify(result)).to.eql('{"certs":[],"total":0}');
       });
     });
 
@@ -67,19 +80,29 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('retrieves expected cert data', async () => {
-        const apiResponse = await supertest.get(API_URLS.CERTS);
-        const { body } = apiResponse;
+        const { body } = await supertest
+          .post(`/internal/search/ese`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            params: {
+              index: 'heartbeat-*',
+              body: getCertsRequestBody({ pageIndex: 0, size: 10 }),
+            },
+          });
 
-        expect(body.certs).not.to.be(undefined);
-        expect(Array.isArray(body.certs)).to.be(true);
-        expect(body.certs).to.have.length(1);
+        const result = processCertsResult(body.rawResponse);
 
-        const decoded = CertType.decode(body.certs[0]);
+        expect(result.certs).not.to.be(undefined);
+        expect(Array.isArray(result.certs)).to.be(true);
+        expect(result.certs).to.have.length(1);
+
+        const decoded = CertType.decode(result.certs[0]);
         expect(isRight(decoded)).to.be(true);
 
-        const cert = body.certs[0];
+        const cert = result.certs[0];
         expect(Array.isArray(cert.monitors)).to.be(true);
         expect(cert.monitors[0]).to.eql({
+          name: undefined,
           id: monitorId,
           url: 'http://localhost:5678/pattern?r=200x5,500x1',
         });
