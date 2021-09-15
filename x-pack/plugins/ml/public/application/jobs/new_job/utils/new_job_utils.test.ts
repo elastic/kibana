@@ -6,7 +6,7 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { createSearchItems } from './new_job_utils';
 
