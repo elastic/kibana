@@ -66,7 +66,28 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
 
   ```
   yarn es snapshot -E path.data=./path_to_6.x_indices
-```
+  ```
+
+  **Token-based authentication**
+
+  Reindexing should also work using token-based authentication (implemented via [#111451](https://github.com/elastic/kibana/pull/111451)). To simulate, set the following parameters when running ES from a snapshot:
+
+  ```
+  yarn es snapshot -E path.data=./path_to_6.x_indices -E xpack.security.authc.token.enabled=true -E xpack.security.authc.api_key.enabled=true
+  ```
+
+  Then, update your `kibana.dev.yml` file to include:
+
+  ```
+  xpack.security.authc.providers:
+      token:
+         token1:
+            order: 0
+            showInSelector: true
+            enabled: true
+  ```
+
+  To verify it's working as expected, kick off a reindex task in UA. Then, navigate to **Security > API keys** and verify an API key was created. The name should be prefixed with `ua_reindex_`. Once the reindex task has completed successfully, the API key should be deleted.
 
 **2. Upgrading or deleting ML job model snapshots**
 
@@ -178,7 +199,24 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
   ```
 
 #### Kibana deprecations
-To test the Kibana deprecations page, you will first need to create a set of deprecations that will be returned from the Kibana deprecations API. Refer to the [8.0 Kibana deprecations meta issue](https://github.com/elastic/kibana/issues/109166) for example deprecations and steps to reproduce.
+To test the Kibana deprecations page, you will first need to create a set of deprecations that will be returned from the Kibana deprecations API.
+
+`reporting` is currently one of the only plugins that is registering a deprecation with an automated resolution (implemented via [#104303](https://github.com/elastic/kibana/pull/104303)). To trigger this deprecation:
+
+1. Add Kibana sample data.
+2. Create a PDF report from the Dashboard (**Dashboard > Share > PDF reports > Generate PDFs**). This requires a trial license.
+3. Issue the following request in Console:
+
+```
+PUT .reporting-*/_settings
+{
+  "settings": {
+    "index.lifecycle.name": null
+  }
+}
+```
+
+For a complete list of Kibana deprecations, refer to the [8.0 Kibana deprecations meta issue](https://github.com/elastic/kibana/issues/109166).
 
 ### Errors
 
