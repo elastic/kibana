@@ -39,7 +39,10 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useSearchStrategy } from '../../../hooks/use_search_strategy';
 
-import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
+import {
+  TransactionDistributionChart,
+  TransactionDistributionChartData,
+} from '../../shared/charts/transaction_distribution_chart';
 import { push } from '../../shared/Links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
@@ -239,6 +242,25 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     histogramTerms.length < 1 &&
     (progressNormalized === 1 || !progress.isRunning);
 
+  const transactionDistributionChartData: TransactionDistributionChartData[] = [];
+
+  if (Array.isArray(overallHistogram)) {
+    transactionDistributionChartData.push({
+      id: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
+        { defaultMessage: 'All transactions' }
+      ),
+      histogram: overallHistogram,
+    });
+  }
+
+  if (selectedHistogram && Array.isArray(selectedHistogram.histogram)) {
+    transactionDistributionChartData.push({
+      id: `${selectedHistogram.fieldName}:${selectedHistogram.fieldValue}`,
+      histogram: selectedHistogram.histogram,
+    });
+  }
+
   return (
     <div data-test-subj="apmLatencyCorrelationsTabContent">
       <EuiFlexGroup>
@@ -264,8 +286,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       <TransactionDistributionChart
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={response.percentileThresholdValue ?? 0}
-        {...selectedHistogram}
-        overallHistogram={overallHistogram}
+        data={transactionDistributionChartData}
         hasData={hasData}
         status={status}
       />

@@ -57,9 +57,10 @@ describe('flattenHit', () => {
       fields: {
         date: ['1'],
         zzz: ['z'],
+        _abc: ['a'],
       },
     });
-    const expectedOrder = ['date', 'name', 'zzz', '_id', '_routing', '_score', '_type'];
+    const expectedOrder = ['_abc', 'date', 'name', 'zzz', '_id', '_routing', '_score', '_type'];
     expect(Object.keys(response)).toEqual(expectedOrder);
     expect(Object.entries(response).map(([key]) => key)).toEqual(expectedOrder);
   });
