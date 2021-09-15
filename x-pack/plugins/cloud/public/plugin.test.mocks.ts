@@ -10,6 +10,7 @@ import type { FullStoryDeps, FullStoryApi, FullStoryService } from './fullstory'
 
 export const fullStoryApiMock: jest.Mocked<FullStoryApi> = {
   event: jest.fn(),
+  setUserVars: jest.fn(),
   identify: jest.fn(),
 };
 export const initializeFullStoryMock = jest.fn<FullStoryService, [FullStoryDeps]>(() => ({
