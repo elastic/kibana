@@ -148,7 +148,7 @@ describe('PieComponent', function () {
     } as unknown) as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
     const component = mount(<PieComponent {...newProps} />);
-    expect(findTestSubject(component, 'pieVisualizationError').length).toBe(1);
+    expect(findTestSubject(component, 'pieVisualizationError').text()).toEqual('No results found');
   });
 
   it('renders the no results component if there are negative values', () => {
