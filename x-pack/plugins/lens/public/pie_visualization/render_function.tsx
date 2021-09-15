@@ -253,7 +253,7 @@ export function PieComponent(
       <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
         <FormattedMessage
           id="xpack.lens.pie.pieWithNegativeWarningLabel"
-          defaultMessage="{chartType} charts can't render with negative values. Try a different visualization type."
+          defaultMessage="{chartType} charts can't render with negative values."
           values={{
             chartType: CHART_NAMES[shape].label,
           }}

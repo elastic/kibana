@@ -20,8 +20,7 @@ export const VisualizationNoResults = ({ hasNegativeValues = false }) => {
         <EuiText size="xs">
           {hasNegativeValues
             ? i18n.translate('visTypePie.negativeValuesFound', {
-                defaultMessage:
-                  "Pie/donut charts can't render with negative values. Try a different visualization type.",
+                defaultMessage: "Pie/donut charts can't render with negative values.",
               })
             : i18n.translate('visTypePie.noResultsFoundTitle', {
                 defaultMessage: 'No results found',
