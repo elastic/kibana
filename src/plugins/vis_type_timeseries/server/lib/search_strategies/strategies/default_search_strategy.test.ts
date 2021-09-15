@@ -27,9 +27,11 @@ describe('DefaultSearchStrategy', () => {
   let req: VisTypeTimeseriesVisDataRequest;
 
   beforeEach(() => {
-    req = {
-      body: {},
-    } as VisTypeTimeseriesVisDataRequest;
+    req = ({
+      body: {
+        panels: [],
+      },
+    } as unknown) as VisTypeTimeseriesVisDataRequest;
     defaultSearchStrategy = new DefaultSearchStrategy();
   });
 
@@ -46,6 +48,7 @@ describe('DefaultSearchStrategy', () => {
     expect(value.capabilities).toMatchInlineSnapshot(`
       DefaultSearchCapabilities {
         "maxBucketsLimit": undefined,
+        "panel": undefined,
         "timezone": undefined,
       }
     `);
