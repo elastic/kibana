@@ -33,6 +33,11 @@ export type ArtifactCardGridProps = Omit<
 
   onExpandCollapse: (/* TODO:PT defined structure for props */) => void;
 
+  /**
+   * Callback to provide additional props for the `ArtifactEntryCollapsableCard`
+   *
+   * @param item
+   */
   cardComponentProps?: (
     item: AnyArtifact
   ) => Omit<ArtifactEntryCollapsableCardProps, 'onExpandCollapse' | 'item'>;
@@ -66,6 +71,7 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
     return (
       <>
         <GridHeader />
+
         <PaginatedContent
           {...paginatedContentProps}
           items={items}
