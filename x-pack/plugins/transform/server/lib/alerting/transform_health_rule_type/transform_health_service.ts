@@ -85,7 +85,7 @@ export function transformHealthServiceProvider(esClient: ElasticsearchClient) {
         .map((t) => ({
           transform_id: t.id,
           description: transformsDict.get(t.id)?.description,
-          state: t.state,
+          transform_state: t.state,
           node_name: t.node?.name,
         }));
     },
