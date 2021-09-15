@@ -12,7 +12,6 @@ module.exports = {
   rootDir: path.resolve(__dirname, '../../..'),
   roots: ['<rootDir>/x-pack/plugins/apm'],
   setupFiles: ['<rootDir>/x-pack/plugins/apm/.storybook/jest_setup.js'],
-  testPathIgnorePatterns: ['<rootDir>/x-pack/plugins/apm/e2e/'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/apm',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
