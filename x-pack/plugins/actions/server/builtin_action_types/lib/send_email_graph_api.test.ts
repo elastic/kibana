@@ -27,6 +27,9 @@ describe('sendEmailGraphApi', () => {
   const configurationUtilities = actionsConfigMock.create();
 
   test('email contains the proper message', async () => {
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 202,
+    });
     await sendEmailGraphApi(
       { options: getSendEmailOptions(), messageHTML: 'test1', headers: {} },
       logger,
@@ -108,6 +111,9 @@ describe('sendEmailGraphApi', () => {
   });
 
   test('email was sent on behalf of the user "from" mailbox', async () => {
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 202,
+    });
     await sendEmailGraphApi(
       {
         options: getSendEmailOptions(),
@@ -195,6 +201,9 @@ describe('sendEmailGraphApi', () => {
   });
 
   test('sendMail request was sent to the custom configured Graph API URL', async () => {
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 202,
+    });
     await sendEmailGraphApi(
       {
         options: getSendEmailOptions(),
@@ -278,6 +287,35 @@ describe('sendEmailGraphApi', () => {
         },
       ]
       `);
+  });
+
+  test('throw the exception and log the proper error if message was not sent successfuly', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 400,
+      data: {
+        error: {
+          code: 'ErrorMimeContentInvalidBase64String',
+          message: 'Invalid base64 string for MIME content.',
+        },
+      },
+    });
+
+    await expect(
+      sendEmailGraphApi(
+        { options: getSendEmailOptions(), messageHTML: 'test1', headers: {} },
+        logger,
+        configurationUtilities
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"{\\"error\\":{\\"code\\":\\"ErrorMimeContentInvalidBase64String\\",\\"message\\":\\"Invalid base64 string for MIME content.\\"}}"'
+    );
+
+    expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "error thrown sending Microsoft Exchange email for clientID: undefined: {\\"error\\":{\\"code\\":\\"ErrorMimeContentInvalidBase64String\\",\\"message\\":\\"Invalid base64 string for MIME content.\\"}}",
+      ]
+    `);
   });
 });
 

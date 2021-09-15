@@ -59,9 +59,10 @@ export async function requestOAuthClientCredentialsToken(
       expiresIn: res.data.expires_in,
     };
   } else {
+    const errString = JSON.stringify(res.data);
     logger.warn(
-      `error thrown getting the access token from ${tokenUrl} for clientID: ${clientId}: ${res.data}`
+      `error thrown getting the access token from ${tokenUrl} for clientID: ${clientId}: ${errString}`
     );
-    throw new Error(JSON.stringify(res.data));
+    throw new Error(errString);
   }
 }

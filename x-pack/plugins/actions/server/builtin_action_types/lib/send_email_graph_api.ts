@@ -40,11 +40,14 @@ export async function sendEmailGraphApi(
     configurationUtilities,
     validateStatus: () => true,
   });
-  if (res.status === 200) {
+  if (res.status === 202) {
     return res;
   }
-  logger.warn(`error thrown sending Microsoft Exchange email: ${res.data}`);
-  throw new Error(JSON.stringify(res.data));
+  const errString = JSON.stringify(res.data);
+  logger.warn(
+    `error thrown sending Microsoft Exchange email for clientID: ${sendEmailOptions.options.transport.clientId}: ${errString}`
+  );
+  throw new Error(errString);
 }
 
 function getMessage(emailOptions: SendEmailOptions, messageHTML: string) {
