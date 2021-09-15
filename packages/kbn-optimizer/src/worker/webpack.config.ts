@@ -261,6 +261,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         test: /\.(js|css)$/,
         cache: false,
       }),
+      new webpack.DllReferencePlugin({
+        context: worker.repoRoot,
+        manifest: require(UiSharedDepsNpm.dllManifestPath),
+      }),
     ],
 
     optimization: {

@@ -183,11 +183,6 @@ export const GeneratePackagesOptimizedAssets: Task = {
         id: 'kbnUiSharedDeps-fonts',
         value: getSize(groups.get('font') ?? []),
       },
-      {
-        group: 'page load bundle size',
-        id: 'kbnUiSharedDeps-asyncChunks',
-        value: getSize(groups.get('asyncChunk') ?? []),
-      },
     ];
     log.verbose('metrics:', metrics);
 
