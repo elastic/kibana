@@ -10,7 +10,6 @@ import { CoreSetup, Plugin } from '../../../core/public';
 import { FieldFormatsRegistry, FORMATS_UI_SETTINGS } from '../common';
 import { baseFormattersPublic } from './lib';
 import { FormatFactory } from '../common/types';
-import './index.scss';
 
 export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {
   private readonly fieldFormatsRegistry: FieldFormatsRegistry = new FieldFormatsRegistry();

@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { DateFormat, DateNanosFormat } from './converters';
 export { baseFormattersPublic } from './constants';

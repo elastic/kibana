@@ -14,5 +14,8 @@
     "common/**/*.json",
     "public/**/*.json"
   ],
-  "references": [{ "path": "../../core/tsconfig.json" }]
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../kibana_utils/tsconfig.json" }
+  ]
 }

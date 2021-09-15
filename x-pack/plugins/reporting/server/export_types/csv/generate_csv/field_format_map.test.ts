@@ -9,10 +9,9 @@ import expect from '@kbn/expect';
 import {
   FieldFormatsGetConfigFn,
   FieldFormatsRegistry,
-  BytesFormat,
-  NumberFormat,
   FORMATS_UI_SETTINGS,
 } from 'src/plugins/field_formats/common';
+import { BytesFormat, NumberFormat } from 'src/plugins/field_formats/common/converters';
 import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
 import { fieldFormatMapFactory } from './field_format_map';
 

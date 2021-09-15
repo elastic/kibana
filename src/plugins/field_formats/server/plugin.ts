@@ -16,7 +16,8 @@ import {
 } from '../../../core/server';
 import { FieldFormatsStart, FieldFormatsSetup } from './types';
 import { DateFormat, DateNanosFormat } from './lib/converters';
-import { baseFormatters, FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
+import { FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
+import { baseFormatters } from '../common/constants/base_formatters';
 import { getUiSettings } from './ui_settings';
 
 export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {

@@ -7,7 +7,8 @@
  */
 
 import { AggConfigs } from '../agg_configs';
-import { FieldFormatsGetConfigFn, NumberFormat } from '../../../../../field_formats/common';
+import { FieldFormatsGetConfigFn } from '../../../../../field_formats/common';
+import { NumberFormat } from '../../../../../field_formats/common/converters';
 import { getShardDelayBucketAgg, SHARD_DELAY_AGG_NAME } from './shard_delay';
 
 describe('Shard Delay Agg', () => {

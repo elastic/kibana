@@ -15,9 +15,9 @@ import sinon from 'sinon';
 import { ReportingConfig, ReportingCore } from '../../';
 import {
   FieldFormatsRegistry,
-  StringFormat,
   FORMATS_UI_SETTINGS,
 } from '../../../../../../src/plugins/field_formats/common';
+import { StringFormat } from '../../../../../../src/plugins/field_formats/common/converters';
 import {
   CSV_QUOTE_VALUES_SETTING,
   CSV_SEPARATOR_SETTING,

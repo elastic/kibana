@@ -162,6 +162,7 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
         "has": [MockFunction],
         "init": [MockFunction],
         "parseDefaultTypeMap": [MockFunction],
+        "preloadAll": [MockFunction],
         "register": [MockFunction],
       },
       "fields": FldList [

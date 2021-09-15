@@ -15,7 +15,7 @@ import { DefaultFormatEditor, defaultState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
-import { StringFormat } from '../../../../../../field_formats/common';
+import type { StringFormat } from '../../../../../../field_formats/common/converters';
 
 interface StringFormatEditorFormatParams {
   transform: string;

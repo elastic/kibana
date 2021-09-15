@@ -523,6 +523,7 @@ export class DataViewsService {
    * @returns IndexPattern
    */
   async create(spec: DataViewSpec, skipFetchFields = false): Promise<DataView> {
+    await this.fieldFormats.preloadAll();
     const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 

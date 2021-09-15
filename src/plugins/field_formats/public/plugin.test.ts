@@ -11,11 +11,12 @@ import { DateFormat } from './lib/converters/date';
 import { FieldFormatsPlugin } from './plugin';
 
 describe('FieldFormatsPublic', () => {
-  test('DateFormat is public version', () => {
+  test('DateFormat is public version', async () => {
     const mockCore = coreMock.createSetup();
     const plugin = new FieldFormatsPlugin();
     plugin.setup(mockCore);
     const fieldFormatsRegistry = plugin.start();
+    await fieldFormatsRegistry.preloadAll();
     const DateFormatFromRegistry = fieldFormatsRegistry.getTypeWithoutMetaParams('date');
 
     expect(DateFormatFromRegistry).toEqual(DateFormat);

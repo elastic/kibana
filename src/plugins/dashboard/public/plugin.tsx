@@ -199,6 +199,7 @@ export class DashboardPlugin
         http: coreStart.http,
         ExitFullScreenButton,
         presentationUtil: deps.presentationUtil,
+        fieldFormats: deps.data.fieldFormats,
       };
     };
 

@@ -25,7 +25,7 @@ import { formatId } from './constants';
 
 import { context as contextType } from '../../../../../../kibana_react/public';
 import { FormatEditorProps } from '../types';
-import { UrlFormat } from '../../../../../../field_formats/common';
+import type { UrlFormat } from '../../../../../../field_formats/common/converters';
 
 interface OnChangeParam {
   type: string;

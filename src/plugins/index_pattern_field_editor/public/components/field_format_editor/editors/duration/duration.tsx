@@ -7,7 +7,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { DurationFormat } from 'src/plugins/field_formats/common';
+import type { DurationFormat } from 'src/plugins/field_formats/common/converters';
 
 import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 

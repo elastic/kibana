@@ -13,7 +13,8 @@ import {
   createFiltersFromValueClickAction,
   ValueClickDataContext,
 } from './create_filters_from_value_click';
-import { FieldFormatsGetConfigFn, BytesFormat } from '../../../../field_formats/common';
+import { FieldFormatsGetConfigFn } from '../../../../field_formats/common';
+import { BytesFormat } from '../../../../field_formats/common/converters';
 import { RangeFilter } from '@kbn/es-query';
 
 const mockField = {

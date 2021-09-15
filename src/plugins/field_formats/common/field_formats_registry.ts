@@ -21,13 +21,13 @@ import {
   FormatFactory,
   FieldFormatParams,
 } from './types';
-import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
 import { FORMATS_UI_SETTINGS } from '../common/constants/ui_settings';
 import { FieldFormatNotFoundError } from './errors';
+import { KbnRegistry, KbnRegistryItemLoader } from '../../kibana_utils/common';
 
 export class FieldFormatsRegistry {
-  protected fieldFormats: Map<FieldFormatId, FieldFormatInstanceType> = new Map();
+  protected readonly fieldFormats = new KbnRegistry<FieldFormatInstanceType>();
   protected defaultMap: Record<string, FieldFormatConfig> = {};
   protected metaParamsOptions: FieldFormatMetaParams = {};
   protected getConfig?: FieldFormatsGetConfigFn;
@@ -52,7 +52,9 @@ export class FieldFormatsRegistry {
   init(
     getConfig: FieldFormatsGetConfigFn,
     metaParamsOptions: FieldFormatMetaParams = {},
-    defaultFieldConverters: FieldFormatInstanceType[] = baseFormatters
+    defaultFieldConverters:
+      | FieldFormatInstanceType[]
+      | Array<KbnRegistryItemLoader<FieldFormatInstanceType>>
   ) {
     const defaultTypeMap = getConfig(FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP) as Record<
       string,
@@ -62,6 +64,10 @@ export class FieldFormatsRegistry {
     this.parseDefaultTypeMap(defaultTypeMap);
     this.getConfig = getConfig;
     this.metaParamsOptions = metaParamsOptions;
+  }
+
+  async preloadAll() {
+    await this.fieldFormats.preloadAll();
   }
 
   /**
@@ -230,7 +236,8 @@ export class FieldFormatsRegistry {
    * @return {FieldFormatInstanceType[]}
    */
   getByFieldType(fieldType: KBN_FIELD_TYPES): FieldFormatInstanceType[] {
-    return [...this.fieldFormats.values()]
+    return this.fieldFormats
+      .getAll()
       .filter(
         (format: FieldFormatInstanceType) =>
           format && !format.hidden && format.fieldType.indexOf(fieldType) !== -1
@@ -269,14 +276,18 @@ export class FieldFormatsRegistry {
     this.getDefaultInstanceMemoized.cache.clear?.();
   }
 
-  register(fieldFormats: FieldFormatInstanceType[]) {
-    fieldFormats.forEach((fieldFormat) => {
-      if (this.fieldFormats.has(fieldFormat.id))
-        throw new Error(
-          `Failed to register field format with id "${fieldFormat.id}" as it already has been registered`
-        );
-      this.fieldFormats.set(fieldFormat.id, fieldFormat);
-    });
+  register(
+    fieldFormats: FieldFormatInstanceType[] | Array<KbnRegistryItemLoader<FieldFormatInstanceType>>
+  ) {
+    fieldFormats.forEach(
+      (fieldFormat: FieldFormatInstanceType | KbnRegistryItemLoader<FieldFormatInstanceType>) => {
+        if (this.fieldFormats.has(fieldFormat.id))
+          throw new Error(
+            `Failed to register field format with id "${fieldFormat.id}" as it already has been registered`
+          );
+        this.fieldFormats.register(fieldFormat);
+      }
+    );
   }
 
   /**

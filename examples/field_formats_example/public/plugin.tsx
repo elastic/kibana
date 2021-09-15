@@ -80,6 +80,7 @@ export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, 
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount({ element }: AppMountParameters) {
         const [, plugins] = await core.getStartServices();
+        await plugins.fieldFormats.preloadAll();
         ReactDOM.render(
           <App deps={{ fieldFormats: plugins.fieldFormats, openIndexPatternNumberFieldEditor }} />,
           element

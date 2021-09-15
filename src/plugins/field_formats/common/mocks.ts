@@ -32,4 +32,5 @@ export const fieldFormatsMock: IFieldFormatsRegistry = {
     return new DefaultFieldFormat();
   }),
   getTypeWithoutMetaParams: jest.fn(),
+  preloadAll: jest.fn(),
 };

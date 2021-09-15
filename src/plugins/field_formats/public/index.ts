@@ -7,7 +7,6 @@
  */
 
 import { FieldFormatsPlugin } from './plugin';
-export { DateFormat, DateNanosFormat } from './lib/converters';
 
 export function plugin() {
   return new FieldFormatsPlugin();

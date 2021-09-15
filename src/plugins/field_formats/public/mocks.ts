@@ -7,10 +7,13 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { baseFormattersPublic } from './lib/constants';
 import { FieldFormatsRegistry, FORMATS_UI_SETTINGS } from '../common';
 import type { FieldFormatsSetup, FieldFormatsStart } from '.';
 import { fieldFormatsMock } from '../common/mocks';
+import { DateFormat, DateNanosFormat } from './lib/converters';
+import { baseFormatters } from '../common/constants/base_formatters';
+
+const baseFormattersPublicMock = [DateFormat, DateNanosFormat, ...baseFormatters];
 
 export const getFieldFormatsRegistry = (core: CoreSetup) => {
   const fieldFormatsRegistry = new FieldFormatsRegistry();
@@ -37,7 +40,7 @@ export const getFieldFormatsRegistry = (core: CoreSetup) => {
     }
   };
 
-  fieldFormatsRegistry.init(getConfigWithFallbacks, {}, baseFormattersPublic);
+  fieldFormatsRegistry.init(getConfigWithFallbacks, {}, baseFormattersPublicMock);
 
   return fieldFormatsRegistry;
 };

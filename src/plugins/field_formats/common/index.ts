@@ -14,23 +14,6 @@ type IFieldFormatsRegistry = PublicMethodsOf<FieldFormatsRegistry>;
 
 export { FieldFormatsRegistry, IFieldFormatsRegistry };
 export { FieldFormat } from './field_format';
-export { baseFormatters } from './constants/base_formatters';
-export {
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-} from './converters';
 
 export { getHighlightRequest } from './utils';
 

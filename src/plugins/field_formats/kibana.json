@@ -6,6 +6,7 @@
   "ui": true,
   "extraPublicDirs": ["common"],
   "requiredPlugins": [],
+  "requiredBundles": ["kibanaUtils"],
   "optionalPlugins": [],
   "owner": {
     "name": "App Services",
