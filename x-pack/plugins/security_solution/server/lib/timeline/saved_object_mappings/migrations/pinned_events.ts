@@ -5,21 +5,9 @@
  * 2.0.
  */
 
-import {
-  SavedObjectMigrationMap,
-  SavedObjectSanitizedDoc,
-  SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
-import { pinnedEventSavedObjectType } from '..';
+import { SavedObjectMigrationMap } from 'kibana/server';
 import { migrateTimelineIdToReferences } from './utils';
-import { TimelineId } from './types';
-
-export const migratePinnedEventsTimelineIdToReferences = (
-  doc: SavedObjectUnsanitizedDoc<TimelineId>
-): SavedObjectSanitizedDoc<unknown> => {
-  return migrateTimelineIdToReferences(doc, pinnedEventSavedObjectType);
-};
 
 export const pinnedEventsMigrations: SavedObjectMigrationMap = {
-  '7.16.0': migratePinnedEventsTimelineIdToReferences,
+  '7.16.0': migrateTimelineIdToReferences,
 };

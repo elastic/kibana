@@ -6,23 +6,28 @@
  */
 
 import expect from '@kbn/expect';
-import { pinnedEventSavedObjectType } from '../../../../plugins/security_solution/server/lib/timeline/saved_object_mappings';
-import { SavedTimeline } from '../../../../plugins/security_solution/common/types/timeline';
-import { SavedNote } from '../../../../plugins/security_solution/common/types/timeline/note';
+import {
+  noteSavedObjectType,
+  pinnedEventSavedObjectType,
+  timelineSavedObjectType,
+} from '../../../../plugins/security_solution/server/lib/timeline/saved_object_mappings';
+import { TimelineWithoutExternalRefs } from '../../../../plugins/security_solution/common/types/timeline';
+import { NoteWithoutExternalRefs } from '../../../../plugins/security_solution/common/types/timeline/note';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getSavedObjectFromES } from './utils';
+import { PinnedEventWithoutExternalRefs } from '../../../../plugins/security_solution/common/types/timeline/pinned_event';
 
 interface TimelineWithoutSavedQueryId {
-  'siem-ui-timeline': Omit<SavedTimeline, 'savedQueryId'>;
+  [timelineSavedObjectType]: TimelineWithoutExternalRefs;
 }
 
 interface NoteWithoutTimelineId {
-  'siem-ui-timeline-note': Omit<SavedNote, 'timelineId'>;
+  [noteSavedObjectType]: NoteWithoutExternalRefs;
 }
 
 interface PinnedEventWithoutTimelineId {
-  [pinnedEventSavedObjectType]: Omit<SavedNote, 'timelineId'>;
+  [pinnedEventSavedObjectType]: PinnedEventWithoutExternalRefs;
 }
 
 export default function ({ getService }: FtrProviderContext) {
@@ -33,23 +38,22 @@ export default function ({ getService }: FtrProviderContext) {
     const es = getService('es');
 
     describe('7.16.0', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
+        );
+      });
       describe('notes timelineId', () => {
-        before(async () => {
-          await esArchiver.load(
-            'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
-          );
-        });
-
-        after(async () => {
-          await esArchiver.unload(
-            'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
-          );
-        });
-
         it('removes the timelineId in the saved object', async () => {
           const timelines = await getSavedObjectFromES<NoteWithoutTimelineId>(
             es,
-            'siem-ui-timeline-note',
+            noteSavedObjectType,
             {
               ids: {
                 values: [
@@ -60,13 +64,13 @@ export default function ({ getService }: FtrProviderContext) {
             }
           );
 
-          expect(
-            timelines.body.hits.hits[0]._source?.['siem-ui-timeline-note']
-          ).to.not.have.property('timelineId');
+          expect(timelines.body.hits.hits[0]._source?.[noteSavedObjectType]).to.not.have.property(
+            'timelineId'
+          );
 
-          expect(
-            timelines.body.hits.hits[1]._source?.['siem-ui-timeline-note']
-          ).to.not.have.property('timelineId');
+          expect(timelines.body.hits.hits[1]._source?.[noteSavedObjectType]).to.not.have.property(
+            'timelineId'
+          );
         });
 
         it('preserves the eventId in the saved object after migration', async () => {
@@ -92,30 +96,18 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('savedQueryId', () => {
-        before(async () => {
-          await esArchiver.load(
-            'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
-          );
-        });
-
-        after(async () => {
-          await esArchiver.unload(
-            'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
-          );
-        });
-
         it('removes the savedQueryId', async () => {
           const timelines = await getSavedObjectFromES<TimelineWithoutSavedQueryId>(
             es,
-            'siem-ui-timeline',
+            timelineSavedObjectType,
             {
               ids: { values: ['siem-ui-timeline:8dc70950-1012-11ec-9ad3-2d7c6600c0f7'] },
             }
           );
 
-          expect(timelines.body.hits.hits[0]._source?.['siem-ui-timeline']).to.not.have.property(
-            'savedQueryId'
-          );
+          expect(
+            timelines.body.hits.hits[0]._source?.[timelineSavedObjectType]
+          ).to.not.have.property('savedQueryId');
         });
 
         it('preserves the title in the saved object after migration', async () => {
@@ -136,18 +128,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('pinned events timelineId', () => {
-        before(async () => {
-          await esArchiver.load(
-            'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
-          );
-        });
-
-        after(async () => {
-          await esArchiver.unload(
-            'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
-          );
-        });
-
         it('removes the timelineId in the saved object', async () => {
           const timelines = await getSavedObjectFromES<PinnedEventWithoutTimelineId>(
             es,
