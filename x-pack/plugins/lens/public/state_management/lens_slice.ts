@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
+import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
@@ -68,247 +68,306 @@ export const getPreloadedState = ({
   return state;
 };
 
-const reducers = {
-  setState: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
-    return {
-      ...state,
-      ...payload,
-    };
-  },
-  onActiveDataChange: (state, { payload }: PayloadAction<TableInspectorAdapter>) => {
-    return {
-      ...state,
-      activeData: payload,
-    };
-  },
-  setSaveable: (state, { payload }: PayloadAction<boolean>) => {
-    return {
-      ...state,
-      isSaveable: payload,
-    };
-  },
-  updateState: (
-    state,
-    action: {
-      payload: {
-        subType: string;
-        updater: (prevState: LensAppState) => LensAppState;
-      };
-    }
-  ) => {
-    return action.payload.updater(current(state) as LensAppState);
-  },
-  updateDatasourceState: (
-    state,
-    {
-      payload,
-    }: {
-      payload: {
-        updater: unknown | ((prevState: unknown) => unknown);
-        datasourceId: string;
-        clearStagedPreview?: boolean;
-      };
-    }
-  ) => {
-    return {
-      ...state,
-      datasourceStates: {
-        ...state.datasourceStates,
-        [payload.datasourceId]: {
-          state:
-            typeof payload.updater === 'function'
-              ? payload.updater(current(state).datasourceStates[payload.datasourceId].state)
-              : payload.updater,
-          isLoading: false,
-        },
-      },
-      stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
-    };
-  },
-  updateVisualizationState: (
-    state,
-    {
-      payload,
-    }: {
-      payload: {
-        visualizationId: string;
-        updater: unknown | ((state: unknown) => unknown);
-        clearStagedPreview?: boolean;
-      };
-    }
-  ) => {
-    if (!state.visualization.activeId) {
-      throw new Error('Invariant: visualization state got updated without active visualization');
-    }
-    // This is a safeguard that prevents us from accidentally updating the
-    // wrong visualization. This occurs in some cases due to the uncoordinated
-    // way we manage state across plugins.
-    if (state.visualization.activeId !== payload.visualizationId) {
-      return state;
-    }
-    return {
-      ...state,
-      visualization: {
-        ...state.visualization,
-        state:
-          typeof payload.updater === 'function'
-            ? payload.updater(current(state.visualization.state))
-            : payload.updater,
-      },
-      stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
-    };
-  },
-  updateLayer: (
-    state,
-    {
-      payload,
-    }: {
-      payload: {
-        layerId: string;
-        datasourceId: string;
-        updater: (state: unknown, layerId: string) => unknown;
-      };
-    }
-  ) => {
-    return {
-      ...state,
-      datasourceStates: {
-        ...state.datasourceStates,
-        [payload.datasourceId]: {
-          ...state.datasourceStates[payload.datasourceId],
-          state: payload.updater(
-            current(state).datasourceStates[payload.datasourceId].state,
-            payload.layerId
-          ),
-        },
-      },
-    };
-  },
+export const setState = createAction<Partial<LensAppState>>('setState');
+export const onActiveDataChange = createAction<TableInspectorAdapter>('onActiveDataChange');
+export const setSaveable = createAction<boolean>('setSaveable');
+export const updateState = createAction<{
+  subType: string;
+  updater: (prevState: LensAppState) => LensAppState;
+}>('updateState');
+export const updateDatasourceState = createAction<{
+  updater: unknown | ((prevState: unknown) => unknown);
+  datasourceId: string;
+  clearStagedPreview?: boolean;
+}>('updateDatasourceState');
+export const updateVisualizationState = createAction<{
+  subType: string;
+  updater: (prevState: LensAppState) => LensAppState;
+}>('updateVisualizationState');
+export const updateLayer = createAction<{
+  layerId: string;
+  datasourceId: string;
+  updater: (state: unknown, layerId: string) => unknown;
+}>('updateLayer');
+export const switchVisualization = createAction<{
+  newVisualizationId: string;
+  initialState: unknown;
+  datasourceState?: unknown;
+  datasourceId?: string;
+}>('switchVisualization');
+export const selectSuggestion = createAction<{
+  newVisualizationId: string;
+  initialState: unknown;
+  datasourceState: unknown;
+  datasourceId: string;
+}>('selectSuggestion');
+export const rollbackSuggestion = createAction<void>('rollbackSuggestion');
+export const setToggleFullscreen = createAction<void>('setToggleFullscreen');
+export const submitSuggestion = createAction<void>('submitSuggestion');
+export const switchDatasource = createAction<{
+  newDatasourceId: string;
+}>('switchDatasource');
+export const navigateAway = createAction<void>('navigateAway');
+export const loadInitial = createAction<{
+  initialInput?: LensEmbeddableInput;
+  redirectCallback: (savedObjectId?: string) => void;
+  emptyState: LensAppState;
+  history: History<unknown>;
+}>('loadInitial');
 
-  switchVisualization: (
-    state,
-    {
-      payload,
-    }: {
-      payload: {
-        newVisualizationId: string;
-        initialState: unknown;
-        datasourceState?: unknown;
-        datasourceId?: string;
-      };
-    }
-  ) => {
-    return {
-      ...state,
-      datasourceStates:
-        'datasourceId' in payload && payload.datasourceId
-          ? {
-              ...state.datasourceStates,
-              [payload.datasourceId]: {
-                ...state.datasourceStates[payload.datasourceId],
-                state: payload.datasourceState,
-              },
-            }
-          : state.datasourceStates,
-      visualization: {
-        ...state.visualization,
-        activeId: payload.newVisualizationId,
-        state: payload.initialState,
-      },
-      stagedPreview: undefined,
-    };
-  },
-  selectSuggestion: (
-    state,
-    {
-      payload,
-    }: {
-      payload: {
-        newVisualizationId: string;
-        initialState: unknown;
-        datasourceState: unknown;
-        datasourceId: string;
-      };
-    }
-  ) => {
-    return {
-      ...state,
-      datasourceStates:
-        'datasourceId' in payload && payload.datasourceId
-          ? {
-              ...state.datasourceStates,
-              [payload.datasourceId]: {
-                ...state.datasourceStates[payload.datasourceId],
-                state: payload.datasourceState,
-              },
-            }
-          : state.datasourceStates,
-      visualization: {
-        ...state.visualization,
-        activeId: payload.newVisualizationId,
-        state: payload.initialState,
-      },
-      stagedPreview: state.stagedPreview || {
-        datasourceStates: state.datasourceStates,
-        visualization: state.visualization,
-      },
-    };
-  },
-  rollbackSuggestion: (state) => {
-    return {
-      ...state,
-      ...(state.stagedPreview || {}),
-      stagedPreview: undefined,
-    };
-  },
-  setToggleFullscreen: (state) => {
-    return { ...state, isFullscreenDatasource: !state.isFullscreenDatasource };
-  },
-  submitSuggestion: (state) => {
-    return {
-      ...state,
-      stagedPreview: undefined,
-    };
-  },
-  switchDatasource: (
-    state,
-    {
-      payload,
-    }: {
-      payload: {
-        newDatasourceId: string;
-      };
-    }
-  ) => {
-    return {
-      ...state,
-      datasourceStates: {
-        ...state.datasourceStates,
-        [payload.newDatasourceId]: state.datasourceStates[payload.newDatasourceId] || {
-          state: null,
-          isLoading: true,
-        },
-      },
-      activeDatasourceId: payload.newDatasourceId,
-    };
-  },
-  navigateAway: (state) => state,
-  loadInitial: (
-    state,
-    payload: PayloadAction<{
-      initialInput?: LensEmbeddableInput;
-      redirectCallback: (savedObjectId?: string) => void;
-      emptyState: LensAppState;
-      history: History<unknown>;
-    }>
-  ) => state,
+export const lensActions = {
+  setState,
+  onActiveDataChange,
+  setSaveable,
+  updateState,
+  updateDatasourceState,
+  updateVisualizationState,
+  updateLayer,
+  switchVisualization,
+  selectSuggestion,
+  rollbackSuggestion,
+  setToggleFullscreen,
+  submitSuggestion,
+  switchDatasource,
+  navigateAway,
+  loadInitial,
 };
 
-export const lensSlice = createSlice({
-  name: 'lens',
-  initialState,
-  reducers,
-});
+export const makeLensReducer = (storeDeps: LensStoreDeps) => {
+  const { datasourceMap, visualizationMap } = storeDeps;
+  return createReducer<LensAppState>(initialState, {
+    [setState.type]: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
+      return {
+        ...state,
+        ...payload,
+      };
+    },
+    [onActiveDataChange.type]: (state, { payload }: PayloadAction<TableInspectorAdapter>) => {
+      return {
+        ...state,
+        activeData: payload,
+      };
+    },
+    [setSaveable.type]: (state, { payload }: PayloadAction<boolean>) => {
+      return {
+        ...state,
+        isSaveable: payload,
+      };
+    },
+    [updateState.type]: (
+      state,
+      action: {
+        payload: {
+          subType: string;
+          updater: (prevState: LensAppState) => LensAppState;
+        };
+      }
+    ) => {
+      return action.payload.updater(current(state) as LensAppState);
+    },
+    [updateDatasourceState.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          updater: unknown | ((prevState: unknown) => unknown);
+          datasourceId: string;
+          clearStagedPreview?: boolean;
+        };
+      }
+    ) => {
+      return {
+        ...state,
+        datasourceStates: {
+          ...state.datasourceStates,
+          [payload.datasourceId]: {
+            state:
+              typeof payload.updater === 'function'
+                ? payload.updater(current(state).datasourceStates[payload.datasourceId].state)
+                : payload.updater,
+            isLoading: false,
+          },
+        },
+        stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
+      };
+    },
+    [updateVisualizationState.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          visualizationId: string;
+          updater: unknown | ((state: unknown) => unknown);
+          clearStagedPreview?: boolean;
+        };
+      }
+    ) => {
+      if (!state.visualization.activeId) {
+        throw new Error('Invariant: visualization state got updated without active visualization');
+      }
+      // This is a safeguard that prevents us from accidentally updating the
+      // wrong visualization. This occurs in some cases due to the uncoordinated
+      // way we manage state across plugins.
+      if (state.visualization.activeId !== payload.visualizationId) {
+        return state;
+      }
+      return {
+        ...state,
+        visualization: {
+          ...state.visualization,
+          state:
+            typeof payload.updater === 'function'
+              ? payload.updater(current(state.visualization.state))
+              : payload.updater,
+        },
+        stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
+      };
+    },
+    [updateLayer.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          layerId: string;
+          datasourceId: string;
+          updater: (state: unknown, layerId: string) => unknown;
+        };
+      }
+    ) => {
+      return {
+        ...state,
+        datasourceStates: {
+          ...state.datasourceStates,
+          [payload.datasourceId]: {
+            ...state.datasourceStates[payload.datasourceId],
+            state: payload.updater(
+              current(state).datasourceStates[payload.datasourceId].state,
+              payload.layerId
+            ),
+          },
+        },
+      };
+    },
 
-export const lensReducer = lensSlice.reducer;
-export const lensActions = lensSlice.actions;
+    [switchVisualization.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          newVisualizationId: string;
+          initialState: unknown;
+          datasourceState?: unknown;
+          datasourceId?: string;
+        };
+      }
+    ) => {
+      return {
+        ...state,
+        datasourceStates:
+          'datasourceId' in payload && payload.datasourceId
+            ? {
+                ...state.datasourceStates,
+                [payload.datasourceId]: {
+                  ...state.datasourceStates[payload.datasourceId],
+                  state: payload.datasourceState,
+                },
+              }
+            : state.datasourceStates,
+        visualization: {
+          ...state.visualization,
+          activeId: payload.newVisualizationId,
+          state: payload.initialState,
+        },
+        stagedPreview: undefined,
+      };
+    },
+    [selectSuggestion.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          newVisualizationId: string;
+          initialState: unknown;
+          datasourceState: unknown;
+          datasourceId: string;
+        };
+      }
+    ) => {
+      return {
+        ...state,
+        datasourceStates:
+          'datasourceId' in payload && payload.datasourceId
+            ? {
+                ...state.datasourceStates,
+                [payload.datasourceId]: {
+                  ...state.datasourceStates[payload.datasourceId],
+                  state: payload.datasourceState,
+                },
+              }
+            : state.datasourceStates,
+        visualization: {
+          ...state.visualization,
+          activeId: payload.newVisualizationId,
+          state: payload.initialState,
+        },
+        stagedPreview: state.stagedPreview || {
+          datasourceStates: state.datasourceStates,
+          visualization: state.visualization,
+        },
+      };
+    },
+    [rollbackSuggestion.type]: (state) => {
+      return {
+        ...state,
+        ...(state.stagedPreview || {}),
+        stagedPreview: undefined,
+      };
+    },
+    [setToggleFullscreen.type]: (state) => {
+      return { ...state, isFullscreenDatasource: !state.isFullscreenDatasource };
+    },
+    [submitSuggestion.type]: (state) => {
+      return {
+        ...state,
+        stagedPreview: undefined,
+      };
+    },
+    [switchDatasource.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          newDatasourceId: string;
+        };
+      }
+    ) => {
+      return {
+        ...state,
+        datasourceStates: {
+          ...state.datasourceStates,
+          [payload.newDatasourceId]: state.datasourceStates[payload.newDatasourceId] || {
+            state: null,
+            isLoading: true,
+          },
+        },
+        activeDatasourceId: payload.newDatasourceId,
+      };
+    },
+    // [navigateAway]: (state) => state,
+    [loadInitial.type]: (
+      state,
+      payload: PayloadAction<{
+        initialInput?: LensEmbeddableInput;
+        redirectCallback: (savedObjectId?: string) => void;
+        emptyState: LensAppState;
+        history: History<unknown>;
+      }>
+    ) => state,
+  });
+};
