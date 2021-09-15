@@ -30,6 +30,7 @@ import {
 } from '../../../../routes';
 
 import {
+  CONFIG_COMPLETED_PRIVATE_SOURCES_DISABLED_LINK,
   CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK,
   CONFIG_COMPLETED_CONFIGURE_NEW_BUTTON,
 } from './constants';
@@ -114,7 +115,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
                             values={{
                               securityLink: (
                                 <EuiLinkTo to={SECURITY_PATH}>
-                                  enable private source connection
+                                  {CONFIG_COMPLETED_PRIVATE_SOURCES_DISABLED_LINK}
                                 </EuiLinkTo>
                               ),
                             }}

@@ -46,6 +46,8 @@ import {
   GO_BUTTON,
   RESET_BUTTON,
   SOURCE_CONTENT_TITLE,
+  SEARCH_CONTENT_PLACEHOLDER,
+  FILTER_CONTENT_PLACEHOLDER,
   CONTENT_LOADING_TEXT,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
@@ -197,13 +199,9 @@ export const SourceContent: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiFieldSearch
             disabled={!hasItems && !contentFilterValue}
-            placeholder={i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.searchBar.placeholder',
-              {
-                defaultMessage: '{prefix} content...',
-                values: { prefix: isFederatedSource ? 'Search' : 'Filter' },
-              }
-            )}
+            placeholder={
+              isFederatedSource ? SEARCH_CONTENT_PLACEHOLDER : FILTER_CONTENT_PLACEHOLDER
+            }
             incremental={!isFederatedSource}
             isClearable={!isFederatedSource}
             onSearch={setContentFilterValue}

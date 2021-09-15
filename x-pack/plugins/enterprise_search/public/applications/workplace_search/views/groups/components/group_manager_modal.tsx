@@ -52,6 +52,20 @@ const EMPTY_STATE_BODY = i18n.translate(
   }
 );
 
+const ADD_SOURCE_MODAL_SELECT_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerSourceModal.selectButton.text',
+  {
+    defaultMessage: 'Select all',
+  }
+);
+
+const ADD_SOURCE_MODAL_DESELECT_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerSourceModal.deselectButton.text',
+  {
+    defaultMessage: 'Deselect all',
+  }
+);
+
 interface GroupManagerModalProps {
   children: React.ReactElement;
   label: string;
@@ -75,8 +89,7 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
   const { contentSources } = useValues(GroupsLogic);
 
   const allSelected = numSelected === allItems.length;
-  const isSources = label === 'shared content sources';
-  const showEmptyState = isSources && contentSources.length < 1;
+  const showEmptyState = contentSources.length < 1;
   const handleClose = () => hideModal(group);
   const handleSelectAll = () => selectAll(allSelected ? [] : allItems);
 
@@ -125,13 +138,7 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="SelectAllGroups" onClick={handleSelectAll}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerSelectAllToggle',
-                {
-                  defaultMessage: '{action} All',
-                  values: { action: allSelected ? 'Deselect' : 'Select' },
-                }
-              )}
+              {allSelected ? ADD_SOURCE_MODAL_DESELECT_BUTTON : ADD_SOURCE_MODAL_SELECT_BUTTON}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

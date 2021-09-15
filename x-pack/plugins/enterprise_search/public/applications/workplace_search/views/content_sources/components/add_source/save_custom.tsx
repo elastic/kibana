@@ -46,8 +46,11 @@ import {
   SAVE_CUSTOM_API_KEYS_TITLE,
   SAVE_CUSTOM_API_KEYS_BODY,
   SAVE_CUSTOM_VISUAL_WALKTHROUGH_TITLE,
+  SAVE_CUSTOM_VISUAL_WALKTHROUGH_LINK,
   SAVE_CUSTOM_STYLING_RESULTS_TITLE,
+  SAVE_CUSTOM_STYLING_RESULTS_LINK,
   SAVE_CUSTOM_DOC_PERMISSIONS_TITLE,
+  SAVE_CUSTOM_DOC_PERMISSIONS_LINK,
 } from './constants';
 
 interface SaveCustomProps {
@@ -140,7 +143,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                       values={{
                         link: (
                           <EuiLink target="_blank" href={documentationUrl}>
-                            Check out the documentation
+                            {SAVE_CUSTOM_VISUAL_WALKTHROUGH_LINK}
                           </EuiLink>
                         ),
                       }}
@@ -168,7 +171,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                               isOrganization
                             )}
                           >
-                            Display Settings
+                            {SAVE_CUSTOM_STYLING_RESULTS_LINK}
                           </EuiLinkTo>
                         ),
                       }}
@@ -193,7 +196,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                       values={{
                         link: (
                           <EuiLink target="_blank" href={CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL}>
-                            Document-level permissions
+                            {SAVE_CUSTOM_DOC_PERMISSIONS_LINK}
                           </EuiLink>
                         ),
                       }}

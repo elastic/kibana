@@ -53,6 +53,7 @@ import {
   SOURCES_NO_CONTENT_TITLE,
   SOURCE_OVERVIEW_TITLE,
   CONTENT_SUMMARY_TITLE,
+  CONTENT_SUMMARY_LOADING_TEXT,
   CONTENT_TYPE_HEADER,
   ITEMS_HEADER,
   EVENT_HEADER,
@@ -137,7 +138,7 @@ export const Overview: React.FC = () => {
           <h3>{CONTENT_SUMMARY_TITLE}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {!summary && <ComponentLoader text="Loading summary details..." />}
+        {!summary && <ComponentLoader text={CONTENT_SUMMARY_LOADING_TEXT} />}
         {!!summary &&
           (totalDocuments === 0 ? (
             emptyState

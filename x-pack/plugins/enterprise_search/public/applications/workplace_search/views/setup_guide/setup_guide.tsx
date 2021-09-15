@@ -55,7 +55,10 @@ export const SetupGuide: React.FC = () => {
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiButton target="_blank" fill href={GETTING_STARTED_LINK_URL} iconType="popout">
-        Get started with Workplace Search
+        <FormattedMessage
+          id="xpack.enterpriseSearch.workplaceSearch.setupGuide.button"
+          defaultMessage="Get started with Workplace Search"
+        />
       </EuiButton>
       <EuiSpacer size="l" />
       <EuiText>

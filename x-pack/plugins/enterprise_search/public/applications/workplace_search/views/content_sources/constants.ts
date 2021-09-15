@@ -21,6 +21,13 @@ export const CONTENT_SUMMARY_TITLE = i18n.translate(
   }
 );
 
+export const CONTENT_SUMMARY_LOADING_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.contentSummaryLoading.text',
+  {
+    defaultMessage: 'Loading summary details...',
+  }
+);
+
 export const CONTENT_TYPE_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.contentType.header',
   {
@@ -219,6 +226,20 @@ export const SOURCE_CONTENT_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.title',
   {
     defaultMessage: 'Source content',
+  }
+);
+
+export const SEARCH_CONTENT_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.searchBar.search.placeholder',
+  {
+    defaultMessage: 'Search content...',
+  }
+);
+
+export const FILTER_CONTENT_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.searchBar.filter.placeholder',
+  {
+    defaultMessage: 'Filter content...',
   }
 );
 
