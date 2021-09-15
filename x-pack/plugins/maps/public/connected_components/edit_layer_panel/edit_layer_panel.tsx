@@ -113,7 +113,8 @@ export class EditLayerPanel extends Component<Props, State> {
   async _loadLeftJoinFields() {
     if (
       !this.props.selectedLayer ||
-      !this.props.selectedLayer.showJoinEditor() ||
+      this.props.selectedLayer.getType() !== LAYER_TYPE.VECTOR ||
+      !(this.props.selectedLayer as IVectorLayer).showJoinEditor() ||
       (this.props.selectedLayer as IVectorLayer).getLeftJoinFields === undefined
     ) {
       return;
@@ -181,7 +182,7 @@ export class EditLayerPanel extends Component<Props, State> {
   }
 
   _renderJoinSection() {
-    if (!this.props.selectedLayer || !this.props.selectedLayer.showJoinEditor()) {
+    if (!this.props.selectedLayer || this.props.selectedLayer.getType() !== LAYER_TYPE.VECTOR || !(this.props.selectedLayer as IVectorLayer).showJoinEditor()) {
       return null;
     }
 
@@ -189,7 +190,7 @@ export class EditLayerPanel extends Component<Props, State> {
       <Fragment>
         <EuiPanel>
           <JoinEditor
-            layer={this.props.selectedLayer}
+            layer={this.props.selectedLayer as IVectorLayer}
             leftJoinFields={this.state.leftJoinFields}
             layerDisplayName={this.state.displayName}
           />
