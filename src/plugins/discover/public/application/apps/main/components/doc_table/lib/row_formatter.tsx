@@ -73,7 +73,7 @@ export const formatTopLevelObject = (
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const formatter = field
       ? indexPattern.getFormatterForField(field)
-      : { convert: (v: string, ...rest: unknown[]) => String(v) };
+      : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
     if (!values.map) return;
     const formatted = values
       .map((val: unknown) =>

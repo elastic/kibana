@@ -34,20 +34,21 @@ export async function getFieldCapabilities(
   const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
-    .filter((name) => !name.startsWith('_'))
+    // not all meta fields are provided, so remove and manually add
+    .filter((name) => !fieldsFromFieldCapsByName[name].metadata_field)
     .concat(metaFields)
-    .reduce<{ names: string[]; hash: Record<string, string> }>(
+    .reduce<{ names: string[]; map: Map<string, string> }>(
       (agg, value) => {
-        // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
-        if (agg.hash[value] != null) {
+        // This is intentionally using a Map to be highly optimized with very large indexes AND be safe for user provided data
+        if (agg.map.get(value) != null) {
           return agg;
         } else {
-          agg.hash[value] = value;
+          agg.map.set(value, value);
           agg.names.push(value);
           return agg;
         }
       },
-      { names: [], hash: {} }
+      { names: [], map: new Map<string, string>() }
     )
     .names.map<FieldDescriptor>((name) =>
       defaults({}, fieldsFromFieldCapsByName[name], {
@@ -56,6 +57,7 @@ export async function getFieldCapabilities(
         searchable: false,
         aggregatable: false,
         readFromDocValues: false,
+        metadata_field: metaFields.includes(name),
       })
     )
     .map(mergeOverrides);
