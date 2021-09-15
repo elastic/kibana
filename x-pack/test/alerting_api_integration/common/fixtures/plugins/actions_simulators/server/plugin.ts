@@ -31,7 +31,7 @@ export enum ExternalServiceSimulator {
   JIRA = 'jira',
   RESILIENT = 'resilient',
   WEBHOOK = 'webhook',
-  MS_EXCHANGE = 'exchange'
+  MS_EXCHANGE = 'exchange',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {

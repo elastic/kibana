@@ -28,21 +28,30 @@ export function initPlugin(router: IRouter, path: string) {
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       return jsonResponse(res, 200, {
-        id: '123',
-        key: 'CK-1',
-        created: '2020-04-27T14:17:45.490Z',
+        envelope: {
+          from: 'bob@example.com',
+          to: ['kibana-action-test@elastic.co'],
+        },
+        message: {
+          from: { address: 'bob@example.com', name: '' },
+          to: [
+            {
+              address: 'kibana-action-test@elastic.co',
+              name: '',
+            },
+          ],
+          cc: null,
+          bcc: null,
+          subject: 'email-subject',
+          html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Kibana. <a href=\"https://localhost:5601\">Go to Kibana</a>.</p>\n`,
+          text:
+            'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
+          headers: {},
+        },
       });
     }
   );
 
-  /* `https://login.microsoftonline.com/${transport.tenantId}/oauth2/v2.0/token`,
-      logger,
-      {
-        scope: GRAPH_API_OAUTH_SCOPE,
-        clientId: transport.clientId,
-        clientSecret: transport.clientSecret,
-      },
-      */
   router.post(
     {
       path: `${path}/1234567/oauth2/v2.0/token`,
@@ -57,10 +66,9 @@ export function initPlugin(router: IRouter, path: string) {
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       return jsonResponse(res, 200, {
-        id: '123',
-        key: 'CK-1',
-        created: '2020-04-27T14:17:45.490Z',
-        updated: '2020-04-27T14:17:45.490Z',
+        access_token: 'asdadasd',
+        expires_in: 3660,
+        token_type: 'Bearer',
       });
     }
   );
