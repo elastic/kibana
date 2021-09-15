@@ -7,13 +7,15 @@
 
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
-import { getBreadcrumbsForRoute, setBreadcrumbs } from '.';
+import { getBreadcrumbsForRoute, useSetBreadcrumbs } from '.';
 import { HostsTableType } from '../../../../hosts/store/model';
 import { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
 import { TabNavigationProps } from '../tab_navigation/types';
 import { NetworkRouteType } from '../../../../network/pages/navigation/types';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { AdministrationSubTab } from '../../../../management/types';
+import { renderHook } from '@testing-library/react-hooks';
+import { TestProviders } from '../../../mock';
 
 const setBreadcrumbsMock = jest.fn();
 const chromeMock = {
@@ -443,7 +445,8 @@ describe('Navigation Breadcrumbs', () => {
   describe('setBreadcrumbs()', () => {
     test('should call chrome breadcrumb service with correct breadcrumbs', () => {
       const navigateToUrlMock = jest.fn();
-      setBreadcrumbs(
+      const { result } = renderHook(() => useSetBreadcrumbs(), { wrapper: TestProviders });
+      result.current(
         getMockObject('hosts', '/', hostName),
         chromeMock,
         getUrlForAppMock,

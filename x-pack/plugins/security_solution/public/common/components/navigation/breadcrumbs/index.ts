@@ -7,6 +7,7 @@
 
 import { getOr, omit } from 'lodash/fp';
 
+import { useDispatch } from 'react-redux';
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import { APP_NAME, APP_ID } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';
@@ -27,33 +28,40 @@ import {
   UebaRouteSpyState,
 } from '../../../utils/route/types';
 import { getAppOverviewUrl } from '../../link_to';
-
+import { timelineActions } from '../../../../../public/timelines/store/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
 import { TabNavigationProps } from '../tab_navigation/types';
 import { getSearch } from '../helpers';
 import { GetUrlForApp, NavigateToUrl, SearchNavTab } from '../types';
 
-export const setBreadcrumbs = (
-  spyState: RouteSpyState & TabNavigationProps,
-  chrome: StartServices['chrome'],
-  getUrlForApp: GetUrlForApp,
-  navigateToUrl: NavigateToUrl
-) => {
-  const breadcrumbs = getBreadcrumbsForRoute(spyState, getUrlForApp);
-  if (breadcrumbs) {
-    chrome.setBreadcrumbs(
-      breadcrumbs.map((breadcrumb) => ({
-        ...breadcrumb,
-        ...(breadcrumb.href && !breadcrumb.onClick
-          ? {
-              onClick: (ev) => {
-                ev.preventDefault();
-                navigateToUrl(breadcrumb.href!);
-              },
-            }
-          : {}),
-      }))
-    );
-  }
+export const useSetBreadcrumbs = () => {
+  const dispatch = useDispatch();
+  return (
+    spyState: RouteSpyState & TabNavigationProps,
+    chrome: StartServices['chrome'],
+    getUrlForApp: GetUrlForApp,
+    navigateToUrl: NavigateToUrl
+  ) => {
+    const breadcrumbs = getBreadcrumbsForRoute(spyState, getUrlForApp);
+    if (breadcrumbs) {
+      chrome.setBreadcrumbs(
+        breadcrumbs.map((breadcrumb) => ({
+          ...breadcrumb,
+          ...(breadcrumb.href && !breadcrumb.onClick
+            ? {
+                onClick: (ev) => {
+                  ev.preventDefault();
+
+                  dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
+
+                  navigateToUrl(breadcrumb.href!);
+                },
+              }
+            : {}),
+        }))
+      );
+    }
+  };
 };
 
 const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpyState =>
@@ -83,7 +91,7 @@ export const getBreadcrumbsForRoute = (
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
-  const overviewPath = getUrlForApp(APP_ID, { path: SecurityPageName.overview });
+  const overviewPath = getUrlForApp(APP_ID, { deepLinkId: SecurityPageName.overview });
   const siemRootBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
     href: getAppOverviewUrl(overviewPath),
