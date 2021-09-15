@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
             'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
           );
         });
+<<<<<<< HEAD
 
         it('removes the timelineId in the saved object', async () => {
           const timelines = await getSavedObjectFromES<NoteWithoutTimelineId>(
@@ -60,6 +61,23 @@ export default function ({ getService }: FtrProviderContext) {
             }
           );
 
+=======
+
+        it('removes the timelineId in the saved object', async () => {
+          const timelines = await getSavedObjectFromES<NoteWithoutTimelineId>(
+            es,
+            'siem-ui-timeline-note',
+            {
+              ids: {
+                values: [
+                  'siem-ui-timeline-note:989002c0-126e-11ec-83d2-db1096c73738',
+                  'siem-ui-timeline-note:f09b5980-1271-11ec-83d2-db1096c73738',
+                ],
+              },
+            }
+          );
+
+>>>>>>> 92cb6ce08062e741341a0ee35027e309a51580d0
           expect(
             timelines.body.hits.hits[0]._source?.['siem-ui-timeline-note']
           ).to.not.have.property('timelineId');
@@ -73,6 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           const resp = await supertest
             .get('/api/timeline')
             .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+<<<<<<< HEAD
 
           expect(resp.body.data.getOneTimeline.notes[0].eventId).to.be('Edo00XsBEVtyvU-8LGNe');
         });
@@ -136,6 +155,27 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('pinned events timelineId', () => {
+=======
+
+          expect(resp.body.data.getOneTimeline.notes[0].eventId).to.be('Edo00XsBEVtyvU-8LGNe');
+        });
+
+        it('returns the timelineId in the response', async () => {
+          const resp = await supertest
+            .get('/api/timeline')
+            .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
+
+          expect(resp.body.data.getOneTimeline.notes[0].timelineId).to.be(
+            '6484cc90-126e-11ec-83d2-db1096c73738'
+          );
+          expect(resp.body.data.getOneTimeline.notes[1].timelineId).to.be(
+            '6484cc90-126e-11ec-83d2-db1096c73738'
+          );
+        });
+      });
+
+      describe('savedQueryId', () => {
+>>>>>>> 92cb6ce08062e741341a0ee35027e309a51580d0
         before(async () => {
           await esArchiver.load(
             'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
@@ -148,6 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
+<<<<<<< HEAD
         it('removes the timelineId in the saved object', async () => {
           const timelines = await getSavedObjectFromES<PinnedEventWithoutTimelineId>(
             es,
@@ -195,6 +236,36 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.body.data.getOneTimeline.pinnedEventsSaveObject[1].timelineId).to.be(
             '6484cc90-126e-11ec-83d2-db1096c73738'
           );
+=======
+        it('removes the savedQueryId', async () => {
+          const timelines = await getSavedObjectFromES<TimelineWithoutSavedQueryId>(
+            es,
+            'siem-ui-timeline',
+            {
+              ids: { values: ['siem-ui-timeline:8dc70950-1012-11ec-9ad3-2d7c6600c0f7'] },
+            }
+          );
+
+          expect(timelines.body.hits.hits[0]._source?.['siem-ui-timeline']).to.not.have.property(
+            'savedQueryId'
+          );
+        });
+
+        it('preserves the title in the saved object after migration', async () => {
+          const resp = await supertest
+            .get('/api/timeline')
+            .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' });
+
+          expect(resp.body.data.getOneTimeline.title).to.be('Awesome Timeline');
+        });
+
+        it('returns the savedQueryId in the response', async () => {
+          const resp = await supertest
+            .get('/api/timeline')
+            .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' });
+
+          expect(resp.body.data.getOneTimeline.savedQueryId).to.be("It's me");
+>>>>>>> 92cb6ce08062e741341a0ee35027e309a51580d0
         });
       });
     });

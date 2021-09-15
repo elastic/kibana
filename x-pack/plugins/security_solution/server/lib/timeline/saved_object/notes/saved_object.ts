@@ -128,7 +128,7 @@ export const persistNote = async ({
     }
 
     // Update existing note
-    return updateNote({ request, noteId, note, overrideOwner });
+    return await updateNote({ request, noteId, note, overrideOwner });
   } catch (err) {
     if (getOr(null, 'output.statusCode', err) === 403) {
       const noteToReturn: NoteResult = {
