@@ -283,7 +283,7 @@ Machine Learning::
 * Adds reset anomaly detection jobs link to jobs list {kibana-pull}108039[#108039]
 * Delayed data test for anomaly detection jobs health rule type {kibana-pull}107183[#107183]
 * Model memory state test for anomaly detection jobs health rule type {kibana-pull}106763[#106763]
-* Alerting rule for aanomaly detection jobs monitoring {kibana-pull}106084[#106084]
+* Alerting rule for anomaly detection jobs monitoring {kibana-pull}106084[#106084]
 * Jobs import and export {kibana-pull}101037[#101037]
 Osquery Manager::
 * Adds RBAC for the Osquery plugin {kibana-pull}106669[#106669]
