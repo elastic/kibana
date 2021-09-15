@@ -35,7 +35,7 @@ function getFormattedValue(value: number, totalCount: number): string {
   return `${value} (${getPercentLabel(percentage)})`;
 }
 
-const BOOLEAN_DISTRIBUTION_CHART_HEIGHT = 100;
+const BOOLEAN_DISTRIBUTION_CHART_HEIGHT = 70;
 
 export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
