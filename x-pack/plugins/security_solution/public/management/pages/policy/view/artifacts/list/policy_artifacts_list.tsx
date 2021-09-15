@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React from 'react';
 
-import { TrustedAppsListData } from '../../../../trusted_apps/state';
+import { TrustedApp } from '../../../../../../../common/endpoint/types';
 
 interface PolicyArtifactsListProps {
-  artifacts: TrustedAppsListData; // Or other artifacts type like Event Filters or Endpoint Exceptions
+  artifacts: TrustedApp[]; // Or other artifacts type like Event Filters or Endpoint Exceptions
   selectedArtifactIds: string[];
   isListLoading: boolean;
   isSubmitLoading: boolean;
 }
 
-export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
-  (artifacts, selectedArtifacts, isListLoading, isSubmitLoading) => {
-    return <>{'test'}</>;
-  }
-);
+export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(() => {
+  return <>{'test'}</>;
+});
 
 PolicyArtifactsList.displayName = 'PolicyArtifactsList';

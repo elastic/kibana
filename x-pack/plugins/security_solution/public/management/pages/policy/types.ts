@@ -61,6 +61,8 @@ export interface PolicyDetailsState {
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<AppLocation>;
+  /** artifacts location params  */
+  artifactsLocation: PolicyDetailsArtifactsPageLocation;
   /** A summary of stats for the agents associated with a given Fleet Agent Policy */
   agentStatusSummary?: Omit<GetAgentStatusResponse['results'], 'updating'>;
   /** Status of an update to the policy  */
@@ -70,14 +72,19 @@ export interface PolicyDetailsState {
   };
   /** current license */
   license?: ILicense;
-  /** A flag to open add trusted apps flyout */
-  addTrustedAppsFlyoutOpen: boolean;
 }
 
 export enum OS {
   windows = 'windows',
   mac = 'mac',
   linux = 'linux',
+}
+
+export interface PolicyDetailsArtifactsPageLocation {
+  page_index: number;
+  page_size: number;
+  show?: 'list';
+  filter: string;
 }
 
 /**

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-nodejs-modules
+import { parse } from 'querystring';
 import { fullPolicy, isOnPolicyDetailsPage, license } from './selectors';
 import {
   Immutable,
@@ -15,6 +17,11 @@ import {
 import { ImmutableReducer } from '../../../../../common/store';
 import { AppAction } from '../../../../../common/store/actions';
 import { PolicyDetailsState } from '../../types';
+import {
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+} from '../../../../common/constants';
+import { extractPolicyDetailsArtifactsListPageLocation } from '../../../../common/routing';
 
 const updatePolicyConfigInPolicyData = (
   policyData: Immutable<PolicyData>,
@@ -47,7 +54,12 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
     total: 0,
     other: 0,
   },
-  addTrustedAppsFlyoutOpen: true,
+  artifactsLocation: {
+    page_index: MANAGEMENT_DEFAULT_PAGE,
+    page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
+    show: undefined,
+    filter: '',
+  },
 });
 
 export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppAction> = (
@@ -96,13 +108,6 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     };
   }
 
-  if (action.type === 'toggleAddTrustedAppsFlyout') {
-    return {
-      ...state,
-      addTrustedAppsFlyoutOpen: action.payload.addTrustedAppsFlyoutOpen,
-    };
-  }
-
   if (action.type === 'licenseChanged') {
     return {
       ...state,
@@ -114,6 +119,9 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     const newState: Immutable<PolicyDetailsState> = {
       ...state,
       location: action.payload,
+      artifactsLocation: extractPolicyDetailsArtifactsListPageLocation(
+        parse(action.payload.search.slice(1))
+      ),
     };
     const isCurrentlyOnDetailsPage = isOnPolicyDetailsPage(newState);
     const wasPreviouslyOnDetailsPage = isOnPolicyDetailsPage(state);

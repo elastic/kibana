@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
+import React, { useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -22,27 +20,32 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
 } from '@elastic/eui';
-import { AppAction } from '../../../../../../common/store/actions';
-import { isAddTrustedAppsFlyoutOpen, policyDetails } from '../../../store/policy_details/selectors';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import {
+  policyDetails,
+  getCurrentArtifactsLocation,
+} from '../../../store/policy_details/selectors';
+import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyArtifactsList } from '../../artifacts/list';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
-  const dispatch = useDispatch<Dispatch<AppAction>>();
-  const isAddTrustedAppsFlyoutOpenFlag = usePolicyDetailsSelector(isAddTrustedAppsFlyoutOpen);
+  // const history = useHistory();
+  const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const policyItem = usePolicyDetailsSelector(policyDetails);
 
   const policyName = policyItem?.name ?? '';
+  const showListFlyout = location.show === 'list';
 
-  const onClickAssignTrustedAppButton = useCallback(() => {
-    dispatch({
-      type: 'toggleAddTrustedAppsFlyout',
-      payload: { addTrustedAppsFlyoutOpen: !isAddTrustedAppsFlyoutOpenFlag },
-    });
-  }, [dispatch, isAddTrustedAppsFlyoutOpenFlag]);
+  const handleListFlyoutClose = usePolicyDetailsNavigateCallback(() => ({
+    show: undefined,
+  }));
+
+  const handleListFlyoutOpen = usePolicyDetailsNavigateCallback(() => ({
+    show: 'list',
+  }));
+
   const assignTrustedAppButton = useMemo(
     () => (
-      <EuiButton fill iconType="plusInCircle" onClick={onClickAssignTrustedAppButton}>
+      <EuiButton fill iconType="plusInCircle" onClick={handleListFlyoutOpen}>
         {i18n.translate(
           'xpack.securitySolution.endpoint.policy.trustedApps.layout.assignToPolicy',
           {
@@ -51,7 +54,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         )}
       </EuiButton>
     ),
-    [onClickAssignTrustedAppButton]
+    [handleListFlyoutOpen]
   );
 
   return (
@@ -78,15 +81,8 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         {/* TODO: To be implemented */}
         {'Policy trusted apps layout content'}
       </EuiPageContent>
-      {isAddTrustedAppsFlyoutOpenFlag ? (
-        <EuiFlyout
-          onClose={() =>
-            dispatch({
-              type: 'toggleAddTrustedAppsFlyout',
-              payload: { addTrustedAppsFlyoutOpen: !isAddTrustedAppsFlyoutOpenFlag },
-            })
-          }
-        >
+      {showListFlyout ? (
+        <EuiFlyout onClose={handleListFlyoutClose}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>
@@ -104,7 +100,13 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
             />
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <PolicyArtifactsList />
+            {/* TODO: To be done... */}
+            <PolicyArtifactsList
+              artifacts={[]}
+              selectedArtifactIds={[]}
+              isListLoading={false}
+              isSubmitLoading={false}
+            />
           </EuiFlyoutBody>
         </EuiFlyout>
       ) : null}

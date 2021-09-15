@@ -9,7 +9,7 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { ILicense } from '../../../../../../../licensing/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../common/license/policy_config';
-import { PolicyDetailsState } from '../../types';
+import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../../types';
 import {
   Immutable,
   NewPolicyData,
@@ -79,6 +79,13 @@ export const policyDetailsForUpdate: (
 export const needsToRefresh = (state: Immutable<PolicyDetailsState>): boolean => {
   return !state.policyItem && !state.apiError;
 };
+
+/**
+ * Returns current artifacts location
+ */
+export const getCurrentArtifactsLocation = (
+  state: Immutable<PolicyDetailsState>
+): Immutable<PolicyDetailsArtifactsPageLocation> => state.artifactsLocation;
 
 /** Returns a boolean of whether the user is on the policy form page or not */
 export const isOnPolicyFormPage = (state: Immutable<PolicyDetailsState>) => {
@@ -262,7 +269,3 @@ export const agentStatusSummary = (state: PolicyDetailsState) => state.agentStat
 
 /** Status for an update to the policy */
 export const updateStatus = (state: PolicyDetailsState) => state.updateStatus;
-
-/** Is add trusted apps flyout open */
-export const isAddTrustedAppsFlyoutOpen = (state: PolicyDetailsState): boolean =>
-  state.addTrustedAppsFlyoutOpen;
