@@ -39,7 +39,7 @@ import {
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
-import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { IndexPatternBase } from '@kbn/es-query';
