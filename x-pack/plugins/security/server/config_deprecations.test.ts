@@ -426,4 +426,53 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toHaveLength(0);
   });
+
+  it('warns when the spaces plugin is disabled', () => {
+    const config = {
+      xpack: {
+        security: {
+          session: { idleTimeout: 123, lifespan: 345 },
+        },
+        spaces: {
+          enabled: false,
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated).toEqual(config);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Disabling the Spaces plugin will not be allowed in 8.0.",
+      ]
+    `);
+  });
+
+  it('does not warn when the spaces plugin is enabled', () => {
+    const config = {
+      xpack: {
+        security: {
+          session: { idleTimeout: 123, lifespan: 345 },
+        },
+        spaces: {
+          enabled: true,
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated).toEqual(config);
+    expect(messages).toHaveLength(0);
+  });
+
+  it("does not warn when xpack.spaces.enabled isn't set", () => {
+    const config = {
+      xpack: {
+        security: {
+          session: { idleTimeout: 123, lifespan: 345 },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated).toEqual(config);
+    expect(messages).toHaveLength(0);
+  });
 });

@@ -161,6 +161,25 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       });
     }
   },
+  (settings, fromPath, addDeprecation) => {
+    if (settings?.xpack?.spaces?.enabled === false) {
+      addDeprecation({
+        title: i18n.translate('xpack.spaces.deprecations.enabledTitle', {
+          defaultMessage: 'Setting "xpack.spaces.enabled" is deprecated',
+        }),
+        message: i18n.translate('xpack.spaces.deprecations.enabledMessage', {
+          defaultMessage: 'Disabling the Spaces plugin will not be allowed in 8.0.',
+        }),
+        correctiveActions: {
+          manualSteps: [
+            i18n.translate('xpack.spaces.deprecations.enabled.manualStepOneMessage', {
+              defaultMessage: `Remove "xpack.spaces.enabled" from kibana.yml.`,
+            }),
+          ],
+        },
+      });
+    }
+  },
   // Default values for session expiration timeouts.
   (settings, fromPath, addDeprecation) => {
     if (settings?.xpack?.security?.session?.idleTimeout === undefined) {
