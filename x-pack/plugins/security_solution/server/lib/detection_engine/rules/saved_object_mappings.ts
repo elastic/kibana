@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '../../../../../../../src/core/server';
+import {
+  SavedObjectsType,
+  SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
+} from 'kibana/server';
+
+import { truncateMessage } from '../rule_execution_log';
 
 export const ruleStatusSavedObjectType = 'siem-detection-engine-rule-status';
 
@@ -47,11 +53,30 @@ export const ruleStatusSavedObjectMappings: SavedObjectsType['mappings'] = {
   },
 };
 
+const truncateMessageFields = (
+  doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+): SavedObjectSanitizedDoc => {
+  const { lastFailureMessage, lastSuccessMessage, ...restAttributes } = doc.attributes;
+
+  return {
+    ...doc,
+    attributes: {
+      lastFailureMessage: truncateMessage(lastFailureMessage),
+      lastSuccessMessage: truncateMessage(lastSuccessMessage),
+      ...restAttributes,
+    },
+    references: doc.references ?? [],
+  };
+};
+
 export const type: SavedObjectsType = {
   name: ruleStatusSavedObjectType,
   hidden: false,
   namespaceType: 'single',
   mappings: ruleStatusSavedObjectMappings,
+  migrations: {
+    '7.14.2': truncateMessageFields,
+  },
 };
 
 export const ruleAssetSavedObjectType = 'security-rule';
