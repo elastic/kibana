@@ -15,7 +15,7 @@ import { SwitchModePopover } from './switch_mode_popover';
 
 import type { SelectIndexComponentProps } from './types';
 import type { IndexPatternValue } from '../../../../../common/types';
-import type { IndexPatternsService } from '../../../../../../data/public';
+import type { IndexPatternsService } from '../../../../../../../data/public';
 
 /** @internal **/
 type IdsWithTitle = UnwrapPromise<ReturnType<IndexPatternsService['getIdsWithTitle']>>;
