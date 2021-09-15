@@ -243,7 +243,7 @@ export function PieComponent(
         reportDescription={props.args.description}
         className="lnsPieExpression__container"
       >
-        <EmptyPlaceholder icon={LensIconChartDonut} />;
+        <EmptyPlaceholder icon={LensIconChartDonut} />
       </VisualizationContainer>
     );
   }
