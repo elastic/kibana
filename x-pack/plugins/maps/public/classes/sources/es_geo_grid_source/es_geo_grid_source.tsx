@@ -48,7 +48,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
