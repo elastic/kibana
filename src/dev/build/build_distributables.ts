@@ -106,10 +106,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     // control w/ --skip-archives
     await run(Tasks.CreateArchives);
   }
-
-  if (options.createDebPackage || options.createRpmPackage) {
-    await run(Tasks.CreatePackageConfig);
-  }
   if (options.createDebPackage) {
     // control w/ --deb or --skip-os-packages
     await run(Tasks.CreateDebPackage);

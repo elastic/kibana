@@ -915,6 +915,16 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
+// Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class EventLoopDelaysMonitor {
+    constructor();
+    collect(): IntervalHistogram;
+    reset(): void;
+    stop(): void;
+}
+
 // @public (undocumented)
 export interface ExecutionContextSetup {
     withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
@@ -1146,6 +1156,31 @@ export interface IKibanaSocket {
         rejectUnauthorized?: boolean;
         requestCert?: boolean;
     }): Promise<void>;
+}
+
+// @public
+export interface IntervalHistogram {
+    // (undocumented)
+    exceeds: number;
+    // (undocumented)
+    fromTimestamp: string;
+    // (undocumented)
+    lastUpdatedAt: string;
+    // (undocumented)
+    max: number;
+    // (undocumented)
+    mean: number;
+    // (undocumented)
+    min: number;
+    // (undocumented)
+    percentiles: {
+        50: number;
+        75: number;
+        95: number;
+        99: number;
+    };
+    // (undocumented)
+    stddev: number;
 }
 
 // @public (undocumented)
@@ -1433,7 +1468,9 @@ export interface OpsMetrics {
     collected_at: Date;
     concurrent_connections: OpsServerMetrics['concurrent_connections'];
     os: OpsOsMetrics;
+    // @deprecated
     process: OpsProcessMetrics;
+    processes: OpsProcessMetrics[];
     requests: OpsServerMetrics['requests'];
     response_times: OpsServerMetrics['response_times'];
 }
@@ -1474,6 +1511,7 @@ export interface OpsOsMetrics {
 // @public
 export interface OpsProcessMetrics {
     event_loop_delay: number;
+    event_loop_delay_histogram: IntervalHistogram;
     memory: {
         heap: {
             total_in_bytes: number;

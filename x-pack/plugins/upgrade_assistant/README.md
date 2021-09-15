@@ -66,7 +66,28 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
 
   ```
   yarn es snapshot -E path.data=./path_to_6.x_indices
-```
+  ```
+
+  **Token-based authentication**
+
+  Reindexing should also work using token-based authentication (implemented via [#111451](https://github.com/elastic/kibana/pull/111451)). To simulate, set the following parameters when running ES from a snapshot:
+
+  ```
+  yarn es snapshot -E path.data=./path_to_6.x_indices -E xpack.security.authc.token.enabled=true -E xpack.security.authc.api_key.enabled=true
+  ```
+
+  Then, update your `kibana.dev.yml` file to include:
+
+  ```
+  xpack.security.authc.providers:
+      token:
+         token1:
+            order: 0
+            showInSelector: true
+            enabled: true
+  ```
+
+  To verify it's working as expected, kick off a reindex task in UA. Then, navigate to **Security > API keys** and verify an API key was created. The name should be prefixed with `ua_reindex_`. Once the reindex task has completed successfully, the API key should be deleted.
 
 **2. Upgrading or deleting ML job model snapshots**
 
