@@ -13,7 +13,7 @@ import {
   MapEmbeddable,
   MapEmbeddableInput,
 } from '../../../../../../maps/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   ErrorEmbeddable,

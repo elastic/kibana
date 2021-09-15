@@ -49,6 +49,12 @@
 
   &.kbnBody--hasHeaderBanner {
     @include kbnAffordForHeader($kbnHeaderOffsetWithBanner);
+
+    // Prevents banners from covering full screen data grids
+    .euiDataGrid--fullScreen {
+      height: calc(100vh - #{$kbnHeaderBannerHeight});
+      top: $kbnHeaderBannerHeight;
+    }
   }
   &.kbnBody--chromeHidden {
     @include kbnAffordForHeader(0);

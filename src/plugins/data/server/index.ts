@@ -41,6 +41,7 @@ export {
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
   getCapabilitiesForRollupIndices,
+  IndexPatternsServiceStart,
 } from './index_patterns';
 
 export {

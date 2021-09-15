@@ -29,6 +29,7 @@ interface Props {
   detailsData: TimelineEventsDetailsItem[] | null;
   event: { eventId: string; indexName: string };
   isAlert: boolean;
+  isDraggable?: boolean;
   loading: boolean;
   messageHeight?: number;
   timelineTabType: TimelineTabs | 'flyout';
@@ -80,7 +81,16 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
 ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
 export const ExpandableEvent = React.memo<Props>(
-  ({ browserFields, event, timelineId, timelineTabType, isAlert, loading, detailsData }) => {
+  ({
+    browserFields,
+    event,
+    timelineId,
+    timelineTabType,
+    isAlert,
+    isDraggable,
+    loading,
+    detailsData,
+  }) => {
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
     }
@@ -97,6 +107,7 @@ export const ExpandableEvent = React.memo<Props>(
             data={detailsData ?? []}
             id={event.eventId!}
             isAlert={isAlert}
+            isDraggable={isDraggable}
             timelineId={timelineId}
             timelineTabType={timelineTabType}
           />

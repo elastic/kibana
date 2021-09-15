@@ -22,7 +22,8 @@ import { updateRules } from '../../rules/update_rules';
 
 export const updateRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
 ) => {
   router.put(
     {
@@ -74,6 +75,7 @@ export const updateRulesBulkRoute = (
               ruleStatusClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
               ruleUpdate: payloadRule,
+              isRuleRegistryEnabled,
             });
             if (rule != null) {
               const ruleStatuses = await ruleStatusClient.find({
@@ -81,7 +83,7 @@ export const updateRulesBulkRoute = (
                 ruleId: rule.id,
                 spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, ruleStatuses);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses, isRuleRegistryEnabled);
             } else {
               return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }

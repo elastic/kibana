@@ -492,6 +492,34 @@ export interface CoreUsageDataStart {
 // @internal
 export interface CoreUsageStats {
     // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.total'?: number;
+    // (undocumented)
     'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no'?: number;
     // (undocumented)
     'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes'?: number;
@@ -910,6 +938,16 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
+// Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class EventLoopDelaysMonitor {
+    constructor();
+    collect(): IntervalHistogram;
+    reset(): void;
+    stop(): void;
+}
+
 // @public (undocumented)
 export interface ExecutionContextSetup {
     withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
@@ -1141,6 +1179,31 @@ export interface IKibanaSocket {
         rejectUnauthorized?: boolean;
         requestCert?: boolean;
     }): Promise<void>;
+}
+
+// @public
+export interface IntervalHistogram {
+    // (undocumented)
+    exceeds: number;
+    // (undocumented)
+    fromTimestamp: string;
+    // (undocumented)
+    lastUpdatedAt: string;
+    // (undocumented)
+    max: number;
+    // (undocumented)
+    mean: number;
+    // (undocumented)
+    min: number;
+    // (undocumented)
+    percentiles: {
+        50: number;
+        75: number;
+        95: number;
+        99: number;
+    };
+    // (undocumented)
+    stddev: number;
 }
 
 // @public (undocumented)
@@ -1428,7 +1491,9 @@ export interface OpsMetrics {
     collected_at: Date;
     concurrent_connections: OpsServerMetrics['concurrent_connections'];
     os: OpsOsMetrics;
+    // @deprecated
     process: OpsProcessMetrics;
+    processes: OpsProcessMetrics[];
     requests: OpsServerMetrics['requests'];
     response_times: OpsServerMetrics['response_times'];
 }
@@ -1469,6 +1534,7 @@ export interface OpsOsMetrics {
 // @public
 export interface OpsProcessMetrics {
     event_loop_delay: number;
+    event_loop_delay_histogram: IntervalHistogram;
     memory: {
         heap: {
             total_in_bytes: number;
