@@ -6,12 +6,6 @@
 
 Synchronizes {kib} saved objects for {ml} jobs.
 
-* If saved objects are missing for {ml} jobs, they are created.
-* If a saved object for an {anomaly-jobs} is missing a{dfeed} identifier, it is
-added.
-* If saved objects exist for jobs or {dfeeds} that no longer exist, they are
-deleted.
-
 [[machine-learning-api-sync-request]]
 ==== Request
 
@@ -38,16 +32,18 @@ the list actions that _would_ be performed.
 ==== Response body
 
 `datafeedsAdded`::
-(array) TBD
+(array) If a saved object for an {anomaly-job} is missing a {dfeed} identifier,
+it is added.
 
 `datafeedsRemoved`::
-(array) TBD
+(array) If saved objects exist for {dfeeds} that no longer exist, they are
+deleted.
 
 `savedObjectsCreated`::
-(array) TBD
+(array) If saved objects are missing for {ml} jobs, they are created.
 
 `savedObjectsDeleted`::
-(array) TBD
+(array) If saved objects exist for jobs that no longer exist, they are deleted.
 
 [[machine-learning-api-sync-codes]]
 ==== Response code
