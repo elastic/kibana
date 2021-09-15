@@ -14,7 +14,7 @@ import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGeneratorState,
 } from '../../../../../../../../src/plugins/discover/public';
-import type { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import type { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { useUrlState } from '../../../common/util/url_state';
 import { LinkCard } from '../../../common/components/link_card';

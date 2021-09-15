@@ -19,7 +19,7 @@ import {
 } from '../stats_table/components/field_data_expanded_row';
 import { NotInDocsContent } from '../not_in_docs_content';
 import { FieldVisConfig } from '../stats_table/types';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { CombinedQuery } from '../../../index_data_visualizer/types/combined_query';
 import { LoadingIndicator } from '../loading_indicator';
 

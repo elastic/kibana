@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import type { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import type {
   IndexPatternColumn,

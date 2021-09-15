@@ -29,7 +29,7 @@ import {
   isRisonSerializationRequired,
 } from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../src/plugins/data/common';
 import { ResultLink } from '../common/components/results_links';
 
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;

@@ -17,7 +17,7 @@ import {
 } from '@kbn/es-query';
 import { estypes } from '@elastic/elasticsearch';
 import { SavedSearchSavedObject } from '../../../../common/types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
 import { getEsQueryConfig, Query } from '../../../../../../../src/plugins/data/public';
 

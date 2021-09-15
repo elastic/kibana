@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { JOB_FIELD_TYPES } from '../../../../common';
-import type { IndexPatternField } from '../../../../../../../src/plugins/data/common/index_patterns/fields';
+import type { IndexPatternField } from '../../../../../../../src/plugins/data/common';
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
 export const jobTypeAriaLabels = {
