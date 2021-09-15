@@ -252,7 +252,7 @@ To save the panel to the *Visualize Library*:
 
 . Click *Save and return*.
 
-To add the panel without saving:
+To save the panel to the dashboard:
 
 . Click *Save and return*.
 

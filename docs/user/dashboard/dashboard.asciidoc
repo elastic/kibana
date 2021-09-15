@@ -76,8 +76,6 @@ When you create a dashboard, you are automatically in edit mode and can make cha
 * To open an existing dashboard, click the dashboard *Title* you want to open.
 +
 When you open an existing dashboard, you are in view mode. To make changes to the dashboard, click *Edit* in the toolbar. 
-+
-When you're finished making changes, click *Switch to view mode*. 
 
 [float]
 [[create-panels-with-lens]]
@@ -185,29 +183,29 @@ To add unsaved dashboard panels to the *Visualize Library*:
 
 To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more. You create *Text* panels using GitHub-flavored Markdown text.
 
-. From the dashboard, click *All types*, then select *Text*.
+. On the dashboard, click image:images/dashboard_createNewTextButton_7.15.0.png[Create New Text button in dashboard toolbar].
 
 . In the *Markdown* field, enter the text, then click *Update*.
 
 For example, when you enter:
 
 [role="screenshot"]
-image::images/markdown_example_1.png[]
+image::images/markdown_example_1.png[Markdown text with links]
 
 The following instructions are displayed:
 
 [role="screenshot"]
-image::images/markdown_example_2.png[]
+image::images/markdown_example_2.png[Panel with markdown link text]
 
 Or when you enter:
 
 [role="screenshot"]
-image::images/markdown_example_3.png[]
+image::images/markdown_example_3.png[Markdown text with image file]
 
 The following image is displayed:
 
 [role="screenshot"]
-image::images/markdown_example_4.png[]
+image::images/markdown_example_4.png[Panel with markdown image]
 
 For detailed information about writing on GitHub, click *Help*.
 
@@ -227,7 +225,7 @@ To save the panel to the *Visualize Library*:
 
 . Click *Save and return*.
 
-To add the panel without saving:
+To save the panel to the dashboard:
 
 . Click *Save and return*.
 
@@ -343,6 +341,10 @@ Apply a set of design options to the entire dashboard.
 [[save-dashboards]]
 == Save dashboards
 
+When you've finished making changes to the dashboard, save it.
+
+If you are saving a new dashboard:
+
 . In the toolbar, click *Save*.
 
 . On the *Save dashboard* window, enter the *Title* and an optional *Description*.
@@ -352,6 +354,10 @@ Apply a set of design options to the entire dashboard.
 . To save the time filter to the dashboard, select *Store time with dashboard*.
 
 . Click *Save*.
+
+If you are saving an existing dashboard, click *Save*.
+
+To exit *Edit* mode, click *Switch to view mode*. 
 
 [float]
 [[download-csv]]
