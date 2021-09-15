@@ -12,7 +12,6 @@ import { BehaviorSubject } from 'rxjs';
 import { migrateToLatest } from '../../../../kibana_utils/common';
 import type { UrlService } from '../../../common/url_service';
 import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
-import { render } from './render';
 
 export interface RedirectManagerDependencies {
   url: UrlService;
@@ -28,7 +27,8 @@ export class RedirectManager {
       id: 'r',
       title: 'Redirect endpoint',
       chromeless: true,
-      mount: (params) => {
+      mount: async (params) => {
+        const { render } = await import('./render');
         const unmount = render(params.element, { manager: this });
         this.onMount(params.history.location.search);
         return () => {
