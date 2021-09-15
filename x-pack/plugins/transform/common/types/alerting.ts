@@ -8,6 +8,15 @@
 import type { AlertTypeParams } from '../../../alerting/common';
 
 export type TransformHealthRuleParams = {
-  includeTransforms: string[];
-  excludeTransforms?: string[];
+  includeTransforms?: string[];
+  excludeTransforms?: string[] | null;
+  testsConfig: {
+    notStarted: {
+      enabled: boolean;
+    } | null;
+  } | null;
 } & AlertTypeParams;
+
+export type TransformHealthRuleTestsConfig = TransformHealthRuleParams['testsConfig'];
+
+export type TransformHealthTests = keyof Exclude<TransformHealthRuleTestsConfig, null | undefined>;

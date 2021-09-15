@@ -15,6 +15,7 @@ import type {
 import { PLUGIN, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { AlertType } from '../../../../../alerting/server';
+import { transformHealthServiceProvider } from './transform_health_service';
 
 export type TransformHealthAlertContext = {
   results: any[];
@@ -73,6 +74,17 @@ export function getTransformHealthRuleType(): AlertType<
     producer: 'monitoring',
     minimumLicenseRequired: PLUGIN.MINIMUM_LICENSE_REQUIRED,
     isExportable: true,
-    async executor(options) {},
+    async executor(options) {
+      const {
+        services: { scopedClusterClient, alertInstanceFactory },
+        params,
+      } = options;
+
+      const transformHealthService = transformHealthServiceProvider(
+        scopedClusterClient.asInternalUser
+      );
+
+      const report = transformHealthService.getHealthChecksResults(params);
+    },
   };
 }
