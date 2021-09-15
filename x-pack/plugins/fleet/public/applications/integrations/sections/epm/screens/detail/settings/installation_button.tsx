@@ -161,6 +161,10 @@ export function InstallationButton(props: InstallationButtonProps) {
   }, [installPackage, name, title, version]);
 
   const handleClickUpgradePolicies = useCallback(async () => {
+    if (isUpgradingPackagePolicies) {
+      return;
+    }
+
     setIsUpgradingPackagePolicies(true);
 
     await installPackage({ name, version, title });
@@ -196,13 +200,14 @@ export function InstallationButton(props: InstallationButtonProps) {
   }, [
     dryRunData,
     installPackage,
+    isUpgradingPackagePolicies,
     name,
-    version,
-    title,
     navigateToNewSettingsPage,
     notifications.toasts,
     packagePolicyIds,
     setIsUpgradingPackagePolicies,
+    title,
+    version,
   ]);
 
   const handleClickUninstall = useCallback(() => {

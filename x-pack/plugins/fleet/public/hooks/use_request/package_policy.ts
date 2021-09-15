@@ -70,7 +70,7 @@ export function sendUpgradePackagePolicyDryRun(
   packagePolicyIds: string[],
   packageVersion?: string
 ) {
-  const body: any = {
+  const body: { packagePolicyIds: string[]; dryRun: boolean; packageVersion?: string } = {
     packagePolicyIds,
     dryRun: true,
   };
