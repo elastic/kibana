@@ -21,15 +21,9 @@ interface Props {
   transaction: Transaction;
   urlParams: ApmUrlParams;
   waterfall: IWaterfall;
-  exceedsMax: boolean;
 }
 
-export function TransactionTabs({
-  transaction,
-  urlParams,
-  waterfall,
-  exceedsMax,
-}: Props) {
+export function TransactionTabs({ transaction, urlParams, waterfall }: Props) {
   const history = useHistory();
   const tabs = [timelineTab, metadataTab, logsTab];
   const currentTab =
@@ -65,7 +59,6 @@ export function TransactionTabs({
       <TabContent
         urlParams={urlParams}
         waterfall={waterfall}
-        exceedsMax={exceedsMax}
         transaction={transaction}
       />
     </React.Fragment>
@@ -99,19 +92,11 @@ const logsTab = {
 function TimelineTabContent({
   urlParams,
   waterfall,
-  exceedsMax,
 }: {
   urlParams: ApmUrlParams;
   waterfall: IWaterfall;
-  exceedsMax: boolean;
 }) {
-  return (
-    <WaterfallContainer
-      urlParams={urlParams}
-      waterfall={waterfall}
-      exceedsMax={exceedsMax}
-    />
-  );
+  return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
 }
 
 function MetadataTabContent({ transaction }: { transaction: Transaction }) {
