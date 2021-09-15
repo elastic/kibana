@@ -93,8 +93,6 @@ export default async function ({ readConfigFile }) {
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--timelion.ui.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
-        '--xpack.observability.unsafe.cases.enabled=true',
-        '--xpack.observability.unsafe.alertingExperience.enabled=true', // NOTE: Can be removed once enabled by default
       ],
     },
     uiSettings: {
