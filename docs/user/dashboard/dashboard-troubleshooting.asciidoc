@@ -10,7 +10,7 @@ Refer to the troubleshooting information to find solutions to common dashboard a
 [[defer-loading-panels-below-the-fold]]
 === Improve dashboard loading time
 
-To improve the dashboard loading time, enable the *Defer loading panels below the fold* *Lab*, which loads the dashboard panels as they become visible on the dashboard.
+To improve the dashboard loading time, enable *Defer loading panels below the fold* *Lab*, which loads dashboard panels as they become visible on the dashboard.
 
 . In the toolbar, click *Labs*.
 +
