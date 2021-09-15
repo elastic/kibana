@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useContext } from 'react';
 import createContainer from 'constate';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { Legacy } from '../../legacy_shims';
+import { GlobalStateContext } from '../../application/global_state_context';
 
 interface TimeOptions {
   from: string;
@@ -25,6 +27,8 @@ const DEFAULT_REFRESH_INTERVAL_PAUSE = false;
 
 export const useMonitoringTime = () => {
   const { services } = useKibana<{ data: any }>();
+  const state = useContext(GlobalStateContext);
+
   const defaultTimeRange = {
     ...DEFAULT_TIMERANGE,
     ...services.data?.query.timefilter.timefilter.getTime(),
@@ -39,8 +43,14 @@ export const useMonitoringTime = () => {
   const handleTimeChange = useCallback(
     (start: string, end: string) => {
       setTimeRange({ ...currentTimerange, from: start, to: end });
+      state.time = {
+        from: start,
+        to: end,
+      };
+      Legacy.shims.timefilter.setTime(state.time);
+      state.save?.();
     },
-    [currentTimerange, setTimeRange]
+    [currentTimerange, setTimeRange, state]
   );
 
   return {
