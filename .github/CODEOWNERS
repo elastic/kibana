@@ -241,7 +241,6 @@
 /packages/kbn-std/ @elastic/kibana-core
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
-/packages/kbn-legacy-logging/ @elastic/kibana-core
 /packages/kbn-crypto/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core

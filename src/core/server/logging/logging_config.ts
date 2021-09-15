@@ -7,7 +7,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { legacyLoggingConfigSchema } from '@kbn/legacy-logging';
 import { AppenderConfigType, Appenders } from './appenders/appenders';
 
 // We need this helper for the types to be correct
@@ -60,7 +59,7 @@ export const loggerSchema = schema.object({
 export type LoggerConfigType = TypeOf<typeof loggerSchema>;
 export const config = {
   path: 'logging',
-  schema: legacyLoggingConfigSchema.extends({
+  schema: schema.object({
     appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
       defaultValue: new Map<string, AppenderConfigType>(),
     }),

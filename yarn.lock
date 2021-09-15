@@ -2789,10 +2789,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/legacy-logging@link:bazel-bin/packages/kbn-legacy-logging":
-  version "0.0.0"
-  uid ""
-
 "@kbn/logging@link:bazel-bin/packages/kbn-logging":
   version "0.0.0"
   uid ""
