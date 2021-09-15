@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
+import type { Transform as EsTransform } from '@elastic/elasticsearch/api/types';
 import { TransformHealthRuleParams } from './schema';
 import {
   ALL_TRANSFORMS_SELECTION,
@@ -23,7 +24,12 @@ interface TestResult {
   context: TransformHealthAlertContext;
 }
 
+// @ts-ignore FIXME update types in the elasticsearch client
+type Transform = EsTransform & { id: string; description?: string; sync: object };
+
 export function transformHealthServiceProvider(esClient: ElasticsearchClient) {
+  const transformsDict = new Map<string, Transform>();
+
   /**
    * Resolves result transform selection.
    * @param includeTransforms
@@ -41,18 +47,23 @@ export function transformHealthServiceProvider(esClient: ElasticsearchClient) {
         ...(includeAll ? {} : { transform_id: includeTransforms.join(',') }),
         allow_no_match: true,
       })
-    ).body.transforms;
+    ).body.transforms as Transform[];
 
-    // Filter out for continuous transforms.
-    // @ts-ignore FIXME update types in the elasticsearch client
-    let resultTransforms = transformsResponse.filter((v) => v.sync).map((v) => v.id);
+    let resultTransformIds: string[] = [];
+
+    transformsResponse.forEach((t) => {
+      transformsDict.set(t.id, t);
+      if (t.sync) {
+        resultTransformIds.push(t.id);
+      }
+    });
 
     if (excludeTransforms && excludeTransforms.length > 0) {
       const excludeIdsSet = new Set(excludeTransforms);
-      resultTransforms = resultTransforms.filter((id) => excludeIdsSet.has(id));
+      resultTransformIds = resultTransformIds.filter((id) => excludeIdsSet.has(id));
     }
 
-    return resultTransforms;
+    return resultTransformIds;
   };
 
   return {
@@ -73,6 +84,7 @@ export function transformHealthServiceProvider(esClient: ElasticsearchClient) {
         .filter((t) => t.state !== 'started' && t.state !== 'indexing')
         .map((t) => ({
           transform_id: t.id,
+          description: transformsDict.get(t.id)?.description,
           state: t.state,
           node_name: t.node?.name,
         }));

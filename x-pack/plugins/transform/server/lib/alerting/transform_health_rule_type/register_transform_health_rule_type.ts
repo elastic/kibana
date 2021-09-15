@@ -17,8 +17,12 @@ import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { AlertType } from '../../../../../alerting/server';
 import { transformHealthServiceProvider } from './transform_health_service';
 
-export interface NotStartedTransformResponse {
+export interface BaseResponse {
   transform_id: string;
+  description?: string;
+}
+
+export interface NotStartedTransformResponse extends BaseResponse {
   state: string;
   node_name?: string;
 }
