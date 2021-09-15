@@ -42,14 +42,14 @@ describe('PrivateSources', () => {
     expect(wrapper.find(SourcesView)).toHaveLength(1);
   });
 
-  it('renders only shared sources section when canCreatePersonalSources is false', () => {
+  it('renders only organizational sources section when canCreatePersonalSources is false', () => {
     setMockValues({ ...mockValues });
     const wrapper = shallow(<PrivateSources />);
 
     expect(wrapper.find(ContentSection)).toHaveLength(1);
   });
 
-  it('renders both shared and private sources sections when canCreatePersonalSources is true', () => {
+  it('renders both organizational and private sources sections when canCreatePersonalSources is true', () => {
     setMockValues({ ...mockValues, account: { canCreatePersonalSources: true, groups: [] } });
     const wrapper = shallow(<PrivateSources />);
 
