@@ -15,6 +15,7 @@ import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { Datatable } from 'src/plugins/expressions';
 
 function exampleState(): State {
   return {
@@ -778,6 +779,58 @@ describe('xy_visualization', () => {
             invalid: true,
             groupId: 'xThreshold',
           })
+        );
+      });
+
+      it('differ vertical axis if the formatters are not compatibles between each other', () => {
+        const tables: Record<string, Datatable> = {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [
+              {
+                id: 'xAccessorId',
+                name: 'horizontal axis',
+                meta: {
+                  type: 'date',
+                  params: { params: { id: 'date', params: { pattern: 'HH:mm' } } },
+                },
+              },
+              {
+                id: 'yAccessorId',
+                name: 'left axis',
+                meta: {
+                  type: 'number',
+                  params: { id: 'number' },
+                },
+              },
+              {
+                id: 'yAccessorId2',
+                name: 'right axis',
+                meta: {
+                  type: 'number',
+                  params: { id: 'bytes' },
+                },
+              },
+            ],
+          },
+        };
+
+        const state = getStateWithBaseThreshold();
+        state.layers[0].accessors = ['yAccessorId', 'yAccessorId2'];
+        state.layers[1].yConfig = []; // empty the configuration
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame: { ...frame, activeData: tables },
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ groupId: 'yThresholdLeft' }),
+            expect.objectContaining({ groupId: 'yThresholdRight' }),
+          ])
         );
       });
     });

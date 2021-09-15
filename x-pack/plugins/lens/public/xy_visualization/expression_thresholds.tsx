@@ -10,22 +10,23 @@ import { groupBy } from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import type { PaletteRegistry, SeriesLayer } from 'src/plugins/charts/public';
+import type { FieldFormat } from 'src/plugins/field_formats/common';
 import type { LayerArgs } from '../../common/expressions';
-import type { FormatFactory, LensMultiTable } from '../../common/types';
+import type { LensMultiTable } from '../../common/types';
 import type { ColorAssignments } from './color_assignment';
 
 export const ThresholdAnnotations = ({
   thresholdLayers,
   data,
   colorAssignments,
-  formatFactory,
+  formatters,
   paletteService,
   syncColors,
 }: {
   thresholdLayers: LayerArgs[];
   data: LensMultiTable;
   colorAssignments: ColorAssignments;
-  formatFactory: FormatFactory;
+  formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   paletteService: PaletteRegistry;
   syncColors: boolean;
 }) => {
@@ -51,11 +52,15 @@ export const ThresholdAnnotations = ({
         const groupedByDirection = groupBy(yConfigByValue, 'fill');
 
         return yConfigByValue.flatMap((yConfig, i) => {
-          const formatter = formatFactory(
-            table?.columns.find((column) => column.id === yConfig.forAccessor)?.meta?.params || {
-              id: 'number',
-            }
-          );
+          // Find the formatter for the given axis
+          const groupId =
+            yConfig.axisMode === 'bottom'
+              ? undefined
+              : yConfig.axisMode === 'right'
+              ? 'right'
+              : 'left';
+
+          const formatter = formatters[groupId || 'bottom'];
 
           const seriesLayers: SeriesLayer[] = [
             {
@@ -80,12 +85,7 @@ export const ThresholdAnnotations = ({
           );
 
           const props = {
-            groupId:
-              yConfig.axisMode === 'bottom'
-                ? undefined
-                : yConfig.axisMode === 'right'
-                ? 'right'
-                : 'left',
+            groupId,
             marker: yConfig.icon ? <EuiIcon type={yConfig.icon} /> : undefined,
           };
           const annotations = [];
@@ -111,7 +111,7 @@ export const ThresholdAnnotations = ({
               dataValues={table.rows.map(() => ({
                 dataValue: row[yConfig.forAccessor],
                 header: columnToLabelMap[yConfig.forAccessor],
-                details: formatter.convert(row[yConfig.forAccessor]),
+                details: formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
               }))}
               domainType={
                 yConfig.axisMode === 'bottom'
@@ -155,7 +155,8 @@ export const ThresholdAnnotations = ({
                         y1: undefined,
                       },
                       header: columnToLabelMap[yConfig.forAccessor],
-                      details: formatter.convert(row[yConfig.forAccessor]),
+                      details:
+                        formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
                     };
                   }
                   return {
@@ -172,13 +173,14 @@ export const ThresholdAnnotations = ({
                         : row[yConfig.forAccessor],
                     },
                     header: columnToLabelMap[yConfig.forAccessor],
-                    details: formatter.convert(row[yConfig.forAccessor]),
+                    details:
+                      formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
                   };
                 })}
                 style={{
                   ...sharedStyle,
                   fill: (yConfig.color || defaultColor) ?? '#f00',
-                  opacity: 0.3,
+                  opacity: 0.1,
                 }}
               />
             );

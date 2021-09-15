@@ -839,7 +839,11 @@ export function XYChart({
         colorAssignments={colorAssignments}
         syncColors={syncColors}
         paletteService={paletteService}
-        formatFactory={formatFactory}
+        formatters={{
+          left: yAxesConfiguration.find(({ groupId }) => groupId === 'left')?.formatter,
+          right: yAxesConfiguration.find(({ groupId }) => groupId === 'right')?.formatter,
+          bottom: xAxisFormatter,
+        }}
       />
     </Chart>
   );

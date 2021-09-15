@@ -223,7 +223,8 @@ export const getXyVisualization = ({
     const thresholdGroups = getGroupsRelatedToData(
       thresholdGroupIds,
       state,
-      frame?.datasourceLayers || {}
+      frame?.datasourceLayers || {},
+      frame?.activeData
     );
 
     const layers = [
@@ -339,7 +340,8 @@ export const getXyVisualization = ({
           },
         ],
         state,
-        frame.datasourceLayers
+        frame.datasourceLayers,
+        frame?.activeData
       );
       return {
         supportFieldFormat: false,
@@ -492,7 +494,8 @@ export const getXyVisualization = ({
     // // check for data layers if they all still have xAccessors
     const groupsAvailable = getGroupsAvailableInData(
       layersByType[layerTypes.DATA],
-      frame.datasourceLayers
+      frame.datasourceLayers,
+      frame?.activeData
     );
     if (
       (Object.keys(groupsAvailable) as Array<'x' | 'yLeft' | 'yRight'>).every(

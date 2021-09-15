@@ -81,7 +81,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     toggleFullscreen,
     isFullscreen,
     supportStaticValue,
-    supportFieldFormat,
+    supportFieldFormat = true,
     layerType,
   } = props;
   const services = {

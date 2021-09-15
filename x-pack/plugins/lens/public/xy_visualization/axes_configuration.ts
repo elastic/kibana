@@ -30,12 +30,7 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function getAxesConfiguration(
-  layers: XYLayerConfig[],
-  shouldRotate: boolean,
-  tables?: Record<string, Datatable>,
-  formatFactory?: FormatFactory
-): GroupsConfiguration {
+export function groupAxesByType(layers: XYLayerConfig[], tables?: Record<string, Datatable>) {
   const series: {
     auto: FormattedMetric[];
     left: FormattedMetric[];
@@ -95,6 +90,16 @@ export function getAxesConfiguration(
       series.right.push(currentSeries);
     }
   });
+  return series;
+}
+
+export function getAxesConfiguration(
+  layers: XYLayerConfig[],
+  shouldRotate: boolean,
+  tables?: Record<string, Datatable>,
+  formatFactory?: FormatFactory
+): GroupsConfiguration {
+  const series = groupAxesByType(layers, tables);
 
   const axisGroups: GroupsConfiguration = [];
 

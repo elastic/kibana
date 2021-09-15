@@ -6,10 +6,12 @@
  */
 
 import { layerTypes } from '../../common';
-import { XYLayerConfig, YConfig } from '../../common/expressions';
-import { DatasourcePublicAPI, FramePublicAPI } from '../types';
+import type { XYLayerConfig, YConfig } from '../../common/expressions';
+import { Datatable } from '../../../../../src/plugins/expressions/public';
+import type { DatasourcePublicAPI, FramePublicAPI } from '../types';
+import { groupAxesByType } from './axes_configuration';
 import { isPercentageSeries } from './state_helpers';
-import { XYState } from './types';
+import type { XYState } from './types';
 import { checkScaleOperation } from './visualization_helpers';
 
 export interface ThresholdBase {
@@ -24,7 +26,8 @@ export interface ThresholdBase {
 export function getGroupsToShow<T extends ThresholdBase & { config?: YConfig[] }>(
   thresholdLayers: T[],
   state: XYState | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  tables: Record<string, Datatable> | undefined
 ): Array<T & { valid: boolean }> {
   if (!state) {
     return [];
@@ -32,7 +35,7 @@ export function getGroupsToShow<T extends ThresholdBase & { config?: YConfig[] }
   const dataLayers = state.layers.filter(
     ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
   );
-  const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers);
+  const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
   return thresholdLayers
     .filter(({ label, config }: T) => groupsAvailable[label] || config?.length)
     .map((layer) => ({ ...layer, valid: groupsAvailable[layer.label] }));
@@ -44,7 +47,8 @@ export function getGroupsToShow<T extends ThresholdBase & { config?: YConfig[] }
 export function getGroupsRelatedToData<T extends ThresholdBase>(
   thresholdLayers: T[],
   state: XYState | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  tables: Record<string, Datatable> | undefined
 ): T[] {
   if (!state) {
     return [];
@@ -52,7 +56,7 @@ export function getGroupsRelatedToData<T extends ThresholdBase>(
   const dataLayers = state.layers.filter(
     ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
   );
-  const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers);
+  const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
   return thresholdLayers.filter(({ label }: T) => groupsAvailable[label]);
 }
 /**
@@ -60,36 +64,19 @@ export function getGroupsRelatedToData<T extends ThresholdBase>(
  */
 export function getGroupsAvailableInData(
   dataLayers: XYState['layers'],
-  datasourceLayers: Record<string, DatasourcePublicAPI>
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  tables: Record<string, Datatable> | undefined
 ) {
   const hasNumberHistogram = dataLayers.some(
     checkScaleOperation('interval', 'number', datasourceLayers)
   );
-  return dataLayers.reduce(
-    (memo, dataLayer) => {
-      if (!memo.x && hasNumberHistogram) {
-        memo.x = Boolean(dataLayer.xAccessor);
-      }
-      if (!memo.yLeft) {
-        const leftConfigs = dataLayer.yConfig?.filter(({ axisMode }) => axisMode !== 'right');
-        const hasMoreConfigsThanAccessor =
-          dataLayer.accessors.length > (dataLayer.yConfig?.length ?? 0);
+  const { right, left, bottom } = groupAxesByType(dataLayers, tables);
 
-        memo.yLeft = Boolean(
-          dataLayer.accessors.length &&
-            (leftConfigs == null || leftConfigs.length || hasMoreConfigsThanAccessor)
-        );
-      }
-      if (!memo.yRight) {
-        memo.yRight = Boolean(
-          dataLayer.accessors.length &&
-            dataLayer.yConfig?.some(({ axisMode }) => axisMode === 'right')
-        );
-      }
-      return memo;
-    },
-    { x: false, yLeft: false, yRight: false }
-  );
+  return {
+    x: bottom.length > 0 && hasNumberHistogram,
+    yLeft: left.length > 0,
+    yRight: right.length > 0,
+  };
 }
 
 export function getStaticValue(
