@@ -60,14 +60,6 @@ jest.mock('../../lib/kibana', () => ({
   },
 }));
 
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
-  return {
-    ...original,
-    useDispatch: () => jest.fn(),
-  };
-});
-
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 
