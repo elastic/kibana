@@ -12,7 +12,7 @@ import _ from 'lodash';
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
-import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
+import { IFieldType } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
   errors: IErrorObject;
