@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
@@ -30,17 +30,21 @@ export interface HomeTestBed extends TestBed<TestSubjects> {
 
 export const setup = async (): Promise<HomeTestBed> => {
   const testBed = await initTestBed();
+  const { component, find } = testBed;
 
   /**
    * User Actions
    */
 
   const selectHomeTab = (tab: 'indicesTab' | 'templatesTab') => {
-    testBed.find(tab).simulate('click');
+    find(tab).simulate('click');
   };
 
-  const toggleHiddenIndices = () => {
-    testBed.find('indexTableIncludeHiddenIndicesToggle').simulate('click');
+  const toggleHiddenIndices = function () {
+    act(() => {
+      find('indexTableIncludeHiddenIndicesToggle').simulate('click');
+    });
+    component.update();
   };
 
   return {

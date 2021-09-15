@@ -98,10 +98,18 @@ describe('<IndexManagementHome />', () => {
         expect(noIndicesMessageText).toEqual('No indices to show');
       });
 
-      it('Should show system indices if hidden indices is toggled. ', () => {
-        const { find, actions } = testBed;
+      it('Should show system indices if hidden indices is toggled. ', async () => {
+        const { find, actions, component } = testBed;
 
-        actions.toggleHiddenIndices();
+        await act(async () => {
+          actions.toggleHiddenIndices();
+        });
+        component.update();
+
+        const indicesListTable = find('indicesList');
+        const indicesTableRows = indicesListTable.find('.euiTableRow');
+
+        expect(indicesTableRows.children().length).toBeGreaterThan(0);
       });
     });
   });
