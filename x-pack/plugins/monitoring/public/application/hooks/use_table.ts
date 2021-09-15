@@ -8,6 +8,27 @@
 import { useState, useCallback } from 'react';
 import { EUI_SORT_ASCENDING } from '../../../common/constants';
 import { euiTableStorageGetter, euiTableStorageSetter } from '../../components/table';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+
+interface Pagination {
+  pageSize: number;
+  initialPageSize: number;
+  pageIndex: number;
+  initialPageIndex: number;
+  pageSizeOptions: number[];
+}
+
+interface Page {
+  size: number;
+  index: number;
+}
+
+interface Sorting {
+  sort: {
+    field: string;
+    direction: string;
+  };
+}
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
@@ -19,28 +40,38 @@ const DEFAULT_PAGINATION = {
   pageSizeOptions: PAGE_SIZE_OPTIONS,
 };
 
-const verifyDataFromLocalStorage = (page) => {
+const getPaginationInitialState = (page: Page | undefined) => {
+  if (!page) {
+    return DEFAULT_PAGINATION;
+  }
+
   if (!PAGE_SIZE_OPTIONS.includes(page.size)) {
     page.size = 20;
   }
 
-  return page;
+  return {
+    initialPageSize: page.size,
+    pageSize: page.size,
+    initialPageIndex: page.index,
+    pageIndex: page.index,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+  };
 };
 
-export function useTable(storageKey) {
+export function useTable(storageKey: string) {
   const storage = new Storage(window.localStorage);
   const getLocalStorageData = euiTableStorageGetter(storageKey);
   const setLocalStorageData = euiTableStorageSetter(storageKey);
 
   const storageData = getLocalStorageData(storage);
   // get initial state from localstorage
-  const [pagination, setPagination] = useState(
-    page ? verifyDataFromLocalStorage(storageData.page) : DEFAULT_PAGINATION
+  const [pagination, setPagination] = useState<Pagination>(
+    getPaginationInitialState(storageData.page)
   );
 
   // get initial state from localStorage
-  const [sorting, setSorting] = useState({});
-  const cleanSortingData = (sortData) => {
+  const [sorting, setSorting] = useState<Sorting>(storageData.sort || { sort: {} });
+  const cleanSortingData = (sortData: Sorting) => {
     const sort = sortData || { sort: {} };
 
     if (!sort.sort.field) {
@@ -55,14 +86,12 @@ export function useTable(storageKey) {
 
   const [queryText, setQueryText] = useState('');
 
-  const onTableChange = ({ page, sort }) => {
+  const onTableChange = () => {
     // we are already updating the state in fetchMoreData. We would need to check in react
     // if both methods are needed or we can clean one of them
-    // TODO: check if we need this
-    // if (this.onTableChangeRender) {
-    //   this.onTableChangeRender();
-    // }
+    // For now I just keep it so existing react components don't break
   };
+
   const getPaginationRouteOptions = useCallback(() => {
     if (!pagination || !sorting) {
       return {};
@@ -83,7 +112,15 @@ export function useTable(storageKey) {
       sorting,
       pagination,
       onTableChange,
-      fetchMoreData: async ({ page, sort, query }) => {
+      fetchMoreData: async ({
+        page,
+        sort,
+        query,
+      }: {
+        page: Page;
+        sort: Sorting;
+        query: string;
+      }) => {
         setPagination({
           initialPageSize: page.size,
           pageSize: page.size,
@@ -93,6 +130,11 @@ export function useTable(storageKey) {
         });
         setSorting(cleanSortingData(sort));
         setQueryText(query);
+
+        setLocalStorageData(storage, {
+          page,
+          sort,
+        });
       },
     };
   };
