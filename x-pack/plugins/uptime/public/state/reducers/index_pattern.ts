@@ -7,7 +7,7 @@
 
 import { handleActions, Action } from 'redux-actions';
 import { getIndexPattern, getIndexPatternSuccess, getIndexPatternFail } from '../actions';
-import type { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import type { IndexPattern } from '../../../../../../src/plugins/data/common';
 
 export interface IndexPatternState {
   index_pattern: IndexPattern | null;
