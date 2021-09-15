@@ -833,18 +833,20 @@ export function XYChart({
           }
         })
       )}
-      <ThresholdAnnotations
-        thresholdLayers={thresholdLayers}
-        data={data}
-        colorAssignments={colorAssignments}
-        syncColors={syncColors}
-        paletteService={paletteService}
-        formatters={{
-          left: yAxesConfiguration.find(({ groupId }) => groupId === 'left')?.formatter,
-          right: yAxesConfiguration.find(({ groupId }) => groupId === 'right')?.formatter,
-          bottom: xAxisFormatter,
-        }}
-      />
+      {thresholdLayers.length ? (
+        <ThresholdAnnotations
+          thresholdLayers={thresholdLayers}
+          data={data}
+          colorAssignments={colorAssignments}
+          syncColors={syncColors}
+          paletteService={paletteService}
+          formatters={{
+            left: yAxesConfiguration.find(({ groupId }) => groupId === 'left')?.formatter,
+            right: yAxesConfiguration.find(({ groupId }) => groupId === 'right')?.formatter,
+            bottom: xAxisFormatter,
+          }}
+        />
+      ) : null}
     </Chart>
   );
 }

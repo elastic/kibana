@@ -70,10 +70,9 @@ export function getGroupsAvailableInData(
   const hasNumberHistogram = dataLayers.some(
     checkScaleOperation('interval', 'number', datasourceLayers)
   );
-  const { right, left, bottom } = groupAxesByType(dataLayers, tables);
-
+  const { right, left } = groupAxesByType(dataLayers, tables);
   return {
-    x: bottom.length > 0 && hasNumberHistogram,
+    x: dataLayers.some(({ xAccessor }) => xAccessor != null) && hasNumberHistogram,
     yLeft: left.length > 0,
     yRight: right.length > 0,
   };
@@ -146,7 +145,12 @@ function computeStaticValueForGroup(
         (max, row) => Math.max(row[columnId], max),
         -Infinity
       );
-      return Number(((columnMax * 3) / 4).toFixed(2));
+      const columnMin = activeData[tableId].rows.reduce(
+        (max, row) => Math.min(row[columnId], max),
+        Infinity
+      );
+      const interval = columnMax - columnMin;
+      return columnMin + Number(((interval * 3) / 4).toFixed(2));
     }
   }
 }
