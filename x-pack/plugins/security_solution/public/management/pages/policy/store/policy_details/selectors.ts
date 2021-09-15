@@ -262,3 +262,7 @@ export const agentStatusSummary = (state: PolicyDetailsState) => state.agentStat
 
 /** Status for an update to the policy */
 export const updateStatus = (state: PolicyDetailsState) => state.updateStatus;
+
+/** Is add trusted apps flyout open */
+export const isAddTrustedAppsFlyoutOpen = (state: PolicyDetailsState): boolean =>
+  state.addTrustedAppsFlyoutOpen;

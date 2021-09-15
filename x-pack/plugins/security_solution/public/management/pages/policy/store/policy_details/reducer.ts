@@ -47,6 +47,7 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
     total: 0,
     other: 0,
   },
+  addTrustedAppsFlyoutOpen: true,
 });
 
 export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppAction> = (
@@ -92,6 +93,13 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
       ...state,
       isLoading: true,
       updateApiError: undefined,
+    };
+  }
+
+  if (action.type === 'toggleAddTrustedAppsFlyout') {
+    return {
+      ...state,
+      addTrustedAppsFlyoutOpen: action.payload.addTrustedAppsFlyoutOpen,
     };
   }
 

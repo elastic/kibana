@@ -69,6 +69,13 @@ export interface LicenseChanged {
   payload: ILicense;
 }
 
+export interface ToggleAddTrustedAppsFlyout {
+  type: 'toggleAddTrustedAppsFlyout';
+  payload: {
+    addTrustedAppsFlyoutOpen: boolean;
+  };
+}
+
 export type PolicyDetailsAction =
   | ServerReturnedPolicyDetailsData
   | UserClickedPolicyDetailsSaveButton
@@ -78,4 +85,5 @@ export type PolicyDetailsAction =
   | ServerFailedToReturnPolicyDetailsData
   | UserChangedPolicyConfig
   | UserChangedAntivirusRegistration
-  | LicenseChanged;
+  | LicenseChanged
+  | ToggleAddTrustedAppsFlyout;

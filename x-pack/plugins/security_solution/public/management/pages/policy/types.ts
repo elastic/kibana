@@ -70,6 +70,8 @@ export interface PolicyDetailsState {
   };
   /** current license */
   license?: ILicense;
+  /** A flag to open add trusted apps flyout */
+  addTrustedAppsFlyoutOpen: boolean;
 }
 
 export enum OS {
