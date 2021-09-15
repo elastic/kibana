@@ -7,14 +7,12 @@
 
 import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FilterLabel } from '../components/filter_label';
-import { SeriesConfig, SeriesUrl, UrlFilter } from '../types';
-import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
-import { useSeriesFilters } from '../hooks/use_series_filters';
-import { getFiltersFromDefs } from '../hooks/use_lens_attributes';
-import { useSeriesStorage } from '../hooks/use_series_storage';
+import { FilterLabel } from '../../components/filter_label';
+import { SeriesConfig, SeriesUrl, UrlFilter } from '../../types';
+import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { useSeriesFilters } from '../../hooks/use_series_filters';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: number;
@@ -24,28 +22,15 @@ interface Props {
 export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
   const { setSeries } = useSeriesStorage();
 
-  const isPreview = !!useRouteMatch('/exploratory-view/preview');
-
-  const { reportDefinitions = {} } = series;
-
   const { labels } = seriesConfig;
 
   const filters: UrlFilter[] = series.filters ?? [];
-
-  let definitionFilters: UrlFilter[] = getFiltersFromDefs(reportDefinitions);
-
-  const isConfigure = !!useRouteMatch('/exploratory-view/configure');
-
-  // we don't want to display report definition filters in new series view
-  if (isConfigure) {
-    definitionFilters = [];
-  }
 
   const { removeFilter } = useSeriesFilters({ seriesId, series });
 
   const { indexPattern } = useAppIndexPatternContext(series.dataType);
 
-  if ((filters.length === 0 && definitionFilters.length === 0) || !indexPattern) {
+  if (filters.length === 0 || !indexPattern) {
     return null;
   }
 
@@ -92,25 +77,7 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
         </Fragment>
       ))}
 
-      {definitionFilters.map(({ field, values }) =>
-        values ? (
-          <EuiFlexItem key={field} grow={false} style={{ maxWidth: 350 }}>
-            <FilterLabel
-              series={series}
-              seriesId={seriesId}
-              field={field}
-              label={labels[field]}
-              value={values}
-              removeFilter={() => {}}
-              negate={false}
-              definitionFilter={true}
-              indexPattern={indexPattern}
-            />
-          </EuiFlexItem>
-        ) : null
-      )}
-
-      {(series.filters ?? []).length > 0 && !isPreview && (
+      {(series.filters ?? []).length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             flush="left"

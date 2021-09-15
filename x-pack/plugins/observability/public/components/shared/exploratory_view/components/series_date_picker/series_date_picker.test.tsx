@@ -26,7 +26,7 @@ describe('SeriesDatePicker', function () {
       initSeries,
     });
 
-    getByText('Last 30 Minutes');
+    getByText('Last 30 minutes');
   });
 
   it('should set series data', async function () {
@@ -43,7 +43,7 @@ describe('SeriesDatePicker', function () {
 
     const { onRefreshTimeRange } = mockUseHasData();
     const { getByTestId, setSeries } = render(
-      <SeriesDatePicker seriesId={0} series={initSeries.data[0]} readonly={false} />,
+      <SeriesDatePicker seriesId={0} series={initSeries.data[0]} />,
       {
         initSeries,
       }

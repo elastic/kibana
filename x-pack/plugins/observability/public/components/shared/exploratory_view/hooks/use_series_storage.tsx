@@ -6,7 +6,6 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import {
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
@@ -24,10 +23,8 @@ import { URL_KEYS } from '../configurations/constants/url_constants';
 
 export interface SeriesContextValue {
   firstSeries?: SeriesUrl;
-  autoApply: boolean;
   lastRefresh: number;
   setLastRefresh: (val: number) => void;
-  setAutoApply: (val: boolean) => void;
   applyChanges: () => void;
   allSeries: AllSeries;
   setSeries: (seriesIndex: number, newValue: SeriesUrl) => void;
@@ -48,7 +45,6 @@ export function convertAllShortSeries(allShortSeries: AllShortSeries) {
 }
 
 export const allSeriesKey = 'sr';
-const autoApplyKey = 'autoApply';
 const reportTypeKey = 'reportType';
 
 export function UrlStorageContextProvider({
@@ -59,8 +55,6 @@ export function UrlStorageContextProvider({
     convertAllShortSeries(storage.get(allSeriesKey) ?? [])
   );
 
-  // Auto apply feature is currently disabled
-  const [autoApply, setAutoApply] = useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = useState<number>(() => Date.now());
 
   const [reportType, setReportType] = useState<string>(
@@ -68,29 +62,12 @@ export function UrlStorageContextProvider({
   );
 
   const [firstSeries, setFirstSeries] = useState<SeriesUrl>();
-  const isPreview = !!useRouteMatch('/exploratory-view/preview');
 
   useEffect(() => {
-    const allShortSeries = allSeries.map((series) => convertToShortUrl(series));
-
     const firstSeriesT = allSeries?.[0];
 
     setFirstSeries(firstSeriesT);
-
-    if (autoApply) {
-      (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
-    }
-  }, [allSeries, autoApply, storage]);
-
-  useEffect(() => {
-    // needed for tab change
-    const allShortSeries = allSeries.map((series) => convertToShortUrl(series));
-
-    (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
-    (storage as IKbnUrlStateStorage).set(reportTypeKey, reportType);
-    // this is only needed for tab change, so we will not add allSeries into dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPreview, storage]);
+  }, [allSeries, storage]);
 
   const setSeries = useCallback((seriesIndex: number, newValue: SeriesUrl) => {
     setAllSeries((prevAllSeries) => {
@@ -133,13 +110,7 @@ export function UrlStorageContextProvider({
     setLastRefresh(Date.now());
   }, [allSeries, storage]);
 
-  useEffect(() => {
-    (storage as IKbnUrlStateStorage).set(autoApplyKey, autoApply);
-  }, [autoApply, storage]);
-
   const value = {
-    autoApply,
-    setAutoApply,
     applyChanges,
     storage,
     getSeries,

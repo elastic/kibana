@@ -12,14 +12,14 @@ import { isEqual } from 'lodash';
 import { allSeriesKey, convertAllShortSeries, useSeriesStorage } from '../hooks/use_series_storage';
 
 export function ViewActions() {
-  const { allSeries, storage, autoApply, applyChanges } = useSeriesStorage();
+  const { allSeries, storage, applyChanges } = useSeriesStorage();
 
   const noChanges = isEqual(allSeries, convertAllShortSeries(storage.get(allSeriesKey) ?? []));
 
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiButton onClick={() => applyChanges()} isDisabled={autoApply || noChanges} fill>
+        <EuiButton onClick={() => applyChanges()} isDisabled={noChanges} fill>
           {i18n.translate('xpack.observability.expView.seriesBuilder.apply', {
             defaultMessage: 'Apply changes',
           })}

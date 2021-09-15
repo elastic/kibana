@@ -47,10 +47,9 @@ describe('ExploratoryView', () => {
   });
 
   it('renders exploratory view', async () => {
-    render(<ExploratoryView />);
+    render(<ExploratoryView />, { initSeries: { data: [] } });
 
-    expect(await screen.findByText(/Preview/i)).toBeInTheDocument();
-    expect(await screen.findByText(/Configure series/i)).toBeInTheDocument();
+    expect(await screen.findByText(/No series found. Please add a series./i)).toBeInTheDocument();
     expect(await screen.findByText(/Hide chart/i)).toBeInTheDocument();
     expect(await screen.findByText(/Refresh/i)).toBeInTheDocument();
     expect(

@@ -13,9 +13,9 @@ import {
   ToolbarButton,
 } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
-import { SeriesUrl, useFetcher } from '../../../../..';
+import { SeriesUrl, useFetcher } from '../../../../../index';
 import { SeriesConfig } from '../../types';
-import { SeriesChartTypesSelect } from '../../series_editor/columns/chart_types';
+import { SeriesChartTypesSelect } from './chart_types';
 
 interface Props {
   seriesId: number;

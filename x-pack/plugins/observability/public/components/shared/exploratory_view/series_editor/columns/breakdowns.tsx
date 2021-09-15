@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useRouteMatch } from 'react-router-dom';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
 import { SeriesConfig, SeriesUrl } from '../../types';
@@ -21,7 +20,6 @@ interface Props {
 
 export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
   const { setSeries } = useSeriesStorage();
-  const isPreview = !!useRouteMatch('/exploratory-view/preview');
 
   const selectedBreakdown = series.breakdown;
   const NO_BREAKDOWN = 'no_breakdown';
@@ -71,7 +69,6 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
     <div style={{ width: 200 }}>
       <EuiSuperSelect
         fullWidth
-        compressed={isPreview}
         options={options}
         valueOfSelected={valueOfSelected}
         onChange={(value) => onOptionChange(value)}
