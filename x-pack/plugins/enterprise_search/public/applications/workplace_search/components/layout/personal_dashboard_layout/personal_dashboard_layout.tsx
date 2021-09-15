@@ -26,7 +26,7 @@ import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_bread
 import { Loading } from '../../../../shared/loading';
 
 import { PERSONAL_SOURCES_PATH, PERSONAL_SETTINGS_PATH } from '../../../routes';
-import { PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING } from '../../../views/content_sources/constants';
+import { PERSONAL_DASHBOARD_READ_ONLY_MODE_WARNING } from '../../../views/content_sources/constants';
 import { AccountHeader, AccountSettingsSidebar, PrivateSourcesSidebar } from '../index';
 
 import './personal_dashboard_layout.scss';
@@ -59,7 +59,7 @@ export const PersonalDashboardLayout: React.FC<LayoutProps> = ({
                 <EuiCallOut
                   color="warning"
                   iconType="lock"
-                  title={PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING}
+                  title={PERSONAL_DASHBOARD_READ_ONLY_MODE_WARNING}
                 />
                 <EuiSpacer />
               </>
