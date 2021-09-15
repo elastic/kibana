@@ -17,8 +17,16 @@ import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { AlertType } from '../../../../../alerting/server';
 import { transformHealthServiceProvider } from './transform_health_service';
 
+export interface NotStartedTransformResponse {
+  transform_id: string;
+  state: string;
+  node_name?: string;
+}
+
+export type TransformHealthResult = NotStartedTransformResponse;
+
 export type TransformHealthAlertContext = {
-  results: any[];
+  results: TransformHealthResult[];
   message: string;
 } & AlertInstanceContext;
 
@@ -84,7 +92,14 @@ export function getTransformHealthRuleType(): AlertType<
         scopedClusterClient.asInternalUser
       );
 
-      const report = transformHealthService.getHealthChecksResults(params);
+      const executionResult = await transformHealthService.getHealthChecksResults(params);
+
+      if (executionResult.length > 0) {
+        executionResult.forEach(({ name: alertInstanceName, context }) => {
+          const alertInstance = alertInstanceFactory(alertInstanceName);
+          alertInstance.scheduleActions(TRANSFORM_ISSUE, context);
+        });
+      }
     },
   };
 }

@@ -6,9 +6,22 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import { i18n } from '@kbn/i18n';
 import { TransformHealthRuleParams } from './schema';
-import { ALL_TRANSFORMS_SELECTION } from '../../../../common/constants';
+import {
+  ALL_TRANSFORMS_SELECTION,
+  TRANSFORM_HEALTH_CHECK_NAMES,
+} from '../../../../common/constants';
 import { getResultTestConfig } from '../../../../common/utils/alerts';
+import {
+  NotStartedTransformResponse,
+  TransformHealthAlertContext,
+} from './register_transform_health_rule_type';
+
+interface TestResult {
+  name: string;
+  context: TransformHealthAlertContext;
+}
 
 export function transformHealthServiceProvider(esClient: ElasticsearchClient) {
   /**
@@ -22,6 +35,7 @@ export function transformHealthServiceProvider(esClient: ElasticsearchClient) {
   ): Promise<string[]> => {
     const includeAll = includeTransforms.some((id) => id === ALL_TRANSFORMS_SELECTION);
 
+    // Fetch transforms to make sure assigned transforms exists.
     const transformsResponse = (
       await esClient.transform.getTransform({
         ...(includeAll ? {} : { transform_id: includeTransforms.join(',') }),
@@ -29,9 +43,11 @@ export function transformHealthServiceProvider(esClient: ElasticsearchClient) {
       })
     ).body.transforms;
 
-    let resultTransforms = transformsResponse.map((v) => v.transform_id);
+    // Filter out for continuous transforms.
+    // @ts-ignore FIXME update types in the elasticsearch client
+    let resultTransforms = transformsResponse.filter((v) => v.sync).map((v) => v.id);
 
-    if (excludeTransforms) {
+    if (excludeTransforms && excludeTransforms.length > 0) {
       const excludeIdsSet = new Set(excludeTransforms);
       resultTransforms = resultTransforms.filter((id) => excludeIdsSet.has(id));
     }
@@ -40,21 +56,65 @@ export function transformHealthServiceProvider(esClient: ElasticsearchClient) {
   };
 
   return {
-    async getNotStartedTransformsReport(transformIds: string[]) {
-      const { body } = await esClient.transform.getTransformStats({
-        transform_id: transformIds.join(','),
-      });
-      console.log(body, '___body___');
+    /**
+     * Returns report about not started transform
+     * @param transformIds
+     */
+    async getNotStartedTransformsReport(
+      transformIds: string[]
+    ): Promise<NotStartedTransformResponse[]> {
+      const transformsStats = (
+        await esClient.transform.getTransformStats({
+          transform_id: transformIds.join(','),
+        })
+      ).body.transforms;
+
+      return transformsStats
+        .filter((t) => t.state !== 'started' && t.state !== 'indexing')
+        .map((t) => ({
+          transform_id: t.id,
+          state: t.state,
+          node_name: t.node?.name,
+        }));
     },
+    /**
+     * Returns results of the transform health checks
+     * @param params
+     */
     async getHealthChecksResults(params: TransformHealthRuleParams) {
       const transformIds = await getResultsTransformIds(
         params.includeTransforms,
         params.excludeTransforms
       );
+
       const testsConfig = getResultTestConfig(params.testsConfig);
+
+      const result: TestResult[] = [];
+
       if (testsConfig.notStarted.enabled) {
-        const result = this.getNotStartedTransformsReport(transformIds);
+        const response = await this.getNotStartedTransformsReport(transformIds);
+        if (response.length > 0) {
+          const count = response.length;
+          const transformsString = response.map((t) => t.transform_id).join(', ');
+
+          result.push({
+            name: TRANSFORM_HEALTH_CHECK_NAMES.notStarted.name,
+            context: {
+              results: response,
+              message: i18n.translate(
+                'xpack.transform.alertTypes.transformHealth.notStartedMessage',
+                {
+                  defaultMessage:
+                    '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} not started.',
+                  values: { count, transformsString },
+                }
+              ),
+            },
+          });
+        }
       }
+
+      return result;
     },
   };
 }
