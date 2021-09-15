@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { PaletteOutput } from 'src/plugins/charts/common';
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
@@ -25,11 +26,11 @@ const prepareDimension = (params: SchemaConfig) => {
   return buildExpression([visdimension]);
 };
 
-const preparePalette = (params: Record<string, unknown>) => {
-  const { colors, stops, range, gradient, continuity, rangeMin, rangeMax } = params ?? {};
-  const args = { color: colors, stop: stops, range, gradient, continuity, rangeMin, rangeMax };
-  const palette = buildExpressionFunction('palette', args);
-  return buildExpression([palette]);
+const preparePalette = (palette: PaletteOutput) => {
+  const paletteExpressionFunction = buildExpressionFunction('system_palette', {
+    name: palette.name,
+  });
+  return buildExpression([paletteExpressionFunction]);
 };
 
 export const toExpressionAst: VisToExpressionAst<TagCloudVisParams> = (vis, params) => {
@@ -54,7 +55,7 @@ export const toExpressionAst: VisToExpressionAst<TagCloudVisParams> = (vis, para
     maxFontSize,
     showLabel,
     metric: prepareDimension(schemas.metric[0]),
-    palette: preparePalette(palette?.params ?? {}),
+    palette: preparePalette(palette),
   });
 
   if (schemas.segment) {

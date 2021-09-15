@@ -14,9 +14,7 @@ import { getTagCloudOptions } from './components/get_tag_cloud_options';
 import { toExpressionAst } from './to_ast';
 import { TagCloudVisDependencies } from './plugin';
 
-export const getTagCloudVisTypeDefinition = async ({ palettes }: TagCloudVisDependencies) => {
-  const defaultPalette = (await palettes.getPalettes()).get('default');
-  const colors = defaultPalette.getCategoricalColors(10);
+export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependencies) => {
   return {
     name: 'tagcloud',
     title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag cloud' }),
@@ -37,9 +35,6 @@ export const getTagCloudVisTypeDefinition = async ({ palettes }: TagCloudVisDepe
         palette: {
           name: 'default',
           type: 'palette',
-          params: {
-            colors,
-          },
         },
       },
     },

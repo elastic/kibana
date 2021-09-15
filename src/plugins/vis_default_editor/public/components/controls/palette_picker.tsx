@@ -57,9 +57,6 @@ export function PalettePicker<ParamName extends string>({
           setPalette(paramName, {
             type: 'palette',
             name: palette?.value ?? 'clear',
-            params: {
-              colors: palette?.palette,
-            },
           });
         }}
         valueOfSelected={activePalette?.name || 'default'}

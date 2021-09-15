@@ -36,7 +36,7 @@ export interface SystemPaletteArguments {
 }
 
 export interface PaletteOutput<T = { [key: string]: unknown }> {
-  type: 'palette';
+  type: 'palette' | 'system_palette';
   name: string;
   params?: T;
 }

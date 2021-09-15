@@ -110,7 +110,7 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         help: argHelp.showLabel,
       },
       palette: {
-        types: ['palette'],
+        types: ['palette', 'system_palette'],
         help: argHelp.palette,
         default: '{palette}',
       },
