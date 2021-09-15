@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  timelion_chain: {
-    src: 'src/plugins/vis_types/timelion/common/chain.peg',
-    dest: 'src/plugins/vis_types/timelion/common/_generated_/chain.js',
-  },
-};
+import { createGetterSetter } from '../../../kibana_utils/public';
+import { DataPublicPluginStart } from '../../../data/public';
+
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('table data.fieldFormats');

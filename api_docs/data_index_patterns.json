@@ -6175,11 +6175,11 @@
           },
           {
             "plugin": "visTypeTable",
-            "path": "src/plugins/vis_type_table/public/legacy/table_vis_controller.test.ts"
+            "path": "src/plugins/vis_types/table/public/legacy/table_vis_controller.test.ts"
           },
           {
             "plugin": "visTypeTable",
-            "path": "src/plugins/vis_type_table/public/legacy/table_vis_controller.test.ts"
+            "path": "src/plugins/vis_types/table/public/legacy/table_vis_controller.test.ts"
           },
           {
             "plugin": "visTypeVega",
@@ -13591,11 +13591,11 @@
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/plugin_services.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/plugin_services.ts"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/helpers/plugin_services.ts"
+            "path": "src/plugins/vis_types/timelion/public/helpers/plugin_services.ts"
           },
           {
             "plugin": "indexPatternManagement",
@@ -13623,11 +13623,11 @@
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/components/timelion_expression_input_helpers.test.ts"
+            "path": "src/plugins/vis_types/timelion/public/components/timelion_expression_input_helpers.test.ts"
           },
           {
             "plugin": "visTypeTimelion",
-            "path": "src/plugins/vis_type_timelion/public/components/timelion_expression_input_helpers.test.ts"
+            "path": "src/plugins/vis_types/timelion/public/components/timelion_expression_input_helpers.test.ts"
           },
           {
             "plugin": "discover",
