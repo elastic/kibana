@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './artifact_entry_card';
-export * from './artifact_entry_collapsable_card';
-export * from './types';
+export * from './artifact_card_grid';
