@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
+import type { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
 
 /**
  * APIs to retrieves metrics gathered and exposed by the core platform.
@@ -51,8 +51,13 @@ export type InternalMetricsServiceStart = MetricsServiceStart;
 export interface OpsMetrics {
   /** Time metrics were recorded at. */
   collected_at: Date;
-  /** Process related metrics */
+  /**
+   * Process related metrics.
+   * @deprecated use the processes field instead.
+   */
   process: OpsProcessMetrics;
+  /** Process related metrics. Reports an array of objects for each kibana pid.*/
+  processes: OpsProcessMetrics[];
   /** OS related metrics */
   os: OpsOsMetrics;
   /** server response time stats */
@@ -61,4 +66,38 @@ export interface OpsMetrics {
   requests: OpsServerMetrics['requests'];
   /** number of current concurrent connections to the server */
   concurrent_connections: OpsServerMetrics['concurrent_connections'];
+}
+
+/**
+ * an IntervalHistogram object that samples and reports the event loop delay over time.
+ * The delays will be reported in nanoseconds.
+ *
+ * @public
+ */
+export interface IntervalHistogram {
+  // The first timestamp the interval timer kicked in for collecting data points.
+  fromTimestamp: string;
+  // Last timestamp the interval timer kicked in for collecting data points.
+  lastUpdatedAt: string;
+  // The minimum recorded event loop delay.
+  min: number;
+  // The maximum recorded event loop delay.
+  max: number;
+  // The mean of the recorded event loop delays.
+  mean: number;
+  // The number of times the event loop delay exceeded the maximum 1 hour event loop delay threshold.
+  exceeds: number;
+  // The standard deviation of the recorded event loop delays.
+  stddev: number;
+  // An object detailing the accumulated percentile distribution.
+  percentiles: {
+    // 50th percentile of delays of the collected data points.
+    50: number;
+    // 75th percentile of delays of the collected data points.
+    75: number;
+    // 95th percentile of delays of the collected data points.
+    95: number;
+    // 99th percentile of delays of the collected data points.
+    99: number;
+  };
 }

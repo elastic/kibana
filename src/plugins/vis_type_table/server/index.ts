@@ -13,9 +13,6 @@ import { configSchema, ConfigSchema } from '../config';
 import { registerVisTypeTableUsageCollector } from './usage_collector';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
-  exposeToBrowser: {
-    legacyVisEnabled: true,
-  },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('table_vis.enabled', 'vis_type_table.enabled'),

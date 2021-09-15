@@ -311,7 +311,7 @@
           },
           {
             "parentPluginId": "kibanaLegacy",
-            "id": "def-public.configureAppAngularModule.$2.newPlatform",
+            "id": "def-public.configureAppAngularModule.$2",
             "type": "Object",
             "tags": [],
             "label": "newPlatform",
@@ -321,7 +321,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaLegacy",
-                "id": "def-public.configureAppAngularModule.$2.newPlatform.core",
+                "id": "def-public.configureAppAngularModule.$2.core",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -340,7 +340,7 @@
               },
               {
                 "parentPluginId": "kibanaLegacy",
-                "id": "def-public.configureAppAngularModule.$2.newPlatform.env",
+                "id": "def-public.configureAppAngularModule.$2.env",
                 "type": "Object",
                 "tags": [],
                 "label": "env",
@@ -407,7 +407,7 @@
         "children": [
           {
             "parentPluginId": "kibanaLegacy",
-            "id": "def-public.options",
+            "id": "def-public.createTopNavHelper.$1",
             "type": "Unknown",
             "tags": [],
             "label": "options",
@@ -1098,7 +1098,7 @@
         "children": [
           {
             "parentPluginId": "kibanaLegacy",
-            "id": "def-public.provider",
+            "id": "def-public.IPrivate.$1",
             "type": "Function",
             "tags": [],
             "label": "provider",
@@ -1112,7 +1112,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaLegacy",
-                "id": "def-public.injectable",
+                "id": "def-public.IPrivate.$1.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "injectable",
