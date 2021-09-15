@@ -267,7 +267,7 @@ To view the full list of {kib} apps and features, go to https://www.elastic.co/k
 [[try-kibana]]
 === Get help
 
-Click the help icon image:images/intro-help-icon.png[Help icon in navigation bar]
+Click image:images/intro-help-icon.png[Help icon in navigation bar]
 for help with questions or to provide feedback.
 
 To keep up with what’s new and changed in Elastic, click the celebration icon in the global header.
