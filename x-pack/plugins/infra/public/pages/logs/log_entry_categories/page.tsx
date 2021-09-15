@@ -18,7 +18,6 @@ export const LogEntryCategoriesPage = () => {
       text: logCategoriesTitle,
     },
   ]);
-
   return (
     <EuiErrorBoundary>
       <LogEntryCategoriesPageProviders>

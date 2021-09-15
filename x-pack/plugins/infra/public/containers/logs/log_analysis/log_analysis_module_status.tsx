@@ -97,9 +97,9 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
         {} as Record<JobType, JobStatus>
       );
       const nextSetupStatus: SetupStatus = Object.values<JobStatus>(nextJobStatus).every(
-        (jobState) => jobState === 'started'
+        (jobState) => jobState === 'started' || jobState === 'starting'
       )
-        ? { type: 'succeeded' }
+        ? { type: 'succeeded', awaitingNodeAssignment: false }
         : {
             type: 'failed',
             reasons: [
@@ -223,10 +223,19 @@ const getJobStatus = (jobId: string) => (jobSummaries: FetchJobStatusResponsePay
           jobSummary.datafeedState === 'stopped'
         ) {
           return 'stopped';
-        } else if (jobSummary.jobState === 'opening') {
+        } else if (
+          jobSummary.jobState === 'opening' &&
+          jobSummary.awaitingNodeAssignment === false
+        ) {
           return 'initializing';
         } else if (jobSummary.jobState === 'opened' && jobSummary.datafeedState === 'started') {
           return 'started';
+        } else if (
+          jobSummary.jobState === 'opening' &&
+          jobSummary.datafeedState === 'starting' &&
+          jobSummary.awaitingNodeAssignment === true
+        ) {
+          return 'awaitingNodeAssignment';
         }
 
         return 'unknown';
@@ -237,7 +246,9 @@ const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, 
   previousSetupStatus: SetupStatus
 ): SetupStatus =>
   Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>((setupStatus, [, jobStatus]) => {
-    if (jobStatus === 'missing') {
+    if (jobStatus === 'awaitingNodeAssignment') {
+      return { type: 'succeeded', awaitingNodeAssignment: true };
+    } else if (jobStatus === 'missing') {
       return { type: 'required' };
     } else if (setupStatus.type === 'required' || setupStatus.type === 'succeeded') {
       return setupStatus;

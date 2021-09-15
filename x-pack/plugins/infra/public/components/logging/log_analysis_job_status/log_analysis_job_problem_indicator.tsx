@@ -7,6 +7,9 @@
 
 import React from 'react';
 
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { MLJobsAwaitingNodeWarning } from '../../../../../ml/public';
+
 import { JobConfigurationOutdatedCallout } from './job_configuration_outdated_callout';
 import { JobDefinitionOutdatedCallout } from './job_definition_outdated_callout';
 import { JobStoppedCallout } from './job_stopped_callout';
@@ -18,6 +21,7 @@ export const LogAnalysisJobProblemIndicator: React.FC<{
   hasSetupCapabilities: boolean;
   hasStoppedJobs: boolean;
   isFirstUse: boolean;
+  isAwaitingNodeAssignment: boolean;
   moduleName: string;
   onRecreateMlJobForReconfiguration: () => void;
   onRecreateMlJobForUpdate: () => void;
@@ -27,10 +31,12 @@ export const LogAnalysisJobProblemIndicator: React.FC<{
   hasSetupCapabilities,
   hasStoppedJobs,
   isFirstUse,
+  isAwaitingNodeAssignment,
   moduleName,
   onRecreateMlJobForReconfiguration,
   onRecreateMlJobForUpdate,
 }) => {
+  const { http } = useKibana().services;
   return (
     <>
       {hasOutdatedJobDefinitions ? (
@@ -48,7 +54,8 @@ export const LogAnalysisJobProblemIndicator: React.FC<{
         />
       ) : null}
       {hasStoppedJobs ? <JobStoppedCallout /> : null}
-      {isFirstUse ? <FirstUseCallout /> : null}
+      {isFirstUse && isAwaitingNodeAssignment === false ? <FirstUseCallout /> : null}
+      {isAwaitingNodeAssignment ? <MLJobsAwaitingNodeWarning fetch={http!.fetch} /> : null}
     </>
   );
 };

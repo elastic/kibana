@@ -181,6 +181,15 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     [hasAnomalyResults, logEntryCategoriesSetupStatus, logEntryRateSetupStatus]
   );
 
+  const isAwaitingNodeAssignment = useMemo(
+    () =>
+      (logEntryCategoriesSetupStatus.type === 'succeeded' &&
+        !!logEntryCategoriesSetupStatus.awaitingNodeAssignment === true) ||
+      (logEntryRateSetupStatus.type === 'succeeded' &&
+        !!logEntryRateSetupStatus.awaitingNodeAssignment === true),
+    [logEntryCategoriesSetupStatus, logEntryRateSetupStatus]
+  );
+
   const handleSelectedTimeRangeChange = useCallback(
     (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
       if (selectedTime.isInvalid) {
@@ -228,6 +237,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
             hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             hasStoppedJobs={hasStoppedLogEntryRateJobs}
             isFirstUse={false /* the first use message is already shown by the section below */}
+            isAwaitingNodeAssignment={false}
             moduleName={logEntryRateModuleDescriptor.moduleName}
             onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
             onRecreateMlJobForUpdate={showLogEntryRateSetup}
@@ -238,6 +248,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
             hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
             isFirstUse={isFirstUse}
+            isAwaitingNodeAssignment={isAwaitingNodeAssignment}
             moduleName={logEntryCategoriesModuleDescriptor.moduleName}
             onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}
             onRecreateMlJobForUpdate={showLogEntryCategoriesSetup}

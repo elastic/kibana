@@ -159,6 +159,11 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
     [hasResults, setupStatus]
   );
 
+  const isAwaitingNodeAssignment = useMemo(
+    () => setupStatus.type === 'succeeded' && !!setupStatus.awaitingNodeAssignment === true,
+    [setupStatus]
+  );
+
   useEffect(() => {
     getTopLogEntryCategories();
   }, [
@@ -251,6 +256,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
               hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
               hasStoppedJobs={hasStoppedJobs}
               isFirstUse={isFirstUse}
+              isAwaitingNodeAssignment={isAwaitingNodeAssignment}
               moduleName={moduleDescriptor.moduleName}
               onRecreateMlJobForReconfiguration={onOpenSetup}
               onRecreateMlJobForUpdate={onOpenSetup}
