@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { LegacyRequest, PipelineVersion } from '../../types';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 
-function scalarCounterAggregation(field, fieldPath, ephemeralIdField, maxBucketSize) {
+function scalarCounterAggregation(
+  field: string,
+  fieldPath: string,
+  ephemeralIdField: string,
+  maxBucketSize: number
+) {
   const fullPath = `${fieldPath}.${field}`;
 
   const byEphemeralIdName = `${field}_temp_by_ephemeral_id`;
   const sumName = `${field}_total`;
 
-  const aggs = {};
+  const aggs: any = {};
 
   aggs[byEphemeralIdName] = {
     terms: {
@@ -46,11 +52,11 @@ function scalarCounterAggregation(field, fieldPath, ephemeralIdField, maxBucketS
   return aggs;
 }
 
-function createAggsObjectFromAggsList(aggsList) {
-  return aggsList.reduce((aggsSoFar, agg) => ({ ...aggsSoFar, ...agg }), {});
+function createAggsObjectFromAggsList(aggsList: any) {
+  return aggsList.reduce((aggsSoFar: object, agg: object) => ({ ...aggsSoFar, ...agg }), {});
 }
 
-function createNestedVertexAgg(vertexId, maxBucketSize) {
+function createNestedVertexAgg(vertexId: string, maxBucketSize: number) {
   const fieldPath = 'logstash_stats.pipelines.vertices';
   const ephemeralIdField = 'logstash_stats.pipelines.vertices.pipeline_ephemeral_id';
 
@@ -96,7 +102,7 @@ function createTotalProcessorDurationStatsAgg() {
   };
 }
 
-function createScopedAgg(pipelineId, pipelineHash, ...aggsList) {
+function createScopedAgg(pipelineId: string, pipelineHash: string, ...aggsList: object[]) {
   return {
     pipelines: {
       nested: { path: 'logstash_stats.pipelines' },
@@ -117,7 +123,7 @@ function createScopedAgg(pipelineId, pipelineHash, ...aggsList) {
   };
 }
 
-function createTimeSeriesAgg(timeSeriesIntervalInSeconds, ...aggsList) {
+function createTimeSeriesAgg(timeSeriesIntervalInSeconds: number, ...aggsList: object[]) {
   return {
     timeseries: {
       date_histogram: {
@@ -129,7 +135,7 @@ function createTimeSeriesAgg(timeSeriesIntervalInSeconds, ...aggsList) {
   };
 }
 
-function fetchPipelineVertexTimeSeriesStats(
+function fetchPipelineVertexTimeSeriesStats({
   query,
   logstashIndexPattern,
   pipelineId,
@@ -138,8 +144,18 @@ function fetchPipelineVertexTimeSeriesStats(
   timeSeriesIntervalInSeconds,
   maxBucketSize,
   callWithRequest,
-  req
-) {
+  req,
+}: {
+  query: object;
+  logstashIndexPattern: string;
+  pipelineId: string;
+  version: PipelineVersion;
+  vertexId: string;
+  timeSeriesIntervalInSeconds: number;
+  maxBucketSize: number;
+  callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
+  req: LegacyRequest;
+}) {
   const aggs = {
     ...createTimeSeriesAgg(
       timeSeriesIntervalInSeconds,
@@ -165,7 +181,7 @@ function fetchPipelineVertexTimeSeriesStats(
       'aggregations.timeseries.buckets.pipelines.scoped.total_processor_duration_stats',
     ],
     body: {
-      query: query,
+      query,
       aggs,
     },
   };
@@ -173,12 +189,23 @@ function fetchPipelineVertexTimeSeriesStats(
   return callWithRequest(req, 'search', params);
 }
 
-export function getPipelineVertexStatsAggregation(
+export function getPipelineVertexStatsAggregation({
   req,
   logstashIndexPattern,
   timeSeriesIntervalInSeconds,
-  { clusterUuid, start, end, pipelineId, version, vertexId }
-) {
+  clusterUuid,
+  pipelineId,
+  version,
+  vertexId,
+}: {
+  req: LegacyRequest;
+  logstashIndexPattern: string;
+  timeSeriesIntervalInSeconds: number;
+  clusterUuid: string;
+  pipelineId: string;
+  version: PipelineVersion;
+  vertexId: string;
+}) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const filters = [
     {
@@ -196,8 +223,8 @@ export function getPipelineVertexStatsAggregation(
     },
   ];
 
-  start = version.firstSeen;
-  end = version.lastSeen;
+  const start = version.firstSeen;
+  const end = version.lastSeen;
 
   const query = createQuery({
     types: ['stats', 'logstash_stats'],
@@ -210,15 +237,17 @@ export function getPipelineVertexStatsAggregation(
 
   const config = req.server.config();
 
-  return fetchPipelineVertexTimeSeriesStats(
+  return fetchPipelineVertexTimeSeriesStats({
     query,
     logstashIndexPattern,
     pipelineId,
     version,
     vertexId,
     timeSeriesIntervalInSeconds,
-    config.get('monitoring.ui.max_bucket_size'),
+    // @ts-ignore not undefined, need to get correct config
+    // https://github.com/elastic/kibana/issues/112146
+    maxBucketSize: config.get('monitoring.ui.max_bucket_size'),
     callWithRequest,
-    req
-  );
+    req,
+  });
 }

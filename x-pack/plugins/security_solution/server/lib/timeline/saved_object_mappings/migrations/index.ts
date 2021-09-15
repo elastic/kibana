@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
-
-export function sortPipelines(pipelines, sort) {
-  if (!sort) {
-    return pipelines;
-  }
-
-  return orderBy(pipelines, (pipeline) => pipeline[sort.field], sort.direction);
-}
+export { timelinesMigrations } from './timelines';
