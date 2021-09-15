@@ -22,7 +22,7 @@ export function groupFields(
   fields: IndexPatternField[] | null,
   columns: string[],
   popularLimit: number,
-  fieldCounts: Record<string, number>,
+  fieldCounts: Record<string, number> | undefined,
   fieldFilterState: FieldFilterState,
   useNewFieldsApi: boolean
 ): GroupedFields {
