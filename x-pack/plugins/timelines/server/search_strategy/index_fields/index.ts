@@ -12,9 +12,8 @@ import {
   IndexPatternsFetcher,
   ISearchStrategy,
   SearchStrategyDependencies,
+  FieldDescriptor,
 } from '../../../../../../src/plugins/data/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FieldDescriptor } from '../../../../../../src/plugins/data/server/index_patterns';
 
 // TODO cleanup path
 import {
