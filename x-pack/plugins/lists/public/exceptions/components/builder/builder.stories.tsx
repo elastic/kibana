@@ -11,10 +11,7 @@ import { HttpStart } from 'kibana/public';
 
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
