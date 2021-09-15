@@ -211,8 +211,8 @@ To test the Kibana deprecations page, you will first need to create a set of dep
 PUT .reporting-*/_settings
 {
   "settings": {
-		"index.lifecycle.name": null
-	}
+    "index.lifecycle.name": null
+  }
 }
 ```
 
