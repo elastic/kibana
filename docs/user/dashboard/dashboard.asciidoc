@@ -413,3 +413,5 @@ include::lens-advanced.asciidoc[]
 include::create-panels-with-editors.asciidoc[]
 
 include::make-dashboards-interactive.asciidoc[]
+
+include::dashboard-troubleshooting.asciidoc[]
