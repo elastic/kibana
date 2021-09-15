@@ -517,17 +517,39 @@ export class ManifestManager {
   }
 
   /**
-   * Cleanup .fleet-agents indice if there are some orphan artifacts
+   * Cleanup .fleet-agents index if there are some orphan artifacts
    */
   public async cleanup(manifest: Manifest) {
     try {
-      const fleetArtifacts = await this.artifactClient.listArtifacts();
+      const fleetArtifacts = [];
+      const perPage = 100;
+      let page = 1;
+
+      let fleetArtifactsResponse = await this.artifactClient.listArtifacts({
+        perPage,
+        page,
+      });
+      fleetArtifacts.push(...fleetArtifactsResponse.items);
+
+      while (
+        fleetArtifactsResponse.total > fleetArtifacts.length &&
+        !isEmpty(fleetArtifactsResponse.items)
+      ) {
+        page += 1;
+        fleetArtifactsResponse = await this.artifactClient.listArtifacts({
+          perPage,
+          page,
+        });
+        fleetArtifacts.push(...fleetArtifactsResponse.items);
+      }
 
       if (isEmpty(fleetArtifacts)) {
         return;
       }
 
       const artifactsToDelete = [];
+      const badArtifacts = [];
+
       const manifestArtifactsIds = manifest
         .getAllArtifacts()
         .map((artifact) => getArtifactId(artifact));
@@ -537,25 +559,24 @@ export class ManifestManager {
         const isArtifactInManifest = manifestArtifactsIds.includes(artifactId);
 
         if (!isArtifactInManifest) {
-          this.logger.info(`Artifact ${artifactId} needs to be removed because it's orphan`);
           artifactsToDelete.push(this.artifactClient.deleteArtifact(artifactId));
+          badArtifacts.push(fleetArtifact);
         }
       }
 
-      if (isEmpty(artifactsToDelete)) {
+      if (isEmpty(badArtifacts)) {
         return;
       }
 
-      this.logger.info(
-        `Starting .fleet-agents cleanup, ${artifactsToDelete.length} orphan artifactes are going to be removed`
+      this.logger.error(
+        new EndpointError(`Cleaning up ${badArtifacts.length} orphan artifacts`, badArtifacts)
       );
 
       Promise.all(artifactsToDelete);
 
-      this.logger.info(`All orphan artifacts has been removed succesfully`);
+      this.logger.info(`All orphan artifacts has been removed successfully`);
     } catch (error) {
-      this.logger.error('There was an error cleaning orphan artifacts in .fleet-artifacts index');
-      this.logger.error(error);
+      this.logger.error(new EndpointError('There was an error cleaning orphan artifacts', error));
     }
   }
 }

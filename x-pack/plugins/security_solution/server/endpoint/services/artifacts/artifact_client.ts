@@ -6,7 +6,12 @@
  */
 
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
-import { Artifact, ArtifactsClientInterface } from '../../../../../fleet/server';
+import {
+  Artifact,
+  ArtifactsClientInterface,
+  ListArtifactsProps,
+} from '../../../../../fleet/server';
+import { ListResult } from '../../../../../fleet/common';
 
 export interface EndpointArtifactClientInterface {
   getArtifact(id: string): Promise<InternalArtifactCompleteSchema | undefined>;
@@ -15,7 +20,7 @@ export interface EndpointArtifactClientInterface {
 
   deleteArtifact(id: string): Promise<void>;
 
-  listArtifacts(): Promise<InternalArtifactCompleteSchema[]>;
+  listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
 }
 
 /**
@@ -51,10 +56,8 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
     return artifacts.items[0];
   }
 
-  async listArtifacts() {
-    const artifacts = await this.fleetArtifacts.listArtifacts();
-
-    return artifacts.items;
+  async listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>> {
+    return this.fleetArtifacts.listArtifacts(options);
   }
 
   async createArtifact(

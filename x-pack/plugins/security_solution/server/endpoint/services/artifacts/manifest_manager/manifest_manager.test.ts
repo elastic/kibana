@@ -1033,8 +1033,7 @@ describe('ManifestManager', () => {
       expect(artifactToBeRemoved).not.toBeUndefined();
 
       expect(context.artifactClient.deleteArtifact).toHaveBeenCalledWith(
-        // @ts-ignore this is always defined
-        getArtifactId(artifactToBeRemoved)
+        getArtifactId(artifactToBeRemoved!)
       );
     });
 

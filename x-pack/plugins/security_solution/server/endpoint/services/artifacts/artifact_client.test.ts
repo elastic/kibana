@@ -31,7 +31,7 @@ describe('artifact_client', () => {
     test('can list artifact', async () => {
       const response = await artifactClient.listArtifacts();
       expect(fleetArtifactClient.listArtifacts).toHaveBeenCalled();
-      expect(response[0].id).toEqual('123');
+      expect(response.items[0].id).toEqual('123');
     });
 
     test('can create artifact', async () => {
