@@ -4,7 +4,7 @@
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
 
-Refer to the troubleshooting information to find solutions to common dashboard and visualization issues.
+Find solutions to common dashboard and visualization issues.
 
 [float]
 [[defer-loading-panels-below-the-fold]]
@@ -14,7 +14,7 @@ To improve the dashboard loading time, enable the *Defer loading panels below th
 
 . In the toolbar, click *Labs*.
 +
-To enable *Labs*, contact your administrator, or configure the <<advanced-options,Advanced Settings>>. 
+To enable *Labs*, contact your administrator, or configure the <<presentation-labs,Advanced Settings>>. 
 
 . To specify how you want to enable the lab, use the following actions:
 
@@ -30,7 +30,7 @@ To enable *Labs*, contact your administrator, or configure the <<advanced-option
 [[migrate-timelion-app-worksheets]]
 === Migrate Timelion app worksheets
 
-deprecated::[The *Timelion* app is deprecated in 7.0.0, and is replaced by dashboard features. In 7.16.0 and later, the *Timelion* app is removed from {kib}. Only the *Timelion* app is deprecated. {kib} continues to support the *Timelion* editor visualizations in *Dashboard*, *Visualize Library*, and *Canvas*. To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
+deprecated::[The *Timelion* app is deprecated in 7.0.0, and will be removed in 7.16.0. To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
 
 . Open the main menu, then click *Dashboard*.
 
