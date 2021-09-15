@@ -41,13 +41,6 @@ const buttonLabel = (status?: ReindexStatus) => {
           defaultMessage="Reindexing…"
         />
       );
-    case ReindexStatus.completed:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.doneLabel"
-          defaultMessage="Resolved"
-        />
-      );
     case ReindexStatus.paused:
       return (
         <FormattedMessage
@@ -143,18 +136,20 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              color={status === ReindexStatus.paused ? 'warning' : 'primary'}
-              iconType={status === ReindexStatus.paused ? 'play' : undefined}
-              onClick={startReindex}
-              isLoading={loading}
-              disabled={loading || status === ReindexStatus.completed || !hasRequiredPrivileges}
-            >
-              {buttonLabel(status)}
-            </EuiButton>
-          </EuiFlexItem>
+          {status !== ReindexStatus.completed && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color={status === ReindexStatus.paused ? 'warning' : 'primary'}
+                iconType={status === ReindexStatus.paused ? 'play' : undefined}
+                onClick={startReindex}
+                isLoading={loading}
+                disabled={loading || !hasRequiredPrivileges}
+              >
+                {buttonLabel(status)}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </Fragment>

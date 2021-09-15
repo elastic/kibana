@@ -25173,7 +25173,6 @@
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail": "再インデックスはバックグラウンドで継続しますが、Kibana がシャットダウンまたは再起動した場合、このページに戻り再インデックスを再開させる必要があります。",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.calloutTitle": "インデックスは再インデックス中にドキュメントを投入、更新、または削除できません",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.cantStopDetail": "ドキュメントの更新を停止できない場合、または新しいクラスターに再インデックスする必要がある場合は、異なるアップグレード方法をお勧めします。",
-    "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.doneLabel": "完了！",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.reindexingLabel": "再インデックス中…",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.resumeLabel": "再開",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel": "再インデックスを実行",

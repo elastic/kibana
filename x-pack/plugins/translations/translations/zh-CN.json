@@ -25602,7 +25602,6 @@
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail": "重新索引将在后台继续，但如果 Kibana 关闭或重新启动，您将需要返回此页，才能恢复重新索引。",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.calloutTitle": "在重新索引时，索引无法采集、更新或删除文档",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.cantStopDetail": "如果您无法停止文档更新或需要重新索引到新的集群中，请考虑使用不同的升级策略。",
-    "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.doneLabel": "已完成！",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.reindexingLabel": "正在重新索引……",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.resumeLabel": "恢复",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel": "运行重新索引",
