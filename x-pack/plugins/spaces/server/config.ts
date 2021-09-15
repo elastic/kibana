@@ -33,7 +33,7 @@ const disabledDeprecation: ConfigDeprecation = (config, fromPath, addDeprecation
       }),
       message: i18n.translate('xpack.spaces.deprecations.enabledMessage', {
         defaultMessage:
-          'Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0).',
+          'In 8.0.0 and later, using "xpack.spaces.enabled" to disable the Spaces plugin is unsupported.',
       }),
       correctiveActions: {
         manualSteps: [
