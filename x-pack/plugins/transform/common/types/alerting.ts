@@ -10,8 +10,8 @@ import type { AlertTypeParams } from '../../../alerting/common';
 export type TransformHealthRuleParams = {
   includeTransforms?: string[];
   excludeTransforms?: string[] | null;
-  testsConfig: {
-    notStarted: {
+  testsConfig?: {
+    notStarted?: {
       enabled: boolean;
     } | null;
   } | null;
