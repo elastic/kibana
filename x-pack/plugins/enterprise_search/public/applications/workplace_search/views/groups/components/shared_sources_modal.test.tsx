@@ -13,23 +13,23 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { GroupManagerModal } from './group_manager_modal';
-import { SharedSourcesModal } from './shared_sources_modal';
+import { OrgSourcesModal } from './shared_sources_modal';
 import { SourcesList } from './sources_list';
 
 const group = groups[0];
 
 const addGroupSource = jest.fn();
 const selectAllSources = jest.fn();
-const hideSharedSourcesModal = jest.fn();
+const hideOrgSourcesModal = jest.fn();
 const removeGroupSource = jest.fn();
 const saveGroupSources = jest.fn();
 
-describe('SharedSourcesModal', () => {
+describe('OrgSourcesModal', () => {
   it('renders', () => {
     setMockActions({
       addGroupSource,
       selectAllSources,
-      hideSharedSourcesModal,
+      hideOrgSourcesModal,
       removeGroupSource,
       saveGroupSources,
     });
@@ -40,7 +40,7 @@ describe('SharedSourcesModal', () => {
       contentSources: group.contentSources,
     });
 
-    const wrapper = shallow(<SharedSourcesModal />);
+    const wrapper = shallow(<OrgSourcesModal />);
 
     expect(wrapper.find(SourcesList)).toHaveLength(1);
     expect(wrapper.find(GroupManagerModal)).toHaveLength(1);
