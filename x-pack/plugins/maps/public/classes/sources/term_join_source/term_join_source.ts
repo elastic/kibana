@@ -8,10 +8,7 @@
 import { GeoJsonProperties } from 'geojson';
 import { IField } from '../../fields/field';
 import { Query } from '../../../../../../../src/plugins/data/common/query';
-import {
-  VectorJoinSourceRequestMeta,
-  VectorSourceSyncMeta,
-} from '../../../../common/descriptor_types';
+import { VectorJoinSourceRequestMeta } from '../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ISource } from '../source';
@@ -26,7 +23,7 @@ export interface ITermJoinSource extends ISource {
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<PropertiesMap>;
-  getSyncMeta(): VectorSourceSyncMeta | null;
+  getSyncMeta(): object | null;
   getId(): string;
   getRightFields(): IField[];
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
