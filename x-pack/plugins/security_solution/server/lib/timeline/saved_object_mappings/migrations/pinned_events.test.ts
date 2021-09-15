@@ -6,13 +6,13 @@
  */
 
 import { TIMELINE_ID_REF_NAME } from '../../constants';
-import { migrateNoteTimelineIdToReferences } from './notes';
+import { migratePinnedEventsTimelineIdToReferences } from './pinned_events';
 import { TimelineId } from './types';
 
-describe('notes migrations', () => {
+describe('pinned events migrations', () => {
   describe('7.16.0 timelineId', () => {
     it('removes the timelineId from the migrated document', () => {
-      const migratedDoc = migrateNoteTimelineIdToReferences({
+      const migratedDoc = migratePinnedEventsTimelineIdToReferences({
         id: '1',
         type: 'awesome',
         attributes: { timelineId: '123' },
@@ -21,12 +21,12 @@ describe('notes migrations', () => {
       expect(migratedDoc.attributes).toEqual({});
       expect(migratedDoc.references).toEqual([
         // importing the timeline saved object type from the timeline saved object causes a circular import and causes the jest tests to fail
-        { id: '123', name: TIMELINE_ID_REF_NAME, type: 'siem-ui-timeline' },
+        { id: '123', name: TIMELINE_ID_REF_NAME, type: 'siem-ui-timeline-pinned-events' },
       ]);
     });
 
     it('preserves additional fields when migrating timeline id', () => {
-      const migratedDoc = migrateNoteTimelineIdToReferences({
+      const migratedDoc = migratePinnedEventsTimelineIdToReferences({
         id: '1',
         type: 'awesome',
         attributes: ({ awesome: 'yes', timelineId: '123' } as unknown) as TimelineId,
@@ -34,7 +34,7 @@ describe('notes migrations', () => {
 
       expect(migratedDoc.attributes).toEqual({ awesome: 'yes' });
       expect(migratedDoc.references).toEqual([
-        { id: '123', name: TIMELINE_ID_REF_NAME, type: 'siem-ui-timeline' },
+        { id: '123', name: TIMELINE_ID_REF_NAME, type: 'siem-ui-timeline-pinned-events' },
       ]);
     });
   });

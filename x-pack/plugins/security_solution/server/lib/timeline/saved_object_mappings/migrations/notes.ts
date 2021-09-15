@@ -12,11 +12,8 @@ import {
 } from 'kibana/server';
 import { timelineSavedObjectType } from '..';
 import { TIMELINE_ID_REF_NAME } from '../../constants';
+import { TimelineId } from './types';
 import { createMigratedDoc, createReference } from './utils';
-
-export interface TimelineId {
-  timelineId?: string | null;
-}
 
 export const migrateNoteTimelineIdToReferences = (
   doc: SavedObjectUnsanitizedDoc<TimelineId>

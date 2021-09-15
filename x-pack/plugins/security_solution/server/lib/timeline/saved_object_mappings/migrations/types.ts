@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { timelinesMigrations } from './timelines';
-export { notesMigrations } from './notes';
-export { pinnedEventsMigrations } from './pinned_events';
+export interface TimelineId {
+  timelineId?: string | null;
+}
