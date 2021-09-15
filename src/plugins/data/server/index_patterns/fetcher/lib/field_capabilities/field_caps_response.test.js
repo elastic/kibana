@@ -48,6 +48,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
               'searchable',
               'aggregatable',
               'readFromDocValues',
+              'metadata_field',
             ]);
           });
         }

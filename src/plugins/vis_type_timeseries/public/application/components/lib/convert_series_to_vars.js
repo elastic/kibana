@@ -7,32 +7,35 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import _ from 'lodash';
+import { startsWith, snakeCase } from 'lodash';
+import { BUCKET_TYPES, DATA_FORMATTERS } from '../../../../common/enums';
 import { getLastValue } from '../../../../common/last_value_utils';
 import { getValueOrEmpty, emptyLabel } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
+import { getMetricsField } from './get_metrics_field';
+import { createFieldFormatter } from './create_field_formatter';
 import { labelDateFormatter } from './label_date_formatter';
 import moment from 'moment';
 
-export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig = null) => {
+export const convertSeriesToVars = (series, model, getConfig = null, fieldFormatMap) => {
   const variables = {};
+  const dateFormat = getConfig?.('dateFormat') ?? 'lll';
   model.series.forEach((seriesModel) => {
     series
-      .filter((row) => _.startsWith(row.id, seriesModel.id))
+      .filter((row) => startsWith(row.id, seriesModel.id))
       .forEach((row) => {
         let label = getValueOrEmpty(row.label);
 
         if (label !== emptyLabel) {
-          label = _.snakeCase(label);
+          label = snakeCase(label);
         }
 
-        const varName = [label, _.snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
+        const varName = [label, snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
 
-        const formatter = createTickFormatter(
-          seriesModel.formatter,
-          seriesModel.value_template,
-          getConfig
-        );
+        const formatter =
+          seriesModel.formatter === DATA_FORMATTERS.DEFAULT
+            ? createFieldFormatter(getMetricsField(seriesModel.metrics), fieldFormatMap)
+            : createTickFormatter(seriesModel.formatter, seriesModel.value_template, getConfig);
         const lastValue = getLastValue(row.data);
 
         const data = {
@@ -47,8 +50,12 @@ export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig
             }),
           },
         };
+        const rowLabel =
+          seriesModel.split_mode === BUCKET_TYPES.TERMS
+            ? createFieldFormatter(seriesModel.terms_field, fieldFormatMap)(row.label)
+            : row.label;
         set(variables, varName, data);
-        set(variables, `${label}.label`, row.label);
+        set(variables, `${label}.label`, rowLabel);
 
         /**
          * Handle the case when a field has "key_as_string" value.
