@@ -23,7 +23,13 @@ export interface ITermJoinSource extends ISource {
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<PropertiesMap>;
+
+  /*
+   * Vector layer avoids unnecessarily re-fetching join data.
+   * Use getSyncMeta to expose fields that require join data re-fetch when changed.
+   */
   getSyncMeta(): object | null;
+
   getId(): string;
   getRightFields(): IField[];
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
