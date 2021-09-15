@@ -199,7 +199,24 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
   ```
 
 #### Kibana deprecations
-To test the Kibana deprecations page, you will first need to create a set of deprecations that will be returned from the Kibana deprecations API. Refer to the [8.0 Kibana deprecations meta issue](https://github.com/elastic/kibana/issues/109166) for example deprecations and steps to reproduce.
+To test the Kibana deprecations page, you will first need to create a set of deprecations that will be returned from the Kibana deprecations API.
+
+`reporting` is currently one of the only plugins that is registering a deprecation with an automated resolution (implemented via [#104303](https://github.com/elastic/kibana/pull/104303)). To trigger this deprecation:
+
+1. Add Kibana sample data.
+2. Create a PDF report from the Dashboard (**Dashboard > Share > PDF reports > Generate PDFs**). This requires a trial license.
+3. Issue the following request in Console:
+
+```
+PUT .reporting-*/_settings
+{
+  "settings": {
+    "index.lifecycle.name": null
+  }
+}
+```
+
+For a complete list of Kibana deprecations, refer to the [8.0 Kibana deprecations meta issue](https://github.com/elastic/kibana/issues/109166).
 
 ### Errors
 
