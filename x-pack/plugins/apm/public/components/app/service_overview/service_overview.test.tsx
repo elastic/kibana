@@ -15,7 +15,7 @@ import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
+import * as useDynamicDataViewHooks from '../../../hooks/use_dynamic_data_view';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import * as useAnnotationsHooks from '../../../context/annotations/use_annotations_context';
 import * as useTransactionBreakdownHooks from '../../shared/charts/transaction_breakdown_chart/use_transaction_breakdown';
@@ -91,9 +91,9 @@ describe('ServiceOverview', () => {
       .spyOn(useAnnotationsHooks, 'useAnnotationsContext')
       .mockReturnValue({ annotations: [] });
     jest
-      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPatternFetcher')
+      .spyOn(useDynamicDataViewHooks, 'useDynamicDataViewFetcher')
       .mockReturnValue({
-        indexPattern: undefined,
+        dataView: undefined,
         status: FETCH_STATUS.SUCCESS,
       });
 

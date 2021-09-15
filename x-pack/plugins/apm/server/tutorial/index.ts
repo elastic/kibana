@@ -14,11 +14,11 @@ import {
 } from '../../../../../src/plugins/home/server';
 import { CloudSetup } from '../../../cloud/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
-import { getApmIndexPatternTitle } from '../lib/index_pattern/get_apm_index_pattern_title';
+import { getApmDataViewTitle } from '../lib/data_view/get_apm_data_view_title';
 import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
-import apmIndexPattern from './index_pattern.json';
+import apmDataView from './index_pattern.json';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
@@ -37,15 +37,15 @@ export const tutorialProvider = ({
   cloud?: CloudSetup;
   isFleetPluginEnabled: boolean;
 }) => () => {
-  const indexPatternTitle = getApmIndexPatternTitle(apmIndices);
+  const dataViewTitle = getApmDataViewTitle(apmIndices);
 
   const savedObjects = [
     {
-      ...apmIndexPattern,
+      ...apmDataView,
       id: APM_STATIC_INDEX_PATTERN_ID,
       attributes: {
-        ...apmIndexPattern.attributes,
-        title: indexPatternTitle,
+        ...apmDataView.attributes,
+        title: dataViewTitle,
       },
     },
   ];
@@ -111,7 +111,7 @@ It allows you to monitor the performance of thousands of applications in real ti
       'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',
       {
         defaultMessage:
-          'An APM index pattern is required for some features in the APM UI.',
+          'An APM data view is required for some features in the APM UI.',
       }
     ),
   } as TutorialSchema;

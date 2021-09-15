@@ -7,9 +7,9 @@
 
 import { callApmApi } from './createCallApmApi';
 
-export const createStaticIndexPattern = async () => {
+export const createStaticDataView = async () => {
   return await callApmApi({
-    endpoint: 'POST /api/apm/index_pattern/static',
+    endpoint: 'POST /api/apm/data_view/static',
     signal: null,
   });
 };

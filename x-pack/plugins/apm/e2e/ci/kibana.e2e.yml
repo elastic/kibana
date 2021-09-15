@@ -11,7 +11,7 @@ elasticsearch.hosts: http://localhost:9201
 elasticsearch.username: 'kibana_system_user'
 elasticsearch.password: 'changeme'
 
-# APM index pattern
+# APM data view
 apm_oss.indexPattern: apm-*
 
 # APM Indices
