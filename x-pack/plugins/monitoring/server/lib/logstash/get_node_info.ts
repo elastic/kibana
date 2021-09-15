@@ -6,14 +6,11 @@
  */
 
 import { merge } from 'lodash';
-// @ts-ignore
 import { checkParam, MissingRequiredError } from '../error_missing_required';
-// @ts-ignore
 import { calculateAvailability } from '../calculate_availability';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-// @ts-ignore
 import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
 
 export function handleResponse(resp: ElasticsearchResponse) {

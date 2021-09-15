@@ -87,6 +87,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   entityType,
   excludedRowRendererIds,
   filters,
+  globalQuery,
   id,
   isLive,
   itemsPerPage,
@@ -102,6 +103,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   scopeId,
   showCheckboxes,
   sort,
+  timelineQuery,
   utilityBar,
   additionalFilters,
   // If truthy, the graph viewer (Resolver) is showing
@@ -157,6 +159,18 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     [dispatch, id]
   );
 
+  const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
+    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+  };
+  const onAlertStatusActionSuccess = useCallback(() => {
+    if (id === TimelineId.active) {
+      refetchQuery([timelineQuery]);
+    } else {
+      refetchQuery(globalQuery);
+    }
+  }, [id, timelineQuery, globalQuery]);
+  const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
+
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -166,6 +180,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               id,
               type: 'embedded',
               browserFields,
+              bulkActions,
               columns,
               dataProviders: dataProviders!,
               defaultCellActions,
@@ -245,6 +260,8 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getGlobalQueries = inputsSelectors.globalQuery();
+  const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
@@ -280,6 +297,8 @@ const makeMapStateToProps = () => {
       // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
       // `getTimeline` actually returns `TimelineModel | undefined`
       graphEventId,
+      globalQuery: getGlobalQueries(state),
+      timelineQuery: getTimelineQuery(state, id),
     };
   };
   return mapStateToProps;
