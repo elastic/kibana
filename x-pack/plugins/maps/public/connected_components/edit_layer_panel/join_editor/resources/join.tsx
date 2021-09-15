@@ -209,7 +209,7 @@ export class Join extends Component<Props, State> {
           }
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
           label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
-            defaultMessage: `Apply global filter to join`,
+            defaultMessage: `Apply global search to join`,
           })}
         />
       );

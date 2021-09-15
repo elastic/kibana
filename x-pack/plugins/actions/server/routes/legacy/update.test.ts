@@ -11,10 +11,19 @@ import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess, ActionTypeDisabledError } from '../../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { actionsClientMock } from '../../actions_client.mock';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 
 jest.mock('../../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
+
+jest.mock('../../lib/track_legacy_route_usage', () => ({
+  trackLegacyRouteUsage: jest.fn(),
+}));
+
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -181,5 +190,20 @@ describe('updateActionRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  it('should track every call', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const actionsClient = actionsClientMock.create();
+
+    updateActionRoute(router, licenseState, mockUsageCounter);
+    const [, handler] = router.put.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      { params: { id: '1' }, body: {} }
+    );
+    await handler(context, req, res);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('update', mockUsageCounter);
   });
 });
