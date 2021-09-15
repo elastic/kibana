@@ -13,7 +13,7 @@ import {
   OnRefreshChangeProps,
 } from '@elastic/eui';
 import React, { useContext, useCallback } from 'react';
-import { MonitoringTimeContainer } from '../../application/pages/use_monitoring_time';
+import { MonitoringTimeContainer } from '../../application/hooks/use_monitoring_time';
 import { GlobalStateContext } from '../../application/global_state_context';
 import { Legacy } from '../../legacy_shims';
 

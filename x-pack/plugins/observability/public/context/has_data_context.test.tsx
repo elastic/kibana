@@ -79,11 +79,11 @@ describe('HasDataContextProvider', () => {
   });
 
   describe('when no plugin has registered', () => {
-    it('hasAnyData returns false and all apps return undefined', async () => {
+    it('hasAnyData returns undefined and all apps return undefined', async () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toMatchObject({
         hasDataMap: {},
-        hasAnyData: false,
+        hasAnyData: undefined,
         isAllRequestsComplete: false,
         forceUpdate: expect.any(String),
         onRefreshTimeRange: expect.any(Function),
@@ -132,7 +132,7 @@ describe('HasDataContextProvider', () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: {},
-          hasAnyData: false,
+          hasAnyData: undefined,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -188,7 +188,7 @@ describe('HasDataContextProvider', () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: {},
-          hasAnyData: false,
+          hasAnyData: undefined,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -246,7 +246,7 @@ describe('HasDataContextProvider', () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: {},
-          hasAnyData: false,
+          hasAnyData: undefined,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -301,7 +301,7 @@ describe('HasDataContextProvider', () => {
           });
           expect(result.current).toEqual({
             hasDataMap: {},
-            hasAnyData: false,
+            hasAnyData: undefined,
             isAllRequestsComplete: false,
             forceUpdate: expect.any(String),
             onRefreshTimeRange: expect.any(Function),
@@ -346,7 +346,7 @@ describe('HasDataContextProvider', () => {
           });
           expect(result.current).toEqual({
             hasDataMap: {},
-            hasAnyData: false,
+            hasAnyData: undefined,
             isAllRequestsComplete: false,
             forceUpdate: expect.any(String),
             onRefreshTimeRange: expect.any(Function),
@@ -406,7 +406,7 @@ describe('HasDataContextProvider', () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: {},
-          hasAnyData: false,
+          hasAnyData: undefined,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -484,7 +484,7 @@ describe('HasDataContextProvider', () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: {},
-          hasAnyData: false,
+          hasAnyData: undefined,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -534,7 +534,7 @@ describe('HasDataContextProvider', () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toEqual({
         hasDataMap: {},
-        hasAnyData: false,
+        hasAnyData: undefined,
         isAllRequestsComplete: false,
         forceUpdate: expect.any(String),
         onRefreshTimeRange: expect.any(Function),
