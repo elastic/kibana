@@ -59,7 +59,13 @@ export interface IVectorSource extends ISource {
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getLeftJoinFields(): Promise<IField[]>;
+
+  /*
+   * Vector layer avoids unnecessarily re-fetching source data.
+   * Use getSyncMeta to expose fields that require source data re-fetch when changed.
+   */
   getSyncMeta(): object | null;
+
   getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
   hasTooltipProperties(): boolean;
