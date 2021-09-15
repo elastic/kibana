@@ -16,7 +16,7 @@ import { FORMATS_UI_SETTINGS } from '../../../../../../../field_formats/common';
 import { METRIC_TYPES } from '../../../../../../../data/common';
 import { getFieldFormatsRegistry } from '../../../../../../../data/public/test_utils';
 
-jest.mock('../../../../../../data/public/services', () => ({
+jest.mock('../../../../../../../data/public/services', () => ({
   getUiSettings: () => ({ get: jest.fn() }),
 }));
 
