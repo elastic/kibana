@@ -153,14 +153,14 @@ describe('Field', function () {
   it('spec snapshot', () => {
     const field = new IndexPatternField(fieldValues);
     const getFormatterForField = () =>
-      ({
+      (({
         toJSON: () => ({
           id: 'number',
           params: {
             pattern: '$0,0.[00]',
           },
         }),
-      } as FieldFormat);
+      } as unknown) as FieldFormat);
     expect(field.toSpec({ getFormatterForField })).toMatchSnapshot();
   });
 });

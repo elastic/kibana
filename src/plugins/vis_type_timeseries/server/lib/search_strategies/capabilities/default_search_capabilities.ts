@@ -13,19 +13,30 @@ import {
   getSuitableUnit,
 } from '../../vis_data/helpers/unit_to_seconds';
 import { RESTRICTIONS_KEYS } from '../../../../common/ui_restrictions';
+import {
+  TIME_RANGE_DATA_MODES,
+  PANEL_TYPES,
+  BUCKET_TYPES,
+  TSVB_METRIC_TYPES,
+} from '../../../../common/enums';
+import { getAggsByType, AGG_TYPE } from '../../../../common/agg_utils';
+import type { Panel } from '../../../../common/types';
 
 export interface SearchCapabilitiesOptions {
   timezone?: string;
   maxBucketsLimit: number;
+  panel?: Panel;
 }
 
 export class DefaultSearchCapabilities {
   public timezone: SearchCapabilitiesOptions['timezone'];
   public maxBucketsLimit: SearchCapabilitiesOptions['maxBucketsLimit'];
+  public panel?: Panel;
 
   constructor(options: SearchCapabilitiesOptions) {
     this.timezone = options.timezone;
     this.maxBucketsLimit = options.maxBucketsLimit;
+    this.panel = options.panel;
   }
 
   public get defaultTimeInterval() {
@@ -33,6 +44,28 @@ export class DefaultSearchCapabilities {
   }
 
   public get whiteListedMetrics() {
+    if (
+      this.panel &&
+      this.panel.type !== PANEL_TYPES.TIMESERIES &&
+      this.panel.time_range_mode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
+    ) {
+      const aggs = getAggsByType<string>((agg) => agg.id);
+      const allAvailableAggs = [
+        ...aggs[AGG_TYPE.METRIC],
+        ...aggs[AGG_TYPE.SIBLING_PIPELINE],
+        TSVB_METRIC_TYPES.MATH,
+        BUCKET_TYPES.TERMS,
+      ].reduce(
+        (availableAggs, aggType) => ({
+          ...availableAggs,
+          [aggType]: {
+            '*': true,
+          },
+        }),
+        {}
+      );
+      return this.createUiRestriction(allAvailableAggs);
+    }
     return this.createUiRestriction();
   }
 
