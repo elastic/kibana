@@ -187,8 +187,33 @@ TIP: Aggregation-based panels support a maximum of three *Split series*.
 [role="screenshot"]
 image:images/bar-chart-tutorial-2.png[Bar chart with sample logs data]
 
+[float]
+[[save-the-aggregation-based-panel]]
+===== Save and add the panel
+
+Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
+
+To save the panel to the *Visualize Library*:
+
+. Click *Save to library*.
+
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+
+. Make sure that *Add to Dashboard after saving* is selected.
+
 . Click *Save and return*.
 
+To save the panel to the dashboard:
+
+. Click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Customize panel* window, select *Show panel title*.
+
+.. Enter the *Panel title*, then click *Save*.
 
 
 

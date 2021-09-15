@@ -68,7 +68,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
           </EuiText>
         </CardSectionPanel>
 
-        <EuiHorizontalRule margin="xs" />
+        <EuiHorizontalRule margin="none" />
 
         <CardSectionPanel>
           <CriteriaConditions
