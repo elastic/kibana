@@ -16,6 +16,12 @@ export function useCharts() {
   const { handleTimeChange } = useContext(MonitoringTimeContainer.Context);
 
   const [zoomInLevel, setZoomInLevel] = useState(0);
+
+  // We need something to know when the onBrush event was fired because the pop state event
+  // is also fired when the onBrush event is fired (although only on the first onBrush event) and
+  // causing the zoomInLevel to change.
+  // In Angular, this was handled by removing the listener before updating the state and adding
+  // it again after some milliseconds, but the same trick didn't work in React.
   const [onBrushHappened, _setOnBrushHappened] = useState(false);
 
   const onBrushHappenedRef = useRef(onBrushHappened);
