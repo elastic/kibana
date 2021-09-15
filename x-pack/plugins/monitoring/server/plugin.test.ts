@@ -7,7 +7,6 @@
 
 import { coreMock } from 'src/core/server/mocks';
 import { MonitoringPlugin } from './plugin';
-import { AlertsFactory } from './alerts';
 
 jest.mock('./es_client/instantiate_client', () => ({
   instantiateClient: jest.fn().mockImplementation(() => ({
@@ -72,9 +71,8 @@ describe('Monitoring plugin', () => {
   });
 
   it('should register all alerts', async () => {
-    const alerts = AlertsFactory.getAll();
     const plugin = new MonitoringPlugin(initializerContext as any);
     await plugin.setup(coreSetup as any, setupPlugins as any);
-    expect(setupPlugins.alerting.registerType).toHaveBeenCalledTimes(alerts.length);
+    expect(setupPlugins.alerting.registerType).toHaveBeenCalledTimes(16);
   });
 });
