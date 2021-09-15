@@ -33,6 +33,8 @@ import {
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 
 import { InstallationButton } from './installation_button';
+import { UpdateButton } from './update_button';
+import { UninstallButton } from './uninstall_button';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.spacerSizes.xl};
@@ -187,11 +189,9 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   <UpdatesAvailableMsg latestVersion={latestVersion} />
                   <EuiSpacer size="l" />
                   <p>
-                    <InstallationButton
+                    <UpdateButton
                       {...packageInfo}
                       version={latestVersion}
-                      disabled={false}
-                      isUpdate={true}
                       packagePolicyIds={packagePolicyIds}
                       dryRunData={dryRunData}
                       isUpgradingPackagePolicies={isUpgradingPackagePolicies}
@@ -263,7 +263,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
                         <p>
-                          <InstallationButton
+                          <UninstallButton
                             {...packageInfo}
                             latestVersion={latestVersion}
                             disabled={!packagePoliciesData || packageHasUsages}
