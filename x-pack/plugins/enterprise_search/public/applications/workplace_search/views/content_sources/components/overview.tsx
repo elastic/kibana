@@ -237,13 +237,7 @@ export const Overview: React.FC = () => {
       <EuiPanel color="subdued">
         <EuiListGroup flush maxWidth={false} data-test-subj="GroupsSummary">
           {groups.map((group, index) => (
-            <EuiListGroupItemTo
-              label={group.name}
-              key={index}
-              to={getGroupPath(group.id)}
-              data-test-subj="SourceGroupLink"
-            >
-            </EuiListGroupItemTo>
+            <EuiListGroupItemTo label={group.name} key={index} to={getGroupPath(group.id)} data-test-subj="SourceGroupLink" />
           ))}
         </EuiListGroup>
       </EuiPanel>
