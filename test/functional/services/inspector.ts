@@ -16,6 +16,7 @@ export class InspectorService extends FtrService {
   private readonly flyout = this.ctx.getService('flyout');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
+  private readonly comboBox = this.ctx.getService('comboBox');
 
   private async getIsEnabled(): Promise<boolean> {
     const ariaDisabled = await this.testSubjects.getAttribute('openInspectorButton', 'disabled');
@@ -206,20 +207,13 @@ export class InspectorService extends FtrService {
   }
 
   /**
-   * Returns request name as the comma-separated string
+   * Returns request name as the comma-separated string from combobox
    */
   public async getRequestNames(): Promise<string> {
     await this.openInspectorRequestsView();
-    const requestChooserExists = await this.testSubjects.exists('inspectorRequestChooser');
-    if (requestChooserExists) {
-      await this.testSubjects.click('inspectorRequestChooser');
-      const menu = await this.testSubjects.find('inspectorRequestChooserMenuPanel');
-      const requestNames = await menu.getVisibleText();
-      return requestNames.trim().split('\n').join(',');
-    }
 
-    const singleRequest = await this.testSubjects.find('inspectorRequestName');
-    return await singleRequest.getVisibleText();
+    const comboBoxOptions = await this.comboBox.getOptionsList('inspectorRequestChooser');
+    return comboBoxOptions.trim().split('\n').join(',');
   }
 
   public getOpenRequestStatisticButton() {

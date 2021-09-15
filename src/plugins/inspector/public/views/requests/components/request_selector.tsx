@@ -57,9 +57,10 @@ export class RequestSelector extends Component<RequestSelectorProps> {
 
     return (
       <EuiComboBox
+        data-test-subj="inspectorRequestChooser"
+        fullWidth={true}
         id="inspectorRequestChooser"
         isClearable={false}
-        fullWidth={true}
         onChange={this.handleSelected}
         options={options}
         prepend="Request"
