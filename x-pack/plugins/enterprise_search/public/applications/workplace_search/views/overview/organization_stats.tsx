@@ -37,8 +37,8 @@ export const OrganizationStats: React.FC = () => {
         <EuiFlexGrid columns={4}>
           <StatisticCard
             title={i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.organizationStats.sharedSources',
-              { defaultMessage: 'Shared sources' }
+              'xpack.enterpriseSearch.workplaceSearch.organizationStats.organizationalSources',
+              { defaultMessage: 'Organizational sources' }
             )}
             count={sourcesCount}
             actionPath={SOURCES_PATH}
