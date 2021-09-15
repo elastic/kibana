@@ -44,6 +44,7 @@ export const DefaultTableRow: React.FunctionComponent<Props> = ({ rowFieldNames,
         },
         flyoutProps: {
           onClose: closeFlyout,
+          className: 'eui-textBreakWord',
           'data-test-subj': 'defaultDeprecationDetails',
           'aria-labelledby': 'defaultDeprecationDetailsFlyoutTitle',
         },
@@ -62,8 +63,8 @@ export const DefaultTableRow: React.FunctionComponent<Props> = ({ rowFieldNames,
           >
             <EsDeprecationsTableCells
               fieldName={field}
-              openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
+              openFlyout={() => setShowFlyout(true)}
             />
           </EuiTableRowCell>
         );

@@ -47,6 +47,7 @@ describe('Kibana deprecation details flyout', () => {
       await actions.table.clickDeprecationAt(1);
 
       expect(exists('kibanaDeprecationDetails')).toBe(true);
+      expect(exists('kibanaDeprecationDetails.warningDeprecationBadge')).toBe(true);
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(manualDeprecation.title);
       expect(find('manualStepsList').find('li').length).toEqual(
         manualDeprecation.correctiveActions.manualSteps.length
@@ -66,6 +67,7 @@ describe('Kibana deprecation details flyout', () => {
       await actions.table.clickDeprecationAt(0);
 
       expect(exists('kibanaDeprecationDetails')).toBe(true);
+      expect(exists('kibanaDeprecationDetails.criticalDeprecationBadge')).toBe(true);
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(
         quickResolveDeprecation.title
       );
@@ -87,8 +89,9 @@ describe('Kibana deprecation details flyout', () => {
 
       // Resolve information should not display and Quick resolve button should be disabled
       expect(exists('resolveSection')).toBe(false);
-      expect(find('resolveButton').props().disabled).toBe(true);
-      expect(find('resolveButton').text()).toContain('Resolved');
+      expect(exists('resolveButton')).toBe(false);
+      // Badge should be updated in flyout title
+      expect(exists('kibanaDeprecationDetails.resolvedDeprecationBadge')).toBe(true);
     });
 
     test('handles resolve failure', async () => {
@@ -103,6 +106,7 @@ describe('Kibana deprecation details flyout', () => {
       await actions.table.clickDeprecationAt(0);
 
       expect(exists('kibanaDeprecationDetails')).toBe(true);
+      expect(exists('kibanaDeprecationDetails.criticalDeprecationBadge')).toBe(true);
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(
         quickResolveDeprecation.title
       );
@@ -123,6 +127,8 @@ describe('Kibana deprecation details flyout', () => {
       expect(exists('quickResolveError')).toBe(true);
       // Resolve information should display and Quick resolve button should be enabled
       expect(exists('resolveSection')).toBe(true);
+      // Badge should remain the same
+      expect(exists('kibanaDeprecationDetails.criticalDeprecationBadge')).toBe(true);
       expect(find('resolveButton').props().disabled).toBe(false);
       expect(find('resolveButton').text()).toContain('Try again');
     });

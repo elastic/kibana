@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import { asyncMap } from '@kbn/std';
 
 function allSeriesContainKey(seriesList, key) {
   const containsKeyInitialValue = true;
@@ -48,16 +49,17 @@ async function pairwiseReduce(left, right, fn) {
   });
 
   // pairwise reduce seriesLists
-  const pairwiseSeriesList = { type: 'seriesList', list: [] };
-  left.list.forEach(async (leftSeries) => {
-    const first = { type: 'seriesList', list: [leftSeries] };
-    const second = { type: 'seriesList', list: [indexedList[leftSeries[pairwiseField]]] };
-    const reducedSeriesList = await reduce([first, second], fn);
-    const reducedSeries = reducedSeriesList.list[0];
-    reducedSeries.label = leftSeries[pairwiseField];
-    pairwiseSeriesList.list.push(reducedSeries);
-  });
-  return pairwiseSeriesList;
+  return {
+    type: 'seriesList',
+    list: await asyncMap(left.list, async (leftSeries) => {
+      const first = { type: 'seriesList', list: [leftSeries] };
+      const second = { type: 'seriesList', list: [indexedList[leftSeries[pairwiseField]]] };
+      const reducedSeriesList = await reduce([first, second], fn);
+      const reducedSeries = reducedSeriesList.list[0];
+      reducedSeries.label = leftSeries[pairwiseField];
+      return reducedSeries;
+    }),
+  };
 }
 
 /**
