@@ -57,10 +57,7 @@ import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
 import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/data_views/fields/fields.mocks';
+import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import { getEntryNestedMock } from '../../../../common/schemas/types/entry_nested.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';

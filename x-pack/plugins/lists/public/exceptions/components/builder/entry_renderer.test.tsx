@@ -22,10 +22,7 @@ import {
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
 import { FieldSpec } from 'src/plugins/data/common';
 
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/data_views/fields/fields.mocks';
+import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
