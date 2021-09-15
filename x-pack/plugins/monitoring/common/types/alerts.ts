@@ -48,14 +48,16 @@ export interface CommonAlertParams {
   duration: string;
   threshold?: number;
   limit?: string;
-  [key: string]: unknown;
   filterQuery?: string;
   filterQueryText?: string;
+  [key: string]: unknown;
 }
 
 export interface ThreadPoolRejectionsAlertParams {
   threshold: number;
   duration: string;
+  filterQuery?: string;
+  filterQueryText?: string;
 }
 
 export interface AlertEnableAction {
