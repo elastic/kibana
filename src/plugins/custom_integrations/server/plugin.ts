@@ -6,21 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '../../../core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
 
-import {
-  CustomIntegrationsPluginSetup,
-  CustomIntegrationsPluginStart,
-  CustomIntegration,
-} from './types';
-import { defineRoutes } from './routes';
-import { CategoryCount, CustomIntegrationRegistry } from './custom_integration_registry';
+import { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
+import { CustomIntegration, CategoryCount } from '../common';
+import { CustomIntegrationRegistry } from './custom_integration_registry';
 
 export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart> {
@@ -34,11 +24,6 @@ export class CustomIntegrationsPlugin
 
   public setup(core: CoreSetup) {
     this.logger.debug('customIntegrations: Setup');
-    const router = core.http.createRouter();
-
-    // Register server side APIs
-    defineRoutes(router);
-
     return {
       registerCustomIntegration: (integration: CustomIntegration) => {
         this.customIngegrationRegistry.registerCustomIntegration(integration);

@@ -18,6 +18,7 @@
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
+
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
@@ -33,6 +34,7 @@
     { "path": "../../../src/plugins/home/tsconfig.json" },
 
     // requiredBundles from ./kibana.json
+    { "path": "../../../src/plugins/custom_integrations/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../infra/tsconfig.json" },

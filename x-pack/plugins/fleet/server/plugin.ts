@@ -21,10 +21,7 @@ import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
-import type {
-  CustomIntegrationsPluginSetup,
-  CustomIntegration,
-} from '../../../../src/plugins/custom_integrations/server';
+import type { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
 
 import type {
   EncryptedSavedObjectsPluginStart,

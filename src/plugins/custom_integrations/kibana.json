@@ -8,7 +8,5 @@
   },
   "description": "test",
   "server": true,
-  "ui": true,
-  "requiredPlugins": ["navigation"],
   "optionalPlugins": []
 }

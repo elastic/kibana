@@ -7,12 +7,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { CustomIntegration } from './types';
-
-export interface CategoryCount {
-  count: number;
-  id: string;
-}
+import { CustomIntegration, CategoryCount } from '../common';
 
 function isAddable(integration: CustomIntegration) {
   return !integration.isBeats && !integration.isAPM;

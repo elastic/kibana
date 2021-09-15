@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CategoryCount } from './custom_integration_registry';
+import { CustomIntegration, CategoryCount } from '../common';
 
 export interface CustomIntegrationsPluginSetup {
   registerCustomIntegration(customIntegration: CustomIntegration): void;
@@ -17,17 +17,3 @@ export interface CustomIntegrationsPluginSetup {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CustomIntegrationsPluginStart {}
-
-export interface CustomIntegration {
-  id: string;
-  title: string;
-  name: string;
-  description: string;
-  type: 'ui_link';
-  uiInternalPath: string;
-  euiIconType: string;
-  categories: string[];
-  isBeats: boolean;
-  isAPM: boolean;
-  beatsModuleName?: string;
-}

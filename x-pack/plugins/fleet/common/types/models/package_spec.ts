@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Category } from '../../../../../../src/plugins/custom_integrations/common';
 import type { RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
@@ -26,30 +27,7 @@ export interface PackageSpecManifest {
   owner: { github: string };
 }
 
-export type PackageSpecCategory =
-  | 'aws'
-  | 'azure'
-  | 'cloud'
-  | 'config_management'
-  | 'containers'
-  | 'crm'
-  | 'custom'
-  | 'datastore'
-  | 'elastic_stack'
-  | 'google_cloud'
-  | 'kubernetes'
-  | 'languages'
-  | 'message_queue'
-  | 'monitoring'
-  | 'network'
-  | 'notification'
-  | 'os_system'
-  | 'productivity'
-  | 'security'
-  | 'support'
-  | 'ticketing'
-  | 'version_control'
-  | 'web';
+export type PackageSpecCategory = Category;
 
 export type PackageSpecConditions = Record<
   'kibana',

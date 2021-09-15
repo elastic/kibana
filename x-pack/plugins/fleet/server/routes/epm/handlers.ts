@@ -55,9 +55,8 @@ import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import type { CustomIntegrationsPluginSetup } from '../../../../../../src/plugins/custom_integrations/server';
-import type { CategoryCount } from '../../../../../../src/plugins/custom_integrations/server/custom_integration_registry';
+import type { CategoryCount } from '../../../../../../src/plugins/custom_integrations/common';
 import type { PackageList } from '../../../common';
-import type { CustomIntegration } from '../../../../../../src/plugins/custom_integrations/server';
 
 interface EPMCategoryCount {
   id: string;
