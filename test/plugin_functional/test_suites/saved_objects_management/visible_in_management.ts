@@ -90,7 +90,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
                   type: 'test-not-visible-in-management',
                 },
               ],
-              errors: [],
               warnings: [],
             });
           });
