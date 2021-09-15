@@ -9,15 +9,7 @@ import React, { useState } from 'react';
 import { DocLinksStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiCallOut,
-  EuiFlyoutHeader,
-  EuiLink,
-  EuiSpacer,
-  EuiTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlyoutHeader, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import {
   EnrichedDeprecationInfo,
@@ -139,27 +131,20 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
-            <div>
-              <DeprecationBadge
-                isCritical={deprecation.isCritical}
-                isResolved={reindexState.status === ReindexStatus.completed}
-              />
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="s" data-test-subj="flyoutTitle">
-              <h2 id="reindexDetailsFlyoutTitle">
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.flyoutHeader"
-                  defaultMessage="Reindex {index}"
-                  values={{ index }}
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <DeprecationBadge
+          isCritical={deprecation.isCritical}
+          isResolved={reindexState.status === ReindexStatus.completed}
+        />
+        <EuiSpacer size="s" />
+        <EuiTitle size="s" data-test-subj="flyoutTitle">
+          <h2 id="reindexDetailsFlyoutTitle">
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.flyoutHeader"
+              defaultMessage="Reindex {index}"
+              values={{ index }}
+            />
+          </h2>
+        </EuiTitle>
       </EuiFlyoutHeader>
       {flyoutContents}
     </>
