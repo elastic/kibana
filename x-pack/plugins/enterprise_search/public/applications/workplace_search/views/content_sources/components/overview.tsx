@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiListGroup,
-  EuiListGroupItemTo,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -31,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiPanelTo } from '../../../../shared/react_router_helpers';
+import { EuiPanelTo, EuiListGroupItemTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import aclImage from '../../../assets/supports_acl.svg';
 import { ComponentLoader } from '../../../components/shared/component_loader';
