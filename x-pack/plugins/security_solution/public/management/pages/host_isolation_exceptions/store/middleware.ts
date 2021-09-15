@@ -11,6 +11,7 @@ import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { ImmutableMiddleware, ImmutableMiddlewareAPI } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../common/constants';
+import { createLoadedResourceState } from '../../../state/async_resource_builders';
 import { getHostIsolationExceptionsList } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
 
@@ -38,7 +39,7 @@ async function loadHostIsolationExceptionsList(
   const entries = await getHostIsolationExceptionsList(http);
   dispatch({
     type: 'hostIsolationExceptionsPageDataChanged',
-    payload: entries,
+    payload: createLoadedResourceState(entries),
   });
   console.log('the data');
   console.log(entries);
