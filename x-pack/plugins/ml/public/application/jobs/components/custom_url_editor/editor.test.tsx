@@ -16,7 +16,7 @@ import React from 'react';
 import { CustomUrlEditor } from './editor';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { CustomUrlSettings } from './utils';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 function prepareTest(customUrl: CustomUrlSettings, setEditCustomUrlFn: (url: UrlConfig) => void) {
   const savedCustomUrls = [
