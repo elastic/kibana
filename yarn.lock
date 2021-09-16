@@ -1408,10 +1408,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.19":
-  version "8.0.0-canary.19"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.19.tgz#07e5f57a361d38b3eb747564a278d3d3bbf4882d"
-  integrity sha512-LVtnCPTC6bdI/r5Yh4TGVa0frzyoHBhQz3q72qvnmlkXW8pHlvaDQ46+46M017CERZxTK8BBYb1/TYs5puWRWQ==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.20":
+  version "8.0.0-canary.20"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.20.tgz#7e9826f693be409b83b3827d9eb14cb8326a5916"
+  integrity sha512-bma25umW+Wio6r10Ixhz/V2F10ZdMdBqNGjKRoOL9E5sU8CfyVSDL/A0j8Rt+FaY+JdagtF1EYT5ikVC4iRfLg==
   dependencies:
     debug "^4.3.1"
     hpagent "^0.1.1"
@@ -2906,6 +2906,10 @@
   uid ""
 
 "@kbn/test@link:bazel-bin/packages/kbn-test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/timelion-grammar@link:bazel-bin/packages/kbn-timelion-grammar":
   version "0.0.0"
   uid ""
 
@@ -23784,23 +23788,7 @@ redux-thunks@^1.0.0:
   resolved "https://registry.yarnpkg.com/redux-thunks/-/redux-thunks-1.0.0.tgz#56e03b86d281a2664c884ab05c543d9ab1673658"
   integrity sha1-VuA7htKBomZMiEqwXFQ9mrFnNlg=
 
-redux@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/redux/-/redux-4.0.0.tgz#aa698a92b729315d22b34a0553d7e6533555cc03"
-  integrity sha512-NnnHF0h0WVE/hXyrB6OlX67LYRuaf/rJcbWvnHHEPCF/Xa/AZpwhs/20WyqzQae5x4SD2F9nPObgBh2rxAgLiA==
-  dependencies:
-    loose-envify "^1.1.0"
-    symbol-observable "^1.2.0"
-
-redux@^4.0.4:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/redux/-/redux-4.0.4.tgz#4ee1aeb164b63d6a1bcc57ae4aa0b6e6fa7a3796"
-  integrity sha512-vKv4WdiJxOWKxK0yRoaK3Y4pxxB0ilzVx6dszU2W8wLxlb2yikRph4iV/ymtdJ6ZxpBLFbyrxklnT5yBbQSl3Q==
-  dependencies:
-    loose-envify "^1.4.0"
-    symbol-observable "^1.2.0"
-
-redux@^4.0.5:
+redux@^4.0.0, redux@^4.0.4, redux@^4.0.5:
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/redux/-/redux-4.0.5.tgz#4db5de5816e17891de8a80c424232d06f051d93f"
   integrity sha512-VSz1uMAH24DM6MF72vcojpYPtrTUu3ByVWfPL1nPfVRb5mZVTve5GnNCUV53QM/BZ66xfWrm0CTWoM+Xlz8V1w==
