@@ -72,7 +72,8 @@ import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
-import { getMapAttributeService, resolveSavedObject } from '../map_attribute_service';
+import { getMapAttributeService } from '../map_attribute_service';
+import { resolveSavedObject } from '../resolve_saved_object';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 
@@ -161,7 +162,7 @@ export class MapEmbeddable
           const currentObjectId = resolvedSavedObject.saved_object.id;
           const otherObjectId = resolvedSavedObject.alias_target_id!;
           throw new Error(
-            `This object ${currentObjectId} has the same URL as a legacy alias ${otherObjectId}. Disable the alias to resolve this error. Reference: https://www.elastic.co/guide/en/kibana/master/legacy-url-aliases.html}`
+            `This object "${currentObjectId}" has the same URL as a legacy alias "${otherObjectId}". Disable the alias to resolve this error. Reference: https://www.elastic.co/guide/en/kibana/master/legacy-url-aliases.html}`
           );
         }
       }

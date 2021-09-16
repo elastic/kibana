@@ -52,7 +52,7 @@ import {
 } from '../saved_map';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
 import { SpacesPluginStart } from '../../../../../spaces/public';
-import { resolveSavedObject } from '../../../map_attribute_service';
+import { resolveSavedObject } from '../../../resolve_saved_object';
 
 interface MapRefreshConfig {
   isPaused: boolean;
