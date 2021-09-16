@@ -67,13 +67,15 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       : { patternList: [], selectablePatterns: [] };
   }, [kibanaDataViews, dataViewId]);
 
-  const selectableOptions = useMemo(() => {
-    return patternList.map((indexName) => ({
-      label: indexName,
-      value: indexName,
-      disabled: !selectablePatterns.includes(indexName),
-    }));
-  }, [selectablePatterns, patternList]);
+  const selectableOptions = useMemo(
+    () =>
+      patternList.map((indexName) => ({
+        label: indexName,
+        value: indexName,
+        disabled: !selectablePatterns.includes(indexName),
+      })),
+    [selectablePatterns, patternList]
+  );
 
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     selectedPatterns.map((indexName) => ({
@@ -197,7 +199,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     [selectableOptions, onChangeCombo, renderOption, selectedOptions]
   );
 
-  // TODO: Steph/sourcerer needs tests
   const superSelect = useMemo(
     () => (
       <EuiSuperSelect

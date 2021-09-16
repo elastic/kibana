@@ -18,6 +18,7 @@ import {
   TestProviders,
 } from '../../mock';
 import { createStore, State } from '../../store';
+import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -68,6 +69,105 @@ describe('Sourcerer component', () => {
     expect(
       wrapper.find(`[data-test-subj="sourcerer-combo-box"]`).first().prop('selectedOptions')
     ).toEqual(mockOptions);
+  });
+  it('Removes duplicate options from title', () => {
+    store = createStore(
+      {
+        ...state,
+        sourcerer: {
+          ...state.sourcerer,
+          defaultDataView: {
+            id: '1234',
+            title: 'filebeat-*,auditbeat-*,auditbeat-*,auditbeat-*,auditbeat-*',
+            patternList: ['filebeat-*', 'auditbeat-*'],
+          },
+          kibanaDataViews: [
+            {
+              id: '1234',
+              title: 'filebeat-*,auditbeat-*,auditbeat-*,auditbeat-*,auditbeat-*',
+              patternList: ['filebeat-*', 'auditbeat-*'],
+            },
+          ],
+          sourcererScopes: {
+            ...state.sourcerer.sourcererScopes,
+            [SourcererScopeName.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+              loading: false,
+              selectedDataViewId: '1234',
+              selectedPatterns: ['filebeat-*'],
+            },
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper
+      .find(`[data-test-subj="sourcerer-combo-box"] [data-test-subj="comboBoxToggleListButton"]`)
+      .first()
+      .simulate('click');
+    const options: Array<EuiSuperSelectOption<string>> = wrapper
+      .find(`[data-test-subj="sourcerer-combo-box"]`)
+      .first()
+      .prop('options');
+    expect(options.length).toEqual(2);
+  });
+  it('Disables options with no data', () => {
+    store = createStore(
+      {
+        ...state,
+        sourcerer: {
+          ...state.sourcerer,
+          defaultDataView: {
+            id: '1234',
+            title: 'filebeat-*,auditbeat-*,fakebeat-*',
+            patternList: ['filebeat-*', 'auditbeat-*'],
+          },
+          kibanaDataViews: [
+            {
+              id: '1234',
+              title: 'filebeat-*,auditbeat-*,fakebeat-*',
+              patternList: ['filebeat-*', 'auditbeat-*'],
+            },
+          ],
+          sourcererScopes: {
+            ...state.sourcerer.sourcererScopes,
+            [SourcererScopeName.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+              loading: false,
+              selectedDataViewId: '1234',
+              selectedPatterns: ['filebeat-*'],
+            },
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper
+      .find(`[data-test-subj="sourcerer-combo-box"] [data-test-subj="comboBoxToggleListButton"]`)
+      .first()
+      .simulate('click');
+    const options: Array<EuiSuperSelectOption<string>> = wrapper
+      .find(`[data-test-subj="sourcerer-combo-box"]`)
+      .first()
+      .prop('options');
+    const disabledOption = options.find((o) => o.disabled);
+    expect(disabledOption?.value).toEqual('fakebeat-*');
   });
   it('Mounts with multiple options selected', () => {
     const state2 = {
@@ -213,5 +313,51 @@ describe('Sourcerer component', () => {
     wrapper.find('[data-test-subj="sourcerer-trigger"]').first().simulate('click');
     wrapper.find('[data-test-subj="comboBoxClearButton"]').first().simulate('click');
     expect(wrapper.find('[data-test-subj="sourcerer-save"]').first().prop('disabled')).toBeTruthy();
+  });
+  it('Selects a different index pattern', async () => {
+    const state2 = {
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        kibanaDataViews: [
+          state.sourcerer.defaultDataView,
+          { id: '1234', title: 'fakebeat-*,neatbeat-*', patternList: ['fakebeat-*'] },
+        ],
+        sourcererScopes: {
+          ...mockGlobalState.sourcerer.sourcererScopes,
+          [SourcererScopeName.default]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+            loading: false,
+            patternList,
+            selectedDataViewId: id,
+            selectedPatterns: patternList.slice(0, 2),
+          },
+        },
+      },
+    };
+
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="sourcerer-select"]`).first().simulate('click');
+
+    wrapper.find(`[data-test-subj="dataView-option-super"]`).first().simulate('click');
+    expect(checkOptionsAndSelections(wrapper, ['fakebeat-*'])).toEqual({
+      availableOptionCount: 0,
+      optionsSelected: true,
+    });
+    wrapper.find(`[data-test-subj="sourcerer-save"]`).first().simulate('click');
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      sourcererActions.setSelectedDataView({
+        id: SourcererScopeName.default,
+        selectedDataViewId: '1234',
+        selectedPatterns: ['fakebeat-*'],
+      })
+    );
   });
 });

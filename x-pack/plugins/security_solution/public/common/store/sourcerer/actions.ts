@@ -25,9 +25,10 @@ export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; 
   'SET_SOURCERER_SCOPE_LOADING'
 );
 
-export const setSelectedDataView = actionCreator<{
+export interface SelectedDataViewPayload {
   id: SourcererScopeName;
   selectedDataViewId: string;
   selectedPatterns?: string[];
   eventType?: TimelineEventsType;
-}>('SET_SELECTED_DATA_VIEW');
+}
+export const setSelectedDataView = actionCreator<SelectedDataViewPayload>('SET_SELECTED_DATA_VIEW');

@@ -29,7 +29,13 @@
 // ];
 describe('sourcerer store helpers', () => {
   // TODO: Steph/sourcerer helpers tests
-  it('it has a test so ci is happy', () => {
+  it('getScopePatternListSelection', () => {
+    expect(true).toBeTruthy();
+  });
+  it('validateSelectedPatterns', () => {
+    expect(true).toBeTruthy();
+  });
+  it('defaultDataViewByEventType', () => {
     expect(true).toBeTruthy();
   });
 });
