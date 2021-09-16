@@ -62,3 +62,15 @@ export const render = (component: React.ReactNode) => {
     </IntlProvider>
   );
 };
+
+export function mockHook<
+  T extends { [key in K]: (...args: any[]) => any },
+  K extends jest.FunctionPropertyNames<T>,
+  U extends (...args: any[]) => ReturnType<T[K]>
+>([object, method]: [T, K], mockedHook: U): void {
+  if (!method.startsWith('use')) {
+    throw new Error(`"${method}" doesn't match hook naming convention, possible mistake?`);
+  }
+
+  jest.spyOn(object, method).mockImplementation(mockedHook);
+}

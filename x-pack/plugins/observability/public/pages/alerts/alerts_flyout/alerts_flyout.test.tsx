@@ -10,11 +10,13 @@ import { shallow } from 'enzyme';
 import * as DateFormatHook from '../../../hooks/use_date_format';
 
 import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
+import { mockHook } from '../../../utils/test_helper';
 import type { TopAlert } from '../';
 import { AlertsFlyout } from './';
 
 describe('AlertsFlyout', () => {
-  jest.spyOn(DateFormatHook, 'useDateFormat').mockImplementation(() => '');
+  mockHook([DateFormatHook, 'useDateFormat'], () => '');
+
   const observabilityRuleTypeRegistryMock = createObservabilityRuleTypeRegistryMock();
 
   it('should include a indicator for an active alert', async () => {
