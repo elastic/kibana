@@ -76,11 +76,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    it('Overview page', async () => {
-      await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
-        return testSubjects.exists('overview');
+    describe('Overview page', () => {
+      beforeEach(async () => {
+        await PageObjects.upgradeAssistant.navigateToPage();
+        await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
+          return testSubjects.exists('overview');
+        });
       });
-      await a11y.testAppSnapshot();
+
+      it('with logs collection disabled', async () => {
+        await a11y.testAppSnapshot();
+      });
+
+      it('with logs collection enabled', async () => {
+        await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
+
+        await retry.waitFor('UA external links title to be present', async () => {
+          return testSubjects.isDisplayed('externalLinksTitle');
+        });
+
+        await a11y.testAppSnapshot();
+      });
     });
 
     describe('Elasticsearch deprecations page', () => {

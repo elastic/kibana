@@ -35,6 +35,18 @@ export class UpgradeAssistantPageObject extends FtrService {
     });
   }
 
+  async clickDeprecationLoggingToggle() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('deprecationLoggingToggle');
+    });
+  }
+
+  async clickResetLastCheckpointButton() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('resetLastStoredDate');
+    });
+  }
+
   async clickKibanaDeprecationsPanel() {
     return await this.retry.try(async () => {
       await this.testSubjects.click('kibanaStatsPanel');
