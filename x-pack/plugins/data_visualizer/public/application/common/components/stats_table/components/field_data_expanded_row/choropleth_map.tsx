@@ -111,7 +111,7 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
       {isTopValuesSampled === true && (
         <>
           <EuiSpacer size="xs" />
-          <EuiText size="xs" textAlign={'left'}>
+          <EuiText size="xs" textAlign={'center'}>
             <FormattedMessage
               id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"
               defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"

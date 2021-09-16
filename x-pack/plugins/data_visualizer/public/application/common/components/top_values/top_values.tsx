@@ -85,7 +85,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
         {isTopValuesSampled === true && (
           <Fragment>
             <EuiSpacer size="xs" />
-            <EuiText size="xs" textAlign={'left'}>
+            <EuiText size="xs" textAlign={'center'}>
               <FormattedMessage
                 id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleDescription"
                 defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
