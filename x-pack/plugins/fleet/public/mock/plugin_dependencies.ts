@@ -10,6 +10,8 @@ import { licensingMock } from '../../../licensing/public/mocks';
 import { homePluginMock } from '../../../../../src/plugins/home/public/mocks';
 import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
 
+import type { CustomIntegrationsSetup } from '../../../../../src/plugins/custom_integrations/public';
+
 import type { MockedFleetSetupDeps, MockedFleetStartDeps } from './types';
 
 export const createSetupDepsMock = (): MockedFleetSetupDeps => {
@@ -17,6 +19,8 @@ export const createSetupDepsMock = (): MockedFleetSetupDeps => {
     licensing: licensingMock.createSetup(),
     data: dataPluginMock.createSetupContract(),
     home: homePluginMock.createSetupContract(),
+    // @ts-expect-error
+    customIntegrations: ({} as unknown) as CustomIntegrationsSetup,
   };
 };
 
