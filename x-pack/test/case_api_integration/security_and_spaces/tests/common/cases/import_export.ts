@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe.only('import and export cases', () => {
+  describe('import and export cases', () => {
     const actionsRemover = new ActionsRemover(supertest);
 
     afterEach(async () => {
