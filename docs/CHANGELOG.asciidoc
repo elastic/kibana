@@ -441,6 +441,7 @@ Other::
 APM::
 * Custom links creation don't work {kibana-pull}110676[#110676]
 * Show relevant nodes in focused service map {kibana-pull}108028[#108028]
+* Display throughput as tps (instead of tpm) when bucket size < 60 seconds {kibana-pull}107850[#107850]
 Canvas::
 * `Flyout` refactor {kibana-pull}106728[#106728]
 * Register `expression_functions` in `{expression}/public/plugin.ts` {kibana-pull}106636[#106636]
