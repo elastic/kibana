@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect } from 'react';
 import { History } from 'history';
+import React, { useCallback, useState, useEffect } from 'react';
+import { AnalyticsNoData } from '../../../../../kibana_react/public';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
@@ -38,8 +39,10 @@ export interface DiscoverMainProps {
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
+  const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
   const { services, history, indexPatternList } = props;
   const { chrome, docLinks, uiSettings: config, data } = services;
+  const indexPatternService = data.indexPatterns;
   const navigateTo = useCallback(
     (path: string) => {
       history.push(path);
@@ -96,7 +99,20 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     resetSavedSearch(savedSearch.id);
   }, [resetSavedSearch, savedSearch]);
 
-  return (
+  /**
+   * Check if any user indices exist
+   */
+  useEffect(() => {
+    const fetchIsNewKibanaInstance = async () => {
+      const hasUserIndexPattern = await indexPatternService.hasUserIndexPattern().catch(() => true);
+
+      setNewKibanaInstance(!hasUserIndexPattern);
+    };
+
+    fetchIsNewKibanaInstance();
+  }, [indexPatternService]);
+
+  return isNewKibanaInstance ? (
     <DiscoverLayoutMemoized
       indexPattern={indexPattern}
       indexPatternList={indexPatternList}
@@ -113,5 +129,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       state={state}
       stateContainer={stateContainer}
     />
+  ) : (
+    <AnalyticsNoData />
   );
 }
