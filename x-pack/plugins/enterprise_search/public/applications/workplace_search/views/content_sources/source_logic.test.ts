@@ -202,7 +202,7 @@ describe('SourceLogic', () => {
             AppLogic.values.isOrganization = false;
             http.get.mockReturnValue(mock404);
 
-            SourceLogic.actions.initializeSource('404ing_personal_source');
+            SourceLogic.actions.initializeSource('404ing_private_source');
             await expectedAsyncError(mock404);
 
             expect(navigateToUrl).toHaveBeenCalledWith('/p/sources');

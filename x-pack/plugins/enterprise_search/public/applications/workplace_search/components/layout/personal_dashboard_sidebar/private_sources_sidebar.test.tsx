@@ -30,7 +30,7 @@ import { PrivateSourcesSidebar } from './private_sources_sidebar';
 
 describe('PrivateSourcesSidebar', () => {
   const mockValues = {
-    account: { canCreatePersonalSources: true },
+    account: { canCreatePrivateSources: true },
     contentSource: {},
   };
 
@@ -55,7 +55,7 @@ describe('PrivateSourcesSidebar', () => {
     });
 
     it('uses correct title and description when private sources are disabled', () => {
-      setMockValues({ ...mockValues, account: { canCreatePersonalSources: false } });
+      setMockValues({ ...mockValues, account: { canCreatePrivateSources: false } });
       const wrapper = shallow(<PrivateSourcesSidebar />);
 
       expect(wrapper.find(ViewContentHeader).prop('title')).toEqual(PRIVATE_VIEW_ONLY_PAGE_TITLE);

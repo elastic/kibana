@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { TruncatedContent } from '../../../../shared/truncate';
-import noSharedSourcesIcon from '../../../assets/share_circle.svg';
+import noOrgSourcesIcon from '../../../assets/share_circle.svg';
 import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourcesTable } from '../../../components/shared/sources_table';
@@ -55,7 +55,7 @@ const GROUP_USERS_DESCRIPTION = i18n.translate(
 const MANAGE_SOURCES_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.manageSourcesButtonText',
   {
-    defaultMessage: 'Manage shared content sources',
+    defaultMessage: 'Manage organizational content sources',
   }
 );
 const MANAGE_USERS_BUTTON_TEXT = i18n.translate(
@@ -110,7 +110,7 @@ const CONFIRM_TITLE_TEXT = i18n.translate(
 export const GroupOverview: React.FC = () => {
   const {
     deleteGroup,
-    showSharedSourcesModal,
+    showOrgSourcesModal,
     showConfirmDeleteModal,
     hideConfirmDeleteModal,
     updateGroupName,
@@ -159,7 +159,7 @@ export const GroupOverview: React.FC = () => {
   const hasContentSources = contentSources?.length > 0;
 
   const manageSourcesButton = (
-    <EuiButton color="primary" onClick={showSharedSourcesModal}>
+    <EuiButton color="primary" onClick={showOrgSourcesModal}>
       {MANAGE_SOURCES_BUTTON_TEXT}
     </EuiButton>
   );
@@ -185,7 +185,7 @@ export const GroupOverview: React.FC = () => {
     <>
       <EuiPanel paddingSize="none" color="subdued">
         <EuiEmptyPrompt
-          iconType={noSharedSourcesIcon}
+          iconType={noOrgSourcesIcon}
           title={<h2>{GROUP_SOURCES_TITLE}</h2>}
           body={<p>{EMPTY_SOURCES_DESCRIPTION}</p>}
           actions={manageSourcesButton}

@@ -124,8 +124,8 @@ export const callEnterpriseSearchConfigAPI = async ({
           id: data?.current_user?.workplace_search?.account?.id,
           groups: data?.current_user?.workplace_search?.account?.groups || [],
           isAdmin: !!data?.current_user?.workplace_search?.account?.is_admin,
-          canCreatePersonalSources: !!data?.current_user?.workplace_search?.account
-            ?.can_create_personal_sources,
+          canCreatePrivateSources: !!data?.current_user?.workplace_search?.account
+            ?.can_create_private_sources,
           viewedOnboardingPage: !!data?.current_user?.workplace_search?.account
             ?.viewed_onboarding_page,
         },

@@ -14,14 +14,14 @@ import { GROUP_SOURCE_PRIORITIZATION_PATH, GROUP_PATH } from '../../routes';
 
 import { GroupOverview } from './components/group_overview';
 import { GroupSourcePrioritization } from './components/group_source_prioritization';
-import { SharedSourcesModal } from './components/shared_sources_modal';
+import { OrgSourcesModal } from './components/org_sources_modal';
 import { GroupLogic } from './group_logic';
 
 export const GroupRouter: React.FC = () => {
   const { groupId } = useParams() as { groupId: string };
 
   const { initializeGroup, resetGroup } = useActions(GroupLogic);
-  const { sharedSourcesModalVisible } = useValues(GroupLogic);
+  const { orgSourcesModalVisible } = useValues(GroupLogic);
 
   useEffect(() => {
     initializeGroup(groupId);
@@ -38,7 +38,7 @@ export const GroupRouter: React.FC = () => {
           <GroupOverview />
         </Route>
       </Switch>
-      {sharedSourcesModalVisible && <SharedSourcesModal />}
+      {orgSourcesModalVisible && <OrgSourcesModal />}
     </>
   );
 };

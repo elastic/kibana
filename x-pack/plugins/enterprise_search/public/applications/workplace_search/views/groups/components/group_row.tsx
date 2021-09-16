@@ -25,7 +25,7 @@ const DAYS_CUTOFF = 8;
 export const NO_SOURCES_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.noSourcesMessage',
   {
-    defaultMessage: 'No shared content sources',
+    defaultMessage: 'No organizational content sources',
   }
 );
 export const NO_USERS_MESSAGE = i18n.translate(

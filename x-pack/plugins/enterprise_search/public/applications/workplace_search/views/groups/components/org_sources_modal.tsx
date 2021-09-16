@@ -21,15 +21,15 @@ import { SourcesList } from './sources_list';
 const MODAL_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.sourcesModalLabel',
   {
-    defaultMessage: 'shared content sources',
+    defaultMessage: 'organizational content sources',
   }
 );
 
-export const SharedSourcesModal: React.FC = () => {
+export const OrgSourcesModal: React.FC = () => {
   const {
     addGroupSource,
     selectAllSources,
-    hideSharedSourcesModal,
+    hideOrgSourcesModal,
     removeGroupSource,
     saveGroupSources,
   } = useActions(GroupLogic);
@@ -43,7 +43,7 @@ export const SharedSourcesModal: React.FC = () => {
       label={MODAL_LABEL}
       allItems={contentSources}
       numSelected={selectedGroupSources.length}
-      hideModal={hideSharedSourcesModal}
+      hideModal={hideOrgSourcesModal}
       selectAll={selectAllSources}
       saveItems={saveGroupSources}
     >

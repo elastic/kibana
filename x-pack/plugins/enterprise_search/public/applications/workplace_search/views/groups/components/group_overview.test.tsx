@@ -20,7 +20,7 @@ import { SourcesTable } from '../../../components/shared/sources_table';
 import { GroupOverview } from './group_overview';
 
 const deleteGroup = jest.fn();
-const showSharedSourcesModal = jest.fn();
+const showOrgSourcesModal = jest.fn();
 const showConfirmDeleteModal = jest.fn();
 const hideConfirmDeleteModal = jest.fn();
 const updateGroupName = jest.fn();
@@ -37,7 +37,7 @@ describe('GroupOverview', () => {
   beforeEach(() => {
     setMockActions({
       deleteGroup,
-      showSharedSourcesModal,
+      showOrgSourcesModal,
       showConfirmDeleteModal,
       hideConfirmDeleteModal,
       updateGroupName,

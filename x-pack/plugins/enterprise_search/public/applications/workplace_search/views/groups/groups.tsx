@@ -112,7 +112,7 @@ export const Groups: React.FC = () => {
         }),
         description: i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.description', {
           defaultMessage:
-            'Assign shared content sources and users to groups to create relevant search experiences for various internal teams.',
+            'Assign organizational content sources and users to groups to create relevant search experiences for various internal teams.',
         }),
         rightSideItems: headerActions,
       }}
