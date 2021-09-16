@@ -12,16 +12,13 @@ import { EuiText, EuiSpacer, EuiPanel, EuiCallOut } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { ExternalLinks } from './external_links';
+import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
 import { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';
 import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { loadLogsCheckpoint, saveLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import type { OverviewStepProps } from '../../types';
-import {
-  WithPrivileges,
-  NotAuthorizedSection,
-  MissingPrivileges,
-} from '../../../../shared_imports';
+import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
 
 const i18nTexts = {
   identifyStepTitle: i18n.translate('xpack.upgradeAssistant.overview.identifyStepTitle', {
@@ -52,6 +49,21 @@ const i18nTexts = {
         'Go to your logs directory to view the deprecation logs or enable log collecting to see them in the UI.',
     }
   ),
+  deniedPrivilegeTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeTitle',
+    {
+      defaultMessage: `You're missing index privileges`,
+    }
+  ),
+  deniedPrivilegeDescription: (privilegesMissing: MissingPrivileges) =>
+    i18n.translate('xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeDescription', {
+      defaultMessage:
+        'To be able to analyze deprecataion logs, you must have {privilegesCount, plural, one {this index privilege} other {these index privileges}}: {missingPrivileges}',
+      values: {
+        missingPrivileges: privilegesMissing?.index!.join(', '),
+        privilegesCount: privilegesMissing?.index!.length,
+      },
+    }),
 };
 
 interface Props {
@@ -105,7 +117,21 @@ const FixLogsStep: FunctionComponent<Props> = ({
         </>
       )}
 
-      {state.isDeprecationLogIndexingEnabled && (
+      {!hasPrivileges && state.isDeprecationLogIndexingEnabled && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            iconType="help"
+            color="warning"
+            title={i18nTexts.deniedPrivilegeTitle}
+            data-test-subj="noIndexPermissionsCallout"
+          >
+            <p>{i18nTexts.deniedPrivilegeDescription(privilegesMissing)}</p>
+          </EuiCallOut>
+        </>
+      )}
+
+      {hasPrivileges && state.isDeprecationLogIndexingEnabled && (
         <>
           <EuiSpacer size="xl" />
           <EuiText data-test-subj="externalLinksTitle">
@@ -138,11 +164,11 @@ export const getFixLogsStep = ({ isComplete, setIsComplete }: OverviewStepProps)
     title: i18nTexts.identifyStepTitle,
     'data-test-subj': `fixLogsStep-${status}`,
     children: (
-      <WithPrivileges privileges={`index.all`}>
-        {({ hasPrivileges, privilegesMissing }) => (
+      <WithPrivileges privileges={`index.${DEPRECATION_LOGS_INDEX}`}>
+        {({ hasPrivileges, privilegesMissing, isLoading }) => (
           <FixLogsStep
             setIsComplete={setIsComplete}
-            hasPrivileges={hasPrivileges}
+            hasPrivileges={!isLoading && hasPrivileges}
             privilegesMissing={privilegesMissing}
           />
         )}

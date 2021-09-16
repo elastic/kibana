@@ -33,7 +33,10 @@ export const WithPrivileges = ({ privileges: requiredPrivileges, children }: Pro
   const { isLoading, privileges } = useAuthorizationContext();
 
   const privilegesToArray: Privilege[] = toArray(requiredPrivileges).map((p) => {
-    const [section, privilege] = p.split('.');
+    // Since an privilege can contain a dot in it's name:
+    //  * `section` needs to be extracted from the beeginning of the string until the first dot
+    //  * `privilege` should be everything after the dot
+    const [section, privilege] = p.replace(/\./, '&').split('&');
     if (!privilege) {
       // Oh! we forgot to use the dot "." notation.
       throw new Error('Required privilege must have the format "section.privilege"');

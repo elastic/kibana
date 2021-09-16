@@ -16,7 +16,6 @@ export {
   GlobalFlyout,
   WithPrivileges,
   MissingPrivileges,
-  NotAuthorizedSection,
   AuthorizationProvider,
 } from '../../../../src/plugins/es_ui_shared/public/';
 

@@ -8,6 +8,8 @@
 
 export { handleEsError, parseEsError } from './errors';
 
+export { Privileges } from '../__packages_do_not_import__/authorization/types';
+
 /** dummy plugin*/
 export function plugin() {
   return new (class EsUiSharedPlugin {
