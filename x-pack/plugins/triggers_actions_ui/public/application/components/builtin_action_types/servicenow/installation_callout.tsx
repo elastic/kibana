@@ -6,11 +6,10 @@
  */
 
 import React, { memo } from 'react';
-import { EuiSpacer, EuiCallOut, EuiButton } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import * as i18n from './translations';
-
-const STORE_URL = 'https://store.servicenow.com/';
+import { SNStoreButton } from './sn_store_button';
 
 const InstallationCalloutComponent: React.FC = () => {
   return (
@@ -23,9 +22,7 @@ const InstallationCalloutComponent: React.FC = () => {
         data-test-subj="snInstallationCallout"
         title={i18n.INSTALLATION_CALLOUT_TITLE}
       >
-        <EuiButton href={STORE_URL} color="warning" iconSide="right" iconType="popout">
-          {i18n.VISIT_SN_STORE}
-        </EuiButton>
+        <SNStoreButton color="warning" />
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

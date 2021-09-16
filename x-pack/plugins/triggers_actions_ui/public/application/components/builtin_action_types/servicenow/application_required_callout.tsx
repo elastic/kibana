@@ -8,24 +8,34 @@
 import React, { memo } from 'react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { SNStoreButton } from './sn_store_button';
+
+const content = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.applicationRequiredCallout.content',
+  {
+    defaultMessage: 'Please go to the ServiceNow app store and install the application',
+  }
+);
 
 const ApplicationRequiredCalloutComponent: React.FC = () => {
   return (
     <>
       <EuiSpacer size="s" />
       <EuiCallOut
-        size="s"
+        size="m"
         iconType="alert"
         data-test-subj="snDeprecatedCallout"
         color="danger"
         title={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.applicationRequiredCallout',
           {
-            defaultMessage:
-              'Elastic application is required. Please go to the ServiceNow Store and install the Elastic application.',
+            defaultMessage: 'Elastic ServiceNow App not installed',
           }
         )}
-      />
+      >
+        <p>{content}</p>
+        <SNStoreButton color="danger" />
+      </EuiCallOut>
       <EuiSpacer size="m" />
     </>
   );
