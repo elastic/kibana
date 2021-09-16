@@ -804,6 +804,7 @@ async function _compilePackageStreams(
   return await Promise.all(streamsPromises);
 }
 
+// temporary export to enable testing pending refactor https://github.com/elastic/kibana/issues/112386
 export function _applyIndexPrivileges(
   packageDataStream: RegistryDataStream,
   stream: PackagePolicyInputStream
