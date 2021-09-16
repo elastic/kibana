@@ -5,9 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useRef, memo } from 'react';
+import React, { useCallback, useEffect, useRef, useState, memo } from 'react';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiContextMenu,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HitsCounter } from '../hits_counter';
 import { search } from '../../../../../../../data/public';
@@ -39,6 +46,72 @@ export function DiscoverChart({
   stateContainer: GetStateReturn;
   timefield?: string;
 }) {
+  const [isPopoverOpen, setPopover] = useState(false);
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+  const getIconType = useCallback(
+    (val) => {
+      return val === state.interval ? 'check' : 'empty';
+    },
+    [state.interval]
+  );
+  const panels = [
+    {
+      id: 0,
+      title: 'Chart options',
+      items: [
+        {
+          name: !state.hideChart
+            ? i18n.translate('discover.hideChart', {
+                defaultMessage: 'Hide chart',
+              })
+            : i18n.translate('discover.showChart', {
+                defaultMessage: 'Show chart',
+              }),
+          icon: !state.hideChart ? 'eyeClosed' : 'eye',
+          onClick: () => {
+            toggleHideChart();
+            setPopover(false);
+          },
+        },
+        {
+          name: i18n.translate('discover.timeIntervalWithValue', {
+            defaultMessage: 'Time interval: {timeInterval}',
+            values: {
+              timeInterval: state.interval ?? 'Auto',
+            },
+          }),
+          icon: '',
+          panel: 1,
+        },
+      ],
+    },
+    {
+      id: 1,
+      initialFocusedItemIndex: 1,
+      title: i18n.translate('discover.timeIntervals', {
+        defaultMessage: 'Time intervals',
+      }),
+      items: search.aggs.intervalOptions
+        .filter(({ val }) => val !== 'custom')
+        .map(({ display, val }) => {
+          return {
+            name: display,
+            label: display,
+            icon: getIconType(val),
+            onClick: () => {
+              onChangeInterval(val);
+              setPopover(false);
+            },
+          };
+        }),
+    },
+  ];
+
+  const closePopover = () => {
+    setPopover(false);
+  };
   const { data, uiSettings: config } = services;
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
     element: null,
@@ -105,20 +178,27 @@ export function DiscoverChart({
           )}
           {timefield && (
             <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                iconType={!state.hideChart ? 'eyeClosed' : 'eye'}
-                onClick={toggleHideChart}
-                data-test-subj="discoverChartToggle"
-              >
-                {!state.hideChart
-                  ? i18n.translate('discover.hideChart', {
-                      defaultMessage: 'Hide chart',
-                    })
-                  : i18n.translate('discover.showChart', {
-                      defaultMessage: 'Show chart',
+              <EuiPopover
+                id="contextMenuExample"
+                button={
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType={'gear'}
+                    onClick={onButtonClick}
+                    data-test-subj="discoverChartToggle"
+                  >
+                    {i18n.translate('discover.hideChart', {
+                      defaultMessage: 'Chart options',
                     })}
-              </EuiButtonEmpty>
+                  </EuiButtonEmpty>
+                }
+                isOpen={isPopoverOpen}
+                closePopover={closePopover}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenu initialPanelId={0} panels={panels} />
+              </EuiPopover>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

@@ -6,15 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiText,
-  EuiSelect,
-  EuiIconTip,
-} from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import dateMath from '@elastic/datemath';
@@ -55,7 +48,6 @@ export interface TimechartHeaderProps {
 export function TimechartHeader({
   dateFormat,
   data: dataPluginStart,
-  options,
   onChangeInterval,
   stateInterval,
   savedSearchData$,
@@ -70,7 +62,6 @@ export function TimechartHeader({
     from: dateMath.parse(from),
     to: dateMath.parse(to, { roundUp: true }),
   };
-  const [interval, setInterval] = useState(stateInterval);
   const toMoment = useCallback(
     (datetime: moment.Moment | undefined) => {
       if (!datetime) {
@@ -83,15 +74,6 @@ export function TimechartHeader({
     },
     [dateFormat]
   );
-
-  useEffect(() => {
-    setInterval(stateInterval);
-  }, [stateInterval]);
-
-  const handleIntervalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setInterval(e.target.value);
-    onChangeInterval(e.target.value);
-  };
 
   if (!timeRange || !bucketInterval) {
     return null;
@@ -114,61 +96,9 @@ export function TimechartHeader({
           delay="long"
         >
           <EuiText data-test-subj="discoverIntervalDateRange" textAlign="center" size="s">
-            {`${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${
-              interval !== 'auto'
-                ? i18n.translate('discover.timechartHeader.timeIntervalSelect.per', {
-                    defaultMessage: 'per',
-                  })
-                : ''
-            }`}
+            {`${toMoment(timeRange.from)} - ${toMoment(timeRange.to)}`}
           </EuiText>
         </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem className="dscTimeIntervalSelect" grow={false}>
-        <EuiSelect
-          aria-label={i18n.translate('discover.timechartHeader.timeIntervalSelect.ariaLabel', {
-            defaultMessage: 'Time interval',
-          })}
-          compressed
-          id="dscResultsIntervalSelector"
-          data-test-subj="discoverIntervalSelect"
-          options={options
-            .filter(({ val }) => val !== 'custom')
-            .map(({ display, val }) => {
-              return {
-                text: display,
-                value: val,
-                label: display,
-              };
-            })}
-          value={interval}
-          onChange={handleIntervalChange}
-          append={
-            bucketInterval.scaled ? (
-              <EuiIconTip
-                id="discoverIntervalIconTip"
-                content={i18n.translate('discover.bucketIntervalTooltip', {
-                  defaultMessage:
-                    'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
-                  values: {
-                    bucketsDescription:
-                      bucketInterval!.scale && bucketInterval!.scale > 1
-                        ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
-                            defaultMessage: 'buckets that are too large',
-                          })
-                        : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
-                            defaultMessage: 'too many buckets',
-                          }),
-                    bucketIntervalDescription: bucketInterval.description,
-                  },
-                })}
-                color="warning"
-                size="s"
-                type="alert"
-              />
-            ) : undefined
-          }
-        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
