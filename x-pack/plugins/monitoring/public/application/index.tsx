@@ -19,7 +19,8 @@ import { ExternalConfigContext, ExternalConfig } from './external_config_context
 import { createPreserveQueryHistory } from './preserve_query_history';
 import { RouteInit } from './route_init';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
-import { CODE_PATH_ELASTICSEARCH } from '../../common/constants';
+import { BeatsOverviewPage } from './pages/beats/overview';
+import { CODE_PATH_ELASTICSEARCH, CODE_PATH_BEATS } from '../../common/constants';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 
@@ -82,6 +83,15 @@ const MonitoringApp: React.FC<{
                     codePaths={[CODE_PATH_ELASTICSEARCH]}
                     fetchAllClusters={false}
                   />
+
+                  {/* Beats Views */}
+                  <RouteInit
+                    path="/beats"
+                    component={BeatsOverviewPage}
+                    codePaths={[CODE_PATH_BEATS]}
+                    fetchAllClusters={false}
+                  />
+
                   <Redirect
                     to={{
                       pathname: '/loading',
