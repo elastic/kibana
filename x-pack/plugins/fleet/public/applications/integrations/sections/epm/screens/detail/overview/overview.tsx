@@ -6,9 +6,15 @@
  */
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiLink } from '@elastic/eui';
 
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
+
+import { useGetReplaceableCustomIntegrations } from '../../../../../../../hooks/use_request';
+
+import type { CustomIntegration } from '../../../../../../../../../../../src/plugins/custom_integrations/common';
+
+import { useLink } from '../../../../../../../hooks';
 
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
@@ -31,6 +37,31 @@ export const OverviewPage: React.FC<Props> = memo(({ packageInfo, integrationInf
     integrationInfo,
     packageInfo.screenshots,
   ]);
+
+  const { value: replaceableIntegrations, loading } = useGetReplaceableCustomIntegrations();
+  const { getAbsolutePath } = useLink();
+
+  const matchingIntegration: CustomIntegration | null = useMemo(() => {
+    return replaceableIntegrations
+      ? replaceableIntegrations.find((integration) => {
+          return integration.eprPackageOverlap === packageInfo.name;
+        })
+      : null;
+  }, [replaceableIntegrations]);
+
+  const matchCallout = matchingIntegration ? (
+    <EuiFlexItem>
+      <EuiCallOut title="Beats module">
+        <p>
+          Use the corresponding
+          <EuiLink href={getAbsolutePath(matchingIntegration.uiInternalPath)}>
+            &nbsp;{matchingIntegration.title}
+          </EuiLink>{' '}
+          module
+        </p>
+      </EuiCallOut>
+    </EuiFlexItem>
+  ) : null;
 
   return (
     <EuiFlexGroup alignItems="flexStart">
@@ -55,6 +86,7 @@ export const OverviewPage: React.FC<Props> = memo(({ packageInfo, integrationInf
               />
             </EuiFlexItem>
           ) : null}
+          {matchCallout}
           <EuiFlexItem>
             <Details packageInfo={packageInfo} />
           </EuiFlexItem>
