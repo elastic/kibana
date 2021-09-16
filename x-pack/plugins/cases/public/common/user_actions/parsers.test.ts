@@ -10,25 +10,25 @@ import { parseStringAsConnector, parseStringAsExternalService } from './parsers'
 
 describe('user actions utility functions', () => {
   describe('parseStringAsConnector', () => {
-    it('return undefined if the data is null', () => {
-      expect(parseStringAsConnector('', null)).toBeUndefined();
+    it('return null if the data is null', () => {
+      expect(parseStringAsConnector('', null)).toBeNull();
     });
 
-    it('return undefined if the data is not a json object', () => {
-      expect(parseStringAsConnector('', 'blah')).toBeUndefined();
+    it('return null if the data is not a json object', () => {
+      expect(parseStringAsConnector('', 'blah')).toBeNull();
     });
 
-    it('return undefined if the data is not a valid connector', () => {
-      expect(parseStringAsConnector('', JSON.stringify({ a: '1' }))).toBeUndefined();
+    it('return null if the data is not a valid connector', () => {
+      expect(parseStringAsConnector('', JSON.stringify({ a: '1' }))).toBeNull();
     });
 
-    it('return undefined if id is null but the data is a connector other than none', () => {
+    it('return null if id is null but the data is a connector other than none', () => {
       expect(
         parseStringAsConnector(
           null,
           JSON.stringify({ type: ConnectorTypes.jira, name: '', fields: null })
         )
-      ).toBeUndefined();
+      ).toBeNull();
     });
 
     it('return the id as the none connector if the data is the none connector', () => {
@@ -51,16 +51,16 @@ describe('user actions utility functions', () => {
   });
 
   describe('parseStringAsExternalService', () => {
-    it('returns undefined when the data is null', () => {
-      expect(parseStringAsExternalService('', null)).toBeUndefined();
+    it('returns null when the data is null', () => {
+      expect(parseStringAsExternalService('', null)).toBeNull();
     });
 
-    it('returns undefined when the data is not valid json', () => {
-      expect(parseStringAsExternalService('', 'blah')).toBeUndefined();
+    it('returns null when the data is not valid json', () => {
+      expect(parseStringAsExternalService('', 'blah')).toBeNull();
     });
 
-    it('returns undefined when the data is not a valid external service object', () => {
-      expect(parseStringAsExternalService('', JSON.stringify({ a: '1' }))).toBeUndefined();
+    it('returns null when the data is not a valid external service object', () => {
+      expect(parseStringAsExternalService('', JSON.stringify({ a: '1' }))).toBeNull();
     });
 
     it('returns the decoded external service with the connector_id field added', () => {

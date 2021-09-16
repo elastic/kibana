@@ -17,15 +17,15 @@ import {
 export const parseStringAsConnector = (
   id: string | null,
   encodedData: string | null
-): CaseConnector | undefined => {
+): CaseConnector | null => {
   if (encodedData == null) {
-    return;
+    return null;
   }
 
   const decodedConnector = parseString(encodedData);
 
   if (!CaseUserActionConnectorRt.is(decodedConnector)) {
-    return;
+    return null;
   }
 
   if (id == null && decodedConnector.type === ConnectorTypes.none) {
@@ -34,7 +34,7 @@ export const parseStringAsConnector = (
       id: noneConnectorId,
     };
   } else if (id == null) {
-    return;
+    return null;
   } else {
     // id does not equal null or undefined and the connector type does not equal none
     // so return the connector with its id
@@ -60,14 +60,14 @@ const parseString = (params: string | null): unknown | null => {
 export const parseStringAsExternalService = (
   id: string | null,
   encodedData: string | null
-): CaseFullExternalService | undefined => {
+): CaseFullExternalService => {
   if (encodedData == null) {
-    return;
+    return null;
   }
 
   const decodedExternalService = parseString(encodedData);
   if (!CaseUserActionExternalServiceRt.is(decodedExternalService)) {
-    return;
+    return null;
   }
 
   return {
