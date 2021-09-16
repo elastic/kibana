@@ -246,7 +246,7 @@ export const CaseResponseRt = rt.intersection([
 
 export const CaseResolveResponseRt = rt.intersection([
   rt.type({
-    case: CaseAttributesRt,
+    case: CaseResponseRt,
     outcome: rt.union([rt.literal('exactMatch'), rt.literal('aliasMatch'), rt.literal('conflict')]),
   }),
   rt.partial({
