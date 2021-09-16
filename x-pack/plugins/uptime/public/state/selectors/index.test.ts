@@ -78,10 +78,7 @@ describe('state selectors', () => {
       },
     },
     certificates: {
-      certs: {
-        data: null,
-        loading: false,
-      },
+      total: 0,
     },
     selectedFilters: null,
     alerts: {

@@ -80,10 +80,7 @@ export const mockState: AppState = {
     },
   },
   certificates: {
-    certs: {
-      data: null,
-      loading: false,
-    },
+    total: 0,
   },
   selectedFilters: null,
   alerts: {

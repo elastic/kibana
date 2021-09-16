@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createGetCertsRoute } from './certs/certs';
 import {
   createGetPingHistogramRoute,
   createGetPingsRoute,
@@ -34,7 +33,6 @@ export { createRouteWithAuth } from './create_route_with_auth';
 export { uptimeRouteWrapper } from './uptime_route_wrapper';
 
 export const restApiRoutes: UMRestApiRouteFactory[] = [
-  createGetCertsRoute,
   createGetPingsRoute,
   createGetIndexStatusRoute,
   createGetDynamicSettingsRoute,
