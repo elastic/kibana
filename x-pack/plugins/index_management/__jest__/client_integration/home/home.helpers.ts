@@ -8,7 +8,7 @@ import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
-import { WithAppDependencies, services, TestSubjects } from '../helpers';
+import { WithAppDependencies, services, TestSubjects, nextTick } from '../helpers';
 
 const testBedConfig: TestBedConfig = {
   store: () => indexManagementStore(services as any),
@@ -30,7 +30,7 @@ export interface HomeTestBed extends TestBed<TestSubjects> {
 
 export const setup = async (): Promise<HomeTestBed> => {
   const testBed = await initTestBed();
-  const { component, find } = testBed;
+  const { find } = testBed;
 
   /**
    * User Actions
@@ -40,11 +40,8 @@ export const setup = async (): Promise<HomeTestBed> => {
     find(tab).simulate('click');
   };
 
-  const toggleHiddenIndices = function () {
-    act(() => {
-      find('indexTableIncludeHiddenIndicesToggle').simulate('click');
-    });
-    component.update();
+  const toggleHiddenIndices = async function () {
+    find('indexTableIncludeHiddenIndicesToggle').simulate('click');
   };
 
   return {
