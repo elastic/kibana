@@ -188,6 +188,7 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
  * Id for the signals alerting type
  */
 export const SIGNALS_ID = `siem.signals` as const;
+export const PREVIEW_ID = `siem.signals.preview` as const;
 
 /**
  * IDs for RAC rule types
@@ -225,6 +226,7 @@ export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
 export const DETECTION_ENGINE_RULES_BULK_ACTION = `${DETECTION_ENGINE_RULES_URL}/_bulk_action`;
+export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview`;
 
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINES_URL = '/api/timelines';

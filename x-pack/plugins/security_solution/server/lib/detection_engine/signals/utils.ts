@@ -719,6 +719,20 @@ export const createSearchAfterReturnTypeFromResponse = ({
   });
 };
 
+export interface PreviewReturnType {
+  totalCount: number;
+  matrixHistogramData: unknown[];
+  errors?: string[] | undefined;
+  warningMessages?: string[] | undefined;
+}
+
+export const createPreviewReturnType = (): PreviewReturnType => ({
+  matrixHistogramData: [],
+  totalCount: 0,
+  errors: [],
+  warningMessages: [],
+});
+
 export const createSearchAfterReturnType = ({
   success,
   warning,

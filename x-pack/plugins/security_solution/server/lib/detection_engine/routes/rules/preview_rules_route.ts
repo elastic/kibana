@@ -1,0 +1,83 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { Logger } from 'src/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
+import { SetupPlugins } from '../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { buildMlAuthz } from '../../../machine_learning/authz';
+import { throwHttpError } from '../../../machine_learning/validation';
+import { buildSiemResponse } from '../utils';
+
+import { previewRulesSchema } from '../../../../../common/detection_engine/schemas/request';
+import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
+import { convertPreviewAPIToInternalSchema } from '../../schemas/rule_converters';
+import { previewRuleAlert } from '../../signals/signal_rule_preview_alert_type';
+
+export const previewRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  ml: SetupPlugins['ml'],
+  logger: Logger
+): void => {
+  router.post(
+    {
+      path: DETECTION_ENGINE_RULES_PREVIEW,
+      validate: {
+        body: buildRouteValidation(previewRulesSchema),
+      },
+      options: {
+        tags: ['access:securitySolution'],
+      },
+    },
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+      const validationErrors = createRuleValidateTypeDependents(request.body);
+      if (validationErrors.length) {
+        return siemResponse.error({ statusCode: 400, body: validationErrors });
+      }
+      try {
+        const savedObjectsClient = context.core.savedObjects.client;
+        const siemClient = context.securitySolution?.getAppClient();
+
+        if (!siemClient /* || !rulesClient*/) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
+        const internalRule = convertPreviewAPIToInternalSchema(request.body, siemClient);
+
+        const mlAuthz = buildMlAuthz({
+          license: context.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
+        throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
+
+        await context.lists?.getExceptionListClient().createEndpointList();
+
+        // TODO: request handler context does not have logger, env, etc.
+        const [previewData, errors] = await previewRuleAlert({
+          logger,
+          ml,
+        }).executor({ params: internalRule, state: null, services: null, spaceId: null });
+
+        if (errors != null) {
+          return siemResponse.error({ statusCode: 500, body: errors });
+        } else {
+          return response.ok({ body: previewData ?? {} });
+        }
+      } catch (err) {
+        const error = transformError(err as Error);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
+      }
+    }
+  );
+};

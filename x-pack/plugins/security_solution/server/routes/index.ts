@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from 'src/core/server';
 import { RuleDataPluginService } from '../../../rule_registry/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
@@ -56,6 +57,7 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -64,7 +66,8 @@ export const initRoutes = (
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
   ruleDataService: RuleDataPluginService,
-  isRuleRegistryEnabled: boolean
+  isRuleRegistryEnabled: boolean,
+  logger: Logger
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
@@ -74,6 +77,7 @@ export const initRoutes = (
   patchRulesRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesRoute(router, isRuleRegistryEnabled);
   findRulesRoute(router, isRuleRegistryEnabled);
+  previewRulesRoute(router, ml, logger);
 
   // TODO: pass isRuleRegistryEnabled to all relevant routes
 
