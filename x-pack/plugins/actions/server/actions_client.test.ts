@@ -1802,6 +1802,9 @@ describe('execute()', () => {
 describe('enqueueExecution()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to excecute actions', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
       await actionsClient.enqueueExecution({
         id: uuid.v4(),
         params: {},
@@ -1812,6 +1815,9 @@ describe('enqueueExecution()', () => {
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to execute all actions`)
       );
