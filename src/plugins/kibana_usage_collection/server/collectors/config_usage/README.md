@@ -55,7 +55,6 @@ when setting an exact config or its parent path to `false`.
     "server.port": 5603,
     "server.basePath": "[redacted]",
     "server.rewriteBasePath": true,
-    "logging.json": false,
     "usageCollection.uiCounters.debug": true
   }
 }
