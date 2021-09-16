@@ -8,7 +8,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 

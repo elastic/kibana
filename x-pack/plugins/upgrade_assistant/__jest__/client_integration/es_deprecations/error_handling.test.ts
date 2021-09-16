@@ -79,7 +79,7 @@ describe('Error handling', () => {
       testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
     });
 
-    const { component, exists, find } = testBed;
+    const { component, find } = testBed;
     component.update();
     expect(find('deprecationsPageLoadingError').text()).toContain(
       'Upgrade Kibana to the same version as your Elasticsearch cluster. One or more nodes in the cluster is running a different version than Kibana.'
