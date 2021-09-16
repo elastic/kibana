@@ -100,7 +100,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the correct throughput in tpm', () => {
           const avg = mean(throughputResponse.currentPeriod.map((d) => d.y));
-          expectSnapshot(avg).toMatchInline(`6.19354838709677`);
+          expectSnapshot(avg).toMatchInline(`0.240860215053763`);
           expectSnapshot(throughputResponse.throughputUnit).toMatchInline(`"minute"`);
         });
       });
@@ -127,12 +127,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the correct throughput in tps', async () => {
           const avgTps = mean(throughputResponse.currentPeriod.map((d) => d.y));
-          expectSnapshot(avgTps).toMatchInline(`0.124043715846995`);
+          expectSnapshot(avgTps).toMatchInline(`0.00206739526411658`);
           expectSnapshot(throughputResponse.throughputUnit).toMatchInline(`"second"`);
 
           // this tpm value must be similar tp tpm value calculated in the previous spec where metric docs were used
           const avgTpm = avgTps * 60;
-          expectSnapshot(avgTpm).toMatchInline(`7.44262295081967`);
+          expectSnapshot(avgTpm).toMatchInline(`0.124043715846995`);
         });
       });
     }

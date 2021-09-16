@@ -33,9 +33,14 @@ const { argv } = yargs(process.argv.slice(2))
     description:
       'Run all tests (an instance of Elasticsearch and kibana are needs to be available)',
   })
+  .option('updateSnapshots', {
+    default: false,
+    type: 'boolean',
+    description: 'Update all Snapshots ',
+  })
   .help();
 
-const { trial, server, runner } = argv;
+const { trial, server, runner, updateSnapshots } = argv;
 
 const license = trial ? 'trial' : 'basic';
 console.log(`License: ${license}`);
@@ -47,6 +52,8 @@ if (server) {
   ftrScript = 'functional_test_runner';
 }
 childProcess.execSync(
-  `node ../../../../scripts/${ftrScript} --config ../../../../test/apm_api_integration/${license}/config.ts`,
+  `node ../../../../scripts/${ftrScript} --config ../../../../test/apm_api_integration/${license}/config.ts ${
+    updateSnapshots ? '--updateSnapshots' : undefined
+  }`,
   { cwd: path.join(__dirname), stdio: 'inherit' }
 );
