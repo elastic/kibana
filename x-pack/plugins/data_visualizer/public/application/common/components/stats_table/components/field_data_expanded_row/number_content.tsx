@@ -84,7 +84,6 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
       name: '',
       render: (summaryItem: { display: ReactNode }) => summaryItem.display,
       width: '75px',
-      align: 'right',
     },
     {
       field: 'value',
@@ -113,6 +112,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
           data-test-subj={'dataVisualizerNumberSummaryTable'}
         />
       </EuiFlexItem>
+
       {stats && (
         <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" compressed={true} />
       )}
@@ -139,7 +139,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" textAlign={'center'}>
+            <EuiText size="xs">
               <FormattedMessage
                 id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.displayingPercentilesLabel"
                 defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"

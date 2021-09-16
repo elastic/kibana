@@ -51,11 +51,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
   return (
     <EuiFlexItem
       data-test-subj={'dataVisualizerFieldDataTopValues'}
-      className={classNames(
-        'dataVisualizerPanelWrapper',
-        'dataVisualizerTopValuesWrapper',
-        `wrapperSize--${compressed === true ? 'compressed' : ''}`
-      )}
+      className={'dataVisualizerPanelWrapper dataVisualizerTopValuesWrapper'}
     >
       <ExpandedRowFieldHeader>
         <FormattedMessage
@@ -71,27 +67,8 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
         {Array.isArray(topValues) &&
           topValues.map((value) => (
             <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
-              {progressBarMax !== undefined && (
-                <EuiFlexItem
-                  grow={false}
-                  className={classNames('eui-textTruncate', 'topValuesPercentLabelContainer')}
-                >
-                  <EuiText size="xs" textAlign="right" color="subdued">
-                    {getPercentLabel(value.doc_count, progressBarMax)}
-                  </EuiText>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar" grow={false}>
-                <EuiProgress
-                  value={value.doc_count}
-                  max={progressBarMax}
-                  color={barColor}
-                  size="m"
-                  style={{ width: 80 }}
-                />
-              </EuiFlexItem>
               <EuiFlexItem
-                grow={true}
+                grow={false}
                 className={classNames(
                   'eui-textTruncate',
                   'topValuesValueLabelContainer',
@@ -99,17 +76,35 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
                 )}
               >
                 <EuiToolTip content={kibanaFieldFormat(value.key, fieldFormat)} position="right">
-                  <EuiText size="xs" textAlign={'left'} color="subdued">
+                  <EuiText size="xs" textAlign={'right'} color="subdued">
                     {kibanaFieldFormat(value.key, fieldFormat)}
                   </EuiText>
                 </EuiToolTip>
               </EuiFlexItem>
+              <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
+                <EuiProgress
+                  value={value.doc_count}
+                  max={progressBarMax}
+                  color={barColor}
+                  size="m"
+                />
+              </EuiFlexItem>
+              {progressBarMax !== undefined && (
+                <EuiFlexItem
+                  grow={false}
+                  className={classNames('eui-textTruncate', 'topValuesPercentLabelContainer')}
+                >
+                  <EuiText size="xs" textAlign="left" color="subdued">
+                    {getPercentLabel(value.doc_count, progressBarMax)}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           ))}
         {isTopValuesSampled === true && (
           <Fragment>
             <EuiSpacer size="xs" />
-            <EuiText size="xs" textAlign={'center'}>
+            <EuiText size="xs" textAlign={'left'}>
               <FormattedMessage
                 id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleDescription"
                 defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"

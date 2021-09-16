@@ -18,7 +18,6 @@ export const ExpandedRowContent: FC<Props> = ({ children, dataTestSubj }) => {
       data-test-subj={dataTestSubj}
       gutterSize={'s'}
       className={'dataVisualizerExpandedRow'}
-      responsive={true}
     >
       {children}
     </EuiFlexGroup>

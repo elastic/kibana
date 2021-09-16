@@ -64,7 +64,7 @@ export const GeoPointContentWithMap: FC<{
     <ExpandedRowContent dataTestSubj={'dataVisualizerIndexBasedMapContent'}>
       <DocumentStatsTable config={config} />
       <ExamplesList examples={stats.examples} />
-      <EuiFlexItem className={'dataVisualizerPanelWrapper dataVisualizerMapWrapper'}>
+      <EuiFlexItem className={'dataVisualizerPanelWrapper'} style={{ minHeight: 300 }}>
         <EmbeddedMapComponent layerList={layerList} />
       </EuiFlexItem>
     </ExpandedRowContent>

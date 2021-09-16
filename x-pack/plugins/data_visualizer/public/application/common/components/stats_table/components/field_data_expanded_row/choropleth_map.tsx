@@ -105,13 +105,14 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   return (
     <EuiFlexItem
       data-test-subj={'fileDataVisualizerChoroplethMapTopValues'}
-      className={'dataVisualizerPanelWrapper dataVisualizerMapWrapper'}
+      className={'dataVisualizerPanelWrapper'}
+      style={{ minHeight: 300 }}
     >
       <EmbeddedMapComponent layerList={layerList} />
       {isTopValuesSampled === true && (
         <>
           <EuiSpacer size="xs" />
-          <EuiText size="xs" textAlign={'center'}>
+          <EuiText size="xs" textAlign={'left'}>
             <FormattedMessage
               id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"
               defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"

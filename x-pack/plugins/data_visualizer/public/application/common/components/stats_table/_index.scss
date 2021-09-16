@@ -4,6 +4,7 @@
 
 $panelWidthS:     300px;
 $panelWidthL:     600px;
+$panelWidthXL:    900px;
 
 .dataVisualizerFieldExpandedRow {
   padding-left: $euiSize * 4;
@@ -69,20 +70,18 @@ $panelWidthL:     600px;
   .dataVisualizerSummaryTableWrapper {
     min-width: $panelWidthS;
     max-width: $panelWidthS;
+    max-height: 120px;
   }
 
   .dataVisualizerMapWrapper {
-    min-height: 200px;
-    min-width: 450px;
+    min-height: 300px;
+    min-width: $panelWidthS;
+    max-width: $panelWidthS;
   }
 
   .dataVisualizerTopValuesWrapper {
     min-width: $panelWidthS;
-    width: fit-content;
-
-    &.wrapperSize--compressed {
-      max-width: 450px;
-    }
+    max-width: $panelWidthL;
   }
 
   .dataVisualizerUniformPanel {
@@ -93,12 +92,14 @@ $panelWidthL:     600px;
   .dataVisualizerPanelWrapper {
     border-radius: $euiBorderRadius;
     border: 1px solid $euiBorderColor;
-    padding: 4px;
+    padding: 6px;
     margin: 3px 12px 12px 0;
+    min-height: 120px;
   }
 
   .dataVisualizerTextContent {
-    min-width: 450px;
+    min-width: $panelWidthS;
+    max-width: $panelWidthXL;
   }
 
 }
