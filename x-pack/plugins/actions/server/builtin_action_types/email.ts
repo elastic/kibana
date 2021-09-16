@@ -61,6 +61,9 @@ const ConfigSchemaProps = {
   secure: schema.nullable(schema.boolean()),
   from: schema.string(),
   hasAuth: schema.boolean({ defaultValue: true }),
+  clientId: schema.nullable(schema.string()),
+  tenantId: schema.nullable(schema.string()),
+  tokenExpirationDate: schema.nullable(schema.string()),
 };
 
 const ConfigSchema = schema.object(ConfigSchemaProps);
@@ -114,6 +117,8 @@ export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const SecretsSchema = schema.object({
   user: schema.nullable(schema.string()),
   password: schema.nullable(schema.string()),
+  clientSecret: schema.nullable(schema.string()),
+  accessToken: schema.nullable(schema.string()),
 });
 
 // params definition
