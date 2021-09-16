@@ -80,6 +80,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           defaultMessage: 'Global',
         }),
         iconType: isGlobal ? 'checkInCircleFilled' : '',
+        'data-test-subj': getTestId('global'),
       },
       {
         id: 'perPolicy',
@@ -87,6 +88,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           defaultMessage: 'Per Policy',
         }),
         iconType: !isGlobal ? 'checkInCircleFilled' : '',
+        'data-test-subj': getTestId('perPolicy'),
       },
     ];
 
@@ -187,7 +189,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 onChange={handleGlobalButtonChange}
                 color="primary"
                 isFullWidth
-                data-test-subj={getTestId('globalButtonGroup')}
               />
             </EuiFormRow>
           </EuiFlexItem>
