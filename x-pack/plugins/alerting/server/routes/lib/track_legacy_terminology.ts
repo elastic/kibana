@@ -7,7 +7,7 @@
 import { flatten } from 'lodash';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 
-export const LEGACY_TERMS = ['alertTypeId'];
+export const LEGACY_TERMS = ['alertTypeId', 'actionTypeId'];
 
 export function trackLegacyTerminology(
   terms: Array<string | string[]>,

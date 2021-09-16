@@ -13,7 +13,7 @@ describe('trackLegacyTerminology', () => {
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
     trackLegacyTerminology(
-      ['shouldNotMatch', ...LEGACY_TERMS.map((lt) => `${lt}foo`)],
+      ['shouldNotMatch', LEGACY_TERMS.map((lt) => `${lt}foo`)],
       mockUsageCounter
     );
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(LEGACY_TERMS.length);
