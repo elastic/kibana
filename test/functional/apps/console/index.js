@@ -10,7 +10,7 @@ export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
 
   describe('console app', function () {
-    this.tags('ciGroup11');
+    this.tags('ciGroup1');
 
     before(async function () {
       await browser.setWindowSize(1300, 1100);
