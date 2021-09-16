@@ -35,4 +35,14 @@ describe('trackLegacyTerminology', () => {
     }
     expect(err).toBeUndefined();
   });
+
+  it('should do nothing if no terms are provided', () => {
+    let err;
+    try {
+      trackLegacyTerminology([], undefined);
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeUndefined();
+  });
 });

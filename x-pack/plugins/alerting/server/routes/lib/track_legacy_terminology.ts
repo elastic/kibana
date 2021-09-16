@@ -17,6 +17,10 @@ export function trackLegacyTerminology(
     return null;
   }
 
+  if (!terms || terms.length === 0) {
+    return null;
+  }
+
   for (const legacyTerm of LEGACY_TERMS) {
     for (const term of flatten(terms)) {
       if (term.includes(legacyTerm)) {
