@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
-import { IIndexPattern, IndexPattern } from '../../../../../../plugins/data/common/index_patterns';
+import { IIndexPattern, IndexPattern } from '../../../../../../plugins/data/common';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',

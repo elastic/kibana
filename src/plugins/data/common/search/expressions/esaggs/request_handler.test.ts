@@ -9,7 +9,7 @@
 import { from } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { Filter } from '../../../es_query';
-import type { IndexPattern } from '../../../index_patterns';
+import type { IndexPattern } from '../../..';
 import type { IAggConfigs } from '../../aggs';
 import type { ISearchSource } from '../../search_source';
 import { searchSourceCommonMock, searchSourceInstanceMock } from '../../search_source/mocks';
