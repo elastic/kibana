@@ -8,6 +8,7 @@
 
 import { ManagementSetup, ManagementStart, DefinedSections } from '../types';
 import { ManagementSection } from '../index';
+import { sharePluginMock } from '../../../share/public/mocks';
 
 export const createManagementSectionMock = () =>
   (({
@@ -31,18 +32,12 @@ const createSetupContract = (): ManagementSetup => ({
     } as unknown) as DefinedSections,
   },
   locator: {
+    ...sharePluginMock.createLocator(),
     getLocation: jest.fn(async () => ({
       app: 'MANAGEMENT',
       path: '',
       state: {},
     })),
-    getUrl: jest.fn(),
-    useUrl: jest.fn(),
-    navigate: jest.fn(),
-    extract: jest.fn(),
-    inject: jest.fn(),
-    telemetry: jest.fn(),
-    migrations: {},
   },
 });
 
