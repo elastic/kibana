@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getDeprecationsUpperLimit } from '../../../../lib/utils';
+import { LoadingIssuesError } from './loading_issues_error';
 import { NoDeprecationIssues } from './no_deprecation_issues';
 
 import './_deprecation_issues_panel.scss';
@@ -38,7 +39,7 @@ interface Props {
   criticalDeprecationsCount: number;
   warningDeprecationsCount: number;
   isLoading: boolean;
-  errorMessage?: JSX.Element | null;
+  errorMessage?: JSX.Element | string | null;
   setIsFixed: (isFixed: boolean) => void;
 }
 
@@ -70,17 +71,16 @@ export const DeprecationIssuesPanel = (props: Props) => {
       data-test-subj={props['data-test-subj']}
       className="upgDeprecationIssuesPanel"
       layout="horizontal"
-      title={
-        <>
-          {deprecationSource}
-          {hasError && errorMessage}
-        </>
-      }
+      title={deprecationSource}
       {...(!hasNoIssues && reactRouterNavigate(history, linkUrl))}
     >
       <EuiSpacer />
 
-      {hasNoIssues ? (
+      {hasError ? (
+        <LoadingIssuesError data-test-subj="loadingIssuesError">
+          {errorMessage}
+        </LoadingIssuesError>
+      ) : hasNoIssues ? (
         <NoDeprecationIssues data-test-subj="noDeprecationIssues" />
       ) : (
         <EuiFlexGroup>

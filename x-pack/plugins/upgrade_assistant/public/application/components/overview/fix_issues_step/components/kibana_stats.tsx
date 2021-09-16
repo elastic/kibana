@@ -53,20 +53,9 @@ export const KibanaDeprecationStats: FunctionComponent<Props> = ({ setIsFixed })
   const warningDeprecationsCount =
     kibanaDeprecations?.filter((deprecation) => deprecation.level === 'warning')?.length ?? 0;
 
-  const errorMessage = error && (
-    <EuiIconTip
-      type="alert"
-      color="danger"
-      size="m"
-      content={i18n.translate('xpack.upgradeAssistant.deprecationStats.loadingErrorMessage', {
-        defaultMessage: 'An error occurred while retrieving Kibana deprecations.',
-      })}
-      anchorClassName="upgWarningIcon"
-      iconProps={{
-        'data-test-subj': 'kibanaRequestErrorIconTip',
-      }}
-    />
-  );
+  const errorMessage = error && i18n.translate('xpack.upgradeAssistant.deprecationStats.loadingErrorMessage', {
+    defaultMessage: 'Could not retrieve Kibana deprecations.',
+  });
 
   return (
     <DeprecationIssuesPanel

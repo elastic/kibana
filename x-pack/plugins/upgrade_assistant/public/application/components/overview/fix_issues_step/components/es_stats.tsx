@@ -8,7 +8,7 @@
 import React, { FunctionComponent } from 'react';
 
 import { useAppContext } from '../../../../app_context';
-import { EsStatsErrors } from './es_stats_error';
+import { getEsDeprecationError } from '../../../../lib/get_es_deprecation_error';
 import { DeprecationIssuesPanel } from './deprecation_issues_panel';
 
 interface Props {
@@ -29,7 +29,7 @@ export const ElasticsearchDeprecationStats: FunctionComponent<Props> = ({ setIsF
     esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical === false)
       ?.length ?? 0;
 
-  const errorMessage = error && <EsStatsErrors error={error} />;
+  const errorMessage = error && getEsDeprecationError(error).message;
 
   return (
     <DeprecationIssuesPanel
