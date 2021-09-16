@@ -295,6 +295,14 @@ export function mockTreeWithNoProcessEvents(): NewResolverTree {
     nodes: [],
   };
 }
+
+export function mockTreeWithNoProcessEventsWithOriginTimestamp(): NewResolverTree {
+  return {
+    originID: 'entityID',
+    nodes: [],
+    originTimestamp: '2021-09-16T18:34:14.605Z',
+  };
+}
 /**
  * first ID (to check in the mock data access layer)
  */

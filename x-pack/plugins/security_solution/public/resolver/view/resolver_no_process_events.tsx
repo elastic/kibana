@@ -27,7 +27,7 @@ export const ResolverNoProcessEvents = () => {
   const originTimestamp = useSelector(selectors.resolverTreeOriginTimestamp);
   const formattedDate = useFormattedDate(originTimestamp);
   return (
-    <StyledEuiFlexGroup data-test-subj="resolver:no-process-events" direction="column">
+    <StyledEuiFlexGroup direction="column">
       <EuiTitle>
         <h4>
           {i18n.translate('xpack.securitySolution.resolver.noProcessEvents.title', {

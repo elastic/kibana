@@ -9,6 +9,8 @@ import { Simulator } from '../test_utilities/simulator';
 import { pausifyMock } from '../data_access_layer/mocks/pausify_mock';
 import { emptifyMock } from '../data_access_layer/mocks/emptify_mock';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
+import { generateTreeWithDAL } from '../data_access_layer/mocks/generator_tree';
+import { mockTreeWithNoProcessEventsWithOriginTimestamp } from '../mocks/resolver_tree';
 import '../test_utilities/extend_jest';
 
 describe('Resolver: data loading and resolution states', () => {
@@ -113,7 +115,7 @@ describe('Resolver: data loading and resolution states', () => {
     });
   });
 
-  describe("When the resolver tree request doesn't return any data", () => {
+  describe("When the resolver tree request doesn't return any data because it has no origin process", () => {
     beforeEach(() => {
       const {
         metadata: { databaseDocumentID },
@@ -135,7 +137,62 @@ describe('Resolver: data loading and resolution states', () => {
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          resolverEmptyMessage: simulator.testSubject('resolver:no-process-events').length,
+          resolverEmptyMessage: simulator.testSubject('resolver:search-for-process-events').length,
+          resolverGraphNodes: simulator.testSubject('resolver:node').length,
+        }))
+      ).toYieldEqualTo({
+        resolverGraphLoading: 0,
+        resolverGraphError: 0,
+        resolverEmptyMessage: 1,
+        resolverGraphNodes: 0,
+      });
+    });
+  });
+
+  describe('When the resolver tree request has an origin process but none are shown', () => {
+    beforeEach(() => {
+      const tree = mockTreeWithNoProcessEventsWithOriginTimestamp();
+      const now = new Date();
+      const testTree = async () => tree.nodes;
+      const testEntity = async () => {
+        return [
+          {
+            name: 'endpoint',
+            schema: {
+              id: 'process.entity_id',
+              parent: 'process.parent.entity_id',
+              ancestry: 'process.Ext.ancestry',
+              name: 'process.name',
+            },
+            id: 'origin',
+            originTimestamp: now.toISOString(),
+          },
+        ];
+      };
+      const {
+        metadata: { databaseDocumentID },
+        dataAccessLayer,
+      } = generateTreeWithDAL();
+
+      dataAccessLayer.entities = testEntity;
+      dataAccessLayer.resolverTree = testTree;
+
+      simulator = new Simulator({
+        dataAccessLayer,
+        databaseDocumentID,
+        resolverComponentInstanceID,
+        indices: [],
+        shouldUpdate: false,
+        filters: {},
+      });
+    });
+
+    it('should display a message informing the user of the timestamp of the origin event', async () => {
+      await expect(
+        simulator.map(() => ({
+          resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
+          resolverGraphError: simulator.testSubject('resolver:graph:error').length,
+          resolverEmptyMessage: simulator.testSubject('resolver:origin-timestamp').length,
           resolverGraphNodes: simulator.testSubject('resolver:node').length,
         }))
       ).toYieldEqualTo({
