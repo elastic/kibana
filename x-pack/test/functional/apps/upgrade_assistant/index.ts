@@ -12,6 +12,7 @@ export default function upgradeCheckup({ loadTestFile }: FtrProviderContext) {
     this.tags('ciGroup4');
 
     loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./upgrade_assistant'));
+    loadTestFile(require.resolve('./deprecation_pages'));
+    loadTestFile(require.resolve('./overview_page'));
   });
 }
