@@ -160,7 +160,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                 iconType={status === ReindexStatus.paused ? 'play' : undefined}
                 onClick={clickStartReindex}
                 isLoading={loading}
-                disabled={loading || status === ReindexStatus.completed || !hasRequiredPrivileges}
+                disabled={loading || !hasRequiredPrivileges}
               >
                 {buttonLabel(status)}
               </EuiButton>
