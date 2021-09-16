@@ -52,6 +52,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
               >
                 <EuiFormRow>
                   <EuiSwitch
+                    disabled
                     label={
                       <FormattedMessage
                         id="xpack.transform.alertTypes.transformHealth.testsSelection.enableTestLabel"
