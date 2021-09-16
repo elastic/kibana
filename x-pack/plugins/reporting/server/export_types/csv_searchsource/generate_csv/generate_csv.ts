@@ -105,16 +105,31 @@ export class CsvGenerator {
     return results;
   }
 
-  private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
+  private async scroll(
+    pitId: string,
+    settings: CsvExportSettings,
+    searchSource: ISearchSource,
+    searchAfter?: estypes.SearchSortResults
+  ) {
     this.logger.debug(`executing scroll request`);
-    const results = (
-      await this.clients.es.asCurrentUser.scroll({
-        body: {
-          scroll: scrollSettings.duration,
-          scroll_id: scrollId,
+    const { scroll: scrollSettings, includeFrozen } = settings;
+    const searchBody = searchSource.getSearchRequestBody();
+    const searchParams: estypes.SearchRequest = {
+      body: {
+        ...searchBody,
+        pit: {
+          id: pitId,
+          keep_alive: scrollSettings.duration,
         },
-      })
-    ).body;
+        search_after: searchAfter,
+      },
+      size: scrollSettings.size,
+      ignore_throttled: !includeFrozen,
+    };
+
+    const results = (await this.clients.es.asCurrentUser.search(searchParams))
+      .body as estypes.SearchResponse<unknown>;
+
     return results;
   }
 
@@ -294,14 +309,15 @@ export class CsvGenerator {
       throw new Error(`The search must have a reference to an index pattern!`);
     }
 
-    const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;
+    const { maxSizeBytes, bom, escapeFormulaValues } = settings;
 
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
     let first = true;
     let currentRecord = -1;
     let totalRecords = 0;
-    let scrollId: string | undefined;
+    let pitId: string | undefined;
+    let searchAfter: undefined | estypes.SearchSortResults;
 
     // apply timezone from the job to all date field formatters
     try {
@@ -326,23 +342,35 @@ export class CsvGenerator {
         if (this.cancellationToken.isCancelled()) {
           break;
         }
-        let results: estypes.SearchResponse<unknown> | undefined;
-        if (scrollId == null) {
-          // open a scroll cursor in Elasticsearch
-          results = await this.scan(index, searchSource, settings);
-          scrollId = results?._scroll_id;
-          if (results.hits?.total != null) {
-            totalRecords = results.hits.total as number;
-            this.logger.debug(`Total search results: ${totalRecords}`);
-          }
-        } else {
-          // use the scroll cursor in Elasticsearch
-          results = await this.scroll(scrollId, scrollSettings);
+        if (pitId == null) {
+          pitId = (
+            await this.clients.es.asCurrentUser.openPointInTime({
+              index: index.title,
+              keep_alive: settings.scroll.duration,
+            })
+          ).body.id;
         }
+
+        // use the scroll cursor in Elasticsearch
+        const results = await this.scroll(pitId, settings, searchSource, searchAfter);
+        if (results.hits?.total != null && !totalRecords) {
+          totalRecords =
+            typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
+          console.log('total hits', totalRecords);
+          this.logger.debug(`Total search results: ${totalRecords}`);
+        }
+
+        pitId = results.pit_id ? results.pit_id : pitId;
 
         if (!results) {
           this.logger.warning(`Search results are undefined!`);
           break;
+        }
+        console.log('results', results.hits.hits.length);
+
+        const totalHits = results.hits.hits.length;
+        if (totalHits) {
+          searchAfter = results.hits.hits[totalHits - 1].sort;
         }
 
         let table: Datatable | undefined;
@@ -386,15 +414,16 @@ export class CsvGenerator {
       }
     } catch (err) {
       this.logger.error(err);
+      console.log(JSON.stringify(err, null, 2));
       if (err instanceof KbnServerError && err.errBody) {
         throw JSON.stringify(err.errBody.error);
       }
     } finally {
       // clear scrollID
-      if (scrollId) {
-        this.logger.debug(`executing clearScroll request`);
+      if (pitId) {
+        this.logger.debug(`executing close PIT request`);
         try {
-          await this.clients.es.asCurrentUser.clearScroll({ body: { scroll_id: [scrollId] } });
+          await this.clients.es.asCurrentUser.closePointInTime({ body: { id: pitId } });
         } catch (err) {
           this.logger.error(err);
         }
@@ -404,6 +433,8 @@ export class CsvGenerator {
     }
 
     this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
+
+    console.log('this.csvRowCount', this.csvRowCount);
 
     return {
       content_type: CONTENT_TYPE_CSV,

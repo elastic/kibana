@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/112164
-  describe.skip('Discover CSV Export', () => {
+  describe.only('Discover CSV Export', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');

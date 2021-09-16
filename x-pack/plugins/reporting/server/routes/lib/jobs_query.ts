@@ -148,7 +148,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
           constant_score: {
             filter: {
               bool: {
-                must: [{ term: { _id: id } }, { term: { created_by: username } }],
+                must: [{ term: { _id: id } }],
               },
             },
           },
