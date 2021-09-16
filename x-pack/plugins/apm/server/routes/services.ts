@@ -511,6 +511,7 @@ const serviceThroughputRoute = createApmServerRoute({
         currentPeriodTimeseries: currentPeriod,
         previousPeriodTimeseries: previousPeriod,
       }),
+      throughputUnit: 'minute',
     };
   },
 });
