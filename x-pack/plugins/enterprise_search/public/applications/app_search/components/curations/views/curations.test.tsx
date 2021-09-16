@@ -19,6 +19,7 @@ import { mountWithIntl, getPageHeaderTabs, getPageTitle } from '../../../../test
 
 import { Curations } from './curations';
 import { CurationsOverview } from './curations_overview';
+import { CurationsSettings } from './curations_settings';
 
 describe('Curations', () => {
   const values = {
@@ -88,7 +89,7 @@ describe('Curations', () => {
 
     expect(tabs.at(1).prop('isSelected')).toEqual(true);
 
-    // There is no currently no content inside the settings tab
+    expect(wrapper.find(CurationsSettings)).toHaveLength(1);
   });
 
   describe('loading state', () => {

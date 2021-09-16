@@ -22,6 +22,7 @@ import { CurationsLogic } from '../curations_logic';
 import { getCurationsBreadcrumbs } from '../utils';
 
 import { CurationsOverview } from './curations_overview';
+import { CurationsSettings } from './curations_settings';
 
 export const Curations: React.FC = () => {
   const { dataLoading, curations, meta, selectedPageTab } = useValues(CurationsLogic);
@@ -73,6 +74,7 @@ export const Curations: React.FC = () => {
       isLoading={dataLoading && !curations.length}
     >
       {selectedPageTab === 'overview' && <CurationsOverview />}
+      {selectedPageTab === 'settings' && <CurationsSettings />}
     </AppSearchPageTemplate>
   );
 };
