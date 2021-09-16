@@ -30,6 +30,7 @@ import {
   loadAlert,
   loadAlertState,
   loadAlertInstanceSummary,
+  loadRuleMonitoringSummary,
   loadAlertTypes,
   alertingFrameworkHealth,
   resolveRule,
@@ -62,6 +63,7 @@ export interface ComponentOpts {
   loadAlert: (id: Alert['id']) => Promise<Alert>;
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
   loadAlertInstanceSummary: (id: Alert['id']) => Promise<AlertInstanceSummary>;
+  loadRuleMonitoringSummary: (id: Alert['id']) => Promise<any>;
   loadAlertTypes: () => Promise<AlertType[]>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Alert['id']) => Promise<ResolvedRule>;
@@ -133,6 +135,9 @@ export function withBulkAlertOperations<T>(
         loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
         loadAlertInstanceSummary={async (alertId: Alert['id']) =>
           loadAlertInstanceSummary({ http, alertId })
+        }
+        loadRuleMonitoringSummary={async (ruleId: Alert['id']) =>
+          loadRuleMonitoringSummary({ http, ruleId })
         }
         loadAlertTypes={async () => loadAlertTypes({ http })}
         resolveRule={async (ruleId: Alert['id']) => resolveRule({ http, ruleId })}
