@@ -63,9 +63,7 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
     <ExpandedRowContent dataTestSubj={'dataVisualizerGeoPointContent'}>
       <DocumentStatsTable config={config} />
       {formattedResults && Array.isArray(formattedResults.examples) && (
-        <EuiFlexItem>
-          <ExamplesList examples={formattedResults.examples} />
-        </EuiFlexItem>
+        <ExamplesList examples={formattedResults.examples} />
       )}
       {formattedResults && Array.isArray(formattedResults.layerList) && (
         <EuiFlexItem

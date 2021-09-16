@@ -4,16 +4,17 @@
 
 .topValuesValueLabelContainer {
   margin-right: $euiSizeM;
-  &.topValuesValueLabelContainer--small {
-    width:70px;
-  }
 
-  &.topValuesValueLabelContainer--large {
-    width: 300px;
-  }
+  //&.topValuesValueLabelContainer--small {
+  //  width:250px;
+  //}
+  //
+  //&.topValuesValueLabelContainer--large {
+  //  width: 250px;
+  //}
 }
 
 .topValuesPercentLabelContainer {
   margin-left: $euiSizeM;
-  width:70px;
+  min-width:50px;
 }
