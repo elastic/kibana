@@ -2925,7 +2925,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-shared-deps@link:bazel-bin/packages/kbn-ui-shared-deps":
+"@kbn/ui-shared-deps-npm@link:bazel-bin/packages/kbn-ui-shared-deps-npm":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-shared-deps-src@link:bazel-bin/packages/kbn-ui-shared-deps-src":
   version "0.0.0"
   uid ""
 
