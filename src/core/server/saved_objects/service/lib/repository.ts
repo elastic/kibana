@@ -74,6 +74,9 @@ import {
   normalizeNamespace,
   rawDocExistsInNamespace,
   rawDocExistsInNamespaces,
+  Either,
+  isLeft,
+  isRight,
 } from './internal_utils';
 import {
   ALL_NAMESPACES_STRING,
@@ -95,20 +98,6 @@ import { getIndexForType } from './get_index_for_type';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
-
-interface Left {
-  tag: 'Left';
-  error: Record<string, any>;
-}
-
-interface Right {
-  tag: 'Right';
-  value: Record<string, any>;
-}
-
-type Either = Left | Right;
-const isLeft = (either: Either): either is Left => either.tag === 'Left';
-const isRight = (either: Either): either is Right => either.tag === 'Right';
 
 export interface SavedObjectsRepositoryOptions {
   index: string;
@@ -375,42 +364,44 @@ export class SavedObjectsRepository {
     const time = getCurrentTime();
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedResults: Either[] = objects.map((object) => {
-      const { type, id, initialNamespaces } = object;
-      let error: DecoratedError | undefined;
-      if (!this._allowedTypes.includes(type)) {
-        error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
-      } else {
-        try {
-          this.validateInitialNamespaces(type, initialNamespaces);
-        } catch (e) {
-          error = e;
+    const expectedResults: Array<Either<Record<string, any>, Record<string, any>>> = objects.map(
+      (object) => {
+        const { type, id, initialNamespaces } = object;
+        let error: DecoratedError | undefined;
+        if (!this._allowedTypes.includes(type)) {
+          error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+        } else {
+          try {
+            this.validateInitialNamespaces(type, initialNamespaces);
+          } catch (e) {
+            error = e;
+          }
         }
-      }
 
-      if (error) {
+        if (error) {
+          return {
+            tag: 'Left',
+            value: { id, type, error: errorContent(error) },
+          };
+        }
+
+        const method = id && overwrite ? 'index' : 'create';
+        const requiresNamespacesCheck = id && this._registry.isMultiNamespace(type);
+
+        if (id == null) {
+          object.id = SavedObjectsUtils.generateId();
+        }
+
         return {
-          tag: 'Left' as 'Left',
-          error: { id, type, error: errorContent(error) },
+          tag: 'Right',
+          value: {
+            method,
+            object,
+            ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+          },
         };
       }
-
-      const method = id && overwrite ? 'index' : 'create';
-      const requiresNamespacesCheck = id && this._registry.isMultiNamespace(type);
-
-      if (id == null) {
-        object.id = SavedObjectsUtils.generateId();
-      }
-
-      return {
-        tag: 'Right' as 'Right',
-        value: {
-          method,
-          object,
-          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
-        },
-      };
-    });
+    );
 
     const bulkGetDocs = expectedResults
       .filter(isRight)
@@ -442,7 +433,9 @@ export class SavedObjectsRepository {
     }
     let bulkRequestIndexCounter = 0;
     const bulkCreateParams: object[] = [];
-    const expectedBulkResults: Either[] = expectedResults.map((expectedBulkGetResult) => {
+    const expectedBulkResults: Array<
+      Either<Record<string, any>, Record<string, any>>
+    > = expectedResults.map((expectedBulkGetResult) => {
       if (isLeft(expectedBulkGetResult)) {
         return expectedBulkGetResult;
       }
@@ -469,8 +462,8 @@ export class SavedObjectsRepository {
         ) {
           const { id, type } = object;
           return {
-            tag: 'Left' as 'Left',
-            error: {
+            tag: 'Left',
+            value: {
               id,
               type,
               error: {
@@ -526,7 +519,7 @@ export class SavedObjectsRepository {
         expectedResult.rawMigratedDoc._source
       );
 
-      return { tag: 'Right' as 'Right', value: expectedResult };
+      return { tag: 'Right', value: expectedResult };
     });
 
     const bulkResponse = bulkCreateParams.length
@@ -540,7 +533,7 @@ export class SavedObjectsRepository {
     return {
       saved_objects: expectedBulkResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error as any;
+          return expectedResult.value as any;
         }
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
@@ -577,13 +570,15 @@ export class SavedObjectsRepository {
     const namespace = normalizeNamespace(options.namespace);
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map((object) => {
+    const expectedBulkGetResults: Array<
+      Either<Record<string, any>, Record<string, any>>
+    > = objects.map((object) => {
       const { type, id } = object;
 
       if (!this._allowedTypes.includes(type)) {
         return {
-          tag: 'Left' as 'Left',
-          error: {
+          tag: 'Left',
+          value: {
             id,
             type,
             error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
@@ -592,7 +587,7 @@ export class SavedObjectsRepository {
       }
 
       return {
-        tag: 'Right' as 'Right',
+        tag: 'Right',
         value: {
           type,
           id,
@@ -629,7 +624,7 @@ export class SavedObjectsRepository {
     const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
     expectedBulkGetResults.forEach((expectedResult) => {
       if (isLeft(expectedResult)) {
-        errors.push(expectedResult.error as any);
+        errors.push(expectedResult.value as any);
         return;
       }
 
@@ -978,7 +973,9 @@ export class SavedObjectsRepository {
     }
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map((object) => {
+    const expectedBulkGetResults: Array<
+      Either<Record<string, any>, Record<string, any>>
+    > = objects.map((object) => {
       const { type, id, fields, namespaces } = object;
 
       let error: DecoratedError | undefined;
@@ -994,13 +991,13 @@ export class SavedObjectsRepository {
 
       if (error) {
         return {
-          tag: 'Left' as 'Left',
-          error: { id, type, error: errorContent(error) },
+          tag: 'Left',
+          value: { id, type, error: errorContent(error) },
         };
       }
 
       return {
-        tag: 'Right' as 'Right',
+        tag: 'Right',
         value: {
           type,
           id,
@@ -1043,7 +1040,7 @@ export class SavedObjectsRepository {
     return {
       saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error as any;
+          return expectedResult.value as any;
         }
 
         const {
@@ -1355,13 +1352,15 @@ export class SavedObjectsRepository {
     const namespace = normalizeNamespace(options.namespace);
 
     let bulkGetRequestIndexCounter = 0;
-    const expectedBulkGetResults: Either[] = objects.map((object) => {
+    const expectedBulkGetResults: Array<
+      Either<Record<string, any>, Record<string, any>>
+    > = objects.map((object) => {
       const { type, id } = object;
 
       if (!this._allowedTypes.includes(type)) {
         return {
-          tag: 'Left' as 'Left',
-          error: {
+          tag: 'Left',
+          value: {
             id,
             type,
             error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
@@ -1373,8 +1372,8 @@ export class SavedObjectsRepository {
 
       if (objectNamespace === ALL_NAMESPACES_STRING) {
         return {
-          tag: 'Left' as 'Left',
-          error: {
+          tag: 'Left',
+          value: {
             id,
             type,
             error: errorContent(
@@ -1395,7 +1394,7 @@ export class SavedObjectsRepository {
       const requiresNamespacesCheck = this._registry.isMultiNamespace(object.type);
 
       return {
-        tag: 'Right' as 'Right',
+        tag: 'Right',
         value: {
           type,
           id,
@@ -1446,78 +1445,78 @@ export class SavedObjectsRepository {
     }
     let bulkUpdateRequestIndexCounter = 0;
     const bulkUpdateParams: object[] = [];
-    const expectedBulkUpdateResults: Either[] = expectedBulkGetResults.map(
-      (expectedBulkGetResult) => {
-        if (isLeft(expectedBulkGetResult)) {
-          return expectedBulkGetResult;
-        }
-
-        const {
-          esRequestIndex,
-          id,
-          type,
-          version,
-          documentToSave,
-          objectNamespace,
-        } = expectedBulkGetResult.value;
-
-        let namespaces;
-        let versionProperties;
-        if (esRequestIndex !== undefined) {
-          const indexFound = bulkGetResponse?.statusCode !== 404;
-          const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-          const docFound = indexFound && actualResult?.found === true;
-          if (
-            !docFound ||
-            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-            !this.rawDocExistsInNamespace(actualResult, getNamespaceId(objectNamespace))
-          ) {
-            return {
-              tag: 'Left' as 'Left',
-              error: {
-                id,
-                type,
-                error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-              },
-            };
-          }
-          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-          namespaces = actualResult!._source.namespaces ?? [
-            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-            SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
-          ];
-          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-          versionProperties = getExpectedVersionProperties(version, actualResult!);
-        } else {
-          if (this._registry.isSingleNamespace(type)) {
-            // if `objectNamespace` is undefined, fall back to `options.namespace`
-            namespaces = [getNamespaceString(objectNamespace)];
-          }
-          versionProperties = getExpectedVersionProperties(version);
-        }
-
-        const expectedResult = {
-          type,
-          id,
-          namespaces,
-          esRequestIndex: bulkUpdateRequestIndexCounter++,
-          documentToSave: expectedBulkGetResult.value.documentToSave,
-        };
-
-        bulkUpdateParams.push(
-          {
-            update: {
-              _id: this._serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
-              _index: this.getIndexForType(type),
-              ...versionProperties,
-            },
-          },
-          { doc: documentToSave }
-        );
-
-        return { tag: 'Right' as 'Right', value: expectedResult };
+    const expectedBulkUpdateResults: Array<
+      Either<Record<string, any>, Record<string, any>>
+    > = expectedBulkGetResults.map((expectedBulkGetResult) => {
+      if (isLeft(expectedBulkGetResult)) {
+        return expectedBulkGetResult;
       }
-    );
+
+      const {
+        esRequestIndex,
+        id,
+        type,
+        version,
+        documentToSave,
+        objectNamespace,
+      } = expectedBulkGetResult.value;
+
+      let namespaces;
+      let versionProperties;
+      if (esRequestIndex !== undefined) {
+        const indexFound = bulkGetResponse?.statusCode !== 404;
+        const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
+        const docFound = indexFound && actualResult?.found === true;
+        if (
+          !docFound ||
+          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+          !this.rawDocExistsInNamespace(actualResult, getNamespaceId(objectNamespace))
+        ) {
+          return {
+            tag: 'Left',
+            value: {
+              id,
+              type,
+              error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+            },
+          };
+        }
+        // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+        namespaces = actualResult!._source.namespaces ?? [
+          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+          SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
+        ];
+        // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+        versionProperties = getExpectedVersionProperties(version, actualResult!);
+      } else {
+        if (this._registry.isSingleNamespace(type)) {
+          // if `objectNamespace` is undefined, fall back to `options.namespace`
+          namespaces = [getNamespaceString(objectNamespace)];
+        }
+        versionProperties = getExpectedVersionProperties(version);
+      }
+
+      const expectedResult = {
+        type,
+        id,
+        namespaces,
+        esRequestIndex: bulkUpdateRequestIndexCounter++,
+        documentToSave: expectedBulkGetResult.value.documentToSave,
+      };
+
+      bulkUpdateParams.push(
+        {
+          update: {
+            _id: this._serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
+            _index: this.getIndexForType(type),
+            ...versionProperties,
+          },
+        },
+        { doc: documentToSave }
+      );
+
+      return { tag: 'Right', value: expectedResult };
+    });
 
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const bulkUpdateResponse = bulkUpdateParams.length
@@ -1532,7 +1531,7 @@ export class SavedObjectsRepository {
     return {
       saved_objects: expectedBulkUpdateResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error as any;
+          return expectedResult.value as any;
         }
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;

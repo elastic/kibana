@@ -28,6 +28,10 @@ import {
   getSavedObjectFromSource,
   normalizeNamespace,
   rawDocExistsInNamespace,
+  Either,
+  Right,
+  isLeft,
+  isRight,
 } from './internal_utils';
 import {
   SavedObjectsIncrementCounterField,
@@ -75,18 +79,6 @@ export interface InternalBulkResolveError {
   id: string;
   error: DecoratedError;
 }
-
-interface Left<L> {
-  tag: 'Left';
-  value: L;
-}
-interface Right<R> {
-  tag: 'Right';
-  value: R;
-}
-type Either<L = unknown, R = L> = Left<L> | Right<R>;
-const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => either.tag === 'Left';
-const isRight = <L, R>(either: Either<L, R>): either is Right<R> => either.tag === 'Right';
 
 export async function internalBulkResolve<T>(
   params: InternalBulkResolveParams
