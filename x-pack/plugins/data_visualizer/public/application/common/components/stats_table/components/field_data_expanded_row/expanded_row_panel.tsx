@@ -12,7 +12,6 @@ import { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
 interface Props {
   children: ReactNode;
   dataTestSubj?: string;
-  // 'data-test-subj'?: string;
   grow?: EuiFlexItemProps['grow'];
   className?: string;
 }

@@ -44,7 +44,7 @@ export const calculateTableColumnsDimensions = (width?: number) => {
     type: '75px',
     docCount: '225px',
     distinctValues: '225px',
-    distributions: '150px',
+    distributions: '225px',
     showIcon: true,
     breakPoint: 'xl',
   };

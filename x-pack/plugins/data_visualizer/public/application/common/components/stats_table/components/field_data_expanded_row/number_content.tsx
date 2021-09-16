@@ -6,7 +6,13 @@
  */
 
 import React, { FC, ReactNode, useEffect, useState } from 'react';
-import { EuiBasicTable, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexItem,
+  EuiText,
+  HorizontalAlignment,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -85,7 +91,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
       name: '',
       render: (summaryItem: { display: ReactNode }) => summaryItem.display,
       width: '25px',
-      align: 'right',
+      align: RIGHT_ALIGNMENT as HorizontalAlignment,
     },
     {
       field: 'value',
@@ -123,7 +129,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
       )}
       {distribution && (
         <ExpandedRowPanel
-          data-test-subj={'dataVisualizerFieldDataMetricDistribution'}
+          dataTestSubj={'dataVisualizerFieldDataMetricDistribution'}
           className="dataVisualizerPanelWrapper"
           grow={false}
         >

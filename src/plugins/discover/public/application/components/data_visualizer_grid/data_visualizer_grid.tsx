@@ -161,6 +161,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
       data-test-subj="dataVisualizerEmbeddedContent"
       ref={embeddableRoot}
       style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
+      // Match the scroll bar of the Discover doc table
       className="kbnDocTableWrapper"
     />
   );

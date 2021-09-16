@@ -16,7 +16,7 @@ import {
   Filter,
 } from '@kbn/es-query';
 import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
 import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';

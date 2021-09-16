@@ -44,7 +44,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
   return (
     <ExpandedRowPanel
-      data-test-subj={'dataVisualizerFieldDataTopValues'}
+      dataTestSubj={'dataVisualizerFieldDataTopValues'}
       className={classNames('dataVisualizerPanelWrapper', compressed ? 'compressed' : undefined)}
     >
       <ExpandedRowFieldHeader>
@@ -56,11 +56,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
 
       <div
         data-test-subj="dataVisualizerFieldDataTopValuesContent"
-        className={classNames(
-          'fieldDataTopValuesContainer',
-          'dataVisualizerTopValuesWrapper'
-          // compressed ? 'compressed' : undefined
-        )}
+        className={classNames('fieldDataTopValuesContainer', 'dataVisualizerTopValuesWrapper')}
       >
         {Array.isArray(topValues) &&
           topValues.map((value) => (

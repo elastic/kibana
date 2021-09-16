@@ -8,7 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, HorizontalAlignment, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { FieldDataRowProps } from '../../types';
 import { roundToDecimalPlace } from '../../../utils';
@@ -16,10 +16,11 @@ import { ExpandedRowPanel } from './expanded_row_panel';
 
 const metaTableColumns = [
   {
+    field: 'function',
     name: '',
-    render: (metaItem: { display: ReactNode }) => metaItem.display,
+    render: (_: string, metaItem: { display: ReactNode }) => metaItem.display,
     width: '25px',
-    align: 'right',
+    align: RIGHT_ALIGNMENT as HorizontalAlignment,
   },
   {
     field: 'value',

@@ -10,6 +10,7 @@ import { EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_VIEW_MODE } from './constants';
+import './_index.scss';
 
 const toggleButtons = [
   {
@@ -31,8 +32,8 @@ export const DocumentViewModeToggle = ({
 }) => {
   return (
     <EuiButtonGroup
+      className={'dscViewModeToggle'}
       legend={i18n.translate('discover.viewModes.legend', { defaultMessage: 'View modes' })}
-      style={{ paddingRight: 16 }}
       buttonSize={'compressed'}
       options={toggleButtons}
       idSelected={discoverViewMode}

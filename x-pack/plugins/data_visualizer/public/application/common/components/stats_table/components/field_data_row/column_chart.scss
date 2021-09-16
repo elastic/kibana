@@ -4,7 +4,6 @@
 
 .dataGridChart__column-chart {
   width: 100%;
-  height: 12px;
 }
 
 .dataGridChart__legend {
@@ -17,7 +16,7 @@
   font-weight: normal;
   text-align: left;
   line-height: 1.1;
-  font-size: 10px;
+  font-size: #{$euiFontSizeL / 2}; // 10px
 }
 
 .dataGridChart__legend--numeric {
