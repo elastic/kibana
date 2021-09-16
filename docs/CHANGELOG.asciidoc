@@ -120,12 +120,12 @@ Previously, scheduled query action IDs used the query ID. For example, if you sc
 [%collapsible]
 ====
 *Details* +
-The legacy area, line, bar, and pie charts library are deprecated in 7.15.0. In 7.16.0, support for the legacy charts library will be removed. For more information, refer to {kibana-pull}105055[#105055].
+The legacy area, line, and charts library are deprecated in 7.15.0. In 7.16.0, support for the legacy charts library will be removed. For more information, refer to {kibana-pull}105055[#105055].
 
 *Impact* +
-You must use the new charts library to create area, line, bar, and pie charts, which includes improved performance, color palettes, fill capacity, and more. 
+When you upgrade, {kib} uses the new charts library by default, which includes improved performance, color palettes, fill capacity, and more. 
 
-To use the new charts library, you must disable the legacy charts library:
+If you have changed the default <<visualization-visualize-chartslibrary,Advanced settings>>, you must disable the legacy charts library to use the new charts library:
 
 . Open the main menu, then click *Stack Management > Advanced Settings*.
 
@@ -296,7 +296,7 @@ Machine Learning::
 * Jobs import and export {kibana-pull}101037[#101037]
 Osquery Manager::
 * Adds RBAC for the Osquery plugin {kibana-pull}106669[#106669]
-* Adds ECS mapping editor{kibana-pull}107706[#107706]
+* Adds an ECS mapping editor for scheduled queries {kibana-pull}107706[#107706]
 Querying & Filtering::
 * Adds scoring support to KQL {kibana-pull}103727[#103727]
 Sharing::
@@ -359,17 +359,16 @@ Kibana Home & Add Data::
 * Use *Lens* in ecommerce data {kibana-pull}106039[#106039]
 * Use *Lens* in flights dashboard {kibana-pull}104780[#104780]
 Lens & Visualizations::
-* Long legend values support {kibana-pull}108365[#108365]
+* Long legend values support in *Aggregation based* visualizations {kibana-pull}108365[#108365]
 * Long legend values support in *TSVB* {kibana-pull}108023[#108023]
 * Supports long legend values in *Lens* {kibana-pull}107894[#107894]
-* Fixes do not submit invalid query in filtered metric in *Lens* {kibana-pull}107542[#107542]
 * Adds a color picker in percentiles and percentiles rank aggs in *TSVB* {kibana-pull}107390[#107390]
 * Synchronize cursor position for x-axis across all *Lens* visualizations on a dashboard {kibana-pull}106845[#106845]
 * Allows the users to change the axis orientation in *Lens* {kibana-pull}106369[#106369]
 * Improve network error message in *Lens* {kibana-pull}106246[#106246]
 * Cleanup bar value labels configuration in *Lens* {kibana-pull}106231[#106231]
-* Fixes the values inside bar charts {kibana-pull}106198[#106198]
-* Client Side caching in *Visualize* {kibana-pull}105589[#105589]
+* Cleanup bar value labels configuration in *Aggregation based* visualizations {kibana-pull}106198[#106198]
+* Adds client-side caching in *Visualize Library* to eliminate unnecessary data fetching when editing visualizations {kibana-pull}105589[#105589]
 * Display legend inside chart in *Lens* {kibana-pull}105571[#105571]
 * Adds a deprecation notice in the UI and a docs section {kibana-pull}105055[#105055]
 * Replace flot with elastic-chart in *Timelion* {kibana-pull}81565[#81565]
@@ -409,7 +408,7 @@ Metrics::
 Monitoring::
 * Enables OOTB alerts in RAC page and multiple rules of a rule type {kibana-pull}106457[#106457]
 Osquery Manager::
-* Fixes scheduled query status {kibana-pull}106600[#106600]
+* Adds status info for scheduled queries {kibana-pull}106600[#106600]
 Platform::
 * Improves not found response handling in the saved objects repository {kibana-pull}108749[#108749]
 * Updates `esaggs` expressions function to return partial results {kibana-pull}105620[#105620]
