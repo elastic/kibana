@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     `legendOpen:!t))),` +
     `viewMode:edit)`;
 
-  describe.only('bwc shared urls', function describeIndexTests() {
+  describe('bwc shared urls', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.only('6.0 urls', () => {
+    describe('6.0 urls', () => {
       let savedDashboardId: string;
 
       it('loads an unsaved dashboard', async function () {
