@@ -41,24 +41,27 @@ export const OverviewPage: React.FC<Props> = memo(({ packageInfo, integrationInf
   const { value: replaceableIntegrations, loading } = useGetReplaceableCustomIntegrations();
   const { getAbsolutePath } = useLink();
 
-  const matchingIntegration: CustomIntegration | null = useMemo(() => {
+  const matchingIntegrations: CustomIntegration[] | null = useMemo(() => {
     return replaceableIntegrations
-      ? replaceableIntegrations.find((integration) => {
+      ? replaceableIntegrations.filter((integration) => {
           return integration.eprPackageOverlap === packageInfo.name;
         })
       : null;
-  }, [replaceableIntegrations]);
+  }, [replaceableIntegrations, packageInfo.name]);
 
-  const matchCallout = matchingIntegration ? (
+  const matchCallout = matchingIntegrations ? (
     <EuiFlexItem>
-      <EuiCallOut title="Beats module">
-        <p>
-          Use the corresponding
-          <EuiLink href={getAbsolutePath(matchingIntegration.uiInternalPath)}>
-            &nbsp;{matchingIntegration.title}
-          </EuiLink>{' '}
-          module
-        </p>
+      <EuiCallOut>
+        {matchingIntegrations.map((matchingIntegration) => {
+          return (
+            <p key={matchingIntegration.id}>
+              <EuiLink href={getAbsolutePath(matchingIntegration.uiInternalPath)}>
+                &nbsp;{matchingIntegration.title}
+              </EuiLink>{' '}
+              module
+            </p>
+          );
+        })}
       </EuiCallOut>
     </EuiFlexItem>
   ) : null;
