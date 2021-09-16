@@ -35,6 +35,7 @@ export function PackageCard({
   type,
   uiInternalPath,
   euiIconType,
+  iconPath,
   ...restProps
 }: PackageCardProps) {
   const { getHref, getAbsolutePath } = useLink();
@@ -51,7 +52,7 @@ export function PackageCard({
       <Card
         title={title || ''}
         description={description}
-        icon={<EuiIcon size={'xl'} type={euiIconType} />}
+        icon={<EuiIcon size={'xl'} type={euiIconType ? euiIconType : getAbsolutePath(iconPath)} />}
         href={getAbsolutePath(uiInternalPath)}
       />
     );

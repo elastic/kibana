@@ -245,15 +245,13 @@ const AvailablePackages: React.FC = memo(() => {
     [categoryPackagesRes, selectedCategory]
   );
 
-  const eprAndCustomCategories =
-    isLoadingAddableCustomIntegrations || !addableCustomIntegrations
-      ? []
-      : mergeAndReplaceCategoryCounts(addableCustomIntegrations);
+  const nonGAWithReplacements = replaceEprPackages(
+    eprPackages,
+    replaceableCustomIntegrations || []
+  );
+  console.log('da', nonGAWithReplacements);
 
-  const replacedNonGAPackages = replaceEprPackages(eprPackages, replaceableCustomIntegrations || []);
-  console.log('da', replacedNonGAPackages);
-
-  const eprAndCustomPackages = replacedNonGAPackages.concat(filteredAddableIntegrations);
+  const eprReplacementsAndAdditions = nonGAWithReplacements.concat(filteredAddableIntegrations);
 
   const allPackages = useMemo(
     () => packageListToIntegrationsList(allCategoryPackagesRes?.response || []),
@@ -268,16 +266,19 @@ const AvailablePackages: React.FC = memo(() => {
     []
   );
 
-  const categories = useMemo(
-    () => [
+  const categories = useMemo(() => {
+    const eprAndCustomCategories =
+      isLoadingAddableCustomIntegrations || !addableCustomIntegrations
+        ? []
+        : mergeAndReplaceCategoryCounts(addableCustomIntegrations);
+    return [
       {
         id: '',
         count: (allPackages?.length || 0) + (addableCustomIntegrations?.length || 0),
       },
       ...(eprAndCustomCategories ? eprAndCustomCategories : []),
-    ],
-    [allPackages?.length, eprAndCustomCategories, addableCustomIntegrations]
-  );
+    ];
+  }, [allPackages?.length, addableCustomIntegrations, replaceableCustomIntegrations]);
 
   if (!categoryExists(selectedCategory, categories)) {
     history.replace(pagePathGetters.integrations_all({ category: '', searchTerm: searchParam })[1]);
@@ -309,7 +310,7 @@ const AvailablePackages: React.FC = memo(() => {
       title={title}
       controls={controls}
       initialSearch={searchParam}
-      list={eprAndCustomPackages}
+      list={eprReplacementsAndAdditions}
       setSelectedCategory={setSelectedCategory}
       onSearchChange={setSearchTerm}
       showMissingIntegrationMessage

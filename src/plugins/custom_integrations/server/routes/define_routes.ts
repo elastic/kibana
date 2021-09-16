@@ -21,7 +21,6 @@ export function defineRoutes(
     },
     async (context, request, response) => {
       const integrations = customIntegrationsRegistry.getAddableCustomIntegrations();
-      console.log('i', integrations);
       return response.ok({
         body: integrations,
       });
@@ -35,7 +34,6 @@ export function defineRoutes(
     },
     async (context, request, response) => {
       const integrations = customIntegrationsRegistry.getReplaceableCustomIntegrations();
-      console.log('i', integrations);
       return response.ok({
         body: integrations,
       });

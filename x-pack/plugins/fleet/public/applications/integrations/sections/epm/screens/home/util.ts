@@ -184,10 +184,7 @@ export function getEprCategoryCounts() {
   return cats;
 }
 
-export function mergeAndReplaceCategoryCounts(
-  addableIntegrations: CustomIntegration[],
-  replaceableIntegrations: CustomIntegration[]
-) {
+export function mergeAndReplaceCategoryCounts(addableIntegrations: CustomIntegration[]) {
   const counts = getEprCategoryCounts();
 
   addableIntegrations.forEach((integration) => {

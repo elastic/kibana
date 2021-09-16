@@ -23,6 +23,7 @@ function registerBeatsTutorialsWithCustomIntegrations(
   provider: TutorialProvider
 ) {
   const tutorial = provider(emptyContext);
+  console.log('b', tutorial);
   customIntegrations.registerCustomIntegration({
     name: tutorial.id,
     id: tutorial.name,
@@ -32,6 +33,7 @@ function registerBeatsTutorialsWithCustomIntegrations(
     uiInternalPath: `/app/home#/tutorial/${tutorial.id}`,
     description: tutorial.shortDescription,
     euiIconType: '',
+    iconPath: tutorial.euiIconType,
     eprPackageOverlap: tutorial.moduleName,
     source: 'beats',
   });
