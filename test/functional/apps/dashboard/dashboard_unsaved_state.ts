@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   let unsavedPanelCount = 0;
   const testQuery = 'Test Query';
 
-  describe.only('dashboard unsaved state', () => {
+  describe('dashboard unsaved state', () => {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
