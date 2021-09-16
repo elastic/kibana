@@ -17,6 +17,8 @@ import { nextTick } from '@kbn/test/jest';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
+import { CurationsValues } from './curations_logic';
+
 import { CurationsLogic } from './';
 
 describe('CurationsLogic', () => {
@@ -46,10 +48,11 @@ describe('CurationsLogic', () => {
     ],
   };
 
-  const DEFAULT_VALUES = {
+  const DEFAULT_VALUES: CurationsValues = {
     dataLoading: true,
     curations: [],
     meta: DEFAULT_META,
+    selectedPageTab: 'overview',
   };
 
   beforeEach(() => {
@@ -86,6 +89,19 @@ describe('CurationsLogic', () => {
         expect(CurationsLogic.values).toEqual({
           ...DEFAULT_VALUES,
           meta: { page: { ...DEFAULT_VALUES.meta.page, current: 3 } },
+        });
+      });
+    });
+
+    describe('onSelectPageTab', () => {
+      it('should set the selected page tab', () => {
+        mount();
+
+        CurationsLogic.actions.onSelectPageTab('settings');
+
+        expect(CurationsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          selectedPageTab: 'settings',
         });
       });
     });
