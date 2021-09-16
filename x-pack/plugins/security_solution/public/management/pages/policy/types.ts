@@ -21,6 +21,8 @@ import {
   GetPackagesResponse,
   UpdatePackagePolicyResponse,
 } from '../../../../../fleet/common';
+import { AsyncResourceState } from '../../state';
+import { TrustedAppsListData } from '../trusted_apps/state';
 
 /**
  * Policy list store state
@@ -63,6 +65,8 @@ export interface PolicyDetailsState {
   location?: Immutable<AppLocation>;
   /** artifacts location params  */
   artifactsLocation: PolicyDetailsArtifactsPageLocation;
+  /** A list of artifacts can be linked to the policy  */
+  availableArtifactsList: AsyncResourceState<TrustedAppsListData>;
   /** A summary of stats for the agents associated with a given Fleet Agent Policy */
   agentStatusSummary?: Omit<GetAgentStatusResponse['results'], 'updating'>;
   /** Status of an update to the policy  */

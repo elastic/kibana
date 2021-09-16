@@ -24,6 +24,8 @@ import {
 } from '../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
+import { AsyncResourceState } from '../../../../state';
+import { TrustedAppsListData } from '../../../trusted_apps/state';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
@@ -86,6 +88,10 @@ export const needsToRefresh = (state: Immutable<PolicyDetailsState>): boolean =>
 export const getCurrentArtifactsLocation = (
   state: Immutable<PolicyDetailsState>
 ): Immutable<PolicyDetailsArtifactsPageLocation> => state.artifactsLocation;
+
+export const getAvailableArtifactsList = (
+  state: Immutable<PolicyDetailsState>
+): Immutable<AsyncResourceState<TrustedAppsListData>> => state.availableArtifactsList;
 
 /** Returns a boolean of whether the user is on the policy form page or not */
 export const isOnPolicyFormPage = (state: Immutable<PolicyDetailsState>) => {

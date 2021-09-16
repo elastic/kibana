@@ -60,6 +60,7 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
     show: undefined,
     filter: '',
   },
+  availableArtifactsList: { type: 'UninitialisedResourceState' },
 });
 
 export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppAction> = (

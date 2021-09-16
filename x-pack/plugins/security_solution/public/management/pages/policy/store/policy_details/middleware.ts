@@ -17,6 +17,9 @@ import {
   policyDetails,
   policyDetailsForUpdate,
   needsToRefresh,
+  isOnPolicyTrustedAppsPage,
+  getCurrentArtifactsLocation,
+  getAvailableArtifactsList,
 } from './selectors';
 import {
   sendGetPackagePolicy,
@@ -26,11 +29,13 @@ import {
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
+import { TrustedAppsHttpService } from '../../../trusted_apps/service';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
   coreStart
 ) => {
   const http = coreStart.http;
+  const trustedAppsService = new TrustedAppsHttpService(http);
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
@@ -94,6 +99,20 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
           },
         });
       }
+    } else if (
+      action.type === 'userChangedUrl' &&
+      isOnPolicyTrustedAppsPage(state) &&
+      getCurrentArtifactsLocation(state).show === 'list'
+    ) {
+      const searchParams = getAvailableArtifactsList(state);
+      const location = getCurrentArtifactsLocation(state);
+      const policyId = policyIdFromParams(state);
+
+      const trustedApps = await trustedAppsService.getTrustedAppsList({
+        page: 1,
+        per_page: 100,
+        kuery: `(not exception-list-agnostic.attributes.tags:"policy:${policyId}") AND (not exception-list-agnostic.attributes.tags:"policy:all")`,
+      });
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
       const { id } = policyDetails(state) as PolicyData;
       const updatedPolicyItem = policyDetailsForUpdate(state) as NewPolicyData;
