@@ -62,8 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/111628
-  describe.skip('lens add-to-dashboards tests', () => {
+  describe('lens add-to-dashboards tests', () => {
     it('should allow new lens to be added by value to a new dashboard', async () => {
       await createNewLens();
       await PageObjects.lens.save('New Lens from Modal', false, false, false, 'new');
@@ -238,17 +237,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // issue #111104
     it('should add a Lens heatmap to the dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
-
-      await PageObjects.dashboard.saveDashboard('My Wonderful Heatmap dashboard');
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await listingTable.searchAndExpectItemsCount(
-        'dashboard',
-        'My Wonderful Heatmap dashboard',
-        1
-      );
-
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -275,14 +263,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.lens.save(
-        'New Lens Heatmap',
-        false,
-        false,
-        true,
-        'existing',
-        'My Wonderful Heatmap dashboard'
-      );
+      await PageObjects.lens.save('New Lens Heatmap', false, false, true, 'new');
 
       await PageObjects.dashboard.waitForRenderComplete();
 

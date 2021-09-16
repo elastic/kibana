@@ -7,7 +7,7 @@
  */
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '../../../../core/server';
-import type { IndexPatternSavedObjectAttrs } from '../../../data/common/index_patterns/index_patterns';
+import type { IndexPatternSavedObjectAttrs } from '../../../data/common/data_views/data_views';
 
 const LOGS_INDEX_PATTERN = 'logs-*';
 const METRICS_INDEX_PATTERN = 'metrics-*';

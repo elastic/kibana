@@ -42,7 +42,7 @@ export const DownloadStep = () => {
         <EuiText size="s">
           <FormattedMessage
             id="xpack.fleet.agentEnrollment.downloadUseLinuxInstaller"
-            defaultMessage="Linux users: We recommend using the installers over (RPM/DEB) because they provide the ability to upgrade your agent within Fleet."
+            defaultMessage="Linux users: We recommend the installer (TAR) over system packages (RPM/DEB) because it lets you upgrade your agent in Fleet."
           />
         </EuiText>
         <EuiSpacer size="l" />
