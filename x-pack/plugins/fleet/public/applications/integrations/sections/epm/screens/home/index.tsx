@@ -252,6 +252,9 @@ const AvailablePackages: React.FC = memo(() => {
   console.log('da', nonGAWithReplacements);
 
   const eprReplacementsAndAdditions = nonGAWithReplacements.concat(filteredAddableIntegrations);
+  eprReplacementsAndAdditions.sort((a, b) => {
+    return a.name.localeCompare(b.name);
+  });
 
   const allPackages = useMemo(
     () => packageListToIntegrationsList(allCategoryPackagesRes?.response || []),
