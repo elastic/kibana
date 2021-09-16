@@ -30,6 +30,7 @@ import {
 } from '../helpers/latency_aggregation_type';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { calculateFailedTransactionRate } from '../helpers/transaction_error_rate';
+import { calculateThroughput } from '../helpers/calculate_throughput';
 
 export async function getServiceTransactionGroupDetailedStatistics({
   environment,
@@ -125,11 +126,6 @@ export async function getServiceTransactionGroupDetailedStatistics({
                   },
                 },
                 aggs: {
-                  throughput_rate: {
-                    rate: {
-                      unit: 'minute',
-                    },
-                  },
                   ...getLatencyAggregation(latencyAggregationType, field),
                   [EVENT_OUTCOME]: {
                     terms: {
@@ -160,7 +156,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     }));
     const throughput = bucket.timeseries.buckets.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,
-      y: timeseriesBucket.throughput_rate.value,
+      y: calculateThroughput({ start, end, value: timeseriesBucket.doc_count }),
     }));
     const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,

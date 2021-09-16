@@ -63,9 +63,6 @@ export async function getTransactionsPerMinute({
                   fixed_interval: bucketSize,
                   min_doc_count: 0,
                 },
-                aggs: {
-                  throughput: { rate: { unit: 'minute' as const } },
-                },
               },
             },
           },
@@ -94,7 +91,7 @@ export async function getTransactionsPerMinute({
     timeseries:
       topTransactionTypeBucket?.timeseries.buckets.map((bucket) => ({
         x: bucket.key,
-        y: bucket.throughput.value,
+        y: calculateThroughput({ start, end, value: bucket.doc_count }),
       })) || [],
   };
 }

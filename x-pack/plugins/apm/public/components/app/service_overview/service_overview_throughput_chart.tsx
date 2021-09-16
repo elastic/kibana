@@ -26,11 +26,14 @@ import {
   getComparisonChartTheme,
   getTimeRangeComparison,
 } from '../../shared/time_comparison/get_time_range_comparison';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
-const INITIAL_STATE = {
+type ThroughputApiReturnType = APIReturnType<'GET /api/apm/services/{serviceName}/throughput'>;
+
+const INITIAL_STATE: ThroughputApiReturnType = {
   currentPeriod: [],
   previousPeriod: [],
-  throughputUnit: 'minute' as const,
+  throughputUnit: 'minute',
 };
 
 export function ServiceOverviewThroughputChart({
