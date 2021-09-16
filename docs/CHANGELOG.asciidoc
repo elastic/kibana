@@ -266,7 +266,7 @@ Use runtime fields. For more information, refer to <<runtime-fields,Explore your
 {kib} 7.15.0 adds the following new and notable features.
 
 APM::
-* Enables metric-powered UI {kibana-pull}104929[#104929]
+* Adds uninstrumented dependencies view {kibana-pull}106223[#106223]
 * Replaces error rate table with failed transactions correlations {kibana-pull}108441[#108441]
 * Moves latency correlations from flyout to transactions page {kibana-pull}107266[#107266]
 Data ingest::
@@ -307,19 +307,17 @@ Alerting::
 * Changed rules table to support visual indication for disabled and muted alerts {kibana-pull}104190[#104190]
 APM::
 * Enables JVM metrics for the Ruby Agent running on a JVM (jRuby) {kibana-pull}108933[#108933]
-* APM agent instrumentation instructions in Fleet {kibana-pull}108242[#108242]
-* Displays callout when transaction events are used instead of aggregrated metrics {kibana-pull}108080[#108080]
+* Adds APM agent instrumentation instructions in Fleet {kibana-pull}108242[#108242]
 * Renames "Error rate" to "Failed transaction rate" {kibana-pull}107895[#107895]
 * Fixes service inventory responsive design {kibana-pull}107690[#107690]
 * Adds a logs tab for services {kibana-pull}107664[#107664]
-* Share components across Service overview and transactions. Add time comparison to the Transactions page {kibana-pull}107299[#107299]
-* Services inventory: add time comparisons to match service overview design {kibana-pull}107094[#107094]
+* Adds time comparison to the Transactions page {kibana-pull}107299[#107299]
+* Adds time comparison to the services inventory {kibana-pull}107094[#107094]
 * Adds backend info and icons to flyouts {kibana-pull}107089[#107089]
-* Visualizing composite spans {kibana-pull}106862[#106862]
+* Supports visualizing composite spans {kibana-pull}106862[#106862]
 * Allows editing of APM rules {kibana-pull}106598[#106598]
-* Fleet: APM Integration settings (fleet editor) redesign {kibana-pull}106535[#106535]
+* Redesigns the APM Integration settings {kibana-pull}106535[#106535]
 * Adds bulk update route to rule registry and bulk update function to alerts client {kibana-pull}106297[#106297]
-* Enables metric-powered ui {kibana-pull}104929[#104929]
 * Replaces error rate table with failed transactions correlations {kibana-pull}108441[#108441]
 * Moves latency correlations from flyout to transactions page {kibana-pull}107266[#107266]
 * Latency correlations: Field/value candidates prioritization {kibana-pull}107370[#107370]
@@ -434,7 +432,6 @@ Other::
 APM::
 * Custom links creation don't work {kibana-pull}110676[#110676]
 * Show relevant nodes in focused service map {kibana-pull}108028[#108028]
-* Display throughput as tps (instead of tpm) when bucket size < 60 seconds {kibana-pull}107850[#107850]
 Canvas::
 * `Flyout` refactor {kibana-pull}106728[#106728]
 * Register `expression_functions` in `{expression}/public/plugin.ts` {kibana-pull}106636[#106636]
