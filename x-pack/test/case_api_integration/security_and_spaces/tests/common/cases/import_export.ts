@@ -45,7 +45,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('exports a case with its associated user actions and comments', async () => {
-      expect(true).to.be(false);
       const caseRequest = getPostCaseRequest();
       const postedCase = await createCase(supertest, caseRequest);
       await createComment({
