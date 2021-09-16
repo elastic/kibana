@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  timelion_chain: {
-    src: 'src/plugins/vis_type_timelion/common/chain.peg',
-    dest: 'src/plugins/vis_type_timelion/common/_generated_/chain.js',
-  },
-};
+module.exports = {};
