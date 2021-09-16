@@ -30,6 +30,7 @@ export function createRedirectLegacyUrl(
       values: { objectNoun },
     });
     notifications.toasts.addInfo({ title, text });
+    console.error('WHAT IS THE APP ID', appId);
     await navigateToApp(appId!, { replace: true, path });
   };
 }

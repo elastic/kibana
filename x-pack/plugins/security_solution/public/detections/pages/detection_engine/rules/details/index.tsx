@@ -287,8 +287,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     if (rule) {
       const outcome = rule.outcome;
       if (spacesApi && outcome === 'aliasMatch') {
+        console.error('BASE PATH', basePath);
         // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
-        const path = basePath.prepend(`/rules/id/${rule.id}`);
+        const path = basePath.prepend(`rules/id/${rule.id}`);
+        console.error('PATH', path);
         spacesApi.ui.redirectLegacyUrl(
           path,
           i18nTranslate.translate(
