@@ -84,7 +84,7 @@ another group that monitors for evidence of malware.
 
 . Click a group name to view the details.
 +
-Details include the last time the group ran, how many results were returned, and the number of agents the group ran against.
+Details include the last time each query ran, how many results were returned, and the number of agents the query ran against.
 If there are errors, expand the row to view the details.
 +
 [role="screenshot"]
@@ -155,7 +155,7 @@ Add or edit saved queries to the *Saved queries* tab.
 
 ** The operating system required to run the query. For information about supported platforms per table, click *OSquery schema* in the *Edit query* flyout.
 
-. Click **Saved query**.
+. Click **Save query**.
 
 [float]
 [[osquery-status]]
