@@ -35,11 +35,9 @@ export TEST_BROWSER_HEADLESS=1
 export ELASTIC_APM_ENVIRONMENT=ci
 export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
 
-CI_REPORTING_ENABLED=false # TODO enable when ready, only controls checks reporter and APM
-
 if is_pr; then
   export ELASTIC_APM_ACTIVE=false
-  export CHECKS_REPORTER_ACTIVE="${CI_REPORTING_ENABLED-}"
+  export CHECKS_REPORTER_ACTIVE=true
 
   # These can be removed once we're not supporting Jenkins and Buildkite at the same time
   # These are primarily used by github checks reporter and can be configured via /github_checks_api.json
@@ -49,14 +47,9 @@ if is_pr; then
 
   # set_git_merge_base # TODO for PRs
 else
-  export ELASTIC_APM_ACTIVE="${CI_REPORTING_ENABLED-}"
+  export ELASTIC_APM_ACTIVE=true
   export CHECKS_REPORTER_ACTIVE=false
 fi
-
-CHECKS_REPORTER_ACTIVE="true" # TODO remove before merge
-export ghprbGhRepository="elastic/kibana" # TODO remove before merge
-export ghprbActualCommit="$BUILDKITE_COMMIT" # TODO remove before merge
-export BUILD_URL="$BUILDKITE_BUILD_URL" # TODO remove before merge
 
 export FLEET_PACKAGE_REGISTRY_PORT=6104
 export TEST_CORS_SERVER_PORT=6105

@@ -27,7 +27,7 @@ const STORYBOOK_DIRECTORY =
   process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
     ? `pr-${process.env.BUILDKITE_PULL_REQUEST}`
     : process.env.BUILDKITE_BRANCH.replace('/', '__');
-const STORYBOOK_BUCKET = 'ci-artifacts.kibana.dev/storybooks-buildkite'; // TODO - remove `-buildkite` to make production
+const STORYBOOK_BUCKET = 'ci-artifacts.kibana.dev/storybooks';
 const STORYBOOK_BUCKET_URL = `https://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}`;
 const STORYBOOK_BASE_URL = `${STORYBOOK_BUCKET_URL}/${process.env.BUILDKITE_COMMIT}`;
 
