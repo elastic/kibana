@@ -1502,15 +1502,6 @@
     async-retry "^1.2.3"
     strip-ansi "^5.2.0"
 
-"@elastic/good@^9.0.1-kibana3":
-  version "9.0.1-kibana3"
-  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-9.0.1-kibana3.tgz#a70c2b30cbb4f44d1cf4a464562e0680322eac9b"
-  integrity sha512-UtPKr0TmlkL1abJfO7eEVUTqXWzLKjMkz+65FvxU/Ub9kMAr4No8wHLRfDHFzBkWoDIbDWygwld011WzUnea1Q==
-  dependencies:
-    "@hapi/hoek" "9.x.x"
-    "@hapi/oppsy" "3.x.x"
-    "@hapi/validate" "1.x.x"
-
 "@elastic/makelogs@^6.0.0":
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/@elastic/makelogs/-/makelogs-6.0.0.tgz#d6d74d5d0f020123c54160370d49ca5e0aab1fe1"
@@ -1961,14 +1952,6 @@
   resolved "https://registry.yarnpkg.com/@hapi/file/-/file-2.0.0.tgz#2ecda37d1ae9d3078a67c13b7da86e8c3237dfb9"
   integrity sha512-WSrlgpvEqgPWkI18kkGELEZfXr0bYLtr16iIN4Krh9sRnzBZN6nnWxHFxtsnP684wueEySBbXPDg/WfA9xJdBQ==
 
-"@hapi/good-squeeze@6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@hapi/good-squeeze/-/good-squeeze-6.0.0.tgz#bb72d6869cd7398b615a6b7270f630dc4f76aebf"
-  integrity sha512-UgHAF9Lm8fJPzgf2HymtowOwNc1+IL+p08YTVR+XA4d8nmyE1t9x3RLA4riqldnOKHkVqGakJ1jGqUG7jk77Cg==
-  dependencies:
-    "@hapi/hoek" "9.x.x"
-    fast-safe-stringify "2.x.x"
-
 "@hapi/h2o2@^9.1.0":
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/@hapi/h2o2/-/h2o2-9.1.0.tgz#b223f4978b6f2b0d7d9db10a84a567606c4c3551"
@@ -2055,13 +2038,6 @@
   dependencies:
     "@hapi/hoek" "^9.0.4"
     "@hapi/vise" "^4.0.0"
-
-"@hapi/oppsy@3.x.x":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@hapi/oppsy/-/oppsy-3.0.0.tgz#1ae397e200e86d0aa41055f103238ed8652947ca"
-  integrity sha512-0kfUEAqIi21GzFVK2snMO07znMEBiXb+/pOx1dmgOO9TuvFstcfmHU5i56aDfiFP2DM5WzQCU2UWc2gK1lMDhQ==
-  dependencies:
-    "@hapi/hoek" "9.x.x"
 
 "@hapi/pez@^5.0.1":
   version "5.0.3"
@@ -13554,7 +13530,7 @@ fast-redact@^3.0.0:
   resolved "https://registry.yarnpkg.com/fast-redact/-/fast-redact-3.0.0.tgz#ac2f9e36c9f4976f5db9fb18c6ffbaf308cf316d"
   integrity sha512-a/S/Hp6aoIjx7EmugtzLqXmcNsyFszqbt6qQ99BdG61QjBZF6shNis0BYR6TsZOQ1twYc0FN2Xdhwwbv6+KD0w==
 
-fast-safe-stringify@2.x.x, fast-safe-stringify@^2.0.4, fast-safe-stringify@^2.0.7:
+fast-safe-stringify@^2.0.4, fast-safe-stringify@^2.0.7:
   version "2.0.8"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.0.8.tgz#dc2af48c46cf712b683e849b2bbd446b32de936f"
   integrity sha512-lXatBjf3WPjmWD6DpIZxkeSsCOwqI0maYMpgDlx8g4U2qi4lbjA9oH/HD2a87G+KfsUmo5WbJFmqBZlPxtptag==
