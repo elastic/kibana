@@ -130,7 +130,6 @@ describe('#run$', () => {
           Array [
             "foo",
             "bar",
-            "--logging.json=false",
           ],
           Object {
             "env": Object {
