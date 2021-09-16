@@ -20,7 +20,7 @@ import { OverviewLogic } from './overview_logic';
 import { StatisticCard } from './statistic_card';
 
 export const OrganizationStats: React.FC = () => {
-  const { sourcesCount, pendingInvitationsCount, accountsCount, personalSourcesCount } = useValues(
+  const { sourcesCount, pendingInvitationsCount, accountsCount, privateSourcesCount } = useValues(
     OverviewLogic
   );
 
@@ -64,7 +64,7 @@ export const OrganizationStats: React.FC = () => {
               'xpack.enterpriseSearch.workplaceSearch.organizationStats.privateSources',
               { defaultMessage: 'Private sources' }
             )}
-            count={personalSourcesCount}
+            count={privateSourcesCount}
           />
         </EuiFlexGrid>
       </EuiPanel>
