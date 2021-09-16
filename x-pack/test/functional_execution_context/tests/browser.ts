@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { assertLogContains, isExecutionContextLog } from '../test_utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'header', 'home']);
   const retry = getService('retry');
 
   describe('Browser apps', () => {
@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('propagates context for Discover', async () => {
+      it('propagates context for Discover without loading a saved search', async () => {
+        await PageObjects.discover.clickNewSearchButton();
         await assertLogContains({
           description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
           predicate: (record) =>
@@ -63,6 +64,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             isExecutionContextLog(record?.message, {
               description: 'fetch chart data and total hits',
               id: '',
+              name: 'discover',
+              type: 'application',
+              url: '/app/discover',
+            }),
+          retry,
+        });
+      });
+
+      it('propagates context for Discover with a saved search loaded', async () => {
+        await PageObjects.discover.loadSavedSearch('[Flights] Flight Log');
+        await assertLogContains({
+          description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
+          predicate: (record) =>
+            Boolean(record.http?.request?.id?.includes('kibana:application:discover')),
+          retry,
+        });
+
+        await assertLogContains({
+          description: 'execution context propagates to Kibana logs',
+          predicate: (record) =>
+            isExecutionContextLog(record?.message, {
+              description: 'fetch documents',
+              id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
+              name: 'discover',
+              type: 'application',
+              // discovery doesn't have an URL since one of from the example dataset is not saved separately
+              url: '/app/discover',
+            }),
+          retry,
+        });
+
+        await assertLogContains({
+          description: 'execution context propagates to Kibana logs',
+          predicate: (record) =>
+            isExecutionContextLog(record?.message, {
+              description: 'fetch chart data and total hits',
+              id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
               name: 'discover',
               type: 'application',
               url: '/app/discover',
