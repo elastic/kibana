@@ -14,6 +14,7 @@ import { DataViewLabels } from '../configurations/constants';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { combineTimeRanges } from '../exploratory_view';
+import { AddToCaseAction } from './add_to_case_action';
 
 interface Props {
   seriesId: string;
@@ -23,7 +24,7 @@ interface Props {
 export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
   const kServices = useKibana<ObservabilityAppServices>().services;
 
-  const { lens, cases } = kServices;
+  const { lens } = kServices;
 
   const { getSeries, allSeries } = useSeriesStorage();
 
@@ -31,21 +32,9 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
 
-  const [isCasesOpen, setIsCasesOpen] = useState(false);
-
   const LensSaveModalComponent = lens.SaveModalComponent;
 
   const timeRange = combineTimeRanges(allSeries, series);
-
-  const SelectCaseComponent = cases.getAllCasesSelectorModal({
-    createCaseNavigation: {
-      href: '',
-      onClick: () => {},
-    },
-    onRowClick: () => {},
-    userCanCrud: true,
-    owner: [],
-  });
 
   return (
     <>
@@ -69,19 +58,7 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fullWidth={false}
-            isDisabled={lensAttributes === null}
-            onClick={() => {
-              if (lensAttributes) {
-                setIsCasesOpen(true);
-              }
-            }}
-          >
-            {i18n.translate('xpack.observability.expView.heading.addToCase', {
-              defaultMessage: 'Add to case',
-            })}
-          </EuiButton>
+          <AddToCaseAction lensAttributes={lensAttributes} timeRange={timeRange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -133,7 +110,6 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
           onSave={() => {}}
         />
       )}
-      {isCasesOpen && lensAttributes && <SelectCaseComponent />}
     </>
   );
 }
