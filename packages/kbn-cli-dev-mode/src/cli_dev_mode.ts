@@ -48,7 +48,6 @@ const GRACEFUL_TIMEOUT = 30000;
 
 export type SomeCliArgs = Pick<
   CliArgs,
-  | 'quiet'
   | 'silent'
   | 'verbose'
   | 'disableOptimizer'
