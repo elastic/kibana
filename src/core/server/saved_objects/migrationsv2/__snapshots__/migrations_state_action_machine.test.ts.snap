@@ -106,11 +106,6 @@ Object {
                     },
                     Object {
                       "term": Object {
-                        "type": "timelion-sheet",
-                      },
-                    },
-                    Object {
-                      "term": Object {
                         "type": "tsvb-validation-telemetry",
                       },
                     },
@@ -243,11 +238,6 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
-                      },
-                    },
-                    Object {
-                      "term": Object {
-                        "type": "timelion-sheet",
                       },
                     },
                     Object {
@@ -392,11 +382,6 @@ Object {
                     },
                     Object {
                       "term": Object {
-                        "type": "timelion-sheet",
-                      },
-                    },
-                    Object {
-                      "term": Object {
                         "type": "tsvb-validation-telemetry",
                       },
                     },
@@ -537,11 +522,6 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
-                      },
-                    },
-                    Object {
-                      "term": Object {
-                        "type": "timelion-sheet",
                       },
                     },
                     Object {
@@ -727,11 +707,6 @@ Object {
                     },
                     Object {
                       "term": Object {
-                        "type": "timelion-sheet",
-                      },
-                    },
-                    Object {
-                      "term": Object {
                         "type": "tsvb-validation-telemetry",
                       },
                     },
@@ -875,11 +850,6 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
-                      },
-                    },
-                    Object {
-                      "term": Object {
-                        "type": "timelion-sheet",
                       },
                     },
                     Object {
