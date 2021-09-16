@@ -176,14 +176,14 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
         const total = (runningSearchResult.body.hits.total as estypes.SearchTotalHits).value;
-        console.log({ total })
+        console.log({ total }); // eslint-disable-line no-console
         expect(total).to.eql(1);
         const hitsMetadata = runningSearchResult.body.hits as estypes.SearchHitsMetadata<{
           task?: { status: string };
         }>;
         const hits = hitsMetadata.hits;
         const firstHitStatus = hits[0]._source?.task?.status;
-        console.log({ firstHitStatus });
+        console.log({ firstHitStatus }); // eslint-disable-line no-console
         expect(firstHitStatus).to.eql('running');
       });
 
