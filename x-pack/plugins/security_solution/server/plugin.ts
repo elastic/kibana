@@ -73,6 +73,7 @@ import {
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   EQL_RULE_TYPE_ID,
+  PREVIEW_SECONDARY_ALIAS,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -221,6 +222,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
 
+    // Register rule types via rule-registry
+    const ruleOptions: Omit<CreateRuleOptions, 'ruleDataClient'> = {
+      experimentalFeatures,
+      lists: plugins.lists,
+      logger: this.logger,
+      mergeStrategy: this.config.alertMergeStrategy,
+      ignoreFields: this.config.alertIgnoreFields,
+      ml: plugins.ml,
+      ruleDataService,
+      version: this.context.env.packageInfo.version,
+    };
+
     if (isRuleRegistryEnabled) {
       // NOTE: this is not used yet
       // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
@@ -251,25 +264,41 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         secondaryAlias: config.signalsIndex,
       });
 
-      // Register rule types via rule-registry
-      const createRuleOptions: CreateRuleOptions = {
-        experimentalFeatures,
-        lists: plugins.lists,
-        logger: this.logger,
-        mergeStrategy: this.config.alertMergeStrategy,
-        ignoreFields: this.config.alertIgnoreFields,
-        ml: plugins.ml,
-        ruleDataClient,
-        ruleDataService,
-        version: this.context.env.packageInfo.version,
-      };
-
-      this.setupPlugins.alerting.registerType(createEqlAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createMlAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createThresholdAlertType(createRuleOptions));
+      const createRuleOptions = { ...ruleOptions, ruleDataClient };
+      [
+        createEqlAlertType,
+        createIndicatorMatchAlertType,
+        createMlAlertType,
+        createQueryAlertType,
+        createThresholdAlertType,
+      ].forEach((createAlertType) =>
+        // @ts-ignore next-line
+        this.setupPlugins.alerting.registerType(
+          // @ts-ignore next-line
+          createAlertType(createRuleOptions)
+        )
+      );
     }
+
+    const previewRuleOptions = {
+      ...ruleOptions,
+      ruleDataClient: ruleDataService.initializeIndex({
+        feature: SERVER_APP_ID,
+        registrationContext: 'security.preview',
+        dataset: Dataset.alerts,
+        componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+        componentTemplates: [
+          {
+            name: 'mappings',
+            mappings: mappingFromFieldMap(
+              { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
+              false
+            ),
+          },
+        ],
+        secondaryAlias: PREVIEW_SECONDARY_ALIAS,
+      }),
+    };
 
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
@@ -280,7 +309,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.ml,
       ruleDataService,
       isRuleRegistryEnabled,
-      this.logger
+      previewRuleOptions
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);

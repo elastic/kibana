@@ -188,7 +188,12 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
  * Id for the signals alerting type
  */
 export const SIGNALS_ID = `siem.signals` as const;
+
+/**
+ * Preview
+ */
 export const PREVIEW_ID = `siem.signals.preview` as const;
+export const PREVIEW_SECONDARY_ALIAS = 'preview-index-secondary-alias-placeholder';
 
 /**
  * IDs for RAC rule types

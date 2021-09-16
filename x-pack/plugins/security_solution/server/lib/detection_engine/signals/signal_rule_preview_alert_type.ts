@@ -93,12 +93,7 @@ export const previewRuleAlert = ({ logger, ml }: { logger: Logger; ml: SetupPlug
     producer: SERVER_APP_ID,
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    async executor({
-      state,
-      services,
-      params,
-      spaceId,
-    }): Promise<[previewData: unknown, errors: string[]]> {
+    async executor({ state, services, params, spaceId }) {
       const { ruleId, maxSignals, meta, outputIndex, timestampOverride, type } = params;
 
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);

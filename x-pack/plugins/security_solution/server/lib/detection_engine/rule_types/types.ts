@@ -134,3 +134,5 @@ export interface CreateRuleOptions {
   version: string;
   ruleDataService: IRuleDataPluginService;
 }
+
+export type PreviewRuleOptions = CreateRuleOptions;

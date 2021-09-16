@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from 'src/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
+import {
+  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
+  DETECTION_ENGINE_RULES_PREVIEW,
+} from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -18,11 +20,14 @@ import { previewRulesSchema } from '../../../../../common/detection_engine/schem
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertPreviewAPIToInternalSchema } from '../../schemas/rule_converters';
 import { previewRuleAlert } from '../../signals/signal_rule_preview_alert_type';
+import { wrapHitsFactory } from '../../rule_types/factories';
+import { PreviewRuleOptions } from '../../rule_types/types';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 
 export const previewRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  logger: Logger
+  previewRuleOptions: PreviewRuleOptions
 ): void => {
   router.post(
     {
@@ -49,6 +54,12 @@ export const previewRulesRoute = (
         }
 
         const internalRule = convertPreviewAPIToInternalSchema(request.body, siemClient);
+        // TODO: where to get the state?
+        const state = 'placeholderState';
+
+        const runState = state;
+        const { from, maxSignals, meta, ruleId, timestampOverride, to } = internalRule.params;
+        const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -60,7 +71,28 @@ export const previewRulesRoute = (
 
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        // TODO: request handler context does not have logger, env, etc.
+        const { logger, ignoreFields, mergeStrategy } = previewRuleOptions;
+
+        const wrapHits = wrapHitsFactory({
+          logger,
+          ignoreFields,
+          mergeStrategy,
+          spaceId: 'default',
+          ruleSO: {
+            id: 'preview-rule-id',
+            type: 'preview-rule-type',
+            references: [],
+            attributes: {
+              ...internalRule,
+              createdBy: 'preview-creator',
+              updatedBy: 'preview-updater',
+              createdAt: '',
+              actions: [] as RuleAlertAction[],
+              throttle: '',
+            },
+          },
+        });
+
         const [previewData, errors] = await previewRuleAlert({
           logger,
           ml,
