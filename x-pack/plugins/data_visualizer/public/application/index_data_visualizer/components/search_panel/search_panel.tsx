@@ -13,7 +13,7 @@ import { QueryStringInput } from '../../../../../../../../src/plugins/data/publi
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DatavisualizerFieldTypeFilter } from './field_type_filter';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { JobFieldType } from '../../../../../common/types';
 import {
   ErrorMessage,

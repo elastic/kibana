@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiLink,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { ApplicationStart } from 'kibana/public';
@@ -503,70 +504,75 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
   return (
     <CreatePackagePolicyPageLayout {...layoutProps} data-test-subj="createPackagePolicy">
-      {formState === 'CONFIRM' && agentPolicy && (
-        <ConfirmDeployAgentPolicyModal
-          agentCount={agentCount}
-          agentPolicy={agentPolicy}
-          onConfirm={onSubmit}
-          onCancel={() => setFormState('VALID')}
-        />
-      )}
-      {packageInfo && (
-        <IntegrationBreadcrumb
-          pkgTitle={integrationInfo?.title || packageInfo.title}
-          pkgkey={pkgKeyFromPackageInfo(packageInfo)}
-          integration={integrationInfo?.name}
-        />
-      )}
-      <StepsWithLessPadding steps={steps} />
-      <EuiSpacer size="xl" />
-      <EuiSpacer size="xl" />
-      <CustomEuiBottomBar data-test-subj="integrationsBottomBar">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            {!isLoadingAgentPolicyStep && agentPolicy && packageInfo && formState === 'INVALID' ? (
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.errorOnSaveText"
-                defaultMessage="Your integration policy has errors. Please fix them before saving."
-              />
-            ) : null}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                <EuiButtonEmpty
-                  color="ghost"
-                  href={cancelUrl}
-                  onClick={cancelClickHandler}
-                  data-test-subj="createPackagePolicyCancelButton"
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.cancelButton"
-                    defaultMessage="Cancel"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={onSubmit}
-                  isLoading={formState === 'LOADING'}
-                  disabled={formState !== 'VALID'}
-                  iconType="save"
-                  color="primary"
-                  fill
-                  data-test-subj="createPackagePolicySaveButton"
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.saveButton"
-                    defaultMessage="Save integration"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </CustomEuiBottomBar>
+      <EuiErrorBoundary>
+        {formState === 'CONFIRM' && agentPolicy && (
+          <ConfirmDeployAgentPolicyModal
+            agentCount={agentCount}
+            agentPolicy={agentPolicy}
+            onConfirm={onSubmit}
+            onCancel={() => setFormState('VALID')}
+          />
+        )}
+        {packageInfo && (
+          <IntegrationBreadcrumb
+            pkgTitle={integrationInfo?.title || packageInfo.title}
+            pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+            integration={integrationInfo?.name}
+          />
+        )}
+        <StepsWithLessPadding steps={steps} />
+        <EuiSpacer size="xl" />
+        <EuiSpacer size="xl" />
+        <CustomEuiBottomBar data-test-subj="integrationsBottomBar">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {!isLoadingAgentPolicyStep &&
+              agentPolicy &&
+              packageInfo &&
+              formState === 'INVALID' ? (
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.errorOnSaveText"
+                  defaultMessage="Your integration policy has errors. Please fix them before saving."
+                />
+              ) : null}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                  <EuiButtonEmpty
+                    color="ghost"
+                    href={cancelUrl}
+                    onClick={cancelClickHandler}
+                    data-test-subj="createPackagePolicyCancelButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.cancelButton"
+                      defaultMessage="Cancel"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={onSubmit}
+                    isLoading={formState === 'LOADING'}
+                    disabled={formState !== 'VALID'}
+                    iconType="save"
+                    color="primary"
+                    fill
+                    data-test-subj="createPackagePolicySaveButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.saveButton"
+                      defaultMessage="Save integration"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </CustomEuiBottomBar>
+      </EuiErrorBoundary>
     </CreatePackagePolicyPageLayout>
   );
 };
