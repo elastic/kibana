@@ -9,7 +9,7 @@
 import { StartServicesAccessor } from 'src/core/server';
 import { getKibanaContextFn } from '../../../common/search/expressions';
 import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
-import { SavedObjectsClientCommon } from '../../../common/index_patterns';
+import { SavedObjectsClientCommon } from '../../../common';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies

@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import { IndexPattern } from '../../../index_patterns';
+import { IndexPattern } from '../../..';
 import { AggParamsDateHistogram } from '../buckets';
 
 export function inferTimeZone(

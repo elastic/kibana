@@ -17,7 +17,7 @@ import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
-import { DataViewsContract } from './index_patterns';
+import { DataViewsContract } from './data_views';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
 import { Setup as InspectorSetup } from '../../inspector/public';

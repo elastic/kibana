@@ -18,7 +18,7 @@ jest.mock('moment', () => {
   return moment;
 });
 
-import { IndexPattern, IndexPatternField } from '../../../index_patterns';
+import { IndexPattern, IndexPatternField } from '../../..';
 import { AggParamsDateHistogram } from '../buckets';
 import { inferTimeZone } from './infer_time_zone';
 

@@ -10,7 +10,7 @@ import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ConfigSchema } from '../config';
-import { IndexPatternsServiceProvider, IndexPatternsServiceStart } from './index_patterns';
+import { IndexPatternsServiceProvider, IndexPatternsServiceStart } from './data_views';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';

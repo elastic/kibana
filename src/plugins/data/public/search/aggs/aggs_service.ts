@@ -20,7 +20,7 @@ import {
   AggTypesDependencies,
 } from '../../../common/search/aggs';
 import { AggsSetup, AggsStart } from './types';
-import { IndexPatternsContract } from '../../index_patterns';
+import { IndexPatternsContract } from '../..';
 import { NowProviderInternalContract } from '../../now_provider';
 
 /**

@@ -11,7 +11,7 @@ import { of as mockOf } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { KibanaRequest } from 'src/core/server';
 import type { ExecutionContext } from 'src/plugins/expressions/server';
-import type { IndexPatternsContract } from '../../../common/index_patterns/index_patterns';
+import type { IndexPatternsContract } from '../../../common';
 import type {
   AggsCommonStart,
   ISearchStartSearchSource,

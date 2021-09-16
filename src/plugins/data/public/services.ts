@@ -8,7 +8,7 @@
 
 import { NotificationsStart, CoreStart } from 'src/core/public';
 import { createGetterSetter } from '../../kibana_utils/public';
-import { IndexPatternsContract } from './index_patterns';
+import { IndexPatternsContract } from './data_views';
 import { DataPublicPluginStart } from './types';
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(

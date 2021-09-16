@@ -11,7 +11,7 @@ import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
-import { IndexPattern } from '../../index_patterns/';
+import { IndexPattern } from '../..';
 import { stubIndexPattern } from '../../stubs';
 import { IEsSearchResponse } from '..';
 

@@ -9,7 +9,7 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 import { IFieldType } from '../../common';
-import { findIndexPatternById, getFieldByName } from '../index_patterns';
+import { findIndexPatternById, getFieldByName } from '../data_views';
 import { shimAbortSignal } from '../search';
 import { ConfigSchema } from '../../config';
 

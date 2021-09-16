@@ -23,7 +23,7 @@ const mockResponse = {
   body: { terms: ['whoa', 'amazing'] },
 };
 
-jest.mock('../index_patterns');
+jest.mock('../data_views');
 
 describe('_terms_enum suggestions', () => {
   beforeEach(() => {

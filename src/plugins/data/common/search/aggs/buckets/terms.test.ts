@@ -10,8 +10,8 @@ import { AggConfigs } from '../agg_configs';
 import { METRIC_TYPES } from '../metrics';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import type { IndexPatternField } from '../../../index_patterns';
-import { IndexPattern } from '../../../index_patterns/index_patterns/index_pattern';
+import type { IndexPatternField } from '../../..';
+import { IndexPattern } from '../../..';
 
 describe('Terms Agg', () => {
   describe('order agg editor UI', () => {

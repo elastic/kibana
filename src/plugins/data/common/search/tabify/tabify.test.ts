@@ -7,7 +7,7 @@
  */
 
 import { tabifyAggResponse } from './tabify';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { IndexPattern } from '../..';
 import { AggConfigs, IAggConfig, IAggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from './fixtures/fake_hierarchical_data';

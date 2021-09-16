@@ -7,7 +7,7 @@
  */
 
 import { tabifyDocs } from './tabify_docs';
-import { IndexPattern } from '../../index_patterns/index_patterns';
+import { IndexPattern } from '../..';
 import type { estypes } from '@elastic/elasticsearch';
 
 describe('tabifyDocs', () => {

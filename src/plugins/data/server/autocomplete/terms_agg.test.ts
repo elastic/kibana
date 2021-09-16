@@ -34,7 +34,7 @@ const mockResponse = {
   },
 } as ApiResponse<estypes.SearchResponse<any>>;
 
-jest.mock('../index_patterns');
+jest.mock('../data_views');
 
 describe('terms agg suggestions', () => {
   beforeEach(() => {
