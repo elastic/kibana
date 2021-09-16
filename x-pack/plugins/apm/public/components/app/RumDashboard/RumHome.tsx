@@ -17,6 +17,7 @@ import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
+import { useHasRumData } from './hooks/useHasRumData';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'Dashboard',
@@ -28,13 +29,11 @@ export function RumHome() {
 
   const { isSmall, isXXL } = useBreakpoints();
 
+  const { data: rumHasData } = useHasRumData();
+
   const envStyle = isSmall ? {} : { maxWidth: 500 };
 
-  // TODO: NOT THE RIGHT METRIC TO CHECK
-  const {
-    sharedData: { totalPageViews },
-  } = useContext(CsmSharedContext);
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !totalPageViews
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !rumHasData?.hasData
     ? {
         solution: i18n.translate('xpack.apm.ux.overview.solutionName', {
           defaultMessage: 'Observability',

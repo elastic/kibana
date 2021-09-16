@@ -32,7 +32,7 @@ export const GLOBAL_EFFECT_SCOPE = i18n.translate(
 
 export const POLICY_EFFECT_SCOPE = (policyCount = 0) => {
   return i18n.translate('xpack.securitySolution.artifactCard.policyEffectScope', {
-    defaultMessage: 'Applied to {count} policies',
+    defaultMessage: 'Applied to {count} {count, plural, one {policy} other {policies}}',
     values: {
       count: policyCount,
     },
