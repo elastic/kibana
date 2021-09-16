@@ -60,7 +60,7 @@ export function transformHealthServiceProvider(esClient: ElasticsearchClient) {
 
     if (excludeTransforms && excludeTransforms.length > 0) {
       const excludeIdsSet = new Set(excludeTransforms);
-      resultTransformIds = resultTransformIds.filter((id) => excludeIdsSet.has(id));
+      resultTransformIds = resultTransformIds.filter((id) => !excludeIdsSet.has(id));
     }
 
     return resultTransformIds;
