@@ -29,7 +29,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('import and export cases', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/112353
+  describe.skip('import and export cases', () => {
     const actionsRemover = new ActionsRemover(supertest);
 
     afterEach(async () => {
