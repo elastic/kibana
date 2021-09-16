@@ -17,7 +17,6 @@ import {
   MapExtent,
   Timeslice,
   VectorSourceRequestMeta,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 
@@ -60,7 +59,13 @@ export interface IVectorSource extends ISource {
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getLeftJoinFields(): Promise<IField[]>;
-  getSyncMeta(): VectorSourceSyncMeta | null;
+
+  /*
+   * Vector layer avoids unnecessarily re-fetching source data.
+   * Use getSyncMeta to expose fields that require source data re-fetch when changed.
+   */
+  getSyncMeta(): object | null;
+
   getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
   hasTooltipProperties(): boolean;
@@ -159,7 +164,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
+  getSyncMeta(): object | null {
     return null;
   }
 
