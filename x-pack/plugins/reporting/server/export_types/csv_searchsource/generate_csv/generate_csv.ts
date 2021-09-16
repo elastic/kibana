@@ -14,8 +14,6 @@ import { Datatable } from 'src/plugins/expressions/server';
 import { ReportingConfig } from '../../..';
 import {
   cellHasFormulas,
-  ES_SEARCH_STRATEGY,
-  IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
   SearchFieldValue,
@@ -79,31 +77,6 @@ export class CsvGenerator {
     private logger: LevelLogger,
     private stream: Writable
   ) {}
-
-  private async scan(
-    index: IndexPattern,
-    searchSource: ISearchSource,
-    settings: CsvExportSettings
-  ) {
-    const { scroll: scrollSettings, includeFrozen } = settings;
-    const searchBody = searchSource.getSearchRequestBody();
-    this.logger.debug(`executing search request`);
-    const searchParams = {
-      params: {
-        body: searchBody,
-        index: index.title,
-        scroll: scrollSettings.duration,
-        size: scrollSettings.size,
-        ignore_throttled: !includeFrozen,
-      },
-    };
-
-    const results = (
-      await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
-    ).rawResponse as estypes.SearchResponse<unknown>;
-
-    return results;
-  }
 
   private async scroll(
     pitId: string,
@@ -356,7 +329,6 @@ export class CsvGenerator {
         if (results.hits?.total != null && !totalRecords) {
           totalRecords =
             typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
-          console.log('total hits', totalRecords);
           this.logger.debug(`Total search results: ${totalRecords}`);
         }
 
@@ -366,7 +338,6 @@ export class CsvGenerator {
           this.logger.warning(`Search results are undefined!`);
           break;
         }
-        console.log('results', results.hits.hits.length);
 
         const totalHits = results.hits.hits.length;
         if (totalHits) {
@@ -414,27 +385,24 @@ export class CsvGenerator {
       }
     } catch (err) {
       this.logger.error(err);
-      console.log(JSON.stringify(err, null, 2));
       if (err instanceof KbnServerError && err.errBody) {
         throw JSON.stringify(err.errBody.error);
       }
     } finally {
-      // clear scrollID
+      // close PIT
       if (pitId) {
-        this.logger.debug(`executing close PIT request`);
+        this.logger.debug(`executing close point-in-time request`);
         try {
           await this.clients.es.asCurrentUser.closePointInTime({ body: { id: pitId } });
         } catch (err) {
           this.logger.error(err);
         }
       } else {
-        this.logger.warn(`No scrollId to clear!`);
+        this.logger.warn(`No point-in-time to close!`);
       }
     }
 
     this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
-
-    console.log('this.csvRowCount', this.csvRowCount);
 
     return {
       content_type: CONTENT_TYPE_CSV,
