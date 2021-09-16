@@ -230,12 +230,11 @@ const getJobStatus = (jobId: string) => (
             jobSummary.awaitingNodeAssignment === false
           ) {
             return 'initializing';
-          } else if (jobSummary.jobState === 'opened' && jobSummary.datafeedState === 'started') {
-            return 'started';
           } else if (
-            jobSummary.jobState === 'opening' &&
-            jobSummary.datafeedState === 'starting' &&
-            jobSummary.awaitingNodeAssignment === true
+            (jobSummary.jobState === 'opened' && jobSummary.datafeedState === 'started') ||
+            (jobSummary.jobState === 'opening' &&
+              jobSummary.datafeedState === 'starting' &&
+              jobSummary.awaitingNodeAssignment === true)
           ) {
             return 'started';
           }
