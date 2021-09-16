@@ -145,6 +145,8 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
 
   const getFilterForValueButton = async () => {
     return await testSubjects.find('filter-for-value');
+  };
+
   const openActionsMenuForRow = async (rowIndex: number) => {
     const rows = await getTableCellsInRows();
     const actionsOverflowButton = await testSubjects.findDescendant(
