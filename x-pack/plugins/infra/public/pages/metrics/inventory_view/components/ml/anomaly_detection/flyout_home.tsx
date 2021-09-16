@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useEffect } from 'react';

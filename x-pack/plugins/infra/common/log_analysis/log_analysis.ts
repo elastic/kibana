@@ -14,15 +14,14 @@ export type JobStatus =
   | 'started'
   | 'starting'
   | 'finished'
-  | 'failed'
-  | 'awaitingNodeAssignment';
+  | 'failed';
 
 export type SetupStatus =
   | { type: 'initializing' } // acquiring job statuses to determine setup status
   | { type: 'unknown' } // job status could not be acquired (failed request etc)
   | { type: 'required' } // setup required
   | { type: 'pending' } // In the process of setting up the module for the first time or retrying, waiting for response
-  | { type: 'succeeded'; awaitingNodeAssignment: boolean } // setup succeeded, notifying user
+  | { type: 'succeeded' } // setup succeeded, notifying user
   | {
       type: 'failed';
       reasons: string[];
@@ -37,12 +36,10 @@ export type SetupStatus =
  * before this state was reached.
  */
 export const isJobStatusWithResults = (jobStatus: JobStatus) =>
-  ['started', 'starting', 'awaitingNodeAssignment', 'finished', 'stopped', 'failed'].includes(
-    jobStatus
-  );
+  ['started', 'starting', 'finished', 'stopped', 'failed'].includes(jobStatus);
 
 export const isHealthyJobStatus = (jobStatus: JobStatus) =>
-  ['started', 'starting', 'awaitingNodeAssignment', 'finished'].includes(jobStatus);
+  ['started', 'starting', 'finished'].includes(jobStatus);
 
 /**
  * Maps a setup status to the possibility that results have already been

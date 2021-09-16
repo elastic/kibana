@@ -16,7 +16,6 @@ export const CategoryJobNoticesSection: React.FC<{
   hasSetupCapabilities: boolean;
   hasStoppedJobs: boolean;
   isFirstUse: boolean;
-  isAwaitingNodeAssignment: boolean;
   moduleName: string;
   onRecreateMlJobForReconfiguration: () => void;
   onRecreateMlJobForUpdate: () => void;
@@ -27,7 +26,6 @@ export const CategoryJobNoticesSection: React.FC<{
   hasSetupCapabilities,
   hasStoppedJobs,
   isFirstUse,
-  isAwaitingNodeAssignment,
   moduleName,
   onRecreateMlJobForReconfiguration,
   onRecreateMlJobForUpdate,
@@ -40,7 +38,6 @@ export const CategoryJobNoticesSection: React.FC<{
       hasSetupCapabilities={hasSetupCapabilities}
       hasStoppedJobs={hasStoppedJobs}
       isFirstUse={isFirstUse}
-      isAwaitingNodeAssignment={isAwaitingNodeAssignment}
       moduleName={moduleName}
       onRecreateMlJobForReconfiguration={onRecreateMlJobForReconfiguration}
       onRecreateMlJobForUpdate={onRecreateMlJobForUpdate}

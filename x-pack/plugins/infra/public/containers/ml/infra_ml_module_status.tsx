@@ -99,7 +99,7 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
       const nextSetupStatus: SetupStatus = Object.values<JobStatus>(nextJobStatus).every(
         (jobState) => jobState === 'started'
       )
-        ? { type: 'succeeded', awaitingNodeAssignment: false }
+        ? { type: 'succeeded' }
         : {
             type: 'failed',
             reasons: [
@@ -237,7 +237,7 @@ const getJobStatus = (jobId: string) => (
             jobSummary.datafeedState === 'starting' &&
             jobSummary.awaitingNodeAssignment === true
           ) {
-            return 'awaitingNodeAssignment';
+            return 'started';
           }
           return 'unknown';
         }
@@ -250,9 +250,7 @@ const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, 
 ): SetupStatus => {
   return Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>(
     (setupStatus, [, jobStatus]) => {
-      if (jobStatus === 'awaitingNodeAssignment') {
-        return { type: 'succeeded', awaitingNodeAssignment: true };
-      } else if (jobStatus === 'missing') {
+      if (jobStatus === 'missing') {
         return { type: 'required' };
       } else if (setupStatus.type === 'required' || setupStatus.type === 'succeeded') {
         return setupStatus;

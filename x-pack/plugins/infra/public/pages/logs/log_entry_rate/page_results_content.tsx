@@ -33,6 +33,7 @@ import { useLogAnalysisResultsUrlState } from './use_log_entry_rate_results_url_
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LogsPageTemplate } from '../page_template';
 import { ManageJobsButton } from '../../../components/logging/log_analysis_setup/manage_jobs_button';
+import { MLJobsAwaitingNodeWarning } from '../../../../../ml/public';
 
 export const SORT_DEFAULTS = {
   direction: 'desc' as const,
@@ -181,15 +182,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     [hasAnomalyResults, logEntryCategoriesSetupStatus, logEntryRateSetupStatus]
   );
 
-  const isAwaitingNodeAssignment = useMemo(
-    () =>
-      (logEntryCategoriesSetupStatus.type === 'succeeded' &&
-        !!logEntryCategoriesSetupStatus.awaitingNodeAssignment === true) ||
-      (logEntryRateSetupStatus.type === 'succeeded' &&
-        !!logEntryRateSetupStatus.awaitingNodeAssignment === true),
-    [logEntryCategoriesSetupStatus, logEntryRateSetupStatus]
-  );
-
   const handleSelectedTimeRangeChange = useCallback(
     (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
       if (selectedTime.isInvalid) {
@@ -237,18 +229,17 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
             hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             hasStoppedJobs={hasStoppedLogEntryRateJobs}
             isFirstUse={false /* the first use message is already shown by the section below */}
-            isAwaitingNodeAssignment={false}
             moduleName={logEntryRateModuleDescriptor.moduleName}
             onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
             onRecreateMlJobForUpdate={showLogEntryRateSetup}
           />
+          <MLJobsAwaitingNodeWarning jobIds={jobIds} />
           <CategoryJobNoticesSection
             hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
             hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
             hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
             isFirstUse={isFirstUse}
-            isAwaitingNodeAssignment={isAwaitingNodeAssignment}
             moduleName={logEntryCategoriesModuleDescriptor.moduleName}
             onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}
             onRecreateMlJobForUpdate={showLogEntryCategoriesSetup}
