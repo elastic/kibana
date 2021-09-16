@@ -7,8 +7,8 @@
  */
 
 import { of } from 'rxjs';
-import { IndexPattern } from '../../index_patterns';
 import { GetConfigFn } from '../../types';
+import { IndexPattern } from '../..';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
 import { AggConfigs, AggTypesRegistryStart, ES_SEARCH_STRATEGY } from '../../';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
