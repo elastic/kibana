@@ -7,7 +7,7 @@
  */
 
 import { ValueSuggestionsMethod } from '../../../common';
-import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
+import { IFieldType, IIndexPattern } from '../../../common';
 
 export enum QuerySuggestionTypes {
   Field = 'field',

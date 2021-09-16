@@ -8,6 +8,7 @@
 import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
+import { asyncForEach } from '@kbn/std';
 import { Alert } from '../../../alerting/common';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
@@ -53,7 +54,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   useEffect(
     () => {
       if (!isExploratoryView)
-        apps.forEach(async (app) => {
+        asyncForEach(apps, async (app) => {
           try {
             const updateState = ({
               hasData,
