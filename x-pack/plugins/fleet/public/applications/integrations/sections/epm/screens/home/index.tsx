@@ -28,9 +28,7 @@ import { DefaultLayout } from '../../../../layouts';
 import type { CategorySummaryItem, PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
-import { getCustomIntegrations } from '../../../../../../services/custom_integrations';
-
-import { getEprCategoryCounts, mergeCategoryCounts } from './util';
+import { getEprCategoryCounts, mergeAndReplaceCategoryCounts, replaceEprPackages } from './util';
 
 import { CategoryFacets } from './category_facets';
 
@@ -222,8 +220,8 @@ const AvailablePackages: React.FC = memo(() => {
   //   include_policy_templates: true,
   // });
 
-  const eprCategories = getEprCategoryCounts();
-  const isLoadingCategories = false;
+  // const eprCategories = getEprCategoryCounts();
+  // const isLoadingCategories = false;
 
   const {
     loading: isLoadingReplaceableCustomIntegrations,
@@ -233,17 +231,6 @@ const AvailablePackages: React.FC = memo(() => {
     loading: isLoadingAddableCustomIntegrations,
     value: addableCustomIntegrations,
   } = useGetAddableCustomIntegrations();
-
-  const eprPackages = useMemo(
-    () => packageListToIntegrationsList(categoryPackagesRes?.response || []),
-    [categoryPackagesRes, selectedCategory]
-  );
-
-  const eprAndCustomCategories =
-    isLoadingAddableCustomIntegrations || !addableCustomIntegrations
-      ? []
-      : mergeCategoryCounts(addableCustomIntegrations);
-
   const filteredAddableIntegrations = addableCustomIntegrations
     ? addableCustomIntegrations.filter((integration) => {
         if (!selectedCategory) {
@@ -253,7 +240,20 @@ const AvailablePackages: React.FC = memo(() => {
       })
     : [];
 
-  const eprAndCustomPackages = eprPackages.concat(filteredAddableIntegrations);
+  const eprPackages = useMemo(
+    () => packageListToIntegrationsList(categoryPackagesRes?.response || []),
+    [categoryPackagesRes, selectedCategory]
+  );
+
+  const eprAndCustomCategories =
+    isLoadingAddableCustomIntegrations || !addableCustomIntegrations
+      ? []
+      : mergeAndReplaceCategoryCounts(addableCustomIntegrations);
+
+  const replacedNonGAPackages = replaceEprPackages(eprPackages, replaceableCustomIntegrations || []);
+  console.log('da', replacedNonGAPackages);
+
+  const eprAndCustomPackages = replacedNonGAPackages.concat(filteredAddableIntegrations);
 
   const allPackages = useMemo(
     () => packageListToIntegrationsList(allCategoryPackagesRes?.response || []),
@@ -272,11 +272,11 @@ const AvailablePackages: React.FC = memo(() => {
     () => [
       {
         id: '',
-        count: allPackages?.length || 0,
+        count: (allPackages?.length || 0) + (addableCustomIntegrations?.length || 0),
       },
       ...(eprAndCustomCategories ? eprAndCustomCategories : []),
     ],
-    [allPackages?.length, eprCategories]
+    [allPackages?.length, eprAndCustomCategories, addableCustomIntegrations]
   );
 
   if (!categoryExists(selectedCategory, categories)) {
@@ -287,7 +287,6 @@ const AvailablePackages: React.FC = memo(() => {
   const controls = categories ? (
     <CategoryFacets
       isLoading={
-        isLoadingCategories ||
         isLoadingAllPackages ||
         isLoadingAddableCustomIntegrations ||
         isLoadingReplaceableCustomIntegrations

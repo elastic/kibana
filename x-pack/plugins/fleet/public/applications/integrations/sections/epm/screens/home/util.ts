@@ -144,6 +144,30 @@ const CATEGORY_PACKAGE_MAP = {
   },
 };
 
+export function replaceEprPackages(eprPackages, customIntegrations: CustomIntegration[]) {
+  const nonGaPackages = eprPackages.filter((p) => p.release !== 'ga');
+  const gaPackages = eprPackages.filter((p) => p.release === 'ga');
+
+  const nonGaWithoutIntegrationReplacement = nonGaPackages.filter((p) => {
+    const matchingIntegration = customIntegrations.find((integration) => {
+      return integration.eprPackageOverlap === p.name;
+    });
+    return !matchingIntegration;
+  });
+
+  const replacementNonGa = customIntegrations.filter((p) => {
+    const matchingCard = nonGaPackages.find((c) => c.name === p.eprPackageOverlap);
+    return !!matchingCard;
+  });
+
+  const replacementList = [
+    ...gaPackages,
+    ...nonGaWithoutIntegrationReplacement,
+    ...replacementNonGa,
+  ];
+  return replacementList;
+}
+
 export function getEprCategoryCounts() {
   const cats = [];
   Object.keys(CATEGORY_PACKAGE_MAP).forEach((category) => {
@@ -160,13 +184,16 @@ export function getEprCategoryCounts() {
   return cats;
 }
 
-export function mergeCategoryCounts(integrations: CustomIntegration[]) {
+export function mergeAndReplaceCategoryCounts(
+  addableIntegrations: CustomIntegration[],
+  replaceableIntegrations: CustomIntegration[]
+) {
   const counts = getEprCategoryCounts();
 
-  integrations.forEach((integration) => {
+  addableIntegrations.forEach((integration) => {
     integration.categories.forEach((cat) => {
       const match = counts.find((c) => {
-        c.id === cat;
+        return c.id === cat;
       });
 
       if (match) {
@@ -178,6 +205,10 @@ export function mergeCategoryCounts(integrations: CustomIntegration[]) {
         });
       }
     });
+  });
+
+  counts.sort((a, b) => {
+    return a.id.localeCompare(b.id);
   });
 
   return counts;
