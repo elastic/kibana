@@ -23,7 +23,7 @@ import { AppLogic } from '../../../../app_logic';
 import {
   ADD_GITHUB_PATH,
   SOURCES_PATH,
-  PERSONAL_SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
   getSourcesPath,
 } from '../../../../routes';
 import { CustomSource } from '../../../../types';
@@ -379,7 +379,7 @@ describe('AddSourceLogic', () => {
           const githubQueryString = getGithubQueryString('account');
           AddSourceLogic.actions.saveSourceParams(githubQueryString, errorParams, false);
 
-          expect(navigateToUrl).toHaveBeenCalledWith(PERSONAL_SOURCES_PATH);
+          expect(navigateToUrl).toHaveBeenCalledWith(PRIVATE_SOURCES_PATH);
           expect(setErrorMessage).toHaveBeenCalledWith(
             PERSONAL_DASHBOARD_SOURCE_ERROR(GITHUB_ERROR)
           );

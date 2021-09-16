@@ -14,7 +14,7 @@ import { Route, Switch, Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { ADD_SOURCE_PATH, PERSONAL_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
+import { ADD_SOURCE_PATH, PRIVATE_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
 
 import { SourcesRouter } from './sources_router';
 
@@ -56,7 +56,7 @@ describe('SourcesRouter', () => {
     expect(wrapper.find(Redirect).last().prop('from')).toEqual(
       getSourcesPath(ADD_SOURCE_PATH, false)
     );
-    expect(wrapper.find(Redirect).last().prop('to')).toEqual(PERSONAL_SOURCES_PATH);
+    expect(wrapper.find(Redirect).last().prop('to')).toEqual(PRIVATE_SOURCES_PATH);
   });
 
   it('does not render the router until canCreatePersonalSources is fetched', () => {

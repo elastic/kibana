@@ -16,7 +16,7 @@ import { AppLogic } from '../../app_logic';
 import {
   ADD_SOURCE_PATH,
   SOURCE_DETAILS_PATH,
-  PERSONAL_SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
   SOURCES_PATH,
   getSourcesPath,
 } from '../../routes';
@@ -60,7 +60,7 @@ export const SourcesRouter: React.FC = () => {
 
   return (
     <Switch>
-      <Route exact path={PERSONAL_SOURCES_PATH}>
+      <Route exact path={PRIVATE_SOURCES_PATH}>
         <PrivateSources />
       </Route>
       <Route exact path={SOURCES_PATH}>
@@ -98,7 +98,7 @@ export const SourcesRouter: React.FC = () => {
           <AddSourceList />
         </Route>
       ) : (
-        <Redirect exact from={getSourcesPath(ADD_SOURCE_PATH, false)} to={PERSONAL_SOURCES_PATH} />
+        <Redirect exact from={getSourcesPath(ADD_SOURCE_PATH, false)} to={PRIVATE_SOURCES_PATH} />
       )}
       <Route exact path={getSourcesPath(ADD_SOURCE_PATH, true)}>
         <AddSourceList />
