@@ -8,7 +8,8 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
-import type { RedirectOptions } from '../redirect_manager';
+import { decompressFromBase64 } from 'lz-string';
+import type { RedirectOptions } from './types';
 
 /**
  * Parses redirect endpoint URL path search parameters. Expects them in the
@@ -23,9 +24,11 @@ import type { RedirectOptions } from '../redirect_manager';
  */
 export function parseSearchParams(urlSearch: string): RedirectOptions {
   const search = new URLSearchParams(urlSearch);
+
   const id = search.get('l');
   const version = search.get('v');
-  const paramsJson = search.get('p');
+  const compressed = search.get('lz');
+  const paramsJson: string | null = compressed ? decompressFromBase64(compressed) : search.get('p');
 
   if (!id) {
     const message = i18n.translate(
