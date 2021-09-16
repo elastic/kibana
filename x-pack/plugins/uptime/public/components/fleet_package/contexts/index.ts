@@ -21,7 +21,7 @@ export {
   HTTPAdvancedFieldsContextProvider,
   initialValues as defaultHTTPAdvancedFields,
   useHTTPAdvancedFieldsContext,
-} from './advanced_fields_http_context';
+} from './http_context_advanced';
 export {
   TCPSimpleFieldsContext,
   TCPSimpleFieldsContextProvider,
@@ -39,7 +39,7 @@ export {
   TCPAdvancedFieldsContextProvider,
   initialValues as defaultTCPAdvancedFields,
   useTCPAdvancedFieldsContext,
-} from './advanced_fields_tcp_context';
+} from './tcp_context_advanced';
 export {
   BrowserSimpleFieldsContext,
   BrowserSimpleFieldsContextProvider,
