@@ -57,6 +57,13 @@ describe('ElasticsearchService', () => {
             return mockConnectionStatusClient;
         }
       });
+      mockPingClient.asInternalUser.transport.request.mockResolvedValue(
+        interactiveSetupMock.createApiResponse({
+          statusCode: 200,
+          body: {},
+          headers: { 'x-elastic-product': 'Elasticsearch' },
+        })
+      );
 
       setupContract = service.setup({
         elasticsearch: mockElasticsearchPreboot,
@@ -534,6 +541,19 @@ some weird+ca/with
 
         await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[ProductNotSupportedError: The client noticed that the server is not Elasticsearch and we do not support this unknown product.]`
+        );
+      });
+
+      it('fails if host is not Elasticsearch', async () => {
+        mockPingClient.asInternalUser.ping.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
+        );
+        mockPingClient.asInternalUser.transport.request.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({ statusCode: 200, body: {}, headers: {} })
+        );
+
+        await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
+          `[Error: Host did not respond with valid Elastic product header.]`
         );
       });
 
