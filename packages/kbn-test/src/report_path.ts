@@ -17,7 +17,7 @@ export function getUniqueJunitReportPath(
   counter?: number
 ): string {
   const BUILDKITE_ID_SUFFIX = process.env.BUILDKITE_JOB_ID
-    ? `-${process.env.BUILDKITE_JOB_ID}`
+    ? `-bk__${process.env.BUILDKITE_JOB_ID}`
     : '';
 
   const path = Path.resolve(

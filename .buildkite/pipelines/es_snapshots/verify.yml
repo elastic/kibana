@@ -28,7 +28,6 @@ steps:
     parallelism: 13
     agents:
       queue: ci-group-6
-    artifact_paths: target/junit/**/*.xml
     depends_on: build
     key: default-cigroup
     retry:
@@ -40,7 +39,6 @@ steps:
     label: 'Docker CI Group'
     agents:
       queue: ci-group-6
-    artifact_paths: target/junit/**/*.xml
     depends_on: build
     key: default-cigroup-docker
     retry:
@@ -50,10 +48,9 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
     label: 'OSS CI Group'
-    parallelism: 12
+    parallelism: 11
     agents:
       queue: ci-group-4d
-    artifact_paths: target/junit/**/*.xml
     depends_on: build
     key: oss-cigroup
     retry:
@@ -65,7 +62,6 @@ steps:
     label: 'Jest Integration Tests'
     agents:
       queue: jest
-    artifact_paths: target/junit/**/*.xml
     key: jest-integration
     retry:
       automatic:
@@ -76,7 +72,6 @@ steps:
     label: 'API Integration Tests'
     agents:
       queue: jest
-    artifact_paths: target/junit/**/*.xml
     key: api-integration
 
   - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
@@ -94,6 +89,7 @@ steps:
   - plugins:
       - junit-annotate#v1.9.0:
           artifacts: target/junit/**/*.xml
+          job-uuid-file-pattern: '-bk__(.*).xml'
 
   - wait: ~
     continue_on_failure: true
