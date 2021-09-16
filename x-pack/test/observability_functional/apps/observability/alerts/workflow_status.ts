@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe('workflow status', function () {
+  describe('alert workflow status', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    it('is filtered for "open" by default', async () => {
+    it('is filtered to only show "open" alerts by default', async () => {
       await retry.try(async () => {
         const tableRows = await observability.alerts.getTableCellsInRows();
         expect(tableRows.length).to.be(12);
@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('can be filtered for "acknowledged" using the filter button', async () => {
+    it('can be filtered to only show "acknowledged" alerts using the filter button', async () => {
       await observability.alerts.setWorkflowStatusFilter('acknowledged');
 
       await retry.try(async () => {
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('can be filtered for "closed" using the filter button', async () => {
+    it('can be filtered to only show "closed" alerts using the filter button', async () => {
       await observability.alerts.setWorkflowStatusFilter('closed');
 
       await retry.try(async () => {
@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('can be filtered for "open" using the filter button', async () => {
+    it('can be filtered to only show "open" alerts using the filter button', async () => {
       await observability.alerts.setWorkflowStatusFilter('open');
 
       await retry.try(async () => {
