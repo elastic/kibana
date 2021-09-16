@@ -7,7 +7,7 @@
  */
 
 // @ts-ignore
-import { parse } from './_generated_/chain';
+import { parse } from '@kbn/timelion-grammar';
 
 export interface ExpressionLocation {
   min: number;
