@@ -36,7 +36,7 @@ import { GroupsLogic } from '../groups_logic';
 const ADD_SOURCE_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerUpdateAddSourceButton',
   {
-    defaultMessage: 'Add an Organizational Source',
+    defaultMessage: 'Add an organizational source',
   }
 );
 const EMPTY_STATE_TITLE = i18n.translate(
