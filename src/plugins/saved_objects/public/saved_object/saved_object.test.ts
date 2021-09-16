@@ -20,7 +20,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
 import { createStubIndexPattern } from '../../../../plugins/data/common/stubs';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
-import { IndexPattern } from '../../../data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../data/common';
 import { savedObjectsDecoratorRegistryMock } from './decorators/registry.mock';
 
 describe('Saved Object', () => {

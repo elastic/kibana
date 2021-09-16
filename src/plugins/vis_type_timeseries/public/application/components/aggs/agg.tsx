@@ -7,16 +7,17 @@
  */
 
 import React, { useMemo, useEffect, HTMLAttributes } from 'react';
+import { EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-ignore
 import { aggToComponent } from '../lib/agg_to_component';
 // @ts-ignore
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
+import { getInvalidAggComponent } from './invalid_agg';
 // @ts-expect-error not typed yet
 import { seriesChangeHandler } from '../lib/series_change_handler';
 import { checkIfNumericMetric } from '../lib/check_if_numeric_metric';
 import { getFormatterType } from '../lib/get_formatter_type';
-import { UnsupportedAgg } from './unsupported_agg';
-import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
 import { DATA_FORMATTERS } from '../../../../common/enums';
 import type { Metric, Panel, Series, SanitizedFieldType } from '../../../../common/types';
 import type { DragHandleProps } from '../../../types';
@@ -43,9 +44,21 @@ export function Agg(props: AggProps) {
   let Component = aggToComponent[model.type];
 
   if (!Component) {
-    Component = UnsupportedAgg;
+    Component = getInvalidAggComponent(
+      <FormattedMessage
+        id="visTypeTimeseries.agg.aggIsNotSupportedDescription"
+        defaultMessage="The {modelType} aggregation is no longer supported."
+        values={{ modelType: <EuiCode>{props.model.type}</EuiCode> }}
+      />
+    );
   } else if (!isMetricEnabled(model.type, uiRestrictions)) {
-    Component = TemporaryUnsupportedAgg;
+    Component = getInvalidAggComponent(
+      <FormattedMessage
+        id="visTypeTimeseries.agg.aggIsUnsupportedForPanelConfigDescription"
+        defaultMessage="The {modelType} aggregation is not supported for existing panel configuration."
+        values={{ modelType: <EuiCode>{props.model.type}</EuiCode> }}
+      />
+    );
   }
 
   const style = {
