@@ -43,7 +43,7 @@ const i18nTexts = {
   apiCompatibilityNoteBody: (docLink: string) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.apiCompatibilityNoteBody"
-      defaultMessage="We recommend resolving deprecation issues before upgrading. However, if you need to enable an application to continue to function without making changes, you can include API compatibility headers in your requests. {learnMoreLink}."
+      defaultMessage="We recommend you resolve all deprecation issues before upgrading. However, it can be challenging to ensure all requests are fixed. For additional safety, include API version compatibility headers in your requests. {learnMoreLink}."
       values={{
         learnMoreLink: (
           <EuiLink href={docLink} target="_blank">
