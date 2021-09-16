@@ -201,11 +201,11 @@ export function registerTransactionDurationAlertType({
               [TRANSACTION_TYPE]: alertParams.transactionType,
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
-              [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
+              [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
               [ALERT_REASON]: formatTransactionDurationReason({
                 measured: transactionDuration,
                 serviceName: alertParams.serviceName,
-                threshold: alertParams.threshold,
+                threshold: thresholdMicroseconds,
                 asDuration,
               }),
             },
@@ -214,7 +214,7 @@ export function registerTransactionDurationAlertType({
             transactionType: alertParams.transactionType,
             serviceName: alertParams.serviceName,
             environment: getEnvironmentLabel(alertParams.environment),
-            threshold: alertParams.threshold,
+            threshold: thresholdMicroseconds,
             triggerValue: transactionDurationFormatted,
             interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
           });
