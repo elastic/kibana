@@ -16,6 +16,9 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiCallOut,
+  EuiTextColor,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionConnectorFieldsProps } from '../../../../../public/types';
@@ -26,29 +29,36 @@ import { isFieldInvalid } from './helpers';
 const title = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.confirmationModalTitle',
   {
-    defaultMessage: 'Migrate ServiceNow connector',
+    defaultMessage: 'Update ServiceNow connector',
   }
 );
 
 const cancelButtonText = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.cancelButtonText',
   {
-    defaultMessage: 'Do not migrate',
+    defaultMessage: 'Cancel',
   }
 );
 
 const confirmButtonText = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.confirmButtonText',
   {
-    defaultMessage: 'Migrate',
+    defaultMessage: 'Update',
   }
 );
 
-const modalText = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.modalText',
+const calloutTitle = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.modalCalloutTitle',
   {
     defaultMessage:
-      'This action migrates the current connector to the new one. The action cannot be reversed.',
+      'The Elastic App from the ServiceNow App Store must be installed prior to running the update.',
+  }
+);
+
+const warningMessage = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.modalWarningMessage',
+  {
+    defaultMessage: 'This will update all instances of this connector.  This can not be reversed.',
   }
 );
 
@@ -93,7 +103,14 @@ const MigrationConfirmationModalComponent: React.FC<Props> = ({
       </EuiModalHeader>
       <EuiModalBody>
         <EuiFlexGroup>
-          <EuiFlexItem>{modalText}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCallOut
+              size="m"
+              iconType="alert"
+              data-test-subj="snModalInstallationCallout"
+              title={calloutTitle}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
         <Credentials
           action={action}
@@ -103,6 +120,12 @@ const MigrationConfirmationModalComponent: React.FC<Props> = ({
           editActionSecrets={editActionSecrets}
           editActionConfig={editActionConfig}
         />
+        <EuiHorizontalRule />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTextColor color="danger">{warningMessage}</EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel}>{cancelButtonText}</EuiButtonEmpty>
