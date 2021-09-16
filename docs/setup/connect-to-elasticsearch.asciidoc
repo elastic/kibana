@@ -37,7 +37,7 @@ an easy way to collect your data, and manage {elastic-agent} installations in st
 ship with dashboards and visualizations,
 so you can quickly get insights into your data, and {fleet} mode offers several advantages:
 
-* A central place to configure and monitor your {agent}s.
+* A central place to configure and monitor your {agents}.
 
 * An overview of the data ingest in your {es} cluster.
 
