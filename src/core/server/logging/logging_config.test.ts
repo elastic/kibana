@@ -35,16 +35,14 @@ test('`schema` throws if `root` logger does not have appenders configured.', () 
   );
 });
 
-test('`schema` throws if `root` logger does not have "default" appender configured.', () => {
+test('`schema` does not throw if `root` logger does not have "default" appender configured.', () => {
   expect(() =>
     config.schema.validate({
       root: {
         appenders: ['console'],
       },
     })
-  ).toThrowErrorMatchingInlineSnapshot(
-    `"[root]: \\"default\\" appender required for migration period till the next major release"`
-  );
+  ).not.toThrow();
 });
 
 test('`getParentLoggerContext()` returns correct parent context name.', () => {
