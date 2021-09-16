@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   // Failing: See https://github.com/elastic/kibana/issues/111812
-  describe.skip('enqueue', () => {
+  describe('enqueue', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
@@ -170,17 +170,21 @@ export default function ({ getService }: FtrProviderContext) {
                       'task.taskType': 'actions:test.no-attempts-rate-limit',
                     },
                   },
-                  {
-                    term: {
-                      'task.status': 'running',
-                    },
-                  },
                 ],
               },
             },
           },
         });
-        expect((runningSearchResult.body.hits.total as estypes.SearchTotalHits).value).to.eql(1);
+        const total = (runningSearchResult.body.hits.total as estypes.SearchTotalHits).value;
+        console.log({ total })
+        expect(total).to.eql(1);
+        const hitsMetadata = runningSearchResult.body.hits as estypes.SearchHitsMetadata<{
+          task?: { status: string };
+        }>;
+        const hits = hitsMetadata.hits;
+        const firstHitStatus = hits[0]._source?.task?.status;
+        console.log({ firstHitStatus });
+        expect(firstHitStatus).to.eql('running');
       });
 
       await retry.try(async () => {
