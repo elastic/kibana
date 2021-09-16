@@ -52,6 +52,7 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
         },
         flyoutProps: {
           onClose: closeFlyout,
+          className: 'eui-textBreakWord',
           'data-test-subj': 'mlSnapshotDetails',
           'aria-labelledby': 'mlSnapshotDetailsFlyoutTitle',
         },

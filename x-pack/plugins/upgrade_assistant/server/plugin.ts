@@ -99,7 +99,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     // We need to initialize the deprecation logs plugin so that we can
     // navigate from this app to the observability app using a source_id.
-    infra.defineInternalSourceConfiguration(DEPRECATION_LOGS_SOURCE_ID, {
+    infra?.defineInternalSourceConfiguration(DEPRECATION_LOGS_SOURCE_ID, {
       name: 'deprecationLogs',
       description: 'deprecation logs',
       logIndices: {
