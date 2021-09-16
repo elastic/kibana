@@ -70,13 +70,11 @@ $panelWidthXL:    900px;
   .dataVisualizerSummaryTableWrapper {
     min-width: $panelWidthS;
     max-width: $panelWidthS;
-    max-height: 120px;
   }
 
   .dataVisualizerMapWrapper {
-    min-height: 300px;
-    min-width: $panelWidthS;
-    max-width: $panelWidthS;
+    min-height: 250px;
+    min-width: $panelWidthL;
   }
 
   .dataVisualizerTopValuesWrapper {
@@ -94,7 +92,6 @@ $panelWidthXL:    900px;
     border: 1px solid $euiBorderColor;
     padding: 6px;
     margin: 3px 12px 12px 0;
-    min-height: 120px;
   }
 
   .dataVisualizerTextContent {
