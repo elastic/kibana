@@ -10,20 +10,20 @@ import { createUninitialisedResourceState } from '../../../state';
 import { HostIsolationExceptionsPageState } from '../types';
 
 export const initialHostIsolationExceptionsPageState = (): HostIsolationExceptionsPageState => ({
-  entries: undefined,
+  entries: createUninitialisedResourceState(),
   // location: {
   // page_index: MANAGEMENT_DEFAULT_PAGE,
   // page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
   // filter: '',
   // },
-  listPage: {
-    active: false,
-    forceRefresh: false,
-    data: createUninitialisedResourceState(),
-    dataExist: createUninitialisedResourceState(),
-    deletion: {
-      item: undefined,
-      status: createUninitialisedResourceState(),
-    },
-  },
+  // listPage: {
+  // active: false,
+  // forceRefresh: false,
+  // data: createUninitialisedResourceState(),
+  // dataExist: createUninitialisedResourceState(),
+  // deletion: {
+  // item: undefined,
+  // status: createUninitialisedResourceState(),
+  // },
+  // },
 });

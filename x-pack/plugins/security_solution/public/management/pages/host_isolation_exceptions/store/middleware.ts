@@ -41,8 +41,6 @@ async function loadHostIsolationExceptionsList(
     type: 'hostIsolationExceptionsPageDataChanged',
     payload: createLoadedResourceState(entries),
   });
-  console.log('the data');
-  console.log(entries);
 }
 
 function isHostIsolationExceptionsPage(location: Immutable<AppLocation>) {
