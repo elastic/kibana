@@ -18,7 +18,7 @@ import { DiscoverSidebarProps } from './discover_sidebar';
 import { IndexPatternAttributes } from '../../../../../../../data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
-import { DiscoverSidebar } from './discover_sidebar';
+import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../../__mocks__/services';
 import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
