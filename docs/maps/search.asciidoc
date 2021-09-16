@@ -7,7 +7,7 @@ Search across the layers in your map to focus on just the data you want. Combine
 This image shows an example of global search and global time filter narrowing results.
 
 [role="screenshot"]
-image::maps/images/global_search_bar.png[]
+image::maps/images/global_search_bar.png[global search and filter narrowing results]
 
 Only layers requesting data from {es} are narrowed by global search and global time filter.
 To add a layer that requests data from {es} to your map, click *Add layer*, then select one of the following:
@@ -33,27 +33,30 @@ To add a layer that requests data from {es} to your map, click *Add layer*, then
 Layers that request data from {es} are narrowed when you submit a <<kibana-concepts-searching-your-data, search>>.
 Layers narrowed by semi-structured search and filters contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
 
-You can prevent the global search from applying to a layer by configuring the following:
+To prevent the global search from applying to a layer, configure the following:
 
-* In *Filtering*, clear the *Apply global filter to layer data* checkbox to turn off global search for the layer source.
+* In *Filtering*, clear the *Apply global search to layer data* checkbox to turn off global search for the layer source.
 
-* In *Term joins*, clear the *Apply global filter to join* checkbox to turn off global search for the <<terms-join, term join>>.
+* In *Term joins*, clear the *Apply global search to join* checkbox to turn off global search for the <<terms-join, term join>>.
 
 [float]
 [[maps-narrow-layer-by-global-time]]
-==== Narrow layers by global time filter
+==== Narrow layers by global time
 
-Layers that request data from {es} using an <<index-patterns, index pattern>> with a configured time field are narrowed by the <<set-time-filter, global time filter>>.
+Layers that request data from {es} using an <<index-patterns, index pattern>> with a configured time field are narrowed by the <<set-time-filter, global time>>.
 These layers contain the clock icon image:maps/images/clock_icon.png[clock icon] next to the layer name in the legend.
 
-Click image:maps/images/timeslider_toggle_icon.png[timeslider icon] to open the time slider. Use the time slider to quickly select time slices within the global time filter range.
-Click previous and next buttons to advance the time slice backward or forward. Click play to animate your spatial temporal data.
+Use the time slider to quickly select time slices within the global time range:
 
-You can prevent the global time filter from applying to a layer by configuring the following:
+. Click image:maps/images/timeslider_toggle_icon.png[timeslider icon] to open the time slider.
+. Click previous and next buttons to advance the time slice backward or forward. 
+. Click play to animate your spatial temporal data.
 
-* In *Filtering*, clear the *Apply global time to layer data* checkbox to turn off the global time filter for the layer source.
+To prevent the global time filter from applying to a layer, configure the following:
 
-* In *Term joins*, clear the *Apply global time to join* checkbox to turn off the global time filter for the <<terms-join, term join>>.
+* In *Filtering*, clear the *Apply global time to layer data* checkbox to turn off the global time for the layer source.
+
+* In *Term joins*, clear the *Apply global time to join* checkbox to turn off the global time for the <<terms-join, term join>>.
 
 [float]
 [[maps-refresh-layer]]
@@ -61,7 +64,7 @@ You can prevent the global time filter from applying to a layer by configuring t
 
 Layers that request data from {es} re-fetch data when <<set-time-filter, automatic refresh>> fires and when you click *Refresh*.
 
-You can prevent refreshing layer data by configuring the following:
+To prevent refreshing layer data, configure the following:
 
 * In *Filtering*, clear the *Apply global refresh to layer data* checkbox to turn off refresh for the layer source.
 
