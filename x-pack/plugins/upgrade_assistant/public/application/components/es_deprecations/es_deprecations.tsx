@@ -14,9 +14,9 @@ import { i18n } from '@kbn/i18n';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
+import { getEsDeprecationError } from '../../lib/get_es_deprecation_error';
+import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
 import { EsDeprecationsTable } from './es_deprecations_table';
-import { EsDeprecationErrors } from './es_deprecation_errors';
-import { NoDeprecationsPrompt, DeprecationCount } from '../shared';
 
 const getDeprecationCountByLevel = (deprecations: EnrichedDeprecationInfo[]) => {
   const criticalDeprecations: EnrichedDeprecationInfo[] = [];
@@ -86,7 +86,12 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
   }, [api, isLoading, isInitialRequest]);
 
   if (error) {
-    return <EsDeprecationErrors error={error} />;
+    return (
+      <DeprecationsPageLoadingError
+        deprecationSource="Elasticsearch"
+        message={getEsDeprecationError(error).message}
+      />
+    );
   }
 
   if (isLoading) {

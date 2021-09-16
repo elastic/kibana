@@ -11,6 +11,7 @@ import { EuiCard, EuiStat, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic
 import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate } from '../../../../../shared_imports';
+import { DeprecationSource } from '../../../../../../common/types';
 import { getDeprecationsUpperLimit } from '../../../../lib/utils';
 import { LoadingIssuesError } from './loading_issues_error';
 import { NoDeprecationIssues } from './no_deprecation_issues';
@@ -34,7 +35,7 @@ const i18nTexts = {
 
 interface Props {
   'data-test-subj': string;
-  deprecationSource: string;
+  deprecationSource: DeprecationSource;
   linkUrl: string;
   criticalDeprecationsCount: number;
   warningDeprecationsCount: number;
