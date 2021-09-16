@@ -7,7 +7,7 @@
  */
 
 import type { ApiResponse } from '@elastic/elasticsearch';
-import { Client, errors } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
 import { from, of, timer } from 'rxjs';
@@ -305,8 +305,6 @@ export class ElasticsearchService {
       }
 
       authRequired = getErrorStatusCode(error) === 401;
-    } finally {
-      await client.close();
     }
 
     this.logger.debug(`Fetching certificate chain from host "${host}"`);
@@ -322,6 +320,7 @@ export class ElasticsearchService {
         this.logger.error(
           `Failed to fetch peer certificate from host "${host}": ${getDetailedErrorMessage(error)}`
         );
+        await client.close();
         throw error;
       }
     }
@@ -329,19 +328,8 @@ export class ElasticsearchService {
     // This check is a security requirement - Do not remove it!
     this.logger.debug(`Verifying that host "${host}" responds with Elastic product header`);
 
-    // Using native Client for this check instead of Kibana's `elasticsearch.createClient()` wrapper
-    // since it throws `NoLivingConnectionsError` when sending an OPTIONS request. We can't use a
-    // GET request either since we don't have valid credentials yet and the product header isn't
-    // returned for unauthenticated requests.
-    const verifyClient = new Client({
-      node: host,
-      ssl: {
-        rejectUnauthorized: false,
-      },
-    });
-
     try {
-      const response = await verifyClient.transport.request({
+      const response = await client.asInternalUser.transport.request({
         method: 'OPTIONS',
         path: '/',
       });
@@ -352,8 +340,11 @@ export class ElasticsearchService {
       this.logger.error(
         `Host "${host}" is not a valid Elasticsearch cluster: ${getDetailedErrorMessage(error)}`
       );
+      await client.close();
       throw error;
     }
+
+    await client.close();
 
     return {
       authRequired,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Client, errors } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import tls from 'tls';
 
 import { nextTick } from '@kbn/test/jest';
@@ -19,19 +19,8 @@ import { ElasticsearchService } from './elasticsearch_service';
 import { interactiveSetupMock } from './mocks';
 
 jest.mock('tls');
-jest.mock('@elastic/elasticsearch', () => ({
-  ...jest.requireActual('@elastic/elasticsearch'),
-  Client: jest.fn().mockImplementation(() => ({
-    transport: {
-      request: jest.fn().mockReturnValue({
-        headers: { 'x-elastic-product': 'Elasticsearch' },
-      }),
-    },
-  })),
-}));
 
 const tlsConnectMock = tls.connect as jest.MockedFunction<typeof tls.connect>;
-const ClientMock = Client as jest.MockedClass<typeof Client>;
 
 describe('ElasticsearchService', () => {
   let service: ElasticsearchService;
@@ -68,6 +57,13 @@ describe('ElasticsearchService', () => {
             return mockConnectionStatusClient;
         }
       });
+      mockPingClient.asInternalUser.transport.request.mockResolvedValue(
+        interactiveSetupMock.createApiResponse({
+          statusCode: 200,
+          body: {},
+          headers: { 'x-elastic-product': 'Elasticsearch' },
+        })
+      );
 
       setupContract = service.setup({
         elasticsearch: mockElasticsearchPreboot,
@@ -552,14 +548,9 @@ some weird+ca/with
         mockPingClient.asInternalUser.ping.mockResolvedValue(
           interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
         );
-
-        ClientMock.mockReturnValueOnce(({
-          transport: {
-            request: jest.fn().mockReturnValue({
-              headers: {},
-            }),
-          },
-        } as unknown) as Client);
+        mockPingClient.asInternalUser.transport.request.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({ statusCode: 200, body: {}, headers: {} })
+        );
 
         await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[Error: Host did not respond with valid Elastic product header.]`
