@@ -68,7 +68,7 @@ export function getTransformHealthRuleType(): AlertType<
           description: i18n.translate(
             'xpack.transform.alertTypes.transformHealth.alertContext.resultsDescription',
             {
-              defaultMessage: 'Results of the rule execution',
+              defaultMessage: 'Rule execution results',
             }
           ),
         },
