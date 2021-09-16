@@ -12,12 +12,12 @@ import { EuiText, EuiSpacer, EuiPanel, EuiCallOut } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { ExternalLinks } from './external_links';
-import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
 import { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';
 import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { loadLogsCheckpoint, saveLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import type { OverviewStepProps } from '../../types';
+import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
 import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
 
 const i18nTexts = {

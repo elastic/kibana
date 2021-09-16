@@ -10,13 +10,14 @@ import { MissingPrivileges } from '../types';
 
 import { useAuthorizationContext } from './authorization_provider';
 
+type Privileges = string | string[];
 interface Props {
   /**
    * Each required privilege must have the format "section.privilege".
    * To indicate that *all* privileges from a section are required, we can use the asterix
    * e.g. "index.*"
    */
-  privileges: string | string[];
+  privileges: Privileges;
   children: (childrenProps: {
     isLoading: boolean;
     hasPrivileges: boolean;
@@ -26,15 +27,13 @@ interface Props {
 
 type Privilege = [string, string];
 
-const toArray = (value: string | string[]): string[] =>
+const toArray = (value: Privileges): string[] =>
   Array.isArray(value) ? (value as string[]) : ([value] as string[]);
 
-export const WithPrivileges = ({ privileges: requiredPrivileges, children }: Props) => {
-  const { isLoading, privileges } = useAuthorizationContext();
-
-  const privilegesToArray: Privilege[] = toArray(requiredPrivileges).map((p) => {
+export const convertPrivilegesToArray = (privileges: Privileges): Privilege[] => {
+  return toArray(privileges).map((p) => {
     // Since an privilege can contain a dot in it's name:
-    //  * `section` needs to be extracted from the beeginning of the string until the first dot
+    //  * `section` needs to be extracted from the beginning of the string until the first dot
     //  * `privilege` should be everything after the dot
     const [section, privilege] = p.replace(/\./, '&').split('&');
     if (!privilege) {
@@ -43,10 +42,15 @@ export const WithPrivileges = ({ privileges: requiredPrivileges, children }: Pro
     }
     return [section, privilege];
   });
+};
+
+export const WithPrivileges = ({ privileges: requiredPrivileges, children }: Props) => {
+  const { isLoading, privileges } = useAuthorizationContext();
+  const privilegesArray = convertPrivilegesToArray(requiredPrivileges);
 
   const hasPrivileges = isLoading
     ? false
-    : privilegesToArray.every((privilege) => {
+    : privilegesArray.every((privilege) => {
         const [section, requiredPrivilege] = privilege;
         if (!privileges.missingPrivileges[section]) {
           // if the section does not exist in our missingPriviledges, everything is OK
@@ -64,7 +68,7 @@ export const WithPrivileges = ({ privileges: requiredPrivileges, children }: Pro
         return !privileges.missingPrivileges[section]!.includes(requiredPrivilege);
       });
 
-  const privilegesMissing = privilegesToArray.reduce((acc, [section, privilege]) => {
+  const privilegesMissing = privilegesArray.reduce((acc, [section, privilege]) => {
     if (privilege === '*') {
       acc[section] = privileges.missingPrivileges[section] || [];
     } else if (
