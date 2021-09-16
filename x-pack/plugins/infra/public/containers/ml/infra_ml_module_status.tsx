@@ -238,6 +238,7 @@ const getJobStatus = (jobId: string) => (
           ) {
             return 'started';
           }
+
           return 'unknown';
         }
       )[0] || 'missing'

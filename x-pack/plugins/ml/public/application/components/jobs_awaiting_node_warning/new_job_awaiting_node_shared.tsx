@@ -11,10 +11,12 @@ import { estypes } from '@elastic/elasticsearch';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { JOB_STATE } from '../../../../common';
+import { JOB_STATE } from '../../../../common/constants/states';
+import { mlApiServicesProvider } from '../../services/ml_api_service';
+import { HttpService } from '../../services/http_service';
 
 interface Props {
-  jobIds?: string[];
+  jobIds: string[];
 }
 
 function isJobAwaitingNodeAssignment(job: estypes.MlJobStats) {
@@ -23,30 +25,28 @@ function isJobAwaitingNodeAssignment(job: estypes.MlJobStats) {
 
 export const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
   const { http } = useKibana().services;
+  const ml = mlApiServicesProvider(new HttpService(http!));
 
-  const [unassignedJobCount, setUnassignedJobCount] = useState<null | number>(0);
+  const [unassignedJobCount, setUnassignedJobCount] = useState<number>(0);
 
   const checkNodes = useCallback(async () => {
     try {
-      const { lazyNodeCount } = await http!.fetch<{ lazyNodeCount: number }>(
-        '/api/ml/ml_node_count'
-      );
-      if (lazyNodeCount === 0) {
+      if (jobIds.length === 0) {
+        setUnassignedJobCount(0);
         return;
       }
 
-      if (jobIds?.length) {
-        //
-        const { jobs } = await http!.fetch<estypes.MlGetJobStatsResponse>(
-          `/api/ml/anomaly_detectors/${jobIds.join(',')}/_stats`
-        );
-        const unassignedJobs = jobs.filter((j) => isJobAwaitingNodeAssignment(j));
-        setUnassignedJobCount(unassignedJobs.length);
-      } else if (jobIds === undefined) {
-        setUnassignedJobCount(null);
+      const { lazyNodeCount } = await ml.mlNodeCount();
+      if (lazyNodeCount === 0) {
+        setUnassignedJobCount(0);
+        return;
       }
+
+      const { jobs } = await ml.getJobStats({ jobId: jobIds.join(',') });
+      const unassignedJobs = jobs.filter(isJobAwaitingNodeAssignment);
+      setUnassignedJobCount(unassignedJobs.length);
     } catch (error) {
-      setUnassignedJobCount(null);
+      setUnassignedJobCount(0);
       // eslint-disable-next-line no-console
       console.error('Could not determine ML node information', error);
     }
@@ -65,7 +65,7 @@ export const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.ml.jobsAwaitingNodeWarning.title"
+            id="xpack.ml.jobsAwaitingNodeWarningShared.title"
             defaultMessage="Awaiting machine learning node"
           />
         }
@@ -73,20 +73,13 @@ export const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
         iconType="iInCircle"
       >
         <div>
-          {unassignedJobCount === null ? (
-            <FormattedMessage
-              id="xpack.ml.jobsAwaitingNodeWarning.unknownJobCount.noMLNodesAvailableDescription"
-              defaultMessage="Some jobs are waiting for machine learning nodes to start."
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.ml.jobsAwaitingNodeWarning.knownJobCount.noMLNodesAvailableDescription"
-              defaultMessage="There {jobCount, plural, one {is} other {are}} {jobCount, plural, one {# job} other {# jobs}} waiting for machine learning nodes to start."
-              values={{
-                jobCount: unassignedJobCount,
-              }}
-            />
-          )}
+          <FormattedMessage
+            id="xpack.ml.jobsAwaitingNodeWarningShared.noMLNodesAvailableDescription"
+            defaultMessage="There {jobCount, plural, one {is} other {are}} {jobCount, plural, one {# job} other {# jobs}} waiting for machine learning nodes to start."
+            values={{
+              jobCount: unassignedJobCount,
+            }}
+          />
         </div>
       </EuiCallOut>
       <EuiSpacer size="m" />
