@@ -391,16 +391,33 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Disabling the security plugin \\"xpack.security.enabled\\" will only be supported by disable security in Elasticsearch.",
+        "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
       ]
     `);
   });
 
-  it('does not warn when the security plugin is enabled', () => {
+  it('warns when the security plugin is enabled', () => {
     const config = {
       xpack: {
         security: {
           enabled: true,
+          session: { idleTimeout: 123, lifespan: 345 },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated).toEqual(config);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.",
+      ]
+    `);
+  });
+
+  it("does not warn when xpack.security.enabled isn't set", () => {
+    const config = {
+      xpack: {
+        security: {
           session: { idleTimeout: 123, lifespan: 345 },
         },
       },

@@ -136,22 +136,25 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     }
   },
   (settings, fromPath, addDeprecation) => {
-    if (settings?.xpack?.security?.enabled === false) {
+    if ('enabled' in (settings?.xpack?.security || {})) {
       addDeprecation({
         title: i18n.translate('xpack.security.deprecations.enabledTitle', {
-          defaultMessage: 'Disabling the security plugin "xpack.security.enabled" is deprecated',
+          defaultMessage: 'Setting "xpack.security.enabled" is deprecated',
         }),
         message: i18n.translate('xpack.security.deprecations.enabledMessage', {
           defaultMessage:
-            'Disabling the security plugin "xpack.security.enabled" will only be supported by disable security in Elasticsearch.',
+            'Enabling or disabling the Security plugin in Kibana is deprecated. Configure security in Elasticsearch instead.',
         }),
+        documentationUrl:
+          'https://www.elastic.co/guide/en/elasticsearch/reference/current/secure-cluster.html',
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.enabled.manualStepOneMessage', {
-              defaultMessage: `Remove "xpack.security.enabled" from your Kibana configuration.`,
+              defaultMessage: 'Remove "xpack.security.enabled" from kibana.yml.',
             }),
             i18n.translate('xpack.security.deprecations.enabled.manualStepTwoMessage', {
-              defaultMessage: `To turn off security features, disable them in Elasticsearch instead.`,
+              defaultMessage:
+                'Set "xpack.security.enabled" to true or false in elasticsearch.yml to enable or disable security.',
             }),
           ],
         },
