@@ -25,7 +25,7 @@ import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../co
 import {
   SOURCES_PATH,
   ADD_GITHUB_PATH,
-  PERSONAL_SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
   getSourcesPath,
 } from '../../../../routes';
 import { CustomSource } from '../../../../types';
@@ -521,7 +521,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         app home page and display the error message, and not persist the other query params to the server.
       */
       if (params.error_description) {
-        navigateToUrl(isOrganization ? '/' : PERSONAL_SOURCES_PATH);
+        navigateToUrl(isOrganization ? '/' : PRIVATE_SOURCES_PATH);
         setErrorMessage(
           isOrganization
             ? params.error_description
