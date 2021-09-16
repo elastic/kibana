@@ -93,7 +93,6 @@ export const readRulesRoute = (
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {
-            console.error('RESPONSE', JSON.stringify(transformed, null, 2));
             return response.ok({ body: transformed ?? {} });
           }
         } else {

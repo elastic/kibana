@@ -30,9 +30,7 @@ export const readRules = async ({
   if (id != null) {
     try {
       const rule = await rulesClient.resolve({ id });
-      // const rule = await rulesClient.get({ id });
       if (isAlertType(isRuleRegistryEnabled, rule)) {
-        console.error('rulesClient.resolve', JSON.stringify(rule, null, 2));
         return rule;
       } else {
         return null;
@@ -62,7 +60,6 @@ export const readRules = async ({
     ) {
       return null;
     } else {
-      console.error('findRules result', JSON.stringify(ruleFromFind, null, 2));
       return ruleFromFind.data[0];
     }
   } else {

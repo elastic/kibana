@@ -149,8 +149,6 @@ export const RulesSchema = t.array(RuleSchema);
 export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
 
-// export type ResolvedRule = ResolvedSanitizedRule<
-
 export interface RuleError {
   id?: string;
   rule_id?: string;
