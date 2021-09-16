@@ -13,13 +13,13 @@ import { LAYER_TYPE } from '../../../common/constants';
 import { getSelectedLayer } from '../../selectors/map_selectors';
 import { updateSourceProp } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
-import { IVectorLayer } from '../../classes/layers/vector_layer';
+import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
 
 function mapStateToProps(state: MapStoreState) {
   const selectedLayer = getSelectedLayer(state);
   let key = 'none';
   if (selectedLayer) {
-    key = selectedLayer.getType() === LAYER_TYPE.VECTOR
+    key = isVectorLayer(selectedLayer)
       ? `${selectedLayer.getId()}${(selectedLayer as IVectorLayer).showJoinEditor()}`
       : selectedLayer.getId();
   }

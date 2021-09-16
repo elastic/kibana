@@ -60,6 +60,8 @@ export interface IVectorSource extends ISource {
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getLeftJoinFields(): Promise<IField[]>;
+  showJoinEditor(): boolean;
+  getJoinsDisabledReason(): string | null;
   getSyncMeta(): VectorSourceSyncMeta | null;
   getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
@@ -115,6 +117,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   async getLeftJoinFields(): Promise<IField[]> {
     return [];
+  }
+
+  getJoinsDisabledReason(): string | null {
+    return null;
   }
 
   async getGeoJsonWithMeta(

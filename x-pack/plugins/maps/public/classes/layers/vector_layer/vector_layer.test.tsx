@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-jest.mock('../../styles/vector/vector_style',  () => ({
+/* eslint-disable max-classes-per-file */
+
+jest.mock('../../styles/vector/vector_style', () => ({
   VectorStyle: class MockVectorStyle {},
 }));
 
