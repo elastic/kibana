@@ -33,7 +33,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
   });
-  const [data, setData] = useState(null);
+  const [data, setData] = useState({} as any);
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.nodes.routeTitle', {
     defaultMessage: 'Elasticsearch - Nodes',
