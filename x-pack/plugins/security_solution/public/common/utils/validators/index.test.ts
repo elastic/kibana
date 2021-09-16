@@ -13,6 +13,10 @@ describe('helpers', () => {
       expect(isUrlInvalid('this is not a url')).toBeTruthy();
     });
 
+    test('verifies as invalid url without http(s):// prefix', () => {
+      expect(isUrlInvalid('www.thisIsNotValid.com')).toBeTruthy();
+    });
+
     test('verifies valid url', () => {
       expect(isUrlInvalid('https://www.elastic.co/')).toBeFalsy();
     });
