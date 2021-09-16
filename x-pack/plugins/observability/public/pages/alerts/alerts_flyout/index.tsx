@@ -37,13 +37,16 @@ import {
   ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
 import type { TopAlert } from '../';
-import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import { parseAlert } from '../parse_alert';
+import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
+import { useDateFormat } from '../../../hooks/use_date_format';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
@@ -68,7 +71,7 @@ export function AlertsFlyout({
   onClose,
   selectedAlertId,
 }: AlertsFlyoutProps) {
-  const dateFormat = useUiSetting<string>('dateFormat');
+  const dateFormat = useDateFormat();
   const { services } = useKibana();
   const { http } = services;
   const prepend = http?.basePath.prepend;
@@ -90,7 +93,11 @@ export function AlertsFlyout({
       title: i18n.translate('xpack.observability.alertsFlyout.statusLabel', {
         defaultMessage: 'Status',
       }),
-      description: alertData.active ? 'Active' : 'Recovered',
+      description: (
+        <AlertStatusIndicator
+          alertStatus={alertData.active ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED}
+        />
+      ),
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.lastUpdatedLabel', {
