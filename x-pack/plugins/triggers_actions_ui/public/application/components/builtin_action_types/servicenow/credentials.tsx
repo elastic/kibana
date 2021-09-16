@@ -61,7 +61,25 @@ const CredentialsComponent: React.FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h4>{i18n.SN_INSTANCE_LABEL}</h4>
+          </EuiTitle>
+          <p>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
+              defaultMessage="Please provide the full URL to the desired ServiceNow instance. If you do not have one, you can {instance}"
+              values={{
+                instance: (
+                  <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
+                    {i18n.SETUP_DEV_INSTANCE}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
             id="apiUrl"
@@ -69,14 +87,7 @@ const CredentialsComponent: React.FC<Props> = ({
             error={errors.apiUrl}
             isInvalid={isApiUrlInvalid}
             label={i18n.API_URL_LABEL}
-            helpText={
-              <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
-                  defaultMessage="Configure a Personal Developer Instance"
-                />
-              </EuiLink>
-            }
+            helpText={i18n.API_URL_HELPTEXT}
           >
             <EuiFieldText
               fullWidth

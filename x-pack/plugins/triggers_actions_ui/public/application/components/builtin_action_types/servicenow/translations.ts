@@ -10,7 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const API_URL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiUrlTextFieldLabel',
   {
-    defaultMessage: 'URL',
+    defaultMessage: 'ServiceNow instance URL',
+  }
+);
+
+export const API_URL_HELPTEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiUrlTextFieldLabel',
+  {
+    defaultMessage: 'Include the full URL',
   }
 );
 
@@ -53,7 +60,7 @@ export const REMEMBER_VALUES_LABEL = i18n.translate(
 export const REENTER_VALUES_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.reenterValuesLabel',
   {
-    defaultMessage: 'Username and password are encrypted. Please reenter values for these fields.',
+    defaultMessage: 'You will need to re-authenticate each time you edit the connector',
   }
 );
 
@@ -241,5 +248,19 @@ export const VISIT_SN_STORE = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.visitSNStore',
   {
     defaultMessage: 'Visit ServiceNow app store',
+  }
+);
+
+export const SETUP_DEV_INSTANCE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.setupDevInstance',
+  {
+    defaultMessage: 'setup a developer instance',
+  }
+);
+
+export const SN_INSTANCE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.snInstanceLabel',
+  {
+    defaultMessage: 'ServiceNow instance',
   }
 );
