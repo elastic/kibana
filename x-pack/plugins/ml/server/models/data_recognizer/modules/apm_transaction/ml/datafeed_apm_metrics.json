@@ -6,6 +6,14 @@
   "chunking_config" : {
     "mode" : "off"
   },
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "processor.event": "metric" } },
+        { "term": { "metricset.name": "transaction" } }
+      ]
+    }
+  },
   "aggregations" : {
     "buckets" : {
       "composite" : {
