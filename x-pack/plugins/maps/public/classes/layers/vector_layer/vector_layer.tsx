@@ -81,6 +81,10 @@ import { JoinState, performInnerJoins } from './perform_inner_joins';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
 
+export function isVectorLayer(layer: ILayer) {
+  return (layer as IVectorLayer).canShowTooltip !== undefined;
+}
+
 export interface VectorLayerArguments {
   source: IVectorSource;
   joins?: InnerJoin[];
