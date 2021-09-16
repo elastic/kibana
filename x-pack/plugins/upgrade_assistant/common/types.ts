@@ -151,17 +151,6 @@ export interface UpgradeAssistantTelemetrySavedObject {
 }
 
 export interface UpgradeAssistantTelemetry {
-  ui_open: {
-    overview: number;
-    elasticsearch: number;
-    kibana: number;
-  };
-  ui_reindex: {
-    close: number;
-    open: number;
-    start: number;
-    stop: number;
-  };
   features: {
     deprecation_logging: {
       enabled: boolean;

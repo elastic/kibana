@@ -11,10 +11,12 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import type { DomainDeprecationDetails } from 'kibana/public';
 import { SectionLoading, GlobalFlyout } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
+import { uiMetricService, UIM_KIBANA_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
 import { NoDeprecationsPrompt, DeprecationCount } from '../shared';
 import { KibanaDeprecationsTable } from './kibana_deprecations_table';
 import {
@@ -125,7 +127,6 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
     services: {
       core: { deprecations },
       breadcrumbs,
-      api,
     },
   } = useAppContext();
 
@@ -236,14 +237,8 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
   ]);
 
   useEffect(() => {
-    async function sendTelemetryData() {
-      await api.sendPageTelemetryData({
-        kibana: true,
-      });
-    }
-
-    sendTelemetryData();
-  }, [api]);
+    uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_KIBANA_DEPRECATIONS_PAGE_LOAD);
+  }, []);
 
   useEffect(() => {
     breadcrumbs.setBreadcrumbs('kibanaDeprecations');

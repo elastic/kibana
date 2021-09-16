@@ -10,10 +10,12 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageHeader, EuiSpacer, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
+import { uiMetricService, UIM_ES_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
 import { EsDeprecationsTable } from './es_deprecations_table';
 import { EsDeprecationErrors } from './es_deprecation_errors';
 import { NoDeprecationsPrompt, DeprecationCount } from '../shared';
@@ -54,13 +56,7 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
     services: { api, breadcrumbs },
   } = useAppContext();
 
-  const {
-    data: esDeprecations,
-    isLoading,
-    error,
-    resendRequest,
-    isInitialRequest,
-  } = api.useLoadEsDeprecations();
+  const { data: esDeprecations, isLoading, error, resendRequest } = api.useLoadEsDeprecations();
 
   const deprecationsCountByLevel: {
     warningDeprecations: number;
@@ -74,16 +70,8 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
   }, [breadcrumbs]);
 
   useEffect(() => {
-    if (isLoading === false && isInitialRequest) {
-      async function sendTelemetryData() {
-        await api.sendPageTelemetryData({
-          elasticsearch: true,
-        });
-      }
-
-      sendTelemetryData();
-    }
-  }, [api, isLoading, isInitialRequest]);
+    uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_ES_DEPRECATIONS_PAGE_LOAD);
+  }, []);
 
   if (error) {
     return <EsDeprecationErrors error={error} />;
