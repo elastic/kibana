@@ -20,18 +20,18 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
       <EuiSpacer size="s" />
       <EuiCallOut
         size="m"
-        iconType="help"
+        iconType="alert"
         data-test-subj="snDeprecatedCallout"
         color="warning"
         title={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutTitle',
           {
-            defaultMessage: 'Deprecated connector',
+            defaultMessage: 'Deprecated connector type',
           }
         )}
       >
         <FormattedMessage
-          defaultMessage="You are running a deprecated connector. Create a new connector or {migrate}."
+          defaultMessage="This connector type is deprecated. Create a new connector or {migrate}"
           id="xpack.triggersActionsUI.components.builtinActionTypes.servicenow.appInstallationInfo"
           values={{
             migrate: (
@@ -39,7 +39,7 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
                 {i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutMigrate',
                   {
-                    defaultMessage: 'migrate',
+                    defaultMessage: 'update this connector.',
                   }
                 )}
               </EuiButtonEmpty>
