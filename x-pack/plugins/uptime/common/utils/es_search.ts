@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-declare namespace Cypress {
-  interface Chainable<Subject> {
-    snapshot: () => {};
-  }
+import { estypes } from '@elastic/elasticsearch';
+
+export function createEsQuery<T extends estypes.SearchRequest>(params: T): T {
+  return params;
 }
