@@ -29,12 +29,10 @@ export function useDiscoverState({
   services,
   history,
   savedSearch,
-  savedSearchId,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
-  savedSearchId?: string;
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
@@ -220,7 +218,7 @@ export function useDiscoverState({
     if (indexPattern) {
       refetch$.next();
     }
-  }, [initialFetchStatus, refetch$, indexPattern, savedSearchId]);
+  }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
   return {
     data$,

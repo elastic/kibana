@@ -138,7 +138,6 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
       history={history}
       indexPatternList={indexPatternList}
       savedSearch={savedSearch}
-      savedSearchId={savedSearch.id}
       services={services}
     />
   );
