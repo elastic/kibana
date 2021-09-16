@@ -1,6 +1,8 @@
 *:not(.essentialAnimation),
 *:not(.essentialAnimation):before,
-*:not(.essentialAnimation):after {
+*:not(.essentialAnimation):after,
+*:not('[data-rbd-draggable-context-id]'),
+*:not('[data-rbd-droppable-context-id]') {
   /**
    * set the animation/transition duration to 0s so that animation callbacks are
    * still triggered, allowing components that require them to remain functional
