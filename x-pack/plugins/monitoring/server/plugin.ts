@@ -52,6 +52,7 @@ import {
   RequestHandlerContextMonitoringPlugin,
 } from './types';
 import { getTransformHealthRuleType } from '../../transform/server';
+import { TRANSFORM_RULE_TYPE } from '../../transform/common';
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
@@ -269,6 +270,8 @@ export class MonitoringPlugin
   }
 
   registerPluginInUI(plugins: PluginsSetup) {
+    const alertingRules = [...RULES, TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH];
+
     plugins.features.registerKibanaFeature({
       id: 'monitoring',
       name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
@@ -278,7 +281,7 @@ export class MonitoringPlugin
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
-      alerting: RULES,
+      alerting: alertingRules,
       reserved: {
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
@@ -295,10 +298,10 @@ export class MonitoringPlugin
               },
               alerting: {
                 rule: {
-                  all: RULES,
+                  all: alertingRules,
                 },
                 alert: {
-                  all: RULES,
+                  all: alertingRules,
                 },
               },
               ui: [],
