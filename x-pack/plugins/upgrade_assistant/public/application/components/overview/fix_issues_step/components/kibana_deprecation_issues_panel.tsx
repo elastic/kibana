@@ -55,7 +55,7 @@ export const KibanaDeprecationIssuesPanel: FunctionComponent<Props> = ({ setIsFi
   const errorMessage =
     error &&
     i18n.translate('xpack.upgradeAssistant.deprecationStats.loadingErrorMessage', {
-      defaultMessage: 'Could not retrieve Kibana deprecations.',
+      defaultMessage: 'Could not retrieve Kibana deprecation issues.',
     });
 
   return (
