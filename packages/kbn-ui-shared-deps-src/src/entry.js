@@ -8,9 +8,9 @@
 
 require('./polyfills');
 
-// must load before angular
 export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;
+// mutates window.jQuery and window.$
 require('./flot_charts');
 
 // stateful deps
@@ -26,7 +26,8 @@ export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
 export const React = require('react');
 export const ReactDom = require('react-dom');
 export const ReactDomServer = require('react-dom/server');
-export const ReactRouter = require('react-router'); // eslint-disable-line
+// eslint-disable-next-line @kbn/eslint/module_migration
+export const ReactRouter = require('react-router');
 export const ReactRouterDom = require('react-router-dom');
 export const StyledComponents = require('styled-components');
 
@@ -41,12 +42,14 @@ export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibServices = require('@elastic/eui/lib/services');
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/lib/services/format');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
+export const ElasticDatemath = require('@elastic/datemath');
 export const ReactBeautifulDnD = require('react-beautiful-dnd');
+
 export const Theme = require('./theme.ts');
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');
 
-import { unzlibSync, strFromU8 } from 'fflate';
+const { unzlibSync, strFromU8 } = require('fflate');
 export const Fflate = { unzlibSync, strFromU8 };
 
 // runtime deps which don't need to be copied across all bundles
