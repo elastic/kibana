@@ -21,7 +21,7 @@ export const IpContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerIPContent'}>
       <DocumentStatsTable config={config} />
-      <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" compressed={true} />
+      <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
     </ExpandedRowContent>
   );
 };

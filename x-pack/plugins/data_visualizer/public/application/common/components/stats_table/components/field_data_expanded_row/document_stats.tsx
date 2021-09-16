@@ -18,7 +18,6 @@ const metaTableColumns = [
     name: '',
     render: (metaItem: { display: ReactNode }) => metaItem.display,
     width: '75px',
-    align: 'right',
   },
   {
     field: 'value',
