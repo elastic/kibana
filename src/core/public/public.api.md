@@ -1296,11 +1296,11 @@ export class SavedObjectsClient {
         id: string;
         type: string;
     }>) => Promise<SavedObjectsBatchResponse<unknown>>;
-    bulkResolve: (objects?: Array<{
+    bulkResolve: <T = unknown>(objects?: Array<{
         id: string;
         type: string;
     }>) => Promise<{
-        resolved_objects: ResolvedSimpleSavedObject<unknown>[];
+        resolved_objects: ResolvedSimpleSavedObject<T>[];
     }>;
     bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;

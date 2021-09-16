@@ -530,10 +530,14 @@ export class SavedObjectsClient {
    *   { id: 'one', type: 'config' },
    *   { id: 'foo', type: 'index-pattern' }
    * ])
+   *
+   * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
+   * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. This behavior is unique to
+   * `bulkResolve`; the regular `resolve` API will throw an error instead.
    */
   async bulkResolve<T = unknown>(
-    objects: SavedObjectsBulkResolveObject[] = [],
-    options: SavedObjectsBaseOptions = {}
+    objects: SavedObjectsBulkResolveObject[],
+    options?: SavedObjectsBaseOptions
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
     return await this._repository.bulkResolve(objects, options);
   }

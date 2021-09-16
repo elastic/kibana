@@ -9,15 +9,17 @@ Resolves an array of objects by id, using any legacy URL aliases if they exist
 <b>Signature:</b>
 
 ```typescript
-bulkResolve: (objects?: Array<{
+bulkResolve: <T = unknown>(objects?: Array<{
         id: string;
         type: string;
     }>) => Promise<{
-        resolved_objects: ResolvedSimpleSavedObject<unknown>[];
+        resolved_objects: ResolvedSimpleSavedObject<T>[];
     }>;
 ```
 
 ## Example
 
 bulkResolve(\[ { id: 'one', type: 'config' }<!-- -->, { id: 'foo', type: 'index-pattern' } \])
+
+ Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. The `resolve` method in the public client uses `bulkResolve` under the hood, so it behaves the same way.
 

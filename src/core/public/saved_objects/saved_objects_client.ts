@@ -12,6 +12,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   SavedObject,
   SavedObjectReference,
+  SavedObjectsBulkResolveResponse,
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
@@ -480,6 +481,11 @@ export class SavedObjectsClient {
    * @param {string} type
    * @param {string} id
    * @returns The resolve result for the saved object for the given type and id.
+   *
+   * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
+   * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. This behavior for the `resolve`
+   * API is unique to the public client, which batches individual calls with `bulkResolve` under the hood. We don't throw an error in that
+   * case for legacy compatibility reasons.
    */
   public resolve = <T = unknown>(
     type: string,
@@ -506,20 +512,24 @@ export class SavedObjectsClient {
    *   { id: 'one', type: 'config' },
    *   { id: 'foo', type: 'index-pattern' }
    * ])
+   *
+   * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
+   * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. The `resolve` method in the
+   * public client uses `bulkResolve` under the hood, so it behaves the same way.
    */
-  public bulkResolve = async (objects: Array<{ id: string; type: string }> = []) => {
+  public bulkResolve = async <T = unknown>(objects: Array<{ id: string; type: string }> = []) => {
     const filteredObjects = objects.map(({ type, id }) => ({ type, id }));
-    const response = await this.performBulkResolve(filteredObjects);
+    const response = await this.performBulkResolve<T>(filteredObjects);
     return {
       resolved_objects: response.resolved_objects.map((resolveResponse) =>
-        this.createResolvedSavedObject(resolveResponse)
+        this.createResolvedSavedObject<T>(resolveResponse)
       ),
     };
   };
 
-  private async performBulkResolve(objects: ObjectTypeAndId[]) {
+  private async performBulkResolve<T>(objects: ObjectTypeAndId[]) {
     const path = this.getPath(['_bulk_resolve']);
-    const request: ReturnType<SavedObjectsApi['bulkResolve']> = this.savedObjectsFetch(path, {
+    const request: Promise<SavedObjectsBulkResolveResponse<T>> = this.savedObjectsFetch(path, {
       method: 'POST',
       body: JSON.stringify(objects),
     });

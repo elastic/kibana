@@ -2039,7 +2039,7 @@ export class SavedObjectsClient {
     constructor(repository: ISavedObjectsRepository);
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
-    bulkResolve<T = unknown>(objects?: SavedObjectsBulkResolveObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResolveResponse<T>>;
+    bulkResolve<T = unknown>(objects: SavedObjectsBulkResolveObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResolveResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
