@@ -23,7 +23,6 @@ const ManageIntegrationLinkComponent = () => {
 
   const integrationHref = useMemo(() => {
     if (osqueryIntegration) {
-      console.log('asdf')
       return getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
         path: pagePathGetters.integration_details_policies({
           pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
