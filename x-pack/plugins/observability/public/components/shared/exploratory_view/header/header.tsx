@@ -23,7 +23,7 @@ interface Props {
 export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
   const kServices = useKibana<ObservabilityAppServices>().services;
 
-  const { lens } = kServices;
+  const { lens, cases } = kServices;
 
   const { getSeries, allSeries } = useSeriesStorage();
 
@@ -31,9 +31,21 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
 
+  const [isCasesOpen, setIsCasesOpen] = useState(false);
+
   const LensSaveModalComponent = lens.SaveModalComponent;
 
   const timeRange = combineTimeRanges(allSeries, series);
+
+  const SelectCaseComponent = cases.getAllCasesSelectorModal({
+    createCaseNavigation: {
+      href: '',
+      onClick: () => {},
+    },
+    onRowClick: () => {},
+    userCanCrud: true,
+    owner: [],
+  });
 
   return (
     <>
@@ -55,6 +67,21 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
               />
             </h2>
           </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fullWidth={false}
+            isDisabled={lensAttributes === null}
+            onClick={() => {
+              if (lensAttributes) {
+                setIsCasesOpen(true);
+              }
+            }}
+          >
+            {i18n.translate('xpack.observability.expView.heading.addToCase', {
+              defaultMessage: 'Add to case',
+            })}
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -106,6 +133,7 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
           onSave={() => {}}
         />
       )}
+      {isCasesOpen && lensAttributes && <SelectCaseComponent />}
     </>
   );
 }

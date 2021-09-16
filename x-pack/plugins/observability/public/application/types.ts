@@ -20,6 +20,7 @@ import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public'
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { LensPublicStart } from '../../../lens/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
+import { CasesUiStart } from '../../../cases/public';
 
 export interface ObservabilityAppServices {
   http: HttpStart;
@@ -36,4 +37,5 @@ export interface ObservabilityAppServices {
 
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   lens: LensPublicStart;
+  cases: CasesUiStart;
 }
