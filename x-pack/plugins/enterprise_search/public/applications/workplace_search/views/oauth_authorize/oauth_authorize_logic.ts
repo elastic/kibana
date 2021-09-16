@@ -48,7 +48,7 @@ interface OAuthAuthorizeActions {
   setHasError(): void;
 }
 
-export const oauthAuthorizeRoute = '/api/workplace_search/oauth/authorize';
+export const oauthAuthorizeRoute = '/internal/workplace_search/oauth/authorize';
 
 export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuthAuthorizeActions>>({
   path: ['enterprise_search', 'workplace_search', 'oauth_authorize_logic'],
