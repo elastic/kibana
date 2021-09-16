@@ -11,7 +11,7 @@ import { buildExpression } from '../../../expressions/public';
 import { sampleAreaVis } from './sample_vis.test.mocks';
 
 import { toExpressionAst } from './to_ast';
-import { VisTypeXyConfig } from '../../../chart_expressions/expression_xy/common/types';
+import { VisTypeXyConfig } from '../../../chart_expressions/expression_xy/common';
 
 jest.mock('../../../expressions/public', () => ({
   ...(jest.requireActual('../../../expressions/public') as any),

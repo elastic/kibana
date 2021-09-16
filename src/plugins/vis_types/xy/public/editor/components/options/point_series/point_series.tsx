@@ -21,7 +21,7 @@ import { BUCKET_TYPES } from '../../../../../../../data/public';
 import {
   VisTypeXyConfig,
   ChartType,
-} from '../../../../../../../chart_expressions/expression_xy/common/types';
+} from '../../../../../../../chart_expressions/expression_xy/common';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
 import { ValidationVisOptionsProps } from '../../common';

@@ -13,10 +13,7 @@ import { Position } from '@elastic/charts';
 
 import { TextInputOption } from '../../../../../../../vis_default_editor/public';
 
-import {
-  ValueAxis,
-  ScaleType,
-} from '../../../../../../../chart_expressions/expression_xy/common/types';
+import { ValueAxis, ScaleType } from '../../../../../../../chart_expressions/expression_xy/common';
 import { LabelOptions } from './label_options';
 import { ValueAxisOptions, ValueAxisOptionsParams } from './value_axis_options';
 import { valueAxis } from './mocks';

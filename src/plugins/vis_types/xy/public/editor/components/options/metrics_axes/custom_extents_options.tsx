@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { NumberInputOption, SwitchOption } from '../../../../../../../vis_default_editor/public';
 
-import { ValueAxis } from '../../../../../../../chart_expressions/expression_xy/common/types';
+import { ValueAxis } from '../../../../../../../chart_expressions/expression_xy/common';
 import { YExtents } from './y_extents';
 import { SetScale } from './value_axis_options';
 

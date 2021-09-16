@@ -17,7 +17,7 @@ import { Vis } from '../../../../../../../visualizations/public';
 import {
   ValueAxis,
   SeriesParam,
-} from '../../../../../../../chart_expressions/expression_xy/common/types';
+} from '../../../../../../../chart_expressions/expression_xy/common';
 import { ChartOptions } from './chart_options';
 import { SetParamByIndex, ChangeValueAxis } from '.';
 

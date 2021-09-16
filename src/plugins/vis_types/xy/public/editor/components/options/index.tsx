@@ -8,7 +8,7 @@
 
 import React, { lazy } from 'react';
 
-import { VisTypeXyConfig } from '../../../../../../chart_expressions/expression_xy/common/types';
+import { VisTypeXyConfig } from '../../../../../../chart_expressions/expression_xy/common';
 import { ValidationVisOptionsProps } from '../common';
 
 const PointSeriesOptionsLazy = lazy(() => import('./point_series'));

@@ -15,7 +15,7 @@ import {
   InterpolationMode,
   ThresholdLineStyle,
   ChartType,
-} from '../../../../chart_expressions/expression_xy/common/types';
+} from '../../../../chart_expressions/expression_xy/common';
 import { LabelRotation } from '../../../../charts/public';
 import { getScaleTypes } from './scale_types';
 import { getPositions } from './positions';

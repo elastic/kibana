@@ -34,7 +34,7 @@ import {
   VisTypeXy,
   ChartType,
   XyVisType,
-} from '../../../chart_expressions/expression_xy/common/types';
+} from '../../../chart_expressions/expression_xy/common';
 import {
   EXPRESSION_NAME,
   getColumnByAccessor,

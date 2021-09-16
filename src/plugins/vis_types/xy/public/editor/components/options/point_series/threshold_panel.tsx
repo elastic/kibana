@@ -18,7 +18,7 @@ import {
   RequiredNumberInputOption,
 } from '../../../../../../../vis_default_editor/public';
 import { ValidationVisOptionsProps } from '../../common';
-import { VisTypeXyConfig } from '../../../../../../../chart_expressions/expression_xy/common/types';
+import { VisTypeXyConfig } from '../../../../../../../chart_expressions/expression_xy/common';
 import { getThresholdLineStyles } from '../../../collections';
 
 const thresholdLineStyles = getThresholdLineStyles();

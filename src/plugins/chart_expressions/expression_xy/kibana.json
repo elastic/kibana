@@ -4,8 +4,8 @@
   "ui": true,
   "server": false,
   "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection", "fieldFormats"],
-  "requiredBundles": ["kibanaUtils", "visDefaultEditor"],
-  "extraPublicDirs": ["common/index"],
+  "requiredBundles": ["kibanaUtils"],
+  "extraPublicDirs": ["common"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

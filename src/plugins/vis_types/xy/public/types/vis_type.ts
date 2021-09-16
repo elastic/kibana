@@ -7,6 +7,6 @@
  */
 
 import { VisTypeDefinition } from '../../../../visualizations/public';
-import { VisTypeXyConfig } from '../../../../chart_expressions/expression_xy/common/types';
+import { VisTypeXyConfig } from '../../../../chart_expressions/expression_xy/common';
 
 export type XyVisTypeDefinition = VisTypeDefinition<VisTypeXyConfig>;

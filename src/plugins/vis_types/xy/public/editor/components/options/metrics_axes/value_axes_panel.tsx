@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   SeriesParam,
   ValueAxis,
-} from '../../../../../../../chart_expressions/expression_xy/common/types';
+} from '../../../../../../../chart_expressions/expression_xy/common';
 import { ValueAxisOptions } from './value_axis_options';
 import { SetParamByIndex } from '.';
 

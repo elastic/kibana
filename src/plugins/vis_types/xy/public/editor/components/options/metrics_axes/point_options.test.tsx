@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { SeriesParam } from '../../../../../../../chart_expressions/expression_xy/common/types';
+import { SeriesParam } from '../../../../../../../chart_expressions/expression_xy/common';
 import { PointOptions, PointOptionsParams } from './point_options';
 import { seriesParam } from './mocks';
 

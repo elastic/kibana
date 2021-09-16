@@ -1,4 +1,4 @@
-# expressionXY
+# expressionXy
 
 A Kibana plugin
 

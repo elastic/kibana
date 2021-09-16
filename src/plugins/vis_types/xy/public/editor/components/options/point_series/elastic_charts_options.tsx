@@ -21,7 +21,7 @@ import { PaletteRegistry } from '../../../../../../../charts/public';
 import {
   VisTypeXyConfig,
   ChartType,
-} from '../../../../../../../chart_expressions/expression_xy/common/types';
+} from '../../../../../../../chart_expressions/expression_xy/common';
 import { ValidationVisOptionsProps } from '../../common';
 import { getPalettesService, getTrackUiMetric } from '../../../../services';
 import { getFittingFunctions } from '../../../collections';

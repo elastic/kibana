@@ -12,10 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { NumberInputOption } from '../../../../../../../vis_default_editor/public';
 
-import {
-  Scale,
-  ScaleType,
-} from '../../../../../../../chart_expressions/expression_xy/common/types';
+import { Scale, ScaleType } from '../../../../../../../chart_expressions/expression_xy/common';
 import { SetScale } from './value_axis_options';
 
 const rangeError = i18n.translate('visTypeXy.controls.pointSeries.valueAxes.minErrorMessage', {

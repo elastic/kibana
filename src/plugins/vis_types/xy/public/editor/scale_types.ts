@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ScaleType } from '../../../../chart_expressions/expression_xy/common/types';
+import { ScaleType } from '../../../../chart_expressions/expression_xy/common';
 
 export const getScaleTypes = () => [
   {

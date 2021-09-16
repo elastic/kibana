@@ -16,7 +16,7 @@ import { SelectOption, SwitchOption } from '../../../../../../../vis_default_edi
 import {
   VisTypeXyConfig,
   ValueAxis,
-} from '../../../../../../../chart_expressions/expression_xy/common/types';
+} from '../../../../../../../chart_expressions/expression_xy/common';
 import { ValidationVisOptionsProps } from '../../common';
 
 type GridPanelOptions = ValidationVisOptionsProps<VisTypeXyConfig>;

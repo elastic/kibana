@@ -22,7 +22,7 @@ import {
   ThresholdLineStyle,
   InterpolationMode,
   ChartType,
-} from '../../../../chart_expressions/expression_xy/common/types';
+} from '../../../../chart_expressions/expression_xy/common';
 import { toExpressionAst } from '../to_ast';
 import { optionTabs } from '../editor/common_config';
 import { defaultCountLabel, LabelRotation } from '../../../../charts/public';

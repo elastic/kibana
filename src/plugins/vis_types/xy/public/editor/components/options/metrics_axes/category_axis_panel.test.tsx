@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Position } from '@elastic/charts';
 import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
-import { CategoryAxis } from '../../../../../../../chart_expressions/expression_xy/common/types';
+import { CategoryAxis } from '../../../../../../../chart_expressions/expression_xy/common';
 import { LabelOptions } from './label_options';
 import { categoryAxis } from './mocks';
 

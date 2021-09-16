@@ -20,7 +20,7 @@ import {
   AxisType,
   CategoryAxis,
   ChartType,
-} from '../../../../../../../chart_expressions/expression_xy/common/types';
+} from '../../../../../../../chart_expressions/expression_xy/common';
 
 const defaultValueAxisId = 'ValueAxis-1';
 

@@ -15,7 +15,7 @@ import { Position } from '@elastic/charts';
 import {
   ValueAxis,
   SeriesParam,
-} from '../../../../../../../chart_expressions/expression_xy/common/types';
+} from '../../../../../../../chart_expressions/expression_xy/common';
 import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
 import { valueAxis, seriesParam } from './mocks';
 

@@ -18,7 +18,7 @@ import {
   SeriesParam,
   ValueAxis,
   ChartType,
-} from '../../../../../../../chart_expressions/expression_xy/common/types';
+} from '../../../../../../../chart_expressions/expression_xy/common';
 import MetricsAxisOptions from './index';
 import { ValidationVisOptionsProps } from '../../common';
 import { ValueAxesPanel } from './value_axes_panel';

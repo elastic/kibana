@@ -19,7 +19,7 @@ import {
   ChartMode,
   AxisMode,
   ChartType,
-} from '../../../../../../../chart_expressions/expression_xy/common/types';
+} from '../../../../../../../chart_expressions/expression_xy/common';
 import { LineOptions } from './line_options';
 import { PointOptions } from './point_options';
 import { SetParamByIndex, ChangeValueAxis } from '.';

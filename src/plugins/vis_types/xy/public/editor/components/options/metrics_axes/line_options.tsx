@@ -17,7 +17,7 @@ import {
   SwitchOption,
 } from '../../../../../../../vis_default_editor/public';
 
-import { SeriesParam } from '../../../../../../../chart_expressions/expression_xy/common/types';
+import { SeriesParam } from '../../../../../../../chart_expressions/expression_xy/common';
 import { SetChart } from './chart_options';
 import { getInterpolationModes } from '../../../collections';
 

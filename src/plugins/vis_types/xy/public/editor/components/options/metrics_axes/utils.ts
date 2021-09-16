@@ -17,7 +17,7 @@ import {
   ChartMode,
   InterpolationMode,
   ChartType,
-} from '../../../../../../../chart_expressions/expression_xy/common/types';
+} from '../../../../../../../chart_expressions/expression_xy/common';
 
 export const makeSerie = (
   id: string,
