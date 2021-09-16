@@ -9,7 +9,7 @@
 import { StartServicesAccessor } from 'src/core/public';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { getEsdslFn } from '../../../common/search/expressions/esdsl';
-import { UiSettingsCommon } from '../../../common/index_patterns';
+import { UiSettingsCommon } from '../../../common';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
