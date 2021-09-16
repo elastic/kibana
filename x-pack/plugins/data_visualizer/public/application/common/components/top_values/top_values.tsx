@@ -6,14 +6,7 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -51,7 +44,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
   return (
     <EuiFlexItem
       data-test-subj={'dataVisualizerFieldDataTopValues'}
-      className={'dataVisualizerPanelWrapper dataVisualizerTopValuesWrapper'}
+      className={'dataVisualizerPanelWrapper'}
     >
       <ExpandedRowFieldHeader>
         <FormattedMessage
@@ -62,31 +55,19 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
 
       <div
         data-test-subj="dataVisualizerFieldDataTopValuesContent"
-        className={'fieldDataTopValuesContainer'}
+        className={'fieldDataTopValuesContainer dataVisualizerTopValuesWrapper'}
       >
         {Array.isArray(topValues) &&
           topValues.map((value) => (
             <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
-              <EuiFlexItem
-                grow={false}
-                className={classNames(
-                  'eui-textTruncate',
-                  'topValuesValueLabelContainer',
-                  `topValuesValueLabelContainer--${compressed === true ? 'small' : 'large'}`
-                )}
-              >
-                <EuiToolTip content={kibanaFieldFormat(value.key, fieldFormat)} position="right">
-                  <EuiText size="xs" textAlign={'right'} color="subdued">
-                    {kibanaFieldFormat(value.key, fieldFormat)}
-                  </EuiText>
-                </EuiToolTip>
-              </EuiFlexItem>
               <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
                 <EuiProgress
                   value={value.doc_count}
                   max={progressBarMax}
                   color={barColor}
-                  size="m"
+                  size="xs"
+                  label={kibanaFieldFormat(value.key, fieldFormat)}
+                  className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                 />
               </EuiFlexItem>
               {progressBarMax !== undefined && (

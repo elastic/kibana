@@ -79,7 +79,6 @@ $panelWidthXL:    900px;
 
   .dataVisualizerTopValuesWrapper {
     min-width: $panelWidthS;
-    max-width: $panelWidthL;
   }
 
   .dataVisualizerUniformPanel {
@@ -89,9 +88,9 @@ $panelWidthXL:    900px;
 
   .dataVisualizerPanelWrapper {
     border-radius: $euiBorderRadius;
-    border: 1px solid $euiBorderColor;
-    padding: 6px;
-    margin: 3px 12px 12px 0;
+    border: $euiBorderThin;
+    padding: $euiSizeS;
+    margin: $euiSizeXS $euiSizeM $euiSizeM 0;
   }
 
   .dataVisualizerTextContent {

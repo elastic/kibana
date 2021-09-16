@@ -105,8 +105,7 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   return (
     <EuiFlexItem
       data-test-subj={'fileDataVisualizerChoroplethMapTopValues'}
-      className={'dataVisualizerPanelWrapper'}
-      style={{ minHeight: 300 }}
+      className={'dataVisualizerPanelWrapper dataVisualizerMapWrapper'}
     >
       <EmbeddedMapComponent layerList={layerList} />
       {isTopValuesSampled === true && (

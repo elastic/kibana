@@ -101,7 +101,10 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerNumberContent'}>
       <DocumentStatsTable config={config} />
-      <EuiFlexItem className={'dataVisualizerSummaryTableWrapper dataVisualizerPanelWrapper'}>
+      <EuiFlexItem
+        className={'dataVisualizerSummaryTableWrapper dataVisualizerPanelWrapper'}
+        grow={1}
+      >
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
           className={'dataVisualizerSummaryTable'}
@@ -120,6 +123,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
         <EuiFlexItem
           data-test-subj={'dataVisualizerFieldDataMetricDistribution'}
           className="dataVisualizerPanelWrapper"
+          grow={1}
         >
           <EuiFlexItem grow={false}>
             <ExpandedRowFieldHeader>
