@@ -79,8 +79,8 @@ describe('utils', () => {
   });
 
   describe('getFieldMeta', () => {
-    test('returns "canHaveChildFields:true" for IP data type', () => {
-      expect(getFieldMeta({ name: 'ip_field', type: 'ip' })).toBe({
+    test('returns "canHaveMultiFields:true" for IP data type', () => {
+      expect(getFieldMeta({ name: 'ip_field', type: 'ip' })).toEqual({
         canHaveChildFields: false,
         canHaveMultiFields: true,
         childFieldsName: 'fields',
