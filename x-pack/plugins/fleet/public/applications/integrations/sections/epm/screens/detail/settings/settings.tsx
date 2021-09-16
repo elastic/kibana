@@ -32,7 +32,7 @@ import {
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 
-import { InstallationButton } from './installation_button';
+import { InstallButton } from './install_button';
 import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 
@@ -125,6 +125,20 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
     (installationStatus === InstallStatus.installed && installedVersion !== version);
 
   const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
+
+  const numOfAssets = useMemo(
+    () =>
+      Object.entries(packageInfo.assets).reduce(
+        (acc, [serviceName, serviceNameValue]) =>
+          acc +
+          Object.entries(serviceNameValue).reduce(
+            (acc2, [assetName, assetNameValue]) => acc2 + assetNameValue.length,
+            0
+          ),
+        0
+      ),
+    [packageInfo.assets]
+  );
 
   return (
     <EuiFlexGroup alignItems="flexStart">
@@ -232,8 +246,9 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false}>
                       <p>
-                        <InstallationButton
+                        <InstallButton
                           {...packageInfo}
+                          numOfAssets={numOfAssets}
                           disabled={!packagePoliciesData || packageHasUsages}
                         />
                       </p>
@@ -265,6 +280,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                         <p>
                           <UninstallButton
                             {...packageInfo}
+                            numOfAssets={numOfAssets}
                             latestVersion={latestVersion}
                             disabled={!packagePoliciesData || packageHasUsages}
                           />

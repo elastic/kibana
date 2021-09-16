@@ -45,6 +45,26 @@ interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'versio
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+/*
+
+  Updating an integration to a new version entails a bit of logic. We allow the user to choose whether they'd like to
+  simultaneously upgrade any package policies that include the current version of the integration. For example, if
+  a user is running four agent policies that include the `nginx-0.2.4` package and they update to `nginx-0.7.0`, they
+  can elect to also deploy the new integration version to any agent running one of those four agent policies.
+
+  If the user does not elect to upgrade their running policies, we simply install the latest version of the package and
+  navigate to the new version's settings page, e.g. `/detail/nginx-0.7.0/settings`.
+
+  If the user _does_ elect to upgrade their running policies, we display a confirmation modal. In this modal, we'll report the
+  number of agents and policies that will be affected by the upgrade, and if there are any conflicts. In the case of a conflict
+  between versions, an upgrade for a given package policy will be skipped and the user will need to manually recreate their policy
+  to resolve any breaking changes between versions. Once the user confirms, we first install the latest version of the integration,
+  then we make a call to the "upgrade policies" API endpoint with a list of all package policy ID's that include the current version
+  of the integration. This API endpoint will complete the upgrade process in bulk for each package policy provided. Upon completion,
+  we navigate to the new version's settings page, as above.
+
+*/
+
 export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   dryRunData,
   isUpgradingPackagePolicies = false,

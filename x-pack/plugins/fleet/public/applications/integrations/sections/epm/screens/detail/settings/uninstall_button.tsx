@@ -6,7 +6,7 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { InstallStatus } from '../../../../../types';
@@ -20,16 +20,17 @@ import {
 
 import { ConfirmPackageUninstall } from './confirm_package_uninstall';
 
-interface UninstallButtonProps extends Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version'> {
+interface UninstallButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'version'> {
   disabled?: boolean;
   latestVersion?: string;
+  numOfAssets: number;
 }
 
 export const UninstallButton: React.FunctionComponent<UninstallButtonProps> = ({
-  assets,
   disabled = false,
   latestVersion,
   name,
+  numOfAssets,
   title,
   version,
 }) => {
@@ -40,21 +41,6 @@ export const UninstallButton: React.FunctionComponent<UninstallButtonProps> = ({
   const isRemoving = installationStatus === InstallStatus.uninstalling;
 
   const [isUninstallModalVisible, setIsUninstallModalVisible] = useState<boolean>(false);
-
-  // TODO: Move to settings page and pass into install/uninstall buttons
-  const numOfAssets = useMemo(
-    () =>
-      Object.entries(assets).reduce(
-        (acc, [serviceName, serviceNameValue]) =>
-          acc +
-          Object.entries(serviceNameValue).reduce(
-            (acc2, [assetName, assetNameValue]) => acc2 + assetNameValue.length,
-            0
-          ),
-        0
-      ),
-    [assets]
-  );
 
   const handleClickUninstall = useCallback(() => {
     uninstallPackage({ name, version, title, redirectToVersion: latestVersion ?? version });
