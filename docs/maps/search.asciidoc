@@ -14,11 +14,11 @@ To add a layer that requests data from {es} to your map, click *Add layer*, then
 
 * Documents
 
-* <<terms-join, Choropleth>>
+* Choropleth
 
 * Clusters and grid
 
-* <<heatmap-layer, Heat map>>
+* Heat map
 
 * Point to point
 
