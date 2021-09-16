@@ -91,66 +91,73 @@ export function getStaticValue(
 
   // filter and organize data dimensions into threshold groups
   // now pick the columnId in the active data
+  const { dataLayer, accessor } = getAccessorCriteriaForGroup(groupId, dataLayers, activeData);
   return (
     computeStaticValueForGroup(
-      dataLayers,
+      dataLayer,
+      accessor,
       activeData,
-      getAccessorCriteriaForGroup(groupId),
       (layer) => groupId === 'x' && !layerHasNumberHistogram(layer)
     ) || fallbackValue
   );
 }
 
 function getAccessorCriteriaForGroup(
-  groupId: 'x' | 'yLeft' | 'yRight'
-): (layer: XYLayerConfig) => string | undefined {
+  groupId: 'x' | 'yLeft' | 'yRight',
+  dataLayers: XYState['layers'],
+  activeData: FramePublicAPI['activeData']
+) {
   switch (groupId) {
     case 'x':
-      return ({ xAccessor }) => xAccessor;
+      const dataLayer = dataLayers.find(({ xAccessor }) => xAccessor);
+      return {
+        dataLayer,
+        accessor: dataLayer?.xAccessor,
+      };
     case 'yLeft':
-      return ({ accessors, yConfig }) => {
-        if (yConfig == null) {
-          return accessors[0];
-        }
-        return yConfig.find(({ axisMode }) => axisMode == null || axisMode === 'left')?.forAccessor;
+      const { left } = groupAxesByType(dataLayers, activeData);
+      return {
+        dataLayer: dataLayers.find(({ layerId }) => layerId === left[0]?.layer),
+        accessor: left[0]?.accessor,
       };
     case 'yRight':
-      return ({ yConfig }) => {
-        return yConfig?.find(({ axisMode }) => axisMode === 'right')?.forAccessor;
+      const { right } = groupAxesByType(dataLayers, activeData);
+      return {
+        dataLayer: dataLayers.find(({ layerId }) => layerId === right[0]?.layer),
+        accessor: right[0]?.accessor,
       };
   }
 }
 
 function computeStaticValueForGroup(
-  dataLayers: XYState['layers'],
+  dataLayer: XYLayerConfig | undefined,
+  accessorId: string | undefined,
   activeData: NonNullable<FramePublicAPI['activeData']>,
-  getColumnIdForGroup: (layer: XYLayerConfig) => string | undefined,
   dropForDateHistogram: (layer: XYLayerConfig) => boolean
 ) {
-  const dataLayer = dataLayers.find(getColumnIdForGroup);
+  const defaultThresholdFactor = 3 / 4;
 
-  if (dataLayer) {
+  if (dataLayer && accessorId) {
     if (isPercentageSeries(dataLayer?.seriesType)) {
-      return 0.75;
+      return defaultThresholdFactor;
     }
     if (dropForDateHistogram(dataLayer)) {
       return;
     }
-    const columnId = getColumnIdForGroup(dataLayer);
     const tableId = Object.keys(activeData).find((key) =>
-      activeData[key].columns.some(({ id }) => id === columnId)
+      activeData[key].columns.some(({ id }) => id === accessorId)
     );
-    if (columnId && tableId) {
+    if (tableId) {
       const columnMax = activeData[tableId].rows.reduce(
-        (max, row) => Math.max(row[columnId], max),
+        (max, row) => Math.max(row[accessorId], max),
         -Infinity
       );
       const columnMin = activeData[tableId].rows.reduce(
-        (max, row) => Math.min(row[columnId], max),
+        (max, row) => Math.min(row[accessorId], max),
         Infinity
       );
       const interval = columnMax - columnMin;
-      return columnMin + Number(((interval * 3) / 4).toFixed(2));
+      return Number(columnMin + (interval * defaultThresholdFactor).toFixed(2));
     }
   }
 }
