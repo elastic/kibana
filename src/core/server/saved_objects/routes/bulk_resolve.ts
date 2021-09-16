@@ -8,11 +8,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
-import { InternalCoreUsageDataSetup } from '../../core_usage_data';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 import { catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
-  coreUsageData: InternalCoreUsageDataSetup;
+  coreUsageData: CoreUsageDataSetup;
 }
 
 export const registerBulkResolveRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
