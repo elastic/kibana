@@ -25,5 +25,9 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKeys.SCREENSHOTS]: null,
   [ConfigKeys.SYNTHETICS_ARGS]: (fields) =>
     arrayToJsonFormatter(fields[ConfigKeys.SYNTHETICS_ARGS]),
+  [ConfigKeys.JOURNEY_FILTERS_MATCH]: null,
+  [ConfigKeys.JOURNEY_FILTERS_TAGS]: (fields) =>
+    arrayToJsonFormatter(fields[ConfigKeys.JOURNEY_FILTERS_TAGS]),
+  [ConfigKeys.IGNORE_HTTPS_ERRORS]: null,
   ...commonFormatters,
 };

@@ -10,6 +10,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
   EuiSelect,
+  EuiFieldText,
+  EuiCheckbox,
   EuiFormRow,
   EuiDescribedFormGroup,
   EuiSpacer,
@@ -43,6 +45,73 @@ export const BrowserAdvancedFields = () => {
         title={
           <h4>
             <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.title"
+              defaultMessage="Synthetics agent filtering"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.description"
+            defaultMessage="Filter tests using match or tags options."
+          />
+        }
+      >
+        <EuiSpacer size="s" />
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.label"
+              defaultMessage="Filter match"
+            />
+          }
+          labelAppend={<OptionalLabel />}
+          helpText={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.helpText"
+              defaultMessage="Run only journeys with a name or tags that matches the provided glob."
+            />
+          }
+        >
+          <EuiFieldText
+            value={fields[ConfigKeys.JOURNEY_FILTERS_MATCH]}
+            onChange={(event) =>
+              handleInputChange({
+                value: event.target.value,
+                configKey: ConfigKeys.JOURNEY_FILTERS_MATCH,
+              })
+            }
+            data-test-subj="syntheticsBrowserJourneyFiltersMatch"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.label"
+              defaultMessage="Filter tags"
+            />
+          }
+          labelAppend={<OptionalLabel />}
+          helpText={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.helpText"
+              defaultMessage="Run only journeys with the given tag(s), or globs."
+            />
+          }
+        >
+          <ComboBox
+            selectedOptions={fields[ConfigKeys.JOURNEY_FILTERS_TAGS]}
+            onChange={(value) =>
+              handleInputChange({ value, configKey: ConfigKeys.JOURNEY_FILTERS_TAGS })
+            }
+            data-test-subj="syntheticsBrowserJourneyFiltersTags"
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.title"
               defaultMessage="Synthetics agent options"
             />
@@ -56,6 +125,34 @@ export const BrowserAdvancedFields = () => {
         }
       >
         <EuiSpacer size="s" />
+        <EuiFormRow
+          helpText={
+            <>
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.ignoreHttpsErrors.helpText"
+                defaultMessage="Set this option to true to disable TLS/SSL validation in the synthetics browser. This is useful for testing sites that use self-signed certs."
+              />
+            </>
+          }
+          data-test-subj="syntheticsBrowserIgnoreHttpsErrors"
+        >
+          <EuiCheckbox
+            id="syntheticsBrowserIgnoreHttpsErrorsCheckbox"
+            checked={fields[ConfigKeys.IGNORE_HTTPS_ERRORS]}
+            label={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.ignoreHttpsErrors.label"
+                defaultMessage="Ignore HTTPS errors"
+              />
+            }
+            onChange={(event) =>
+              handleInputChange({
+                value: event.target.checked,
+                configKey: ConfigKeys.IGNORE_HTTPS_ERRORS,
+              })
+            }
+          />
+        </EuiFormRow>
         <EuiFormRow
           label={
             <FormattedMessage

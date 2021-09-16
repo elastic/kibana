@@ -76,9 +76,13 @@ export enum ScreenshotOption {
 export enum ConfigKeys {
   APM_SERVICE_NAME = 'service.name',
   HOSTS = 'hosts',
+  IGNORE_HTTPS_ERRORS = 'ignore_https_errors',
+  JOURNEY_FILTERS_MATCH = 'filter_journeys.match',
+  JOURNEY_FILTERS_TAGS = 'filter_journeys.tags',
   MAX_REDIRECTS = 'max_redirects',
   MONITOR_TYPE = 'type',
   NAME = 'name',
+  PARAMS = 'params',
   PASSWORD = 'password',
   PROXY_URL = 'proxy_url',
   PROXY_USE_LOCAL_RESOLVER = 'proxy_use_local_resolver',
@@ -101,7 +105,6 @@ export enum ConfigKeys {
   SOURCE_ZIP_PASSWORD = 'source.zip_url.password',
   SOURCE_ZIP_FOLDER = 'source.zip_url.folder',
   SYNTHETICS_ARGS = 'synthetics_args',
-  PARAMS = 'params',
   TLS_CERTIFICATE_AUTHORITIES = 'ssl.certificate_authorities',
   TLS_CERTIFICATE = 'ssl.certificate',
   TLS_KEY = 'ssl.key',
@@ -198,6 +201,9 @@ export type IBrowserSimpleFields = {
 export interface IBrowserAdvancedFields {
   [ConfigKeys.SYNTHETICS_ARGS]: string[];
   [ConfigKeys.SCREENSHOTS]: string;
+  [ConfigKeys.JOURNEY_FILTERS_MATCH]: string;
+  [ConfigKeys.JOURNEY_FILTERS_TAGS]: string[];
+  [ConfigKeys.IGNORE_HTTPS_ERRORS]: boolean;
 }
 
 export type HTTPFields = IHTTPSimpleFields & IHTTPAdvancedFields & ITLSFields;
