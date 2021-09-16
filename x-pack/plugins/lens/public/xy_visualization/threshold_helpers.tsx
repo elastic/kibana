@@ -92,12 +92,15 @@ export function getStaticValue(
   // filter and organize data dimensions into threshold groups
   // now pick the columnId in the active data
   const { dataLayer, accessor } = getAccessorCriteriaForGroup(groupId, dataLayers, activeData);
+  if (groupId === 'x' && dataLayer && !layerHasNumberHistogram(dataLayer)) {
+    return fallbackValue;
+  }
   return (
     computeStaticValueForGroup(
       dataLayer,
       accessor,
       activeData,
-      (layer) => groupId === 'x' && !layerHasNumberHistogram(layer)
+      groupId !== 'x' // histogram axis should compute the min based on the current data
     ) || fallbackValue
   );
 }
@@ -133,16 +136,13 @@ function computeStaticValueForGroup(
   dataLayer: XYLayerConfig | undefined,
   accessorId: string | undefined,
   activeData: NonNullable<FramePublicAPI['activeData']>,
-  dropForDateHistogram: (layer: XYLayerConfig) => boolean
+  minZeroBased: boolean
 ) {
   const defaultThresholdFactor = 3 / 4;
 
   if (dataLayer && accessorId) {
     if (isPercentageSeries(dataLayer?.seriesType)) {
       return defaultThresholdFactor;
-    }
-    if (dropForDateHistogram(dataLayer)) {
-      return;
     }
     const tableId = Object.keys(activeData).find((key) =>
       activeData[key].columns.some(({ id }) => id === accessorId)
@@ -156,8 +156,10 @@ function computeStaticValueForGroup(
         (max, row) => Math.min(row[accessorId], max),
         Infinity
       );
-      const interval = columnMax - columnMin;
-      return Number(columnMin + (interval * defaultThresholdFactor).toFixed(2));
+      // Custom axis bounds can go below 0, so consider also lower values than 0
+      const finalMinValue = minZeroBased ? Math.min(0, columnMin) : columnMin;
+      const interval = columnMax - finalMinValue;
+      return Number((finalMinValue + interval * defaultThresholdFactor).toFixed(2));
     }
   }
 }

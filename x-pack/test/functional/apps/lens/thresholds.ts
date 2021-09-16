@@ -29,8 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add a threshold layer with a static value in it', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
