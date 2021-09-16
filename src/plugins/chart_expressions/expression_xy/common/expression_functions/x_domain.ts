@@ -57,77 +57,77 @@ export const xDomain = (): ExpressionFunctionDefinition<
   ExpressionValueXDomain
 > => ({
   name: X_DOMAIN_EXPRESSION,
-  help: i18n.translate('visTypeXy.function.valueaxis.help', {
+  help: i18n.translate('expressionXy.function.valueaxis.help', {
     defaultMessage: 'Generates value axis object',
   }),
   type: X_DOMAIN_EXPRESSION,
   args: {
     minInterval: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.xDomain.minInterval.help', {
+      help: i18n.translate('expressionXy.function.xDomain.minInterval.help', {
         defaultMessage: 'Min interval',
       }),
     },
 
     intervalUnit: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.xDomain.intervalUnit.help', {
+      help: i18n.translate('expressionXy.function.xDomain.intervalUnit.help', {
         defaultMessage: 'intervalUnit',
       }),
     },
 
     intervalValue: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.xDomain.intervalValue.help', {
+      help: i18n.translate('expressionXy.function.xDomain.intervalValue.help', {
         defaultMessage: 'intervalValue',
       }),
     },
 
     column: {
       types: ['vis_dimension'],
-      help: i18n.translate('visTypeXy.function.column.intervalValue.help', {
+      help: i18n.translate('expressionXy.function.column.intervalValue.help', {
         defaultMessage: 'column',
       }),
     },
 
     timezone: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.xDomain.timezone.help', {
+      help: i18n.translate('expressionXy.function.xDomain.timezone.help', {
         defaultMessage: 'timezone',
       }),
     },
 
     considerInterval: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.xDomain.considerInterval.help', {
+      help: i18n.translate('expressionXy.function.xDomain.considerInterval.help', {
         defaultMessage: 'considerInterval',
       }),
     },
 
     min: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.xDomain.min.help', {
+      help: i18n.translate('expressionXy.function.xDomain.min.help', {
         defaultMessage: 'min',
       }),
     },
 
     max: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.xDomain.max.help', {
+      help: i18n.translate('expressionXy.function.xDomain.max.help', {
         defaultMessage: 'max',
       }),
     },
 
     logBase: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.xDomain.logBase.help', {
+      help: i18n.translate('expressionXy.function.xDomain.logBase.help', {
         defaultMessage: 'logBase',
       }),
     },
 
     coordinates: {
       types: ['string', 'number'],
-      help: i18n.translate('visTypeXy.function.xDomain.coordinates.help', {
+      help: i18n.translate('expressionXy.function.xDomain.coordinates.help', {
         defaultMessage: 'coordinates',
       }),
       multi: true,

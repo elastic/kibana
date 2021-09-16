@@ -31,7 +31,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
   context: {
     types: ['datatable'],
   },
-  help: i18n.translate('visTypeXy.functions.help', {
+  help: i18n.translate('expressionXy.functions.help', {
     defaultMessage: 'XY visualization',
   }),
   args: {
@@ -42,198 +42,198 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
     },
     chartType: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.args.args.chartType.help', {
+      help: i18n.translate('expressionXy.function.args.args.chartType.help', {
         defaultMessage: 'Type of a chart. Can be line, area or histogram',
       }),
     },
     addTimeMarker: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.args.addTimeMarker.help', {
+      help: i18n.translate('expressionXy.function.args.addTimeMarker.help', {
         defaultMessage: 'Show time marker',
       }),
     },
     truncateLegend: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.args.truncateLegend.help', {
+      help: i18n.translate('expressionXy.function.args.truncateLegend.help', {
         defaultMessage: 'Defines if the legend will be truncated or not',
       }),
     },
     maxLegendLines: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.args.args.maxLegendLines.help', {
+      help: i18n.translate('expressionXy.function.args.args.maxLegendLines.help', {
         defaultMessage: 'Defines the maximum lines per legend item',
       }),
     },
     addLegend: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.args.addLegend.help', {
+      help: i18n.translate('expressionXy.function.args.addLegend.help', {
         defaultMessage: 'Show chart legend',
       }),
     },
     addTooltip: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.args.addTooltip.help', {
+      help: i18n.translate('expressionXy.function.args.addTooltip.help', {
         defaultMessage: 'Show tooltip on hover',
       }),
     },
     legendPosition: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.args.legendPosition.help', {
+      help: i18n.translate('expressionXy.function.args.legendPosition.help', {
         defaultMessage: 'Position the legend on top, bottom, left, right of the chart',
       }),
     },
     categoryAxes: {
       types: ['category_axis'],
-      help: i18n.translate('visTypeXy.function.args.categoryAxes.help', {
+      help: i18n.translate('expressionXy.function.args.categoryAxes.help', {
         defaultMessage: 'Category axis config',
       }),
       multi: true,
     },
     thresholdLine: {
       types: ['threshold_line'],
-      help: i18n.translate('visTypeXy.function.args.thresholdLine.help', {
+      help: i18n.translate('expressionXy.function.args.thresholdLine.help', {
         defaultMessage: 'Threshold line config',
       }),
     },
     labels: {
       types: ['label'],
-      help: i18n.translate('visTypeXy.function.args.labels.help', {
+      help: i18n.translate('expressionXy.function.args.labels.help', {
         defaultMessage: 'Chart labels config',
       }),
     },
     orderBucketsBySum: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.args.orderBucketsBySum.help', {
+      help: i18n.translate('expressionXy.function.args.orderBucketsBySum.help', {
         defaultMessage: 'Order buckets by sum',
       }),
     },
     seriesParams: {
       types: ['series_param'],
-      help: i18n.translate('visTypeXy.function.args.seriesParams.help', {
+      help: i18n.translate('expressionXy.function.args.seriesParams.help', {
         defaultMessage: 'Series param config',
       }),
       multi: true,
     },
     valueAxes: {
       types: ['value_axis'],
-      help: i18n.translate('visTypeXy.function.args.valueAxes.help', {
+      help: i18n.translate('expressionXy.function.args.valueAxes.help', {
         defaultMessage: 'Value axis config',
       }),
       multi: true,
     },
     radiusRatio: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.args.radiusRatio.help', {
+      help: i18n.translate('expressionXy.function.args.radiusRatio.help', {
         defaultMessage: 'Dot size ratio',
       }),
     },
     gridCategoryLines: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.args.gridCategoryLines.help', {
+      help: i18n.translate('expressionXy.function.args.gridCategoryLines.help', {
         defaultMessage: 'Show grid category lines in chart',
       }),
     },
     gridValueAxis: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.args.gridValueAxis.help', {
+      help: i18n.translate('expressionXy.function.args.gridValueAxis.help', {
         defaultMessage: 'Name of value axis for which we show grid',
       }),
     },
     isVislibVis: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.args.isVislibVis.help', {
+      help: i18n.translate('expressionXy.function.args.isVislibVis.help', {
         defaultMessage:
           'Flag to indicate old vislib visualizations. Used for backwards compatibility including colors',
       }),
     },
     enableHistogramMode: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.args.enableHistogramMode.help', {
+      help: i18n.translate('expressionXy.function.args.enableHistogramMode.help', {
         defaultMessage: 'Flag to enable histogram mode',
       }),
     },
     detailedTooltip: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.args.detailedTooltip.help', {
+      help: i18n.translate('expressionXy.function.args.detailedTooltip.help', {
         defaultMessage: 'Show detailed tooltip',
       }),
     },
     fittingFunction: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.args.fittingFunction.help', {
+      help: i18n.translate('expressionXy.function.args.fittingFunction.help', {
         defaultMessage: 'Name of fitting function',
       }),
     },
     times: {
       types: ['time_marker'],
-      help: i18n.translate('visTypeXy.function.args.times.help', {
+      help: i18n.translate('expressionXy.function.args.times.help', {
         defaultMessage: 'Time marker config',
       }),
       multi: true,
     },
     palette: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.args.palette.help', {
+      help: i18n.translate('expressionXy.function.args.palette.help', {
         defaultMessage: 'Defines the chart palette name',
       }),
     },
     fillOpacity: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.args.fillOpacity.help', {
+      help: i18n.translate('expressionXy.function.args.fillOpacity.help', {
         defaultMessage: 'Defines the area chart fill opacity',
       }),
     },
     xDimension: {
       types: ['xy_dimension', 'null'],
-      help: i18n.translate('visTypeXy.function.args.xDimension.help', {
+      help: i18n.translate('expressionXy.function.args.xDimension.help', {
         defaultMessage: 'X axis dimension config',
       }),
     },
     yDimension: {
       types: ['xy_dimension'],
-      help: i18n.translate('visTypeXy.function.args.yDimension.help', {
+      help: i18n.translate('expressionXy.function.args.yDimension.help', {
         defaultMessage: 'Y axis dimension config',
       }),
       multi: true,
     },
     zDimension: {
       types: ['xy_dimension'],
-      help: i18n.translate('visTypeXy.function.args.zDimension.help', {
+      help: i18n.translate('expressionXy.function.args.zDimension.help', {
         defaultMessage: 'Z axis dimension config',
       }),
       multi: true,
     },
     widthDimension: {
       types: ['xy_dimension'],
-      help: i18n.translate('visTypeXy.function.args.widthDimension.help', {
+      help: i18n.translate('expressionXy.function.args.widthDimension.help', {
         defaultMessage: 'Width dimension config',
       }),
       multi: true,
     },
     seriesDimension: {
       types: ['xy_dimension'],
-      help: i18n.translate('visTypeXy.function.args.seriesDimension.help', {
+      help: i18n.translate('expressionXy.function.args.seriesDimension.help', {
         defaultMessage: 'Series dimension config',
       }),
       multi: true,
     },
     splitRowDimension: {
       types: ['xy_dimension'],
-      help: i18n.translate('visTypeXy.function.args.splitRowDimension.help', {
+      help: i18n.translate('expressionXy.function.args.splitRowDimension.help', {
         defaultMessage: 'Split by row dimension config',
       }),
       multi: true,
     },
     splitColumnDimension: {
       types: ['xy_dimension'],
-      help: i18n.translate('visTypeXy.function.args.splitColumnDimension.help', {
+      help: i18n.translate('expressionXy.function.args.splitColumnDimension.help', {
         defaultMessage: 'Split by column dimension config',
       }),
       multi: true,
     },
     xDomain: {
       types: ['x_domain'],
-      help: i18n.translate('visTypeXy.function.args.xDomain.help', {
+      help: i18n.translate('expressionXy.function.args.xDomain.help', {
         defaultMessage: 'x_domains',
       }),
     },
@@ -304,25 +304,25 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       const argsTable: Dimension[] = [
         [
           args.yDimension,
-          i18n.translate('visTypeXy.function.dimension.metric', {
+          i18n.translate('expressionXy.function.dimension.metric', {
             defaultMessage: 'Metric',
           }),
         ],
         [
           args.zDimension,
-          i18n.translate('visTypeXy.function.adimension.dotSize', {
+          i18n.translate('expressionXy.function.adimension.dotSize', {
             defaultMessage: 'Dot size',
           }),
         ],
         [
           args.splitColumnDimension,
-          i18n.translate('visTypeXy.function.dimension.splitcolumn', {
+          i18n.translate('expressionXy.function.dimension.splitcolumn', {
             defaultMessage: 'Column split',
           }),
         ],
         [
           args.splitRowDimension,
-          i18n.translate('visTypeXy.function.dimension.splitrow', {
+          i18n.translate('expressionXy.function.dimension.splitrow', {
             defaultMessage: 'Row split',
           }),
         ],
@@ -331,7 +331,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       if (args.xDimension) {
         argsTable.push([
           [args.xDimension],
-          i18n.translate('visTypeXy.function.adimension.bucket', {
+          i18n.translate('expressionXy.function.adimension.bucket', {
             defaultMessage: 'Bucket',
           }),
         ]);

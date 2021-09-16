@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions/public';
-import { ExpressionValueTimeMarker, ExpressionValueTimeMarkerArguments } from '../../common/types';
+import { ExpressionValueTimeMarker, ExpressionValueTimeMarkerArguments } from '../types';
 
 export const timeMarker = (): ExpressionFunctionDefinition<
   'timemarker',
@@ -17,39 +17,39 @@ export const timeMarker = (): ExpressionFunctionDefinition<
   ExpressionValueTimeMarker
 > => ({
   name: 'timemarker',
-  help: i18n.translate('visTypeXy.function.timemarker.help', {
+  help: i18n.translate('expressionXy.function.timemarker.help', {
     defaultMessage: 'Generates time marker object',
   }),
   type: 'time_marker',
   args: {
     time: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.timeMarker.time.help', {
+      help: i18n.translate('expressionXy.function.timeMarker.time.help', {
         defaultMessage: 'Exact Time',
       }),
       required: true,
     },
     class: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.timeMarker.class.help', {
+      help: i18n.translate('expressionXy.function.timeMarker.class.help', {
         defaultMessage: 'Css class name',
       }),
     },
     color: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.timeMarker.color.help', {
+      help: i18n.translate('expressionXy.function.timeMarker.color.help', {
         defaultMessage: 'Color of time marker',
       }),
     },
     opacity: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.timeMarker.opacity.help', {
+      help: i18n.translate('expressionXy.function.timeMarker.opacity.help', {
         defaultMessage: 'Opacity of time marker',
       }),
     },
     width: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.timeMarker.width.help', {
+      help: i18n.translate('expressionXy.function.timeMarker.width.help', {
         defaultMessage: 'Width of time marker',
       }),
     },

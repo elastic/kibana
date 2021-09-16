@@ -41,7 +41,7 @@ export const getLegendActions = (
         title: `${name}`,
         items: [
           {
-            name: i18n.translate('visTypeXy.legend.filterForValueButtonAriaLabel', {
+            name: i18n.translate('expressionXy.legend.filterForValueButtonAriaLabel', {
               defaultMessage: 'Filter for value',
             }),
             'data-test-subj': `legend-${name}-filterIn`,
@@ -52,7 +52,7 @@ export const getLegendActions = (
             },
           },
           {
-            name: i18n.translate('visTypeXy.legend.filterOutValueButtonAriaLabel', {
+            name: i18n.translate('expressionXy.legend.filterOutValueButtonAriaLabel', {
               defaultMessage: 'Filter out value',
             }),
             'data-test-subj': `legend-${name}-filterOut`,
@@ -95,7 +95,7 @@ export const getLegendActions = (
         closePopover={() => setPopoverOpen(false)}
         panelPaddingSize="none"
         anchorPosition="upLeft"
-        title={i18n.translate('visTypeXy.legend.filterOptionsLegend', {
+        title={i18n.translate('expressionXy.legend.filterOptionsLegend', {
           defaultMessage: '{legendDataLabel}, filter options',
           values: { legendDataLabel: name },
         })}

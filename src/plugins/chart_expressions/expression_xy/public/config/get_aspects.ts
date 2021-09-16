@@ -19,7 +19,7 @@ import { Aspect, Aspects, Dimension, Dimensions } from '../../common/types';
 export function getEmptyAspect(): Aspect {
   return {
     accessor: null,
-    title: i18n.translate('visTypeXy.aggResponse.allDocsTitle', {
+    title: i18n.translate('expressionXy.response.allDocsTitle', {
       defaultMessage: 'All docs',
     }),
     params: {

@@ -17,7 +17,7 @@ export const seriesParam = (): ExpressionFunctionDefinition<
   ExpressionValueSeriesParam
 > => ({
   name: 'seriesparam',
-  help: i18n.translate('visTypeXy.function.seriesparam.help', {
+  help: i18n.translate('expressionXy.function.seriesparam.help', {
     defaultMessage: 'Generates series param object',
   }),
   type: 'series_param',
@@ -25,70 +25,70 @@ export const seriesParam = (): ExpressionFunctionDefinition<
   args: {
     label: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.seriesParam.label.help', {
+      help: i18n.translate('expressionXy.function.seriesParam.label.help', {
         defaultMessage: 'Name of series param',
       }),
       required: true,
     },
     id: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.seriesParam.id.help', {
+      help: i18n.translate('expressionXy.function.seriesParam.id.help', {
         defaultMessage: 'Id of series param',
       }),
       required: true,
     },
     drawLinesBetweenPoints: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.seriesParam.drawLinesBetweenPoints.help', {
+      help: i18n.translate('expressionXy.function.seriesParam.drawLinesBetweenPoints.help', {
         defaultMessage: 'Draw lines between points',
       }),
     },
     interpolate: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.seriesParam.interpolate.help', {
+      help: i18n.translate('expressionXy.function.seriesParam.interpolate.help', {
         defaultMessage: 'Interpolate mode. Can be linear, cardinal or step-after',
       }),
     },
     show: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.seriesParam.show.help', {
+      help: i18n.translate('expressionXy.function.seriesParam.show.help', {
         defaultMessage: 'Show param',
       }),
       required: true,
     },
     lineWidth: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.seriesParam.lineWidth.help', {
+      help: i18n.translate('expressionXy.function.seriesParam.lineWidth.help', {
         defaultMessage: 'Width of line',
       }),
     },
     mode: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.seriesParam.mode.help', {
+      help: i18n.translate('expressionXy.function.seriesParam.mode.help', {
         defaultMessage: 'Chart mode. Can be stacked or percentage',
       }),
     },
     showCircles: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.seriesParam.showCircles.help', {
+      help: i18n.translate('expressionXy.function.seriesParam.showCircles.help', {
         defaultMessage: 'Show circles',
       }),
     },
     circlesRadius: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.seriesParam.circlesRadius.help', {
+      help: i18n.translate('expressionXy.function.seriesParam.circlesRadius.help', {
         defaultMessage: 'Defines the circles size (radius)',
       }),
     },
     type: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.seriesParam.type.help', {
+      help: i18n.translate('expressionXy.function.seriesParam.type.help', {
         defaultMessage: 'Chart type. Can be line, area or histogram',
       }),
     },
     valueAxis: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.seriesParam.valueAxis.help', {
+      help: i18n.translate('expressionXy.function.seriesParam.valueAxis.help', {
         defaultMessage: 'Name of value axis',
       }),
     },

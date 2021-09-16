@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions/public';
-import type { ExpressionValueScale, ExpressionValueScaleArguments } from '../../common/types';
+import type { ExpressionValueScale, ExpressionValueScaleArguments } from '../types';
 
 export const visScale = (): ExpressionFunctionDefinition<
   'visscale',
@@ -17,50 +17,50 @@ export const visScale = (): ExpressionFunctionDefinition<
   ExpressionValueScale
 > => ({
   name: 'visscale',
-  help: i18n.translate('visTypeXy.function.scale.help', {
+  help: i18n.translate('expressionXy.function.scale.help', {
     defaultMessage: 'Generates scale object',
   }),
   type: 'vis_scale',
   args: {
     boundsMargin: {
       types: ['number', 'string'],
-      help: i18n.translate('visTypeXy.function.scale.boundsMargin.help', {
+      help: i18n.translate('expressionXy.function.scale.boundsMargin.help', {
         defaultMessage: 'Margin of bounds',
       }),
     },
     defaultYExtents: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.scale.defaultYExtents.help', {
+      help: i18n.translate('expressionXy.function.scale.defaultYExtents.help', {
         defaultMessage: 'Flag which allows to scale to data bounds',
       }),
     },
     setYExtents: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.scale.setYExtents.help', {
+      help: i18n.translate('expressionXy.function.scale.setYExtents.help', {
         defaultMessage: 'Flag which allows to set your own extents',
       }),
     },
     max: {
       types: ['number', 'null'],
-      help: i18n.translate('visTypeXy.function.scale.max.help', {
+      help: i18n.translate('expressionXy.function.scale.max.help', {
         defaultMessage: 'Max value',
       }),
     },
     min: {
       types: ['number', 'null'],
-      help: i18n.translate('visTypeXy.function.scale.min.help', {
+      help: i18n.translate('expressionXy.function.scale.min.help', {
         defaultMessage: 'Min value',
       }),
     },
     mode: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.scale.mode.help', {
+      help: i18n.translate('expressionXy.function.scale.mode.help', {
         defaultMessage: 'Scale mode. Can be normal, percentage, wiggle or silhouette',
       }),
     },
     type: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.scale.type.help', {
+      help: i18n.translate('expressionXy.function.scale.type.help', {
         defaultMessage: 'Scale type. Can be linear, log or square root',
       }),
       required: true,

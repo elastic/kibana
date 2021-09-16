@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions/public';
-import { ExpressionValueLabel, ExpressionValueLabelArguments } from '../../common/types';
+import { ExpressionValueLabel, ExpressionValueLabelArguments } from '../types';
 
 export const label = (): ExpressionFunctionDefinition<
   'label',
@@ -17,44 +17,44 @@ export const label = (): ExpressionFunctionDefinition<
   ExpressionValueLabel
 > => ({
   name: 'label',
-  help: i18n.translate('visTypeXy.function.label.help', {
+  help: i18n.translate('expressionXy.function.label.help', {
     defaultMessage: 'Generates label object',
   }),
   type: 'label',
   args: {
     color: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.label.color.help', {
+      help: i18n.translate('expressionXy.function.label.color.help', {
         defaultMessage: 'Color of label',
       }),
     },
     filter: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.label.filter.help', {
+      help: i18n.translate('expressionXy.function.label.filter.help', {
         defaultMessage: 'Hides overlapping labels and duplicates on axis',
       }),
     },
     overwriteColor: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.label.overwriteColor.help', {
+      help: i18n.translate('expressionXy.function.label.overwriteColor.help', {
         defaultMessage: 'Overwrite color',
       }),
     },
     rotate: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.label.rotate.help', {
+      help: i18n.translate('expressionXy.function.label.rotate.help', {
         defaultMessage: 'Rotate angle',
       }),
     },
     show: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.label.show.help', {
+      help: i18n.translate('expressionXy.function.label.show.help', {
         defaultMessage: 'Show label',
       }),
     },
     truncate: {
       types: ['number', 'null'],
-      help: i18n.translate('visTypeXy.function.label.truncate.help', {
+      help: i18n.translate('expressionXy.function.label.truncate.help', {
         defaultMessage: 'The number of symbols before truncating',
       }),
     },

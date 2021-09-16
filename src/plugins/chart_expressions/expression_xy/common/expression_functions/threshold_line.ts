@@ -17,42 +17,42 @@ export const thresholdLine = (): ExpressionFunctionDefinition<
   ExpressionValueThresholdLine
 > => ({
   name: 'thresholdline',
-  help: i18n.translate('visTypeXy.function.thresholdLine.help', {
+  help: i18n.translate('expressionXy.function.thresholdLine.help', {
     defaultMessage: 'Generates threshold line object',
   }),
   type: 'threshold_line',
   args: {
     show: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.thresholdLine.show.help', {
+      help: i18n.translate('expressionXy.function.thresholdLine.show.help', {
         defaultMessage: 'Show threshould line',
       }),
       required: true,
     },
     value: {
       types: ['number', 'null'],
-      help: i18n.translate('visTypeXy.function.thresholdLine.value.help', {
+      help: i18n.translate('expressionXy.function.thresholdLine.value.help', {
         defaultMessage: 'Threshold value',
       }),
       required: true,
     },
     width: {
       types: ['number', 'null'],
-      help: i18n.translate('visTypeXy.function.thresholdLine.width.help', {
+      help: i18n.translate('expressionXy.function.thresholdLine.width.help', {
         defaultMessage: 'Width of threshold line',
       }),
       required: true,
     },
     style: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.thresholdLine.style.help', {
+      help: i18n.translate('expressionXy.function.thresholdLine.style.help', {
         defaultMessage: 'Style of threshold line. Can be full, dashed or dot-dashed',
       }),
       required: true,
     },
     color: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.thresholdLine.color.help', {
+      help: i18n.translate('expressionXy.function.thresholdLine.color.help', {
         defaultMessage: 'Color of threshold line',
       }),
       required: true,
