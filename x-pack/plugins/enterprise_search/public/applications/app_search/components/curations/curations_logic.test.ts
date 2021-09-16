@@ -17,8 +17,6 @@ import { nextTick } from '@kbn/test/jest';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
-import { CurationsValues } from './curations_logic';
-
 import { CurationsLogic } from './';
 
 describe('CurationsLogic', () => {
@@ -48,7 +46,7 @@ describe('CurationsLogic', () => {
     ],
   };
 
-  const DEFAULT_VALUES: CurationsValues = {
+  const DEFAULT_VALUES = {
     dataLoading: true,
     curations: [],
     meta: DEFAULT_META,

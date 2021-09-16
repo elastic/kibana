@@ -25,7 +25,7 @@ import { Curation, CurationsAPIResponse } from './types';
 
 type CurationsPageTabs = 'overview' | 'settings';
 
-export interface CurationsValues {
+interface CurationsValues {
   dataLoading: boolean;
   curations: Curation[];
   meta: Meta;
