@@ -197,6 +197,11 @@ describe('Executor', () => {
           types: ['string'],
           help: 'other arg',
         },
+        nullable: {
+          types: ['string', 'null'],
+          help: 'nullable arg',
+          default: null,
+        },
       },
       extract: (state: ExpressionAstFunction['arguments']) => {
         const references: SavedObjectReference[] = [
@@ -252,6 +257,14 @@ describe('Executor', () => {
         expect(references[1].name).toBe('l2_ref.id');
         expect(references[1].id).toBe('my-id');
 
+        expect(formatExpression(executor.inject(state, references))).toBe(expression);
+      });
+
+      test('allows expression function argument to be null', () => {
+        const expression = `ref nullable=null id="my-id" other={ref id="nested-id" other="other" | foo bar="baz"}`;
+        const { state, references } = executor.extract(parseExpression(expression));
+
+        expect(state.chain[0].arguments.nullable[0]).toBeNull();
         expect(formatExpression(executor.inject(state, references))).toBe(expression);
       });
     });
