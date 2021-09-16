@@ -7,14 +7,15 @@
  */
 
 const Path = require('path');
+
+const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-
 const { REPO_ROOT } = require('@kbn/utils');
+const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 
-const UiSharedDeps = require('./src/index');
+const UiSharedDepsSrc = require('./src');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
-const WEBPACK_SRC = require.resolve('webpack');
 
 module.exports = {
   node: {
@@ -26,41 +27,33 @@ module.exports = {
   },
   mode: 'production',
   entry: {
-    'kbn-ui-shared-deps': './src/entry.js',
-    'kbn-ui-shared-deps.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
-    'kbn-ui-shared-deps.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
-    'kbn-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_amsterdam_dark.css'],
-    'kbn-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
+    'kbn-ui-shared-deps-src': './src/entry.js',
   },
   context: __dirname,
   devtool: 'cheap-source-map',
   output: {
-    path: UiSharedDeps.distDir,
+    path: UiSharedDepsSrc.distDir,
     filename: '[name].js',
+    chunkFilename: 'kbn-ui-shared-deps-src.chunk.[id].js',
     sourceMapFilename: '[file].map',
     devtoolModuleFilenameTemplate: (info) =>
-      `kbn-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
+      `kbn-ui-shared-deps-src/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__kbnSharedDeps__',
     futureEmitAssets: true,
   },
 
   module: {
-    noParse: [MOMENT_SRC, WEBPACK_SRC],
     rules: [
       {
         include: [require.resolve('./src/entry.js')],
         use: [
           {
-            loader: UiSharedDeps.publicPathLoader,
+            loader: UiSharedDepsNpm.publicPathLoader,
             options: {
-              key: 'kbn-ui-shared-deps',
+              key: 'kbn-ui-shared-deps-src',
             },
           },
         ],
-      },
-      {
-        test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
         include: [require.resolve('./src/theme.ts')],
@@ -74,23 +67,8 @@ module.exports = {
         ],
       },
       {
-        test: /[\\\/]@elastic[\\\/]eui[\\\/].*\.js$/,
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              plugins: [
-                [
-                  require.resolve('babel-plugin-transform-react-remove-prop-types'),
-                  {
-                    mode: 'remove',
-                    removeImport: true,
-                  },
-                ],
-              ],
-            },
-          },
-        ],
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
         test: /\.(ttf)(\?|$)/,
@@ -103,6 +81,8 @@ module.exports = {
   },
 
   resolve: {
+    extensions: ['.js', '.ts'],
+    symlinks: false,
     alias: {
       moment: MOMENT_SRC,
       // NOTE: Used to include react profiling on bundles
@@ -110,23 +90,11 @@ module.exports = {
       'react-dom$': 'react-dom/profiling',
       'scheduler/tracing': 'scheduler/tracing-profiling',
     },
-    extensions: ['.js', '.ts'],
-    symlinks: false,
   },
 
   optimization: {
     minimize: false,
     noEmitOnErrors: true,
-    splitChunks: {
-      cacheGroups: {
-        'kbn-ui-shared-deps.@elastic': {
-          name: 'kbn-ui-shared-deps.@elastic',
-          test: (m) => m.resource && m.resource.includes('@elastic'),
-          chunks: 'all',
-          enforce: true,
-        },
-      },
-    },
   },
 
   performance: {
@@ -139,6 +107,11 @@ module.exports = {
   plugins: [
     new MiniCssExtractPlugin({
       filename: '[name].css',
+    }),
+
+    new webpack.DllReferencePlugin({
+      context: REPO_ROOT,
+      manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line
     }),
   ],
 };

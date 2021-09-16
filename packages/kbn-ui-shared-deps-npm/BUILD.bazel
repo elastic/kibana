@@ -3,8 +3,8 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
-PKG_BASE_NAME = "kbn-ui-shared-deps"
-PKG_REQUIRE_NAME = "@kbn/ui-shared-deps"
+PKG_BASE_NAME = "kbn-ui-shared-deps-npm"
+PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-npm"
 
 SOURCE_FILES = glob(
   [
@@ -23,20 +23,13 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "flot_charts/package.json",
-  "theme/package.json",
+  "eui_theme_vars/package.json",
   "package.json",
   "README.md"
 ]
 
 RUNTIME_DEPS = [
   "//packages/elastic-datemath",
-  "//packages/elastic-safer-lodash-set",
-  "//packages/kbn-analytics",
-  "//packages/kbn-babel-preset",
-  "//packages/kbn-i18n",
-  "//packages/kbn-monaco",
-  "//packages/kbn-std",
   "//packages/kbn-utils",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
@@ -45,6 +38,7 @@ RUNTIME_DEPS = [
   "@npm//abortcontroller-polyfill",
   "@npm//angular",
   "@npm//babel-loader",
+  "@npm//babel-plugin-transform-react-remove-prop-types",
   "@npm//core-js",
   "@npm//css-loader",
   "@npm//fflate",
@@ -71,14 +65,12 @@ RUNTIME_DEPS = [
   "@npm//whatwg-fetch"
 ]
 
+WEBPACK_DEPS = [
+  "@npm//clean-webpack-plugin",
+]
+
 TYPES_DEPS = [
   "//packages/elastic-datemath",
-  "//packages/elastic-safer-lodash-set",
-  "//packages/kbn-analytics",
-  "//packages/kbn-babel-preset",
-  "//packages/kbn-i18n",
-  "//packages/kbn-monaco",
-  "//packages/kbn-std",
   "//packages/kbn-utils",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
@@ -146,7 +138,7 @@ ts_project(
 
 webpack(
   name = "shared_built_assets",
-  data = RUNTIME_DEPS + [
+  data = RUNTIME_DEPS + WEBPACK_DEPS + [
     "//:package.json",
     ":srcs",
     ":tsconfig",

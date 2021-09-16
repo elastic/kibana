@@ -16,5 +16,5 @@ module.exports = function (source) {
   const options = this.query;
   const valOpts = Qs.stringify({ key: options.key });
   const req = `${VAL_LOADER}?${valOpts}!${MODULE_CREATOR}`;
-  return `import ${stringifyRequest(this, req)};${source}`;
+  return `require(${stringifyRequest(this, req)});${source}`;
 };

@@ -19,6 +19,7 @@ import {
   isNormalModule,
   isIgnoredModule,
   isConcatenatedModule,
+  isDelegatedModule,
   getModulePath,
 } from './webpack_helpers';
 
@@ -118,7 +119,7 @@ export class PopulateBundleCachePlugin {
             continue;
           }
 
-          if (isExternalModule(module) || isIgnoredModule(module)) {
+          if (isExternalModule(module) || isIgnoredModule(module) || isDelegatedModule(module)) {
             continue;
           }
 

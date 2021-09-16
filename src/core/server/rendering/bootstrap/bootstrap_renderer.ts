@@ -78,7 +78,8 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     // src/optimize/bundles_route/bundles_route.ts
     const publicPathMap = JSON.stringify({
       core: `${regularBundlePath}/core/`,
-      'kbn-ui-shared-deps': `${regularBundlePath}/kbn-ui-shared-deps/`,
+      'kbn-ui-shared-deps-src': `${regularBundlePath}/kbn-ui-shared-deps-src/`,
+      'kbn-ui-shared-deps-npm': `${regularBundlePath}/kbn-ui-shared-deps-npm/`,
       ...Object.fromEntries(
         [...bundlePaths.entries()].map(([pluginId, plugin]) => [pluginId, plugin.publicPath])
       ),
