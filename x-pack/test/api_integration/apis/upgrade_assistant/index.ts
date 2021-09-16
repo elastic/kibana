@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Upgrade Assistant', () => {
     loadTestFile(require.resolve('./upgrade_assistant'));
     loadTestFile(require.resolve('./cloud_backup_status'));
+    loadTestFile(require.resolve('./es_deprecations'));
   });
 }
