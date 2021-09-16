@@ -114,6 +114,7 @@ It allows you to monitor the performance of thousands of applications in real ti
           'An APM index pattern is required for some features in the APM UI.',
       }
     ),
-    integrationBrowserCategories: ['elastic_stack'],
+    eprPackageOverlap: 'apm',
+    // integrationBrowserCategories: ['elastic_stack'],
   } as TutorialSchema;
 };
