@@ -15,7 +15,7 @@ export function createTransformHealthRuleType(): AlertTypeModel<TransformHealthR
   return {
     id: TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
     description: i18n.translate('xpack.transform.alertingRuleTypes.transformHealth.description', {
-      defaultMessage: 'Alert when transform jobs experience operational issues.',
+      defaultMessage: 'Alert when transforms experience operational issues.',
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
