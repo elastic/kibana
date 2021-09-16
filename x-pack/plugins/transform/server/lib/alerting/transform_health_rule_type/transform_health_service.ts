@@ -46,6 +46,7 @@ export function transformHealthServiceProvider(esClient: ElasticsearchClient) {
       await esClient.transform.getTransform({
         ...(includeAll ? {} : { transform_id: includeTransforms.join(',') }),
         allow_no_match: true,
+        size: 1000,
       })
     ).body.transforms as Transform[];
 

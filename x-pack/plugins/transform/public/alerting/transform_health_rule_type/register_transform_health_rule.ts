@@ -57,6 +57,7 @@ export function createTransformHealthRuleType(): AlertTypeModel<TransformHealthR
   \\{\\{/notification_message\\}\\}\\{\\{#node_name\\}\\}Node name: \\{\\{node_name\\}\\}
   \\{\\{/node_name\\}\\}\\{\\{#timestamp\\}\\}Timestamp: \\{\\{timestamp\\}\\}
   \\{\\{/timestamp\\}\\}
+
 \\{\\{/context.results\\}\\}
 `,
       }
