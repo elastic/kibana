@@ -14,7 +14,6 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { JOB_STATE } from '../../../../common';
 
 interface Props {
-  jobCount?: number;
   jobIds?: string[];
 }
 
@@ -22,7 +21,7 @@ function isJobAwaitingNodeAssignment(job: estypes.MlJobStats) {
   return job.node === undefined && job.state === JOB_STATE.OPENING;
 }
 
-export const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobCount, jobIds }) => {
+export const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
   const { http } = useKibana().services;
 
   const [unassignedJobCount, setUnassignedJobCount] = useState<null | number>(0);
@@ -43,21 +42,19 @@ export const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobCount, jobIds }) => {
         );
         const unassignedJobs = jobs.filter((j) => isJobAwaitingNodeAssignment(j));
         setUnassignedJobCount(unassignedJobs.length);
-      } else if (jobCount === undefined && jobIds === undefined) {
+      } else if (jobIds === undefined) {
         setUnassignedJobCount(null);
-      } else if (jobCount !== undefined && jobCount > 0) {
-        setUnassignedJobCount(jobCount);
       }
     } catch (error) {
       setUnassignedJobCount(null);
       // eslint-disable-next-line no-console
       console.error('Could not determine ML node information', error);
     }
-  }, [jobCount, jobIds]);
+  }, [jobIds]);
 
   useEffect(() => {
     checkNodes();
-  }, [jobCount, jobIds]);
+  }, [jobIds]);
 
   if (unassignedJobCount === 0) {
     return null;
