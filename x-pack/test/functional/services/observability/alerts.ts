@@ -17,6 +17,7 @@ const DATE_WITH_DATA = {
 };
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
+const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 
 const ACTION_COLUMN_INDEX = 1;
 
@@ -36,7 +37,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
   };
 
   const getTableColumnHeaders = async () => {
-    const table = await testSubjects.find('events-viewer-panel');
+    const table = await testSubjects.find(ALERTS_TABLE_CONTAINER_SELECTOR);
     const tableHeaderRow = await testSubjects.findDescendant('dataGridHeader', table);
     const columnHeaders = await tableHeaderRow.findAllByXpath('./div');
     return columnHeaders;
@@ -57,7 +58,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
   };
 
   const getTableOrFail = async () => {
-    return await testSubjects.existOrFail('events-viewer-panel');
+    return await testSubjects.existOrFail(ALERTS_TABLE_CONTAINER_SELECTOR);
   };
 
   const getNoDataStateOrFail = async () => {
