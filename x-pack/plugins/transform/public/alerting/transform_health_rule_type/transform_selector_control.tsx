@@ -7,7 +7,6 @@
 
 import { EuiComboBox, EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
 import React, { FC, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 import { isDefined } from '../../../common/types/common';
 
@@ -55,19 +54,7 @@ export const TransformSelectorControl: FC<TransformSelectorControlProps> = ({
   }, [options, allowSelectAll]);
 
   return (
-    <EuiFormRow
-      fullWidth
-      label={
-        label ?? (
-          <FormattedMessage
-            id="xpack.transform.transformSelector.formControlLabel"
-            defaultMessage="Select transforms"
-          />
-        )
-      }
-      isInvalid={!!errors?.length}
-      error={errors}
-    >
+    <EuiFormRow fullWidth label={label} isInvalid={!!errors?.length} error={errors}>
       <EuiComboBox<string>
         singleSelection={false}
         selectedOptions={selectedOptionsEui}

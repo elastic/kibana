@@ -87,7 +87,7 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
       <TransformSelectorControl
         label={
           <FormattedMessage
-            id="xpack.transform.alertTypes.transformHealth.testsSelection.enableTestLabel"
+            id="xpack.transform.alertTypes.transformHealth.includeTransformsLabel"
             defaultMessage="Include transforms"
           />
         }
@@ -104,7 +104,7 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
           <TransformSelectorControl
             label={
               <FormattedMessage
-                id="xpack.transform.transformSelector.formControlLabel"
+                id="xpack.transform.alertTypes.transformHealth.excludeTransformsLabel"
                 defaultMessage="Exclude transforms"
               />
             }

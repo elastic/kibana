@@ -35,7 +35,7 @@ export function createTransformHealthRuleType(): AlertTypeModel<TransformHealthR
     defaultActionMessage: i18n.translate(
       'xpack.transform.alertTypes.transformHealth.defaultActionMessage',
       {
-        defaultMessage: `[\\{\\{rule.name\\}\\}] Transforms health check result:
+        defaultMessage: `[\\{\\{rule.name\\}\\}] Transform health check result:
 \\{\\{context.message\\}\\}
 \\{\\{#context.results\\}\\}
   Transform ID: \\{\\{transform_id\\}\\}
