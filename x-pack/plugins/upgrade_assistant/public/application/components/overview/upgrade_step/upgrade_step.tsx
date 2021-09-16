@@ -123,6 +123,7 @@ export const getUpgradeStep = ({ docLinks, nextMajor }: Props): EuiStepProps => 
   return {
     title: i18nTexts.upgradeStepTitle(nextMajor),
     status: 'incomplete',
+    'data-test-subj': 'upgradeStep',
     children: <UpgradeStep docLinks={docLinks} />,
   };
 };

@@ -55,7 +55,7 @@ export default function upgradeAssistantFunctionalTests({
   const es = getService('es');
   const log = getService('log');
 
-  describe('Upgrade Assistant', function () {
+  describe('Deprecation pages', function () {
     this.tags('skipFirefox');
 
     before(async () => {
@@ -82,13 +82,6 @@ export default function upgradeAssistantFunctionalTests({
       }
 
       await security.testUser.restoreDefaults();
-    });
-
-    it('renders the Overview page', async () => {
-      await PageObjects.upgradeAssistant.navigateToPage();
-      await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
-        return testSubjects.exists('overview');
-      });
     });
 
     it('renders the Elasticsearch deprecations page', async () => {
