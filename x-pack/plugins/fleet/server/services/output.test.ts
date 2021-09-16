@@ -7,7 +7,6 @@
 
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import type { OutputSOAttributes } from '../types';
-import type { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 
 import { outputService, outputIdToUuid } from './output';
 import { appContextService } from './app_context';
