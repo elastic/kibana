@@ -21,7 +21,7 @@ import { OnboardingSteps, OrgNameOnboarding } from './onboarding_steps';
 const account = {
   id: '1',
   isAdmin: true,
-  canCreatePersonalSources: true,
+  canCreatePrivateSources: true,
   groups: [],
 };
 

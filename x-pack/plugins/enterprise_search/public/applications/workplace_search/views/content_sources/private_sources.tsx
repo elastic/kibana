@@ -51,11 +51,11 @@ export const PrivateSources: React.FC = () => {
   );
 
   const {
-    account: { canCreatePersonalSources, groups },
+    account: { canCreatePrivateSources, groups },
   } = useValues(AppLogic);
 
   const hasConfiguredConnectors = serviceTypes.some(({ configured }) => configured);
-  const canAddSources = canCreatePersonalSources && hasConfiguredConnectors;
+  const canAddSources = canCreatePrivateSources && hasConfiguredConnectors;
   const hasPrivateSources = privateContentSources?.length > 0;
   const hasOrgSources = contentSources.length > 0;
 
@@ -148,7 +148,7 @@ export const PrivateSources: React.FC = () => {
     <PersonalDashboardLayout pageChrome={[NAV.SOURCES]} isLoading={dataLoading}>
       <SourcesView>
         {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
-        {canCreatePersonalSources && privateSourcesSection}
+        {canCreatePrivateSources && privateSourcesSection}
         {orgSourcesSection}
       </SourcesView>
     </PersonalDashboardLayout>
