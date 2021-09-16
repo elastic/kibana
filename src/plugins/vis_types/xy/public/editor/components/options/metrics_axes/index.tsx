@@ -13,7 +13,12 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { IAggConfig } from '../../../../../../../data/public';
 
-import { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
+import {
+  VisTypeXyConfig,
+  ValueAxis,
+  SeriesParam,
+  CategoryAxis,
+} from '../../../../../../../chart_expressions/expression_xy/common/types';
 import { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
@@ -43,7 +48,7 @@ export type ChangeValueAxis = (
 
 const VALUE_AXIS_PREFIX = 'ValueAxis-';
 
-function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
+function MetricsAxisOptions(props: ValidationVisOptionsProps<VisTypeXyConfig>) {
   const { stateParams, setValue, aggs, vis, isTabSelected } = props;
 
   const setParamByIndex: SetParamByIndex = useCallback(

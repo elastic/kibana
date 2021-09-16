@@ -8,16 +8,16 @@
 
 import React, { lazy } from 'react';
 
-import { VisParams } from '../../../types';
+import { VisTypeXyConfig } from '../../../../../../chart_expressions/expression_xy/common/types';
 import { ValidationVisOptionsProps } from '../common';
 
 const PointSeriesOptionsLazy = lazy(() => import('./point_series'));
 const MetricsAxisOptionsLazy = lazy(() => import('./metrics_axes'));
 
-export const PointSeriesOptions = (props: ValidationVisOptionsProps<VisParams>) => (
+export const PointSeriesOptions = (props: ValidationVisOptionsProps<VisTypeXyConfig>) => (
   <PointSeriesOptionsLazy {...props} />
 );
 
-export const MetricsAxisOptions = (props: ValidationVisOptionsProps<VisParams>) => (
+export const MetricsAxisOptions = (props: ValidationVisOptionsProps<VisTypeXyConfig>) => (
   <MetricsAxisOptionsLazy {...props} />
 );

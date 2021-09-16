@@ -9,7 +9,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import { ScaleType } from '../../../../types';
+import { ScaleType } from '../../../../../../../chart_expressions/expression_xy/common/types';
 import { YExtents, YExtentsProps } from './y_extents';
 import { NumberInputOption } from '../../../../../../../vis_default_editor/public';
 

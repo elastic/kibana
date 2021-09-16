@@ -7,10 +7,6 @@
  */
 
 import { VisTypeDefinition } from '../../../../visualizations/public';
-import { ChartType } from '../../common';
+import { VisTypeXyConfig } from '../../../../chart_expressions/expression_xy/common/types';
 
-import { VisParams } from './param';
-
-export type VisTypeNames = ChartType | 'horizontal_bar';
-
-export type XyVisTypeDefinition = VisTypeDefinition<VisParams>;
+export type XyVisTypeDefinition = VisTypeDefinition<VisTypeXyConfig>;

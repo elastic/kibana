@@ -13,21 +13,9 @@ import { VisualizationsSetup, VisualizationsStart } from '../../../visualization
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import {
-  setDataActions,
-  setFormatService,
-  setThemeService,
-  setUISettings,
-  setDocLinks,
-  setPalettesService,
-  setTrackUiMetric,
-  setActiveCursor,
-} from './services';
+import { setPalettesService, setTrackUiMetric } from './services';
 
 import { visTypesDefinitions } from './vis_types';
-import { xyVisRenderer } from './vis_renderer';
-
-import * as expressionFunctions from './expression_functions';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeXyPluginSetup {}
@@ -45,6 +33,7 @@ export interface VisTypeXyPluginSetupDependencies {
 /** @internal */
 export interface VisTypeXyPluginStartDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['start']>;
+
   visualizations: VisualizationsStart;
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
@@ -64,22 +53,9 @@ export class VisTypeXyPlugin
     > {
   public setup(
     core: VisTypeXyCoreSetup,
-    { expressions, visualizations, charts, usageCollection }: VisTypeXyPluginSetupDependencies
+    { visualizations, charts, usageCollection }: VisTypeXyPluginSetupDependencies
   ) {
-    setUISettings(core.uiSettings);
-    setThemeService(charts.theme);
     setPalettesService(charts.palettes);
-
-    expressions.registerRenderer(xyVisRenderer);
-    expressions.registerFunction(expressionFunctions.visTypeXyVisFn);
-    expressions.registerFunction(expressionFunctions.categoryAxis);
-    expressions.registerFunction(expressionFunctions.timeMarker);
-    expressions.registerFunction(expressionFunctions.valueAxis);
-    expressions.registerFunction(expressionFunctions.seriesParam);
-    expressions.registerFunction(expressionFunctions.thresholdLine);
-    expressions.registerFunction(expressionFunctions.label);
-    expressions.registerFunction(expressionFunctions.visScale);
-    expressions.registerFunction(expressionFunctions.xDomain);
 
     visTypesDefinitions.forEach(visualizations.createBaseVisualization);
 
@@ -89,10 +65,6 @@ export class VisTypeXyPlugin
   }
 
   public start(core: CoreStart, { data, charts, fieldFormats }: VisTypeXyPluginStartDependencies) {
-    setFormatService(fieldFormats);
-    setDataActions(data.actions);
-    setDocLinks(core.docLinks);
-    setActiveCursor(charts.activeCursor);
     return {};
   }
 }

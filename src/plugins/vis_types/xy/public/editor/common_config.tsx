@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { VisEditorOptionsProps } from '../../../../visualizations/public';
 
-import type { VisParams } from '../types';
+import type { VisTypeXyConfig } from '../../../../chart_expressions/expression_xy/common/types';
 import { MetricsAxisOptions, PointSeriesOptions } from './components/options';
 import { ValidationWrapper } from './components/common/validation_wrapper';
 
@@ -21,7 +21,7 @@ export const optionTabs = [
     title: i18n.translate('visTypeXy.area.tabs.metricsAxesTitle', {
       defaultMessage: 'Metrics & axes',
     }),
-    editor: (props: VisEditorOptionsProps<VisParams>) => (
+    editor: (props: VisEditorOptionsProps<VisTypeXyConfig>) => (
       <ValidationWrapper {...props} component={MetricsAxisOptions} />
     ),
   },
@@ -30,7 +30,7 @@ export const optionTabs = [
     title: i18n.translate('visTypeXy.area.tabs.panelSettingsTitle', {
       defaultMessage: 'Panel settings',
     }),
-    editor: (props: VisEditorOptionsProps<VisParams>) => (
+    editor: (props: VisEditorOptionsProps<VisTypeXyConfig>) => (
       <ValidationWrapper {...props} component={PointSeriesOptions} />
     ),
   },

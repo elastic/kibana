@@ -18,7 +18,7 @@ import {
   RequiredNumberInputOption,
 } from '../../../../../../../vis_default_editor/public';
 import { ValidationVisOptionsProps } from '../../common';
-import { VisParams } from '../../../../types';
+import { VisTypeXyConfig } from '../../../../../../../chart_expressions/expression_xy/common/types';
 import { getThresholdLineStyles } from '../../../collections';
 
 const thresholdLineStyles = getThresholdLineStyles();
@@ -27,22 +27,22 @@ function ThresholdPanel({
   stateParams,
   setValue,
   setMultipleValidity,
-}: ValidationVisOptionsProps<VisParams>) {
+}: ValidationVisOptionsProps<VisTypeXyConfig>) {
   const setThresholdLine = useCallback(
-    <T extends keyof VisParams['thresholdLine']>(
+    <T extends keyof VisTypeXyConfig['thresholdLine']>(
       paramName: T,
-      value: VisParams['thresholdLine'][T]
+      value: VisTypeXyConfig['thresholdLine'][T]
     ) => setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value }),
     [stateParams.thresholdLine, setValue]
   );
 
   const setThresholdLineColor = useCallback(
-    (value: VisParams['thresholdLine']['color']) => setThresholdLine('color', value),
+    (value: VisTypeXyConfig['thresholdLine']['color']) => setThresholdLine('color', value),
     [setThresholdLine]
   );
 
   const setThresholdLineValidity = useCallback(
-    (paramName: keyof VisParams['thresholdLine'], isValid: boolean) =>
+    (paramName: keyof VisTypeXyConfig['thresholdLine'], isValid: boolean) =>
       setMultipleValidity(`thresholdLine__${paramName}`, isValid),
     [setMultipleValidity]
   );

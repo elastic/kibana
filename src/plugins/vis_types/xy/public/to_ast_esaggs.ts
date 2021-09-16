@@ -13,7 +13,7 @@ import {
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../../data/public';
 
-import { VisParams } from './types';
+import { VisTypeXyConfig } from '../../../chart_expressions/expression_xy/common/types';
 
 /**
  * Get esaggs expressions function
@@ -21,7 +21,7 @@ import { VisParams } from './types';
  * https://github.com/elastic/kibana/issues/61768
  * @param vis
  */
-export function getEsaggsFn(vis: Vis<VisParams>) {
+export function getEsaggsFn(vis: Vis<VisTypeXyConfig>) {
   return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: buildExpression([
       buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {

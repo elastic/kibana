@@ -14,9 +14,9 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 
 import { SelectOption, SwitchOption } from '../../../../../../../vis_default_editor/public';
+import { CategoryAxis } from '../../../../../../../chart_expressions/expression_xy/common/types';
 
 import { LabelOptions, SetAxisLabel } from './label_options';
-import { CategoryAxis } from '../../../../types';
 import { getPositions } from '../../../collections';
 
 const positions = getPositions();

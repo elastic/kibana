@@ -10,11 +10,16 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import { ChartOptions, ChartOptionsParams } from './chart_options';
-import { SeriesParam, ChartMode, AxisMode } from '../../../../types';
+import {
+  SeriesParam,
+  ChartMode,
+  AxisMode,
+  ChartType,
+} from '../../../../../../../chart_expressions/expression_xy/common/types';
+
 import { LineOptions } from './line_options';
 import { PointOptions } from './point_options';
 import { valueAxis, seriesParam } from './mocks';
-import { ChartType } from '../../../../../common';
 
 describe('ChartOptions component', () => {
   let setParamByIndex: jest.Mock;

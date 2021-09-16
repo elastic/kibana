@@ -13,14 +13,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { SelectOption, SwitchOption } from '../../../../../../../vis_default_editor/public';
-import { VisParams, ValueAxis } from '../../../../types';
+import {
+  VisTypeXyConfig,
+  ValueAxis,
+} from '../../../../../../../chart_expressions/expression_xy/common/types';
 import { ValidationVisOptionsProps } from '../../common';
 
-type GridPanelOptions = ValidationVisOptionsProps<VisParams>;
+type GridPanelOptions = ValidationVisOptionsProps<VisTypeXyConfig>;
 
 function GridPanel({ stateParams, setValue }: GridPanelOptions) {
   const setGrid = useCallback(
-    <T extends keyof VisParams['grid']>(paramName: T, value: VisParams['grid'][T]) =>
+    <T extends keyof VisTypeXyConfig['grid']>(paramName: T, value: VisTypeXyConfig['grid'][T]) =>
       setValue('grid', { ...stateParams.grid, [paramName]: value }),
     [stateParams.grid, setValue]
   );

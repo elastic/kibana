@@ -11,7 +11,7 @@ import { buildExpression } from '../../../expressions/public';
 import { sampleAreaVis } from './sample_vis.test.mocks';
 
 import { toExpressionAst } from './to_ast';
-import { VisParams } from './types';
+import { VisTypeXyConfig } from '../../../chart_expressions/expression_xy/common/types';
 
 jest.mock('../../../expressions/public', () => ({
   ...(jest.requireActual('../../../expressions/public') as any),
@@ -28,7 +28,7 @@ jest.mock('./to_ast_esaggs', () => ({
 }));
 
 describe('xy vis toExpressionAst function', () => {
-  let vis: Vis<VisParams>;
+  let vis: Vis<VisTypeXyConfig>;
 
   const params = {
     timefilter: {},

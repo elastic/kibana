@@ -13,8 +13,12 @@ import { Position } from '@elastic/charts';
 
 import { IAggConfig, IAggType } from 'src/plugins/data/public';
 
-import { ChartType } from '../../../../../common';
-import { VisParams, SeriesParam, ValueAxis } from '../../../../types';
+import {
+  VisTypeXyConfig,
+  SeriesParam,
+  ValueAxis,
+  ChartType,
+} from '../../../../../../../chart_expressions/expression_xy/common/types';
 import MetricsAxisOptions from './index';
 import { ValidationVisOptionsProps } from '../../common';
 import { ValueAxesPanel } from './value_axes_panel';
@@ -54,7 +58,7 @@ const createAggs = (aggs: any[]) => ({
 
 describe('MetricsAxisOptions component', () => {
   let setValue: jest.Mock;
-  let defaultProps: ValidationVisOptionsProps<VisParams>;
+  let defaultProps: ValidationVisOptionsProps<VisTypeXyConfig>;
   let axis: ValueAxis;
   let axisRight: ValueAxis;
   let chart: SeriesParam;
@@ -236,7 +240,7 @@ describe('MetricsAxisOptions component', () => {
     const getProps = (
       valuePosition1: Position = Position.Right,
       valuePosition2: Position = Position.Left
-    ): ValidationVisOptionsProps<VisParams> => ({
+    ): ValidationVisOptionsProps<VisTypeXyConfig> => ({
       ...defaultProps,
       stateParams: {
         ...defaultProps.stateParams,
@@ -374,7 +378,7 @@ describe('MetricsAxisOptions component', () => {
   describe('onCategoryAxisPositionChanged', () => {
     const getProps = (
       position: Position = Position.Bottom
-    ): ValidationVisOptionsProps<VisParams> => ({
+    ): ValidationVisOptionsProps<VisTypeXyConfig> => ({
       ...defaultProps,
       stateParams: {
         ...defaultProps.stateParams,

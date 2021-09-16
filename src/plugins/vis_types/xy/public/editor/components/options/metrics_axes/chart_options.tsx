@@ -13,11 +13,16 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { SelectOption } from '../../../../../../../vis_default_editor/public';
 
-import { SeriesParam, ValueAxis, ChartMode, AxisMode } from '../../../../types';
+import {
+  SeriesParam,
+  ValueAxis,
+  ChartMode,
+  AxisMode,
+  ChartType,
+} from '../../../../../../../chart_expressions/expression_xy/common/types';
 import { LineOptions } from './line_options';
 import { PointOptions } from './point_options';
 import { SetParamByIndex, ChangeValueAxis } from '.';
-import { ChartType } from '../../../../../common';
 import { getConfigCollections } from '../../../collections';
 
 const collections = getConfigCollections();

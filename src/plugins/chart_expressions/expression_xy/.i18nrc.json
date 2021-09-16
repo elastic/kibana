@@ -1,7 +1,0 @@
-{
-  "prefix": "expressionXy",
-  "paths": {
-    "expressionXy": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}

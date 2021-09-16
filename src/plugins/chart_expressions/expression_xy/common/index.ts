@@ -6,5 +6,20 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'expressionXy';
-export const PLUGIN_NAME = 'expressionXY';
+/**
+ * Type of charts able to render
+ */
+export enum ChartType {
+  Line = 'line',
+  Area = 'area',
+  Histogram = 'histogram',
+}
+
+/**
+ * Type of xy visualizations
+ */
+export type XyVisType = ChartType | 'horizontal_bar';
+
+export { getAdjustedInterval, getColumnByAccessor } from './utils';
+
+export { EXPRESSION_NAME } from './constants';

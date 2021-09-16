@@ -22,9 +22,9 @@ import {
   AxisMode,
   ThresholdLineStyle,
   InterpolationMode,
-} from '../types';
+  ChartType,
+} from '../../../../chart_expressions/expression_xy/common/types';
 import { toExpressionAst } from '../to_ast';
-import { ChartType } from '../../common';
 import { optionTabs } from '../editor/common_config';
 
 export const lineVisTypeDefinition = {

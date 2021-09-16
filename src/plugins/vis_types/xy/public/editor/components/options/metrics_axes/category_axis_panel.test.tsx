@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { Position } from '@elastic/charts';
 import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
-import { CategoryAxis } from '../../../../types';
+import { CategoryAxis } from '../../../../../../../chart_expressions/expression_xy/common/types';
 import { LabelOptions } from './label_options';
 import { categoryAxis } from './mocks';
-import { Position } from '@elastic/charts';
 
 describe('CategoryAxisPanel component', () => {
   let setCategoryAxis: jest.Mock;

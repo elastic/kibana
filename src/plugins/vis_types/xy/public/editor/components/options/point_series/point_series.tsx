@@ -18,17 +18,19 @@ import {
 } from '../../../../../../../vis_default_editor/public';
 import { BUCKET_TYPES } from '../../../../../../../data/public';
 
-import { VisParams } from '../../../../types';
+import {
+  VisTypeXyConfig,
+  ChartType,
+} from '../../../../../../../chart_expressions/expression_xy/common/types';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
-import { ChartType } from '../../../../../common';
 import { ValidationVisOptionsProps } from '../../common';
 import { ElasticChartsOptions } from './elastic_charts_options';
 import { getPositions } from '../../../collections';
 
 const legendPositions = getPositions();
 
-export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) {
+export function PointSeriesOptions(props: ValidationVisOptionsProps<VisTypeXyConfig>) {
   const { stateParams, setValue, vis, aggs } = props;
   const hasBarChart = useMemo(
     () =>

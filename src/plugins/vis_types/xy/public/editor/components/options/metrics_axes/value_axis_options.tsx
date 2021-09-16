@@ -16,7 +16,7 @@ import {
   TextInputOption,
 } from '../../../../../../../vis_default_editor/public';
 
-import { ValueAxis } from '../../../../types';
+import { ValueAxis } from '../../../../../../../chart_expressions/expression_xy/common/types';
 import { LabelOptions, SetAxisLabel } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
 import { SetParamByIndex } from '.';

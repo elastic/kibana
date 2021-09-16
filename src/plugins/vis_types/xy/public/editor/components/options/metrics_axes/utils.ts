@@ -10,8 +10,14 @@ import { upperFirst } from 'lodash';
 
 import { Position } from '@elastic/charts';
 
-import { VisParams, ValueAxis, SeriesParam, ChartMode, InterpolationMode } from '../../../../types';
-import { ChartType } from '../../../../../common';
+import {
+  VisTypeXyConfig,
+  ValueAxis,
+  SeriesParam,
+  ChartMode,
+  InterpolationMode,
+  ChartType,
+} from '../../../../../../../chart_expressions/expression_xy/common/types';
 
 export const makeSerie = (
   id: string,
@@ -57,7 +63,7 @@ const AXIS_PREFIX = 'Axis-';
 
 export const getUpdatedAxisName = (
   axisPosition: ValueAxis['position'],
-  valueAxes: VisParams['valueAxes']
+  valueAxes: VisTypeXyConfig['valueAxes']
 ) => {
   const axisName = upperFirst(axisPosition) + AXIS_PREFIX;
   const nextAxisNameNumber = valueAxes.reduce(countNextAxisNumber(axisName, 'name'), 1);

@@ -14,7 +14,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Vis } from '../../../../../../../visualizations/public';
 
-import { ValueAxis, SeriesParam } from '../../../../types';
+import {
+  ValueAxis,
+  SeriesParam,
+} from '../../../../../../../chart_expressions/expression_xy/common/types';
 import { ChartOptions } from './chart_options';
 import { SetParamByIndex, ChangeValueAxis } from '.';
 

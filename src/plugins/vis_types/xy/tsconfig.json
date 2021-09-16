@@ -20,5 +20,6 @@
     { "path": "../../usage_collection/tsconfig.json" },
     { "path": "../../kibana_utils/tsconfig.json" },
     { "path": "../../vis_default_editor/tsconfig.json" },
+    { "path": "../../chart_expressions/expression_xy/tsconfig.json" },
   ]
 }

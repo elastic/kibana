@@ -21,7 +21,7 @@ import { Labels } from '../../../charts/public';
 
 import {
   Dimensions,
-  VisParams,
+  VisTypeXyConfig,
   CategoryAxis,
   SeriesParam,
   ThresholdLine,
@@ -31,13 +31,17 @@ import {
   AxisMode,
   XDomainArguments,
   Dimension,
-} from './types';
-import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_functions/xy_vis_fn';
-import { ChartType, XyVisType } from '../common';
+  VisTypeXy,
+  ChartType,
+  XyVisType,
+} from '../../../chart_expressions/expression_xy/common/types';
+import {
+  EXPRESSION_NAME,
+  getColumnByAccessor,
+} from '../../../chart_expressions/expression_xy/common';
+import { getTimeZone } from '../../../chart_expressions/expression_xy/public';
 import { getEsaggsFn } from './to_ast_esaggs';
 import { TimeRangeBounds } from '../../../data/common';
-import { getTimeZone } from './utils';
-import { getColumnByAccessor } from './utils/accessors';
 
 type XDomainPreArgs = Omit<XDomainArguments, 'column'> & {
   column?: Omit<ExpressionValueVisDimension, 'type'>;
@@ -161,7 +165,7 @@ const getDimensionFromSchemaConfig = (schemaConfig: SchemaConfig): Dimension => 
   params: {},
 });
 
-export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params) => {
+export const toExpressionAst: VisToExpressionAst<VisTypeXyConfig> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
   const dimensions: Dimensions = {
     x: schemas.segment ? getDimensionFromSchemaConfig(schemas.segment[0]) : null,
@@ -259,7 +263,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
         }
       : undefined;
 
-  const visTypeXy = buildExpressionFunction<VisTypeXyExpressionFunctionDefinition>(visName, {
+  const visTypeXy = buildExpressionFunction<VisTypeXy>(EXPRESSION_NAME, {
     type: vis.type.name as XyVisType,
     chartType: vis.params.type,
     addTimeMarker: vis.params.addTimeMarker,

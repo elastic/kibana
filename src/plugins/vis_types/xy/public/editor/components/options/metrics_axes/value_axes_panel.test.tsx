@@ -12,7 +12,10 @@ import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test/jest';
 import { Position } from '@elastic/charts';
 
-import { ValueAxis, SeriesParam } from '../../../../types';
+import {
+  ValueAxis,
+  SeriesParam,
+} from '../../../../../../../chart_expressions/expression_xy/common/types';
 import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
 import { valueAxis, seriesParam } from './mocks';
 

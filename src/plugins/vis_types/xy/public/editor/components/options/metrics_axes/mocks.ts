@@ -19,8 +19,8 @@ import {
   ScaleType,
   AxisType,
   CategoryAxis,
-} from '../../../../types';
-import { ChartType } from '../../../../../common';
+  ChartType,
+} from '../../../../../../../chart_expressions/expression_xy/common/types';
 
 const defaultValueAxisId = 'ValueAxis-1';
 

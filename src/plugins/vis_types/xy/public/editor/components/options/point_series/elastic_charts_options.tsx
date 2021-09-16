@@ -18,15 +18,17 @@ import {
 } from '../../../../../../../vis_default_editor/public';
 import { PaletteRegistry } from '../../../../../../../charts/public';
 
-import { ChartType } from '../../../../../common';
-import { VisParams } from '../../../../types';
+import {
+  VisTypeXyConfig,
+  ChartType,
+} from '../../../../../../../chart_expressions/expression_xy/common/types';
 import { ValidationVisOptionsProps } from '../../common';
 import { getPalettesService, getTrackUiMetric } from '../../../../services';
 import { getFittingFunctions } from '../../../collections';
 
 const fittingFunctions = getFittingFunctions();
 
-export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>) {
+export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisTypeXyConfig>) {
   const trackUiMetric = getTrackUiMetric();
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
   const { stateParams, setValue, aggs } = props;

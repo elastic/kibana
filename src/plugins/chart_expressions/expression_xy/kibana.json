@@ -1,14 +1,14 @@
 {
   "id": "expressionXy",
-  "version": "1.0.0",
-  "kibanaVersion": "kibana",
+  "version": "kibana",
+  "ui": true,
+  "server": false,
+  "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection", "fieldFormats"],
+  "requiredBundles": ["kibanaUtils", "visDefaultEditor"],
+  "extraPublicDirs": ["common/index"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"
   },
-  "description": "",
-  "server": true,
-  "ui": true,
-  "requiredPlugins": ["navigation"],
-  "optionalPlugins": []
+  "description": "Expression XY plugin adds a `xy` renderer and function to the expression plugin. The renderer will display the xy-axis chart."
 }

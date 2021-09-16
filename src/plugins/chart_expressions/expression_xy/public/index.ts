@@ -6,13 +6,17 @@
  * Side Public License, v 1.
  */
 
-import './index.scss';
+// TODO: https://github.com/elastic/kibana/issues/110891
+/* eslint-disable @kbn/eslint/no_export_all */
 
-import { ExpressionXyPlugin } from './plugin';
+import { VisTypeXyPlugin as Plugin } from './plugin';
 
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
+export { VisTypeXyPluginSetup } from './plugin';
+
+// Export common types
+export * from '../common';
+export { getTimeZone } from './utils';
+
 export function plugin() {
-  return new ExpressionXyPlugin();
+  return new Plugin();
 }
-export { ExpressionXyPluginStart } from './types';

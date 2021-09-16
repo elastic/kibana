@@ -20,7 +20,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SeriesParam, ValueAxis } from '../../../../types';
+import {
+  SeriesParam,
+  ValueAxis,
+} from '../../../../../../../chart_expressions/expression_xy/common/types';
 import { ValueAxisOptions } from './value_axis_options';
 import { SetParamByIndex } from '.';
 
