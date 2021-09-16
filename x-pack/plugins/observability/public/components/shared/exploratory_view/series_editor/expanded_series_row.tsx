@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
 import { SeriesConfig, SeriesUrl } from '../types';
 import { ReportDefinitionCol } from './columns/report_definition_col';
 import { OperationTypeSelect } from './columns/operation_type_select';
