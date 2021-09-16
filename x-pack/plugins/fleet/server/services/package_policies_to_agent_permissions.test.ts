@@ -444,34 +444,4 @@ describe('getDataStreamPrivileges()', () => {
       privileges: ['read', 'monitor'],
     });
   });
-  it('removes invalid custom privileges from datastream', () => {
-    const dataStream = {
-      type: 'logs',
-      dataset: 'test',
-      elasticsearch: {
-        privileges: { indices: ['read', 'monitor', 'delete'] },
-      },
-    } as RegistryDataStream;
-    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
-
-    expect(privileges).toMatchObject({
-      names: ['logs-test-namespace'],
-      privileges: ['read', 'monitor'],
-    });
-  });
-  it('uses default privileges if all datastream privileges are invalid', () => {
-    const dataStream = {
-      type: 'logs',
-      dataset: 'test',
-      elasticsearch: {
-        privileges: { indices: ['delete', 'all'] },
-      },
-    } as RegistryDataStream;
-    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
-
-    expect(privileges).toMatchObject({
-      names: ['logs-test-namespace'],
-      privileges: ['auto_configure', 'create_doc'],
-    });
-  });
 });
