@@ -10,7 +10,7 @@ import { highlightTags } from './highlight_tags';
 
 const FRAGMENT_SIZE = Math.pow(2, 31) - 1; // Max allowed value for fragment_size (limit of a java int)
 
-export function getHighlightRequest(query: any, shouldHighlight: boolean) {
+export function getHighlightRequest(shouldHighlight: boolean) {
   if (!shouldHighlight) return;
 
   return {

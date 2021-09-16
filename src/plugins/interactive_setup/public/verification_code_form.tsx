@@ -9,6 +9,7 @@
 import {
   EuiButton,
   EuiCallOut,
+  EuiCode,
   EuiEmptyPrompt,
   EuiForm,
   EuiFormRow,
@@ -69,8 +70,8 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
           }),
         });
       } catch (error) {
-        if (error.response?.status === 403) {
-          form.setError('code', error.body?.message);
+        if ((error as IHttpFetchError).response?.status === 403) {
+          form.setError('code', (error as IHttpFetchError).body?.message);
           return;
         } else {
           throw error;
@@ -111,7 +112,10 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
               <p>
                 <FormattedMessage
                   id="interactiveSetup.verificationCodeForm.codeDescription"
-                  defaultMessage="Copy the verification code from Kibana server."
+                  defaultMessage="Copy the code from the Kibana server or run {command} to retrieve it."
+                  values={{
+                    command: <EuiCode lang="bash">./bin/kibana-verification-code</EuiCode>,
+                  }}
                 />
               </p>
             </EuiText>
