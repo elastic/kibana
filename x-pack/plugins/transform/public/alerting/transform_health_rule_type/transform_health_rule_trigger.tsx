@@ -95,6 +95,7 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
         selectedOptions={alertParams.includeTransforms ?? []}
         onChange={onAlertParamChange('includeTransforms')}
         allowSelectAll
+        errors={errors.includeTransforms as string[]}
       />
 
       <EuiSpacer size="m" />

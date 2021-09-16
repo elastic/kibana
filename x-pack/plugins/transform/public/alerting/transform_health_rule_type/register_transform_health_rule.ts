@@ -29,6 +29,17 @@ export function createTransformHealthRuleType(): AlertTypeModel<TransformHealthR
         } as Record<keyof TransformHealthRuleParams, string[]>,
       };
 
+      if (!alertParams.includeTransforms?.length) {
+        validationResult.errors.includeTransforms?.push(
+          i18n.translate(
+            'xpack.transform.alertTypes.transformHealth.includeTransforms.errorMessage',
+            {
+              defaultMessage: 'At least one transform has to be selected',
+            }
+          )
+        );
+      }
+
       return validationResult;
     },
     requiresAppContext: false,
