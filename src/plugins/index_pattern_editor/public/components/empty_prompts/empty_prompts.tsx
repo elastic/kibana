@@ -56,7 +56,7 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
 
   const hasDataIndices = allSources.some(isUserDataIndex);
   const hasUserIndexPattern = useAsync(() =>
-    indexPatternService.hasUserIndexPattern().catch(() => true)
+    indexPatternService.hasUserDataView().catch(() => true)
   );
 
   useEffect(() => {
