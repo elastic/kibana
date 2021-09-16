@@ -292,12 +292,11 @@ export function DiscoverLayout({
                       savedSearch={savedSearch}
                       services={services}
                       indexPattern={indexPattern}
-                      searchDescription={savedSearch.description}
-                      searchTitle={savedSearch.lastSavedTitle}
                       query={state.query}
                       filters={state.filters}
                       columns={columns}
                       stateContainer={stateContainer}
+                      onAddFilter={onAddFilter}
                     />
                   )}
                 </EuiFlexGroup>

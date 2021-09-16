@@ -9,7 +9,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { DataView, Query } from '../../../../../data/common';
+import { DataView, DataViewField, Query } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import {
   EmbeddableInput,
@@ -28,6 +28,10 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
+  /**
+   * Callback to add a filter to filter bar
+   */
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
@@ -39,7 +43,7 @@ export interface DiscoverDataVisualizerGridProps {
    */
   columns: string[];
   /**
-   * The used index pattern
+   * The used data view
    */
   indexPattern: DataView;
   /**
@@ -57,7 +61,11 @@ export interface DiscoverDataVisualizerGridProps {
   savedSearch?: SavedSearch;
   query?: Query;
   filters?: Filter[];
-  stateContainer: GetStateReturn;
+  stateContainer?: GetStateReturn;
+  /**
+   * Callback to add a filter to filter bar
+   */
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -65,7 +73,16 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
 });
 
 export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProps) => {
-  const { services, indexPattern, savedSearch, query, columns, filters, stateContainer } = props;
+  const {
+    services,
+    indexPattern,
+    savedSearch,
+    query,
+    columns,
+    filters,
+    stateContainer,
+    onAddFilter,
+  } = props;
   const { uiSettings } = services;
 
   const [embeddable, setEmbeddable] = useState<
@@ -76,13 +93,14 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   const showPreviewByDefault = useMemo(
-    () => !stateContainer.appStateContainer.getState().hideAggregatedPreview,
-    [stateContainer.appStateContainer]
+    () =>
+      stateContainer ? !stateContainer.appStateContainer.getState().hideAggregatedPreview : true,
+    [stateContainer]
   );
 
   useEffect(() => {
     embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
-      if (output.showDistributions !== undefined) {
+      if (output.showDistributions !== undefined && stateContainer) {
         stateContainer.setAppState({ hideAggregatedPreview: !output.showDistributions });
       }
     });
@@ -97,10 +115,11 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
         query,
         filters,
         visibleFieldNames: columns,
+        onAddFilter,
       });
       embeddable.reload();
     }
-  }, [embeddable, indexPattern, savedSearch, query, columns, filters]);
+  }, [embeddable, indexPattern, savedSearch, query, columns, filters, onAddFilter]);
 
   useEffect(() => {
     if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {
@@ -135,6 +154,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
             savedSearch,
             query,
             showPreviewByDefault,
+            onAddFilter,
           });
           if (!unmounted) {
             setEmbeddable(initializedEmbeddable);

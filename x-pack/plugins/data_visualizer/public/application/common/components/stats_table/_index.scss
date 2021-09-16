@@ -70,10 +70,6 @@ $panelWidthL:     #{'max(40%, 450px)'};
     min-width: $panelWidthL;
   }
 
-  .dataVisualizerTopValuesWrapper {
-    min-width: $panelWidthS;
-  }
-
   .dataVisualizerUniformPanel {
     min-width: $panelWidthS;
     max-width: $panelWidthS;

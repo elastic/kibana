@@ -25,8 +25,8 @@ import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';
 import {
-  IndexPattern,
-  IndexPatternField,
+  DataView,
+  DataViewField,
   KBN_FIELD_TYPES,
   Query,
   UI_SETTINGS,
@@ -61,12 +61,13 @@ import { getActions } from '../../../common/components/field_data_row/action_men
 import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   savedSearch?: SavedSearch;
   query?: Query;
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
 
@@ -175,7 +176,7 @@ const useDataVisualizerGridData = (
     });
   }, [uiSettings]);
 
-  const indexPatternFields: IndexPatternField[] = useMemo(() => currentIndexPattern.fields, [
+  const indexPatternFields: DataViewField[] = useMemo(() => currentIndexPattern.fields, [
     currentIndexPattern,
   ]);
 
@@ -663,6 +664,7 @@ export const DiscoverWrapper = ({
               item={item}
               indexPattern={input.indexPattern}
               combinedQuery={{ searchQueryLanguage, searchString }}
+              onAddFilter={input.onAddFilter}
             />
           );
         }

@@ -38,7 +38,7 @@ interface SummaryTableItem {
   value: number | string | undefined | null;
 }
 
-export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
+export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
   const { stats } = config;
 
   useEffect(() => {
@@ -125,7 +125,13 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
       </ExpandedRowPanel>
 
       {stats && (
-        <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" compressed={true} />
+        <TopValues
+          stats={stats}
+          fieldFormat={fieldFormat}
+          barColor="secondary"
+          compressed={true}
+          onAddFilter={onAddFilter}
+        />
       )}
       {distribution && (
         <ExpandedRowPanel

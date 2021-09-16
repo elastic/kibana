@@ -7,6 +7,6 @@
  */
 
 export enum DISCOVER_VIEW_MODE {
-  DOCUMENT_LEVEL = 'discoverViewOptionDocument',
-  FIELD_LEVEL = 'discoverViewOptionAggregated',
+  DOCUMENT_LEVEL = 'documents',
+  FIELD_LEVEL = 'fields',
 }

@@ -19,12 +19,12 @@ import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { APPLY_FILTER_TRIGGER, esFilters, FilterManager } from '../../../../data/public';
 import { DiscoverServices } from '../../build_services';
 import {
-  Query,
-  TimeRange,
   Filter,
   IndexPattern,
-  ISearchSource,
   IndexPatternField,
+  ISearchSource,
+  Query,
+  TimeRange,
 } from '../../../../data/common';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
@@ -45,6 +45,8 @@ import { DocTableProps } from '../apps/main/components/doc_table/doc_table_wrapp
 import { getDefaultSort } from '../apps/main/components/doc_table';
 import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
 import { updateSearchSource } from './helpers/update_search_source';
+import { DISCOVER_VIEW_MODE } from '../apps/main/components/view_mode_toggle';
+import { FieldStatsTableEmbeddable } from '../components/data_visualizer_grid/field_stats_table_embeddable';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -376,6 +378,27 @@ export class SavedSearchEmbeddable
 
   private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
     if (!this.searchProps) {
+      return;
+    }
+
+    if (
+      this.savedSearch.discoverViewMode === DISCOVER_VIEW_MODE.FIELD_LEVEL &&
+      searchProps.services &&
+      searchProps.indexPattern &&
+      Array.isArray(searchProps.columns)
+    ) {
+      ReactDOM.render(
+        <FieldStatsTableEmbeddable
+          services={searchProps.services}
+          indexPattern={searchProps.indexPattern}
+          columns={searchProps.columns}
+          savedSearch={this.savedSearch}
+          filters={this.input.filters}
+          query={this.input.query}
+          onAddFilter={searchProps.onFilter}
+        />,
+        domNode
+      );
       return;
     }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);

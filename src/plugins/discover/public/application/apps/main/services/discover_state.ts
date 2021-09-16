@@ -75,11 +75,11 @@ export interface AppState {
    */
   savedQuery?: string;
   /**
-   * Table view: Document view or Aggregated view
+   * Table view: Documents vs Field Statistics
    */
   discoverViewMode?: DISCOVER_VIEW_MODE;
   /**
-   * Hide mini distribution/preview charts when in Aggregated view
+   * Hide mini distribution/preview charts when in Field Statistics mode
    */
   hideAggregatedPreview?: boolean;
 }

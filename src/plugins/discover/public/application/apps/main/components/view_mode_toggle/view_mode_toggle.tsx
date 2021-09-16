@@ -14,11 +14,11 @@ import { DISCOVER_VIEW_MODE } from './constants';
 const toggleButtons = [
   {
     id: DISCOVER_VIEW_MODE.DOCUMENT_LEVEL,
-    label: 'Document view',
+    label: 'Documents',
   },
   {
     id: DISCOVER_VIEW_MODE.FIELD_LEVEL,
-    label: 'Aggregated view',
+    label: 'Field Statistics',
   },
 ];
 
