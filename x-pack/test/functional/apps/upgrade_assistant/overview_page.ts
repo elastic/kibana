@@ -48,7 +48,6 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
         // Access to system indices will be deprecated and should generate a deprecation log
         await es.indices.get({ index: '.kibana' });
 
-        await PageObjects.upgradeAssistant.navigateToPage();
         await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
 
         await retry.waitFor('UA external links title to be present', async () => {
