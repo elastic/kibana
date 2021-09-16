@@ -6,12 +6,13 @@
  */
 
 import React, { FC, ReactNode } from 'react';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, HorizontalAlignment } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
+import { RIGHT_ALIGNMENT } from '@elastic/eui';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { DocumentStatsTable } from './document_stats';
@@ -61,9 +62,10 @@ export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
   const summaryTableColumns = [
     {
       name: '',
-      render: (summaryItem: { display: ReactNode }) => summaryItem.display,
+      field: 'function',
+      render: (func: string, summaryItem: { display: ReactNode }) => summaryItem.display,
       width: '80px',
-      align: 'right',
+      align: RIGHT_ALIGNMENT as HorizontalAlignment,
     },
     {
       field: 'value',

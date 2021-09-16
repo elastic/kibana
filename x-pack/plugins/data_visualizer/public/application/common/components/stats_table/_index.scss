@@ -16,10 +16,6 @@ $panelWidthL:     #{'max(40%, 450px)'};
     font-weight: bold;
     padding-bottom: $euiSizeS;
   }
-
-  .fieldDataCard__codeContent {
-    padding-left: 4px;
-  }
 }
 
 .dataVisualizer {
@@ -56,8 +52,6 @@ $panelWidthL:     #{'max(40%, 450px)'};
   }
 
   .dataVisualizerSummaryTable {
-    //max-width: #{$panelWidthS - $euiSize};
-    //min-width: #{$panelWidthS - $euiSize};
     .euiTableRow > .euiTableRowCell {
       border-bottom: 0;
     }
@@ -86,7 +80,7 @@ $panelWidthL:     #{'max(40%, 450px)'};
   }
 
   .dataVisualizerPanelWrapper {
-    margin: $euiSizeXS $euiSizeS $euiSizeS 0;
+    margin: $euiSizeXS $euiSizeM $euiSizeM 0;
     &.compressed {
       max-width: $panelWidthS;
     }

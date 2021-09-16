@@ -6,7 +6,7 @@
  */
 
 import React, { FC, ReactNode, useMemo } from 'react';
-import { EuiBasicTable, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, RIGHT_ALIGNMENT, HorizontalAlignment } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -69,10 +69,11 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   ];
   const summaryTableColumns = [
     {
+      field: 'function',
       name: '',
-      render: (summaryItem: { display: ReactNode }) => summaryItem.display,
+      render: (_: string, summaryItem: { display: ReactNode }) => summaryItem.display,
       width: '25px',
-      align: 'right',
+      align: RIGHT_ALIGNMENT as HorizontalAlignment,
     },
     {
       field: 'value',
