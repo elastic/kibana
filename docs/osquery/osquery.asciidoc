@@ -3,21 +3,25 @@
 [[osquery]]
 = Osquery
 
-Osquery augments security, compliance, and operations use cases.
-For example,
-you might use Qsquery to find
-unexpected changes in disk free space or memory usage. Or you might use it to
-improve visibility into active accounts and processes.
+https://osquery.io[Osquery] is an open source tool that lets you query operating systems like a database.
+Using basic SQL commands, you can ask questions about devices, like servers, 
+docker containers, and PCs running Linux, macOS, or Windows.
+It gives you visibility into your infrastructure and operating systems.
+With its https://osquery.io/schema[extensive schema], it can help with a variety of use cases,
+including vulnerability detection, compliance monitoring, incident investigations, and many others.  
 
-Use Osquery UI in {kib} to search, analyze, and visualize Osquery data ingested in {es}:
+From the Osquery UI in {kib}, you can:
 
- * Run live queries with one or more agents
- * View a history of past queries and their results
+ * Run live queries for one or more agents
  * Schedule queries to capture changes to OS state over time
+ * View a history of past queries and their results
  * Save queries and build a library of queries for specific use cases
 
+Osquery results are stored in {es}, so that you can 
+search, analyze, and visualize Osquery data in {kib}.
+
 The UI is powered by the Osquery Manager integration.
-For information on how to set up Osquery Manager, refer to <<manage-osquery-integrations>>.
+For information on how to set up Osquery Manager, refer to <<manage-osquery-integration>>.
 
 [float]
 == Required privileges
@@ -27,15 +31,15 @@ To use *Osquery Manager*, you must be assigned to a role with the following priv
 * `Read` privileges for the `logs-osquery_manager.result*` index.
 * {kib} privileges for **Osquery Manager**. The `All` privilege
 enables you to run, schedule, and save queries. `Read` enables you to
-view live and scheduled query results, but you can run live queries or edit anything.
+view live and scheduled query results, but you cannot run live queries or edit anything.
 
 [float]
 [[osquery-run-query]]
 ==  Run live queries
 
 Run a query against one or more agents or policies
-and view the results. This is useful for testing your query and
-troubleshooting problems.
+and view the results. This is useful when inspecting a host 
+or to test queries you want to schedule.
 
 . Open the main menu, and then click *Osquery*.
 . In the *Live queries* view, click **New live query**.
@@ -49,12 +53,14 @@ image::images/enter-query.png[Select saved query dropdown name showing query nam
 . Review the results in a table, or navigate to *Discover* to dive deeper into the response
 or to *Lens* to build visualizations.
 . To view more information about the request, for example, if there are any failures, open the *Status* tab.
-. When your query captures the data you want, click *Save for later* and define the ID,
+. (optional) To save the query for future use, click *Save for later* and define the ID,
 description, and other
 <<osquery-manage-query,details>>.
-. To view a history of the past queries you have run, Open the *Live queries history*.
-.. To replay a query, click image:images/play-icon.png[Right-pointing triangle].
-.. To view the query <<osquery-results,results>> and <<osquery-status,status>>,
+
+To view a history of the past queries you have run, open the *Live queries history*.
+
+* To replay a query, click image:images/play-icon.png[Right-pointing triangle].
+* To view the query <<osquery-results,results>> and <<osquery-status,status>>,
 click image:images/table-icon.png[Table icon].
 +
 [role="screenshot"]
@@ -75,11 +81,11 @@ another group that monitors for evidence of malware.
 . Click a group name to view its details.
 +
 Details include the last time it ran, how many results were returned, and the number of agents it ran against.
-If there are errors, expand row to view the details.
+If there are errors, expand the row to view the details.
 +
 [role="screenshot"]
-image::images/scheduled-query-group.png[Shos last results last time it ran, how many results returned, number of agents it ran against,  Is
-it actually running and if there are errors]
+image::images/scheduled-query-groupds.png[Shows last results last time it ran, how many results returned, number of agents it ran against, if it is
+actually running and if there are errors]
 
 . Click *Edit* to make changes.
 .. To add a query to the group, click *Add query*, and then enter the query ID and interval.
@@ -124,8 +130,8 @@ and only include fields that will be returned by the query.
 
 Add or edit saved queries on the *Saved queries* tab.
 
-1. Go to saved queries
-2. From the saved queries, click **Add saved query**. or edit icon
+1. Go to saved queries.
+2. From the saved queries, click **Add saved query** or the edit icon.
 3. Provide these fields.
 +
 * A unique identifier.
@@ -133,7 +139,7 @@ Add or edit saved queries on the *Saved queries* tab.
 * The SQL query.
 * The defaults for the scheduled query group. This information is included when you
 add the query to a scheduled query group.
-** The frequency at which at which to run the query.
+** The frequency at which to run the query.
 ** The minimum https://github.com/osquery/osquery/releases)[version of osquery] required to run the query.
 ** The operating system required to run the query. For information about supported platforms per table, click the *OSquery schema* link on the *Edit query* flyout.
 4. Click **Saved query**.
@@ -165,14 +171,12 @@ the results are still returned.
 For the fields that can be returned in Osquery results,
 refer to https://docs.elastic.co/en/integrations/osquery_manager#exported-fields[exported fields].
 Scheduled Osquery
-results can alos include ECS fields, if that query has an ECS mapping defined.
-
-https://docs.elastic.co/en/integrations/osquery_manager
+results can also include ECS fields, if that query has an ECS mapping defined.
 
 Osquery responses include the following information:
 
 * Everything prefaced with `osquery.` is part of the query response. These fields are not mapped to ECS.
-* The `host.*` and `agent.*` fields are mapped to ECS.
+* The `host.*` and `agent.*` fields are mapped to ECS by default.
 * The `action_data.query` has the query that was sent.
 * All query results are https://osquery.readthedocs.io/en/stable/deployment/logging/#snapshot-logs[snapshot logs]
 that represent a point in time with a set of results, with no differentials.
@@ -337,8 +341,8 @@ This is an example of an **error response** for an undefined action query.
 }
 ```
 [float]
-[[manage-osquery-integrations]]
-== Manage the integrations
+[[manage-osquery-integration]]
+== Manage the integration
 
 [float]
 == System requirements
@@ -348,9 +352,10 @@ one or more {fleet-guide}/elastic-agent-installation-configuration.html[Elastic 
 * The https://docs.elastic.co/en/integrations/osquery_manager[Osquery Manager] integration
 has been added and configured
 for an agent policy through Fleet.
-This integration supports x86_64 bit Windows, Darwin, Arm64, and Linux platforms.
+This integration supports x64 architecture on Windows, MacOS and Linux platforms 
+and ARM64 architecture on Linux.
 
-NOTE: The original {filebeat-ref}/filebeat-module-osquery.html[Filebeat] module
+NOTE: The original {filebeat-ref}/filebeat-module-osquery.html[Filebeat Osquery module]
 and the https://docs.elastic.co/en/integrations/osquery[Osquery Log Collection]
 integration collect logs from self-managed osquery deployments.
 The new Osquery Manager integration manages osquery deployments
