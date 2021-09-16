@@ -153,6 +153,14 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./settings/custom_link'));
     });
 
+    // suggestions
+    describe('suggestions/environments', function () {
+      loadTestFile(require.resolve('./suggestions/environments'));
+    });
+    describe('suggestions/service_names', function () {
+      loadTestFile(require.resolve('./suggestions/service_names'));
+    });
+
     // traces
     describe('traces/top_traces', function () {
       loadTestFile(require.resolve('./traces/top_traces'));

@@ -10,6 +10,7 @@ import { Setup } from '../helpers/setup_request';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
@@ -22,23 +23,25 @@ export async function getAllEnvironments({
   serviceName,
   setup,
   searchAggregatedTransactions,
+  transactionType,
   includeMissing = false,
 }: {
   serviceName?: string;
   setup: Setup;
   searchAggregatedTransactions: boolean;
+  transactionType?: string;
   includeMissing?: boolean;
 }) {
-  const operationName = serviceName
-    ? 'get_all_environments_for_service'
-    : 'get_all_environments_for_all_services';
-
   const { apmEventClient, config } = setup;
   const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
   // omit filter for service.name if "All" option is selected
   const serviceNameFilter = serviceName
     ? [{ term: { [SERVICE_NAME]: serviceName } }]
+    : [];
+
+  const transactionTypeFilter = transactionType
+    ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
     : [];
 
   const params = {
@@ -58,7 +61,7 @@ export async function getAllEnvironments({
       size: 0,
       query: {
         bool: {
-          filter: [...serviceNameFilter],
+          filter: [...serviceNameFilter, ...transactionTypeFilter],
         },
       },
       aggs: {
@@ -74,7 +77,7 @@ export async function getAllEnvironments({
     },
   };
 
-  const resp = await apmEventClient.search(operationName, params);
+  const resp = await apmEventClient.search('get_all_environments', params);
 
   const environments =
     resp.aggregations?.environments.buckets.map(

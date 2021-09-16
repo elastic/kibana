@@ -14,21 +14,40 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getEnvironmentLabel } from '../../../common/environment_filter_values';
-import { EnvironmentSelect } from '../shared/selects/environment_select';
+import { EnvironmentsSelect } from '../shared/selects/environments_select';
+import { ServiceNamesSelect } from '../shared/selects/service_names_select';
 import { PopoverExpression } from './service_alert_trigger/popover_expression';
 
 const ALL_OPTION = i18n.translate('xpack.apm.alerting.fields.all_option', {
   defaultMessage: 'All',
 });
 
-export function ServiceField({ value }: { value?: string }) {
+export function ServiceField({
+  currentValue,
+  onChange,
+  environment,
+  transactionType,
+}: {
+  currentValue?: string;
+  environment?: string;
+  onChange: (value: string) => void;
+  transactionType?: string;
+}) {
   return (
-    <EuiExpression
-      description={i18n.translate('xpack.apm.alerting.fields.service', {
+    <PopoverExpression
+      value={currentValue || ALL_OPTION}
+      title={i18n.translate('xpack.apm.alerting.fields.service', {
         defaultMessage: 'Service',
       })}
-      value={value || ALL_OPTION}
-    />
+    >
+      <ServiceNamesSelect
+        compressed={true}
+        defaultValue={currentValue}
+        environment={environment}
+        onChange={onChange}
+        transactionType={transactionType}
+      />
+    </PopoverExpression>
   );
 }
 
@@ -36,10 +55,12 @@ export function EnvironmentField({
   currentValue,
   onChange,
   serviceName,
+  transactionType,
 }: {
   currentValue: string;
   onChange: (value: string) => void;
   serviceName?: string;
+  transactionType?: string;
 }) {
   return (
     <PopoverExpression
@@ -48,7 +69,7 @@ export function EnvironmentField({
         defaultMessage: 'Environment',
       })}
     >
-      <EnvironmentSelect
+      <EnvironmentsSelect
         compressed={true}
         defaultValue={currentValue}
         onChange={onChange}

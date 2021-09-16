@@ -8,11 +8,11 @@
 import { composeStories } from '@storybook/testing-react';
 import { render } from '@testing-library/react';
 import React from 'react';
-import * as stories from './environment_select.stories';
+import * as stories from './environments_select.stories';
 
 const { Example } = composeStories(stories);
 
-describe('EnvironmentSelect', () => {
+describe('EnvironmentsSelect', () => {
   it('renders', () => {
     expect(() => render(<Example />)).not.toThrowError();
   });

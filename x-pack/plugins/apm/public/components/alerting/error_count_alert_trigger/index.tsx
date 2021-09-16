@@ -83,7 +83,11 @@ export function ErrorCountAlertTrigger(props: Props) {
   );
 
   const fields = [
-    <ServiceField value={params.serviceName} />,
+    <ServiceField
+      currentValue={params.serviceName}
+      onChange={(value) => setAlertParams('serviceName', value)}
+      environment={params.environment}
+    />,
     <EnvironmentField
       currentValue={params.environment}
       onChange={(value) => setAlertParams('environment', value)}

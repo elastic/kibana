@@ -10,23 +10,23 @@ import React from 'react';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
-import { EnvironmentSelect } from './';
+import { ServiceNamesSelect } from './';
 
 interface Args {
-  environments: string[];
+  serviceNames: string[];
 }
 
 const stories: Meta<Args> = {
-  title: 'shared/selects/EnvironmentSelect',
-  component: EnvironmentSelect,
+  title: 'shared/selects/ServiceNamesSelect',
+  component: ServiceNamesSelect,
   decorators: [
     (StoryComponent, { args }) => {
-      const { environments } = args;
+      const { serviceNames } = args;
 
       const coreMock = ({
         http: {
           get: () => {
-            return { environments };
+            return { serviceNames };
           },
         },
         notifications: { toasts: { add: () => {} } },
@@ -48,8 +48,8 @@ const stories: Meta<Args> = {
 export default stories;
 
 export const Example: Story<Args> = (args) => {
-  return <EnvironmentSelect onChange={() => {}} />;
+  return <ServiceNamesSelect onChange={() => {}} />;
 };
 Example.args = {
-  environments: ['staging', 'production'],
+  serviceNames: ['service A', 'service B'],
 };

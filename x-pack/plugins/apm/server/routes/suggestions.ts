@@ -13,17 +13,17 @@ import { getServiceNames } from '../lib/settings/agent_configuration/get_service
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
-const environmentsSelectRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/select/environments',
+const environmentsSuggestionsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/suggestions/environments',
   params: t.partial({
-    query: t.partial({ serviceName: t.string }),
+    query: t.partial({ serviceName: t.string, transactionType: t.string }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
 
-    const { serviceName } = params.query;
+    const { serviceName, transactionType } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
@@ -34,16 +34,22 @@ const environmentsSelectRoute = createApmServerRoute({
       serviceName,
       setup,
       searchAggregatedTransactions,
+      transactionType,
     });
 
     return { environments };
   },
 });
 
-const servicesSelectRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/select/services',
+const serviceNamesSuggestionsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/suggestions/service_names',
+  params: t.partial({
+    query: t.partial({ environment: t.string, transactionType: t.string }),
+  }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
+    const { params } = resources;
+    const { environment, transactionType } = params.query;
     const setup = await setupRequest(resources);
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
@@ -51,14 +57,16 @@ const servicesSelectRoute = createApmServerRoute({
       kuery: '',
     });
     const serviceNames = await getServiceNames({
+      environment,
       setup,
       searchAggregatedTransactions,
+      transactionType,
     });
 
     return { serviceNames };
   },
 });
 
-export const selectsRouteRepository = createApmServerRouteRepository()
-  .add(environmentsSelectRoute)
-  .add(servicesSelectRoute);
+export const suggestionsRouteRepository = createApmServerRouteRepository()
+  .add(environmentsSuggestionsRoute)
+  .add(serviceNamesSuggestionsRoute);

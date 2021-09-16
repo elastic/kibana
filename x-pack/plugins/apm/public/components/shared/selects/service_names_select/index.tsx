@@ -11,11 +11,12 @@ import React, { useState } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
-interface EnvironmentSelectProps {
+interface SericeNamesSelectProps {
   compressed?: boolean;
   defaultValue?: string;
   onChange: (value: string) => void;
-  serviceName?: string;
+  environment?: string;
+  transactionType?: string;
 }
 
 const allOption: EuiComboBoxOptionOption<string> = {
@@ -23,12 +24,13 @@ const allOption: EuiComboBoxOptionOption<string> = {
   value: ENVIRONMENT_ALL.value,
 };
 
-export function EnvironmentSelect({
+export function ServiceNamesSelect({
   compressed,
   defaultValue,
   onChange,
-  serviceName,
-}: EnvironmentSelectProps) {
+  environment,
+  transactionType,
+}: ServiceNamesSelect) {
   const defaultOption =
     !defaultValue || defaultValue === ENVIRONMENT_ALL.value
       ? allOption
@@ -38,21 +40,21 @@ export function EnvironmentSelect({
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        endpoint: 'GET /api/apm/select/environments',
+        endpoint: 'GET /api/apm/suggestions/service_names',
         params: {
-          query: { serviceName },
+          query: { environment, transactionType },
         },
       });
     },
-    [serviceName],
+    [environment, transactionType],
     { preservePreviousData: false }
   );
 
-  const environments = data?.environments ?? [];
+  const serviceNames = data?.serviceNames ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
     allOption,
-    ...environments.map((name) => {
+    ...serviceNames.map((name) => {
       return { label: name, value: name };
     }),
   ];
@@ -72,8 +74,8 @@ export function EnvironmentSelect({
       isLoading={status === FETCH_STATUS.LOADING}
       onChange={handleChange}
       options={options}
-      placeholder={i18n.translate('xpack.apm.environmentSelectPlaceholder', {
-        defaultMessage: 'Select environment',
+      placeholder={i18n.translate('xpack.apm.serviceNamesSelectPlaceholder', {
+        defaultMessage: 'Select service name',
       })}
       selectedOptions={selectedOptions}
       singleSelection={{ asPlainText: true }}
