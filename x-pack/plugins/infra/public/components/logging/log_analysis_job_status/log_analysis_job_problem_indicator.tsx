@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { MLJobsAwaitingNodeWarning } from '../../../../../ml/public';
 
 import { JobConfigurationOutdatedCallout } from './job_configuration_outdated_callout';
@@ -36,7 +35,6 @@ export const LogAnalysisJobProblemIndicator: React.FC<{
   onRecreateMlJobForReconfiguration,
   onRecreateMlJobForUpdate,
 }) => {
-  const { http } = useKibana().services;
   return (
     <>
       {hasOutdatedJobDefinitions ? (
@@ -55,7 +53,7 @@ export const LogAnalysisJobProblemIndicator: React.FC<{
       ) : null}
       {hasStoppedJobs ? <JobStoppedCallout /> : null}
       {isFirstUse && isAwaitingNodeAssignment === false ? <FirstUseCallout /> : null}
-      {isAwaitingNodeAssignment ? <MLJobsAwaitingNodeWarning fetch={http!.fetch} /> : null}
+      {isAwaitingNodeAssignment ? <MLJobsAwaitingNodeWarning /> : null}
     </>
   );
 };

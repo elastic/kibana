@@ -8,7 +8,7 @@
 // import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyoutHeader,
@@ -26,7 +26,6 @@ import {
   EuiTab,
   EuiSpacer,
 } from '@elastic/eui';
-import { useKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { MLJobsAwaitingNodeWarning } from '../../../../../../../../ml/public';
 import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
@@ -48,7 +47,6 @@ interface Props {
 
 type Tab = 'jobs' | 'anomalies';
 export const FlyoutHome = (props: Props) => {
-  const { http } = useKibana().services;
   const [tab, setTab] = useState<Tab>('jobs');
   const { goToSetup, closeFlyout } = props;
   const {
@@ -88,13 +86,6 @@ export const FlyoutHome = (props: Props) => {
   }, [fetchK8sJobStatus, fetchHostJobStatus, hasInfraMLReadCapabilities]);
 
   const hasJobs = hostJobSummaries.length > 0 || k8sJobSummaries.length > 0;
-  const jobsAwaitingNodeAssignmentCount = useMemo(() => {
-    return [
-      ...hostJobSummaries.filter((j) => j.awaitingNodeAssignment === true),
-      ...k8sJobSummaries.filter((j) => j.awaitingNodeAssignment === true),
-    ].length;
-  }, [hostJobSummaries, k8sJobSummaries]);
-
   const manageJobsLinkProps = useLinkProps({
     app: 'ml',
     pathname: '/jobs',
@@ -153,12 +144,7 @@ export const FlyoutHome = (props: Props) => {
                   />
                 </>
               )}
-              {jobsAwaitingNodeAssignmentCount > 0 && (
-                <MLJobsAwaitingNodeWarning
-                  jobCount={jobsAwaitingNodeAssignmentCount}
-                  fetch={http!.fetch}
-                />
-              )}
+              <MLJobsAwaitingNodeWarning jobIds={jobIds} />
             </>
           }
         >
