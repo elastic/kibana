@@ -204,7 +204,7 @@ export const alternateCompositeResponse = (from: number) => ({
             groupBy0: 'c',
           },
           aggregatedIntervals: {
-            buckets: bucketsA(from),
+            buckets: bucketsC(from),
           },
         },
       ],

@@ -94,6 +94,7 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
 
       // If any previous groups are no longer being reported, backfill them with null values
       const currentGroups = Object.keys(currentValues);
+
       const missingGroups = prevGroups.filter((g) => !currentGroups.includes(g));
       if (currentGroups.length === 0 && missingGroups.length === 0) {
         missingGroups.push(UNGROUPED_FACTORY_KEY);
@@ -109,7 +110,7 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
           [group]: [
             {
               key: backfillTimestamp,
-              value: null,
+              value: criterion.aggType === Aggregators.COUNT ? 0 : null,
             },
           ],
         }),

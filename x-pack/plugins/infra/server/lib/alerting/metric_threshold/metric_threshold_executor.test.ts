@@ -319,6 +319,44 @@ describe('The metric threshold alert type', () => {
       await execute(Comparator.LT, [0.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
     });
+    describe('with a groupBy parameter', () => {
+      const executeGroupBy = (
+        comparator: Comparator,
+        threshold: number[],
+        sourceId: string = 'default',
+        state?: any
+      ) =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            sourceId,
+            groupBy: 'something',
+            criteria: [
+              {
+                ...baseCountCriterion,
+                comparator,
+                threshold,
+              },
+            ],
+          },
+          state: state ?? mockOptions.state.wrapped,
+        });
+      const instanceIdA = 'a';
+      const instanceIdB = 'b';
+
+      test('successfully detects and alerts on a document count of 0', async () => {
+        const resultState = await executeGroupBy(Comparator.LT_OR_EQ, [0]);
+        expect(mostRecentAction(instanceIdA)).toBe(undefined);
+        expect(mostRecentAction(instanceIdB)).toBe(undefined);
+        await executeGroupBy(Comparator.LT_OR_EQ, [0], 'empty-response', resultState);
+        expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
+        expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
+        await executeGroupBy(Comparator.LT_OR_EQ, [0]);
+        expect(mostRecentAction(instanceIdA)).toBe(undefined);
+        expect(mostRecentAction(instanceIdB)).toBe(undefined);
+      });
+    });
   });
   describe('querying with the p99 aggregator', () => {
     afterAll(() => clearInstances());
@@ -585,6 +623,7 @@ const services: AlertServicesMock &
 services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
   const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
   if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse(from);
+  if (params.index === 'empty-response') return mocks.emptyMetricResponse;
   const metric = params?.body.query.bool.filter[1]?.exists.field;
   if (metric === 'test.metric.3') {
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -620,6 +659,13 @@ services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId
     return {
       id: 'alternate',
       attributes: { metricAlias: 'alternatebeat-*' },
+      type,
+      references: [],
+    };
+  if (sourceId === 'empty-response')
+    return {
+      id: 'empty',
+      attributes: { metricAlias: 'empty-response' },
       type,
       references: [],
     };
