@@ -6690,12 +6690,6 @@
                 "description": "The number of spaces which have this feature disabled."
               }
             },
-            "timelion": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of spaces which have this feature disabled."
-              }
-            },
             "dev_tools": {
               "type": "long",
               "_meta": {
@@ -6905,6 +6899,12 @@
                 }
               }
             }
+          }
+        },
+        "task_type_exclusion": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
           }
         }
       }

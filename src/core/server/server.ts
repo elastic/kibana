@@ -206,6 +206,10 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
+    const deprecationsSetup = this.deprecations.setup({
+      http: httpSetup,
+    });
+
     // setup i18n prior to any other service, to have translations ready
     const i18nServiceSetup = await this.i18n.setup({ http: httpSetup, pluginPaths });
 
@@ -214,6 +218,7 @@ export class Server {
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
       executionContext: executionContextSetup,
+      deprecations: deprecationsSetup,
     });
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
@@ -228,6 +233,7 @@ export class Server {
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
+      deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
     });
 
@@ -257,10 +263,6 @@ export class Server {
     });
 
     const loggingSetup = this.logging.setup();
-
-    const deprecationsSetup = this.deprecations.setup({
-      http: httpSetup,
-    });
 
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
@@ -300,6 +302,7 @@ export class Server {
 
     const executionContextStart = this.executionContext.start();
     const elasticsearchStart = await this.elasticsearch.start();
+    const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
@@ -317,7 +320,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
-    const deprecationsStart = this.deprecations.start();
+
     this.status.start();
 
     this.coreStart = {
