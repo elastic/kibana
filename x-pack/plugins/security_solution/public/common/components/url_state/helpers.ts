@@ -113,12 +113,7 @@ export const getUrlType = (pageName: string): UrlStateType => {
   return 'overview';
 };
 
-export const getTitle = (
-  pageName: string,
-  detailName: string | undefined,
-  navTabs: Record<string, NavTab>
-): string => {
-  if (detailName != null) return detailName;
+export const getTitle = (pageName: string, navTabs: Record<string, NavTab>): string => {
   return navTabs[pageName] != null ? navTabs[pageName].name : '';
 };
 

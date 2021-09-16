@@ -58,7 +58,6 @@ const updateTimelineAtinitialization = (
 };
 
 export const useUrlStateHooks = ({
-  detailName,
   indexPattern,
   navTabs,
   pageName,
@@ -150,7 +149,6 @@ export const useUrlStateHooks = ({
     replaceStatesInLocation(statesToUpdate, pathName, mySearch, history);
 
     setInitialStateFromUrl({
-      detailName,
       filterManager,
       indexPattern,
       pageName,
@@ -216,7 +214,7 @@ export const useUrlStateHooks = ({
   }, [isInitializing, history, pathName, pageName, prevProps, urlState, browserPathName]);
 
   useEffect(() => {
-    document.title = `${getTitle(pageName, detailName, navTabs)} - Kibana`;
+    document.title = `${getTitle(pageName, navTabs)} - Kibana`;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageName]);
 

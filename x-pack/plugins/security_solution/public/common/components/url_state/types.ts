@@ -171,7 +171,6 @@ export interface UrlStateToRedux {
 }
 
 export interface SetInitialStateFromUrl<TCache> {
-  detailName: string | undefined;
   filterManager: FilterManager;
   indexPattern: IIndexPattern | undefined;
   pageName: string;
@@ -182,7 +181,6 @@ export interface SetInitialStateFromUrl<TCache> {
 }
 
 export type DispatchSetInitialStateFromUrl = <TCache>({
-  detailName,
   indexPattern,
   pageName,
   updateTimeline,
