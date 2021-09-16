@@ -6881,6 +6881,12 @@
                   "description": "The process id of the monitored kibana instance."
                 }
               },
+              "instanceUuid": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The uuid of the kibana instance."
+                }
+              },
               "fromTimestamp": {
                 "type": "date",
                 "_meta": {
@@ -7064,12 +7070,6 @@
         },
         "visualization:regionmap:showWarnings": {
           "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "visualization:dimmingOpacity": {
-          "type": "float",
           "_meta": {
             "description": "Non-default value of setting."
           }
