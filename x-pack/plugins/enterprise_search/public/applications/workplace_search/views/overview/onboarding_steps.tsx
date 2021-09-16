@@ -41,9 +41,29 @@ const USERS_TITLE = i18n.translate(
   { defaultMessage: 'Users & invitations' }
 );
 
+const INVITE_FIRST_USERS_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingUsersCard.inviteFirstUsers.button',
+  { defaultMessage: 'Invite users' }
+);
+
+const INVITE_MORE_USERS_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingUsersCard.inviteMoreUsers.button',
+  { defaultMessage: 'Invite more users' }
+);
+
 const ONBOARDING_SOURCES_CARD_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingSourcesCard.description',
   { defaultMessage: 'Add shared sources for your organization to start searching.' }
+);
+
+const ADD_FIRST_SOURCES_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.addFirstSources.button',
+  { defaultMessage: 'Add sources' }
+);
+
+const ADD_MORE_SOURCES_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.addMoreSources.button',
+  { defaultMessage: 'Add more sources' }
 );
 
 const USERS_CARD_DESCRIPTION = i18n.translate(
@@ -82,13 +102,7 @@ export const OnboardingSteps: React.FC = () => {
           description={
             hasOrgSources ? SOURCES_CARD_DESCRIPTION : ONBOARDING_SOURCES_CARD_DESCRIPTION
           }
-          actionTitle={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.buttonLabel',
-            {
-              defaultMessage: 'Add {label} sources',
-              values: { label: sourcesCount > 0 ? 'more' : '' },
-            }
-          )}
+          actionTitle={sourcesCount > 0 ? ADD_MORE_SOURCES_BUTTON : ADD_FIRST_SOURCES_BUTTON}
           actionPath={ADD_SOURCE_PATH}
           complete={hasOrgSources}
         />
@@ -97,13 +111,7 @@ export const OnboardingSteps: React.FC = () => {
           testSubj="usersButton"
           icon="user"
           description={hasUsers ? USERS_CARD_DESCRIPTION : ONBOARDING_USERS_CARD_DESCRIPTION}
-          actionTitle={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.usersOnboardingCard.buttonLabel',
-            {
-              defaultMessage: 'Invite {label} users',
-              values: { label: accountsCount > 0 ? 'more' : '' },
-            }
-          )}
+          actionTitle={accountsCount > 0 ? INVITE_MORE_USERS_BUTTON : INVITE_FIRST_USERS_BUTTON}
           actionPath={USERS_AND_ROLES_PATH}
           complete={hasUsers}
         />
