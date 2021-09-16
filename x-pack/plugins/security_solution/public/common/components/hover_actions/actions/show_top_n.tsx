@@ -36,14 +36,14 @@ interface Props {
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   enablePopOver?: boolean;
   field: string;
+  globalFilters?: Filter[];
   onClick: () => void;
   onFilterAdded?: () => void;
   ownFocus: boolean;
-  showTopN: boolean;
   showTooltip?: boolean;
+  showTopN: boolean;
   timelineId?: string | null;
   value?: string[] | string | null;
-  globalFilters?: Filter[];
 }
 
 export const ShowTopNButton: React.FC<Props> = React.memo(

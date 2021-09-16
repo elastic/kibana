@@ -302,16 +302,18 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     data,
     defaultCellActions,
     filterQuery,
-    filterStatus,
     filters,
+    filterStatus,
+    hasAlertsCrud,
+    hasAlertsCrudPermissions,
     id,
     indexNames,
     isEventViewer = false,
+    isLoading,
     isSelectAllChecked,
     itemsPerPageOptions,
     leadingControlColumns = EMPTY_CONTROL_COLUMNS,
     loadingEventIds,
-    isLoading,
     loadPage,
     onRuleChange,
     pageSize,
@@ -325,11 +327,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     tableView = 'gridView',
     tabType,
     totalItems,
+    totalSelectAllAlerts,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
-    hasAlertsCrud,
-    hasAlertsCrudPermissions,
-    totalSelectAllAlerts,
   }) => {
     const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
@@ -644,11 +644,11 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         columnHeaders.map((header) => {
           const buildAction = (tGridCellAction: TGridCellAction) =>
             tGridCellAction({
-              data: data.map((row) => row.data),
               browserFields,
-              timelineId: id,
-              pageSize,
+              data: data.map((row) => row.data),
               globalFilters: filters,
+              pageSize,
+              timelineId: id,
             });
 
           return {

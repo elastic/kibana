@@ -216,17 +216,17 @@ export const defaultCellActions: TGridCellAction[] = [
     return showButton ? (
       <ShowTopNButton
         Component={Component}
-        enablePopOver
         data-test-subj="hover-actions-show-top-n"
+        enablePopOver
         field={columnId}
+        globalFilters={globalFilters}
         onClick={onClick}
         onFilterAdded={onFilterAdded}
         ownFocus={false}
-        showTopN={showTopN}
         showTooltip={false}
+        showTopN={showTopN}
         timelineId={timelineId}
         value={value}
-        globalFilters={globalFilters}
       />
     ) : null;
   },
