@@ -109,7 +109,7 @@ Fleet::
 Lens & Visualizations::
 * Adds migration script for 'drop_last_bucket' value in *TSVB* {kibana-pull}110782[#110782]
 Machine Learning::
-* Fixes Anomaly Explorer data points not showing up because of missing indices {kibana-pull}110899[#110899]
+* Fixes Anomaly Explorer data points not showing up when index pattern has multiple indices {kibana-pull}110899[#110899]
 Maps::
 * Ensure draw tools updates by index name, not index pattern title {kibana-pull}108394[#108394]
 Platform::
