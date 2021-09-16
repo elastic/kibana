@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { RedirectOptions } from '../redirect_manager';
-
-export function formatSearchParams(opts: RedirectOptions): URLSearchParams {
-  const searchParams = new URLSearchParams();
-
-  searchParams.set('l', opts.id);
-  searchParams.set('v', opts.version);
-  searchParams.set('p', JSON.stringify(opts.params));
-
-  return searchParams;
-}
+export * from './types';
+export * from './format_search_params';
+export * from './parse_search_params';
