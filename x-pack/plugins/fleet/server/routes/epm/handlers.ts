@@ -57,33 +57,33 @@ import type { CategoryCount } from '../../../../../../src/plugins/custom_integra
 import type { PackageList } from '../../../common';
 import { getCustomIntegrations } from '../../services/custom_integrations';
 
-interface EPMCategoryCount {
-  id: string;
-  title: string;
-  count: number;
-}
-
-function mergeCounts(accumulator: CategoryCount[], item: CategoryCount): CategoryCount[] {
-  const match = accumulator.find((c) => {
-    return c.id === item.id;
-  });
-  if (match) {
-    match.count += item.count;
-  } else {
-    accumulator.push(item);
-  }
-  return accumulator;
-}
-
-function mergeCategoryCounts(
-  categoriesFromEpm: CategoryCount[],
-  categoriesFromCustom: CategoryCount[]
-) {
-  let result: EPMCategoryCount[] = [];
-  result = categoriesFromEpm.reduce(mergeCounts, result);
-  result = categoriesFromCustom.reduce(mergeCounts, result);
-  return result;
-}
+// interface EPMCategoryCount {
+//   id: string;
+//   title: string;
+//   count: number;
+// }
+//
+// function mergeCounts(accumulator: CategoryCount[], item: CategoryCount): CategoryCount[] {
+//   const match = accumulator.find((c) => {
+//     return c.id === item.id;
+//   });
+//   if (match) {
+//     match.count += item.count;
+//   } else {
+//     accumulator.push(item);
+//   }
+//   return accumulator;
+// }
+//
+// function mergeCategoryCounts(
+//   categoriesFromEpm: CategoryCount[],
+//   categoriesFromCustom: CategoryCount[]
+// ) {
+//   let result: EPMCategoryCount[] = [];
+//   result = categoriesFromEpm.reduce(mergeCounts, result);
+//   result = categoriesFromCustom.reduce(mergeCounts, result);
+//   return result;
+// }
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -91,10 +91,10 @@ export const getCategoriesHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const categoriesFromEpm = await getCategories(request.query);
-    const categoriesFromCustom = getCustomIntegrations().getAddableCategories();
-    const mergedCategories = mergeCategoryCounts(categoriesFromEpm, categoriesFromCustom);
+    // const categoriesFromCustom = getCustomIntegrations().getAddableCategories();
+    // const mergedCategories = mergeCategoryCounts(categoriesFromEpm, categoriesFromCustom);
     const body: GetCategoriesResponse = {
-      response: mergedCategories,
+      response: categoriesFromEpm,
     };
     return response.ok({ body });
   } catch (error) {
@@ -133,20 +133,20 @@ export const getListHandler: RequestHandler<
     //   return !matchingCard;
     // });
 
-    const re = getCustomIntegrations().getAddableCustomIntegrations();
-    const filteredCustomIntegrations = re.filter((integration) => {
-      return !request.query.category || integration.categories.includes(request.query.category);
-    });
-
-    // const merged: PackageList = [...replacingBeats, ...gaPackages, ...filteredCustomIntegrations];
-    const merged: PackageList = [...packages, ...filteredCustomIntegrations];
-
-    merged.sort((packagea, packageb) => {
-      return packagea.title < packageb.title;
-    });
+    // const re = getCustomIntegrations().getAddableCustomIntegrations();
+    // const filteredCustomIntegrations = re.filter((integration) => {
+    //   return !request.query.category || integration.categories.includes(request.query.category);
+    // });
+    //
+    // // const merged: PackageList = [...replacingBeats, ...gaPackages, ...filteredCustomIntegrations];
+    // const merged: PackageList = [...packages, ...filteredCustomIntegrations];
+    //
+    // merged.sort((packagea, packageb) => {
+    //   return packagea.title < packageb.title;
+    // });
 
     const body: GetPackagesResponse = {
-      response: merged,
+      response: packages,
     };
     return response.ok({
       body,

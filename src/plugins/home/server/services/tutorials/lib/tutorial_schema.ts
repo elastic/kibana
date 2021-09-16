@@ -112,7 +112,8 @@ export const tutorialSchema = schema.object({
       }
     },
   }),
-  isAPM: schema.maybe(schema.boolean()),
+  integrationBrowserCategories: schema.maybe(schema.arrayOf(schema.string())),
+  eprPackageOverlap: schema.maybe(schema.string()),
   category: schema.oneOf([
     schema.literal('logging'),
     schema.literal('security'),

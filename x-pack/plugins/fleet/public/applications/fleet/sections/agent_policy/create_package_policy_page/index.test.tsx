@@ -93,7 +93,6 @@ const mockApiCalls = (http: MockedFleetStartServices['http']) => {
   http.get.mockImplementation(async (path) => {
     const err = new Error(`API [GET ${path}] is not MOCKED!`);
     // eslint-disable-next-line no-console
-    console.log(err);
     throw err;
   });
 };

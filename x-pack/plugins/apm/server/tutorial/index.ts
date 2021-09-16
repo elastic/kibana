@@ -83,7 +83,6 @@ export const tutorialProvider = ({
     name: i18n.translate('xpack.apm.tutorial.specProvider.name', {
       defaultMessage: 'APM',
     }),
-    isAPM: true,
     moduleName,
     category: TutorialsCategory.OTHER,
     shortDescription: apmIntro,
@@ -115,5 +114,6 @@ It allows you to monitor the performance of thousands of applications in real ti
           'An APM index pattern is required for some features in the APM UI.',
       }
     ),
+    integrationBrowserCategories: ['elastic_stack'],
   } as TutorialSchema;
 };

@@ -14,31 +14,34 @@ export interface CategoryCount {
   id: Category;
 }
 
-export type Category =
-  | 'aws'
-  | 'azure'
-  | 'cloud'
-  | 'config_management'
-  | 'containers'
-  | 'crm'
-  | 'custom'
-  | 'datastore'
-  | 'elastic_stack'
-  | 'google_cloud'
-  | 'kubernetes'
-  | 'languages'
-  | 'message_queue'
-  | 'monitoring'
-  | 'network'
-  | 'notification'
-  | 'os_system'
-  | 'productivity'
-  | 'security'
-  | 'support'
-  | 'ticketing'
-  | 'version_control'
-  | 'web'
-  | 'other';
+export const CATEGORY_DISPLAY = {
+  aws: 'AWS',
+  azure: 'Azure',
+  cloud: 'Cloud',
+  config_management: 'Config management',
+  containers: 'Containers',
+  crm: 'CRM',
+  custom: 'Custom',
+  datastore: 'Datastore',
+  elastic_stack: 'Elastic Stack',
+  google_cloud: 'Google cloud',
+  kubernetes: 'Kubernetes',
+  languages: 'Languages',
+  message_queue: 'Message queue',
+  monitoring: 'Monitoring',
+  network: 'Network',
+  notification: 'Notification',
+  os_system: 'OS & System',
+  productivity: 'Productivity',
+  security: 'Security',
+  support: 'Support',
+  ticketing: 'Ticketing',
+  version_control: 'Version control',
+  web: 'Web',
+  other: 'Other',
+};
+
+export type Category = keyof typeof CATEGORY_DISPLAY;
 
 export interface CustomIntegration {
   id: string;
@@ -49,9 +52,9 @@ export interface CustomIntegration {
   uiInternalPath: string;
   euiIconType: string;
   categories: Category[];
-  isBeats: boolean;
-  isAPM: boolean;
-  beatsModuleName?: string;
-  source?: string;
-  eprEquivalent?: string[];
+  source: string;
+  eprPackageOverlap?: string;
 }
+
+export const ROUTES_ADDABLECUSTOMINTEGRATIONS = `/api/${PLUGIN_ID}/addableCustomIntegrations`
+export const ROUTES_REPLACEABLECUSTOMINMTEGRATIONS = `/api/${PLUGIN_ID}/replaceableCustomIntegrations`

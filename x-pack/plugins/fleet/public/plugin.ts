@@ -32,6 +32,10 @@ import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common
 
 import type { FleetConfigType } from '../common/types';
 
+import type { CustomIntegrationsSetup } from '../../../../src/plugins/custom_integrations/public';
+
+import { setCustomIntegrations } from './services/custom_integrations';
+
 import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
 import { setHttpClient } from './hooks/use_request';
@@ -66,6 +70,7 @@ export interface FleetSetupDeps {
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  customIntegrations: CustomIntegrationsSetup;
 }
 
 export interface FleetStartDeps {
@@ -90,12 +95,16 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   }
 
   public setup(core: CoreSetup, deps: FleetSetupDeps) {
+
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
 
     // Set up http client
     setHttpClient(core.http);
+
+    // Set up custom integrations
+    setCustomIntegrations(deps.customIntegrations);
 
     // Set up license service
     licenseService.start(deps.licensing.license$);

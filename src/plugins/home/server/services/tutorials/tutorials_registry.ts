@@ -15,6 +15,7 @@ import {
 import { tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
 import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
+import { Category, CATEGORY_DISPLAY } from '../../../../custom_integrations/common';
 
 const emptyContext = {};
 function registerBeatsTutorialsWithCustomIntegrations(
@@ -26,14 +27,13 @@ function registerBeatsTutorialsWithCustomIntegrations(
     name: tutorial.id,
     id: tutorial.name,
     title: tutorial.name,
-    categories: [], // beats packages, we don't know categories
+    categories: [], // For beats packages, we don't know categories
     type: 'ui_link',
     uiInternalPath: `/app/home#/tutorial/${tutorial.id}`,
-    isBeats: true,
-    isAPM: !!tutorial.isAPM,
     description: tutorial.shortDescription,
     euiIconType: '',
-    beatsModuleName: tutorial.moduleName,
+    eprPackageOverlap: tutorial.moduleName,
+    source: 'beats',
   });
 }
 
@@ -42,17 +42,24 @@ function registerTutorialWithCustomIntegrations(
   provider: TutorialProvider
 ) {
   const tutorial = provider(emptyContext);
+
+  const allowedCategories: Category[] = (tutorial.integrationBrowserCategories
+    ? tutorial.integrationBrowserCategories.filter((category) => {
+        return CATEGORY_DISPLAY.hasOwnProperty(category);
+      })
+    : []) as Category[];
+
   customIntegrations.registerCustomIntegration({
     name: tutorial.id,
     id: tutorial.name,
     title: tutorial.name,
-    categories: tutorial.category === 'other' ? [tutorial.category] : [],
+    categories: allowedCategories,
     type: 'ui_link',
     uiInternalPath: `/app/home#/tutorial/${tutorial.id}`,
-    isBeats: false,
-    isAPM: !!tutorial.isAPM,
     description: tutorial.shortDescription,
     euiIconType: tutorial.euiIconType || `logo${name}`,
+    eprPackageOverlap: tutorial.eprPackageOverlap,
+    source: 'tutorial',
   });
 }
 
@@ -74,7 +81,6 @@ export class TutorialsRegistry {
         );
         return res.ok({
           body: this.tutorialProviders.map((tutorialProvider) => {
-            console.log('map utotrial', tutorialProvider);
             return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
           }),
         });

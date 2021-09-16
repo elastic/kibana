@@ -20,7 +20,7 @@ import type {
 import type { ValueOf } from '../../types';
 import type { Omit } from '../../../../../../src/plugins/data/server/search/strategies/es_search/elasticsearch';
 
-import type { CustomIntegration } from '../../../../../../src/plugins/custom_integrations/common';
+import type { CustomIntegration, CategoryCount } from '../../../../../../src/plugins/custom_integrations/common';
 
 import type {
   PackageSpecManifest,
@@ -234,11 +234,7 @@ export type ScreenshotItem = RegistryImage | PackageSpecScreenshot;
 // https://github.com/elastic/package-registry/blob/master/docs/api/categories.json
 export type CategorySummaryList = CategorySummaryItem[];
 export type CategoryId = string;
-export interface CategorySummaryItem {
-  id: CategoryId;
-  title?: string;
-  count: number;
-}
+export type CategorySummaryItem = CategoryCount;
 
 export type RequirementsByServiceName = PackageSpecManifest['conditions'];
 export interface AssetParts {

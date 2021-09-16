@@ -7,6 +7,10 @@
     "githubTeam": ""
   },
   "description": "test",
+  "ui": true,
   "server": true,
+  "extraPublicDirs": [
+    "common"
+  ],
   "optionalPlugins": []
 }

@@ -7,10 +7,10 @@
  */
 
 import { Logger } from 'kibana/server';
-import {CustomIntegration, CategoryCount, Category} from '../common';
+import { CustomIntegration, CategoryCount, Category } from '../common';
 
 function isAddable(integration: CustomIntegration) {
-  return !integration.isBeats && !integration.isAPM;
+  return integration.categories.length;
 }
 
 export class CustomIntegrationRegistry {
@@ -40,7 +40,9 @@ export class CustomIntegrationRegistry {
   }
 
   getReplaceableCustomIntegrations(): CustomIntegration[] {
-    return this._integrations.filter((integration) => integration.isBeats);
+    return this._integrations.filter(
+      (integration) => typeof integration.eprPackageOverlap !== 'undefined'
+    );
   }
 
   getAddableCategories(): CategoryCount[] {

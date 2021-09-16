@@ -58,7 +58,6 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      console.log('GET PACKAGES');
       const resp = await getListHandler(context, request, response);
       return resp;
     }

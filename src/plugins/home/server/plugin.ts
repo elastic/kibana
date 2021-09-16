@@ -39,8 +39,6 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     const router = core.http.createRouter();
     registerRoutes(router);
 
-    console.log('HOME SET?UP');
-    console.log(plugins.customIntegrations);
     this.customIntegrations = plugins.customIntegrations;
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core, plugins.customIntegrations) },

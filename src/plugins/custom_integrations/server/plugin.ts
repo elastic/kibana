@@ -11,6 +11,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 import { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
 import { CustomIntegration, CategoryCount } from '../common';
 import { CustomIntegrationRegistry } from './custom_integration_registry';
+import { defineRoutes } from './routes/define_routes';
 
 export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart> {
@@ -24,6 +25,10 @@ export class CustomIntegrationsPlugin
 
   public setup(core: CoreSetup) {
     this.logger.debug('customIntegrations: Setup');
+
+    const router = core.http.createRouter();
+    defineRoutes(router, this.customIngegrationRegistry);
+
     return {
       registerCustomIntegration: (integration: CustomIntegration) => {
         this.customIngegrationRegistry.registerCustomIntegration(integration);
