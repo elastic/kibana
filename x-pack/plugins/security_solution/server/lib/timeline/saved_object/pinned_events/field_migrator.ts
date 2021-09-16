@@ -6,7 +6,7 @@
  */
 
 import { TIMELINE_ID_REF_NAME } from '../../constants';
-import { pinnedEventSavedObjectType } from '../../saved_object_mappings';
+import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { FieldMigrator } from '../../utils/migrator';
 
 /**
@@ -14,5 +14,5 @@ import { FieldMigrator } from '../../utils/migrator';
  * object.
  */
 export const pinnedEventFieldsMigrator = new FieldMigrator([
-  { path: 'timelineId', type: pinnedEventSavedObjectType, name: TIMELINE_ID_REF_NAME },
+  { path: 'timelineId', type: timelineSavedObjectType, name: TIMELINE_ID_REF_NAME },
 ]);
