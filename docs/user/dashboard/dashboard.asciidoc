@@ -9,7 +9,7 @@ The best way to understand your data is to visualize it. With dashboards, you ca
 that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. 
 
 [role="screenshot"]
-image:images/Dashboard_example.png[Example dashboard]
+image:images/dashboard_ecommerceRevenueDashboard_7.15.0.png[Example dashboard]
 
 Panels display your data in charts, tables, maps, and more, which allow you to compare your data side-by-side to identify patterns and connections. Dashboards support several types of panels to display your data, and several options to create panels.
 
