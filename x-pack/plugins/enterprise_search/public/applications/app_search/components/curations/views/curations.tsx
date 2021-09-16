@@ -9,8 +9,6 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiPanel } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
@@ -19,10 +17,11 @@ import { ENGINE_CURATIONS_NEW_PATH } from '../../../routes';
 import { generateEnginePath } from '../../engine';
 import { AppSearchPageTemplate } from '../../layout';
 
-import { CurationsTable, EmptyState } from '../components';
 import { CURATIONS_OVERVIEW_TITLE, CREATE_NEW_CURATION_TITLE } from '../constants';
 import { CurationsLogic } from '../curations_logic';
 import { getCurationsBreadcrumbs } from '../utils';
+
+import { CurationsOverview } from './curations_overview';
 
 export const Curations: React.FC = () => {
   const { dataLoading, curations, meta, selectedPageTab } = useValues(CurationsLogic);
@@ -72,14 +71,8 @@ export const Curations: React.FC = () => {
         tabs: pageTabs,
       }}
       isLoading={dataLoading && !curations.length}
-      isEmptyState={!curations.length}
-      emptyState={<EmptyState />}
     >
-      {selectedPageTab === 'overview' && (
-        <EuiPanel hasBorder>
-          <CurationsTable />
-        </EuiPanel>
-      )}
+      {selectedPageTab === 'overview' && <CurationsOverview />}
     </AppSearchPageTemplate>
   );
 };

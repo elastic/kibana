@@ -17,37 +17,28 @@ import { EuiTab } from '@elastic/eui';
 
 import { mountWithIntl, getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
 
-import { CurationsTable } from '../components';
-import { CurationsValues } from '../curations_logic';
-
 import { Curations } from './curations';
+import { CurationsOverview } from './curations_overview';
 
 describe('Curations', () => {
-  const values: CurationsValues = {
+  const values = {
     dataLoading: false,
     curations: [
       {
         id: 'cur-id-1',
         last_updated: 'January 1, 1970 at 12:00PM',
         queries: ['hiking'],
-        promoted: [],
-        hidden: [],
-        organic: [],
       },
       {
         id: 'cur-id-2',
         last_updated: 'January 2, 1970 at 12:00PM',
         queries: ['mountains', 'valleys'],
-        promoted: [],
-        hidden: [],
-        organic: [],
       },
     ],
     meta: {
       page: {
         current: 1,
         size: 10,
-        total_pages: 1,
         total_results: 2,
       },
     },
@@ -56,7 +47,6 @@ describe('Curations', () => {
 
   const actions = {
     loadCurations: jest.fn(),
-    deleteCuration: jest.fn(),
     onPaginate: jest.fn(),
     onSelectPageTab: jest.fn(),
   };
@@ -88,7 +78,7 @@ describe('Curations', () => {
 
     expect(tabs.at(0).prop('isSelected')).toEqual(true);
 
-    expect(wrapper.find(CurationsTable)).toHaveLength(1);
+    expect(wrapper.find(CurationsOverview)).toHaveLength(1);
   });
 
   it('renders a settings view', () => {
