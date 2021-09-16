@@ -87,7 +87,9 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
           }}
         />
       </EuiText>
+
       <EuiSpacer size="m" />
+
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="s">

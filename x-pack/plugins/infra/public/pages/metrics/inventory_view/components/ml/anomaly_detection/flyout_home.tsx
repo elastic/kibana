@@ -5,26 +5,17 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useEffect } from 'react';
+import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCard,
-  EuiIcon,
-  EuiCallOut,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiTabs,
-  EuiTab,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiCallOut } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
+import moment from 'moment';
+import { EuiTabs } from '@elastic/eui';
+import { EuiTab } from '@elastic/eui';
 import { MLJobsAwaitingNodeWarning } from '../../../../../../../../ml/public';
 import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
