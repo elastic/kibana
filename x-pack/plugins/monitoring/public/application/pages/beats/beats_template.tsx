@@ -16,7 +16,6 @@ interface BeatsTemplateProps extends PageTemplateProps {
 }
 
 export const BeatsTemplate: React.FC<BeatsTemplateProps> = ({ cluster, ...props }) => {
-  // TODO figure out where the tab i18n is coming from
   const tabs: TabMenuItem[] = [
     {
       id: 'overview',
