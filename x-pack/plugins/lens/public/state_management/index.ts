@@ -26,6 +26,7 @@ export const {
   updateDatasourceState,
   updateVisualizationState,
   updateLayer,
+  initEmpty,
   switchVisualization,
   selectSuggestion,
   rollbackSuggestion,

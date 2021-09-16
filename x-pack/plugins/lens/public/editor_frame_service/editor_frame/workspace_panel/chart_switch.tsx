@@ -138,7 +138,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       (!selection.datasourceId && !selection.sameDatasources) ||
       selection.dataLoss === 'everything'
     ) {
-      dispatchLens(removeLayers(Object.keys(props.framePublicAPI.datasourceLayers)));
+      dispatchLens(removeLayers());
     }
   };
 

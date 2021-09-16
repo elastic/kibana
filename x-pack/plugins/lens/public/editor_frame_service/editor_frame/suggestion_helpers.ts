@@ -169,24 +169,21 @@ export function getVisualizeFieldSuggestions({
   datasourceMap,
   datasourceStates,
   visualizationMap,
-  activeVisualizationId,
-  visualizationState,
   visualizeTriggerFieldContext,
 }: {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
   visualizationMap: VisualizationMap;
-  activeVisualizationId: string | null;
   subVisualizationId?: string;
-  visualizationState: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
 }): Suggestion | undefined {
+  const activeVisualizationId = Object.keys(visualizationMap)[0] || null;
   const suggestions = getSuggestions({
     datasourceMap,
-    datasourceStates,
     visualizationMap,
+    datasourceStates,
     activeVisualizationId,
-    visualizationState,
+    visualizationState: null,
     visualizeTriggerFieldContext,
   });
   if (suggestions.length) {

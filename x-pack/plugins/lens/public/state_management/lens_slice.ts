@@ -6,11 +6,18 @@
  */
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
+import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
+import { getDatasourceLayersIds } from '../async_services';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getInitialDatasourceId, getResolvedDateRange } from '../utils';
 import { LensAppState, LensStoreDeps } from './types';
+import { generateId } from '../id_generator';
+import {
+  getVisualizeFieldSuggestions,
+  Suggestion,
+} from '../editor_frame_service/editor_frame/suggestion_helpers';
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -71,7 +78,7 @@ export const getPreloadedState = ({
 export const setState = createAction<Partial<LensAppState>>('setState');
 export const onActiveDataChange = createAction<TableInspectorAdapter>('onActiveDataChange');
 export const setSaveable = createAction<boolean>('setSaveable');
-export const removeLayers = createAction<string[]>('removeLayers');
+export const removeLayers = createAction<void>('removeLayers');
 export const updateState = createAction<{
   subType: string;
   updater: (prevState: LensAppState) => LensAppState;
@@ -90,6 +97,20 @@ export const updateLayer = createAction<{
   datasourceId: string;
   updater: (state: unknown, layerId: string) => unknown;
 }>('updateLayer');
+
+export const initEmpty = createAction<Partial<LensAppState>>(
+  'initEmpty',
+  function prepare({
+    newState,
+    initialContext,
+  }: {
+    newState: Partial<LensAppState>;
+    initialContext?: VisualizeFieldContext;
+  }) {
+    return { payload: { layerId: generateId(), newState, initialContext } };
+  }
+);
+
 export const switchVisualization = createAction<{
   newVisualizationId: string;
   initialState: unknown;
@@ -125,6 +146,7 @@ export const lensActions = {
   updateVisualizationState,
   removeLayers,
   updateLayer,
+  initEmpty,
   switchVisualization,
   selectSuggestion,
   rollbackSuggestion,
@@ -254,6 +276,76 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       };
     },
 
+    [initEmpty.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          newState: Partial<LensAppState>;
+          initialContext: VisualizeFieldContext | undefined;
+          layerId: string;
+        };
+      }
+    ) => {
+      const newState = {
+        ...state,
+        ...payload.newState,
+      };
+      const suggestion: Suggestion | undefined = getVisualizeFieldSuggestions({
+        datasourceMap,
+        datasourceStates: newState.datasourceStates,
+        visualizationMap,
+        visualizeTriggerFieldContext: payload.initialContext,
+      });
+      if (suggestion) {
+        return {
+          ...newState,
+          datasourceStates: {
+            ...newState.datasourceStates,
+            [suggestion.datasourceId!]: {
+              ...newState.datasourceStates[suggestion.datasourceId!],
+              state: suggestion.datasourceState,
+            },
+          },
+          visualization: {
+            ...newState.visualization,
+            activeId: suggestion.visualizationId,
+            state: suggestion.visualizationState,
+          },
+          stagedPreview: undefined,
+        };
+      }
+      const visualization = newState.visualization;
+
+      if (!visualization.activeId) {
+        throw new Error('Invariant: visualization state got updated without active visualization');
+      }
+
+      const activeVisualization = visualizationMap[visualization.activeId];
+
+      if (visualization.state === null && activeVisualization) {
+        const activeDatasourceId = getInitialDatasourceId(datasourceMap)!;
+        const newVisState = activeVisualization.initialize(() => payload.layerId);
+        const updater = datasourceMap[activeDatasourceId].insertLayer;
+        return {
+          ...newState,
+          datasourceStates: {
+            ...newState.datasourceStates,
+            [activeDatasourceId]: {
+              ...newState.datasourceStates[activeDatasourceId],
+              state: updater(newState.datasourceStates[activeDatasourceId].state, payload.layerId),
+            },
+          },
+          visualization: {
+            ...visualization,
+            state: newVisState,
+          },
+        };
+      }
+      return newState;
+    },
+
     [switchVisualization.type]: (
       state,
       {
@@ -361,24 +453,19 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         activeDatasourceId: payload.newDatasourceId,
       };
     },
-    [removeLayers.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: string[];
-      }
-    ) => {
+    [removeLayers.type]: (state) => {
       if (!state.visualization.activeId) {
         throw new Error('Invariant: visualization state got updated without active visualization');
       }
+
+      const layers = getDatasourceLayersIds(state.datasourceStates, datasourceMap);
 
       const activeVisualization =
         state.visualization.activeId && visualizationMap[state.visualization.activeId];
 
       let newVisualization = state.visualization;
       if (activeVisualization && activeVisualization.removeLayer && state.visualization.state) {
-        const updater = payload.reduce(
+        const updater = layers.reduce(
           (acc, layerId) =>
             activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
           state.visualization.state
@@ -391,7 +478,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         };
       }
       let newDatasourceStates = state.datasourceStates;
-      payload.forEach((layerId) => {
+      layers.forEach((layerId) => {
         const [layerDatasourceId] =
           Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
             return (
