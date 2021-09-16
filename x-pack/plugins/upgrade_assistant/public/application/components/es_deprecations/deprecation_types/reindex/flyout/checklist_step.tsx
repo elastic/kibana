@@ -77,12 +77,12 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
 
-  const clickStartReindex = useCallback(() => {
+  const onStartReindex = useCallback(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_START_CLICK);
     startReindex();
   }, [startReindex]);
 
-  const clickStopReindex = useCallback(() => {
+  const onStopReindex = useCallback(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_STOP_CLICK);
     cancelReindex();
   }, [cancelReindex]);
@@ -140,7 +140,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             />
           </h3>
         </EuiTitle>
-        <ReindexProgress reindexState={reindexState} cancelReindex={clickStopReindex} />
+        <ReindexProgress reindexState={reindexState} cancelReindex={onStopReindex} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -158,7 +158,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                 fill
                 color={status === ReindexStatus.paused ? 'warning' : 'primary'}
                 iconType={status === ReindexStatus.paused ? 'play' : undefined}
-                onClick={clickStartReindex}
+                onClick={onStartReindex}
                 isLoading={loading}
                 disabled={loading || !hasRequiredPrivileges}
               >

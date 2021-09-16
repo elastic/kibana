@@ -35,15 +35,10 @@ export class UiMetricService {
 
   private track(metricType: UiCounterMetricType, eventName: string | string[]) {
     if (!this.usageCollection) {
-      // Usage collection might have been disabled in Kibana config.
+      // Usage collection might be disabled in Kibana config.
       return;
     }
-    return this.usageCollection.reportUiCounter.bind(
-      this.usageCollection,
-      UIM_APP_NAME,
-      metricType,
-      eventName
-    );
+    return this.usageCollection.reportUiCounter(UIM_APP_NAME, metricType, eventName);
   }
 
   public trackUiMetric(metricType: UiCounterMetricType, eventName: string | string[]) {
