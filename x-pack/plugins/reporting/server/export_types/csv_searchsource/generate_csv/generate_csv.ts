@@ -16,6 +16,7 @@ import {
   cellHasFormulas,
   ISearchSource,
   ISearchStartSearchSource,
+  ES_SEARCH_STRATEGY,
   SearchFieldValue,
   SearchSourceFields,
   tabifyDocs,
@@ -98,10 +99,14 @@ export class CsvGenerator {
       },
       size: scrollSettings.size,
       ignore_throttled: !includeFrozen,
+      ignore_unavailable: undefined,
     };
 
-    const results = (await this.clients.es.asCurrentUser.search(searchParams))
-      .body as estypes.SearchResponse<unknown>;
+    const results = (
+      await this.clients.data
+        .search({ params: searchParams }, { strategy: ES_SEARCH_STRATEGY })
+        .toPromise()
+    ).rawResponse as estypes.SearchResponse<unknown>;
 
     return results;
   }
@@ -324,7 +329,6 @@ export class CsvGenerator {
           ).body.id;
         }
 
-        // use the scroll cursor in Elasticsearch
         const results = await this.scroll(pitId, settings, searchSource, searchAfter);
         if (results.hits?.total != null && !totalRecords) {
           totalRecords =
