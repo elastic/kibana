@@ -48,11 +48,10 @@ import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { registerSource } from '../source_registry';
 import {
-  DataMeta,
+  DataRequestMeta,
   ESSearchSourceDescriptor,
   Timeslice,
   VectorSourceRequestMeta,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { TimeRange } from '../../../../../../../src/plugins/data/common';
@@ -73,6 +72,16 @@ import {
   getIsDrawLayer,
   getMatchingIndexes,
 } from './util/feature_edit';
+
+type ESSearchSourceSyncMeta = Pick<
+  ESSearchSourceDescriptor,
+  | 'filterByMapBounds'
+  | 'sortField'
+  | 'sortOrder'
+  | 'scalingType'
+  | 'topHitsSplitField'
+  | 'topHitsSize'
+>;
 
 export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
   const timeRangeBounds = getTimeFilter().calculateBounds(timerange);
@@ -714,7 +723,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
+  getSyncMeta(): ESSearchSourceSyncMeta {
     return {
       filterByMapBounds: this._descriptor.filterByMapBounds,
       sortField: this._descriptor.sortField,
@@ -853,7 +862,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
   }
 
-  getUpdateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
+  getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return true;
     }

@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { EngineLogic } from '../../../engine';
+import { CrawlerLogic } from '../../crawler_logic';
 import { CrawlerDomain } from '../../types';
 
 export interface ManageCrawlsPopoverLogicValues {
@@ -53,7 +54,7 @@ export const ManageCrawlsPopoverLogic = kea<
       }
 
       try {
-        await http.post(`/api/app_search/engines/${engineName}/crawler/process_crawls`, {
+        await http.post(`/internal/app_search/engines/${engineName}/crawler/process_crawls`, {
           body: JSON.stringify(requestBody),
         });
 
@@ -65,6 +66,8 @@ export const ManageCrawlsPopoverLogic = kea<
             }
           )
         );
+
+        CrawlerLogic.actions.fetchCrawlerData();
       } catch (e) {
         flashAPIErrors(e);
       } finally {

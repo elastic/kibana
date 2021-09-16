@@ -8,10 +8,8 @@
 import { TableSource } from './table_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 import {
-  MapFilters,
-  MapQuery,
   VectorJoinSourceRequestMeta,
-  VectorSourceSyncMeta,
+  VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 
 describe('TableSource', () => {
@@ -178,14 +176,7 @@ describe('TableSource', () => {
       try {
         await tableSource.getGeoJsonWithMeta(
           'foobar',
-          ({} as unknown) as MapFilters & {
-            applyGlobalQuery: boolean;
-            applyGlobalTime: boolean;
-            fieldNames: string[];
-            geogridPrecision?: number;
-            sourceQuery?: MapQuery;
-            sourceMeta: VectorSourceSyncMeta;
-          },
+          ({} as unknown) as VectorSourceRequestMeta,
           () => {},
           () => {
             return false;
