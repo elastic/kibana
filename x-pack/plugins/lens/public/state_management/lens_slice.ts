@@ -316,6 +316,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           stagedPreview: undefined,
         };
       }
+
       const visualization = newState.visualization;
 
       if (!visualization.activeId) {
@@ -503,10 +504,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       return {
         ...state,
         visualization: newVisualization,
-        // datasourceStates: newDatasourceStates,
+        datasourceStates: newDatasourceStates,
       };
     },
-    // [navigateAway]: (state) => state,
+    [navigateAway.type]: (state) => state,
     [loadInitial.type]: (
       state,
       payload: PayloadAction<{
