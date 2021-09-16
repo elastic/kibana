@@ -38,6 +38,7 @@ import {
   AlertWithLegacyId,
   SanitizedAlertWithLegacyId,
   PartialAlertWithLegacyId,
+  RuleMonitoringSummary,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -73,7 +74,7 @@ import { ruleAuditEvent, RuleAuditAction } from './audit_events';
 import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField } from './lib';
 import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
-
+import { ruleMonitoringSummaryFromEventLog } from '../lib/rule_monitoring_summary_from_event_log';
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
 }
@@ -532,6 +533,59 @@ export class RulesClient {
 
     return alertInstanceSummaryFromEventLog({
       alert,
+      events,
+      dateStart: parsedDateStart.toISOString(),
+      dateEnd: dateNow.toISOString(),
+    });
+  }
+
+  public async getMonitoringSummary({
+    id,
+    dateStart,
+  }: GetAlertInstanceSummaryParams): Promise<RuleMonitoringSummary> {
+    this.logger.debug(`getMonitoringSummary(): getting rule ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedAlertWithLegacyId;
+
+    await this.authorization.ensureAuthorized({
+      ruleTypeId: rule.alertTypeId,
+      consumer: rule.consumer,
+      operation: ReadOperations.GetAlertSummary,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
+
+    const dateNow = new Date();
+
+    // default duration of monitoring is 7 days
+    const defaultDateStart = new Date(dateNow - 7 * 24 * 60 * 60 * 1000);
+    const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    this.logger.debug(`getMonitoringSummary(): search the event log for rule ${id}`);
+    let events: IEvent[];
+    try {
+      const queryResults = await eventLogClient.findEventsBySavedObjectIds(
+        'alert',
+        [id],
+        {
+          page: 1,
+          per_page: 10000,
+          start: parsedDateStart.toISOString(),
+          end: dateNow.toISOString(),
+          sort_order: 'desc',
+        },
+        rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
+      events = queryResults.data;
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getAlertInstanceSummary(): error searching event log for alert ${id}: ${err.message}`
+      );
+      events = [];
+    }
+
+    return ruleMonitoringSummaryFromEventLog({
+      rule,
       events,
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
