@@ -10,7 +10,7 @@ import {
   Chart,
   ElementClickListener,
   Heatmap,
-  HeatmapBrushEvent,
+  BrushEvent,
   HeatmapElementEvent,
   HeatmapSpec,
   ScaleType,
@@ -221,7 +221,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     onClickValue(context);
   }) as ElementClickListener;
 
-  const onBrushEnd = (e: HeatmapBrushEvent) => {
+  const onBrushEnd = (e: BrushEvent) => {
     const { x, y } = e;
 
     const xAxisFieldName = xAxisColumn.meta.field;
@@ -270,7 +270,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   };
 
   const config: HeatmapSpec['config'] = {
-    onBrushEnd,
     grid: {
       stroke: {
         width:
@@ -338,6 +337,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
             labelOptions: { maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0 },
           },
         }}
+        onBrushEnd={onBrushEnd}
       />
       <Heatmap
         id={tableId}

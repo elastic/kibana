@@ -28,6 +28,7 @@ import {
   HeatmapBrushEvent,
   Position,
   ScaleType,
+  BrushEndListener,
 } from '@elastic/charts';
 import moment from 'moment';
 
@@ -284,16 +285,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     if (!showSwimlane) return {};
 
     const config: HeatmapSpec['config'] = {
-      onBrushEnd: (e: HeatmapBrushEvent) => {
-        if (!e.cells.length) return;
-
-        onCellsSelection({
-          lanes: e.y as string[],
-          times: e.x.map((v) => (v as number) / 1000) as [number, number],
-          type: swimlaneType,
-          viewByFieldName: swimlaneData.fieldName,
-        });
-      },
       grid: {
         cellHeight: {
           min: CELL_HEIGHT,
@@ -372,6 +363,17 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval, onCellsSelection]
   ) as ElementClickListener;
 
+  const onBrushEnd = (e: HeatmapBrushEvent) => {
+    if (!e.cells.length) return;
+
+    onCellsSelection({
+      lanes: e.y as string[],
+      times: e.x!.map((v) => (v as number) / 1000) as [number, number],
+      type: swimlaneType,
+      viewByFieldName: swimlaneData.fieldName,
+    });
+  };
+
   const tooltipOptions: TooltipSettings = useMemo(
     () => ({
       placement: 'auto',
@@ -425,6 +427,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         xDomain={xDomain}
                         tooltip={tooltipOptions}
                         debugState={window._echDebugStateFlag ?? false}
+                        onBrushEnd={onBrushEnd as BrushEndListener}
                       />
 
                       <Heatmap

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { BrushEndListener, XYBrushArea } from '@elastic/charts';
+import { BrushEndListener, BrushEvent } from '@elastic/charts';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -126,9 +126,7 @@ export function TransactionDistribution({
 
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
-  const onTrackedChartSelection: BrushEndListener = (
-    brushArea: XYBrushArea
-  ) => {
+  const onTrackedChartSelection: BrushEndListener = (brushArea: BrushEvent) => {
     onChartSelection(brushArea);
     trackApmEvent({ metric: 'transaction_distribution_chart_selection' });
   };

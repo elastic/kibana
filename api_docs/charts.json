@@ -229,7 +229,7 @@
           ", xAccessor: string | number | ",
           "AccessorFn",
           ") => ({ x: selectedRange }: ",
-          "XYBrushArea",
+          "XYBrushEvent",
           ") => ",
           {
             "pluginId": "charts",
