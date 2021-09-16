@@ -266,6 +266,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           : [
               <EuiButton
                 key="addPackagePolicyButton"
+                fill
                 isDisabled={!hasWriteCapabilities}
                 iconType="plusInCircle"
                 onClick={() => {
