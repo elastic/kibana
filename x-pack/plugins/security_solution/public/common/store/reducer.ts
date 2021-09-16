@@ -47,6 +47,7 @@ export const createInitialState = (
     enableExperimental: ExperimentalFeatures;
   }
 ): PreloadedState<State> => {
+  console.log('signalIndexName', signalIndexName, defaultDataView);
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
       defaultDataView,
@@ -60,6 +61,7 @@ export const createInitialState = (
     ),
     [SourcererScopeName.timeline]: defaultDataView.patternList,
   };
+  console.log('initialPatterns', initialPatterns);
   const preloadedState: PreloadedState<State> = {
     app: { ...initialAppState, enableExperimental },
     dragAndDrop: initialDragAndDropState,

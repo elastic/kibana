@@ -10,11 +10,15 @@ import get from 'lodash/get';
 
 export const findExistingIndices = async (
   indices: string[],
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  signalIndexName?: string
 ): Promise<boolean[]> =>
   Promise.all(
     indices
       .map(async (index) => {
+        if (signalIndexName === index) {
+          return true;
+        }
         const searchResponse = await esClient.search({
           index,
           body: { query: { match_all: {} }, size: 0 },

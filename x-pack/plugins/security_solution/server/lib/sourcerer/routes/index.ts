@@ -49,7 +49,7 @@ export const createSourcererDataViewRoute = (
 
         let allDataViews = await dataViewService.getIdsWithTitle();
         const patternId = DEFAULT_DATA_VIEW_ID;
-        const { patternList } = request.body;
+        const { forceSignalsIndex, patternList } = request.body;
         const siemDataView = allDataViews.find((v) => v.id === patternId);
         let defaultDataView;
         const patternListAsTitle = patternList.join();
@@ -78,9 +78,14 @@ export const createSourcererDataViewRoute = (
         const patternLists: string[][] = allDataViews.map(({ title }) => title.split(','));
         const activePatternBools: boolean[][] = await Promise.all(
           patternLists.map((pl) =>
-            findExistingIndices(pl, context.core.elasticsearch.client.asCurrentUser)
+            findExistingIndices(
+              pl,
+              context.core.elasticsearch.client.asCurrentUser,
+              forceSignalsIndex
+            )
           )
         );
+
         const activePatternLists = patternLists.map((pl, i) =>
           // also remove duplicates from active
           pl.filter((pattern, j, self) => self.indexOf(pattern) === j && activePatternBools[i][j])

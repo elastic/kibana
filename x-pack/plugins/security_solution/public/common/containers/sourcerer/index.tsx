@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
@@ -19,11 +19,14 @@ import { TimelineId } from '../../../../common';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { postSourcererDataView } from './api';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
 ) => {
   const dispatch = useDispatch();
+  const abortCtrl = useRef(new AbortController());
+  const [isLoading, setLoading] = useState(false);
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
@@ -62,11 +65,47 @@ export const useInitSourcerer = (
     getTimelineSelector(state, TimelineId.active)
   );
 
+  const updateSourcererDataView = useCallback(
+    (newSignalsIndex: string) => {
+      const asyncSearch = async (newPatternList: string[]) => {
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+        try {
+          console.log('postSourcererDataView', newPatternList);
+          const response = await postSourcererDataView({
+            body: { patternList: newPatternList, forceSignalsIndex: newSignalsIndex },
+            signal: abortCtrl.current.signal,
+          });
+          console.log('response', response);
+          setLoading(false);
+          sourcererActions.setSourcererDataViews(response);
+        } catch (err) {
+          console.log('ERROR GO HERE STEPH', err);
+          setLoading(false);
+        }
+      };
+      if (defaultDataView.title.indexOf(newSignalsIndex) === -1) {
+        abortCtrl.current.abort();
+        asyncSearch([...defaultDataView.title.split(','), newSignalsIndex]);
+      }
+    },
+    [defaultDataView.title]
+  );
+
   useIndexFields(scopeId);
   useIndexFields(SourcererScopeName.timeline);
 
   useEffect(() => {
+    console.log('things', {
+      loadingSignalIndex,
+      signalIndexName,
+      signalIndexNameSelector,
+      condition: !loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null,
+    });
     if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {
+      // update signal name also updates sourcerer
+      updateSourcererDataView(signalIndexName);
+      console.log('dispatch setSignalIndexName', signalIndexName);
       dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
     }
   }, [dispatch, loadingSignalIndex, signalIndexName, signalIndexNameSelector]);

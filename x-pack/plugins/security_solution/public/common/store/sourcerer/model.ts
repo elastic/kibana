@@ -57,8 +57,6 @@ export interface KibanaDataView {
   title: string;
 }
 
-export type KibanaDataViews = KibanaDataView[];
-
 // ManageSourcerer
 export interface SourcererModel {
   defaultDataView: KibanaDataView;

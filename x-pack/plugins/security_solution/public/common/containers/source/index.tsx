@@ -252,11 +252,14 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
           )
           .subscribe({
             next: (response) => {
+              // TODO: Steph/sourcerer needs better tests
               if (isCompleteResponse(response)) {
+                // TODO: Steph/sourcerer why
                 const newSelectedPatterns = selectedPatterns.filter((pattern) =>
                   patternList.includes(pattern)
                 );
                 const patternString = newSelectedPatterns.sort().join();
+                console.log('response', { patternList, newSelectedPatterns, response });
                 dispatch(
                   sourcererActions.setSource({
                     id: sourcererScopeName,
@@ -268,7 +271,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                       errorMessage: null,
                       id: sourcererScopeName,
                       indexPattern: getIndexFields(patternString, response.indexFields),
-                      indicesExist: patternList.length > 0,
+                      indicesExist: response.indicesExist.length > 0,
                       loading: false,
                       runtimeMappings: response.runtimeMappings,
                     },

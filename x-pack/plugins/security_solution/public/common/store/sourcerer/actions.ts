@@ -8,7 +8,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
-import { ManageScopeInit, SourcererScopeName } from './model';
+import { KibanaDataView, ManageScopeInit, SourcererScopeName } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
@@ -20,6 +20,11 @@ export const setSource = actionCreator<{
 export const setSignalIndexName = actionCreator<{ signalIndexName: string }>(
   'SET_SIGNAL_INDEX_NAME'
 );
+
+export const setSourcererDataViews = actionCreator<{
+  defaultDataView: KibanaDataView;
+  kibanaDataViews: KibanaDataView[];
+}>('SET_SOURCERER_DATA_VIEWS');
 
 export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; loading: boolean }>(
   'SET_SOURCERER_SCOPE_LOADING'

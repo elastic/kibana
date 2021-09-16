@@ -10,5 +10,6 @@ import * as t from 'io-ts';
 export const sourcererSchema = t.exact(
   t.type({
     patternList: t.array(t.string),
+    forceSignalsIndex: t.union([t.string, t.undefined]),
   })
 );

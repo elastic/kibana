@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
+  setSourcererDataViews,
   setSourcererScopeLoading,
   setSelectedDataView,
   setSignalIndexName,
@@ -24,6 +25,11 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     ...state,
     signalIndexName,
   }))
+  .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => ({
+    ...state,
+    defaultDataView,
+    kibanaDataViews,
+  }))
   .case(setSourcererScopeLoading, (state, { id, loading }) => ({
     ...state,
     sourcererScopes: {
@@ -35,6 +41,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     },
   }))
   .case(setSelectedDataView, (state, payload) => {
+    console.log('setSelectedDataView', { state, payload });
     const { id, eventType, ...rest } = payload;
     const pattern = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
     // TODO: Steph/sourcerer needs unit tests
@@ -63,6 +70,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     };
   })
   .case(setSource, (state, { id, payload }) => {
+    console.log('setSource', { state, payload });
     return {
       ...state,
       sourcererScopes: {
