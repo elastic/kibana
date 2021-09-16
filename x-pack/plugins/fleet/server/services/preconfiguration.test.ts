@@ -513,17 +513,6 @@ describe('output preconfiguration', () => {
               hosts: ['http://es.co:80'],
               is_preconfigured: true,
             };
-          case 'existing-output-fleet-server-service-token':
-            return {
-              id: 'existing-output-1',
-              is_default: false,
-              name: 'Output 1',
-              // @ts-ignore
-              type: 'elasticsearch',
-              hosts: ['http://es.co:80'],
-              is_preconfigured: true,
-              fleet_server: { service_token: 'test123' },
-            };
           default:
             throw soClient.errors.createGenericNotFoundError(id);
         }
@@ -597,19 +586,6 @@ describe('output preconfiguration', () => {
         name: 'Output 1',
         type: 'elasticsearch',
         hosts: ['http://es.co'],
-      },
-    },
-    {
-      name: 'with fleet server service token',
-      data: {
-        id: 'existing-output-fleet-server-service-token',
-        is_default: false,
-        name: 'Output 1',
-        type: 'elasticsearch',
-        hosts: ['http://es.co:80'],
-        fleet_server: {
-          service_token: 'test123',
-        },
       },
     },
   ];

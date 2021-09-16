@@ -19,9 +19,6 @@ export interface NewOutput {
   api_key?: string;
   config_yaml?: string;
   is_preconfigured?: boolean;
-  fleet_server?: {
-    service_token?: string;
-  };
 }
 
 export type OutputSOAttributes = NewOutput & {

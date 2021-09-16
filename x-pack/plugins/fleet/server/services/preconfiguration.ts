@@ -57,8 +57,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
         preconfiguredOutput.hosts.map(normalizeHostsForAgents)
       )) ||
     existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
-    existingOutput.config_yaml !== preconfiguredOutput.config_yaml ||
-    !isEqual(existingOutput.fleet_server, preconfiguredOutput.fleet_server)
+    existingOutput.config_yaml !== preconfiguredOutput.config_yaml
   );
 }
 

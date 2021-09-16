@@ -86,8 +86,8 @@ Optional properties are:
   be changed by updating the {kib} config.
   `is_default`:: If `true`, this policy is the default agent policy.
   `is_default_fleet_server`:: If `true`, this policy is the default {fleet-server} agent policy.
-  `data_output_id`:: ID of the output to send data
-  `monitoring_output_id`:: ID of the output to send monitoring data.
+  `data_output_id`:: ID of the output to send data (Need to be identical to `monitoring_output_id`)
+  `monitoring_output_id`:: ID of the output to send monitoring data. (Need to be identical to `data_output_id`)
   `package_policies`:: List of integration policies to add to this policy.
     `name`::: (required) Name of the integration policy.
     `package`::: (required) Integration that this policy configures

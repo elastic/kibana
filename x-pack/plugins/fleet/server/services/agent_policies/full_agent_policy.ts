@@ -196,14 +196,13 @@ function transformOutputToFullPolicyOutput(
   standalone = false
 ): FullAgentPolicyOutput {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { config_yaml, type, hosts, ca_sha256, api_key, fleet_server } = output;
+  const { config_yaml, type, hosts, ca_sha256, api_key } = output;
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
   const newOutput: FullAgentPolicyOutput = {
     type,
     hosts,
     ca_sha256,
     api_key,
-    fleet_server,
     ...configJs,
   };
 
