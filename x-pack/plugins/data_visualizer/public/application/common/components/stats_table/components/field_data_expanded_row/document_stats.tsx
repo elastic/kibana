@@ -8,16 +8,17 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { FieldDataRowProps } from '../../types';
 import { roundToDecimalPlace } from '../../../utils';
+import { ExpandedRowPanel } from './expanded_row_panel';
 
 const metaTableColumns = [
   {
     name: '',
     render: (metaItem: { display: ReactNode }) => metaItem.display,
-    width: '75px',
+    width: '25px',
     align: 'right',
   },
   {
@@ -77,8 +78,8 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
   ];
 
   return (
-    <EuiFlexItem
-      data-test-subj={'dataVisualizerDocumentStatsContent'}
+    <ExpandedRowPanel
+      dataTestSubj={'dataVisualizerDocumentStatsContent'}
       className={'dataVisualizerSummaryTableWrapper dataVisualizerPanelWrapper'}
     >
       <ExpandedRowFieldHeader>{metaTableTitle}</ExpandedRowFieldHeader>
@@ -89,6 +90,6 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
         columns={metaTableColumns}
         tableCaption={metaTableTitle}
       />
-    </EuiFlexItem>
+    </ExpandedRowPanel>
   );
 };

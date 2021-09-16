@@ -2,9 +2,8 @@
 @import 'components/field_count_stats/index';
 @import 'components/field_data_row/index';
 
-$panelWidthS:     300px;
-$panelWidthL:     600px;
-$panelWidthXL:    900px;
+$panelWidthS:     #{'max(20%, 225px)'};
+$panelWidthL:     #{'max(40%, 450px)'};
 
 .dataVisualizerFieldExpandedRow {
   padding-left: $euiSize * 4;
@@ -57,8 +56,8 @@ $panelWidthXL:    900px;
   }
 
   .dataVisualizerSummaryTable {
-    max-width: 350px;
-    min-width: 250px;
+    //max-width: #{$panelWidthS - $euiSize};
+    //min-width: #{$panelWidthS - $euiSize};
     .euiTableRow > .euiTableRowCell {
       border-bottom: 0;
     }
@@ -87,15 +86,14 @@ $panelWidthXL:    900px;
   }
 
   .dataVisualizerPanelWrapper {
-    border-radius: $euiBorderRadius;
-    border: $euiBorderThin;
-    padding: $euiSizeS;
-    margin: $euiSizeXS $euiSizeM $euiSizeM 0;
+    margin: $euiSizeXS $euiSizeS $euiSizeS 0;
+    &.compressed {
+      max-width: $panelWidthS;
+    }
   }
 
   .dataVisualizerTextContent {
     min-width: $panelWidthS;
-    max-width: $panelWidthXL;
   }
 
 }

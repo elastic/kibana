@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { EuiFlexItem, EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
+import { EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -19,6 +19,7 @@ import {
 import { EMSTermJoinConfig } from '../../../../../../../../maps/public';
 import { EmbeddedMapComponent } from '../../../embedded_map';
 import { FieldVisStats } from '../../../../../../../common/types';
+import { ExpandedRowPanel } from './expanded_row_panel';
 
 export const getChoroplethTopValuesLayer = (
   fieldName: string,
@@ -103,8 +104,8 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   );
 
   return (
-    <EuiFlexItem
-      data-test-subj={'fileDataVisualizerChoroplethMapTopValues'}
+    <ExpandedRowPanel
+      dataTestSubj={'fileDataVisualizerChoroplethMapTopValues'}
       className={'dataVisualizerPanelWrapper dataVisualizerMapWrapper'}
     >
       <EmbeddedMapComponent layerList={layerList} />
@@ -122,6 +123,6 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
           </EuiText>
         </>
       )}
-    </EuiFlexItem>
+    </ExpandedRowPanel>
   );
 };

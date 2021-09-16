@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
 import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
@@ -17,6 +16,7 @@ import { useDataVisualizerKibana } from '../../../../kibana_context';
 import { JOB_FIELD_TYPES } from '../../../../../../common';
 import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '../../../../../../../maps/common';
 import { EmbeddedMapComponent } from '../../embedded_map';
+import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
 
 export const GeoPointContentWithMap: FC<{
   config: FieldVisConfig;
@@ -64,9 +64,12 @@ export const GeoPointContentWithMap: FC<{
     <ExpandedRowContent dataTestSubj={'dataVisualizerIndexBasedMapContent'}>
       <DocumentStatsTable config={config} />
       <ExamplesList examples={stats.examples} />
-      <EuiFlexItem className={'dataVisualizerPanelWrapper dataVisualizerMapWrapper'} grow={true}>
+      <ExpandedRowPanel
+        className={'dataVisualizerPanelWrapper dataVisualizerMapWrapper'}
+        grow={true}
+      >
         <EmbeddedMapComponent layerList={layerList} />
-      </EuiFlexItem>
+      </ExpandedRowPanel>
     </ExpandedRowContent>
   );
 };

@@ -11,6 +11,7 @@ import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
+import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
 interface Props {
   examples: Array<string | object>;
 }
@@ -40,8 +41,8 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
   }
 
   return (
-    <div
-      data-test-subj="dataVisualizerFieldDataExamplesList"
+    <ExpandedRowPanel
+      dataTestSubj="dataVisualizerFieldDataExamplesList"
       className="dataVisualizerTextContent dataVisualizerPanelWrapper"
     >
       <ExpandedRowFieldHeader>
@@ -56,6 +57,6 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
       <EuiListGroup showToolTips={true} maxWidth={'s'} gutterSize={'none'} flush={true}>
         {examplesContent}
       </EuiListGroup>
-    </div>
+    </ExpandedRowPanel>
   );
 };

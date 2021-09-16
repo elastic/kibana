@@ -21,8 +21,9 @@ import { TopValues } from '../../../top_values';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
+import { ExpandedRowPanel } from './expanded_row_panel';
 
-const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
+const METRIC_DISTRIBUTION_CHART_WIDTH = 260;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 200;
 
 interface SummaryTableItem {
@@ -83,7 +84,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
     {
       name: '',
       render: (summaryItem: { display: ReactNode }) => summaryItem.display,
-      width: '75px',
+      width: '25px',
       align: 'right',
     },
     {
@@ -102,7 +103,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerNumberContent'}>
       <DocumentStatsTable config={config} />
-      <EuiFlexItem
+      <ExpandedRowPanel
         className={'dataVisualizerSummaryTableWrapper dataVisualizerPanelWrapper'}
         grow={1}
       >
@@ -115,16 +116,16 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
           tableCaption={summaryTableTitle}
           data-test-subj={'dataVisualizerNumberSummaryTable'}
         />
-      </EuiFlexItem>
+      </ExpandedRowPanel>
 
       {stats && (
         <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" compressed={true} />
       )}
       {distribution && (
-        <EuiFlexItem
+        <ExpandedRowPanel
           data-test-subj={'dataVisualizerFieldDataMetricDistribution'}
           className="dataVisualizerPanelWrapper"
-          grow={1}
+          grow={false}
         >
           <EuiFlexItem grow={false}>
             <ExpandedRowFieldHeader>
@@ -155,7 +156,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
               />
             </EuiText>
           </EuiFlexItem>
-        </EuiFlexItem>
+        </ExpandedRowPanel>
       )}
     </ExpandedRowContent>
   );

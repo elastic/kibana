@@ -14,6 +14,7 @@ import classNames from 'classnames';
 import { roundToDecimalPlace, kibanaFieldFormat } from '../utils';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { FieldVisStats } from '../../../../../common/types';
+import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
 
 interface Props {
   stats: FieldVisStats | undefined;
@@ -42,9 +43,9 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
   } = stats;
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
   return (
-    <EuiFlexItem
+    <ExpandedRowPanel
       data-test-subj={'dataVisualizerFieldDataTopValues'}
-      className={'dataVisualizerPanelWrapper'}
+      className={classNames('dataVisualizerPanelWrapper', compressed ? 'compressed' : undefined)}
     >
       <ExpandedRowFieldHeader>
         <FormattedMessage
@@ -55,7 +56,11 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
 
       <div
         data-test-subj="dataVisualizerFieldDataTopValuesContent"
-        className={'fieldDataTopValuesContainer dataVisualizerTopValuesWrapper'}
+        className={classNames(
+          'fieldDataTopValuesContainer',
+          'dataVisualizerTopValuesWrapper'
+          // compressed ? 'compressed' : undefined
+        )}
       >
         {Array.isArray(topValues) &&
           topValues.map((value) => (
@@ -97,6 +102,6 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
           </Fragment>
         )}
       </div>
-    </EuiFlexItem>
+    </ExpandedRowPanel>
   );
 };

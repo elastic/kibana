@@ -18,6 +18,7 @@ import { roundToDecimalPlace } from '../../../utils';
 import { useDataVizChartTheme } from '../../hooks';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
+import { ExpandedRowPanel } from './expanded_row_panel';
 
 function getPercentLabel(value: number): string {
   if (value === 0) {
@@ -70,7 +71,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
     {
       name: '',
       render: (summaryItem: { display: ReactNode }) => summaryItem.display,
-      width: '75px',
+      width: '25px',
       align: 'right',
     },
     {
@@ -91,7 +92,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
     <ExpandedRowContent dataTestSubj={'dataVisualizerBooleanContent'}>
       <DocumentStatsTable config={config} />
 
-      <EuiFlexItem className={'dataVisualizerSummaryTableWrapper dataVisualizerPanelWrapper'}>
+      <ExpandedRowPanel className={'dataVisualizerSummaryTableWrapper dataVisualizerPanelWrapper'}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable
           className={'dataVisualizerSummaryTable'}
@@ -100,9 +101,9 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
           columns={summaryTableColumns}
           tableCaption={summaryTableTitle}
         />
-      </EuiFlexItem>
+      </ExpandedRowPanel>
 
-      <EuiFlexItem className={'dataVisualizerUniformPanel dataVisualizerPanelWrapper'}>
+      <ExpandedRowPanel className={'dataVisualizerUniformPanel dataVisualizerPanelWrapper'}>
         <ExpandedRowFieldHeader>
           <FormattedMessage
             id="xpack.dataVisualizer.dataGrid.field.cardBoolean.valuesLabel"
@@ -140,7 +141,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
             yScaleType="linear"
           />
         </Chart>
-      </EuiFlexItem>
+      </ExpandedRowPanel>
     </ExpandedRowContent>
   );
 };
