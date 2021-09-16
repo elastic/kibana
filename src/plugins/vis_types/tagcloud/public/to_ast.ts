@@ -26,9 +26,9 @@ const prepareDimension = (params: SchemaConfig) => {
   return buildExpression([visdimension]);
 };
 
-const preparePalette = (palette: PaletteOutput) => {
+const preparePalette = (palette?: PaletteOutput) => {
   const paletteExpressionFunction = buildExpressionFunction('system_palette', {
-    name: palette.name,
+    name: palette?.name,
   });
   return buildExpression([paletteExpressionFunction]);
 };

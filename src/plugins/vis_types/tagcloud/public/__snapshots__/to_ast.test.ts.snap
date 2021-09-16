@@ -88,8 +88,12 @@ Object {
           Object {
             "chain": Array [
               Object {
-                "arguments": Object {},
-                "function": "palette",
+                "arguments": Object {
+                  "name": Array [
+                    "default",
+                  ],
+                },
+                "function": "system_palette",
                 "type": "function",
               },
             ],
@@ -199,8 +203,12 @@ Object {
           Object {
             "chain": Array [
               Object {
-                "arguments": Object {},
-                "function": "palette",
+                "arguments": Object {
+                  "name": Array [
+                    "default",
+                  ],
+                },
+                "function": "system_palette",
                 "type": "function",
               },
             ],
@@ -302,7 +310,7 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {},
-                "function": "palette",
+                "function": "system_palette",
                 "type": "function",
               },
             ],
