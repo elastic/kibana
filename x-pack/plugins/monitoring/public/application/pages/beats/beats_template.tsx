@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { includes } from 'lodash';
 import { PageTemplate } from '../page_template';
 import { TabMenuItem, PageTemplateProps } from '../page_template';
-import { ML_SUPPORTED_LICENSES } from '../../../../common/constants';
 
 interface BeatsTemplateProps extends PageTemplateProps {
   cluster: any;
@@ -33,5 +32,5 @@ export const BeatsTemplate: React.FC<BeatsTemplateProps> = ({ cluster, ...props 
     },
   ];
 
-  return <PageTemplate {...props} tabs={tabs} product="elasticsearch" />;
+  return <PageTemplate {...props} tabs={tabs} product="beats" />;
 };
