@@ -6,10 +6,11 @@
  */
 
 import React, { memo } from 'react';
-import { EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer, EuiCallOut, EuiButton } from '@elastic/eui';
 
 import * as i18n from './translations';
+
+const STORE_URL = 'https://store.servicenow.com/';
 
 const InstallationCalloutComponent: React.FC = () => {
   return (
@@ -17,21 +18,14 @@ const InstallationCalloutComponent: React.FC = () => {
       <EuiSpacer size="s" />
       <EuiCallOut
         size="m"
-        iconType="pin"
+        iconType="alert"
+        color="warning"
         data-test-subj="snInstallationCallout"
         title={i18n.INSTALLATION_CALLOUT_TITLE}
       >
-        <FormattedMessage
-          defaultMessage="To use the connector you need to {install} the Elastic Application from the ServiceNow Store."
-          id="xpack.triggersActionsUI.components.builtinActionTypes.servicenow.appInstallationInfo"
-          values={{
-            install: (
-              <EuiLink href="https://store.servicenow.com/" target="_blank">
-                {i18n.INSTALL}
-              </EuiLink>
-            ),
-          }}
-        />
+        <EuiButton href={STORE_URL} color="warning" iconSide="right" iconType="popout">
+          {i18n.VISIT_SN_STORE}
+        </EuiButton>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

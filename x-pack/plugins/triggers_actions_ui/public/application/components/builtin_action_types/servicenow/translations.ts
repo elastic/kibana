@@ -214,7 +214,8 @@ export const INSTALL = i18n.translate(
 export const INSTALLATION_CALLOUT_TITLE = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutInfo',
   {
-    defaultMessage: 'Elastic ServiceNow Application',
+    defaultMessage:
+      'To use this connector, you must first install the Elastic App from the ServiceNow App Store',
   }
 );
 
@@ -233,5 +234,12 @@ export const MIGRATION_SUCCESS_TOAST_TEXT = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutInfo',
   {
     defaultMessage: 'Connector has been successfully migrated.',
+  }
+);
+
+export const VISIT_SN_STORE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.visitSNStore',
+  {
+    defaultMessage: 'Visit ServiceNow app store',
   }
 );
