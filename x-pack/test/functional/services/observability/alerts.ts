@@ -21,6 +21,8 @@ const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 
 const ACTION_COLUMN_INDEX = 1;
 
+type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
+
 export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const flyoutService = getService('flyout');
@@ -130,7 +132,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListDescription', flyout);
   };
 
-  const openRowActionsOverflowMenu = async (rowIndex: number) => {
+  const openActionsMenuForRow = async (rowIndex: number) => {
     const rows = await getTableCellsInRows();
     const actionsOverflowButton = await testSubjects.findDescendant(
       'alerts-table-row-action-more',
@@ -139,11 +141,8 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     await actionsOverflowButton.click();
   };
 
-  const setSingleAlertWorkflowStatus = async (
-    rowIndex: number,
-    workflowStatus: 'open' | 'acknowledged' | 'closed'
-  ) => {
-    await openRowActionsOverflowMenu(rowIndex);
+  const setWorkflowStatusForRow = async (rowIndex: number, workflowStatus: WorkflowStatus) => {
+    await openActionsMenuForRow(rowIndex);
 
     if (workflowStatus === 'closed') {
       await testSubjects.click('close-alert-status');
@@ -156,7 +155,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     await toasts.dismissAllToasts();
   };
 
-  const setWorkflowStatusFilter = async (workflowStatus: 'open' | 'acknowledged' | 'closed') => {
+  const setWorkflowStatusFilter = async (workflowStatus: WorkflowStatus) => {
     const buttonGroupButton = await testSubjects.find(
       `workflow-status-filter-${workflowStatus}-button`
     );
@@ -179,7 +178,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     getTableOrFail,
     navigateToTimeWithData,
     openAlertsFlyout,
-    setSingleAlertWorkflowStatus,
+    setWorkflowStatusForRow,
     setWorkflowStatusFilter,
     submitQuery,
     typeInQueryBar,

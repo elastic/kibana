@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('can be set to "acknowledged" using the row menu', async () => {
-      await observability.alerts.setSingleAlertWorkflowStatus(0, 'acknowledged');
+      await observability.alerts.setWorkflowStatusForRow(0, 'acknowledged');
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.getTableCellsInRows();
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('can be set to "closed" using the row menu', async () => {
-      await observability.alerts.setSingleAlertWorkflowStatus(0, 'closed');
+      await observability.alerts.setWorkflowStatusForRow(0, 'closed');
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.getTableCellsInRows();
@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('can be set to "open" using the row menu', async () => {
-      await observability.alerts.setSingleAlertWorkflowStatus(0, 'open');
+      await observability.alerts.setWorkflowStatusForRow(0, 'open');
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.getTableCellsInRows();
