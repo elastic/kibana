@@ -6,6 +6,7 @@
  */
 
 import { APMBaseDoc } from './apm_base_doc';
+import { EventOutcome } from './fields/event_outcome';
 import { Stackframe } from './fields/stackframe';
 import { TimestampUs } from './fields/timestamp_us';
 
@@ -17,6 +18,7 @@ interface Processor {
 export interface SpanRaw extends APMBaseDoc {
   processor: Processor;
   trace: { id: string }; // trace is required
+  event?: { outcome?: EventOutcome };
   service: {
     name: string;
     environment?: string;

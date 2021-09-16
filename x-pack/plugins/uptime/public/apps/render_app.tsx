@@ -27,7 +27,7 @@ export function renderApp(
   const {
     application: { capabilities },
     chrome: { setBadge, setHelpExtension },
-    docLinks: { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL },
+    docLinks,
     http: { basePath },
     i18n,
   } = core;
@@ -59,7 +59,7 @@ export function renderApp(
         links: [
           {
             linkType: 'documentation',
-            href: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime.html`,
+            href: `${docLinks.links.observability.monitorUptime}`,
           },
           {
             linkType: 'discuss',

@@ -330,6 +330,19 @@ describe('create rules schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('You can send in a namespace', () => {
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      namespace: 'a namespace',
+    };
+
+    const decoded = createRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
   test('You can send in an empty array to threat', () => {
     const payload: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),

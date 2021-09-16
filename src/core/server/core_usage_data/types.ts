@@ -110,6 +110,21 @@ export interface CoreUsageStats {
   'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no'?: number;
   'apiCalls.savedObjectsExport.allTypesSelected.yes'?: number;
   'apiCalls.savedObjectsExport.allTypesSelected.no'?: number;
+  // Legacy Dashboard Import/Export API
+  'apiCalls.legacyDashboardExport.total'?: number;
+  'apiCalls.legacyDashboardExport.namespace.default.total'?: number;
+  'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes'?: number;
+  'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no'?: number;
+  'apiCalls.legacyDashboardExport.namespace.custom.total'?: number;
+  'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes'?: number;
+  'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no'?: number;
+  'apiCalls.legacyDashboardImport.total'?: number;
+  'apiCalls.legacyDashboardImport.namespace.default.total'?: number;
+  'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes'?: number;
+  'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no'?: number;
+  'apiCalls.legacyDashboardImport.namespace.custom.total'?: number;
+  'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes'?: number;
+  'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no'?: number;
   // Saved Objects Repository counters
   'savedObjectsRepository.resolvedOutcome.exactMatch'?: number;
   'savedObjectsRepository.resolvedOutcome.aliasMatch'?: number;
@@ -280,12 +295,59 @@ export interface CoreConfigUsageData {
   };
 }
 
+/**
+ * @internal Details about the counter to be incremented
+ */
+export interface CoreIncrementCounterParams {
+  /** The name of the counter **/
+  counterName: string;
+  /** The counter type ("count" by default) **/
+  counterType?: string;
+  /** Increment the counter by this number (1 if not specified) **/
+  incrementBy?: number;
+}
+
+/**
+ * @internal
+ * Method to call whenever an event occurs, so the counter can be increased.
+ */
+export type CoreIncrementUsageCounter = (params: CoreIncrementCounterParams) => void;
+
+/**
+ * @internal
+ * API to track whenever an event occurs, so the core can report them.
+ */
+export interface CoreUsageCounter {
+  /** @internal {@link CoreIncrementUsageCounter} **/
+  incrementCounter: CoreIncrementUsageCounter;
+}
+
 /** @internal */
-export interface CoreUsageDataSetup {
+export interface InternalCoreUsageDataSetup extends CoreUsageDataSetup {
   registerType(
     typeRegistry: ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
   ): void;
   getClient(): CoreUsageStatsClient;
+
+  /** @internal {@link CoreIncrementUsageCounter} **/
+  incrementUsageCounter: CoreIncrementUsageCounter;
+}
+
+/**
+ * Internal API for registering the Usage Tracker used for Core's usage data payload.
+ *
+ * @note This API should never be used to drive application logic and is only
+ * intended for telemetry purposes.
+ *
+ * @internal
+ */
+export interface CoreUsageDataSetup {
+  /**
+   * @internal
+   * API for a usage tracker plugin to inject the {@link CoreUsageCounter} to use
+   * when tracking events.
+   */
+  registerUsageCounter: (usageCounter: CoreUsageCounter) => void;
 }
 
 /**

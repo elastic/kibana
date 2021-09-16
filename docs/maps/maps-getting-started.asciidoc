@@ -50,13 +50,13 @@ and lighter shades will symbolize countries with less traffic.
 
 . In **Statistics source**, set:
 ** **Index pattern** to **kibana_sample_data_logs**
-** **Join field** to **geo.src**
+** **Join field** to **geo.dest**
 
 . Click **Add layer**.
 
 . In **Layer settings**, set:
 
-** **Name** to `Total Requests by Country`
+** **Name** to `Total Requests by Destination`
 ** **Opacity** to 50%
 
 . Add a Tooltip field:

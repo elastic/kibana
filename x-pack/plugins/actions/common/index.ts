@@ -13,3 +13,5 @@ export * from './alert_history_schema';
 export * from './rewrite_request_case';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
+export const INTERNAL_BASE_ACTION_API_PATH = '/internal/actions';
+export const ACTIONS_FEATURE_ID = 'actions';

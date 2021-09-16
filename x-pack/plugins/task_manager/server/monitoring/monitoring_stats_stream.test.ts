@@ -43,6 +43,9 @@ describe('createMonitoringStatsStream', () => {
       enabled: true,
       request_capacity: 10,
     },
+    unsafe: {
+      exclude_task_types: [],
+    },
   };
 
   it('returns the initial config used to configure Task Manager', async () => {

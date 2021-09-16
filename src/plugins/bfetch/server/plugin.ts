@@ -19,7 +19,7 @@ import type {
   StartServicesAccessor,
 } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { Subject } from 'rxjs';
+import { map$ } from '@kbn/std';
 import {
   StreamingResponseHandler,
   BatchRequestData,
@@ -208,23 +208,15 @@ export class BfetchServerPlugin
     >(path, (request) => {
       const handlerInstance = handler(request);
       return {
-        getResponseStream: ({ batch }) => {
-          const subject = new Subject<BatchResponseItem<BatchItemResult, E>>();
-          let cnt = batch.length;
-          batch.forEach(async (batchItem, id) => {
+        getResponseStream: ({ batch }) =>
+          map$(batch, async (batchItem, id) => {
             try {
               const result = await handlerInstance.onBatchItem(batchItem);
-              subject.next({ id, result });
-            } catch (err) {
-              const error = normalizeError<E>(err);
-              subject.next({ id, error });
-            } finally {
-              cnt--;
-              if (!cnt) subject.complete();
+              return { id, result };
+            } catch (error) {
+              return { id, error: normalizeError<E>(error) };
             }
-          });
-          return subject;
-        },
+          }),
       };
     });
   };

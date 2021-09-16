@@ -6,120 +6,120 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
-import type { Request, RequestOptions } from './cloud_service';
+/* eslint-disable dot-notation */
+jest.mock('node-fetch');
+jest.mock('fs/promises');
 import { AWSCloudService, AWSResponse } from './aws';
 
-type Callback = (err: unknown, res: unknown) => void;
-
-const AWS = new AWSCloudService();
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fetchMock = require('node-fetch') as jest.Mock;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { readFile } = require('fs/promises') as { readFile: jest.Mock };
 
 describe('AWS', () => {
-  const expectedFilenames = ['/sys/hypervisor/uuid', '/sys/devices/virtual/dmi/id/product_uuid'];
-  const expectedEncoding = 'utf8';
-  // mixed case to ensure we check for ec2 after lowercasing
-  const ec2Uuid = 'eC2abcdef-ghijk\n';
-  const ec2FileSystem = {
-    readFile: (filename: string, encoding: string, callback: Callback) => {
-      expect(expectedFilenames).toContain(filename);
-      expect(encoding).toEqual(expectedEncoding);
+  const mockIsWindows = jest.fn();
+  const awsService = new AWSCloudService();
+  awsService['_isWindows'] = mockIsWindows.mockReturnValue(false);
+  readFile.mockResolvedValue('eC2abcdef-ghijk\n');
 
-      callback(null, ec2Uuid);
-    },
-  } as typeof fs;
-
+  beforeEach(() => jest.clearAllMocks());
   it('is named "aws"', () => {
-    expect(AWS.getName()).toEqual('aws');
+    expect(awsService.getName()).toEqual('aws');
   });
 
   describe('_checkIfService', () => {
     it('handles expected response', async () => {
       const id = 'abcdef';
-      const request = ((req: RequestOptions, callback: Callback) => {
-        expect(req.method).toEqual('GET');
-        expect(req.uri).toEqual(
-          'http://169.254.169.254/2016-09-02/dynamic/instance-identity/document'
-        );
-        expect(req.json).toEqual(true);
 
-        const body = `{"instanceId": "${id}","availabilityZone":"us-fake-2c", "imageId" : "ami-6df1e514"}`;
-
-        callback(null, { statusCode: 200, body });
-      }) as Request;
-      // ensure it does not use the fs to trump the body
-      const awsCheckedFileSystem = new AWSCloudService({
-        _fs: ec2FileSystem,
-        _isWindows: false,
+      fetchMock.mockResolvedValue({
+        json: () =>
+          `{"instanceId": "${id}","availabilityZone":"us-fake-2c", "imageId" : "ami-6df1e514"}`,
+        status: 200,
+        ok: true,
       });
 
-      const response = await awsCheckedFileSystem._checkIfService(request);
+      const response = await awsService['_checkIfService']();
+      expect(readFile).toBeCalledTimes(0);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(
+        'http://169.254.169.254/2016-09-02/dynamic/instance-identity/document',
+        {
+          method: 'GET',
+        }
+      );
 
       expect(response.isConfirmed()).toEqual(true);
-      expect(response.toJSON()).toEqual({
-        name: AWS.getName(),
-        id,
-        region: undefined,
-        vm_type: undefined,
-        zone: 'us-fake-2c',
-        metadata: {
-          imageId: 'ami-6df1e514',
-        },
-      });
+      expect(response.toJSON()).toMatchInlineSnapshot(`
+        Object {
+          "id": "abcdef",
+          "metadata": Object {
+            "imageId": "ami-6df1e514",
+          },
+          "name": "aws",
+          "region": undefined,
+          "vm_type": undefined,
+          "zone": "us-fake-2c",
+        }
+      `);
     });
 
     it('handles request without a usable body by downgrading to UUID detection', async () => {
-      const request = ((_req: RequestOptions, callback: Callback) =>
-        callback(null, { statusCode: 404 })) as Request;
-      const awsCheckedFileSystem = new AWSCloudService({
-        _fs: ec2FileSystem,
-        _isWindows: false,
+      fetchMock.mockResolvedValue({
+        json: () => null,
+        status: 200,
+        ok: true,
       });
 
-      const response = await awsCheckedFileSystem._checkIfService(request);
+      const response = await awsService['_checkIfService']();
 
       expect(response.isConfirmed()).toBe(true);
-      expect(response.toJSON()).toEqual({
-        name: AWS.getName(),
-        id: ec2Uuid.trim().toLowerCase(),
-        region: undefined,
-        vm_type: undefined,
-        zone: undefined,
-        metadata: undefined,
-      });
+      expect(response.toJSON()).toMatchInlineSnapshot(`
+        Object {
+          "id": "ec2abcdef-ghijk",
+          "metadata": undefined,
+          "name": "aws",
+          "region": undefined,
+          "vm_type": undefined,
+          "zone": undefined,
+        }
+      `);
     });
 
     it('handles request failure by downgrading to UUID detection', async () => {
-      const failedRequest = ((_req: RequestOptions, callback: Callback) =>
-        callback(new Error('expected: request failed'), null)) as Request;
-      const awsCheckedFileSystem = new AWSCloudService({
-        _fs: ec2FileSystem,
-        _isWindows: false,
+      fetchMock.mockResolvedValue({
+        status: 404,
+        ok: false,
       });
 
-      const response = await awsCheckedFileSystem._checkIfService(failedRequest);
+      const response = await awsService['_checkIfService']();
 
       expect(response.isConfirmed()).toBe(true);
-      expect(response.toJSON()).toEqual({
-        name: AWS.getName(),
-        id: ec2Uuid.trim().toLowerCase(),
-        region: undefined,
-        vm_type: undefined,
-        zone: undefined,
-        metadata: undefined,
-      });
+      expect(response.toJSON()).toMatchInlineSnapshot(`
+        Object {
+          "id": "ec2abcdef-ghijk",
+          "metadata": undefined,
+          "name": "aws",
+          "region": undefined,
+          "vm_type": undefined,
+          "zone": undefined,
+        }
+      `);
     });
 
     it('handles not running on AWS', async () => {
-      const failedRequest = ((_req: RequestOptions, callback: Callback) =>
-        callback(null, null)) as Request;
-      const awsIgnoredFileSystem = new AWSCloudService({
-        _fs: ec2FileSystem,
-        _isWindows: true,
+      fetchMock.mockResolvedValue({
+        json: () => null,
+        status: 404,
+        ok: false,
       });
 
-      const response = await awsIgnoredFileSystem._checkIfService(failedRequest);
+      mockIsWindows.mockReturnValue(true);
 
-      expect(response.getName()).toEqual(AWS.getName());
+      const response = await awsService['_checkIfService']();
+      expect(mockIsWindows).toBeCalledTimes(1);
+      expect(readFile).toBeCalledTimes(0);
+
+      expect(response.getName()).toEqual('aws');
       expect(response.isConfirmed()).toBe(false);
     });
   });
@@ -144,10 +144,10 @@ describe('AWS', () => {
         marketplaceProductCodes: null,
       };
 
-      const response = AWSCloudService.parseBody(AWS.getName(), body)!;
+      const response = awsService.parseBody(body)!;
       expect(response).not.toBeNull();
 
-      expect(response.getName()).toEqual(AWS.getName());
+      expect(response.getName()).toEqual('aws');
       expect(response.isConfirmed()).toEqual(true);
       expect(response.toJSON()).toEqual({
         name: 'aws',
@@ -169,141 +169,84 @@ describe('AWS', () => {
 
     it('ignores unexpected response body', () => {
       // @ts-expect-error
-      expect(AWSCloudService.parseBody(AWS.getName(), undefined)).toBe(null);
+      expect(awsService.parseBody(undefined)).toBe(null);
       // @ts-expect-error
-      expect(AWSCloudService.parseBody(AWS.getName(), null)).toBe(null);
+      expect(awsService.parseBody(null)).toBe(null);
       // @ts-expect-error
-      expect(AWSCloudService.parseBody(AWS.getName(), {})).toBe(null);
+      expect(awsService.parseBody({})).toBe(null);
       // @ts-expect-error
-      expect(AWSCloudService.parseBody(AWS.getName(), { privateIp: 'a.b.c.d' })).toBe(null);
+      expect(awsService.parseBody({ privateIp: 'a.b.c.d' })).toBe(null);
     });
   });
 
-  describe('_tryToDetectUuid', () => {
+  describe('tryToDetectUuid', () => {
     describe('checks the file system for UUID if not Windows', () => {
-      it('checks /sys/hypervisor/uuid', async () => {
-        const awsCheckedFileSystem = new AWSCloudService({
-          _fs: {
-            readFile: (filename: string, encoding: string, callback: Callback) => {
-              expect(expectedFilenames).toContain(filename);
-              expect(encoding).toEqual(expectedEncoding);
+      beforeAll(() => mockIsWindows.mockReturnValue(false));
 
-              callback(null, ec2Uuid);
-            },
-          } as typeof fs,
-          _isWindows: false,
+      it('checks /sys/hypervisor/uuid and /sys/devices/virtual/dmi/id/product_uuid', async () => {
+        const response = await awsService['tryToDetectUuid']();
+
+        readFile.mockImplementation(async (filename: string, encoding: string) => {
+          expect(['/sys/hypervisor/uuid', '/sys/devices/virtual/dmi/id/product_uuid']).toContain(
+            filename
+          );
+          expect(encoding).toEqual('utf8');
+
+          return 'eC2abcdef-ghijk\n';
         });
 
-        const response = await awsCheckedFileSystem._tryToDetectUuid();
-
+        expect(readFile).toBeCalledTimes(2);
         expect(response.isConfirmed()).toEqual(true);
-        expect(response.toJSON()).toEqual({
-          name: AWS.getName(),
-          id: ec2Uuid.trim().toLowerCase(),
-          region: undefined,
-          zone: undefined,
-          vm_type: undefined,
-          metadata: undefined,
-        });
-      });
-
-      it('checks /sys/devices/virtual/dmi/id/product_uuid', async () => {
-        const awsCheckedFileSystem = new AWSCloudService({
-          _fs: {
-            readFile: (filename: string, encoding: string, callback: Callback) => {
-              expect(expectedFilenames).toContain(filename);
-              expect(encoding).toEqual(expectedEncoding);
-
-              callback(null, ec2Uuid);
-            },
-          } as typeof fs,
-          _isWindows: false,
-        });
-
-        const response = await awsCheckedFileSystem._tryToDetectUuid();
-
-        expect(response.isConfirmed()).toEqual(true);
-        expect(response.toJSON()).toEqual({
-          name: AWS.getName(),
-          id: ec2Uuid.trim().toLowerCase(),
-          region: undefined,
-          zone: undefined,
-          vm_type: undefined,
-          metadata: undefined,
-        });
+        expect(response.toJSON()).toMatchInlineSnapshot(`
+          Object {
+            "id": "ec2abcdef-ghijk",
+            "metadata": undefined,
+            "name": "aws",
+            "region": undefined,
+            "vm_type": undefined,
+            "zone": undefined,
+          }
+        `);
       });
 
       it('returns confirmed if only one file exists', async () => {
-        let callCount = 0;
-        const awsCheckedFileSystem = new AWSCloudService({
-          _fs: {
-            readFile: (filename: string, encoding: string, callback: Callback) => {
-              if (callCount === 0) {
-                callCount++;
-                throw new Error('oops');
-              }
-              callback(null, ec2Uuid);
-            },
-          } as typeof fs,
-          _isWindows: false,
-        });
+        readFile.mockRejectedValueOnce(new Error('oops'));
+        readFile.mockResolvedValueOnce('ec2Uuid');
 
-        const response = await awsCheckedFileSystem._tryToDetectUuid();
+        const response = await awsService['tryToDetectUuid']();
+        expect(readFile).toBeCalledTimes(2);
 
         expect(response.isConfirmed()).toEqual(true);
-        expect(response.toJSON()).toEqual({
-          name: AWS.getName(),
-          id: ec2Uuid.trim().toLowerCase(),
-          region: undefined,
-          zone: undefined,
-          vm_type: undefined,
-          metadata: undefined,
-        });
+        expect(response.toJSON()).toMatchInlineSnapshot(`
+          Object {
+            "id": "ec2uuid",
+            "metadata": undefined,
+            "name": "aws",
+            "region": undefined,
+            "vm_type": undefined,
+            "zone": undefined,
+          }
+        `);
       });
 
       it('returns unconfirmed if all files return errors', async () => {
-        const awsFailedFileSystem = new AWSCloudService({
-          _fs: ({
-            readFile: () => {
-              throw new Error('oops');
-            },
-          } as unknown) as typeof fs,
-          _isWindows: false,
-        });
+        readFile.mockRejectedValue(new Error('oops'));
 
-        const response = await awsFailedFileSystem._tryToDetectUuid();
+        const response = await awsService['tryToDetectUuid']();
+        expect(response.isConfirmed()).toEqual(false);
+      });
 
+      it('ignores UUID if it does not start with ec2', async () => {
+        readFile.mockResolvedValue('notEC2');
+
+        const response = await awsService['tryToDetectUuid']();
         expect(response.isConfirmed()).toEqual(false);
       });
     });
 
-    it('ignores UUID if it does not start with ec2', async () => {
-      const notEC2FileSystem = {
-        readFile: (filename: string, encoding: string, callback: Callback) => {
-          expect(expectedFilenames).toContain(filename);
-          expect(encoding).toEqual(expectedEncoding);
-
-          callback(null, 'notEC2');
-        },
-      } as typeof fs;
-
-      const awsCheckedFileSystem = new AWSCloudService({
-        _fs: notEC2FileSystem,
-        _isWindows: false,
-      });
-
-      const response = await awsCheckedFileSystem._tryToDetectUuid();
-
-      expect(response.isConfirmed()).toEqual(false);
-    });
-
     it('does NOT check the file system for UUID on Windows', async () => {
-      const awsUncheckedFileSystem = new AWSCloudService({
-        _fs: ec2FileSystem,
-        _isWindows: true,
-      });
-
-      const response = await awsUncheckedFileSystem._tryToDetectUuid();
+      mockIsWindows.mockReturnValue(true);
+      const response = await awsService['tryToDetectUuid']();
 
       expect(response.isConfirmed()).toEqual(false);
     });

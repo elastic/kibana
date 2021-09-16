@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
@@ -14,10 +16,17 @@ import { Container, Nav, Wrapper } from './layouts';
 import { OsqueryAppRoutes } from '../routes';
 import { useRouterNavigate } from '../common/lib/kibana';
 import { ManageIntegrationLink } from './manage_integration_link';
+import { useOsqueryIntegrationStatus } from '../common/hooks';
+import { OsqueryAppEmptyState } from './empty_state';
 
 const OsqueryAppComponent = () => {
   const location = useLocation();
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
+  const { data: osqueryIntegration, isFetched } = useOsqueryIntegrationStatus();
+
+  if (isFetched && osqueryIntegration.install_status !== 'installed') {
+    return <OsqueryAppEmptyState />;
+  }
 
   return (
     <Container>
