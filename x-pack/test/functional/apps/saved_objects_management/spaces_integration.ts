@@ -25,6 +25,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const spaceId = 'space_1';
 
+  const textIncludesAll = (text: string, items: string[]) => {
+    const bools = items.map((item) => !!text.includes(item));
+    return bools.every((currBool) => currBool === true);
+  };
+
   describe('spaces integration', () => {
     before(async () => {
       await esArchiver.load(
@@ -56,6 +61,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const inspectContainer = await find.byClassName('kibanaCodeEditor');
       const visibleContainerText = await inspectContainer.getVisibleText();
+      expect(
+        textIncludesAll(visibleContainerText, [
+          'A Pie',
+          'title',
+          'id',
+          'type',
+          'attributes',
+          'references',
+        ])
+      ).to.be(true);
       expect(visibleContainerText.includes('A Pie'));
     });
   });

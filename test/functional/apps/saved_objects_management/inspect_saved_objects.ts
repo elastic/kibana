@@ -27,9 +27,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     // Allow some time for the transition/animations to occur before assuming the click is done
     await delay(10);
   };
+  const textIncludesAll = (text: string, items: string[]) => {
+    const bools = items.map((item) => !!text.includes(item));
+    return bools.every((currBool) => currBool === true);
+  };
 
   describe('saved objects edition page', () => {
-    debugger;
     beforeEach(async () => {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/edit_saved_object'
@@ -52,11 +55,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       const inspectContainer = await find.byClassName('kibanaCodeEditor');
       const visibleContainerText = await inspectContainer.getVisibleText();
-      debugger;
       // ensure that something renders visibly
-      expect(visibleContainerText.includes('A Dashboard'));
-      const textAsJson = JSON.parse(visibleContainerText);
-      expect(Object.keys(textAsJson)).to.eql(['id', 'attributes', 'references', 'type']);
+      expect(
+        textIncludesAll(visibleContainerText, [
+          'A Dashboard',
+          'title',
+          'id',
+          'type',
+          'attributes',
+          'references',
+        ])
+      ).to.be(true);
     });
 
     it('allows to delete a saved object', async () => {
