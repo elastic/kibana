@@ -242,6 +242,9 @@ async function executor(
     transport.clientId = config.clientId!;
     transport.tenantId = config.tenantId!;
     transport.service = config.service;
+    if (config.oauthTokenUrl !== null) {
+      transport.oauthTokenUrl = config.oauthTokenUrl;
+    }
   } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
     // use configured host/port/secure values
     // already validated service or host/port is not null ...

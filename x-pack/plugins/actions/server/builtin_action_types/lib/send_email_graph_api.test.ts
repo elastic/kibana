@@ -290,7 +290,6 @@ describe('sendEmailGraphApi', () => {
   });
 
   test('throw the exception and log the proper error if message was not sent successfuly', async () => {
-    const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({
       status: 400,
       data: {

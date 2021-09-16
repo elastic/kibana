@@ -499,8 +499,9 @@ export default function emailTest({ getService }: FtrProviderContext) {
           host: null,
           port: null,
           secure: null,
-          oauthTokenUrl:
-            'http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/exchange/1234567/oauth2/v2.0/token',
+          oauthTokenUrl: `${kibanaServer.resolveUrl(
+            getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE)
+          )}/1234567/oauth2/v2.0/token`,
           from: 'bob@example.com',
         },
       });
@@ -524,8 +525,9 @@ export default function emailTest({ getService }: FtrProviderContext) {
           host: null,
           port: null,
           secure: null,
-          oauthTokenUrl:
-            'http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/exchange/1234567/oauth2/v2.0/token',
+          oauthTokenUrl: `${kibanaServer.resolveUrl(
+            getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE)
+          )}/1234567/oauth2/v2.0/token`,
           clientId: '12345',
           tenantId: '1234567',
         },
@@ -543,31 +545,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
             message: 'email-message',
           },
         })
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body.data).to.eql({
-            envelope: {
-              from: 'bob@example.com',
-              to: ['kibana-action-test@elastic.co'],
-            },
-            message: {
-              from: { address: 'bob@example.com', name: '' },
-              to: [
-                {
-                  address: 'kibana-action-test@elastic.co',
-                  name: '',
-                },
-              ],
-              cc: null,
-              bcc: null,
-              subject: 'email-subject',
-              html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Kibana. <a href=\"https://localhost:5601\">Go to Kibana</a>.</p>\n`,
-              text:
-                'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
-              headers: {},
-            },
-          });
-        });
+        .expect(200);
     });
   });
 }
