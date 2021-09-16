@@ -55,33 +55,29 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
             : undefined
         }
         extraAction={
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <SeriesInfo {...seriesProps} />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <SeriesName {...seriesProps} />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <DataTypesSelect {...seriesProps} />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <ReportMetricOptions {...seriesProps} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <DatePickerCol {...seriesProps} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <Breakdowns {...seriesProps} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
               <SeriesActions {...seriesProps} />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
       >
         <EuiSpacer size="s" />
-        <ExpandedSeriesRow {...seriesProps} />
+        <EuiPanel color="subdued">
+          <ExpandedSeriesRow {...seriesProps} />
+        </EuiPanel>
       </StyledAccordion>
     </EuiPanel>
   );

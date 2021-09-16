@@ -40,7 +40,7 @@ export function SeriesActions({ seriesId, series, seriesConfig }: Props) {
   };
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
+    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={i18n.translate('xpack.observability.seriesEditor.sampleDocuments', {

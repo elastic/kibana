@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiSuperSelect } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { AppDataType, SeriesUrl } from '../../types';
@@ -14,7 +14,9 @@ import { DataTypes, ReportTypes } from '../../configurations/constants';
 
 interface Props {
   seriesId: number;
-  series: SeriesUrl;
+  series: Omit<SeriesUrl, 'dataType'> & {
+    dataType?: SeriesUrl['dataType'];
+  };
 }
 
 export const DataTypesLabels = {
@@ -56,6 +58,7 @@ const SELECT_DATA_TYPE = 'SELECT_DATA_TYPE';
 
 export function DataTypesSelect({ seriesId, series }: Props) {
   const { setSeries, reportType } = useSeriesStorage();
+  const [showOptions, setShowOptions] = useState(false);
 
   const onDataTypeChange = (dataType: AppDataType) => {
     if (String(dataType) !== SELECT_DATA_TYPE) {
@@ -83,17 +86,35 @@ export function DataTypesSelect({ seriesId, series }: Props) {
     }));
 
   return (
-    <EuiSuperSelect
-      fullWidth
-      options={
-        series.dataType
-          ? options
-          : [{ value: SELECT_DATA_TYPE, inputDisplay: SELECT_DATA_TYPE_LABEL }, ...options]
-      }
-      valueOfSelected={series.dataType ?? SELECT_DATA_TYPE}
-      onChange={(value) => onDataTypeChange(value as AppDataType)}
-      style={{ minWidth: 220 }}
-    />
+    <>
+      {!series.dataType && (
+        <EuiPopover
+          button={
+            <EuiButton
+              iconType="plusInCircle"
+              onClick={() => setShowOptions((prevState) => !prevState)}
+              fill
+              size="s"
+            >
+              {SELECT_DATA_TYPE_LABEL}
+            </EuiButton>
+          }
+          isOpen={showOptions}
+          closePopover={() => setShowOptions((prevState) => !prevState)}
+        >
+          <EuiListGroup>
+            {options.map((option) => (
+              <EuiListGroupItem
+                key={option.value}
+                onClick={() => onDataTypeChange(option.value)}
+                label={option.inputDisplay}
+              />
+            ))}
+          </EuiListGroup>
+        </EuiPopover>
+      )}
+      {series.dataType && <EuiBadge>{DataTypesLabels[series.dataType as DataTypes]}</EuiBadge>}
+    </>
   );
 }
 

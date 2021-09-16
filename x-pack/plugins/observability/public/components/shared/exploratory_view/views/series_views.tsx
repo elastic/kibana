@@ -6,7 +6,6 @@
  */
 
 import React, { RefObject } from 'react';
-import { EuiPanel } from '@elastic/eui';
 
 import { SeriesEditor } from '../series_editor/series_editor';
 import { AddSeriesButton } from './add_series_button';
@@ -20,10 +19,8 @@ export function SeriesViews({
 }) {
   return (
     <div ref={seriesBuilderRef}>
-      <EuiPanel color="subdued">
-        <SeriesEditor />
-        <AddSeriesButton />
-      </EuiPanel>
+      <SeriesEditor />
+      <AddSeriesButton />
     </div>
   );
 }

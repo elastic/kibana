@@ -52,7 +52,6 @@ export function ReportTypesSelect() {
 
   return (
     <EuiSuperSelect
-      fullWidth
       options={options}
       valueOfSelected={selectedReportType ?? SELECT_REPORT_TYPE}
       onChange={(value) => onReportTypeChange(value as ReportViewType)}

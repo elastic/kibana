@@ -132,7 +132,6 @@ export const SeriesEditor = React.memo(function () {
   return (
     <Wrapper>
       <div>
-        <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiFormRow label={REPORT_TYPE_LABEL} display="columnCompressed">
@@ -153,14 +152,14 @@ export const SeriesEditor = React.memo(function () {
 
         <EuiHorizontalRule margin="s" />
         {editorItems.map((item) => (
-          <>
+          <div key={item.id}>
             <Series
               item={item}
               toggleExpanded={() => toggleDetails(item)}
               isExpanded={itemIdToExpandedRowMap[item.id]}
             />
             <EuiSpacer size="s" />
-          </>
+          </div>
         ))}
         <EuiSpacer size="s" />
       </div>

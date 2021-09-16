@@ -6,7 +6,15 @@
  */
 
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFieldText,
+  EuiText,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiOutsideClickDetector,
+} from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesUrl } from '../../types';
 
@@ -19,6 +27,7 @@ export function SeriesName({ series, seriesId }: Props) {
   const { setSeries } = useSeriesStorage();
 
   const [value, setValue] = useState(series.name);
+  const [isEditingEnabled, setIsEditingEnabled] = useState(false);
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
@@ -34,5 +43,29 @@ export function SeriesName({ series, seriesId }: Props) {
     setValue(series.name);
   }, [series.name]);
 
-  return <EuiFieldText value={value} onChange={onChange} fullWidth onBlur={onSave} />;
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      {isEditingEnabled ? (
+        <EuiFlexItem>
+          <EuiOutsideClickDetector onOutsideClick={() => setIsEditingEnabled(false)}>
+            <EuiFieldText value={value} onChange={onChange} fullWidth onBlur={onSave} />
+          </EuiOutsideClickDetector>
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem>
+          <EuiText>{value}</EuiText>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          onClick={() => setIsEditingEnabled(true)}
+          iconType="pencil"
+          aria-label={i18n.translate('xpack.observability.expView.seriesEditor.editName', {
+            defaultMessage: 'Edit name',
+          })}
+          color="text"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }

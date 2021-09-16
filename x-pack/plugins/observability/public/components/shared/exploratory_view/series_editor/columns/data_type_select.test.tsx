@@ -21,9 +21,15 @@ describe('DataTypeSelect', function () {
   });
 
   it('should set series on change', async function () {
-    const { setSeries } = render(<DataTypesSelect seriesId={seriesId} series={mockUxSeries} />);
+    const seriesWithoutDataType = {
+      ...mockUxSeries,
+      dataType: undefined,
+    };
+    const { setSeries } = render(
+      <DataTypesSelect seriesId={seriesId} series={seriesWithoutDataType} />
+    );
 
-    fireEvent.click(await screen.findByText(DataTypesLabels[DataTypes.UX]));
+    fireEvent.click(await screen.findByText('Select data type'));
     fireEvent.click(await screen.findByText(DataTypesLabels[DataTypes.SYNTHETICS]));
 
     expect(setSeries).toHaveBeenCalledTimes(1);

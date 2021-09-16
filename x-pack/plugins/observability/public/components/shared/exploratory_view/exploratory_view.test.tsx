@@ -11,14 +11,13 @@ import { render, mockAppIndexPattern } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
 import * as obsvInd from './utils/observability_index_patterns';
 import * as pluginHook from '../../../hooks/use_plugin_context';
+import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
 
 jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   appMountParameters: {
     setHeaderActionMenu: jest.fn(),
   },
 } as any);
-import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
-
 describe('ExploratoryView', () => {
   mockAppIndexPattern();
 
