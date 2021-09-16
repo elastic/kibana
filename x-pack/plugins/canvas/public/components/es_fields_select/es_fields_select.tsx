@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { isEqual } from 'lodash';
+import usePrevious from 'react-use/lib/usePrevious';
 import { getFields } from '../../lib/es_service';
 import {
   ESFieldsSelect as Component,
@@ -18,17 +19,31 @@ type ESFieldsSelectProps = Omit<Props, 'fields'> & { index: string };
 export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = (props) => {
   const { index, selected, onChange } = props;
   const [fields, setFields] = useState<string[]>([]);
+  const prevIndex = usePrevious(index);
+  const mounted = useRef(true);
+
   useEffect(() => {
-    getFields(index).then((newFields) => {
-      if (!isEqual(newFields, fields)) {
+    if (prevIndex !== index) {
+      getFields(index).then((newFields) => {
+        if (!mounted.current) {
+          return;
+        }
+
         setFields(newFields || []);
         const filteredSelected = selected.filter((option) => (newFields || []).includes(option));
         if (!isEqual(filteredSelected, selected)) {
-          onChange(selected);
+          onChange(filteredSelected);
         }
-      }
-    });
-  }, [fields, index, onChange, selected]);
+      });
+    }
+  }, [fields, index, onChange, prevIndex, selected]);
+
+  useEffect(
+    () => () => {
+      mounted.current = false;
+    },
+    []
+  );
 
   return <Component {...props} fields={fields} />;
 };
