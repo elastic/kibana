@@ -105,6 +105,66 @@ describe('<IndexManagementHome />', () => {
     });
   });
 
+  describe('toggle system indices', () => {
+    beforeAll(async () => {
+      const systemIndex = {
+        health: 'green',
+        status: 'open',
+        name: 'testSystemIndex',
+        uuid: 'AToRD7lATjKLDV3BYvywtQ',
+        primary: '1',
+        replica: '0',
+        documents: '3',
+        size: '17.7kb',
+        isFrozen: false,
+        aliases: [],
+        hidden: true,
+        ilm: {},
+        isRollupIndex: false,
+        isFollowerIndex: false,
+      };
+
+      httpRequestsMockHelpers.setLoadIndicesResponse([systemIndex]);
+
+      testBed = await setup();
+      const { component } = testBed;
+
+      await act(async () => {
+        await nextTick();
+        component.update();
+      });
+    });
+
+    test('Should show system indices if hidden indices is toggled. ', async () => {
+      // Hidden indices are visible by default due to configuration.
+      const { find, actions, component } = testBed;
+
+      const indicesListTable = find('indicesList');
+      const indicesTableRows = indicesListTable.find('.euiTableRow');
+
+      const indexName = indicesTableRows.find('[data-test-subj="indexTableCell-name"]').text();
+
+      expect(indicesTableRows.length).toEqual(1);
+      expect(indexName).toBe('testSystemIndex');
+
+      // Toggle to hide system indices.
+      await act(async () => {
+        actions.clickIncludeHiddenIndicesToggle();
+      });
+      component.update();
+
+      // Check the updated table after the toggle has been clicked.
+      const updatedIndicesListTable = find('indicesList');
+      const updatedIndicesTableRows = updatedIndicesListTable.find('.euiTableRow');
+      const noIndicesMessageText = updatedIndicesListTable
+        .find('[data-test-subj="noIndicesMessage"]')
+        .text();
+
+      expect(updatedIndicesTableRows.length).toEqual(0);
+      expect(noIndicesMessageText).toEqual('No indices to show');
+    });
+  });
+
   describe('index detail panel with % character in index name', () => {
     const indexName = 'test%';
     beforeEach(async () => {

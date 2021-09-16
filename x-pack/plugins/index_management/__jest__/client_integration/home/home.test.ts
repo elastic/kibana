@@ -54,7 +54,7 @@ describe('<IndexManagementHome />', () => {
     });
 
     describe('tabs', () => {
-      it('should have 4 tabs', () => {
+      test('should have 4 tabs', () => {
         const { find } = testBed;
 
         const indexManagementContainer = find('indexManagementHeaderContent');
@@ -68,7 +68,7 @@ describe('<IndexManagementHome />', () => {
         }
       });
 
-      it('should navigate to Index Templates tab', async () => {
+      test('should navigate to Index Templates tab', async () => {
         const { exists, actions, component } = testBed;
 
         expect(exists('indicesList')).toBe(true);
@@ -88,7 +88,7 @@ describe('<IndexManagementHome />', () => {
       });
     });
     describe('toggles', () => {
-      it('Should show no indices to show when there are no indices ', () => {
+      test('Should show no indices to show when there are no indices ', () => {
         const { find } = testBed;
 
         const indicesListTable = find('indicesList');
@@ -96,20 +96,6 @@ describe('<IndexManagementHome />', () => {
           .find('[data-test-subj="noIndicesMessage"]')
           .text();
         expect(noIndicesMessageText).toEqual('No indices to show');
-      });
-
-      it('Should show system indices if hidden indices is toggled. ', async () => {
-        const { find, actions, component } = testBed;
-
-        await act(async () => {
-          actions.toggleHiddenIndices();
-        });
-        component.update();
-
-        const indicesListTable = find('indicesList');
-        const indicesTableRows = indicesListTable.find('.euiTableRow');
-
-        expect(indicesTableRows.children().length).toBeGreaterThan(0);
       });
     });
   });

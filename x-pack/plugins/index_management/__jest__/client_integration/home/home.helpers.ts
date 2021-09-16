@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
-import { WithAppDependencies, services, TestSubjects, nextTick } from '../helpers';
+import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
 const testBedConfig: TestBedConfig = {
   store: () => indexManagementStore(services as any),
