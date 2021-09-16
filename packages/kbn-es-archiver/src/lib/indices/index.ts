@@ -15,3 +15,4 @@ export {
   cleanKibanaIndices,
   createDefaultSpace,
 } from './kibana_index';
+export { cleanMonitoringIndices } from './monitoring_index';

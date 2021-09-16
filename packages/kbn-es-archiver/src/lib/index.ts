@@ -15,6 +15,7 @@ export {
   deleteKibanaIndices,
   migrateKibanaIndex,
   cleanKibanaIndices,
+  cleanMonitoringIndices,
   createDefaultSpace,
 } from './indices';
 

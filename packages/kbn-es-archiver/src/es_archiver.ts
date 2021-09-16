@@ -20,6 +20,7 @@ import {
   rebuildAllAction,
   emptyKibanaIndexAction,
   editAction,
+  emptyMonitoringIndexAction,
 } from './actions';
 
 interface Options {
@@ -152,6 +153,16 @@ export class EsArchiver {
       client: this.client,
       log: this.log,
       kbnClient: this.kbnClient,
+    });
+  }
+
+  /**
+   * Delete any Monitoring indices that would be referenced by the Stack Monitoring application.
+   */
+  async emptyMonitoringIndex() {
+    return await emptyMonitoringIndexAction({
+      client: this.client,
+      log: this.log,
     });
   }
 

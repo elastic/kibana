@@ -266,6 +266,14 @@ export function runCli() {
       },
     })
     .command({
+      name: 'empty-monitoring-index',
+      description:
+        '[internal] Delete any Monitoring indices that would be referenced by the Stack Monitoring application.',
+      async run({ esArchiver }) {
+        await esArchiver.emptyMonitoringIndex();
+      },
+    })
+    .command({
       name: 'rebuild-all [dir]',
       description:
         '[internal] read and write all archives within [dir] to remove any inconsistencies',
