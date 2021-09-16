@@ -36,6 +36,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
       // permitted
       const object = response.body;
       await expectResponses.permitted(object, testCase);
+      // TODO: add assertions for redacted namespaces (#112455)
     }
   };
   const createTestDefinitions = (

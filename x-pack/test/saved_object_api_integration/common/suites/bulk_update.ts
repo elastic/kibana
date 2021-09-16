@@ -56,6 +56,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
         await expectResponses.permitted(object, testCase);
         if (!testCase.failure) {
           expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+          // TODO: add assertions for redacted namespaces (#112455)
         }
       }
     }

@@ -35,6 +35,7 @@ export type IncrementSavedObjectsExportOptions = BaseIncrementOptions & {
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';
+export const BULK_RESOLVE_STATS_PREFIX = 'apiCalls.savedObjectsBulkResolve';
 export const BULK_UPDATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkUpdate';
 export const CREATE_STATS_PREFIX = 'apiCalls.savedObjectsCreate';
 export const DELETE_STATS_PREFIX = 'apiCalls.savedObjectsDelete';
@@ -59,6 +60,7 @@ const ALL_COUNTER_FIELDS = [
   // Saved Objects Client APIs
   ...getFieldsForCounter(BULK_CREATE_STATS_PREFIX),
   ...getFieldsForCounter(BULK_GET_STATS_PREFIX),
+  ...getFieldsForCounter(BULK_RESOLVE_STATS_PREFIX),
   ...getFieldsForCounter(BULK_UPDATE_STATS_PREFIX),
   ...getFieldsForCounter(CREATE_STATS_PREFIX),
   ...getFieldsForCounter(DELETE_STATS_PREFIX),
@@ -121,6 +123,10 @@ export class CoreUsageStatsClient {
 
   public async incrementSavedObjectsBulkGet(options: BaseIncrementOptions) {
     await this.updateUsageStats([], BULK_GET_STATS_PREFIX, options);
+  }
+
+  public async incrementSavedObjectsBulkResolve(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], BULK_RESOLVE_STATS_PREFIX, options);
   }
 
   public async incrementSavedObjectsBulkUpdate(options: BaseIncrementOptions) {

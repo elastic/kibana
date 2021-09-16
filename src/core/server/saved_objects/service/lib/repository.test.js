@@ -10,10 +10,11 @@ import {
   pointInTimeFinderMock,
   mockCollectMultiNamespaceReferences,
   mockGetBulkOperationError,
+  mockInternalBulkResolve,
   mockUpdateObjectsSpaces,
+  mockGetCurrentTime,
 } from './repository.test.mock';
 
-import { CORE_USAGE_STATS_TYPE, REPOSITORY_RESOLVE_OUTCOME_STATS } from '../../../core_usage_data';
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
@@ -23,7 +24,6 @@ import { loggerMock } from '../../../logging/logger.mock';
 import { SavedObjectsSerializer } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
@@ -33,6 +33,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 const { nodeTypes } = esKuery;
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
+
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
@@ -298,7 +299,7 @@ describe('SavedObjectsRepository', () => {
       logger,
     });
 
-    savedObjectsRepository._getCurrentTime = jest.fn(() => mockTimestamp);
+    mockGetCurrentTime.mockReturnValue(mockTimestamp);
     getSearchDslNS.getSearchDsl.mockClear();
   });
 
@@ -1279,6 +1280,59 @@ describe('SavedObjectsRepository', () => {
           ],
         });
       });
+    });
+  });
+
+  describe('#bulkResolve', () => {
+    afterEach(() => {
+      mockInternalBulkResolve.mockReset();
+    });
+
+    it('passes arguments to the internalBulkResolve module and returns the expected results', async () => {
+      mockInternalBulkResolve.mockResolvedValue({
+        resolved_objects: [
+          { saved_object: 'mock-object', outcome: 'exactMatch' },
+          {
+            type: 'obj-type',
+            id: 'obj-id-2',
+            error: SavedObjectsErrorHelpers.createGenericNotFoundError('obj-type', 'obj-id-2'),
+          },
+        ],
+      });
+
+      const objects = [
+        { type: 'obj-type', id: 'obj-id-1' },
+        { type: 'obj-type', id: 'obj-id-2' },
+      ];
+      await expect(savedObjectsRepository.bulkResolve(objects)).resolves.toEqual({
+        resolved_objects: [
+          {
+            saved_object: 'mock-object',
+            outcome: 'exactMatch',
+          },
+          {
+            saved_object: {
+              type: 'obj-type',
+              id: 'obj-id-2',
+              error: {
+                error: 'Not Found',
+                message: 'Saved object [obj-type/obj-id-2] not found',
+                statusCode: 404,
+              },
+            },
+            outcome: 'exactMatch',
+          },
+        ],
+      });
+      expect(mockInternalBulkResolve).toHaveBeenCalledTimes(1);
+      expect(mockInternalBulkResolve).toHaveBeenCalledWith(expect.objectContaining({ objects }));
+    });
+
+    it('throws when internalBulkResolve throws', async () => {
+      const error = new Error('Oh no!');
+      mockInternalBulkResolve.mockRejectedValue(error);
+
+      await expect(savedObjectsRepository.resolve()).rejects.toEqual(error);
     });
   });
 
@@ -3582,266 +3636,36 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#resolve', () => {
-    const type = 'index-pattern';
-    const id = 'logstash-*';
-    const aliasTargetId = 'some-other-id'; // only used for 'aliasMatch' and 'conflict' outcomes
-    const namespace = 'foo-namespace';
-
-    const getMockAliasDocument = (resolveCounter) => ({
-      body: {
-        get: {
-          _source: {
-            [LEGACY_URL_ALIAS_TYPE]: {
-              targetId: aliasTargetId,
-              ...(resolveCounter && { resolveCounter }),
-              // other fields are not used by the repository
-            },
-          },
-        },
-      },
+    afterEach(() => {
+      mockInternalBulkResolve.mockReset();
     });
 
-    /** Each time resolve is called, usage stats are incremented depending upon the outcome. */
-    const expectIncrementCounter = (n, outcomeStatString) => {
-      expect(client.update).toHaveBeenNthCalledWith(
-        n,
-        expect.objectContaining({
-          body: expect.objectContaining({
-            upsert: expect.objectContaining({
-              [CORE_USAGE_STATS_TYPE]: {
-                [outcomeStatString]: 1,
-                [REPOSITORY_RESOLVE_OUTCOME_STATS.TOTAL]: 1,
-              },
-            }),
-          }),
-        }),
-        expect.anything()
+    it('passes arguments to the internalBulkResolve module and returns the result', async () => {
+      const expectedResult = { saved_object: 'mock-object', outcome: 'exactMatch' };
+      mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
+
+      await expect(savedObjectsRepository.resolve('obj-type', 'obj-id')).resolves.toEqual(
+        expectedResult
       );
-    };
+      expect(mockInternalBulkResolve).toHaveBeenCalledTimes(1);
+      expect(mockInternalBulkResolve).toHaveBeenCalledWith(
+        expect.objectContaining({ objects: [{ type: 'obj-type', id: 'obj-id' }] })
+      );
+    });
 
-    describe('outcomes', () => {
-      describe('error', () => {
-        const expectNotFoundError = async (type, id, options) => {
-          await expect(savedObjectsRepository.resolve(type, id, options)).rejects.toThrowError(
-            createGenericNotFoundError(type, id)
-          );
-        };
+    it('throws when internalBulkResolve result is an error', async () => {
+      const error = new Error('Oh no!');
+      const expectedResult = { type: 'obj-type', id: 'obj-id', error };
+      mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
 
-        it('because type is invalid', async () => {
-          await expectNotFoundError('unknownType', id);
-          expect(client.update).not.toHaveBeenCalled();
-          expect(client.get).not.toHaveBeenCalled();
-          expect(client.mget).not.toHaveBeenCalled();
-        });
+      await expect(savedObjectsRepository.resolve()).rejects.toEqual(error);
+    });
 
-        it('because type is hidden', async () => {
-          await expectNotFoundError(HIDDEN_TYPE, id);
-          expect(client.update).not.toHaveBeenCalled();
-          expect(client.get).not.toHaveBeenCalled();
-          expect(client.mget).not.toHaveBeenCalled();
-        });
+    it('throws when internalBulkResolve throws', async () => {
+      const error = new Error('Oh no!');
+      mockInternalBulkResolve.mockRejectedValue(error);
 
-        it('because alias is not used and actual object is not found', async () => {
-          const options = { namespace: undefined };
-          client.get.mockResolvedValueOnce(
-            elasticsearchClientMock.createSuccessTransportRequestPromise(
-              { found: false },
-              undefined
-            ) // for actual target
-          );
-
-          await expectNotFoundError(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(1); // incremented stats
-          expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
-          expect(client.mget).not.toHaveBeenCalled();
-          expectIncrementCounter(1, REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
-        });
-
-        it('because actual object and alias object are both not found', async () => {
-          const options = { namespace };
-          const objectResults = [
-            { type, id, found: false },
-            { type, id: aliasTargetId, found: false },
-          ];
-          client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
-          const response = getMockMgetResponse(objectResults, options.namespace);
-          client.mget.mockResolvedValueOnce(
-            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
-          );
-
-          await expectNotFoundError(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
-          expect(client.get).not.toHaveBeenCalled();
-          expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
-          expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
-        });
-      });
-
-      describe('exactMatch', () => {
-        it('because namespace is undefined', async () => {
-          const options = { namespace: undefined };
-          const response = getMockGetResponse({ type, id });
-          client.get.mockResolvedValueOnce(
-            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
-          );
-
-          const result = await savedObjectsRepository.resolve(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(1); // incremented stats
-          expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
-          expect(client.mget).not.toHaveBeenCalled();
-          expectIncrementCounter(1, REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-          expect(result).toEqual({
-            saved_object: expect.objectContaining({ type, id }),
-            outcome: 'exactMatch',
-          });
-        });
-
-        describe('because alias is not used', () => {
-          const expectExactMatchResult = async (aliasResult) => {
-            const options = { namespace };
-            if (!aliasResult.body) {
-              client.update.mockResolvedValueOnce(
-                elasticsearchClientMock.createSuccessTransportRequestPromise({}, { ...aliasResult })
-              );
-            } else {
-              client.update.mockResolvedValueOnce(aliasResult); // for alias object
-            }
-            const response = getMockGetResponse({ type, id }, options.namespace);
-            client.get.mockResolvedValueOnce(
-              elasticsearchClientMock.createSuccessTransportRequestPromise({ ...response }) // for actual target
-            );
-
-            const result = await savedObjectsRepository.resolve(type, id, options);
-            expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
-            expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
-            expect(client.mget).not.toHaveBeenCalled();
-            expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-            expect(result).toEqual({
-              saved_object: expect.objectContaining({ type, id }),
-              outcome: 'exactMatch',
-            });
-          };
-
-          it('since alias call resulted in 404', async () => {
-            await expectExactMatchResult({ statusCode: 404 });
-          });
-
-          it('since alias is not found', async () => {
-            await expectExactMatchResult({ body: { get: { found: false } } });
-          });
-
-          it('since alias is disabled', async () => {
-            await expectExactMatchResult({
-              body: { get: { _source: { [LEGACY_URL_ALIAS_TYPE]: { disabled: true } } } },
-            });
-          });
-        });
-
-        describe('because alias is used', () => {
-          const expectExactMatchResult = async (objectResults) => {
-            const options = { namespace };
-            client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
-            const response = getMockMgetResponse(objectResults, options.namespace);
-            client.mget.mockResolvedValueOnce(
-              elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target and alias target
-            );
-
-            const result = await savedObjectsRepository.resolve(type, id, options);
-            expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
-            expect(client.get).not.toHaveBeenCalled();
-            expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
-            expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-            expect(result).toEqual({
-              saved_object: expect.objectContaining({ type, id }),
-              outcome: 'exactMatch',
-            });
-          };
-
-          it('but alias target is not found', async () => {
-            const objects = [
-              { type, id },
-              { type, id: aliasTargetId, found: false },
-            ];
-            await expectExactMatchResult(objects);
-          });
-
-          it('but alias target does not exist in this namespace', async () => {
-            const objects = [
-              { type: MULTI_NAMESPACE_ISOLATED_TYPE, id }, // correct namespace field is added by getMockMgetResponse
-              {
-                type: MULTI_NAMESPACE_ISOLATED_TYPE,
-                id: aliasTargetId,
-                namespace: `not-${namespace}`,
-              }, // overrides namespace field that would otherwise be added by getMockMgetResponse
-            ];
-            await expectExactMatchResult(objects);
-          });
-        });
-      });
-
-      describe('aliasMatch', () => {
-        const expectAliasMatchResult = async (objectResults) => {
-          const options = { namespace };
-          client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
-          const response = getMockMgetResponse(objectResults, options.namespace);
-          client.mget.mockResolvedValueOnce(
-            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target and alias target
-          );
-
-          const result = await savedObjectsRepository.resolve(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
-          expect(client.get).not.toHaveBeenCalled();
-          expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
-          expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
-          expect(result).toEqual({
-            saved_object: expect.objectContaining({ type, id: aliasTargetId }),
-            outcome: 'aliasMatch',
-            alias_target_id: aliasTargetId,
-          });
-        };
-
-        it('because actual target is not found', async () => {
-          const objects = [
-            { type, id, found: false },
-            { type, id: aliasTargetId },
-          ];
-          await expectAliasMatchResult(objects);
-        });
-
-        it('because actual target does not exist in this namespace', async () => {
-          const objects = [
-            { type: MULTI_NAMESPACE_ISOLATED_TYPE, id, namespace: `not-${namespace}` }, // overrides namespace field that would otherwise be added by getMockMgetResponse
-            { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: aliasTargetId }, // correct namespace field is added by getMockMgetResponse
-          ];
-          await expectAliasMatchResult(objects);
-        });
-      });
-
-      describe('conflict', () => {
-        it('because actual target and alias target are both found', async () => {
-          const options = { namespace };
-          const objectResults = [
-            { type, id }, // correct namespace field is added by getMockMgetResponse
-            { type, id: aliasTargetId }, // correct namespace field is added by getMockMgetResponse
-          ];
-          client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
-          const response = getMockMgetResponse(objectResults, options.namespace);
-          client.mget.mockResolvedValueOnce(
-            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target and alias target
-          );
-
-          const result = await savedObjectsRepository.resolve(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
-          expect(client.get).not.toHaveBeenCalled();
-          expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
-          expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
-          expect(result).toEqual({
-            saved_object: expect.objectContaining({ type, id }),
-            outcome: 'conflict',
-            alias_target_id: aliasTargetId,
-          });
-        });
-      });
+      await expect(savedObjectsRepository.resolve()).rejects.toEqual(error);
     });
   });
 

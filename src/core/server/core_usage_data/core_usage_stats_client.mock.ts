@@ -13,6 +13,7 @@ const createUsageStatsClientMock = () =>
     getUsageStats: jest.fn().mockResolvedValue({}),
     incrementSavedObjectsBulkCreate: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsBulkGet: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsBulkResolve: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsBulkUpdate: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsCreate: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsDelete: jest.fn().mockResolvedValue(null),

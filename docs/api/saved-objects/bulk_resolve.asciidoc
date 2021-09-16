@@ -1,0 +1,176 @@
+[[saved-objects-api-bulk-resolve]]
+=== Bulk resolve objects API
+++++
+<titleabbrev>Bulk resolve objects</titleabbrev>
+++++
+
+experimental[] Retrieve multiple {kib} saved objects by ID, using any legacy URL aliases if they exist.
+
+Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new
+features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that
+object can be retrieved via the Bulk Resolve API using either its new ID or its old ID.
+
+[[saved-objects-api-bulk-resolve-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/saved_objects/_bulk_resolve`
+
+`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/_bulk_resolve`
+
+[[saved-objects-api-bulk-resolve-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[saved-objects-api-bulk-resolve-request-body]]
+==== Request Body
+
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
+
+`id`::
+  (Required, string) ID of the retrieved object. The ID includes the {kib} unique identifier or a custom identifier.
+
+[[saved-objects-api-bulk-resolve-response-body]]
+==== Response body
+
+`resolved_objects`::
+  (array) Top-level property containing objects that represent the response for each of the requested objects. The order of the objects in the response is identical to the order of the objects in the request.
+
+Saved objects that {kib} fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the outcome is
+that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. This behavior is unique to `_bulk_resolve`; the
+<<saved-objects-api-resolve,regular `resolve` API>> will return only an HTTP error instead.
+
+[[saved-objects-api-bulk-resolve-body-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+[[saved-objects-api-bulk-resolve-body-example]]
+==== Example
+
+Retrieve an index pattern with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/saved_objects/_bulk_resolve
+[
+  {
+    "type": "index-pattern",
+    "id": "my-pattern"
+  },
+  {
+    "type": "dashboard",
+    "id": "be3733a0-9efe-11e7-acb3-3dab96693fab"
+  }
+]
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "resolved_objects": [
+    {
+      "saved_object": {
+        "id": "my-pattern",
+        "type": "index-pattern",
+        "version": 1,
+        "attributes": {
+          "title": "my-pattern-*"
+        }
+      },
+      "outcome": "exactMatch"
+    },
+    {
+      "saved_object": {
+        "id": "my-dashboard",
+        "type": "dashboard",
+        "error": {
+          "statusCode": 404,
+          "message": "Not found"
+        }
+      },
+      "outcome": "exactMatch"
+    }
+  ]
+}
+--------------------------------------------------
+
+Only the index pattern exists, the dashboard was not found.
+
+The `outcome` field may be any of the following:
+
+* `"exactMatch"` -- One document exactly matched the given ID, *or* {kib} failed to find this object.
+* `"aliasMatch"` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different than the given ID.
+* `"conflict"` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID.
+
+If the outcome is `"aliasMatch"` or `"conflict"`, the response will also include an `alias_target_id` field. This means that an alias was found for another object, and it describes that other object's ID.
+
+Retrieve a dashboard object in the `testspace` by ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET s/testspace/api/saved_objects/resolve/dashboard/7adfa750-4c81-11e8-b3d7-01146121b73d
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "resolved_objects": [
+    {
+      "saved_object": {
+        "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+        "type": "dashboard",
+        "updated_at": "2019-07-23T00:11:07.059Z",
+        "version": "WzQ0LDFd",
+        "attributes": {
+          "title": "[Flights] Global Flight Dashboard",
+          "hits": 0,
+          "description": "Analyze mock flight data for ES-Air, Logstash Airways, Kibana Airlines and JetBeats",
+          "panelsJSON": "[ . . . ]",
+          "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+          "version": 1,
+          "timeRestore": true,
+          "timeTo": "now",
+          "timeFrom": "now-24h",
+          "refreshInterval": {
+            "display": "15 minutes",
+            "pause": false,
+            "section": 2,
+            "value": 900000
+          },
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+          }
+        },
+        "references": [
+          {
+            "name": "panel_0",
+            "type": "visualization",
+            "id": "aeb212e0-4c84-11e8-b3d7-01146121b73d"
+          },
+          . . .
+          {
+            "name": "panel_18",
+            "type": "visualization",
+            "id": "ed78a660-53a0-11e8-acbd-0be0ad9d822b"
+          }
+        ],
+        "migrationVersion": {
+          "dashboard": "7.0.0"
+        }
+      },
+      "outcome": "conflict",
+      "alias_target_id": "05becb88-e214-439a-a2ac-15fc783b5d01"
+    }
+  ]
+}
+--------------------------------------------------

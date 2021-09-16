@@ -99,6 +99,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
         const redactedNamespaces = getRedactedNamespaces(user, testCase.expectedNamespaces);
         expect(object.namespaces).to.eql(redactedNamespaces);
+        // TODO: improve assertions for redacted namespaces? (#112455)
       }
     }
   };

@@ -412,7 +412,7 @@ deprecate and remove them.
 [[sharing-saved-objects-faq-resolve-outcomes]]
 ==== 5. Why are there three different resolve outcomes?
 
-The `resolve()` function first checks if an object with the given ID exists, and then it checks if an object has an alias with the given ID.
+The `resolve()` function checks both if an object with the given ID exists, _and_ if an object has an alias with the given ID.
 
 1. If only the former is true, the outcome is an `'exactMatch'` -- we found the exact object we were looking for.
 2. If only the latter is true, the outcome is an `'aliasMatch'` -- we found an alias with this ID, that pointed us to an object with a
