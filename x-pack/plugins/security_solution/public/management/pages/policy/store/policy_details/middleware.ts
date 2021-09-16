@@ -19,7 +19,6 @@ import {
   needsToRefresh,
   isOnPolicyTrustedAppsPage,
   getCurrentArtifactsLocation,
-  getAvailableArtifactsList,
 } from './selectors';
 import {
   sendGetPackagePolicy,
@@ -30,6 +29,11 @@ import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/typ
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
 import { TrustedAppsHttpService } from '../../../trusted_apps/service';
+import {
+  createLoadedResourceState,
+  createLoadingResourceState,
+  createUninitialisedResourceState,
+} from '../../../../state';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
   coreStart
@@ -104,14 +108,25 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       isOnPolicyTrustedAppsPage(state) &&
       getCurrentArtifactsLocation(state).show === 'list'
     ) {
-      const searchParams = getAvailableArtifactsList(state);
       const location = getCurrentArtifactsLocation(state);
       const policyId = policyIdFromParams(state);
+
+      dispatch({
+        type: 'policyArtifactsAvailableListPageDataChanged',
+        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+        // @ts-ignore
+        payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+      });
 
       const trustedApps = await trustedAppsService.getTrustedAppsList({
         page: 1,
         per_page: 100,
         kuery: `(not exception-list-agnostic.attributes.tags:"policy:${policyId}") AND (not exception-list-agnostic.attributes.tags:"policy:all")`,
+      });
+
+      dispatch({
+        type: 'policyArtifactsAvailableListPageDataChanged',
+        payload: createLoadedResourceState(trustedApps),
       });
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
       const { id } = policyDetails(state) as PolicyData;

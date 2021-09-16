@@ -23,6 +23,8 @@ import {
 import {
   policyDetails,
   getCurrentArtifactsLocation,
+  getAvailableArtifactsList,
+  getAvailableArtifactsListIsLoading,
 } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyArtifactsList } from '../../artifacts/list';
@@ -30,6 +32,10 @@ import { PolicyArtifactsList } from '../../artifacts/list';
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const policyItem = usePolicyDetailsSelector(policyDetails);
+  const availableArtifactsList = usePolicyDetailsSelector(getAvailableArtifactsList);
+  const isAvailableArtifactsListLoading = usePolicyDetailsSelector(
+    getAvailableArtifactsListIsLoading
+  );
 
   const policyName = policyItem?.name ?? '';
   const showListFlyout = location.show === 'list';
@@ -101,9 +107,9 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
           <EuiFlyoutBody>
             {/* TODO: To be done... */}
             <PolicyArtifactsList
-              artifacts={[]}
+              artifacts={availableArtifactsList}
               selectedArtifactIds={[]}
-              isListLoading={false}
+              isListLoading={isAvailableArtifactsListLoading}
               isSubmitLoading={false}
             />
           </EuiFlyoutBody>

@@ -24,7 +24,7 @@ import {
 } from '../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
-import { AsyncResourceState } from '../../../../state';
+import { isLoadedResourceState, isLoadingResourceState } from '../../../../state';
 import { TrustedAppsListData } from '../../../trusted_apps/state';
 
 /** Returns the policy details */
@@ -87,11 +87,23 @@ export const needsToRefresh = (state: Immutable<PolicyDetailsState>): boolean =>
  */
 export const getCurrentArtifactsLocation = (
   state: Immutable<PolicyDetailsState>
-): Immutable<PolicyDetailsArtifactsPageLocation> => state.artifactsLocation;
+): Immutable<PolicyDetailsArtifactsPageLocation> => state.artifacts.location;
 
+/**
+ * Returns current available artifacts list
+ */
 export const getAvailableArtifactsList = (
   state: Immutable<PolicyDetailsState>
-): Immutable<AsyncResourceState<TrustedAppsListData>> => state.availableArtifactsList;
+): Immutable<TrustedAppsListData | undefined> =>
+  isLoadedResourceState(state.artifacts.availableList)
+    ? state.artifacts.availableList.data
+    : undefined;
+
+/**
+ * Returns if available list is loading
+ */
+export const getAvailableArtifactsListIsLoading = (state: Immutable<PolicyDetailsState>): boolean =>
+  isLoadingResourceState(state.artifacts.availableList);
 
 /** Returns a boolean of whether the user is on the policy form page or not */
 export const isOnPolicyFormPage = (state: Immutable<PolicyDetailsState>) => {

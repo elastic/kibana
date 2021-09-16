@@ -5,19 +5,34 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
-import { TrustedApp } from '../../../../../../../common/endpoint/types';
+import { Immutable } from '../../../../../../../common/endpoint/types';
+import { TrustedAppsListData } from '../../../../trusted_apps/state';
+import { Loader } from '../../../../../../common/components/loader';
 
 interface PolicyArtifactsListProps {
-  artifacts: TrustedApp[]; // Or other artifacts type like Event Filters or Endpoint Exceptions
+  artifacts: Immutable<TrustedAppsListData | undefined>; // Or other artifacts type like Event Filters or Endpoint Exceptions
   selectedArtifactIds: string[];
   isListLoading: boolean;
   isSubmitLoading: boolean;
 }
 
-export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(() => {
-  return <>{'test'}</>;
-});
+export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
+  ({ artifacts, isListLoading }) => {
+    const availableList = useMemo(() => {
+      if (!artifacts || !artifacts.items.length) return null;
+      const items = Array.from(artifacts.items);
+      return (
+        <>
+          {items.map((artifact) => (
+            <div key={artifact.id}>{artifact.name}</div>
+          ))}
+        </>
+      );
+    }, [artifacts]);
+    return isListLoading ? <Loader size="xl" /> : null;
+  }
+);
 
 PolicyArtifactsList.displayName = 'PolicyArtifactsList';

@@ -10,6 +10,8 @@ import { GetAgentStatusResponse } from '../../../../../../../fleet/common/types/
 import { PolicyData, UIPolicyConfig } from '../../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../../common/types';
 import { PolicyDetailsState } from '../../types';
+import { AsyncResourceState } from '../../../../state';
+import { TrustedAppsListData } from '../../trusted_apps/state';
 
 export interface ServerReturnedPolicyDetailsData {
   type: 'serverReturnedPolicyDetailsData';
@@ -69,6 +71,11 @@ export interface LicenseChanged {
   payload: ILicense;
 }
 
+export interface PolicyArtifactsAvailableListPageDataChanged {
+  type: 'policyArtifactsAvailableListPageDataChanged';
+  payload: AsyncResourceState<TrustedAppsListData>;
+}
+
 export type PolicyDetailsAction =
   | ServerReturnedPolicyDetailsData
   | UserClickedPolicyDetailsSaveButton
@@ -78,4 +85,5 @@ export type PolicyDetailsAction =
   | ServerFailedToReturnPolicyDetailsData
   | UserChangedPolicyConfig
   | UserChangedAntivirusRegistration
-  | LicenseChanged;
+  | LicenseChanged
+  | PolicyArtifactsAvailableListPageDataChanged;

@@ -63,10 +63,8 @@ export interface PolicyDetailsState {
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<AppLocation>;
-  /** artifacts location params  */
-  artifactsLocation: PolicyDetailsArtifactsPageLocation;
-  /** A list of artifacts can be linked to the policy  */
-  availableArtifactsList: AsyncResourceState<TrustedAppsListData>;
+  /** artifacts namespace inside policy details page */
+  artifacts: PolicyArtifactsState;
   /** A summary of stats for the agents associated with a given Fleet Agent Policy */
   agentStatusSummary?: Omit<GetAgentStatusResponse['results'], 'updating'>;
   /** Status of an update to the policy  */
@@ -76,6 +74,16 @@ export interface PolicyDetailsState {
   };
   /** current license */
   license?: ILicense;
+}
+
+/**
+ * Policy artifacts store state
+ */
+export interface PolicyArtifactsState {
+  /** artifacts location params  */
+  location: PolicyDetailsArtifactsPageLocation;
+  /** A list of artifacts can be linked to the policy  */
+  availableList: AsyncResourceState<TrustedAppsListData>;
 }
 
 export enum OS {

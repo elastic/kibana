@@ -22,6 +22,7 @@ import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
 } from '../../../../common/constants';
 import { extractPolicyDetailsArtifactsListPageLocation } from '../../../../common/routing';
+import { createUninitialisedResourceState } from '../../../../state';
 
 const updatePolicyConfigInPolicyData = (
   policyData: Immutable<PolicyData>,
@@ -54,13 +55,15 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
     total: 0,
     other: 0,
   },
-  artifactsLocation: {
-    page_index: MANAGEMENT_DEFAULT_PAGE,
-    page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
-    show: undefined,
-    filter: '',
+  artifacts: {
+    location: {
+      page_index: MANAGEMENT_DEFAULT_PAGE,
+      page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
+      show: undefined,
+      filter: '',
+    },
+    availableList: createUninitialisedResourceState(),
   },
-  availableArtifactsList: { type: 'UninitialisedResourceState' },
 });
 
 export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppAction> = (
@@ -109,6 +112,16 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     };
   }
 
+  if (action.type === 'policyArtifactsAvailableListPageDataChanged') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        availableList: action.payload,
+      },
+    };
+  }
+
   if (action.type === 'licenseChanged') {
     return {
       ...state,
@@ -120,9 +133,12 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     const newState: Immutable<PolicyDetailsState> = {
       ...state,
       location: action.payload,
-      artifactsLocation: extractPolicyDetailsArtifactsListPageLocation(
-        parse(action.payload.search.slice(1))
-      ),
+      artifacts: {
+        ...state.artifacts,
+        location: extractPolicyDetailsArtifactsListPageLocation(
+          parse(action.payload.search.slice(1))
+        ),
+      },
     };
     const isCurrentlyOnDetailsPage = isOnPolicyDetailsPage(newState);
     const wasPreviouslyOnDetailsPage = isOnPolicyDetailsPage(state);
