@@ -13,16 +13,6 @@ import { AppState } from '../../state';
  * Jest to accept its use within a jest.mock()
  */
 export const mockState: AppState = {
-  overviewFilters: {
-    filters: {
-      locations: [],
-      ports: [],
-      schemes: [],
-      tags: [],
-    },
-    errors: [],
-    loading: false,
-  },
   dynamicSettings: {
     settings: DYNAMIC_SETTINGS_DEFAULTS,
     loading: false,
@@ -44,11 +34,6 @@ export const mockState: AppState = {
   monitorStatus: {
     status: null,
     loading: false,
-  },
-  indexPattern: {
-    index_pattern: null,
-    loading: false,
-    errors: [],
   },
   ping: {
     pingHistogram: null,

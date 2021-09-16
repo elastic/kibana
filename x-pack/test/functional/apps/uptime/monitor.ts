@@ -34,7 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should select the ping list location filter', async () => {
-        await uptimeService.common.selectFilterItem('location', 'mpls');
+        await uptimeService.common.selectFilterItem('Location', 'mpls');
       });
 
       it('should set the status filter', async () => {

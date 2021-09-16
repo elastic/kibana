@@ -35,7 +35,7 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
 
   const { statusFilter } = useGetUrlParams();
 
-  const { selectedLocations } = useSelectedFilters();
+  const selectedFilters = useSelectedFilters();
 
   const dispatch = useDispatch();
 
@@ -45,6 +45,9 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
     dispatch,
   ]);
 
+  const locations = JSON.stringify(selectedFilters.selectedLocations);
+  const excludedLocations = JSON.stringify(selectedFilters.excludedLocations);
+
   useEffect(() => {
     getPings({
       monitorId,
@@ -52,7 +55,8 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
         from,
         to,
       },
-      locations: JSON.stringify(selectedLocations),
+      excludedLocations,
+      locations,
       index: pageIndex,
       size: pageSize,
       status: statusFilter !== 'all' ? statusFilter : '',
@@ -66,7 +70,8 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
     pageIndex,
     pageSize,
     statusFilter,
-    selectedLocations,
+    locations,
+    excludedLocations,
   ]);
 
   const { data } = useFetcher(() => {

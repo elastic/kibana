@@ -20,9 +20,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;
+      let common: any;
 
       before(async () => {
-        alerts = getService('uptime').alerts;
+        const uptimeServices = getService('uptime');
+        alerts = uptimeServices.alerts;
+        common = uptimeServices.common;
       });
 
       it('can open alert flyout', async () => {
@@ -67,17 +70,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can select location filter', async () => {
         await alerts.clickAddFilterLocation();
-        await alerts.clickLocationExpression('mpls');
+        await common.clickFilterItems(['mpls']);
+        await common.applyFilterItems('Location');
       });
 
       it('can select port filter', async () => {
         await alerts.clickAddFilterPort();
-        await alerts.clickPortExpression('5678');
+        await common.clickFilterItems(['5678']);
+        await common.applyFilterItems('Port');
       });
 
       it('can select type/scheme filter', async () => {
         await alerts.clickAddFilterType();
-        await alerts.clickTypeExpression('http');
+        await common.clickFilterItems(['http']);
+        await common.applyFilterItems('Scheme');
       });
 
       it('can save alert', async () => {
