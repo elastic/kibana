@@ -280,13 +280,14 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     };
   }, [agentPoliciesById, policyId]);
 
-  const handleNameChange = useCallback((newName: string) => {
-    if (getFields().name.value === '') {
-      setFieldValue('name', newName)
-    }
-  }, [
-    setFieldValue,
-  ]);
+  const handleNameChange = useCallback(
+    (newName: string) => {
+      if (getFields().name.value === '') {
+        setFieldValue('name', newName);
+      }
+    },
+    [setFieldValue, getFields]
+  );
 
   const handleSaveClick = useCallback(() => {
     if (currentPolicy.agentCount) {
@@ -294,13 +295,19 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
       return;
     }
 
-    submit();
-  }, [currentPolicy.agentCount, submit]);
+    submit().catch((error) => {
+      form.reset({ resetValues: false });
+      setErrorToast(error, { title: error.name, toastMessage: error.message });
+    });
+  }, [currentPolicy.agentCount, submit, form, setErrorToast]);
 
   const handleConfirmConfirmationClick = useCallback(() => {
-    submit();
+    submit().catch((error) => {
+      form.reset({ resetValues: false });
+      setErrorToast(error, { title: error.name, toastMessage: error.message });
+    });
     setShowConfirmationModal(false);
-  }, [submit]);
+  }, [submit, form, setErrorToast]);
 
   return (
     <>
