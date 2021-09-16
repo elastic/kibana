@@ -16,6 +16,8 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('table_vis.enabled', 'vis_type_table.enabled'),
+    // Unused property which should be removed after releasing Kibana v8.0:
+    unused('legacyVisEnabled'),
   ],
 };
 
