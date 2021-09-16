@@ -15,3 +15,8 @@ export const SAVED_QUERY_ID_REF_NAME = 'savedQueryId';
  * https://github.com/elastic/kibana/blob/master/src/plugins/data/public/query/saved_query/saved_query_service.ts#L54
  */
 export const SAVED_QUERY_TYPE = 'query';
+
+/**
+ * The reference name for the timeline ID field within the notes and pinned events saved object definition
+ */
+export const TIMELINE_ID_REF_NAME = 'timelineId';
