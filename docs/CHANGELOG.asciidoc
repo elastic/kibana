@@ -84,6 +84,15 @@ You must upgrade your Elastic Agents to the latest version to use the Osquery Ma
 To upgrade, refer to {fleet-guide}/upgrade-elastic-agent.html[Upgrade Elastic Agent].
 ====
 
+.APM: Metrics-powered throughput is incorrect
+[%collapsible]
+====
+*Details* +
+In some cases, users who have enabled APM aggregated transactions (metrics-powered UI), will see throughput incorrectly stuck on 1tpm.
+*Impact* +
+Disable metrics powered transactions with `xpack.apm.searchAggregatedTransactions: 'never'` until 7.15.1. See {kibana-pull}112240[#112240] for more information.
+====
+
 [float]
 [[breaking-changes-7.15.0]]
 === Breaking changes
