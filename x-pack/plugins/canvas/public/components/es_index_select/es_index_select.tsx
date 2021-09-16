@@ -5,49 +5,44 @@
  * 2.0.
  */
 
-import React, { FocusEventHandler } from 'react';
-import { EuiComboBox } from '@elastic/eui';
+import React, { useRef, useState } from 'react';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { getIndices } from '../../lib/es_service';
+import {
+  ESIndexSelect as Component,
+  ESIndexSelectProps as Props,
+} from './es_index_select.component';
 
-export interface ESIndexSelectProps {
-  loading: boolean;
-  value: string;
-  indices: string[];
-  onChange: (index: string) => void;
-  onBlur: FocusEventHandler<HTMLDivElement> | undefined;
-  onFocus: FocusEventHandler<HTMLDivElement> | undefined;
-}
+type ESIndexSelectProps = Omit<Props, 'indices' | 'loading'>;
 
-const defaultIndex = '_all';
+export const ESIndexSelect: React.FunctionComponent<ESIndexSelectProps> = (props) => {
+  const { value, onChange } = props;
 
-export const ESIndexSelect: React.FunctionComponent<ESIndexSelectProps> = ({
-  value = defaultIndex,
-  loading,
-  indices,
-  onChange,
-  onFocus,
-  onBlur,
-}) => {
-  const selectedOption = value !== defaultIndex ? [{ label: value }] : [];
-  const options = indices.map((index) => ({ label: index }));
+  const [indices, setIndices] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const mounted = useRef(true);
 
-  return (
-    <EuiComboBox
-      selectedOptions={selectedOption}
-      onChange={([index]) => onChange(index?.label ?? defaultIndex)}
-      onSearchChange={(searchValue) => {
-        // resets input when user starts typing
-        if (searchValue) {
-          onChange(defaultIndex);
-        }
-      }}
-      onBlur={onBlur}
-      onFocus={onFocus}
-      isDisabled={loading}
-      options={options}
-      singleSelection={{ asPlainText: true }}
-      isClearable={false}
-      onCreateOption={(input) => onChange(input || defaultIndex)}
-      compressed
-    />
-  );
+  useEffectOnce(() => {
+    getIndices().then((newIndices) => {
+      if (!mounted.current) {
+        return;
+      }
+
+      if (!newIndices) {
+        newIndices = [];
+      }
+
+      setLoading(false);
+      setIndices(newIndices.sort());
+      if (!value && newIndices.length) {
+        onChange(newIndices[0]);
+      }
+    });
+
+    return () => {
+      mounted.current = false;
+    };
+  });
+
+  return <Component {...props} indices={indices} loading={loading} />;
 };
