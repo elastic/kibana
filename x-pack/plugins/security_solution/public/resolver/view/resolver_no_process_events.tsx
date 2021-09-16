@@ -49,7 +49,7 @@ export const ResolverNoProcessEvents = () => {
         <>
           <EuiText size="s" data-test-subj="resolver:origin-timestamp">
             {i18n.translate('xpack.securitySolution.resolver.noProcessEvents.originTimestamp', {
-              defaultMessage: `Analyzer did find a process event associated with this alert, make sure your current time range
+              defaultMessage: `Analyzer did find a process event associated with this event, make sure your current time range
               filter is inclusive of this date.`,
             })}
           </EuiText>
