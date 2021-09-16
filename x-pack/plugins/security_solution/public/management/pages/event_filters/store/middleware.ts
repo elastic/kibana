@@ -235,6 +235,7 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
         // Ignore will be fixed with when AsyncResourceState is refactored (#830)
         // @ts-ignore
         type: 'LoadingResourceState',
+        // @ts-ignore
         previousState: getCurrentListPageDataState(state),
       },
     });

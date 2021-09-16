@@ -417,6 +417,7 @@ const fetchEditTrustedAppIfNeeded = async (
             // type guards would work here
             // @ts-ignore
             type: 'LoadingResourceState',
+            // @ts-ignore
             previousState: editItemState(currentState)!,
           },
         });

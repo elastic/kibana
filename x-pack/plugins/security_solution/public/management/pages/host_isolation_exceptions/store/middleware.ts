@@ -11,7 +11,10 @@ import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { ImmutableMiddleware, ImmutableMiddlewareAPI } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../common/constants';
-import { createLoadedResourceState } from '../../../state/async_resource_builders';
+import {
+  createFailedResourceState,
+  createLoadedResourceState,
+} from '../../../state/async_resource_builders';
 import { getHostIsolationExceptionsList } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
 
@@ -36,11 +39,21 @@ async function loadHostIsolationExceptionsList(
   http: HttpStart
 ) {
   const { dispatch } = store;
-  const entries = await getHostIsolationExceptionsList(http);
-  dispatch({
-    type: 'hostIsolationExceptionsPageDataChanged',
-    payload: createLoadedResourceState(entries),
-  });
+  try {
+    const entries = await getHostIsolationExceptionsList(http);
+
+    // @TODO loading state
+
+    dispatch({
+      type: 'hostIsolationExceptionsPageDataChanged',
+      payload: createLoadedResourceState(entries),
+    });
+  } catch (error) {
+    dispatch({
+      type: 'eventFiltersListPageDataExistsChanged',
+      payload: createFailedResourceState<boolean>(error.body ?? error),
+    });
+  }
 }
 
 function isHostIsolationExceptionsPage(location: Immutable<AppLocation>) {
