@@ -88,9 +88,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       wrapper.setProps({ hookProps: { ...mockProps, urlState: newUrlState } });
       wrapper.update();
-      expect(
-        mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
-      ).toStrictEqual({
+      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: '/network',
         search:
@@ -124,9 +122,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       });
       wrapper.update();
 
-      expect(
-        mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
-      ).toStrictEqual({
+      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: '/network',
         search:
@@ -161,9 +157,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       });
       wrapper.update();
 
-      expect(
-        mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
-      ).toStrictEqual({
+      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: '/network',
         search:
@@ -198,9 +192,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       });
       wrapper.update();
 
-      expect(
-        mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
-      ).toStrictEqual({
+      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: '/network',
         search:
@@ -226,15 +218,6 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
             expect(mockHistory.replace.mock.calls[0][0]).toEqual({
-              hash: '',
-              pathname: examplePath,
-              search: '?',
-              state: '',
-            });
-
-            expect(
-              mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
-            ).toEqual({
               hash: '',
               pathname: examplePath,
               search:
@@ -268,9 +251,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
             <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
           );
 
-          expect(
-            mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0].search
-          ).toEqual(
+          expect(mockHistory.replace.mock.calls[0][0].search).toEqual(
             "?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
           );
 
@@ -282,9 +263,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
           wrapper.update();
 
-          expect(
-            mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0].search
-          ).toEqual(
+          expect(mockHistory.replace.mock.calls[1][0].search).toEqual(
             "?query=(language:kuery,query:'host.name:%22siem-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
           );
         });

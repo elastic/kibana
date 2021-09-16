@@ -17,13 +17,14 @@ import {
   getParamFromQueryString,
   getUrlType,
   getTitle,
-  replaceStateInLocation,
+  replaceStatesInLocation,
   updateUrlStateString,
   decodeRisonUrlState,
   isDetectionsPages,
 } from './helpers';
 import {
   UrlStateContainerPropTypes,
+  ReplaceStateInLocation,
   PreviousLocationUrlState,
   URL_STATE_KEYS,
   KeyUrlState,
@@ -32,6 +33,7 @@ import {
   UrlState,
 } from './types';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
+
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
   useEffect(() => {
@@ -76,6 +78,7 @@ export const useUrlStateHooks = ({
   const handleInitialize = (type: UrlStateType, needUpdate?: boolean) => {
     let mySearch = search;
     let urlStateToUpdate: UrlStateToRedux[] = [];
+    const statesToUpdate: ReplaceStateInLocation[] = [];
     URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
       const newUrlStateString = getParamFromQueryString(
         getQueryStringFromLocation(mySearch),
@@ -112,18 +115,12 @@ export const useUrlStateHooks = ({
         urlState[urlKey] != null &&
         urlState[urlKey]?.query === ''
       ) {
-        mySearch = replaceStateInLocation({
-          history,
-          pathName,
-          search: mySearch,
+        statesToUpdate.push({
           urlStateToReplace: '',
           urlStateKey: urlKey,
         });
       } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
-        mySearch = replaceStateInLocation({
-          history,
-          pathName,
-          search: mySearch,
+        statesToUpdate.push({
           urlStateToReplace: '',
           urlStateKey: urlKey,
         });
@@ -132,32 +129,25 @@ export const useUrlStateHooks = ({
         urlState[urlKey] != null &&
         urlState[urlKey].id === ''
       ) {
-        mySearch = replaceStateInLocation({
-          history,
-          pathName,
-          search: mySearch,
+        statesToUpdate.push({
           urlStateToReplace: '',
           urlStateKey: urlKey,
         });
       } else {
-        mySearch = replaceStateInLocation({
-          history,
-          pathName,
-          search: mySearch,
+        statesToUpdate.push({
           urlStateToReplace: urlState[urlKey] || '',
           urlStateKey: urlKey,
         });
       }
     });
     difference(ALL_URL_STATE_KEYS, URL_STATE_KEYS[type]).forEach((urlKey: KeyUrlState) => {
-      mySearch = replaceStateInLocation({
-        history,
-        pathName,
-        search: mySearch,
+      statesToUpdate.push({
         urlStateToReplace: '',
         urlStateKey: urlKey,
       });
     });
+
+    replaceStatesInLocation(statesToUpdate, pathName, mySearch, history);
 
     setInitialStateFromUrl({
       detailName,
@@ -185,25 +175,19 @@ export const useUrlStateHooks = ({
       handleInitialize(type);
       setIsInitializing(false);
     } else if (!deepEqual(urlState, prevProps.urlState) && !isInitializing) {
-      let mySearch = search;
+      const statesToUpdate: ReplaceStateInLocation[] = [];
       URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
         if (
           urlKey === CONSTANTS.appQuery &&
           urlState[urlKey] != null &&
           urlState[urlKey]?.query === ''
         ) {
-          mySearch = replaceStateInLocation({
-            history,
-            pathName,
-            search: mySearch,
+          statesToUpdate.push({
             urlStateToReplace: '',
             urlStateKey: urlKey,
           });
         } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
-          mySearch = replaceStateInLocation({
-            history,
-            pathName,
-            search: mySearch,
+          statesToUpdate.push({
             urlStateToReplace: '',
             urlStateKey: urlKey,
           });
@@ -212,23 +196,19 @@ export const useUrlStateHooks = ({
           urlState[urlKey] != null &&
           urlState[urlKey].id === ''
         ) {
-          mySearch = replaceStateInLocation({
-            history,
-            pathName,
-            search: mySearch,
+          statesToUpdate.push({
             urlStateToReplace: '',
             urlStateKey: urlKey,
           });
         } else {
-          mySearch = replaceStateInLocation({
-            history,
-            pathName,
-            search: mySearch,
+          statesToUpdate.push({
             urlStateToReplace: urlState[urlKey] || '',
             urlStateKey: urlKey,
           });
         }
       });
+
+      replaceStatesInLocation(statesToUpdate, pathName, search, history);
     } else if (pathName !== prevProps.pathName) {
       handleInitialize(type, isDetectionsPages(pageName));
     }

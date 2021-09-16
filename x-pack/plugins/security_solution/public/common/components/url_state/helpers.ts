@@ -216,78 +216,102 @@ export const updateUrlStateString = ({
   if (urlKey === CONSTANTS.appQuery) {
     const queryState = decodeRisonUrlState<Query>(newUrlStateString);
     if (queryState != null && queryState.query === '') {
-      return replaceStateInLocation({
-        history,
+      return replaceStatesInLocation(
+        [
+          {
+            urlStateToReplace: '',
+            urlStateKey: urlKey,
+          },
+        ],
         pathName,
         search,
-        urlStateToReplace: '',
-        urlStateKey: urlKey,
-      });
+        history
+      );
     }
   } else if (urlKey === CONSTANTS.timerange && updateTimerange) {
     const queryState = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
     if (queryState != null && queryState.global != null) {
-      return replaceStateInLocation({
-        history,
+      return replaceStatesInLocation(
+        [
+          {
+            urlStateToReplace: updateTimerangeUrl(queryState, isInitializing),
+            urlStateKey: urlKey,
+          },
+        ],
         pathName,
         search,
-        urlStateToReplace: updateTimerangeUrl(queryState, isInitializing),
-        urlStateKey: urlKey,
-      });
+        history
+      );
     }
   } else if (urlKey === CONSTANTS.sourcerer) {
     const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
     if (sourcererState != null && Object.keys(sourcererState).length > 0) {
-      return replaceStateInLocation({
-        history,
+      return replaceStatesInLocation(
+        [
+          {
+            urlStateToReplace: sourcererState,
+            urlStateKey: urlKey,
+          },
+        ],
         pathName,
         search,
-        urlStateToReplace: sourcererState,
-        urlStateKey: urlKey,
-      });
+        history
+      );
     }
   } else if (urlKey === CONSTANTS.filters) {
     const queryState = decodeRisonUrlState<Filter[]>(newUrlStateString);
     if (isEmpty(queryState)) {
-      return replaceStateInLocation({
-        history,
+      return replaceStatesInLocation(
+        [
+          {
+            urlStateToReplace: '',
+            urlStateKey: urlKey,
+          },
+        ],
         pathName,
         search,
-        urlStateToReplace: '',
-        urlStateKey: urlKey,
-      });
+        history
+      );
     }
   } else if (urlKey === CONSTANTS.timeline) {
     const queryState = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
     if (queryState != null && queryState.id === '') {
-      return replaceStateInLocation({
-        history,
+      return replaceStatesInLocation(
+        [
+          {
+            urlStateToReplace: '',
+            urlStateKey: urlKey,
+          },
+        ],
         pathName,
         search,
-        urlStateToReplace: '',
-        urlStateKey: urlKey,
-      });
+        history
+      );
     }
   }
   return search;
 };
 
-export const replaceStateInLocation = <T>({
-  history,
-  urlStateToReplace,
-  urlStateKey,
-  pathName,
-  search,
-}: ReplaceStateInLocation<T>) => {
-  const newLocation = replaceQueryStringInLocation(
-    {
-      hash: '',
-      pathname: pathName,
-      search,
-      state: '',
-    },
-    replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(getQueryStringFromLocation(search))
-  );
+export const replaceStatesInLocation = (
+  states: ReplaceStateInLocation[],
+  pathname: string,
+  search: string,
+  history?: H.History
+) => {
+  const location = {
+    hash: '',
+    pathname,
+    search,
+    state: '',
+  };
+
+  const queryString = getQueryStringFromLocation(search);
+  const newQueryString = states.reduce((updatedQueryString, { urlStateKey, urlStateToReplace }) => {
+    return replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(updatedQueryString);
+  }, queryString);
+
+  const newLocation = replaceQueryStringInLocation(location, newQueryString);
+
   if (history) {
     newLocation.state = history.location.state;
     history.replace(newLocation);

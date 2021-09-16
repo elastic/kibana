@@ -190,12 +190,9 @@ export type DispatchSetInitialStateFromUrl = <TCache>({
   urlStateToUpdate,
 }: SetInitialStateFromUrl<TCache>) => () => void;
 
-export interface ReplaceStateInLocation<T> {
-  history?: H.History;
-  urlStateToReplace: T;
+export interface ReplaceStateInLocation {
+  urlStateToReplace: unknown;
   urlStateKey: string;
-  pathName: string;
-  search: string;
 }
 
 export interface UpdateUrlStateString {
