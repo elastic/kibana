@@ -255,25 +255,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowData.startsWith('Sep 22, 2015 @ 16:50:13.253')).to.be.ok();
       });
     });
-    describe('usage of discover:searchOnPageLoad', () => {
-      it('should not fetch data from ES initially when discover:searchOnPageLoad is false', async function () {
-        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': false });
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
-
-        expect(await PageObjects.discover.getNrOfFetches()).to.be(0);
-      });
-
-      it('should fetch data from ES initially when discover:searchOnPageLoad is true', async function () {
-        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
-        await retry.waitFor('number of fetches to be 1', async () => {
-          const nrOfFetches = await PageObjects.discover.getNrOfFetches();
-          return nrOfFetches === 1;
-        });
-      });
-    });
 
     describe('invalid time range in URL', function () {
       it('should get the default timerange', async function () {

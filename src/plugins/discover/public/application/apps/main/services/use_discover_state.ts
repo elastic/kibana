@@ -97,9 +97,7 @@ export function useDiscoverState({
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
 
-    return () => {
-      stopSync();
-    };
+    return () => stopSync();
   }, [stateContainer, filterManager, data, indexPattern]);
 
   /**

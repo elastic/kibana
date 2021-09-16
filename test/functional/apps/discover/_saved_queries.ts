@@ -163,5 +163,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await queryBar.getQueryString()).to.eql('');
       });
     });
+
+    describe('switch saved search', () => {
+      it(`should reset filters when navigating to a 'new' after saved search`, async function () {
+        await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+        await PageObjects.discover.saveSearch('test');
+
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+
+        await PageObjects.discover.clickNewSearchButton();
+
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+      });
+    });
   });
 }
