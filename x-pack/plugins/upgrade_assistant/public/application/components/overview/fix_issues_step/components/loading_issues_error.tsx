@@ -15,9 +15,7 @@ export const LoadingIssuesError: FunctionComponent = ({ children }) => (
         <EuiIcon type="alert" color="danger" />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        {children}
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
     </EuiFlexGroup>
   </EuiText>
 );

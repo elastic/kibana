@@ -77,9 +77,7 @@ export const DeprecationIssuesPanel = (props: Props) => {
       <EuiSpacer />
 
       {hasError ? (
-        <LoadingIssuesError data-test-subj="loadingIssuesError">
-          {errorMessage}
-        </LoadingIssuesError>
+        <LoadingIssuesError data-test-subj="loadingIssuesError">{errorMessage}</LoadingIssuesError>
       ) : hasNoIssues ? (
         <NoDeprecationIssues data-test-subj="noDeprecationIssues" />
       ) : (

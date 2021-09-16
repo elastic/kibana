@@ -15,7 +15,7 @@ interface Props {
   setIsFixed: (isFixed: boolean) => void;
 }
 
-export const ElasticsearchDeprecationStats: FunctionComponent<Props> = ({ setIsFixed }) => {
+export const EsDeprecationIssuesPanel: FunctionComponent<Props> = ({ setIsFixed }) => {
   const {
     services: { api },
   } = useAppContext();
