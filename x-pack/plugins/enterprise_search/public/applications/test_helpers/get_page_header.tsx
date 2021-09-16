@@ -43,6 +43,11 @@ export const getPageHeaderActions = (wrapper: ShallowWrapper) => {
 };
 
 export const getPageHeaderTabs = (wrapper: ShallowWrapper) => {
+  // The tabs prop of EuiPageHeader takes an `Array<EuiTabProps>`
+  // instead of an array of EuiTab jsx components
+  // These are then rendered inside of EuiPageHeader as EuiTabs
+  // See https://elastic.github.io/eui/#/layout/page-header#tabs-in-the-page-header
+
   const tabs = getPageHeader(wrapper).tabs || [];
 
   return shallow(
