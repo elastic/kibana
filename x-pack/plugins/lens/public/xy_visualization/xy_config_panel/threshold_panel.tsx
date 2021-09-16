@@ -139,7 +139,13 @@ export const ThresholdPanel = (
 
   return (
     <>
-      <ColorPicker {...props} />
+      <ColorPicker
+        {...props}
+        disableHelpTooltip
+        label={i18n.translate('xpack.lens.xyChart.thresholdColor.label', {
+          defaultMessage: 'Color',
+        })}
+      />
       <EuiFormRow
         display="columnCompressed"
         fullWidth

@@ -18,6 +18,7 @@ import { getSeriesColor } from '../state_helpers';
 import { getAccessorColorConfig, getColorAssignments } from '../color_assignment';
 import { getSortedAccessors } from '../to_expression';
 import { updateLayer } from '.';
+import { TooltipWrapper } from '../../shared_components';
 
 const tooltipContent = {
   auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
@@ -40,9 +41,13 @@ export const ColorPicker = ({
   frame,
   formatFactory,
   paletteService,
+  label,
+  disableHelpTooltip,
 }: VisualizationDimensionEditorProps<State> & {
   formatFactory: FormatFactory;
   paletteService: PaletteRegistry;
+  label?: string;
+  disableHelpTooltip?: boolean;
 }) => {
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
@@ -104,6 +109,12 @@ export const ColorPicker = ({
     [state, setState, layer, accessor, index]
   );
 
+  const inputLabel =
+    label ??
+    i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+      defaultMessage: 'Series color',
+    });
+
   const colorPicker = (
     <EuiColorPicker
       data-test-subj="indexPattern-dimension-colorPicker"
@@ -115,9 +126,7 @@ export const ColorPicker = ({
       placeholder={i18n.translate('xpack.lens.xyChart.seriesColor.auto', {
         defaultMessage: 'Auto',
       })}
-      aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
-        defaultMessage: 'Series color',
-      })}
+      aria-label={inputLabel}
     />
   );
 
@@ -126,18 +135,27 @@ export const ColorPicker = ({
       display="columnCompressed"
       fullWidth
       label={
-        <EuiToolTip
+        <TooltipWrapper
           delay="long"
           position="top"
-          content={color && !disabled ? tooltipContent.custom : tooltipContent.auto}
+          tooltipContent={color && !disabled ? tooltipContent.custom : tooltipContent.auto}
+          condition={!disableHelpTooltip}
         >
           <span>
-            {i18n.translate('xpack.lens.xyChart.seriesColor.label', {
-              defaultMessage: 'Series color',
-            })}{' '}
-            <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
+            {inputLabel}
+            {!disableHelpTooltip && (
+              <>
+                {''}
+                <EuiIcon
+                  type="questionInCircle"
+                  color="subdued"
+                  size="s"
+                  className="eui-alignTop"
+                />
+              </>
+            )}
           </span>
-        </EuiToolTip>
+        </TooltipWrapper>
       }
     >
       {disabled ? (
