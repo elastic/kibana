@@ -89,6 +89,7 @@ export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
         } else {
           expect(response.body.alias_target_id).to.eql(undefined);
         }
+        // TODO: add assertions for redacted namespaces (#112455)
       }
     }
   };

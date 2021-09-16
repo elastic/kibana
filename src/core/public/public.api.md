@@ -1299,7 +1299,9 @@ export class SavedObjectsClient {
     bulkResolve: (objects?: Array<{
         id: string;
         type: string;
-    }>) => Promise<SavedObjectsBatchResponse<unknown>>;
+    }>) => Promise<{
+        resolved_objects: ResolvedSimpleSavedObject<unknown>[];
+    }>;
     bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts

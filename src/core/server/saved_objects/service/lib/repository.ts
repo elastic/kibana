@@ -1067,7 +1067,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Resolves an array of objects by id, using any legacy URL aliases if they exists
+   * Resolves an array of objects by id, using any legacy URL aliases if they exist
    *
    * @param {array} objects - an array of objects containing id, type
    * @param {object} [options={}]

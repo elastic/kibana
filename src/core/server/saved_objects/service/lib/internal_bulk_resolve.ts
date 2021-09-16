@@ -224,9 +224,7 @@ export async function internalBulkResolve<T>(
 
 /** Separates valid and invalid object types */
 function validateObjectTypes(objects: SavedObjectsBulkResolveObject[], allowedTypes: string[]) {
-  const allObjects: Array<
-    Either<InternalBulkResolveError, SavedObjectsBulkResolveObject>
-  > = objects.map((object) => {
+  return objects.map<Either<InternalBulkResolveError, SavedObjectsBulkResolveObject>>((object) => {
     const { type, id } = object;
     if (!allowedTypes.includes(type)) {
       return {
@@ -243,7 +241,6 @@ function validateObjectTypes(objects: SavedObjectsBulkResolveObject[], allowedTy
       value: object,
     };
   });
-  return allObjects;
 }
 
 async function fetchAndUpdateAliases(

@@ -4,7 +4,7 @@
 
 ## SavedObjectsClient.bulkResolve property
 
-Resolves an array of objects by id, using any legacy URL aliases if they exists
+Resolves an array of objects by id, using any legacy URL aliases if they exist
 
 <b>Signature:</b>
 
@@ -12,7 +12,9 @@ Resolves an array of objects by id, using any legacy URL aliases if they exists
 bulkResolve: (objects?: Array<{
         id: string;
         type: string;
-    }>) => Promise<SavedObjectsBatchResponse<unknown>>;
+    }>) => Promise<{
+        resolved_objects: ResolvedSimpleSavedObject<unknown>[];
+    }>;
 ```
 
 ## Example

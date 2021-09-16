@@ -15,20 +15,12 @@ import {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
-  SavedObjectsBulkResolveObject,
-  SavedObjectsBulkResolveResponse,
   SavedObjectsResolveResponse,
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
 import type { ResolvedSimpleSavedObject } from './types';
 import { HttpFetchOptions, HttpSetup } from '../http';
-
-export type {
-  SavedObjectsBulkResolveObject,
-  SavedObjectsBulkResolveResponse,
-  SavedObjectsResolveResponse,
-};
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
@@ -504,7 +496,7 @@ export class SavedObjectsClient {
   };
 
   /**
-   * Resolves an array of objects by id, using any legacy URL aliases if they exists
+   * Resolves an array of objects by id, using any legacy URL aliases if they exist
    *
    * @param objects - an array of objects containing id, type
    * @returns The bulk resolve result for the saved objects for the given types and ids.
@@ -515,17 +507,14 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  public bulkResolve = (objects: Array<{ id: string; type: string }> = []) => {
-    const filteredObjects = objects.map((obj) => pick(obj, ['id', 'type']));
-    return this.performBulkResolve(filteredObjects).then((resp) => {
-      resp.resolved_objects = resp.resolved_objects.map((resolveResponse) =>
+  public bulkResolve = async (objects: Array<{ id: string; type: string }> = []) => {
+    const filteredObjects = objects.map(({ type, id }) => ({ type, id }));
+    const response = await this.performBulkResolve(filteredObjects);
+    return {
+      resolved_objects: response.resolved_objects.map((resolveResponse) =>
         this.createResolvedSavedObject(resolveResponse)
-      );
-      return renameKeys<
-        PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>,
-        SavedObjectsBatchResponse
-      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
-    });
+      ),
+    };
   };
 
   private async performBulkResolve(objects: ObjectTypeAndId[]) {

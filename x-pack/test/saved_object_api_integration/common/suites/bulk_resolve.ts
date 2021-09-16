@@ -58,8 +58,8 @@ export function bulkResolveTestSuiteFactory(esArchiver: any, supertest: SuperTes
           } else {
             expect(resolvedObject.alias_target_id).to.eql(undefined);
           }
+          // TODO: add assertions for redacted namespaces (#112455)
         }
-        // TODO: add assertions for redacted namespaces (this already exists in the bulkCreate test suite)
       }
     }
   };

@@ -11,15 +11,12 @@ export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkResolveObject,
-  SavedObjectsBulkResolveResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
-  SavedObjectsResolveResponse,
   SavedObjectsBulkUpdateOptions,
 } from './saved_objects_client';
 export { SimpleSavedObject } from './simple_saved_object';
@@ -45,7 +42,10 @@ export type {
   SavedObjectsImportWarning,
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from '../../server/types';
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
+  SavedObjectsResolveResponse,
+} from '../../server';
 
 export type {
   SavedObject,

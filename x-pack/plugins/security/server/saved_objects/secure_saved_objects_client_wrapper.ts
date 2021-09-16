@@ -1103,6 +1103,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     response: T,
     previouslyAuthorizedNamespaces: Array<string | undefined>
   ): Promise<T> {
+    // WARNING: the bulkResolve function has a bespoke implementation of this; any changes here should be applied there too.
+
     if (this.getSpacesService() === undefined) {
       return response;
     }
