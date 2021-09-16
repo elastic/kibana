@@ -345,6 +345,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                           filterQuery={filterQuery}
                           data={nonDeletedEvents}
                           defaultCellActions={defaultCellActions}
+                          filters={filters}
                           id={id}
                           isEventViewer={true}
                           itemsPerPageOptions={itemsPerPageOptions}

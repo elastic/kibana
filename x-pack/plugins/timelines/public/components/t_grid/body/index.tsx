@@ -74,6 +74,7 @@ import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/com
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { useDataGridHeightHack } from './height_hack';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
@@ -86,6 +87,7 @@ interface OwnProps {
   bulkActions?: BulkActionsProp;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
+  filters?: Filter[];
   filterQuery: string;
   filterStatus?: AlertStatus;
   id: string;
@@ -301,6 +303,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     defaultCellActions,
     filterQuery,
     filterStatus,
+    filters,
     id,
     indexNames,
     isEventViewer = false,
@@ -645,6 +648,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               browserFields,
               timelineId: id,
               pageSize,
+              globalFilters: filters,
             });
 
           return {
@@ -653,7 +657,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction),
           };
         }),
-      [browserFields, columnHeaders, data, defaultCellActions, id, pageSize]
+      [browserFields, columnHeaders, data, defaultCellActions, id, pageSize, filters]
     );
 
     const renderTGridCellValue = useMemo(() => {

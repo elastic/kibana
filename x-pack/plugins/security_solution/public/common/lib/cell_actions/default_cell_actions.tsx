@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import type {
   BrowserFields,
@@ -181,11 +182,13 @@ export const defaultCellActions: TGridCellAction[] = [
     data,
     timelineId,
     pageSize,
+    globalFilters,
   }: {
     browserFields: BrowserFields;
     data: TimelineNonEcsData[][];
     timelineId: string;
     pageSize: number;
+    globalFilters?: Filter[];
   }) => ({ rowIndex, columnId, Component }) => {
     const [showTopN, setShowTopN] = useState(false);
     const onClick = useCallback(() => setShowTopN(!showTopN), [showTopN]);
@@ -223,6 +226,7 @@ export const defaultCellActions: TGridCellAction[] = [
         showTooltip={false}
         timelineId={timelineId}
         value={value}
+        globalFilters={globalFilters}
       />
     ) : null;
   },
