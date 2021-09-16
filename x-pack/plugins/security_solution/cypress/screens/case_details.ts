@@ -38,6 +38,11 @@ export const DELETE_CASE_BTN = '[data-test-subj="property-actions-trash"]';
 
 export const DELETE_CASE_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
+export const CASE_CONFLICT_CALL_OUT_DISMISS =
+  '[data-test-subj="legacy-url-conflict-dismiss-button"]';
+export const CASE_CONFLICT_CALL_OUT_REDIRECT =
+  '[data-test-subj="legacy-url-conflict-go-to-other-button"]';
+
 export const PARTICIPANTS = 1;
 
 export const REPORTER = 0;
