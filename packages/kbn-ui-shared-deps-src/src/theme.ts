@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import LightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { default as v7Light } from '@elastic/eui/dist/eui_theme_light.json';
+import { default as v7Dark } from '@elastic/eui/dist/eui_theme_dark.json';
+import { default as v8Light } from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
+import { default as v8Dark } from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
 
 const globals: any = typeof window === 'undefined' ? {} : window;
 
-export type Theme = typeof LightTheme;
+export type Theme = typeof v7Light | typeof v8Light;
 
 // in the Kibana app we can rely on this global being defined, but in
 // some cases (like jest) the global is undefined
@@ -21,11 +24,11 @@ export const darkMode = tag.endsWith('dark');
 export let euiLightVars: Theme;
 export let euiDarkVars: Theme;
 if (version === 7) {
-  euiLightVars = require('@elastic/eui/dist/eui_theme_light.json');
-  euiDarkVars = require('@elastic/eui/dist/eui_theme_dark.json');
+  euiLightVars = v7Light;
+  euiDarkVars = v7Dark;
 } else {
-  euiLightVars = require('@elastic/eui/dist/eui_theme_amsterdam_light.json');
-  euiDarkVars = require('@elastic/eui/dist/eui_theme_amsterdam_dark.json');
+  euiLightVars = v8Light;
+  euiDarkVars = v8Dark;
 }
 
 /**
