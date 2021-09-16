@@ -127,9 +127,7 @@ class OutputService {
   }
 
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
-    const outputSO = await appContextService
-      .getEncryptedSavedObjects()
-      .getDecryptedAsInternalUser<OutputSOAttributes>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
