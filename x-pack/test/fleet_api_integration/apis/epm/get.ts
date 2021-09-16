@@ -10,6 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -35,6 +36,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('EPM - get', () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     it('returns package info from the registry if it was installed from the registry', async function () {
       // this will install through the registry by default
       await installPackage(testPkgKey);

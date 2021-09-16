@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -36,6 +37,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('datastreams', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
 
     beforeEach(async () => {
       await installPackage(pkgKey);

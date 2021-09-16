@@ -6,12 +6,13 @@
  */
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { warnAndSkipTest } from '../../helpers';
+import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
-  const log = getService('log');
 
   const testPackage = 'prerelease-0.1.0-dev.0+abc';
   const server = dockerServers.get('registry');
@@ -21,6 +22,8 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('installs package that has a prerelease version', async () => {
+    skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
@@ -29,14 +32,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should install the package correctly', async function () {
-      if (server.enabled) {
-        await supertest
-          .post(`/api/fleet/epm/packages/${testPackage}`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
-      } else {
-        warnAndSkipTest(this, log);
-      }
+      await supertest
+        .post(`/api/fleet/epm/packages/${testPackage}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
     });
   });
 }

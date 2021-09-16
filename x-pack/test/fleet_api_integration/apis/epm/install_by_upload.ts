@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -55,6 +56,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('installs packages from direct upload', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     afterEach(async () => {
       if (server) {
         // remove the packages just in case it being installed will affect other tests
