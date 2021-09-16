@@ -4,12 +4,12 @@
 
 Search across the layers in your map to focus on just the data you want. Combine free text search with field-based search using the <<kuery-query,{kib} Query Language>>. Set the time filter to restrict layers by time.
 
-This image shows an example of global search and global time filter narrowing results.
+This image shows an example of global search and global time narrowing results.
 
 [role="screenshot"]
-image::maps/images/global_search_bar.png[global search and filter narrowing results]
+image::maps/images/global_search_bar.png[global search and global time narrowing results]
 
-Only layers requesting data from {es} are narrowed by global search and global time filter.
+Only layers requesting data from {es} are narrowed by global search and global time.
 To add a layer that requests data from {es} to your map, click *Add layer*, then select one of the following:
 
 * Documents
