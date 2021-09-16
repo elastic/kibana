@@ -6881,6 +6881,12 @@
                   "description": "The process id of the monitored kibana instance."
                 }
               },
+              "instanceUuid": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The uuid of the kibana instance."
+                }
+              },
               "fromTimestamp": {
                 "type": "date",
                 "_meta": {

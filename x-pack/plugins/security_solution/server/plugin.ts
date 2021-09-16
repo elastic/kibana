@@ -53,6 +53,7 @@ import {
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
+  createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
@@ -264,9 +265,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       };
 
       this.setupPlugins.alerting.registerType(createEqlAlertType(createRuleOptions));
-      this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createIndicatorMatchAlertType(createRuleOptions));
       this.setupPlugins.alerting.registerType(createMlAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createQueryAlertType(createRuleOptions));
+      this.setupPlugins.alerting.registerType(createThresholdAlertType(createRuleOptions));
     }
 
     // TODO We need to get the endpoint routes inside of initRoutes
