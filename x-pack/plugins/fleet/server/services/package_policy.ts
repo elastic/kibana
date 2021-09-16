@@ -849,6 +849,10 @@ async function _compilePackageStream(
 ) {
   let stream = streamIn;
 
+  if (!stream.enabled) {
+    return { ...stream, compiled_stream: undefined };
+  }
+
   const packageDataStreams = pkgInfo.data_streams;
   if (!packageDataStreams) {
     throw new Error('Stream template not found, no data streams');
@@ -865,10 +869,6 @@ async function _compilePackageStream(
   }
 
   stream = _applyIndexPrivileges(packageDataStream, streamIn);
-
-  if (!stream.enabled) {
-    return { ...streamIn, compiled_stream: undefined };
-  }
 
   const streamFromPkg = (packageDataStream.streams || []).find(
     (pkgStream) => pkgStream.input === input.type
