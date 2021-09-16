@@ -1,0 +1,16 @@
+{
+  "id": "customIntegrations",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "platform",
+    "githubTeam": ""
+  },
+  "description": "test",
+  "ui": true,
+  "server": true,
+  "extraPublicDirs": [
+    "common"
+  ],
+  "optionalPlugins": []
+}

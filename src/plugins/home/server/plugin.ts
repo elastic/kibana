@@ -19,15 +19,18 @@ import { UsageCollectionSetup } from '../../usage_collection/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { sampleDataTelemetry } from './saved_objects';
 import { registerRoutes } from './routes';
+import { CustomIntegrationsPluginSetup } from '../../custom_integrations/server';
 
-interface HomeServerPluginSetupDependencies {
+export interface HomeServerPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
+  customIntegrations: CustomIntegrationsPluginSetup;
 }
 
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
   constructor(private readonly initContext: PluginInitializerContext) {}
   private readonly tutorialsRegistry = new TutorialsRegistry();
   private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
+  private customIntegrations: CustomIntegrationsPluginSetup | undefined = undefined;
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -36,13 +39,17 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     const router = core.http.createRouter();
     registerRoutes(router);
 
+    this.customIntegrations = plugins.customIntegrations;
     return {
-      tutorials: { ...this.tutorialsRegistry.setup(core) },
+      tutorials: { ...this.tutorialsRegistry.setup(core, plugins.customIntegrations) },
       sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usageCollection) },
     };
   }
 
   public start(): HomeServerPluginStart {
+    if (!this.customIntegrations) {
+      throw new Error('Canot start home server. CustomIntegrations plugin missing.');
+    }
     return {
       tutorials: { ...this.tutorialsRegistry.start() },
       sampleData: { ...this.sampleDataRegistry.start() },

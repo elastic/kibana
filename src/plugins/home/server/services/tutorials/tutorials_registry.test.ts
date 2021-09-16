@@ -18,6 +18,7 @@ import {
   TutorialsCategory,
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
+import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
 
 const INVALID_TUTORIAL: TutorialSchema = {
   id: 'test',
@@ -65,6 +66,8 @@ const VALID_TUTORIAL: TutorialSchema = {
 const invalidTutorialProvider = INVALID_TUTORIAL;
 const validTutorialProvider = VALID_TUTORIAL;
 
+const mockCustomIntegrationsPluginSetup = ({} as unknown) as CustomIntegrationsPluginSetup;
+
 describe('TutorialsRegistry', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let testProvider: TutorialProvider;
@@ -83,13 +86,13 @@ describe('TutorialsRegistry', () => {
 
   describe('setup', () => {
     test('exposes proper contract', () => {
-      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      const setup = new TutorialsRegistry().setup(mockCoreSetup, mockCustomIntegrationsPluginSetup);
       expect(setup).toHaveProperty('registerTutorial');
       expect(setup).toHaveProperty('addScopedTutorialContextFactory');
     });
 
     test('registerTutorial throws when registering a tutorial with an invalid schema', () => {
-      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      const setup = new TutorialsRegistry().setup(mockCoreSetup, mockCustomIntegrationsPluginSetup);
       testProvider = ({}) => invalidTutorialProvider;
       expect(() => setup.registerTutorial(testProvider)).toThrowErrorMatchingInlineSnapshot(
         `"Unable to register tutorial spec because its invalid. Error: [name]: is not allowed to be empty"`
@@ -97,13 +100,13 @@ describe('TutorialsRegistry', () => {
     });
 
     test('registerTutorial registers a tutorial with a valid schema', () => {
-      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      const setup = new TutorialsRegistry().setup(mockCoreSetup, mockCustomIntegrationsPluginSetup);
       testProvider = ({}) => validTutorialProvider;
       expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
     });
 
     test('addScopedTutorialContextFactory throws when given a scopedTutorialContextFactory that is not a function', () => {
-      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      const setup = new TutorialsRegistry().setup(mockCoreSetup, mockCustomIntegrationsPluginSetup);
       const testItem = {} as TutorialProvider;
       expect(() =>
         setup.addScopedTutorialContextFactory(testItem)
@@ -113,7 +116,7 @@ describe('TutorialsRegistry', () => {
     });
 
     test('addScopedTutorialContextFactory adds a scopedTutorialContextFactory when given a function', () => {
-      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      const setup = new TutorialsRegistry().setup(mockCoreSetup, mockCustomIntegrationsPluginSetup);
       testScopedTutorialContextFactory = ({}) => 'string';
       expect(() =>
         setup.addScopedTutorialContextFactory(testScopedTutorialContextFactory)
