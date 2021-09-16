@@ -22,8 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/112164
-  describe.only('Discover CSV Export', () => {
+  describe('Discover CSV Export', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
