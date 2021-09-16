@@ -51,7 +51,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
         const object = savedObjects[i];
         const testCase = testCaseArray[i];
         await expectResponses.permitted(object, testCase);
-        // TODO: add assertions for redacted namespaces (this already exists in the bulkCreate test suite)
+        // TODO: add assertions for redacted namespaces (#112455)
       }
     }
   };
