@@ -13,40 +13,52 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { mountWithIntl, getPageTitle } from '../../../../test_helpers';
+import { EuiTab } from '@elastic/eui';
+
+import { mountWithIntl, getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
 
 import { CurationsTable } from '../components';
+import { CurationsValues } from '../curations_logic';
 
 import { Curations } from './curations';
 
 describe('Curations', () => {
-  const values = {
+  const values: CurationsValues = {
     dataLoading: false,
     curations: [
       {
         id: 'cur-id-1',
         last_updated: 'January 1, 1970 at 12:00PM',
         queries: ['hiking'],
+        promoted: [],
+        hidden: [],
+        organic: [],
       },
       {
         id: 'cur-id-2',
         last_updated: 'January 2, 1970 at 12:00PM',
         queries: ['mountains', 'valleys'],
+        promoted: [],
+        hidden: [],
+        organic: [],
       },
     ],
     meta: {
       page: {
         current: 1,
         size: 10,
+        total_pages: 1,
         total_results: 2,
       },
     },
+    selectedPageTab: 'overview',
   };
 
   const actions = {
     loadCurations: jest.fn(),
     deleteCuration: jest.fn(),
     onPaginate: jest.fn(),
+    onSelectPageTab: jest.fn(),
   };
 
   beforeEach(() => {
@@ -55,11 +67,38 @@ describe('Curations', () => {
     setMockActions(actions);
   });
 
-  it('renders', () => {
+  it('renders with a set of tabs in the page header', () => {
     const wrapper = shallow(<Curations />);
 
     expect(getPageTitle(wrapper)).toEqual('Curated results');
+
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    tabs.at(0).simulate('click');
+    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(1, 'overview');
+
+    tabs.at(1).simulate('click');
+    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(2, 'settings');
+  });
+
+  it('renders an overview view', () => {
+    setMockValues({ ...values, selectedPageTab: 'overview' });
+    const wrapper = shallow(<Curations />);
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs.at(0).prop('isSelected')).toEqual(true);
+
     expect(wrapper.find(CurationsTable)).toHaveLength(1);
+  });
+
+  it('renders a settings view', () => {
+    setMockValues({ ...values, selectedPageTab: 'settings' });
+    const wrapper = shallow(<Curations />);
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs.at(1).prop('isSelected')).toEqual(true);
+
+    // There is no currently no content inside the settings tab
   });
 
   describe('loading state', () => {

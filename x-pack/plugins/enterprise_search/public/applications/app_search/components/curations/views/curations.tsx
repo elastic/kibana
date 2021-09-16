@@ -11,6 +11,8 @@ import { useValues, useActions } from 'kea';
 
 import { EuiPanel } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
 import { ENGINE_CURATIONS_NEW_PATH } from '../../../routes';
@@ -23,8 +25,31 @@ import { CurationsLogic } from '../curations_logic';
 import { getCurationsBreadcrumbs } from '../utils';
 
 export const Curations: React.FC = () => {
-  const { dataLoading, curations, meta } = useValues(CurationsLogic);
-  const { loadCurations } = useActions(CurationsLogic);
+  const { dataLoading, curations, meta, selectedPageTab } = useValues(CurationsLogic);
+  const { loadCurations, onSelectPageTab } = useActions(CurationsLogic);
+
+  const pageTabs = [
+    {
+      label: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.engine.curations.overviewPageTabLabel',
+        {
+          defaultMessage: 'Overview',
+        }
+      ),
+      isSelected: selectedPageTab === 'overview',
+      onClick: () => onSelectPageTab('overview'),
+    },
+    {
+      label: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.engine.curations.settingsPageTabLabel',
+        {
+          defaultMessage: 'Settings',
+        }
+      ),
+      isSelected: selectedPageTab === 'settings',
+      onClick: () => onSelectPageTab('settings'),
+    },
+  ];
 
   useEffect(() => {
     loadCurations();
@@ -44,14 +69,17 @@ export const Curations: React.FC = () => {
             {CREATE_NEW_CURATION_TITLE}
           </EuiButtonTo>,
         ],
+        tabs: pageTabs,
       }}
       isLoading={dataLoading && !curations.length}
       isEmptyState={!curations.length}
       emptyState={<EmptyState />}
     >
-      <EuiPanel hasBorder>
-        <CurationsTable />
-      </EuiPanel>
+      {selectedPageTab === 'overview' && (
+        <EuiPanel hasBorder>
+          <CurationsTable />
+        </EuiPanel>
+      )}
     </AppSearchPageTemplate>
   );
 };
