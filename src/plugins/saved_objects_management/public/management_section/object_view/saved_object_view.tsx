@@ -85,12 +85,12 @@ export class SavedObjectEdition extends Component<
       });
   }
 
-  canViewInApp = (capabilities: Capabilities, obj?: SavedObjectWithMetadata<any>) => {
+  canViewInApp(capabilities: Capabilities, obj?: SavedObjectWithMetadata<any>) {
     return obj && obj.meta.inAppUrl
       ? get(capabilities, obj?.meta.inAppUrl?.uiCapabilitiesPath, false) &&
           Boolean(obj?.meta.inAppUrl?.path)
       : false;
-  };
+  }
 
   render() {
     const { capabilities, notFoundType, http, uiSettings, docLinks } = this.props;
@@ -110,6 +110,7 @@ export class SavedObjectEdition extends Component<
               canViewInApp={canView}
               onDeleteClick={() => this.delete()}
               viewUrl={http.basePath.prepend(object?.meta.inAppUrl?.path || '')}
+              title={object?.meta.title}
             />
           </EuiFlexItem>
           {notFoundType && (

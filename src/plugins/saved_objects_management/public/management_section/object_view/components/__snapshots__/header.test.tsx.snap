@@ -21,9 +21,13 @@ exports[`Intro component renders correctly 1`] = `
           size="s"
         >
           <FormattedMessage
-            defaultMessage="View in application"
+            defaultMessage="View {title}"
             id="savedObjectsManagement.view.viewItemButtonLabel"
-            values={Object {}}
+            values={
+              Object {
+                "title": "saved object",
+              }
+            }
           />
         </EuiButton>,
         <EuiButton
@@ -57,9 +61,13 @@ exports[`Intro component renders correctly 1`] = `
               size="s"
             >
               <FormattedMessage
-                defaultMessage="View in application"
+                defaultMessage="View {title}"
                 id="savedObjectsManagement.view.viewItemButtonLabel"
-                values={Object {}}
+                values={
+                  Object {
+                    "title": "saved object",
+                  }
+                }
               />
             </EuiButton>,
             <EuiButton
@@ -184,11 +192,15 @@ exports[`Intro component renders correctly 1`] = `
                                       className="euiButton__text"
                                     >
                                       <FormattedMessage
-                                        defaultMessage="View in application"
+                                        defaultMessage="View {title}"
                                         id="savedObjectsManagement.view.viewItemButtonLabel"
-                                        values={Object {}}
+                                        values={
+                                          Object {
+                                            "title": "saved object",
+                                          }
+                                        }
                                       >
-                                        View in application
+                                        View saved object
                                       </FormattedMessage>
                                     </span>
                                   </span>

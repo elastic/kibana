@@ -16,14 +16,16 @@ interface HeaderProps {
   canViewInApp: boolean;
   viewUrl: string;
   onDeleteClick: () => void;
+  title?: string;
 }
 
-export const Header = ({ canDelete, canViewInApp, viewUrl, onDeleteClick }: HeaderProps) => {
+export const Header = ({ canDelete, canViewInApp, viewUrl, onDeleteClick, title }: HeaderProps) => {
   return (
     <EuiPageHeader
       bottomBorder
-      pageTitle={i18n.translate('savedObjectsManagement.view.inspectTitle', {
-        defaultMessage: 'Inspect saved object',
+      pageTitle={i18n.translate('savedObjectsManagement.view.inspectItemTitle', {
+        defaultMessage: 'Inspect {title}',
+        values: { title: title || 'saved object' },
       })}
       rightSideItems={[
         canViewInApp && (
@@ -35,7 +37,8 @@ export const Header = ({ canDelete, canViewInApp, viewUrl, onDeleteClick }: Head
           >
             <FormattedMessage
               id="savedObjectsManagement.view.viewItemButtonLabel"
-              defaultMessage="View in application"
+              defaultMessage="View {title}"
+              values={{ title: title || 'saved object' }}
             />
           </EuiButton>
         ),

@@ -74,7 +74,7 @@ describe('SavedObjectEdition', () => {
 
     defaultProps = {
       id: '1',
-      savedObjectType: 'index-pattern',
+      savedObjectType: 'dashboard',
       http,
       capabilities: applications.capabilities,
       overlays,
@@ -93,17 +93,16 @@ describe('SavedObjectEdition', () => {
       Promise.resolve([
         {
           id: '1',
-          type: 'index-pattern',
+          type: 'dashboard',
           attributes: {
-            title: `MyIndexPattern*`,
+            title: `MyDashboard*`,
           },
           meta: {
-            title: `MyIndexPattern*`,
-            icon: 'indexPatternApp',
-            editUrl: '#/management/kibana/indexPatterns/patterns/1',
+            title: `MyDashboard*`,
+            icon: 'dashboardApp',
             inAppUrl: {
-              path: '/management/kibana/indexPatterns/patterns/1',
-              uiCapabilitiesPath: 'management.kibana.indexPatterns',
+              path: '/app/dashboards#/view/1',
+              uiCapabilitiesPath: 'management.kibana.dashboard',
             },
           },
         },
@@ -131,7 +130,7 @@ describe('SavedObjectEdition', () => {
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
 
-    expect(notifications.toasts.addDanger).toHaveBeenCalled();
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
   });
 
   it('should add danger toast when bulk get throws', async () => {
@@ -140,7 +139,7 @@ describe('SavedObjectEdition', () => {
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
 
-    expect(notifications.toasts.addDanger).toHaveBeenCalled();
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
   });
 
   it('should pass the correct props to the child components', async () => {

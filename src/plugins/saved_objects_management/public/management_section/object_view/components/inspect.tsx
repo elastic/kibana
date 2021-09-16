@@ -52,7 +52,6 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
         <CodeEditor
           languageId={XJsonLang.ID}
           value={objectAsJsonString}
-          onChange={() => {}}
           aria-label={codeEditorAriaLabel(title)}
           height={'100%'}
           options={{

@@ -29,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('saved objects edition page', () => {
+    debugger;
     beforeEach(async () => {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/edit_saved_object'
@@ -51,8 +52,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       const inspectContainer = await find.byClassName('kibanaCodeEditor');
       const visibleContainerText = await inspectContainer.getVisibleText();
+      debugger;
       // ensure that something renders visibly
       expect(visibleContainerText.includes('A Dashboard'));
+      const textAsJson = JSON.parse(visibleContainerText);
+      expect(Object.keys(textAsJson)).to.eql(['id', 'attributes', 'references', 'type']);
     });
 
     it('allows to delete a saved object', async () => {
