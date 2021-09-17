@@ -7,6 +7,7 @@
 
 import { IndicesAlias, IndicesIndexStatePrefixedSettings } from '@elastic/elasticsearch/api/types';
 import { estypes } from '@elastic/elasticsearch';
+import { asyncForEach } from '@kbn/std';
 import { getIlmPolicy, getIndexTemplate } from './documents';
 import { EsContext } from './context';
 
@@ -56,7 +57,7 @@ class EsInitializationSteps {
       this.esContext.logger.error(`error getting existing index templates - ${err.message}`);
     }
 
-    Object.keys(indexTemplates).forEach(async (indexTemplateName: string) => {
+    asyncForEach(Object.keys(indexTemplates), async (indexTemplateName: string) => {
       try {
         const hidden: string | boolean = indexTemplates[indexTemplateName]?.settings?.index?.hidden;
         // Check to see if this index template is hidden
@@ -93,8 +94,7 @@ class EsInitializationSteps {
       // should not block the rest of initialization, log the error and move on
       this.esContext.logger.error(`error getting existing indices - ${err.message}`);
     }
-
-    Object.keys(indices).forEach(async (indexName: string) => {
+    asyncForEach(Object.keys(indices), async (indexName: string) => {
       try {
         const hidden: string | boolean | undefined = (indices[indexName]
           ?.settings as IndicesIndexStatePrefixedSettings)?.index?.hidden;
@@ -127,7 +127,7 @@ class EsInitializationSteps {
       // should not block the rest of initialization, log the error and move on
       this.esContext.logger.error(`error getting existing index aliases - ${err.message}`);
     }
-    Object.keys(indexAliases).forEach(async (indexName: string) => {
+    asyncForEach(Object.keys(indexAliases), async (indexName: string) => {
       try {
         const aliases = indexAliases[indexName]?.aliases;
         const hasNotHiddenAliases: boolean = Object.keys(aliases).some((alias: string) => {
