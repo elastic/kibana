@@ -40,14 +40,14 @@ export const TEST_CASES = Object.freeze({
     type: 'resolvetype',
     id: 'exact-match',
     expectedNamespaces: EACH_SPACE,
-    expectedOutcome: 'exactMatch' as 'exactMatch',
+    expectedOutcome: 'exactMatch' as const,
     expectedId: 'exact-match',
   }),
   ALIAS_MATCH: Object.freeze({
     type: 'resolvetype',
     id: 'alias-match',
     expectedNamespaces: EACH_SPACE,
-    expectedOutcome: 'aliasMatch' as 'aliasMatch',
+    expectedOutcome: 'aliasMatch' as const,
     expectedId: 'alias-match-newid',
     expectedAliasTargetId: 'alias-match-newid',
   }),
@@ -55,7 +55,7 @@ export const TEST_CASES = Object.freeze({
     type: 'resolvetype',
     id: 'conflict',
     expectedNamespaces: EACH_SPACE,
-    expectedOutcome: 'conflict' as 'conflict', // only in space 1, where the alias exists
+    expectedOutcome: 'conflict' as const, // only in space 1, where the alias exists
     expectedId: 'conflict',
     expectedAliasTargetId: 'conflict-newid',
   }),
@@ -89,6 +89,7 @@ export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
         } else {
           expect(response.body.alias_target_id).to.eql(undefined);
         }
+        // TODO: add assertions for redacted namespaces (#112455)
       }
     }
   };
