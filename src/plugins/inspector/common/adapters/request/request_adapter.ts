@@ -33,14 +33,19 @@ export class RequestAdapter extends EventEmitter {
    * {@link RequestResponder#error}.
    *
    * @param  {string} name The name of this request as it should be shown in the UI.
-   * @param  {object} args Additional arguments for the request.
+   * @param  {RequestParams} params Additional arguments for the request.
+   * @param  {number} [startTime] Set an optional start time for the request
    * @return {RequestResponder} An instance to add information to the request and finish it.
    */
-  public start(name: string, params: RequestParams = {}): RequestResponder {
+  public start(
+    name: string,
+    params: RequestParams = {},
+    startTime: number = Date.now()
+  ): RequestResponder {
     const req: Request = {
       ...params,
       name,
-      startTime: Date.now(),
+      startTime,
       status: RequestStatus.PENDING,
       id: params.id ?? uuid(),
     };

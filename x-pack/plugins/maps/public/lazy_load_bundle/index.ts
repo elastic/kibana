@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 import { AppMountParameters } from 'kibana/public';
 import { IContainer } from '../../../../../src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
@@ -70,36 +69,39 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
     return loadModulesPromise;
   }
 
-  loadModulesPromise = new Promise(async (resolve) => {
-    const {
-      MapEmbeddable,
-      getIndexPatternService,
-      getMapsCapabilities,
-      renderApp,
-      createSecurityLayerDescriptors,
-      registerLayerWizard,
-      registerSource,
-      createTileMapLayerDescriptor,
-      createRegionMapLayerDescriptor,
-      createBasemapLayerDescriptor,
-      createESSearchSourceLayerDescriptor,
-      suggestEMSTermJoinConfig,
-    } = await import('./lazy');
-
-    resolve({
-      MapEmbeddable,
-      getIndexPatternService,
-      getMapsCapabilities,
-      renderApp,
-      createSecurityLayerDescriptors,
-      registerLayerWizard,
-      registerSource,
-      createTileMapLayerDescriptor,
-      createRegionMapLayerDescriptor,
-      createBasemapLayerDescriptor,
-      createESSearchSourceLayerDescriptor,
-      suggestEMSTermJoinConfig,
-    });
+  loadModulesPromise = new Promise(async (resolve, reject) => {
+    try {
+      const {
+        MapEmbeddable,
+        getIndexPatternService,
+        getMapsCapabilities,
+        renderApp,
+        createSecurityLayerDescriptors,
+        registerLayerWizard,
+        registerSource,
+        createTileMapLayerDescriptor,
+        createRegionMapLayerDescriptor,
+        createBasemapLayerDescriptor,
+        createESSearchSourceLayerDescriptor,
+        suggestEMSTermJoinConfig,
+      } = await import('./lazy');
+      resolve({
+        MapEmbeddable,
+        getIndexPatternService,
+        getMapsCapabilities,
+        renderApp,
+        createSecurityLayerDescriptors,
+        registerLayerWizard,
+        registerSource,
+        createTileMapLayerDescriptor,
+        createRegionMapLayerDescriptor,
+        createBasemapLayerDescriptor,
+        createESSearchSourceLayerDescriptor,
+        suggestEMSTermJoinConfig,
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
   return loadModulesPromise;
 }

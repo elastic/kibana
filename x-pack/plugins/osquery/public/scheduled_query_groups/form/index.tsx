@@ -88,7 +88,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     `scheduled_query_groups/${editMode ? defaultValue?.id : ''}`
   );
 
-  const { isLoading, mutateAsync } = useMutation(
+  const { mutateAsync } = useMutation(
     (payload: Record<string, unknown>) =>
       editMode && defaultValue?.id
         ? http.put(packagePolicyRouteService.getUpdatePath(defaultValue.id), {
@@ -248,7 +248,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     ),
   });
 
-  const { setFieldValue, submit } = form;
+  const { setFieldValue, submit, isSubmitting } = form;
 
   const policyIdEuiFieldProps = useMemo(
     () => ({ isDisabled: !!defaultValue, options: agentPolicyOptions }),
@@ -368,7 +368,7 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  isLoading={isLoading}
+                  isLoading={isSubmitting}
                   color="primary"
                   fill
                   size="m"

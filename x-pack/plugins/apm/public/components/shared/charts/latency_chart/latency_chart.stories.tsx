@@ -10,12 +10,13 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_RULE_TYPE_ID,
   ALERT_EVALUATION_VALUE,
-  ALERT_ID,
+  ALERT_INSTANCE_ID,
   ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
+  TIMESTAMP,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
@@ -89,7 +90,7 @@ export default {
       return (
         <ApmPluginContext.Provider value={apmPluginContextMock}>
           <MemoryRouter initialEntries={[`/services/${serviceName}`]}>
-            <Route path="/services/:serviceName">
+            <Route path="/services/{serviceName}">
               <KibanaContextProvider
                 services={{ ...apmPluginContextMock.core }}
               >
@@ -141,8 +142,8 @@ Example.args = {
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
-        '@timestamp': ['2021-06-01T20:27:48.833Z'],
-        [ALERT_ID]: ['apm.transaction_duration_All'],
+        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
+        [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
         [ALERT_EVALUATION_THRESHOLD]: [500000],
         [ALERT_START]: ['2021-06-02T04:00:00.000Z'],
@@ -163,8 +164,8 @@ Example.args = {
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478181'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
-        '@timestamp': ['2021-06-01T20:27:48.833Z'],
-        [ALERT_ID]: ['apm.transaction_duration_All'],
+        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
+        [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
         [ALERT_EVALUATION_THRESHOLD]: [500000],
         [ALERT_START]: ['2021-06-02T10:45:00.000Z'],
@@ -185,8 +186,8 @@ Example.args = {
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478182'],
         [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
-        '@timestamp': ['2021-06-01T20:27:48.833Z'],
-        [ALERT_ID]: ['apm.transaction_duration_All'],
+        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
+        [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
         'processor.event': ['transaction'],
         [ALERT_EVALUATION_THRESHOLD]: [500000],
         [ALERT_START]: ['2021-06-02T16:50:00.000Z'],

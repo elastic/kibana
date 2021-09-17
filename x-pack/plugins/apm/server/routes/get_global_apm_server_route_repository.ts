@@ -33,6 +33,7 @@ import { sourceMapsRouteRepository } from './source_maps';
 import { traceRouteRepository } from './traces';
 import { transactionRouteRepository } from './transactions';
 import { APMRouteHandlerResources } from './typings';
+import { historicalDataRouteRepository } from './historical_data';
 
 const getTypedGlobalApmServerRouteRepository = () => {
   const repository = createApmServerRouteRepository()
@@ -56,7 +57,8 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(sourceMapsRouteRepository)
     .merge(apmFleetRouteRepository)
     .merge(backendsRouteRepository)
-    .merge(fallbackToTransactionsRouteRepository);
+    .merge(fallbackToTransactionsRouteRepository)
+    .merge(historicalDataRouteRepository);
 
   return repository;
 };
@@ -72,10 +74,10 @@ export type APMServerRouteRepository = ReturnType<
 // Ensure no APIs return arrays (or, by proxy, the any type),
 // to guarantee compatibility with _inspect.
 
-type CompositeEndpoint = EndpointOf<APMServerRouteRepository>;
+export type APIEndpoint = EndpointOf<APMServerRouteRepository>;
 
 type EndpointReturnTypes = {
-  [Endpoint in CompositeEndpoint]: ReturnOf<APMServerRouteRepository, Endpoint>;
+  [Endpoint in APIEndpoint]: ReturnOf<APMServerRouteRepository, Endpoint>;
 };
 
 type ArrayLikeReturnTypes = PickByValue<EndpointReturnTypes, any[]>;

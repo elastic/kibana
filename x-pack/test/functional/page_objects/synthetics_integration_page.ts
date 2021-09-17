@@ -205,6 +205,16 @@ export function SyntheticsIntegrationPageProvider({
      */
     async configureRequestBody(testSubj: string, value: string) {
       await testSubjects.click(`syntheticsRequestBodyTab__${testSubj}`);
+      await this.fillCodeEditor(value);
+    },
+
+    /**
+     *
+     * Fills the monaco code editor
+     * @params value {string} value of code input
+     *
+     */
+    async fillCodeEditor(value: string) {
       const codeEditorContainer = await testSubjects.find('codeEditorContainer');
       const textArea = await codeEditorContainer.findByCssSelector('textarea');
       await textArea.clearValue();
@@ -271,6 +281,40 @@ export function SyntheticsIntegrationPageProvider({
       await this.fillTextInputByTestSubj('packagePolicyNameInput', name);
       await this.createBasicMonitorDetails({ name, apmServiceName, tags });
       await this.fillTextInputByTestSubj('syntheticsICMPHostField', host);
+    },
+
+    /**
+     * Creates a basic browser monitor
+     * @params name {string} the name of the monitor
+     * @params zipUrl {string} the zip url of the synthetics suites
+     */
+    async createBasicBrowserMonitorDetails(
+      {
+        name,
+        inlineScript,
+        zipUrl,
+        folder,
+        params,
+        username,
+        password,
+        apmServiceName,
+        tags,
+      }: Record<string, string>,
+      isInline: boolean = false
+    ) {
+      await this.selectMonitorType('browser');
+      await this.fillTextInputByTestSubj('packagePolicyNameInput', name);
+      await this.createBasicMonitorDetails({ name, apmServiceName, tags });
+      if (isInline) {
+        await testSubjects.click('syntheticsSourceTab__inline');
+        await this.fillCodeEditor(inlineScript);
+        return;
+      }
+      await this.fillTextInputByTestSubj('syntheticsBrowserZipUrl', zipUrl);
+      await this.fillTextInputByTestSubj('syntheticsBrowserZipUrlFolder', folder);
+      await this.fillTextInputByTestSubj('syntheticsBrowserZipUrlUsername', username);
+      await this.fillTextInputByTestSubj('syntheticsBrowserZipUrlPassword', password);
+      await this.fillCodeEditor(params);
     },
 
     /**
@@ -375,6 +419,17 @@ export function SyntheticsIntegrationPageProvider({
         const label = await field.findByCssSelector('label');
         await label.click();
       }
+    },
+
+    /**
+     * Configure browser advanced settings
+     * @params name {string} the name of the monitor
+     * @params zipUrl {string} the zip url of the synthetics suites
+     */
+    async configureBrowserAdvancedOptions({ screenshots, syntheticsArgs }: Record<string, string>) {
+      await testSubjects.click('syntheticsBrowserAdvancedFieldsAccordion');
+      await testSubjects.selectValue('syntheticsBrowserScreenshots', screenshots);
+      await this.setComboBox('syntheticsBrowserSyntheticsArgs', syntheticsArgs);
     },
   };
 }

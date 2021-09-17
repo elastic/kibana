@@ -86,8 +86,8 @@ describe('AlertSummaryView', () => {
           return {
             category: 'event',
             field: 'event.code',
-            values: ['malicious_thread'],
-            originalValue: ['malicious_thread'],
+            values: ['shellcode_thread'],
+            originalValue: ['shellcode_thread'],
           };
         }
         return item;

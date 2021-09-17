@@ -36,7 +36,7 @@ interface Alert {
 }
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestAsApmWriteUser');
+  const supertest = getService('legacySupertestAsApmWriteUser');
   const es = getService('es');
 
   const MAX_POLLS = 10;
@@ -398,7 +398,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.alert.evaluation.value": Array [
               50,
             ],
-            "kibana.alert.id": Array [
+            "kibana.alert.instance.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
             "kibana.alert.reason": Array [
@@ -508,7 +508,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.alert.evaluation.value": Array [
               50,
             ],
-            "kibana.alert.id": Array [
+            "kibana.alert.instance.id": Array [
               "apm.transaction_error_rate_opbeans-go_request_ENVIRONMENT_NOT_DEFINED",
             ],
             "kibana.alert.reason": Array [

@@ -61,26 +61,40 @@ export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
+  app?: {
+    search?: number;
+    dashboard?: number;
+    visualization?: number;
+    'canvas workpad'?: number;
+  };
+  layout?: {
+    print?: number;
+    preserve_layout?: number;
+    canvas?: number;
+  };
 }
 
-type BaseJobTypes = 'csv' | 'csv_searchsource' | 'PNG' | 'printable_pdf';
+// FIXME: find a way to get this from exportTypesHandler or common/constants
+type BaseJobTypes =
+  | 'csv'
+  | 'csv_searchsource'
+  | 'csv_searchsource_immediate'
+  | 'PNG'
+  | 'PNGV2'
+  | 'printable_pdf'
+  | 'printable_pdf_v2';
 
 export interface LayoutCounts {
+  canvas: number;
   print: number;
   preserve_layout: number;
 }
 
-type AppNames = 'canvas workpad' | 'dashboard' | 'visualization';
 export type AppCounts = {
-  [A in AppNames]?: number;
+  [A in 'canvas workpad' | 'dashboard' | 'visualization' | 'search']?: number;
 };
 
-export type JobTypes = { [K in BaseJobTypes]: AvailableTotal } & {
-  printable_pdf: AvailableTotal & {
-    app: AppCounts;
-    layout: LayoutCounts;
-  };
-};
+export type JobTypes = { [K in BaseJobTypes]: AvailableTotal };
 
 export type ByAppCounts = { [J in BaseJobTypes]?: AppCounts };
 
@@ -106,8 +120,7 @@ export type ReportingUsageType = RangeStats & {
   last7Days: RangeStats;
 };
 
-export type ExportType = 'csv' | 'csv_searchsource' | 'printable_pdf' | 'PNG';
-export type FeatureAvailabilityMap = { [F in ExportType]: boolean };
+export type FeatureAvailabilityMap = Record<string, boolean>;
 
 export interface ReportingUsageSearchResponse {
   aggregations: {

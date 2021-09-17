@@ -21,7 +21,7 @@ import {
   createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
   caseConnectorMappingsSavedObjectType,
-  caseSavedObjectType,
+  createCaseSavedObjectType,
   caseUserActionSavedObjectType,
   subCaseSavedObjectType,
 } from './saved_object_types';
@@ -32,7 +32,6 @@ import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
-import { RuleRegistryPluginStartContract } from '../../rule_registry/server';
 import { LensServerPluginSetup } from '../../lens/server';
 
 function createConfig(context: PluginInitializerContext) {
@@ -50,7 +49,6 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
-  ruleRegistry?: RuleRegistryPluginStartContract;
 }
 
 /**
@@ -96,7 +94,7 @@ export class CasePlugin {
     );
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
-    core.savedObjects.registerType(caseSavedObjectType);
+    core.savedObjects.registerType(createCaseSavedObjectType(core, this.log));
     core.savedObjects.registerType(caseUserActionSavedObjectType);
 
     this.log.debug(
@@ -139,13 +137,15 @@ export class CasePlugin {
       },
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,
-      ruleRegistryPluginStart: plugins.ruleRegistry,
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
     });
+
+    const client = core.elasticsearch.client;
 
     const getCasesClientWithRequest = async (request: KibanaRequest): Promise<CasesClient> => {
       return this.clientFactory.create({
         request,
+        scopedClusterClient: client.asScoped(request).asCurrentUser,
         savedObjectsService: core.savedObjects,
       });
     };
@@ -171,6 +171,7 @@ export class CasePlugin {
 
           return this.clientFactory.create({
             request,
+            scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
             savedObjectsService: savedObjects,
           });
         },

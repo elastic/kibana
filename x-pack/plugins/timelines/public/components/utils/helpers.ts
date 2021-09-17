@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
+import { getOr, isEmpty, uniqBy } from 'lodash/fp';
 import { BrowserField, BrowserFields, ColumnHeaderOptions } from '../../../common';
-import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../t_grid/body/constants';
+import { defaultHeaders } from '../t_grid/body/column_headers/default_headers';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../t_grid/body/constants';
 
 export const getColumnHeaderFromBrowserField = ({
   browserField,
@@ -39,17 +40,14 @@ export const getColumnsWithTimestamp = ({
   category: string;
 }): ColumnHeaderOptions[] => {
   const emptyFields: Record<string, Partial<BrowserField>> = {};
-  const timestamp = get('base.fields.@timestamp', browserFields);
+  const timestamp = defaultHeaders.find(({ id }) => id === '@timestamp');
   const categoryFields: Array<Partial<BrowserField>> = [
     ...Object.values(getOr(emptyFields, `${category}.fields`, browserFields)),
   ];
 
-  return timestamp != null && categoryFields.length
+  return timestamp != null
     ? uniqBy('id', [
-        getColumnHeaderFromBrowserField({
-          browserField: timestamp,
-          width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
-        }),
+        timestamp,
         ...categoryFields.map((f) => getColumnHeaderFromBrowserField({ browserField: f })),
       ])
     : [];

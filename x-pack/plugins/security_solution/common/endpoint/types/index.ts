@@ -18,6 +18,16 @@ export * from './trusted_apps';
  */
 export interface PolicyDetailsRouteState {
   /**
+   * Override the "back link" displayed at the top-left corner of page with custom routing
+   */
+  backLink?: {
+    /** link label text */
+    label: string;
+    navigateTo: Parameters<ApplicationStart['navigateToApp']>;
+    href?: string;
+  };
+
+  /**
    * Where the user should be redirected to when the `Save` button is clicked and the update was successful
    */
   onSaveNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;

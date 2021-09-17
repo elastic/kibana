@@ -246,6 +246,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         expect(object.id).to.eql(expected.id);
         expect(object.updated_at).to.match(/^[\d-]{10}T[\d:\.]{12}Z$/);
         expect(object.namespaces).to.eql(expectedNamespaces);
+        // TODO: improve assertions for redacted namespaces? (#112455)
         // don't test attributes, version, or references
       }
     }

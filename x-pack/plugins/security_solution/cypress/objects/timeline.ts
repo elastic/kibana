@@ -103,6 +103,7 @@ export const expectedExportedTimelineTemplate = (
     eventNotes: [],
     globalNotes: [],
     pinnedEventIds: [],
+    savedQueryId: timelineTemplateBody.savedQueryId,
   };
 };
 
@@ -137,5 +138,6 @@ export const expectedExportedTimeline = (timelineResponse: Cypress.Response<Time
     eventNotes: [],
     globalNotes: [],
     pinnedEventIds: [],
+    savedQueryId: timelineBody.savedQueryId,
   };
 };

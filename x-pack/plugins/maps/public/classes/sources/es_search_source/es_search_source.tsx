@@ -48,11 +48,10 @@ import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { registerSource } from '../source_registry';
 import {
-  DataMeta,
+  DataRequestMeta,
   ESSearchSourceDescriptor,
   Timeslice,
   VectorSourceRequestMeta,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { TimeRange } from '../../../../../../../src/plugins/data/common';
@@ -73,6 +72,16 @@ import {
   getIsDrawLayer,
   getMatchingIndexes,
 } from './util/feature_edit';
+
+type ESSearchSourceSyncMeta = Pick<
+  ESSearchSourceDescriptor,
+  | 'filterByMapBounds'
+  | 'sortField'
+  | 'sortOrder'
+  | 'scalingType'
+  | 'topHitsSplitField'
+  | 'topHitsSize'
+>;
 
 export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
   const timeRangeBounds = getTimeFilter().calculateBounds(timerange);
@@ -441,15 +450,23 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
   }
 
-  async supportsFeatureEditing(): Promise<boolean> {
+  async getSourceIndexList(): Promise<string[]> {
     await this.getIndexPattern();
     if (!(this.indexPattern && this.indexPattern.title)) {
-      return false;
+      return [];
     }
-    const { matchingIndexes } = await getMatchingIndexes(this.indexPattern.title);
-    if (!matchingIndexes) {
-      return false;
+    let success;
+    let matchingIndexes;
+    try {
+      ({ success, matchingIndexes } = await getMatchingIndexes(this.indexPattern.title));
+    } catch (e) {
+      // Fail silently
     }
+    return success ? matchingIndexes : [];
+  }
+
+  async supportsFeatureEditing(): Promise<boolean> {
+    const matchingIndexes = await this.getSourceIndexList();
     // For now we only support 1:1 index-pattern:index matches
     return matchingIndexes.length === 1;
   }
@@ -706,7 +723,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
+  getSyncMeta(): ESSearchSourceSyncMeta {
     return {
       filterByMapBounds: this._descriptor.filterByMapBounds,
       sortField: this._descriptor.sortField,
@@ -749,17 +766,36 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return MVT_SOURCE_LAYER_NAME;
   }
 
+  async _getEditableIndex(): Promise<string> {
+    const indexList = await this.getSourceIndexList();
+    if (indexList.length === 0) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.indexZeroLengthEditError', {
+          defaultMessage: `Your index pattern doesn't point to any indices.`,
+        })
+      );
+    }
+    if (indexList.length > 1) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.indexOverOneLengthEditError', {
+          defaultMessage: `Your index pattern points to multiple indices. Only one index is allowed per index pattern.`,
+        })
+      );
+    }
+    return indexList[0];
+  }
+
   async addFeature(
     geometry: Geometry | Position[],
     defaultFields: Record<string, Record<string, string>>
   ) {
-    const indexPattern = await this.getIndexPattern();
-    await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName(), defaultFields);
+    const index = await this._getEditableIndex();
+    await addFeatureToIndex(index, geometry, this.getGeoFieldName(), defaultFields);
   }
 
   async deleteFeature(featureId: string) {
-    const indexPattern = await this.getIndexPattern();
-    await deleteFeatureFromIndex(indexPattern.title, featureId);
+    const index = await this._getEditableIndex();
+    await deleteFeatureFromIndex(index, featureId);
   }
 
   async getUrlTemplateWithMeta(
@@ -826,7 +862,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
   }
 
-  getUpdateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
+  getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return true;
     }

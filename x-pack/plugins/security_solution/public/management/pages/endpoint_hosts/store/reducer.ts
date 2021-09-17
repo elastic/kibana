@@ -24,6 +24,7 @@ import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { createUninitialisedResourceState, isUninitialisedResourceState } from '../../../state';
+import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 
 type StateReducer = ImmutableReducer<EndpointState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -172,7 +173,11 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         },
       },
     };
-  } else if (action.type === 'endpointDetailsActivityLogUpdatePaging') {
+  } else if (
+    action.type === 'endpointDetailsActivityLogUpdatePaging' ||
+    action.type === 'endpointDetailsActivityLogUpdateIsInvalidDateRange' ||
+    action.type === 'userUpdatedActivityLogRefreshOptions'
+  ) {
     return {
       ...state,
       endpointDetails: {
@@ -186,7 +191,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         },
       },
     };
-  } else if (action.type === 'endpointDetailsActivityLogUpdateIsInvalidDateRange') {
+  } else if (action.type === 'userUpdatedActivityLogRecentlyUsedDateRanges') {
     return {
       ...state,
       endpointDetails: {
@@ -195,7 +200,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
           ...state.endpointDetails.activityLog,
           paging: {
             ...state.endpointDetails.activityLog.paging,
-            ...action.payload,
+            recentlyUsedDateRanges: action.payload,
           },
         },
       },
@@ -315,9 +320,16 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       logData: createUninitialisedResourceState(),
       paging: {
         disabled: false,
+        isInvalidDateRange: false,
         page: 1,
         pageSize: 50,
-        isInvalidDateRange: false,
+        startDate: 'now-1d',
+        endDate: 'now',
+        autoRefreshOptions: {
+          enabled: false,
+          duration: DEFAULT_POLL_INTERVAL,
+        },
+        recentlyUsedDateRanges: [],
       },
     };
 
@@ -337,7 +349,16 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
           ...stateUpdates,
           endpointDetails: {
             ...state.endpointDetails,
-            activityLog,
+            activityLog: {
+              ...activityLog,
+              paging: {
+                ...activityLog.paging,
+                startDate: state.endpointDetails.activityLog.paging.startDate,
+                endDate: state.endpointDetails.activityLog.paging.endDate,
+                recentlyUsedDateRanges:
+                  state.endpointDetails.activityLog.paging.recentlyUsedDateRanges,
+              },
+            },
             hostDetails: {
               ...state.endpointDetails.hostDetails,
               detailsError: undefined,
@@ -355,7 +376,16 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
           ...stateUpdates,
           endpointDetails: {
             ...state.endpointDetails,
-            activityLog,
+            activityLog: {
+              ...activityLog,
+              paging: {
+                ...activityLog.paging,
+                startDate: state.endpointDetails.activityLog.paging.startDate,
+                endDate: state.endpointDetails.activityLog.paging.endDate,
+                recentlyUsedDateRanges:
+                  state.endpointDetails.activityLog.paging.recentlyUsedDateRanges,
+              },
+            },
             hostDetails: {
               ...state.endpointDetails.hostDetails,
               detailsLoading: !isNotLoadingDetails,
@@ -372,7 +402,16 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
           ...stateUpdates,
           endpointDetails: {
             ...state.endpointDetails,
-            activityLog,
+            activityLog: {
+              ...activityLog,
+              paging: {
+                ...activityLog.paging,
+                startDate: state.endpointDetails.activityLog.paging.startDate,
+                endDate: state.endpointDetails.activityLog.paging.endDate,
+                recentlyUsedDateRanges:
+                  state.endpointDetails.activityLog.paging.recentlyUsedDateRanges,
+              },
+            },
             hostDetails: {
               ...state.endpointDetails.hostDetails,
               detailsLoading: true,
@@ -391,7 +430,15 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       ...stateUpdates,
       endpointDetails: {
         ...state.endpointDetails,
-        activityLog,
+        activityLog: {
+          ...activityLog,
+          paging: {
+            ...activityLog.paging,
+            startDate: state.endpointDetails.activityLog.paging.startDate,
+            endDate: state.endpointDetails.activityLog.paging.endDate,
+            recentlyUsedDateRanges: state.endpointDetails.activityLog.paging.recentlyUsedDateRanges,
+          },
+        },
         hostDetails: {
           ...state.endpointDetails.hostDetails,
           detailsError: undefined,

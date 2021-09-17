@@ -125,13 +125,12 @@ describe('Exceptions Table', () => {
     exportExceptionList();
 
     cy.wait('@export').then(({ response }) =>
-      cy
-        .get('@exceptionListResponse')
-        .then((exceptionListResponse) =>
-          cy
-            .wrap(response.body!)
-            .should('eql', expectedExportedExceptionList(exceptionListResponse))
-        )
+      cy.get('@exceptionListResponse').then((exceptionListResponse) =>
+        cy
+          .wrap(response?.body!)
+          // @ts-expect-error
+          .should('eql', expectedExportedExceptionList(exceptionListResponse))
+      )
     );
   });
 

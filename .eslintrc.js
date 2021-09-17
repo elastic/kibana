@@ -1492,7 +1492,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps/src/flot_charts/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps-src/src/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1654,6 +1654,25 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
+      },
+    },
+
+    /**
+     * Disallow `export *` syntax in plugin/core public/server/common index files and instead
+     * require that plugins/core explicitly export the APIs that should be accessible outside the plugin.
+     *
+     * To add your plugin to this list just update the relevant glob with the name of your plugin
+     */
+    {
+      files: [
+        'src/core/{server,public,common}/index.ts',
+        'src/plugins/*/{server,public,common}/index.ts',
+        'src/plugins/*/*/{server,public,common}/index.ts',
+        'x-pack/plugins/*/{server,public,common}/index.ts',
+        'x-pack/plugins/*/*/{server,public,common}/index.ts',
+      ],
+      rules: {
+        '@kbn/eslint/no_export_all': 'error',
       },
     },
   ],
