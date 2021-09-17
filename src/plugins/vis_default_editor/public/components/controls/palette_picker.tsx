@@ -12,6 +12,8 @@ import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elast
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+const DEFAULT_PALETTE = 'default';
+
 export interface PalettePickerProps<ParamName extends string> {
   activePalette?: PaletteOutput;
   palettes: PaletteRegistry;
@@ -56,10 +58,10 @@ export function PalettePicker<ParamName extends string>({
           const palette = palettesList.find((item) => item.value === newPalette);
           setPalette(paramName, {
             type: 'palette',
-            name: palette?.value ?? 'clear',
+            name: palette?.value ?? DEFAULT_PALETTE,
           });
         }}
-        valueOfSelected={activePalette?.name || 'default'}
+        valueOfSelected={activePalette?.name || DEFAULT_PALETTE}
         selectionDisplay={'palette'}
       />
     </EuiFormRow>
