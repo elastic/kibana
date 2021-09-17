@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -60,8 +59,8 @@ const i18nTexts = {
       defaultMessage:
         'To be able to analyze deprecataion logs, you must have {privilegesCount, plural, one {this index privilege} other {these index privileges}}: {missingPrivileges}',
       values: {
-        missingPrivileges: privilegesMissing?.index!.join(', '),
-        privilegesCount: privilegesMissing?.index!.length,
+        missingPrivileges: privilegesMissing?.index?.join(', '),
+        privilegesCount: privilegesMissing?.index?.length,
       },
     }),
 };
