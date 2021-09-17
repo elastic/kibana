@@ -13,10 +13,12 @@ export const wrapSequencesFactory = ({
   ruleSO,
   signalsIndex,
   mergeStrategy,
+  ignoreFields,
 }: {
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   signalsIndex: string;
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  ignoreFields: ConfigType['alertIgnoreFields'];
 }): WrapSequences => (sequences, buildReasonMessage) =>
   sequences.reduce(
     (acc: WrappedSignalHit[], sequence) => [
@@ -26,6 +28,7 @@ export const wrapSequencesFactory = ({
         ruleSO,
         signalsIndex,
         mergeStrategy,
+        ignoreFields,
         buildReasonMessage
       ),
     ],

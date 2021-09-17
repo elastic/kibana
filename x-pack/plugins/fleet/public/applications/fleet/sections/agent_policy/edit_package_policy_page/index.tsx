@@ -9,6 +9,7 @@ import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { safeLoad } from 'js-yaml';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -24,6 +25,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -201,7 +203,9 @@ export const EditPackagePolicyForm = memo<{
 
             if (packageData?.response) {
               setPackageInfo(packageData.response);
-              setValidationResults(validatePackagePolicy(newPackagePolicy, packageData.response));
+              setValidationResults(
+                validatePackagePolicy(newPackagePolicy, packageData.response, safeLoad)
+              );
               setFormState('VALID');
             }
           }
@@ -239,7 +243,8 @@ export const EditPackagePolicyForm = memo<{
       if (packageInfo) {
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
-          packageInfo
+          packageInfo,
+          safeLoad
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
@@ -506,93 +511,95 @@ export const EditPackagePolicyForm = memo<{
 
   return (
     <CreatePackagePolicyPageLayout {...layoutProps} data-test-subj="editPackagePolicy">
-      {isLoadingData ? (
-        <Loading />
-      ) : loadingError || !agentPolicy || !packageInfo ? (
-        <Error
-          title={
-            <FormattedMessage
-              id="xpack.fleet.editPackagePolicy.errorLoadingDataTitle"
-              defaultMessage="Error loading data"
-            />
-          }
-          error={
-            loadingError ||
-            i18n.translate('xpack.fleet.editPackagePolicy.errorLoadingDataMessage', {
-              defaultMessage: 'There was an error loading this integration information',
-            })
-          }
-        />
-      ) : (
-        <>
-          <Breadcrumb
-            agentPolicyName={agentPolicy.name}
-            from={from}
-            packagePolicyName={packagePolicy.name}
-            pkgkey={pkgKeyFromPackageInfo(packageInfo)}
-            pkgTitle={packageInfo.title}
-            policyId={policyId}
+      <EuiErrorBoundary>
+        {isLoadingData ? (
+          <Loading />
+        ) : loadingError || !agentPolicy || !packageInfo ? (
+          <Error
+            title={
+              <FormattedMessage
+                id="xpack.fleet.editPackagePolicy.errorLoadingDataTitle"
+                defaultMessage="Error loading data"
+              />
+            }
+            error={
+              loadingError ||
+              i18n.translate('xpack.fleet.editPackagePolicy.errorLoadingDataMessage', {
+                defaultMessage: 'There was an error loading this integration information',
+              })
+            }
           />
-          {formState === 'CONFIRM' && (
-            <ConfirmDeployAgentPolicyModal
-              agentCount={agentCount}
-              agentPolicy={agentPolicy}
-              onConfirm={onSubmit}
-              onCancel={() => setFormState('VALID')}
+        ) : (
+          <>
+            <Breadcrumb
+              agentPolicyName={agentPolicy.name}
+              from={from}
+              packagePolicyName={packagePolicy.name}
+              pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+              pkgTitle={packageInfo.title}
+              policyId={policyId}
             />
-          )}
-          {isUpgrade && dryRunData && (
-            <>
-              <UpgradeStatusCallout dryRunData={dryRunData} />
-              <EuiSpacer size="xxl" />
-            </>
-          )}
-          {configurePackage}
-          {/* Extra space to accomodate the EuiBottomBar height */}
-          <EuiSpacer size="xxl" />
-          <EuiSpacer size="xxl" />
-          <EuiBottomBar>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                {agentPolicy && packageInfo && formState === 'INVALID' ? (
-                  <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.errorOnSaveText"
-                    defaultMessage="Your integration policy has errors. Please fix them before saving."
-                  />
-                ) : null}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty color="ghost" href={cancelUrl}>
-                      <FormattedMessage
-                        id="xpack.fleet.editPackagePolicy.cancelButton"
-                        defaultMessage="Cancel"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={onSubmit}
-                      isLoading={formState === 'LOADING'}
-                      disabled={formState !== 'VALID'}
-                      iconType="save"
-                      color="primary"
-                      fill
-                      data-test-subj="saveIntegration"
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.editPackagePolicy.saveButton"
-                        defaultMessage="Save integration"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiBottomBar>
-        </>
-      )}
+            {formState === 'CONFIRM' && (
+              <ConfirmDeployAgentPolicyModal
+                agentCount={agentCount}
+                agentPolicy={agentPolicy}
+                onConfirm={onSubmit}
+                onCancel={() => setFormState('VALID')}
+              />
+            )}
+            {isUpgrade && dryRunData && (
+              <>
+                <UpgradeStatusCallout dryRunData={dryRunData} />
+                <EuiSpacer size="xxl" />
+              </>
+            )}
+            {configurePackage}
+            {/* Extra space to accomodate the EuiBottomBar height */}
+            <EuiSpacer size="xxl" />
+            <EuiSpacer size="xxl" />
+            <EuiBottomBar>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  {agentPolicy && packageInfo && formState === 'INVALID' ? (
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.errorOnSaveText"
+                      defaultMessage="Your integration policy has errors. Please fix them before saving."
+                    />
+                  ) : null}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty color="ghost" href={cancelUrl}>
+                        <FormattedMessage
+                          id="xpack.fleet.editPackagePolicy.cancelButton"
+                          defaultMessage="Cancel"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        onClick={onSubmit}
+                        isLoading={formState === 'LOADING'}
+                        disabled={formState !== 'VALID'}
+                        iconType="save"
+                        color="primary"
+                        fill
+                        data-test-subj="saveIntegration"
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.editPackagePolicy.saveButton"
+                          defaultMessage="Save integration"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiBottomBar>
+          </>
+        )}
+      </EuiErrorBoundary>
     </CreatePackagePolicyPageLayout>
   );
 });

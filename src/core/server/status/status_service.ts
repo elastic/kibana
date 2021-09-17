@@ -20,6 +20,7 @@ import { PluginName } from '../plugins';
 import { InternalMetricsServiceSetup } from '../metrics';
 import { registerStatusRoute } from './routes';
 import { InternalEnvironmentServiceSetup } from '../environment';
+import type { InternalCoreUsageDataSetup } from '../core_usage_data';
 
 import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
@@ -38,6 +39,7 @@ interface SetupDeps {
   http: InternalHttpServiceSetup;
   metrics: InternalMetricsServiceSetup;
   savedObjects: Pick<InternalSavedObjectsServiceSetup, 'status$'>;
+  coreUsageData: Pick<InternalCoreUsageDataSetup, 'incrementUsageCounter'>;
 }
 
 export class StatusService implements CoreService<InternalStatusServiceSetup> {
@@ -61,6 +63,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     metrics,
     savedObjects,
     environment,
+    coreUsageData,
   }: SetupDeps) {
     const statusConfig = await this.config$.pipe(take(1)).toPromise();
     const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
@@ -101,6 +104,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         plugins$: this.pluginsStatus.getAll$(),
         core$,
       },
+      incrementUsageCounter: coreUsageData.incrementUsageCounter,
     };
 
     const router = http.createRouter('');

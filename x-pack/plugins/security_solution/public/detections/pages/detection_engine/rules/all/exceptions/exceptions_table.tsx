@@ -7,6 +7,7 @@
 
 import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import {
+  CriteriaWithPagination,
   EuiBasicTable,
   EuiEmptyPrompt,
   EuiLoadingContent,
@@ -37,6 +38,7 @@ import { SecurityPageName } from '../../../../../../../common/constants';
 import { useUserData } from '../../../../../components/user_info';
 import { userHasPermissions } from '../../helpers';
 import { useListsConfig } from '../../../../../containers/detection_engine/lists/use_lists_config';
+import { ExceptionsTableItem } from './types';
 
 export type Func = () => Promise<void>;
 
@@ -74,7 +76,13 @@ export const ExceptionListsTable = React.memo(() => {
     exceptionReferenceModalInitialState
   );
   const [filters, setFilters] = useState<ExceptionListFilter | undefined>(undefined);
-  const [loadingExceptions, exceptions, pagination, refreshExceptions] = useExceptionLists({
+  const [
+    loadingExceptions,
+    exceptions,
+    pagination,
+    setPagination,
+    refreshExceptions,
+  ] = useExceptionLists({
     errorMessage: i18n.ERROR_EXCEPTION_LISTS,
     filterOptions: filters,
     http,
@@ -125,7 +133,7 @@ export const ExceptionListsTable = React.memo(() => {
       try {
         setDeletingListIds((ids) => [...ids, id]);
         if (refreshExceptions != null) {
-          await refreshExceptions();
+          refreshExceptions();
         }
 
         if (exceptionsListsRef[id] != null && exceptionsListsRef[id].rules.length === 0) {
@@ -153,7 +161,7 @@ export const ExceptionListsTable = React.memo(() => {
       } catch (error) {
         handleDeleteError(error);
       } finally {
-        setDeletingListIds((ids) => [...ids.filter((_id) => _id !== id)]);
+        setDeletingListIds((ids) => ids.filter((_id) => _id !== id));
       }
     },
     [
@@ -326,11 +334,27 @@ export const ExceptionListsTable = React.memo(() => {
     setExportDownload({});
   }, []);
 
-  const tableItems = (exceptionListsWithRuleRefs ?? []).map((item) => ({
-    ...item,
-    isDeleting: deletingListIds.includes(item.id),
-    isExporting: exportingListIds.includes(item.id),
-  }));
+  const tableItems = useMemo<ExceptionsTableItem[]>(
+    () =>
+      (exceptionListsWithRuleRefs ?? []).map((item) => ({
+        ...item,
+        isDeleting: deletingListIds.includes(item.id),
+        isExporting: exportingListIds.includes(item.id),
+      })),
+    [deletingListIds, exceptionListsWithRuleRefs, exportingListIds]
+  );
+
+  const handlePaginationChange = useCallback(
+    (criteria: CriteriaWithPagination<ExceptionsTableItem>) => {
+      const { index, size } = criteria.page;
+      setPagination((currentPagination) => ({
+        ...currentPagination,
+        perPage: size,
+        page: index + 1,
+      }));
+    },
+    [setPagination]
+  );
 
   return (
     <>
@@ -367,14 +391,14 @@ export const ExceptionListsTable = React.memo(() => {
                 numberSelectedItems={0}
                 onRefresh={handleRefresh}
               />
-              <EuiBasicTable
+              <EuiBasicTable<ExceptionsTableItem>
                 data-test-subj="exceptions-table"
                 columns={exceptionsColumns}
                 isSelectable={hasPermissions}
                 itemId="id"
                 items={tableItems}
                 noItemsMessage={emptyPrompt}
-                onChange={() => {}}
+                onChange={handlePaginationChange}
                 pagination={paginationMemo}
               />
             </>
@@ -400,3 +424,5 @@ export const ExceptionListsTable = React.memo(() => {
     </>
   );
 });
+
+ExceptionListsTable.displayName = 'ExceptionListsTable';

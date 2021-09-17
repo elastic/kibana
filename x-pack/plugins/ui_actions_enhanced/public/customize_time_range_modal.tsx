@@ -74,7 +74,7 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
     const parent = embeddable.parent as IContainer<{}, ContainerInput<TimeRangeInput>>;
     const parentPanels = parent!.getInput().panels;
 
-    // Remove any explicit input to this child from the parent.
+    // Remove explicit input to this child from the parent.
     parent!.updateInput({
       panels: {
         ...parentPanels,

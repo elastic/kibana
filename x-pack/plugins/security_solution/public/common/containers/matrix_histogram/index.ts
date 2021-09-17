@@ -19,6 +19,7 @@ import {
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
+  MatrixHistogramTypeToAggName,
 } from '../../../../common/search_strategy/security_solution';
 import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
@@ -132,8 +133,8 @@ export const useMatrixHistogram = ({
               if (isCompleteResponse(response)) {
                 const histogramBuckets: Buckets = getOr(
                   bucketEmpty,
-                  'rawResponse.aggregations.eventActionGroup.buckets',
-                  response
+                  MatrixHistogramTypeToAggName[histogramType],
+                  response.rawResponse
                 );
                 setLoading(false);
                 setMatrixHistogramResponse((prevResponse) => ({
@@ -141,7 +142,7 @@ export const useMatrixHistogram = ({
                   data: response.matrixHistogramData,
                   inspect: getInspectResponse(response, prevResponse.inspect),
                   refetch: refetch.current,
-                  totalCount: response.totalCount,
+                  totalCount: histogramBuckets.reduce((acc, bucket) => bucket.doc_count + acc, 0),
                   buckets: histogramBuckets,
                 }));
                 searchSubscription$.current.unsubscribe();
@@ -165,7 +166,7 @@ export const useMatrixHistogram = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, errorMessage, addError, addWarning]
+    [data.search, errorMessage, addError, addWarning, histogramType]
   );
 
   useEffect(() => {

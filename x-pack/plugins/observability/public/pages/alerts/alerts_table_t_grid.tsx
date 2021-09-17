@@ -254,6 +254,7 @@ function ObservabilityActions({
             iconType="expand"
             color="text"
             onClick={() => setFlyoutAlert(alert)}
+            data-test-subj="openFlyoutButton"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -276,6 +277,7 @@ function ObservabilityActions({
                   iconType="boxesHorizontal"
                   aria-label="More"
                   onClick={() => toggleActionsPopover(eventId)}
+                  data-test-subj="alerts-table-row-action-more"
                 />
               }
               isOpen={openActionsPopoverId === eventId}

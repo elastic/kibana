@@ -7,7 +7,7 @@
 
 import chroma from 'chroma-js';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { isColorDark } from '@elastic/eui';
 import type { Datatable } from 'src/plugins/expressions/public';
 import {
@@ -269,11 +269,10 @@ export function getColorStops(
   palettes: PaletteRegistry,
   colorStops: Required<CustomPaletteParams>['stops'],
   activePalette: PaletteOutput<CustomPaletteParams>,
-  dataBounds: { min: number; max: number },
-  defaultPalette?: string
+  dataBounds: { min: number; max: number }
 ) {
   // just forward the current stops if custom
-  if (activePalette?.name === CUSTOM_PALETTE) {
+  if (activePalette?.name === CUSTOM_PALETTE && colorStops?.length) {
     return colorStops;
   }
   // for predefined palettes create some stops, then drop the last one.

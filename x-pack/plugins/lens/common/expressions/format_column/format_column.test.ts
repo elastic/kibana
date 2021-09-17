@@ -10,7 +10,9 @@ import { functionWrapper } from 'src/plugins/expressions/common/expression_funct
 import { FormatColumnArgs, formatColumn } from './index';
 
 describe('format_column', () => {
-  const fn: (input: Datatable, args: FormatColumnArgs) => Datatable = functionWrapper(formatColumn);
+  const fn: (input: Datatable, args: FormatColumnArgs) => Promise<Datatable> = functionWrapper(
+    formatColumn
+  );
 
   let datatable: Datatable;
 
@@ -33,17 +35,17 @@ describe('format_column', () => {
     };
   });
 
-  it('overwrites format', () => {
+  it('overwrites format', async () => {
     datatable.columns[0].meta.params = { id: 'myformatter', params: {} };
-    const result = fn(datatable, { columnId: 'test', format: 'otherformatter' });
+    const result = await fn(datatable, { columnId: 'test', format: 'otherformatter' });
     expect(result.columns[0].meta.params).toEqual({
       id: 'otherformatter',
     });
   });
 
-  it('overwrites format with well known pattern', () => {
+  it('overwrites format with well known pattern', async () => {
     datatable.columns[0].meta.params = { id: 'myformatter', params: {} };
-    const result = fn(datatable, { columnId: 'test', format: 'number' });
+    const result = await fn(datatable, { columnId: 'test', format: 'number' });
     expect(result.columns[0].meta.params).toEqual({
       id: 'number',
       params: {
@@ -52,9 +54,9 @@ describe('format_column', () => {
     });
   });
 
-  it('uses number of decimals if provided', () => {
+  it('uses number of decimals if provided', async () => {
     datatable.columns[0].meta.params = { id: 'myformatter', params: {} };
-    const result = fn(datatable, { columnId: 'test', format: 'number', decimals: 5 });
+    const result = await fn(datatable, { columnId: 'test', format: 'number', decimals: 5 });
     expect(result.columns[0].meta.params).toEqual({
       id: 'number',
       params: {
@@ -63,9 +65,9 @@ describe('format_column', () => {
     });
   });
 
-  it('has special handling for 0 decimals', () => {
+  it('has special handling for 0 decimals', async () => {
     datatable.columns[0].meta.params = { id: 'myformatter', params: {} };
-    const result = fn(datatable, { columnId: 'test', format: 'number', decimals: 0 });
+    const result = await fn(datatable, { columnId: 'test', format: 'number', decimals: 0 });
     expect(result.columns[0].meta.params).toEqual({
       id: 'number',
       params: {
@@ -75,8 +77,8 @@ describe('format_column', () => {
   });
 
   describe('parent format', () => {
-    it('should ignore parent format if it is not specifying an id', () => {
-      const result = fn(datatable, {
+    it('should ignore parent format if it is not specifying an id', async () => {
+      const result = await fn(datatable, {
         columnId: 'test',
         format: '',
         parentFormat: JSON.stringify({ some: 'key' }),
@@ -84,8 +86,8 @@ describe('format_column', () => {
       expect(result.columns[0].meta.params).toEqual(datatable.columns[0].meta.params);
     });
 
-    it('set parent format with params', () => {
-      const result = fn(datatable, {
+    it('set parent format with params', async () => {
+      const result = await fn(datatable, {
         columnId: 'test',
         format: '',
         parentFormat: JSON.stringify({ id: 'wrapper', params: { wrapperParam: 123 } }),
@@ -99,9 +101,9 @@ describe('format_column', () => {
       });
     });
 
-    it('retain inner formatter params', () => {
+    it('retain inner formatter params', async () => {
       datatable.columns[0].meta.params = { id: 'myformatter', params: { innerParam: 456 } };
-      const result = fn(datatable, {
+      const result = await fn(datatable, {
         columnId: 'test',
         format: '',
         parentFormat: JSON.stringify({ id: 'wrapper', params: { wrapperParam: 123 } }),
@@ -118,12 +120,12 @@ describe('format_column', () => {
       });
     });
 
-    it('overwrite existing wrapper param', () => {
+    it('overwrite existing wrapper param', async () => {
       datatable.columns[0].meta.params = {
         id: 'wrapper',
         params: { wrapperParam: 0, id: 'myformatter', params: { innerParam: 456 } },
       };
-      const result = fn(datatable, {
+      const result = await fn(datatable, {
         columnId: 'test',
         format: '',
         parentFormat: JSON.stringify({ id: 'wrapper', params: { wrapperParam: 123 } }),
@@ -140,12 +142,12 @@ describe('format_column', () => {
       });
     });
 
-    it('overwrites format with well known pattern including decimals', () => {
+    it('overwrites format with well known pattern including decimals', async () => {
       datatable.columns[0].meta.params = {
         id: 'previousWrapper',
         params: { id: 'myformatter', params: { innerParam: 456 } },
       };
-      const result = fn(datatable, {
+      const result = await fn(datatable, {
         columnId: 'test',
         format: 'number',
         decimals: 5,
@@ -164,10 +166,10 @@ describe('format_column', () => {
     });
   });
 
-  it('does not touch other column meta data', () => {
+  it('does not touch other column meta data', async () => {
     const extraColumn: DatatableColumn = { id: 'test2', name: 'test2', meta: { type: 'number' } };
     datatable.columns.push(extraColumn);
-    const result = fn(datatable, { columnId: 'test', format: 'number' });
+    const result = await fn(datatable, { columnId: 'test', format: 'number' });
     expect(result.columns[1]).toEqual(extraColumn);
   });
 });

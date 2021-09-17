@@ -9,6 +9,7 @@
 import React, { Fragment, useContext, useEffect } from 'react';
 import themeLight from '@elastic/eui/dist/eui_theme_light.json';
 import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
+import type { IndexPattern } from 'src/plugins/data/common';
 
 import {
   EuiDataGridCellValueElementProps,
@@ -16,7 +17,6 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { IndexPattern } from '../../../kibana_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
@@ -89,7 +89,7 @@ export const getRenderCellValueFn = (
         : undefined;
       const formatter = subField
         ? indexPattern.getFormatterForField(subField)
-        : { convert: (v: string, ...rest: unknown[]) => String(v) };
+        : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
       const formatted = (values as unknown[])
         .map((val: unknown) =>
           formatter.convert(val, 'html', {
@@ -110,6 +110,9 @@ export const getRenderCellValueFn = (
     });
 
     return (
+      // If you change the styling of this list (specifically something that will change the line-height)
+      // make sure to adjust the img overwrites attached to dscDiscoverGrid__descriptionListDescription
+      // in discover_grid.scss
       <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
         {[...highlightPairs, ...sourcePairs].slice(0, maxDocFieldsDisplayed).map(([key, value]) => (
           <Fragment key={key}>
