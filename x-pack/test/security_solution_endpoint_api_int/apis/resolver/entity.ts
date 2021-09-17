@@ -40,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             // this value is from the es archive
             id: '{98da333e-2060-5fc9-2e01-000000003f00}',
+            originTimestamp: '2020-12-03T17:29:04.675Z',
           },
         ]);
       });
