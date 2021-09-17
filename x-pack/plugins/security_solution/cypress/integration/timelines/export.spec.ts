@@ -34,9 +34,8 @@ describe('Export timelines', () => {
 
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response!.statusCode).should('eql', 200);
-      const parsedExport = JSON.parse(_.trimEnd(response!.body, '\n'));
 
-      cy.wrap(parsedExport).should('eql', expectedExportedTimeline(this.timelineResponse));
+      cy.wrap(response!.body).should('eql', expectedExportedTimeline(this.timelineResponse));
     });
   });
 });

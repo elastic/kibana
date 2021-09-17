@@ -66,6 +66,9 @@ describe('Exceptions Table', () => {
     addsExceptionFromRuleSettings(getException());
     waitForTheRuleToBeExecuted();
 
+    // Create exception list not used by any rules
+    createExceptionList(getExceptionList(), getExceptionList().list_id).as('exceptionListResponse');
+
     goBackToAllRulesTable();
     waitForRulesTableToBeLoaded();
   });
@@ -114,9 +117,6 @@ describe('Exceptions Table', () => {
   });
 
   it('Exports exception list', () => {
-    // Create exception list not used by any rules
-    createExceptionList(getExceptionList()).as('exceptionListResponse');
-
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
     waitForPageWithoutDateRange(EXCEPTIONS_URL);
@@ -125,12 +125,9 @@ describe('Exceptions Table', () => {
     exportExceptionList();
 
     cy.wait('@export').then(({ response }) =>
-      cy.get('@exceptionListResponse').then((exceptionListResponse) =>
-        cy
-          .wrap(response?.body!)
-          // @ts-expect-error
-          .should('eql', expectedExportedExceptionList(exceptionListResponse))
-      )
+      cy
+        .wrap(decodeURI(response?.body!), { timeout: 1000 })
+        .should('eql', expectedExportedExceptionList(this.exceptionListResponse))
     );
   });
 
