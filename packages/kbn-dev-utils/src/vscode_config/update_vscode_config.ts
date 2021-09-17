@@ -225,6 +225,7 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, j
     ...(ast.leadingComments ?? [])?.filter((c) => !c.value.includes('@managed')),
   ];
 
+  // @ts-ignore
   return Prettier.format(generate(ast).code, {
     endOfLine: 'auto',
     filepath: 'settings.json',

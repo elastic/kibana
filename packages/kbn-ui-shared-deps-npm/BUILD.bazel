@@ -31,6 +31,7 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/elastic-datemath",
   "//packages/kbn-utils",
+  "@npm//@babel/runtime",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",

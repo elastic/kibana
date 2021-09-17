@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-const babelJest = require('babel-jest');
-
-module.exports = babelJest.createTransformer({
+module.exports = require('babel-jest').createTransformer({
   presets: [
     [
       require.resolve('@kbn/babel-preset/node_preset'),
