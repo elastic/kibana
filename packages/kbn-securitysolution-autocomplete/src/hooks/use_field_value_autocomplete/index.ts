@@ -9,7 +9,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import { IndexPatternBase, IndexPatternFieldBase, IFieldSubTypeNested } from '@kbn/es-query';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { AutocompleteStart } from '../../../../../../../../src/plugins/data/public';
@@ -69,11 +69,12 @@ export const useFieldValueAutocomplete = ({
 
             setIsLoading(true);
 
+            const subTypeNested = fieldSelected?.subType as IFieldSubTypeNested;
             const field =
-              fieldSelected.subType != null && fieldSelected.subType.nested != null
+              subTypeNested != null && subTypeNested.nested != null
                 ? {
                     ...fieldSelected,
-                    name: `${fieldSelected.subType.nested.path}.${fieldSelected.name}`,
+                    name: `${subTypeNested.nested.path}.${fieldSelected.name}`,
                   }
                 : fieldSelected;
 
