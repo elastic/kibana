@@ -7,11 +7,9 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { FieldFormatsStart } from '../../../field_formats/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../../visualizations/public';
-import { ChartsPluginSetup, ChartsPluginStart } from '../../../charts/public';
-import { DataPublicPluginStart } from '../../../data/public';
+import { VisualizationsSetup } from '../../../visualizations/public';
+import { ChartsPluginSetup } from '../../../charts/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { setPalettesService, setTrackUiMetric } from './services';
 
@@ -30,27 +28,11 @@ export interface VisTypeXyPluginSetupDependencies {
   usageCollection: UsageCollectionSetup;
 }
 
-/** @internal */
-export interface VisTypeXyPluginStartDependencies {
-  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
-
-  visualizations: VisualizationsStart;
-  data: DataPublicPluginStart;
-  charts: ChartsPluginStart;
-  fieldFormats: FieldFormatsStart;
-}
-
-type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies, VisTypeXyPluginStart>;
+type VisTypeXyCoreSetup = CoreSetup<{}, VisTypeXyPluginStart>;
 
 /** @internal */
 export class VisTypeXyPlugin
-  implements
-    Plugin<
-      VisTypeXyPluginSetup,
-      VisTypeXyPluginStart,
-      VisTypeXyPluginSetupDependencies,
-      VisTypeXyPluginStartDependencies
-    > {
+  implements Plugin<VisTypeXyPluginSetup, VisTypeXyPluginStart, VisTypeXyPluginSetupDependencies> {
   public setup(
     core: VisTypeXyCoreSetup,
     { visualizations, charts, usageCollection }: VisTypeXyPluginSetupDependencies
@@ -64,7 +46,7 @@ export class VisTypeXyPlugin
     return {};
   }
 
-  public start(core: CoreStart, { data, charts, fieldFormats }: VisTypeXyPluginStartDependencies) {
+  public start(core: CoreStart) {
     return {};
   }
 }

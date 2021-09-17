@@ -88,7 +88,6 @@ pageLoadAssetSize:
   visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
-  visTypeXy: 113478
   visualizations: 90000
   visualize: 57431
   watcher: 43598
@@ -115,3 +114,5 @@ pageLoadAssetSize:
   expressionTagcloud: 27505
   expressions: 239290
   securitySolution: 231753
+  expressionXy: 56824
+  visTypeXy: 38728
