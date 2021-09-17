@@ -11,7 +11,7 @@
 
 export * from './constants';
 export * from './es_query';
-export * from './index_patterns';
+export * from './data_views';
 export * from './kbn_field_types';
 export * from './query';
 export * from './search';
@@ -25,4 +25,4 @@ export * from './exports';
  * @removeBy 8.1
  */
 
-export { IndexPatternAttributes, DataViewAttributes } from './types';
+export { IndexPatternAttributes } from './types';
