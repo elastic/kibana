@@ -8,7 +8,7 @@
 import { EuiPageHeaderProps } from '@elastic/eui';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana, KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
@@ -35,7 +35,7 @@ export function ApmMainTemplate({
   pageTitle?: React.ReactNode;
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
-} & EuiPageTemplateProps) {
+} & KibanaPageTemplateProps) {
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
