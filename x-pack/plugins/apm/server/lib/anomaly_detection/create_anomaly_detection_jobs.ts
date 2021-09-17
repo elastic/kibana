@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-import uuid from 'uuid/v4';
-import { snakeCase } from 'lodash';
 import Boom from '@hapi/boom';
+import { Logger } from 'kibana/server';
+import { snakeCase } from 'lodash';
 import moment from 'moment';
+import uuid from 'uuid/v4';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
+import {
+  METRICSET_NAME,
+  PROCESSOR_EVENT,
+} from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup } from '../helpers/setup_request';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
-import { withApmSpan } from '../../utils/with_apm_span';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
 
 export async function createAnomalyDetectionJobs(
@@ -86,7 +91,11 @@ async function createAnomalyDetectionJob({
       start: moment().subtract(4, 'weeks').valueOf(),
       query: {
         bool: {
-          filter: [...environmentQuery(environment)],
+          filter: [
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
+            { term: { [METRICSET_NAME]: 'transaction' } },
+            ...environmentQuery(environment),
+          ],
         },
       },
       startDatafeed: true,
