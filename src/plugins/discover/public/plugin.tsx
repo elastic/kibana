@@ -19,10 +19,7 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
-import {
-  EmbeddableStart,
-  EmbeddableSetup
-} from "src/plugins/embeddable/public";
+import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
