@@ -34,10 +34,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/unmapped_fields');
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    after(async () => {
+      await esArchiver.unload('test/functional/fixtures/es_archiver/unmapped_fields');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 
     describe('saved query management component functionality', function () {
@@ -162,18 +169,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.switchQueryLanguage('lucene');
         expect(await queryBar.getQueryString()).to.eql('');
       });
-    });
 
-    describe('switch saved search', () => {
-      it(`should reset filters when navigating to a 'new' after saved search`, async function () {
-        await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
-        await PageObjects.discover.saveSearch('test');
+      it(`should unselect saved query when navigating to a 'new'`, async function () {
+        await savedQueryManagementComponent.saveNewQuery(
+          'test-unselect-saved-query',
+          'mock',
+          true,
+          true
+        );
+
+        await queryBar.submitQuery();
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+        expect(await queryBar.getQueryString()).to.eql('response:200');
 
         await PageObjects.discover.clickNewSearchButton();
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+        expect(await queryBar.getQueryString()).to.eql('');
+
+        await PageObjects.discover.selectIndexPattern('test-index-unmapped-fields');
+
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+        expect(await queryBar.getQueryString()).to.eql('');
+
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+        expect(await queryBar.getQueryString()).to.eql('');
       });
     });
   });

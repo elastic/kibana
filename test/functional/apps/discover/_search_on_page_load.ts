@@ -48,6 +48,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
     });
 
+    after(async () => {
+      await esArchiver.unload('test/functional/fixtures/es_archiver/unmapped_fields');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+    });
+
     describe(`when it's false`, () => {
       beforeEach(async () => await initSearchOnPageLoad(false));
 
@@ -97,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('should fetch data from ES initially when discover:searchOnPageLoad is true', async function () {
+    it(`when it's false should fetch data from ES initially`, async function () {
       await initSearchOnPageLoad(true);
       await retry.waitFor('number of fetches to be 1', waitForFetches(1));
     });
