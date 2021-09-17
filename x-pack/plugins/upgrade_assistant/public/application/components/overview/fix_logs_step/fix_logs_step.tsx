@@ -7,7 +7,8 @@
 import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiSpacer, EuiPanel, EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiText, EuiSpacer, EuiPanel, EuiCallOut, EuiCode } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { ExternalLinks } from './external_links';
@@ -54,15 +55,16 @@ const i18nTexts = {
       defaultMessage: `You're missing index privileges`,
     }
   ),
-  deniedPrivilegeDescription: (privilegesMissing: MissingPrivileges) =>
-    i18n.translate('xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeDescription', {
-      defaultMessage:
-        'To be able to analyze deprecataion logs, you must have {privilegesCount, plural, one {this index privilege} other {these index privileges}}: {missingPrivileges}',
-      values: {
+  deniedPrivilegeDescription: (privilegesMissing: MissingPrivileges) => (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeDescription"
+      defaultMessage="To be able to analyze deprecataion logs, you must have {privilegesCount, plural, one {this index privilege} other {these index privileges}}: {missingPrivileges}"
+      values={{
         missingPrivileges: privilegesMissing?.index?.join(', '),
         privilegesCount: privilegesMissing?.index?.length,
-      },
-    }),
+      }}
+    />
+  ),
 };
 
 interface Props {

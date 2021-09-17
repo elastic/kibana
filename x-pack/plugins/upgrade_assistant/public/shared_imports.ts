@@ -15,6 +15,7 @@ export {
   SectionLoading,
   GlobalFlyout,
   WithPrivileges,
+  Privileges,
   MissingPrivileges,
   AuthorizationProvider,
   AuthorizationContext,
