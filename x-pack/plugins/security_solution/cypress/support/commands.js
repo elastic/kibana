@@ -32,25 +32,6 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
 Cypress.Commands.add(
-  'stubSearchStrategyApi',
-  function (stubObject, factoryQueryType, searchStrategyName = 'securitySolutionSearchStrategy') {
-    cy.intercept('POST', '/internal/bsearch', (req) => {
-      if (searchStrategyName === 'indexFields') {
-        req.reply(stubObject);
-        return;
-      } else if (factoryQueryType === 'overviewHost') {
-        req.reply(stubObject.overviewHost);
-        return;
-      } else if (factoryQueryType === 'overviewNetwork') {
-        req.reply(stubObject.overviewNetwork);
-        return;
-      }
-      req.reply();
-    });
-  }
-);
-
-Cypress.Commands.add(
   'attachFile',
   {
     prevSubject: 'element',

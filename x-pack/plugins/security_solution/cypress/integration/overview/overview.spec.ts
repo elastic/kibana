@@ -12,11 +12,10 @@ import { loginAndWaitForPage } from '../../tasks/login';
 
 import { OVERVIEW_URL } from '../../urls/navigation';
 
-import overviewFixture from '../../fixtures/overview_search_strategy.json';
-import emptyInstance from '../../fixtures/empty_instance.json';
 import { cleanKibana } from '../../tasks/common';
 import { createTimeline, favoriteTimeline } from '../../tasks/api_calls/timelines';
 import { getTimeline } from '../../objects/timeline';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 describe('Overview Page', () => {
   before(() => {
@@ -24,7 +23,6 @@ describe('Overview Page', () => {
   });
 
   it('Host stats render with correct values', () => {
-    cy.stubSearchStrategyApi(overviewFixture, 'overviewHost');
     loginAndWaitForPage(OVERVIEW_URL);
     expandHostStats();
 
@@ -34,7 +32,6 @@ describe('Overview Page', () => {
   });
 
   it('Network stats render with correct values', () => {
-    cy.stubSearchStrategyApi(overviewFixture, 'overviewNetwork');
     loginAndWaitForPage(OVERVIEW_URL);
     expandNetworkStats();
 
@@ -44,8 +41,15 @@ describe('Overview Page', () => {
   });
 
   describe('with no data', () => {
+    before(() => {
+      esArchiverUnload('auditbeat');
+    });
+
+    after(() => {
+      esArchiverLoad('auditbeat');
+    });
+
     it('Splash screen should be here', () => {
-      cy.stubSearchStrategyApi(emptyInstance, undefined, 'indexFields');
       loginAndWaitForPage(OVERVIEW_URL);
       cy.get(OVERVIEW_EMPTY_PAGE).should('be.visible');
     });
@@ -57,7 +61,6 @@ describe('Overview Page', () => {
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
         .then((timelineId: string) => {
           favoriteTimeline({ timelineId, timelineType: 'default' }).then(() => {
-            cy.stubSearchStrategyApi(overviewFixture, 'overviewNetwork');
             loginAndWaitForPage(OVERVIEW_URL);
             cy.get('[data-test-subj="overview-recent-timelines"]').should(
               'contain',

@@ -7,67 +7,67 @@
 
 // Host Stats
 export const STAT_AUDITD = {
-  value: '123',
+  value: '7,586',
   domId: '[data-test-subj="host-stat-auditbeatAuditd"]',
 };
 export const ENDGAME_DNS = {
-  value: '391',
+  value: '0',
   domId: '[data-test-subj="host-stat-endgameDns"]',
 };
 export const ENDGAME_FILE = {
-  value: '392',
+  value: '0',
   domId: '[data-test-subj="host-stat-endgameFile"]',
 };
 export const ENDGAME_IMAGE_LOAD = {
-  value: '393',
+  value: '0',
   domId: '[data-test-subj="host-stat-endgameImageLoad"]',
 };
 export const ENDGAME_NETWORK = {
-  value: '394',
+  value: '0',
   domId: '[data-test-subj="host-stat-endgameNetwork"]',
 };
 export const ENDGAME_PROCESS = {
-  value: '395',
+  value: '0',
   domId: '[data-test-subj="host-stat-endgameProcess"]',
 };
 export const ENDGAME_REGISTRY = {
-  value: '396',
+  value: '0',
   domId: '[data-test-subj="host-stat-endgameRegistry"]',
 };
 export const ENDGAME_SECURITY = {
-  value: '397',
+  value: '0',
   domId: '[data-test-subj="host-stat-endgameSecurity"]',
 };
 export const STAT_FILEBEAT = {
-  value: '890',
+  value: '0',
   domId: '[data-test-subj="host-stat-filebeatSystemModule"]',
 };
 export const STAT_FIM = {
-  value: '345',
+  value: '11',
   domId: '[data-test-subj="host-stat-auditbeatFIM"]',
 };
 export const STAT_LOGIN = {
-  value: '456',
+  value: '2,323',
   domId: '[data-test-subj="host-stat-auditbeatLogin"]',
 };
 export const STAT_PACKAGE = {
-  value: '567',
+  value: '686',
   domId: '[data-test-subj="host-stat-auditbeatPackage"]',
 };
 export const STAT_PROCESS = {
-  value: '678',
+  value: '461',
   domId: '[data-test-subj="host-stat-auditbeatProcess"]',
 };
 export const STAT_USER = {
-  value: '789',
+  value: '35',
   domId: '[data-test-subj="host-stat-auditbeatUser"]',
 };
 export const STAT_WINLOGBEAT_SECURITY = {
-  value: '70',
+  value: '0',
   domId: '[data-test-subj="host-stat-winlogbeatSecurity"]',
 };
 export const STAT_WINLOGBEAT_MWSYSMON_OPERATIONAL = {
-  value: '30',
+  value: '0',
   domId: '[data-test-subj="host-stat-winlogbeatMWSysmonOperational"]',
 };
 
@@ -92,39 +92,39 @@ export const HOST_STATS = [
 
 // Network Stats
 export const STAT_SOCKET = {
-  value: '578,502',
+  value: '10,191',
   domId: '[data-test-subj="network-stat-auditbeatSocket"]',
 };
 export const STAT_CISCO = {
-  value: '999',
+  value: '0',
   domId: '[data-test-subj="network-stat-filebeatCisco"]',
 };
 export const STAT_NETFLOW = {
-  value: '2,544',
+  value: '0',
   domId: '[data-test-subj="network-stat-filebeatNetflow"]',
 };
 export const STAT_PANW = {
-  value: '678',
+  value: '0',
   domId: '[data-test-subj="network-stat-filebeatPanw"]',
 };
 export const STAT_SURICATA = {
-  value: '303,699',
+  value: '0',
   domId: '[data-test-subj="network-stat-filebeatSuricata"]',
 };
 export const STAT_ZEEK = {
-  value: '71,129',
+  value: '0',
   domId: '[data-test-subj="network-stat-filebeatZeek"]',
 };
 export const STAT_DNS = {
-  value: '1,090',
+  value: '0',
   domId: '[data-test-subj="network-stat-packetbeatDNS"]',
 };
 export const STAT_FLOW = {
-  value: '722,153',
+  value: '0',
   domId: '[data-test-subj="network-stat-packetbeatFlow"]',
 };
 export const STAT_TLS = {
-  value: '340',
+  value: '0',
   domId: '[data-test-subj="network-stat-packetbeatTLS"]',
 };
 
