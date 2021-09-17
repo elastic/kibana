@@ -10,7 +10,7 @@ import { omit } from 'lodash';
 import { of as mockOf } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { ExecutionContext } from 'src/plugins/expressions/public';
-import type { IndexPatternsContract } from '../../../common/index_patterns/index_patterns';
+import type { IndexPatternsContract } from '../../../common';
 import type {
   ISearchStartSearchSource,
   KibanaContext,

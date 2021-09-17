@@ -59,7 +59,7 @@ describe('registerTransactionDurationAlertType', () => {
       transactionType: 'request',
       serviceName: 'opbeans-java',
       environment: 'Not defined',
-      threshold: 3000,
+      threshold: 3000000,
       triggerValue: '5,500 ms',
       interval: `5m`,
     });

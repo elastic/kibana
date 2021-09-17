@@ -11,6 +11,7 @@ import type {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
+  SavedObjectsBulkResolveObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
@@ -354,6 +355,78 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     );
 
     return await this.redactSavedObjectNamespaces(savedObject, [options.namespace]);
+  }
+
+  public async bulkResolve<T = unknown>(
+    objects: SavedObjectsBulkResolveObject[],
+    options: SavedObjectsBaseOptions = {}
+  ) {
+    try {
+      const args = { objects, options };
+      await this.legacyEnsureAuthorized(
+        this.getUniqueObjectTypes(objects),
+        'bulk_get',
+        options.namespace,
+        { args, auditAction: 'bulk_resolve' }
+      );
+    } catch (error) {
+      objects.forEach(({ type, id }) =>
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.RESOLVE,
+            savedObject: { type, id },
+            error,
+          })
+        )
+      );
+      throw error;
+    }
+
+    const response = await this.baseClient.bulkResolve<T>(objects, options);
+
+    response.resolved_objects.forEach(({ saved_object: { error, type, id } }) => {
+      if (!error) {
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.RESOLVE,
+            savedObject: { type, id },
+          })
+        );
+      }
+    });
+
+    // the generic redactSavedObjectsNamespaces function cannot be used here due to the nested structure of the
+    // resolved objects, so we handle redaction in a bespoke manner for bulkResolve
+
+    if (this.getSpacesService() === undefined) {
+      return response;
+    }
+
+    const previouslyAuthorizedSpaceIds = [
+      this.getSpacesService()!.namespaceToSpaceId(options.namespace),
+    ];
+    // all users can see the "all spaces" ID, and we don't need to recheck authorization for any namespaces that we just checked earlier
+    const namespaces = uniq(
+      response.resolved_objects.flatMap((resolved) => resolved.saved_object.namespaces || [])
+    ).filter((x) => x !== ALL_SPACES_ID && !previouslyAuthorizedSpaceIds.includes(x));
+
+    const privilegeMap = await this.getNamespacesPrivilegeMap(
+      namespaces,
+      previouslyAuthorizedSpaceIds
+    );
+
+    return {
+      ...response,
+      resolved_objects: response.resolved_objects.map((resolved) => ({
+        ...resolved,
+        saved_object: {
+          ...resolved.saved_object,
+          namespaces:
+            resolved.saved_object.namespaces &&
+            this.redactAndSortNamespaces(resolved.saved_object.namespaces, privilegeMap),
+        },
+      })),
+    };
   }
 
   public async resolve<T = unknown>(
@@ -1030,6 +1103,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     response: T,
     previouslyAuthorizedNamespaces: Array<string | undefined>
   ): Promise<T> {
+    // WARNING: the bulkResolve function has a bespoke implementation of this; any changes here should be applied there too.
+
     if (this.getSpacesService() === undefined) {
       return response;
     }
