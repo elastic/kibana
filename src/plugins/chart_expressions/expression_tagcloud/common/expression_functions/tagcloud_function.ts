@@ -110,9 +110,9 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         help: argHelp.showLabel,
       },
       palette: {
-        types: ['string'],
+        types: ['palette', 'system_palette'],
         help: argHelp.palette,
-        default: 'default',
+        default: '{palette}',
       },
       metric: {
         types: ['vis_dimension'],
@@ -135,10 +135,7 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         ...(args.bucket && {
           bucket: args.bucket,
         }),
-        palette: {
-          type: 'palette',
-          name: args.palette,
-        },
+        palette: args.palette,
       };
 
       if (handlers?.inspectorAdapters?.tables) {
