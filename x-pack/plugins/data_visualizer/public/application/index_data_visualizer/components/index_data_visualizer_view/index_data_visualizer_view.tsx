@@ -864,8 +864,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       />
                     </EuiFlexItem>
                   )}
-                  <EuiSpacer size={'m'} />
-
                   <SearchPanel
                     indexPattern={currentIndexPattern}
                     searchString={searchString}

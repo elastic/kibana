@@ -1,0 +1,13 @@
+.dvSearchPanelControls {
+  flex-direction: row;
+  padding: 8px;
+}
+
+@include euiBreakpoint('xs', 's', 'm', 'l') {
+  .dvSearchPanel {
+    flex-direction: column;
+  }
+  .dvSearchBar {
+    min-width:  #{'max(100%, 500px)'};
+  }
+}
