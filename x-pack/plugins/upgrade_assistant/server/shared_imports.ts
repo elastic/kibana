@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { handleEsError, Privileges } from '../../../../src/plugins/es_ui_shared/server';
+export { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
+export { Privileges } from '../../../../src/plugins/es_ui_shared/common';
