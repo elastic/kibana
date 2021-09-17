@@ -6,18 +6,12 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiButton,
-  EuiLink,
-  EuiBadge,
-  Search,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, Search } from '@elastic/eui';
 
 import { PAGINATION_CONFIG } from '../constants';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
 import { ResolutionTableCell } from './resolution_table_cell';
+import { DeprecationBadge } from '../shared';
 
 const i18nTexts = {
   refreshButtonLabel: i18n.translate(
@@ -80,12 +74,6 @@ const i18nTexts = {
       defaultMessage: 'Critical',
     }
   ),
-  criticalBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.criticalBadgeLabel',
-    {
-      defaultMessage: 'critical',
-    }
-  ),
   searchPlaceholderLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.searchPlaceholderLabel',
     {
@@ -115,11 +103,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (level: KibanaDeprecationDetails['level']) => {
-        if (level === 'critical') {
-          return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
-        }
-
-        return <>{''}</>;
+        return <DeprecationBadge isCritical={level === 'critical'} />;
       },
     },
     {

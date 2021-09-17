@@ -38,14 +38,14 @@ const getDeprecationCountByLevel = (deprecations: EnrichedDeprecationInfo[]) => 
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageTitle', {
-    defaultMessage: 'Elasticsearch deprecation warnings',
+    defaultMessage: 'Elasticsearch deprecation issues',
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
     defaultMessage:
       'You must resolve all critical issues before upgrading. Back up recommended. Make sure you have a current snapshot before modifying your configuration or reindexing.',
   }),
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
-    defaultMessage: 'Loading deprecations…',
+    defaultMessage: 'Loading deprecation issues…',
   }),
 };
 

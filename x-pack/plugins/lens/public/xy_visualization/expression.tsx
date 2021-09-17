@@ -74,18 +74,6 @@ type SeriesSpec = InferPropType<typeof LineSeries> &
   InferPropType<typeof BarSeries> &
   InferPropType<typeof AreaSeries>;
 
-export {
-  legendConfig,
-  yAxisConfig,
-  tickLabelsConfig,
-  gridlinesConfig,
-  axisTitlesVisibilityConfig,
-  axisExtentConfig,
-  layerConfig,
-  xyChart,
-  labelsOrientationConfig,
-} from '../../common/expressions';
-
 export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
@@ -528,6 +516,7 @@ export function XYChart({
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
         }}
+        allowBrushingLastHistogramBucket={Boolean(isTimeViz)}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
         onBrushEnd={interactive ? brushHandler : undefined}

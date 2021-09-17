@@ -31,3 +31,8 @@ export interface DeprecationLoggingPreviewProps {
   resendRequest: () => void;
   toggleLogging: () => void;
 }
+
+export interface OverviewStepProps {
+  isComplete: boolean;
+  setIsComplete: (isComplete: boolean) => void;
+}

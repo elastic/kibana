@@ -25,7 +25,7 @@ import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../co
 import {
   SOURCES_PATH,
   ADD_GITHUB_PATH,
-  PERSONAL_SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
   getSourcesPath,
 } from '../../../../routes';
 import { CustomSource } from '../../../../types';
@@ -393,7 +393,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       actions.getSourceConfigData(serviceType);
     },
     getSourceConfigData: async ({ serviceType }) => {
-      const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
+      const route = `/internal/workplace_search/org/settings/connectors/${serviceType}`;
 
       try {
         const response = await HttpLogic.values.http.get(route);
@@ -408,8 +408,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const { subdomainValue: subdomain, indexPermissionsValue: indexPermissions } = values;
 
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${serviceType}/prepare`
-        : `/api/workplace_search/account/sources/${serviceType}/prepare`;
+        ? `/internal/workplace_search/org/sources/${serviceType}/prepare`
+        : `/internal/workplace_search/account/sources/${serviceType}/prepare`;
 
       const query = {
         kibana_host: kibanaHost,
@@ -431,8 +431,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     getSourceReConnectData: async ({ sourceId }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/reauth_prepare`
-        : `/api/workplace_search/account/sources/${sourceId}/reauth_prepare`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/reauth_prepare`
+        : `/internal/workplace_search/account/sources/${sourceId}/reauth_prepare`;
 
       const query = {
         kibana_host: kibanaHost,
@@ -449,8 +449,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const { isOrganization } = AppLogic.values;
       const { preContentSourceId } = values;
       const route = isOrganization
-        ? `/api/workplace_search/org/pre_sources/${preContentSourceId}`
-        : `/api/workplace_search/account/pre_sources/${preContentSourceId}`;
+        ? `/internal/workplace_search/org/pre_sources/${preContentSourceId}`
+        : `/internal/workplace_search/account/pre_sources/${preContentSourceId}`;
 
       try {
         const response = await HttpLogic.values.http.get(route);
@@ -470,8 +470,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       } = values;
 
       const route = isUpdating
-        ? `/api/workplace_search/org/settings/connectors/${serviceType}`
-        : '/api/workplace_search/org/settings/connectors';
+        ? `/internal/workplace_search/org/settings/connectors/${serviceType}`
+        : '/internal/workplace_search/org/settings/connectors';
 
       const http = isUpdating ? HttpLogic.values.http.put : HttpLogic.values.http.post;
 
@@ -512,7 +512,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const { navigateToUrl } = KibanaLogic.values;
       const { setAddedSource } = SourcesLogic.actions;
       const query = { ...params, kibana_host: kibanaHost };
-      const route = '/api/workplace_search/sources/create';
+      const route = '/internal/workplace_search/sources/create';
 
       /**
         There is an extreme edge case where the user is trying to connect Github as source from ent-search,
@@ -521,7 +521,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         app home page and display the error message, and not persist the other query params to the server.
       */
       if (params.error_description) {
-        navigateToUrl(isOrganization ? '/' : PERSONAL_SOURCES_PATH);
+        navigateToUrl(isOrganization ? '/' : PRIVATE_SOURCES_PATH);
         setErrorMessage(
           isOrganization
             ? params.error_description
@@ -557,8 +557,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? '/api/workplace_search/org/create_source'
-        : '/api/workplace_search/account/create_source';
+        ? '/internal/workplace_search/org/create_source'
+        : '/internal/workplace_search/account/create_source';
 
       const {
         selectedGithubOrganizations: githubOrganizations,

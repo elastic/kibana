@@ -311,6 +311,8 @@ export type {
   SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
   SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
@@ -378,7 +380,9 @@ export type {
   OpsProcessMetrics,
   MetricsServiceSetup,
   MetricsServiceStart,
+  IntervalHistogram,
 } from './metrics';
+export { EventLoopDelaysMonitor } from './metrics';
 
 export type { I18nServiceSetup } from './i18n';
 export type {

@@ -4,6 +4,7 @@ exports[`Transform: Transform List <CreateTransformButton /> Minimal initializat
 <EuiToolTip
   content="You do not have permission to create transforms. Please contact your administrator."
   delay="regular"
+  display="inlineBlock"
   position="top"
 >
   <EuiButton

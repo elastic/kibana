@@ -19,8 +19,7 @@ import {
 } from '../action_labels';
 import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
 import { VectorLayer } from '../../../../../../classes/layers/vector_layer';
-import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common';
-import { ESSearchSourceSyncMeta } from '../../../../../../../common/descriptor_types';
+import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common/constants';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
@@ -85,15 +84,13 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
 
   async _getIsFeatureEditingEnabled(): Promise<boolean> {
     const vectorLayer = this.props.layer as VectorLayer;
-    const layerSource = await this.props.layer.getSource();
+    const layerSource = this.props.layer.getSource();
     if (!(layerSource instanceof ESSearchSource)) {
       return false;
     }
-    const isClustered =
-      (layerSource?.getSyncMeta() as ESSearchSourceSyncMeta)?.scalingType ===
-      SCALING_TYPES.CLUSTERS;
+
     if (
-      isClustered ||
+      (layerSource as ESSearchSource).getSyncMeta().scalingType === SCALING_TYPES.CLUSTERS ||
       (await vectorLayer.isFilteredByGlobalTime()) ||
       vectorLayer.isPreviewLayer() ||
       !vectorLayer.isVisible() ||

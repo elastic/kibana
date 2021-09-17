@@ -75,7 +75,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
+import { IIndexPattern, IndexPattern, IndexPatternField } from '../..';
 import {
   AggConfigs,
   ES_SEARCH_STRATEGY,
@@ -841,7 +841,7 @@ export class SearchSource {
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(body.query, getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
+      body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
       delete searchRequest.highlightAll;
     }
 

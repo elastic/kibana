@@ -6,7 +6,6 @@
  */
 
 import { ScopedHistory } from 'kibana/public';
-import { DiscoverStart } from 'src/plugins/discover/public';
 import { ManagementSetup } from 'src/plugins/management/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SharePluginSetup } from 'src/plugins/share/public';
@@ -30,7 +29,6 @@ export interface SetupDependencies {
 
 export interface StartDependencies {
   licensing: LicensingPluginStart;
-  discover: DiscoverStart;
   data: DataPublicPluginStart;
 }
 
@@ -40,10 +38,10 @@ export interface AppDependencies {
   plugins: {
     cloud?: CloudSetup;
     share: SharePluginSetup;
+    infra: object | undefined;
   };
   services: {
     core: CoreStart;
-    discover: DiscoverStart;
     data: DataPublicPluginStart;
     breadcrumbs: BreadcrumbService;
     history: ScopedHistory;
