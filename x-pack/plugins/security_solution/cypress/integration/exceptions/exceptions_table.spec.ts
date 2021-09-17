@@ -116,7 +116,7 @@ describe('Exceptions Table', () => {
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 3 lists`);
   });
 
-  it('Exports exception list', () => {
+  it('Exports exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
     waitForPageWithoutDateRange(EXCEPTIONS_URL);
@@ -126,7 +126,7 @@ describe('Exceptions Table', () => {
 
     cy.wait('@export').then(({ response }) =>
       cy
-        .wrap(decodeURI(response?.body!), { timeout: 1000 })
+        .wrap(decodeURI(response?.body!))
         .should('eql', expectedExportedExceptionList(this.exceptionListResponse))
     );
   });
