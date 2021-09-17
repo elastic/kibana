@@ -1,6 +1,6 @@
-# expressionXy
+# expressionXY
 
-A Kibana plugin
+Expression XY plugin adds a `xy` renderer and function to the expression plugin. The renderer will display the xy-axis chart.
 
 ---
 
