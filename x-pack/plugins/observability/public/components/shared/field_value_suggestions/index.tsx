@@ -32,6 +32,7 @@ export function FieldValueSuggestions({
   allowAllValuesSelection,
   required,
   allowExclusions = true,
+  cardinalityField,
   asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
@@ -43,6 +44,7 @@ export function FieldValueSuggestions({
     sourceField,
     filters,
     time,
+    cardinalityField,
     keepHistory: true,
   });
 

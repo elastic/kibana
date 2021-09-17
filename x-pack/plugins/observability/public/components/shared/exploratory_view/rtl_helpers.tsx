@@ -34,10 +34,8 @@ import * as useValuesListHook from '../../../hooks/use_values_list';
 import indexPatternData from './configurations/test_data/test_index_pattern.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
-import {
-  IndexPattern,
-  IndexPatternsContract,
-} from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/common';
+
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
 import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';

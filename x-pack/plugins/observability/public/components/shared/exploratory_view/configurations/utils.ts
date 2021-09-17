@@ -7,7 +7,7 @@
 import rison, { RisonValue } from 'rison-node';
 import type { ReportViewType, SeriesUrl, UrlFilter } from '../types';
 import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { esFilters, ExistsFilter } from '../../../../../../../../src/plugins/data/public';
 import { URL_KEYS } from './constants/url_constants';
 import { PersistableFilter } from '../../../../../../lens/common';
