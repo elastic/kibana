@@ -36,7 +36,8 @@ exports[`SavedObjectEdition should render normally 1`] = `
         canDelete={false}
         canViewInApp={true}
         onDeleteClick={[Function]}
-        viewUrl="/management/kibana/indexPatterns/patterns/1"
+        title="MyDashboard*"
+        viewUrl="/app/dashboards#/view/1"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -46,19 +47,18 @@ exports[`SavedObjectEdition should render normally 1`] = `
         object={
           Object {
             "attributes": Object {
-              "title": "MyIndexPattern*",
+              "title": "MyDashboard*",
             },
             "id": "1",
             "meta": Object {
-              "editUrl": "#/management/kibana/indexPatterns/patterns/1",
-              "icon": "indexPatternApp",
+              "icon": "dashboardApp",
               "inAppUrl": Object {
-                "path": "/management/kibana/indexPatterns/patterns/1",
-                "uiCapabilitiesPath": "management.kibana.indexPatterns",
+                "path": "/app/dashboards#/view/1",
+                "uiCapabilitiesPath": "management.kibana.dashboard",
               },
-              "title": "MyIndexPattern*",
+              "title": "MyDashboard*",
             },
-            "type": "index-pattern",
+            "type": "dashboard",
           }
         }
       />

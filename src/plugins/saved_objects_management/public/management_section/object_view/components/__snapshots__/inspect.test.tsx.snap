@@ -5,7 +5,6 @@ exports[`Inspect component renders correctly 1`] = `
   aria-label="inspect MyIndexPattern* object"
   height="100%"
   languageId="xjson"
-  onChange={[Function]}
   options={
     Object {
       "automaticLayout": false,

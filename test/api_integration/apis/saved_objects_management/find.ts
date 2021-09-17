@@ -226,8 +226,6 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'visualizeApp',
               title: 'Visualization',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
