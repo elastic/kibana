@@ -8,7 +8,7 @@
 
 import { Assign } from '@kbn/utility-types';
 import { DatatableColumn } from 'src/plugins/expressions';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { IndexPattern } from '../..';
 import {
   aggAvg,
   aggBucketAvg,
