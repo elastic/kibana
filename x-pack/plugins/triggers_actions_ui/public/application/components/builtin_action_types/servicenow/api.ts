@@ -6,6 +6,8 @@
  */
 
 import { HttpSetup } from 'kibana/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { AppInfo, RESTApiError } from './types';
 
@@ -35,21 +37,24 @@ export async function getChoices({
  * The app info url should be the same as at:
  * x-pack/plugins/actions/server/builtin_action_types/servicenow/service.ts
  */
-const getAppInfoUrl = (url: string) => `${url}/api/x_elas2_inc_int/elastic_api/health`;
+const getAppInfoUrl = (url: string, scope: string) => `${url}/api/${scope}/elastic_api/health`;
 
 export async function getAppInfo({
   signal,
   apiUrl,
   username,
   password,
+  actionTypeId,
 }: {
   signal: AbortSignal;
   apiUrl: string;
   username: string;
   password: string;
+  actionTypeId: string;
 }): Promise<AppInfo | RESTApiError> {
   const urlWithoutTrailingSlash = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
-  const response = await fetch(getAppInfoUrl(urlWithoutTrailingSlash), {
+  const config = snExternalServiceConfig[actionTypeId];
+  const response = await fetch(getAppInfoUrl(urlWithoutTrailingSlash, config.appScope ?? ''), {
     method: 'GET',
     signal,
     headers: {

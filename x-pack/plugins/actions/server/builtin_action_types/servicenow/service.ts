@@ -18,6 +18,7 @@ import {
   Incident,
   GetApplicationInfoResponse,
   PartialIncident,
+  SNProductsConfigValue,
 } from './types';
 
 import * as i18n from './translations';
@@ -29,12 +30,7 @@ import {
 } from './types';
 import { request, getErrorMessage, addTimeZoneToDate } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ServiceNowSIRActionTypeId } from './config';
-import { ENABLE_NEW_SN_ITSM_CONNECTOR } from '../../constants/connectors';
-
-const SYS_DICTIONARY = `api/now/table/sys_dictionary`;
-const IMPORTATION_SET_TABLE = 'x_elas2_inc_int_elastic_incident';
-const FIELD_PREFIX = 'u_';
+import { FIELD_PREFIX } from './config';
 
 const prepareIncident = (useOldApi: boolean, incident: PartialIncident): PartialIncident =>
   useOldApi
@@ -44,12 +40,13 @@ const prepareIncident = (useOldApi: boolean, incident: PartialIncident): Partial
         {} as Incident
       );
 
+export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;
+
 export const createExternalService = (
-  table: string,
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
-  actionTypeId: string
+  { table, importSetTable, useImportAPI, appScope }: SNProductsConfigValue
 ): ExternalService => {
   const { apiUrl: url, isLegacy } = config as ServiceNowPublicConfigurationType;
   const { username, password } = secrets as ServiceNowSecretConfigurationType;
@@ -59,23 +56,21 @@ export const createExternalService = (
   }
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
-  const importSetTableUrl = `${urlWithoutTrailingSlash}/api/now/import/${IMPORTATION_SET_TABLE}`;
-  const tableApiIncidentUrl = `${urlWithoutTrailingSlash}/api/now/table/${table}`;
-  const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY}?sysparm_query=name=task^ORname=${table}^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
+  const importSetTableUrl = `${urlWithoutTrailingSlash}/api/now/import/${importSetTable}`;
+  const tableApiIncidentUrl = `${urlWithoutTrailingSlash}/api/now/v2/table/${table}`;
+  const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY_ENDPOINT}?sysparm_query=name=task^ORname=${table}^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
   const choicesUrl = `${urlWithoutTrailingSlash}/api/now/table/sys_choice`;
   /**
    * Need to be set the same at:
    * x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/api.ts
    */
-  const getVersionUrl = `${urlWithoutTrailingSlash}/api/x_elas2_inc_int/elastic_api/health`;
+  const getVersionUrl = () => `${urlWithoutTrailingSlash}/api/${appScope}/elastic_api/health`;
 
   const axiosInstance = axios.create({
     auth: { username, password },
   });
 
-  // TODO: Remove ServiceNow SIR check when there is a SN Store app for SIR.
-  const useOldApi =
-    !ENABLE_NEW_SN_ITSM_CONNECTOR || isLegacy || actionTypeId === ServiceNowSIRActionTypeId;
+  const useOldApi = !useImportAPI || isLegacy;
 
   const getCreateIncidentUrl = () => (useOldApi ? tableApiIncidentUrl : importSetTableUrl);
   const getUpdateIncidentUrl = (incidentId: string) =>
@@ -138,7 +133,7 @@ export const createExternalService = (
     try {
       const res = await request({
         axios: axiosInstance,
-        url: getVersionUrl,
+        url: getVersionUrl(),
         logger,
         configurationUtilities,
       });
@@ -263,8 +258,8 @@ export const createExternalService = (
         logger,
         data: {
           ...prepareIncident(useOldApi, incident),
-          // u_incident_id is used to update the incident when using the Import Set API.
-          ...(useOldApi ? {} : { u_incident_id: incidentId }),
+          // elastic_incident_id is used to update the incident when using the Import Set API.
+          ...(useOldApi ? {} : { elastic_incident_id: incidentId }),
         },
         configurationUtilities,
       });

@@ -44,7 +44,10 @@ const ServiceNowConnectorFields: React.FC<
 
   const [showModal, setShowModal] = useState(false);
 
-  const { fetchAppInfo, isLoading } = useGetAppInfo({ toastNotifications: toasts });
+  const { fetchAppInfo, isLoading } = useGetAppInfo({
+    toastNotifications: toasts,
+    actionTypeId: action.actionTypeId,
+  });
 
   const [applicationRequired, setApplicationRequired] = useState<boolean>(false);
 

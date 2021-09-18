@@ -229,3 +229,12 @@ export interface GetApplicationInfoResponse {
   scope: string;
   version: string;
 }
+
+export interface SNProductsConfigValue {
+  table: string;
+  appScope: string;
+  useImportAPI: boolean;
+  importSetTable: string;
+}
+
+export type SNProductsConfig = Record<string, SNProductsConfigValue>;

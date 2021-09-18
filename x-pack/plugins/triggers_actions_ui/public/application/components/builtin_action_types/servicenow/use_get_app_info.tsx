@@ -12,6 +12,7 @@ import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
 import * as i18n from './translations';
 
 export interface UseGetChoicesProps {
+  actionTypeId: string;
   toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
@@ -23,7 +24,10 @@ export interface UseGetChoices {
   isLoading: boolean;
 }
 
-export const useGetAppInfo = ({ toastNotifications }: UseGetChoicesProps): UseGetChoices => {
+export const useGetAppInfo = ({
+  actionTypeId,
+  toastNotifications,
+}: UseGetChoicesProps): UseGetChoices => {
   const [isLoading, setIsLoading] = useState(false);
   const didCancel = useRef(false);
   const abortCtrl = useRef(new AbortController());
@@ -41,6 +45,7 @@ export const useGetAppInfo = ({ toastNotifications }: UseGetChoicesProps): UseGe
           apiUrl: connector.config.apiUrl,
           username: connector.secrets.username,
           password: connector.secrets.password,
+          actionTypeId,
         });
 
         if (!didCancel.current) {
@@ -59,7 +64,7 @@ export const useGetAppInfo = ({ toastNotifications }: UseGetChoicesProps): UseGe
         throw error;
       }
     },
-    [toastNotifications]
+    [actionTypeId, toastNotifications]
   );
 
   useEffect(() => {

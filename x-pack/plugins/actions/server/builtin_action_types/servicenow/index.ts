@@ -36,6 +36,7 @@ import {
   serviceNowITSMTable,
   ServiceNowSIRActionTypeId,
   serviceNowSIRTable,
+  snExternalServiceConfig,
 } from './config';
 
 export {
@@ -138,17 +139,17 @@ async function executor(
 ): Promise<ActionTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;
+  const externalServiceConfig = snExternalServiceConfig[actionTypeId];
   let data: ServiceNowExecutorResultData | null = null;
 
   const externalService = createExternalService(
-    table,
     {
       config,
       secrets,
     },
     logger,
     configurationUtilities,
-    actionTypeId
+    externalServiceConfig
   );
 
   if (!api[subAction]) {

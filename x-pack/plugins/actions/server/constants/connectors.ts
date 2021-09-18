@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-// TODO: Remove when ServiceNow Elastic Application is published.
+// TODO: Remove when Elastic for ITSM is published.
 export const ENABLE_NEW_SN_ITSM_CONNECTOR = true;
+
+// TODO: Remove when Elastic for Security Operations is published.
+export const ENABLE_NEW_SN_SIR_CONNECTOR = true;
