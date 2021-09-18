@@ -16,6 +16,8 @@ import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';
 import { Fields, Choice } from './types';
 import { choicesToEuiOptions } from './helpers';
+import { connectorValidator } from './validator';
+import { DeprecatedCallout } from './deprecated_callout';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -39,6 +41,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
   } = fields ?? {};
   const { http, notifications } = useKibana().services;
   const [choices, setChoices] = useState<Fields>(defaultFields);
+  const showMappingWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
 
   const categoryOptions = useMemo(() => choicesToEuiOptions(choices.category), [choices.category]);
   const urgencyOptions = useMemo(() => choicesToEuiOptions(choices.urgency), [choices.urgency]);
@@ -151,6 +154,9 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
 
   return isEdit ? (
     <div data-test-subj={'connector-fields-sn-itsm'}>
+      <EuiFlexGroup>
+        <EuiFlexItem>{showMappingWarning && <DeprecatedCallout />}</EuiFlexItem>
+      </EuiFlexGroup>
       <EuiFormRow fullWidth label={i18n.URGENCY}>
         <EuiSelect
           fullWidth
@@ -227,12 +233,15 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
       </EuiFlexGroup>
     </div>
   ) : (
-    <ConnectorCard
-      connectorType={ConnectorTypes.serviceNowITSM}
-      title={connector.name}
-      listItems={listItems}
-      isLoading={false}
-    />
+    <>
+      {showMappingWarning && <DeprecatedCallout />}
+      <ConnectorCard
+        connectorType={ConnectorTypes.serviceNowITSM}
+        title={connector.name}
+        listItems={listItems}
+        isLoading={false}
+      />
+    </>
   );
 };
 

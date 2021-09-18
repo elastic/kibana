@@ -17,6 +17,8 @@ import { Choice, Fields } from './types';
 import { choicesToEuiOptions } from './helpers';
 
 import * as i18n from './translations';
+import { connectorValidator } from './validator';
+import { DeprecatedCallout } from './deprecated_callout';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -40,8 +42,8 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
   } = fields ?? {};
 
   const { http, notifications } = useKibana().services;
-
   const [choices, setChoices] = useState<Fields>(defaultFields);
+  const showMappingWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
 
   const onChangeCb = useCallback(
     (
@@ -169,6 +171,9 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
   return isEdit ? (
     <div data-test-subj={'connector-fields-sn-sir'}>
       <EuiFlexGroup>
+        <EuiFlexItem>{showMappingWarning && <DeprecatedCallout />}</EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow fullWidth label={i18n.ALERT_FIELDS_LABEL}>
             <>
@@ -269,12 +274,15 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
       </EuiFlexGroup>
     </div>
   ) : (
-    <ConnectorCard
-      connectorType={ConnectorTypes.serviceNowITSM}
-      title={connector.name}
-      listItems={listItems}
-      isLoading={false}
-    />
+    <>
+      {showMappingWarning && <DeprecatedCallout />}
+      <ConnectorCard
+        connectorType={ConnectorTypes.serviceNowITSM}
+        title={connector.name}
+        listItems={listItems}
+        isLoading={false}
+      />
+    </>
   );
 };
 

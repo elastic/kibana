@@ -10,6 +10,7 @@ import { ConnectorTypes } from '../../common';
 import { FieldConfig, ValidationConfig } from '../common/shared_imports';
 import { StartPlugins } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
+import { connectorValidator as servicenowConnectorValidator } from './connectors/servicenow/validator';
 import { CaseActionConnector } from './types';
 
 export const getConnectorById = (
@@ -22,6 +23,8 @@ const validators: Record<
   (connector: CaseActionConnector) => ReturnType<ValidationConfig['validator']>
 > = {
   [ConnectorTypes.swimlane]: swimlaneConnectorValidator,
+  [ConnectorTypes.serviceNowITSM]: servicenowConnectorValidator,
+  [ConnectorTypes.serviceNowSIR]: servicenowConnectorValidator,
 };
 
 export const getConnectorsFormValidators = ({
