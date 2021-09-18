@@ -10881,10 +10881,10 @@ cypress-real-events@^1.5.0:
   resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.5.0.tgz#115945872f3e39b90f6896a5a226ff4effa1b8f5"
   integrity sha512-5virdYmZmtnpVqX4U0Ht66985b5MpCHE6icDXReQGognja5d2FuRD+Hh2MqzJqOTmai74z50u5+nmTZ/Dn/VcQ==
 
-cypress@^8.4.0:
-  version "8.4.0"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-8.4.0.tgz#09ec06a73f1cb10121c103cba15076e659e24876"
-  integrity sha512-RtVgGFR06ikyMaq/VqapeqOjGaIA42PpK7F0qe1MCiFArfUuJECsLmeYaOA+1TlmNUgJNMSF5fWKkZIJr5Uc7w==
+cypress@^8.4.1:
+  version "8.4.1"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-8.4.1.tgz#8b5898bf49359cadc28f02ba05d51f63b8e3a717"
+  integrity sha512-itJXq0Vx3sXCUrDyBi2IUrkxVu/gTTp1VhjB5tzGgkeCR8Ae+/T8WV63rsZ7fS8Tpq7LPPXiyoM/sEdOX7cR6A==
   dependencies:
     "@cypress/request" "^2.88.6"
     "@cypress/xvfb" "^1.2.4"

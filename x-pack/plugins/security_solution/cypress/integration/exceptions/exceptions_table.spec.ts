@@ -126,7 +126,7 @@ describe('Exceptions Table', () => {
 
     cy.wait('@export').then(({ response }) =>
       cy
-        .wrap(decodeURI(response?.body!))
+        .wrap(response?.body!)
         .should('eql', expectedExportedExceptionList(this.exceptionListResponse))
     );
   });

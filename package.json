@@ -672,7 +672,7 @@
     "cpy": "^8.1.1",
     "css-loader": "^3.4.2",
     "cssnano": "^4.1.11",
-    "cypress": "^8.4.0",
+    "cypress": "^8.4.1",
     "cypress-axe": "^0.13.0",
     "cypress-cucumber-preprocessor": "^2.5.2",
     "cypress-multi-reporters": "^1.5.0",

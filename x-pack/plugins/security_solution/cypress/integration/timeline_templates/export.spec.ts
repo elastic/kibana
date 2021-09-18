@@ -39,7 +39,7 @@ describe('Export timelines', () => {
 
       cy.wrap(response!.body).should(
         'eql',
-        expectedExportedTimelineTemplate(this.timelineResponse)
+        expectedExportedTimelineTemplate(this.templateResponse)
       );
     });
   });
