@@ -96,7 +96,7 @@ describe('view saved search action', () => {
     );
     await action.execute({ embeddable, trigger });
     expect(applicationMock.navigateToApp).toHaveBeenCalledWith('discover', {
-      path: `view/${savedSearch.id}`,
+      path: `#/view/${savedSearch.id}`,
     });
   });
 });
