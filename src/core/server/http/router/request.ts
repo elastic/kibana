@@ -202,10 +202,7 @@ export class KibanaRequest<
 
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
-    this.isSystemRequest =
-      request.headers['kbn-system-request'] === 'true' ||
-      // Remove support for `kbn-system-api` in 8.x. Used only by legacy platform.
-      request.headers['kbn-system-api'] === 'true';
+    this.isSystemRequest = request.headers['kbn-system-request'] === 'true';
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
