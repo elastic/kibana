@@ -9,7 +9,7 @@
 import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
-import { withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner, REPO_ROOT } from '@kbn/dev-utils';
 import dedent from 'dedent';
 
 import {
@@ -45,15 +45,6 @@ const makeSuccessMessage = (options) => {
   );
 };
 
-/**
- * Run servers and tests for each config
- * @param {object} options                   Optional
- * @property {string[]} options.configs      Array of paths to configs
- * @property {function} options.log          An instance of the ToolingLog
- * @property {string} options.installDir     Optional installation dir from which to run Kibana
- * @property {boolean} options.bail          Whether to exit test run at the first failure
- * @property {string} options.esFrom         Optionally run from source instead of snapshot
- */
 export async function runTests(options) {
   if (!process.env.KBN_NP_PLUGINS_BUILT && !options.assertNoneExcluded) {
     const log = options.createLogger();
@@ -68,36 +59,49 @@ export async function runTests(options) {
     log.warning('❗️❗️❗️');
   }
 
+  const log = options.createLogger();
+
+  if (options.assertNoneExcluded) {
+    log.write('--- asserting that all tests belong to a ciGroup');
+    for (const configPath of options.configs) {
+      log.info('loading', configPath);
+      log.indent(4);
+      try {
+        await assertNoneExcluded({ configPath, options: { ...options, log } });
+      } finally {
+        log.indent(-4);
+      }
+      continue;
+    }
+
+    return;
+  }
+
+  log.write('--- determining which ftr configs to run');
+  const configPathsWithTests = [];
   for (const configPath of options.configs) {
-    const log = options.createLogger();
-    const opts = {
-      ...options,
-      log,
-    };
-
-    log.info('Running', configPath);
-    log.indent(2);
-
-    if (options.assertNoneExcluded) {
-      await assertNoneExcluded({ configPath, options: opts });
-      continue;
+    log.info('testing', configPath);
+    log.indent(4);
+    try {
+      if (await hasTests({ configPath, options: { ...options, log } })) {
+        configPathsWithTests.push(configPath);
+      }
+    } finally {
+      log.indent(-4);
     }
+  }
 
-    if (!(await hasTests({ configPath, options: opts }))) {
-      log.info('Skipping', configPath, 'since all tests are excluded');
-      continue;
-    }
-
-    console.log(`--- Running ${relative(process.cwd(), configPath)}`);
+  for (const configPath of configPathsWithTests) {
+    log.write(`--- Running ${relative(REPO_ROOT, configPath)}`);
 
     await withProcRunner(log, async (procs) => {
       const config = await readConfigFile(log, configPath);
 
       let es;
       try {
-        es = await runElasticsearch({ config, options: opts });
-        await runKibanaServer({ procs, config, options: opts });
-        await runFtr({ configPath, options: opts });
+        es = await runElasticsearch({ config, options: { ...options, log } });
+        await runKibanaServer({ procs, config, options });
+        await runFtr({ configPath, options: { ...options, log } });
       } finally {
         try {
           const delay = config.get('kbnTestServer.delayShutdown');
@@ -117,14 +121,6 @@ export async function runTests(options) {
   }
 }
 
-/**
- * Start only servers using single config
- * @param {object} options                   Optional
- * @property {string} options.config         Path to a config file
- * @property {function} options.log          An instance of the ToolingLog
- * @property {string} options.installDir     Optional installation dir from which to run Kibana
- * @property {string} options.esFrom         Optionally run from source instead of snapshot
- */
 export async function startServers(options) {
   const log = options.createLogger();
   const opts = {
