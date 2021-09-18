@@ -40,6 +40,8 @@ const CommonAttributes = {
   externalId: schema.nullable(schema.string()),
   category: schema.nullable(schema.string()),
   subcategory: schema.nullable(schema.string()),
+  correlation_id: schema.nullable(schema.string()),
+  correlation_display: schema.nullable(schema.string()),
 };
 
 // Schema for ServiceNow Incident Management (ITSM)
