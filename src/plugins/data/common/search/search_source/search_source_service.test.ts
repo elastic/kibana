@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+import { IndexPatternsContract } from '../..';
 import { SearchSourceService, SearchSourceDependencies } from './';
 
 describe('SearchSource service', () => {

@@ -12,7 +12,7 @@ import { coreMock } from '../../../../core/server/mocks';
 
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { createFieldFormatsStartMock } from '../../../field_formats/server/mocks';
-import { createIndexPatternsStartMock } from '../index_patterns/mocks';
+import { createIndexPatternsStartMock } from '../data_views/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 import { bfetchPluginMock } from '../../../bfetch/server/mocks';
