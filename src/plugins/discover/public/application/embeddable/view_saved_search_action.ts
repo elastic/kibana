@@ -28,7 +28,7 @@ export class ViewSavedSearchAction implements Action<ViewSearchContext> {
   async execute(context: ActionExecutionContext<ViewSearchContext>): Promise<void> {
     const { embeddable } = context;
     const savedSearchId = (embeddable as SavedSearchEmbeddable).getSavedSearch().id;
-    const path = `view/${encodeURIComponent(savedSearchId)}`;
+    const path = `#/view/${encodeURIComponent(savedSearchId)}`;
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
     await this.application.navigateToApp(app ? app : 'discover', { path });
   }
