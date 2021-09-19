@@ -26,6 +26,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
 
+  const setUpQueriesWithFilters = async () => {
+    // set up a query with filters and a time filter
+    log.debug('set up a query with filters to save');
+    await queryBar.setQuery('response:200');
+    await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+    const fromTime = 'Sep 20, 2015 @ 08:00:00.000';
+    const toTime = 'Sep 21, 2015 @ 08:00:00.000';
+    await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+  };
+
   describe('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
@@ -49,13 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('saved query management component functionality', function () {
       before(async function () {
-        // set up a query with filters and a time filter
-        log.debug('set up a query with filters to save');
-        await queryBar.setQuery('response:200');
-        await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
-        const fromTime = 'Sep 20, 2015 @ 08:00:00.000';
-        const toTime = 'Sep 21, 2015 @ 08:00:00.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await setUpQueriesWithFilters();
       });
 
       it('should show the saved query management component when there are no saved queries', async () => {
@@ -171,6 +175,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it(`should unselect saved query when navigating to a 'new'`, async function () {
+        await setUpQueriesWithFilters();
+
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'test-unselect-saved-query',
           'mock',
