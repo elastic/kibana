@@ -58,6 +58,7 @@ export interface DashboardMountProps {
   core: CoreSetup<DashboardStartDependencies, DashboardStart>;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   usageCollection: DashboardSetupDependencies['usageCollection'];
+  kibanaUtils: DashboardSetupDependencies['kibanaUtils'];
 }
 
 export async function mountApp({
@@ -67,6 +68,7 @@ export async function mountApp({
   appUnMounted,
   scopedHistory,
   usageCollection,
+  kibanaUtils,
   initializerContext,
   restorePreviousUrl,
   setHeaderActionMenu,
@@ -98,6 +100,7 @@ export async function mountApp({
     urlForwarding,
     visualizations,
     usageCollection,
+    kibanaUtils,
     core: coreStart,
     data: dataStart,
     share: shareStart,

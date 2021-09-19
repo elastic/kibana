@@ -30,6 +30,7 @@ import { VisualizationsStart } from '../../visualizations/public';
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
+import { KibanaUtilsSetup } from './services/kibana_utils';
 import { PresentationUtilPluginStart } from './services/presentation_util';
 import { KibanaLegacySetup, KibanaLegacyStart } from './services/kibana_legacy';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
@@ -103,6 +104,7 @@ export interface DashboardSetupDependencies {
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
+  kibanaUtils: KibanaUtilsSetup;
 }
 
 export interface DashboardStartDependencies {
@@ -162,7 +164,15 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data, usageCollection }: DashboardSetupDependencies
+    {
+      share,
+      embeddable,
+      home,
+      urlForwarding,
+      data,
+      usageCollection,
+      kibanaUtils,
+    }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const startServices = core.getStartServices();
@@ -291,6 +301,7 @@ export class DashboardPlugin
           core,
           appUnMounted,
           usageCollection,
+          kibanaUtils,
           restorePreviousUrl,
           element: params.element,
           onAppLeave: params.onAppLeave,

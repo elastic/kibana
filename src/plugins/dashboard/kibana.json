@@ -11,6 +11,7 @@
     "embeddable",
     "inspector",
     "kibanaLegacy",
+    "kibanaUtils",
     "navigation",
     "savedObjects",
     "share",

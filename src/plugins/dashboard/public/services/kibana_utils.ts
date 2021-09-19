@@ -21,4 +21,5 @@ export {
   createStateContainer,
   ReduxLikeStateContainer,
   createKbnUrlStateStorage,
+  KibanaUtilsSetup,
 } from '../../../kibana_utils/public';

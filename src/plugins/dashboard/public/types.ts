@@ -26,6 +26,7 @@ import { EmbeddableStart } from './services/embeddable';
 import { DashboardSessionStorage } from './application/lib';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { UsageCollectionSetup } from './services/usage_collection';
+import { KibanaUtilsSetup } from './services/kibana_utils';
 import { NavigationPublicPluginStart } from './services/navigation';
 import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
 import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
@@ -194,6 +195,7 @@ export interface DashboardAppServices {
   visualizations: VisualizationsStart;
   indexPatterns: IndexPatternsContract;
   usageCollection?: UsageCollectionSetup;
+  kibanaUtils: KibanaUtilsSetup;
   navigation: NavigationPublicPluginStart;
   dashboardCapabilities: DashboardAppCapabilities;
   initializerContext: PluginInitializerContext;
