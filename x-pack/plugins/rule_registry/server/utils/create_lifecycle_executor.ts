@@ -296,7 +296,7 @@ export const createLifecycleExecutor = (
 
   const nextTrackedAlerts = Object.fromEntries(
     allEventsToIndex
-      .filter(({ event }) => event[ALERT_STATUS] !== 'closed')
+      .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
       .map(({ event }) => {
         const alertId = event[ALERT_INSTANCE_ID]!;
         const alertUuid = event[ALERT_UUID]!;
