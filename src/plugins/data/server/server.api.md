@@ -872,11 +872,11 @@ export const UI_SETTINGS: {
 // src/plugins/data/server/index.ts:98:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:99:1 - (ae-forgotten-export) The symbol "IpAddress" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:101:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/plugin.ts:87:88 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/plugin.ts:109:7 - (ae-forgotten-export) The symbol "ISearchSetup" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/plugin.ts:110:7 - (ae-forgotten-export) The symbol "FieldFormatsSetup" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/plugin.ts:116:78 - (ae-forgotten-export) The symbol "ISearchStart" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/plugin.ts:117:14 - (ae-forgotten-export) The symbol "FieldFormatsStart" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/plugin.ts:88:88 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/plugin.ts:110:7 - (ae-forgotten-export) The symbol "ISearchSetup" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/plugin.ts:111:7 - (ae-forgotten-export) The symbol "FieldFormatsSetup" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/plugin.ts:117:78 - (ae-forgotten-export) The symbol "ISearchStart" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/plugin.ts:118:14 - (ae-forgotten-export) The symbol "FieldFormatsStart" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
