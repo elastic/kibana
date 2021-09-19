@@ -24,6 +24,7 @@ const create = () => {
     closePointInTime: jest.fn(),
     createPointInTimeFinder: jest.fn(),
     openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
+    bulkResolve: jest.fn(),
     resolve: jest.fn(),
     update: jest.fn(),
     removeReferencesTo: jest.fn(),
