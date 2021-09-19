@@ -42,7 +42,7 @@ const indexPattern = {
   ],
 } as IndexPattern;
 
-indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
 
 const singleTerm = {
   aggs: [

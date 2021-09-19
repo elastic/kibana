@@ -39,9 +39,9 @@ function Wrapper({ children }: { children?: ReactNode }) {
 
 describe('Settings', () => {
   it('renders', async () => {
-    const routerProps = ({
+    const routerProps = {
       location,
-    } as unknown) as RouteComponentProps<{}>;
+    } as unknown as RouteComponentProps<{}>;
     expect(() =>
       render(
         <SettingsTemplate selectedTab="agent-configurations" {...routerProps}>

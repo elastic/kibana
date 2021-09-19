@@ -58,8 +58,7 @@ describe('crawler entry point routes', () => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path:
-          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
+        path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
       });
 
       registerCrawlerEntryPointRoutes({
@@ -100,8 +99,7 @@ describe('crawler entry point routes', () => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path:
-          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
+        path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
       });
 
       registerCrawlerEntryPointRoutes({

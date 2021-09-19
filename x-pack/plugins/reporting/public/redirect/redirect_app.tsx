@@ -44,7 +44,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ share }) => {
 
   useEffect(() => {
     try {
-      const locatorParams = ((window as unknown) as Record<string, LocatorParams>)[
+      const locatorParams = (window as unknown as Record<string, LocatorParams>)[
         REPORTING_REDIRECT_LOCATOR_STORE_KEY
       ];
 

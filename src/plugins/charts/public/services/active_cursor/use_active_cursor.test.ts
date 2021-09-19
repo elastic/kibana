@@ -110,7 +110,7 @@ describe('useActiveCursor', () => {
   test('should trigger cursor pointer update (chart type: datatable - time based, event type: time)', async () => {
     await act(
       {
-        datatables: ([
+        datatables: [
           {
             columns: [
               {
@@ -124,7 +124,7 @@ describe('useActiveCursor', () => {
               },
             ],
           },
-        ] as unknown) as Datatable[],
+        ] as unknown as Datatable[],
       },
       [{ isDateHistogram: true }, { accessors: ['foo_index:foo_field'] }]
     );

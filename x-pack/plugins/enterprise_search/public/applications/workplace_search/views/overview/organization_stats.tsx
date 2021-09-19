@@ -20,9 +20,8 @@ import { OverviewLogic } from './overview_logic';
 import { StatisticCard } from './statistic_card';
 
 export const OrganizationStats: React.FC = () => {
-  const { sourcesCount, pendingInvitationsCount, accountsCount, personalSourcesCount } = useValues(
-    OverviewLogic
-  );
+  const { sourcesCount, pendingInvitationsCount, accountsCount, personalSourcesCount } =
+    useValues(OverviewLogic);
 
   return (
     <ContentSection

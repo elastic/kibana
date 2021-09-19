@@ -40,44 +40,44 @@ export function createMockGraphStore({
   mockedDepsOverwrites?: Partial<jest.Mocked<GraphStoreDependencies>>;
   initialStateOverwrites?: Partial<GraphState>;
 }): MockedGraphEnvironment {
-  const workspaceMock = ({
+  const workspaceMock = {
     runLayout: jest.fn(),
     nodes: [],
     edges: [],
     options: {},
     blocklistedNodes: [],
-  } as unknown) as Workspace;
+  } as unknown as Workspace;
 
-  const savedWorkspace = ({
+  const savedWorkspace = {
     save: jest.fn(),
-  } as unknown) as GraphWorkspaceSavedObject;
+  } as unknown as GraphWorkspaceSavedObject;
 
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
     addBasePath: jest.fn((url: string) => url),
     changeUrl: jest.fn(),
-    chrome: ({
+    chrome: {
       setBreadcrumbs: jest.fn(),
-    } as unknown) as ChromeStart,
+    } as unknown as ChromeStart,
     createWorkspace: jest.fn(),
     getWorkspace: jest.fn(() => workspaceMock),
     getSavedWorkspace: jest.fn(() => savedWorkspace),
     indexPatternProvider: {
       get: jest.fn(() =>
-        Promise.resolve(({ id: '123', title: 'test-pattern' } as unknown) as IndexPattern)
+        Promise.resolve({ id: '123', title: 'test-pattern' } as unknown as IndexPattern)
       ),
     },
     indexPatterns: [
-      ({ id: '123', attributes: { title: 'test-pattern' } } as unknown) as IndexPatternSavedObject,
+      { id: '123', attributes: { title: 'test-pattern' } } as unknown as IndexPatternSavedObject,
     ],
     I18nContext: jest
       .fn()
       .mockImplementation(({ children }: { children: React.ReactNode }) => children),
-    notifications: ({
+    notifications: {
       toasts: {
         addDanger: jest.fn(),
         addSuccess: jest.fn(),
       },
-    } as unknown) as NotificationsStart,
+    } as unknown as NotificationsStart,
     http: {} as HttpStart,
     notifyAngular: jest.fn(),
     savePolicy: 'configAndData',
@@ -85,13 +85,13 @@ export function createMockGraphStore({
     setLiveResponseFields: jest.fn(),
     setUrlTemplates: jest.fn(),
     setWorkspaceInitialized: jest.fn(),
-    overlays: ({
+    overlays: {
       openModal: jest.fn(),
-    } as unknown) as OverlayStart,
-    savedObjectsClient: ({
+    } as unknown as OverlayStart,
+    savedObjectsClient: {
       find: jest.fn(),
       get: jest.fn(),
-    } as unknown) as SavedObjectsClientContract,
+    } as unknown as SavedObjectsClientContract,
     ...mockedDepsOverwrites,
   };
   const sagaMiddleware = createSagaMiddleware();

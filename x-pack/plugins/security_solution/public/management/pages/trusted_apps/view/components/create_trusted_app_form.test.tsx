@@ -181,9 +181,9 @@ describe('When using the Trusted App Form', () => {
 
     it('should show an initial condition entry with labels', () => {
       const defaultCondition = getCondition();
-      const labels = Array.from(
-        defaultCondition.querySelectorAll('.euiFormRow__labelWrapper')
-      ).map((label) => (label.textContent || '').trim());
+      const labels = Array.from(defaultCondition.querySelectorAll('.euiFormRow__labelWrapper')).map(
+        (label) => (label.textContent || '').trim()
+      );
       expect(labels).toEqual(['Field', 'Operator', 'Value', '']);
     });
 

@@ -124,17 +124,18 @@ const PieComponent = (props: PieComponentProps) => {
 
   // handles legend action event data
   const getLegendActionEventData = useCallback(
-    (visData: Datatable) => (series: SeriesIdentifier): ClickTriggerEvent | null => {
-      const data = getFilterEventData(visData, series);
+    (visData: Datatable) =>
+      (series: SeriesIdentifier): ClickTriggerEvent | null => {
+        const data = getFilterEventData(visData, series);
 
-      return {
-        name: 'filterBucket',
-        data: {
-          negate: false,
-          data,
-        },
-      };
-    },
+        return {
+          name: 'filterBucket',
+          data: {
+            negate: false,
+            data,
+          },
+        };
+      },
     []
   );
 
@@ -204,10 +205,10 @@ const PieComponent = (props: PieComponentProps) => {
     },
   });
 
-  const { bucketColumns, metricColumn } = useMemo(() => getColumns(visParams, visData), [
-    visData,
-    visParams,
-  ]);
+  const { bucketColumns, metricColumn } = useMemo(
+    () => getColumns(visParams, visData),
+    [visData, visParams]
+  );
 
   const layers = useMemo(
     () =>
@@ -230,11 +231,10 @@ const PieComponent = (props: PieComponentProps) => {
       syncColors,
     ]
   );
-  const config = useMemo(() => getConfig(visParams, chartTheme, dimensions), [
-    chartTheme,
-    visParams,
-    dimensions,
-  ]);
+  const config = useMemo(
+    () => getConfig(visParams, chartTheme, dimensions),
+    [chartTheme, visParams, dimensions]
+  );
   const tooltip: TooltipProps = {
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
   };

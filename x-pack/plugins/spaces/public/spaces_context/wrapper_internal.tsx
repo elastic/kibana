@@ -54,10 +54,10 @@ export const SpacesContextWrapperInternal = (
   const { spacesManager, getStartServices, feature, children } = props;
 
   const [context, setContext] = useState<SpacesReactContext<Services> | undefined>();
-  const shareToSpacesDataPromise = useMemo(() => getShareToSpacesData(spacesManager, feature), [
-    spacesManager,
-    feature,
-  ]);
+  const shareToSpacesDataPromise = useMemo(
+    () => getShareToSpacesData(spacesManager, feature),
+    [spacesManager, feature]
+  );
 
   useEffect(() => {
     getStartServices().then(([coreStart]) => {

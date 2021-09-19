@@ -408,11 +408,17 @@ export class SavedObjectsRepository {
     const bulkGetDocs = expectedResults
       .filter(isRight)
       .filter(({ value }) => value.esRequestIndex !== undefined)
-      .map(({ value: { object: { type, id } } }) => ({
-        _id: this._serializer.generateRawId(namespace, type, id),
-        _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
-      }));
+      .map(
+        ({
+          value: {
+            object: { type, id },
+          },
+        }) => ({
+          _id: this._serializer.generateRawId(namespace, type, id),
+          _index: this.getIndexForType(type),
+          _source: ['type', 'namespaces'],
+        })
+      );
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget<SavedObjectsRawDocSource>(
           {
@@ -923,7 +929,7 @@ export class SavedObjectsRepository {
     }
 
     return {
-      ...(body.aggregations ? { aggregations: (body.aggregations as unknown) as A } : {}),
+      ...(body.aggregations ? { aggregations: body.aggregations as unknown as A } : {}),
       page,
       per_page: perPage,
       total: body.hits.total,
@@ -1028,11 +1034,11 @@ export class SavedObjectsRepository {
 
         // @ts-expect-error MultiGetHit._source is optional
         if (!doc?.found || !this.rawDocExistsInNamespace(doc, namespace)) {
-          return ({
+          return {
             id,
             type,
             error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-          } as any) as SavedObject<T>;
+          } as any as SavedObject<T>;
         }
 
         // @ts-expect-error MultiGetHit._source is optional
@@ -1517,14 +1523,8 @@ export class SavedObjectsRepository {
           return expectedBulkGetResult;
         }
 
-        const {
-          esRequestIndex,
-          id,
-          type,
-          version,
-          documentToSave,
-          objectNamespace,
-        } = expectedBulkGetResult.value;
+        const { esRequestIndex, id, type, version, documentToSave, objectNamespace } =
+          expectedBulkGetResult.value;
 
         let namespaces;
         let versionProperties;

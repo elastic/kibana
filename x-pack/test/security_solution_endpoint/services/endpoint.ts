@@ -45,12 +45,14 @@ export class EndpointTestResources extends FtrService {
     if (endpointPackageVersion) {
       await this.transform.api.waitForTransformToExist(transformId);
 
-      transform = ((
-        await this.transform.api
-          .getTransform(transformId)
-          .catch(catchAndWrapError)
-          .then((response: { body: GetTransformsResponseSchema }) => response)
-      ).body as GetTransformsResponseSchema).transforms[0];
+      transform = (
+        (
+          await this.transform.api
+            .getTransform(transformId)
+            .catch(catchAndWrapError)
+            .then((response: { body: GetTransformsResponseSchema }) => response)
+        ).body as GetTransformsResponseSchema
+      ).transforms[0];
     } else {
       transform = (
         await this.transform.api.getTransformList(100).catch(catchAndWrapError)

@@ -40,16 +40,16 @@ describe('GetCsvReportPanelAction', () => {
     jest.spyOn(apiClient, 'createImmediateReport');
 
     mockLicense$ = (state: LicenseResults = 'valid') => {
-      return (Rx.of({
+      return Rx.of({
         check: jest.fn().mockImplementation(() => ({ state })),
-      }) as unknown) as LicensingPluginSetup['license$'];
+      }) as unknown as LicensingPluginSetup['license$'];
     };
 
     mockStartServices$ = new Rx.Subject<[CoreStart, object, unknown]>();
     mockStartServicesPayload = [
-      ({
+      {
         application: { capabilities: { dashboard: { downloadCsv: true } } },
-      } as unknown) as CoreStart,
+      } as unknown as CoreStart,
       {},
       null,
     ];
@@ -234,7 +234,7 @@ describe('GetCsvReportPanelAction', () => {
       });
 
       mockStartServices$.next([
-        ({ application: { capabilities: {} } } as unknown) as CoreStart,
+        { application: { capabilities: {} } } as unknown as CoreStart,
         {},
         null,
       ]);

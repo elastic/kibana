@@ -25,8 +25,11 @@ export const areValid = (flags: any) => {
 };
 
 // @ts-ignore
-export const print = (log: ToolingLog) => (msg: string | null = null) => ({ xs, count }) =>
-  log.success(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);
+export const print =
+  (log: ToolingLog) =>
+  (msg: string | null = null) =>
+  ({ xs, count }) =>
+    log.success(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);
 
 export const expectedFlags = () => ({
   string: ['esUrl'],

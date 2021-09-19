@@ -21,7 +21,7 @@ import { PromptFooter } from './prompt_footer';
 import { FLEET_ASSETS_TO_IGNORE } from '../../../../data/common';
 
 const removeAliases = (item: MatchedItem) =>
-  !((item as unknown) as ResolveIndexResponseItemAlias).indices;
+  !(item as unknown as ResolveIndexResponseItemAlias).indices;
 
 interface Props {
   onCancel: () => void;

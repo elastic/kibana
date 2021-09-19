@@ -72,13 +72,11 @@ export const TrustedAppsGrid = memo(() => {
     [history, location]
   );
 
-  const handlePaginationChange: PaginatedContentProps<
-    TrustedApp,
-    TrustedAppCardType
-  >['onChange'] = useTrustedAppsNavigateCallback(({ pageIndex, pageSize }) => ({
-    page_index: pageIndex,
-    page_size: pageSize,
-  }));
+  const handlePaginationChange: PaginatedContentProps<TrustedApp, TrustedAppCardType>['onChange'] =
+    useTrustedAppsNavigateCallback(({ pageIndex, pageSize }) => ({
+      page_index: pageIndex,
+      page_size: pageSize,
+    }));
 
   return (
     <RootWrapper>

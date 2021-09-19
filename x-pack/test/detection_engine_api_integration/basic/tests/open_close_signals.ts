@@ -115,13 +115,12 @@ export default ({ getService }: FtrProviderContext) => {
           .send(setSignalStatus({ signalIds, status: 'closed' }))
           .expect(200);
 
-        const {
-          body: signalsClosed,
-        }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds(signalIds))
-          .expect(200);
+        const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+          await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds(signalIds))
+            .expect(200);
         expect(signalsClosed.hits.hits.length).to.equal(10);
       });
 
@@ -142,13 +141,12 @@ export default ({ getService }: FtrProviderContext) => {
           .send(setSignalStatus({ signalIds, status: 'closed' }))
           .expect(200);
 
-        const {
-          body: signalsClosed,
-        }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds(signalIds))
-          .expect(200);
+        const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+          await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds(signalIds))
+            .expect(200);
 
         const everySignalClosed = signalsClosed.hits.hits.every(
           (hit) => hit._source?.signal?.status === 'closed'

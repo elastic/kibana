@@ -29,8 +29,10 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 interface Props {
   serviceName: string;
 }
-type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
-type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
+type ErrorGroupMainStatistics =
+  APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
+type ErrorGroupDetailedStatistics =
+  APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
 type SortField = 'name' | 'lastSeen' | 'occurrences';

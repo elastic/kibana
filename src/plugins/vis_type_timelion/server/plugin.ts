@@ -36,7 +36,8 @@ export interface TimelionPluginStartDeps {
  * Represents Timelion Plugin instance that will be managed by the Kibana plugin system.
  */
 export class TimelionPlugin
-  implements Plugin<RecursiveReadonly<PluginSetupContract>, void, TimelionPluginStartDeps> {
+  implements Plugin<RecursiveReadonly<PluginSetupContract>, void, TimelionPluginStartDeps>
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<TimelionPluginStartDeps>): RecursiveReadonly<PluginSetupContract> {

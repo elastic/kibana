@@ -18,9 +18,7 @@ const context = createContext<Partial<SpacesReactContextValue<KibanaServices>>>(
 export const useSpaces = <Extra extends object = {}>(): SpacesReactContextValue<
   KibanaServices & Extra
 > =>
-  useContext(
-    (context as unknown) as React.Context<SpacesReactContextValue<KibanaServices & Extra>>
-  );
+  useContext(context as unknown as React.Context<SpacesReactContextValue<KibanaServices & Extra>>);
 
 export const createSpacesReactContext = <Services extends KibanaServices>(
   services: Services,
@@ -38,6 +36,6 @@ export const createSpacesReactContext = <Services extends KibanaServices>(
   return {
     value,
     Provider,
-    Consumer: (context.Consumer as unknown) as React.Consumer<SpacesReactContextValue<Services>>,
+    Consumer: context.Consumer as unknown as React.Consumer<SpacesReactContextValue<Services>>,
   };
 };

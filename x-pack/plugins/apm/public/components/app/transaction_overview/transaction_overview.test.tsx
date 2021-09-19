@@ -24,10 +24,10 @@ import {
 import { fromQuery } from '../../shared/Links/url_helpers';
 import { TransactionOverview } from './';
 
-const KibanaReactContext = createKibanaReactContext(({
+const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => true },
   usageCollection: { reportUiCounter: () => {} },
-} as unknown) as Partial<CoreStart>);
+} as unknown as Partial<CoreStart>);
 
 const history = createMemoryHistory();
 jest.spyOn(history, 'push');

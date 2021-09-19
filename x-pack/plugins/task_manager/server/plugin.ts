@@ -49,7 +49,8 @@ export type TaskManagerStartContract = Pick<
   } & { supportsEphemeralTasks: () => boolean };
 
 export class TaskManagerPlugin
-  implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
+  implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>
+{
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   private taskManagerId?: string;

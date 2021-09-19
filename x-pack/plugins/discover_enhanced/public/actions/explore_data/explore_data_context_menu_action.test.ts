@@ -16,7 +16,7 @@ import {
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import { DiscoverAppLocator } from '../../../../../../src/plugins/discover/public';
 
-const i18nTranslateSpy = (i18n.translate as unknown) as jest.SpyInstance;
+const i18nTranslateSpy = i18n.translate as unknown as jest.SpyInstance;
 
 jest.mock('@kbn/i18n', () => ({
   i18n: {
@@ -79,11 +79,11 @@ const setup = ({ dashboardOnlyMode = false }: { dashboardOnlyMode?: boolean } = 
     ],
   };
 
-  const embeddable: VisualizeEmbeddableContract = ({
+  const embeddable: VisualizeEmbeddableContract = {
     type: VISUALIZE_EMBEDDABLE_TYPE,
     getInput: () => input,
     getOutput: () => output,
-  } as unknown) as VisualizeEmbeddableContract;
+  } as unknown as VisualizeEmbeddableContract;
 
   const context = {
     embeddable,

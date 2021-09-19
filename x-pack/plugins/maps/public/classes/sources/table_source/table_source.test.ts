@@ -59,7 +59,7 @@ describe('TableSource', () => {
       });
 
       const propertiesMap = await tableSource.getPropertiesMap(
-        ({} as unknown) as VectorJoinSourceRequestMeta,
+        {} as unknown as VectorJoinSourceRequestMeta,
         'a',
         'b',
         () => {}
@@ -178,7 +178,7 @@ describe('TableSource', () => {
       try {
         await tableSource.getGeoJsonWithMeta(
           'foobar',
-          ({} as unknown) as MapFilters & {
+          {} as unknown as MapFilters & {
             applyGlobalQuery: boolean;
             applyGlobalTime: boolean;
             fieldNames: string[];

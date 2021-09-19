@@ -23,8 +23,9 @@ export async function getESUpgradeStatus(
   const cluster = getClusterDeprecations(deprecations);
   const indices = await getCombinedIndexInfos(deprecations, dataClient);
 
-  const totalCriticalDeprecations = cluster.concat(indices).filter((d) => d.level === 'critical')
-    .length;
+  const totalCriticalDeprecations = cluster
+    .concat(indices)
+    .filter((d) => d.level === 'critical').length;
 
   return {
     totalCriticalDeprecations,

@@ -288,7 +288,7 @@ describe('utils', () => {
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = ({ data: [{ random: 1 }] } as unknown) as PartialAlert;
+      const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialAlert;
       const output = transform(unsafeCast);
       expect(output).toBeNull();
     });
@@ -408,7 +408,7 @@ describe('utils', () => {
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
+      const unsafeCast = { name: 'something else' } as unknown as PartialAlert;
       const output = transformOrBulkError('rule-1', unsafeCast, {
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         actions: [],
@@ -480,7 +480,7 @@ describe('utils', () => {
     });
 
     test('returns 1 error and success of false if the data is not of type siem alert', () => {
-      const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
+      const unsafeCast = { name: 'something else' } as unknown as PartialAlert;
       const output = transformOrImportError('rule-1', unsafeCast, {
         success: true,
         success_count: 1,

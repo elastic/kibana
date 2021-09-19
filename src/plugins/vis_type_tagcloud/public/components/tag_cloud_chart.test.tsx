@@ -23,7 +23,7 @@ jest.mock('../services', () => ({
 }));
 
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
-const visData = ({
+const visData = {
   columns: [
     {
       id: 'col-0',
@@ -41,7 +41,7 @@ const visData = ({
     { 'col-0': 'DE', 'col-1': 4 },
     { 'col-0': 'BR', 'col-1': 3 },
   ],
-} as unknown) as Datatable;
+} as unknown as Datatable;
 
 const visParams = {
   bucket: { accessor: 0, format: {} },

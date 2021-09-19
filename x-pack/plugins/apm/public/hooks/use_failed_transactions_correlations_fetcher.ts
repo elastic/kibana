@@ -43,18 +43,16 @@ export const useFailedTransactionsCorrelationsFetcher = () => {
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
 
-  const [
-    fetchState,
-    setFetchState,
-  ] = useState<FailedTransactionsCorrelationsFetcherState>({
-    isComplete: false,
-    isRunning: false,
-    loaded: 0,
-    ccsWarning: false,
-    values: [],
-    log: [],
-    total: 100,
-  });
+  const [fetchState, setFetchState] =
+    useState<FailedTransactionsCorrelationsFetcherState>({
+      isComplete: false,
+      isRunning: false,
+      loaded: 0,
+      ccsWarning: false,
+      values: [],
+      log: [],
+      total: 100,
+    });
 
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
@@ -105,7 +103,7 @@ export const useFailedTransactionsCorrelationsFetcher = () => {
               searchSubscription$.current?.unsubscribe();
               setFetchState((prevState) => ({
                 ...prevState,
-                error: (res as unknown) as Error,
+                error: res as unknown as Error,
                 isRunning: false,
               }));
             }

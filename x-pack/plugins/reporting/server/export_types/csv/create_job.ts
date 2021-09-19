@@ -26,10 +26,10 @@ export const createJobFnFactory: CreateJobFnFactory<
     const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
 
     const savedObjectsClient = context.core.savedObjects.client;
-    const indexPatternSavedObject = ((await savedObjectsClient.get(
+    const indexPatternSavedObject = (await savedObjectsClient.get(
       'index-pattern',
       jobParams.indexPatternId
-    )) as unknown) as IndexPatternSavedObjectDeprecatedCSV;
+    )) as unknown as IndexPatternSavedObjectDeprecatedCSV;
 
     return {
       isDeprecated: true,

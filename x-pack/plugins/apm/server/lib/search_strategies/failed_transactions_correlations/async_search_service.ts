@@ -36,9 +36,8 @@ export const asyncErrorCorrelationSearchServiceProvider = (
         includeFrozen,
       };
 
-      const {
-        fieldCandidates: candidates,
-      } = await fetchTransactionDurationFieldCandidates(esClient, params);
+      const { fieldCandidates: candidates } =
+        await fetchTransactionDurationFieldCandidates(esClient, params);
 
       const fieldCandidates = candidates.filter((t) => !(t === EVENT_OUTCOME));
 

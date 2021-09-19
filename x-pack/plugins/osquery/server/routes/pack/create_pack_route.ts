@@ -32,7 +32,11 @@ export const createPackRoute = (router: IRouter) => {
       }));
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { attributes, references: _, ...restSO } = await savedObjectsClient.create(
+      const {
+        attributes,
+        references: _,
+        ...restSO
+      } = await savedObjectsClient.create(
         packSavedObjectType,
         {
           name,

@@ -20,7 +20,8 @@ export interface FailedTransactionsCorrelationValue {
   successPercentage: number;
 }
 
-export type FailureCorrelationImpactThreshold = typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
+export type FailureCorrelationImpactThreshold =
+  typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
 
 export interface CorrelationsTerm {
   fieldName: string;

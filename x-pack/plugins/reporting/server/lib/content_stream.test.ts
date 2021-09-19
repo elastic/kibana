@@ -19,9 +19,9 @@ describe('ContentStream', () => {
 
   beforeEach(() => {
     client = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    exportTypesRegistry = ({
+    exportTypesRegistry = {
       get: jest.fn(() => ({})),
-    } as unknown) as typeof exportTypesRegistry;
+    } as unknown as typeof exportTypesRegistry;
     logger = createMockLevelLogger();
     stream = new ContentStream(client, exportTypesRegistry, logger, {
       id: 'something',

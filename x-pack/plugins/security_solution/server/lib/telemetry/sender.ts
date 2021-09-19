@@ -102,7 +102,8 @@ export class TelemetryEventsSender {
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.agentService = endpointContextService?.getAgentService();
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
-    this.savedObjectsClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
+    this.savedObjectsClient =
+      core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
     this.exceptionListClient = exceptionListClient;
 
     if (taskManager && this.diagTask && this.epMetricsTask) {

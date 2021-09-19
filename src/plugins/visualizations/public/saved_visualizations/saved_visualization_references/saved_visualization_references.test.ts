@@ -119,7 +119,7 @@ describe('injectReferences', () => {
       id: '1',
       title: 'test',
       savedSearchRefName: 'search_0',
-      visState: ({
+      visState: {
         type: 'input_control_vis',
         params: {
           controls: [
@@ -132,7 +132,7 @@ describe('injectReferences', () => {
             },
           ],
         },
-      } as unknown) as SavedVisState,
+      } as unknown as SavedVisState,
     } as VisSavedObject;
     const references = [
       {
@@ -185,7 +185,7 @@ describe('injectReferences', () => {
     const context = {
       id: '1',
       title: 'test',
-      visState: ({
+      visState: {
         type: 'input_control_vis',
         params: {
           controls: [
@@ -195,7 +195,7 @@ describe('injectReferences', () => {
             },
           ],
         },
-      } as unknown) as SavedVisState,
+      } as unknown as SavedVisState,
     } as VisSavedObject;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
       `"Could not find index pattern reference \\"control_0_index_pattern\\""`

@@ -21,7 +21,11 @@ export function useTransactionBreakdown({
   } = useUrlParams();
   const { transactionType, serviceName } = useApmServiceContext();
 
-  const { data = { timeseries: undefined }, error, status } = useFetcher(
+  const {
+    data = { timeseries: undefined },
+    error,
+    status,
+  } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
         return callApmApi({

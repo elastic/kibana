@@ -25,8 +25,15 @@ export interface UseFormReturn<T extends FormData, I extends FormData> {
 export function useForm<T extends FormData = FormData, I extends FormData = T>(
   formConfig?: FormConfig<T, I>
 ): UseFormReturn<T, I> {
-  const { onSubmit, schema, serializer, deserializer, options, id = 'default', defaultValue } =
-    formConfig ?? {};
+  const {
+    onSubmit,
+    schema,
+    serializer,
+    deserializer,
+    options,
+    id = 'default',
+    defaultValue,
+  } = formConfig ?? {};
 
   const initDefaultValue = useCallback(
     (_defaultValue?: Partial<T>): { [key: string]: any } => {

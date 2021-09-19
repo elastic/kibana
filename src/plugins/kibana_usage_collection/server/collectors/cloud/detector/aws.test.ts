@@ -263,11 +263,11 @@ describe('AWS', () => {
 
       it('returns unconfirmed if all files return errors', async () => {
         const awsFailedFileSystem = new AWSCloudService({
-          _fs: ({
+          _fs: {
             readFile: () => {
               throw new Error('oops');
             },
-          } as unknown) as typeof fs,
+          } as unknown as typeof fs,
           _isWindows: false,
         });
 

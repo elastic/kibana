@@ -463,9 +463,11 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(0).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'machine.os' }]);
+    (
+      wrapper.find(EuiComboBox).at(0).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'machine.os' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       { field: 'machine.os', id: '123', operator: 'included', type: 'match', value: '' },
@@ -501,9 +503,11 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(1).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'is not' }]);
+    (
+      wrapper.find(EuiComboBox).at(1).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'is not' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '1234' },
@@ -539,9 +543,11 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-      onCreateOption: (a: string) => void;
-    }).onCreateOption('127.0.0.1');
+    (
+      wrapper.find(EuiComboBox).at(2).props() as unknown as {
+        onCreateOption: (a: string) => void;
+      }
+    ).onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith(
       { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '127.0.0.1' },
@@ -577,9 +583,11 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-      onCreateOption: (a: string) => void;
-    }).onCreateOption('127.0.0.1');
+    (
+      wrapper.find(EuiComboBox).at(2).props() as unknown as {
+        onCreateOption: (a: string) => void;
+      }
+    ).onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith(
       { field: 'ip', id: '123', operator: 'included', type: 'match_any', value: ['127.0.0.1'] },
@@ -615,9 +623,11 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'some name' }]);
+    (
+      wrapper.find(EuiComboBox).at(2).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'some name' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       {
@@ -660,9 +670,11 @@ describe('BuilderEntryItem', () => {
     );
 
     await waitFor(() => {
-      ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-        onBlur: () => void;
-      }).onBlur();
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
     });
 
     expect(mockSetErrorExists).toHaveBeenCalledWith(true);
@@ -697,14 +709,18 @@ describe('BuilderEntryItem', () => {
     );
 
     await waitFor(() => {
-      ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-        onBlur: () => void;
-      }).onBlur();
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
 
       // Invalid input because field type is number
-      ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-        onSearchChange: (arg: string) => void;
-      }).onSearchChange('hellooo');
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onSearchChange: (arg: string) => void;
+        }
+      ).onSearchChange('hellooo');
     });
 
     expect(mockSetErrorExists).toHaveBeenCalledWith(true);

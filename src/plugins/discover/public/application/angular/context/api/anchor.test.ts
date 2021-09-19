@@ -22,7 +22,7 @@ describe('context app', function () {
 
   describe('function fetchAnchor', function () {
     beforeEach(() => {
-      searchSourceStub = createSearchSourceStub(([{ _id: 'hit1' }] as unknown) as EsHitRecordList);
+      searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }] as unknown as EsHitRecordList);
       fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub);
     });
 
@@ -145,7 +145,7 @@ describe('context app', function () {
 
   describe('useNewFields API', () => {
     beforeEach(() => {
-      searchSourceStub = createSearchSourceStub(([{ _id: 'hit1' }] as unknown) as EsHitRecordList);
+      searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }] as unknown as EsHitRecordList);
       fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub, true);
     });
 

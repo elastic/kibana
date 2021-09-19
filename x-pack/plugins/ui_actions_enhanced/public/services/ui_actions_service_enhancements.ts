@@ -31,7 +31,8 @@ export interface UiActionsServiceEnhancementsParams {
 }
 
 export class UiActionsServiceEnhancements
-  implements PersistableStateDefinition<DynamicActionsState> {
+  implements PersistableStateDefinition<DynamicActionsState>
+{
   protected readonly actionFactories: ActionFactoryRegistry;
   protected readonly deps: Omit<UiActionsServiceEnhancementsParams, 'actionFactories'>;
 

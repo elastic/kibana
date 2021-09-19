@@ -231,7 +231,7 @@ describe('AggConfigs', () => {
   describe('#toDsl', () => {
     beforeEach(() => {
       indexPattern = stubIndexPattern as IndexPattern;
-      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
     });
 
     it('uses the sorted aggs', () => {
@@ -534,7 +534,7 @@ describe('AggConfigs', () => {
   describe('#postFlightTransform', () => {
     it('merges together splitted responses for multiple shifts', () => {
       indexPattern = stubIndexPattern as IndexPattern;
-      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
       const configStates = [
         {
           enabled: true,
@@ -644,9 +644,7 @@ describe('AggConfigs', () => {
           },
         },
       };
-      const mergedResponse = ac.postFlightTransform(
-        (response as unknown) as IEsSearchResponse<any>
-      );
+      const mergedResponse = ac.postFlightTransform(response as unknown as IEsSearchResponse<any>);
       expect(mergedResponse.rawResponse).toEqual({
         aggregations: {
           '1': {
@@ -692,7 +690,7 @@ describe('AggConfigs', () => {
 
     it('shifts date histogram keys and renames doc_count properties for single shift', () => {
       indexPattern = stubIndexPattern as IndexPattern;
-      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
       const configStates = [
         {
           enabled: true,
@@ -743,9 +741,7 @@ describe('AggConfigs', () => {
           },
         },
       };
-      const mergedResponse = ac.postFlightTransform(
-        (response as unknown) as IEsSearchResponse<any>
-      );
+      const mergedResponse = ac.postFlightTransform(response as unknown as IEsSearchResponse<any>);
       expect(mergedResponse.rawResponse).toEqual({
         aggregations: {
           '1': {

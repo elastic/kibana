@@ -74,8 +74,10 @@ export const readRulesRoute = (
           const [currentStatus] = ruleStatuses;
           if (currentStatus != null && rule.executionStatus.status === 'error') {
             currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
-            currentStatus.attributes.lastFailureAt = rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.statusDate = rule.executionStatus.lastExecutionDate.toISOString();
+            currentStatus.attributes.lastFailureAt =
+              rule.executionStatus.lastExecutionDate.toISOString();
+            currentStatus.attributes.statusDate =
+              rule.executionStatus.lastExecutionDate.toISOString();
             currentStatus.attributes.status = RuleExecutionStatus.failed;
           }
           const transformed = transform(rule, ruleActions, currentStatus);

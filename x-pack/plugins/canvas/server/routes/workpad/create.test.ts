@@ -12,13 +12,13 @@ import { initializeCreateWorkpadRoute } from './create';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import { getMockedRouterDeps } from '../test_helpers';
 
-let mockRouteContext = ({
+let mockRouteContext = {
   core: {
     savedObjects: {
       client: savedObjectsClientMock.create(),
     },
   },
-} as unknown) as RequestHandlerContext;
+} as unknown as RequestHandlerContext;
 
 const mockedUUID = '123abc';
 const now = new Date();
@@ -31,13 +31,13 @@ describe('POST workpad', () => {
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
-    mockRouteContext = ({
+    mockRouteContext = {
       core: {
         savedObjects: {
           client: savedObjectsClientMock.create(),
         },
       },
-    } as unknown) as RequestHandlerContext;
+    } as unknown as RequestHandlerContext;
 
     clock = sinon.useFakeTimers(now);
 

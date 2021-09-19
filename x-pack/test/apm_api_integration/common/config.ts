@@ -20,21 +20,20 @@ interface Config {
   kibanaConfig?: Record<string, string | string[]>;
 }
 
-const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async (
-  context: InheritedFtrProviderContext
-) => {
-  const security = context.getService('security');
-  await security.init();
+const supertestAsApmUser =
+  (kibanaServer: UrlObject, apmUser: ApmUser) => async (context: InheritedFtrProviderContext) => {
+    const security = context.getService('security');
+    await security.init();
 
-  await createApmUser(security, apmUser);
+    await createApmUser(security, apmUser);
 
-  const url = format({
-    ...kibanaServer,
-    auth: `${apmUser}:${APM_TEST_PASSWORD}`,
-  });
+    const url = format({
+      ...kibanaServer,
+      auth: `${apmUser}:${APM_TEST_PASSWORD}`,
+    });
 
-  return supertest(url);
-};
+    return supertest(url);
+  };
 
 export function createTestConfig(config: Config) {
   const { license, name, kibanaConfig } = config;

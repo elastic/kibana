@@ -63,7 +63,8 @@ export class APMPlugin
       void,
       APMPluginSetupDependencies,
       APMPluginStartDependencies
-    > {
+    >
+{
   private currentConfig?: APMConfig;
   private logger?: Logger;
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -172,9 +173,10 @@ export class APMPlugin
       })
     );
 
-    const telemetryUsageCounter = resourcePlugins.usageCollection?.setup.createUsageCounter(
-      APM_SERVER_FEATURE_ID
-    );
+    const telemetryUsageCounter =
+      resourcePlugins.usageCollection?.setup.createUsageCounter(
+        APM_SERVER_FEATURE_ID
+      );
 
     registerRoutes({
       core: {

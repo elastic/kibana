@@ -77,9 +77,9 @@ type ReactMouseEvent = React.MouseEvent<HTMLAnchorElement, MouseEvent> &
   React.MouseEvent<HTMLButtonElement, MouseEvent>;
 
 // need this for MAX_HISTOGRAM value
-const uiSettingsMock = ({
+const uiSettingsMock = {
   get: jest.fn().mockReturnValue(100),
-} as unknown) as IUiSettingsClient;
+} as unknown as IUiSettingsClient;
 
 const sourceField = 'MyField';
 const defaultOptions = {

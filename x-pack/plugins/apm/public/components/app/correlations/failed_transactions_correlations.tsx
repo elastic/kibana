@@ -105,10 +105,8 @@ export function FailedTransactionsCorrelations({
     return cancelFetch;
   }, [cancelFetch, startFetchHandler]);
 
-  const [
-    selectedSignificantTerm,
-    setSelectedSignificantTerm,
-  ] = useState<FailedTransactionsCorrelationValue | null>(null);
+  const [selectedSignificantTerm, setSelectedSignificantTerm] =
+    useState<FailedTransactionsCorrelationValue | null>(null);
 
   const selectedTerm = useMemo(() => {
     if (selectedSignificantTerm) return selectedSignificantTerm;
@@ -353,9 +351,8 @@ export function FailedTransactionsCorrelations({
     }
   }, [error, notifications.toasts]);
 
-  const [sortField, setSortField] = useState<
-    keyof FailedTransactionsCorrelationValue
-  >('normalizedScore');
+  const [sortField, setSortField] =
+    useState<keyof FailedTransactionsCorrelationValue>('normalizedScore');
   const [sortDirection, setSortDirection] = useState<Direction>('desc');
 
   const onTableChange = useCallback(({ sort }) => {

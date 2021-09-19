@@ -493,9 +493,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 (
                   await Promise.all(
                     (
-                      await (await testSubjects.find('editorSelectedFormatId')).findAllByTagName(
-                        'option'
-                      )
+                      await (
+                        await testSubjects.find('editorSelectedFormatId')
+                      ).findAllByTagName('option')
                     ).map((option) => option.getAttribute('value'))
                   )
                 ).filter(Boolean)

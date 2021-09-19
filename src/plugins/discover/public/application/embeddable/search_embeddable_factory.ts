@@ -28,7 +28,8 @@ interface StartServices {
 }
 
 export class SearchEmbeddableFactory
-  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SavedSearchEmbeddable> {
+  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SavedSearchEmbeddable>
+{
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private $injector: auto.IInjectorService | null;
   private getInjector: () => Promise<auto.IInjectorService> | null;

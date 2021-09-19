@@ -19,7 +19,11 @@ const INITIAL_DATA = {
 export function useWaterfallFetcher() {
   const { urlParams } = useUrlParams();
   const { traceId, start, end, transactionId } = urlParams;
-  const { data = INITIAL_DATA, status, error } = useFetcher(
+  const {
+    data = INITIAL_DATA,
+    status,
+    error,
+  } = useFetcher(
     (callApmApi) => {
       if (traceId && start && end) {
         return callApmApi({
@@ -37,10 +41,10 @@ export function useWaterfallFetcher() {
     [traceId, start, end]
   );
 
-  const waterfall = useMemo(() => getWaterfall(data, transactionId), [
-    data,
-    transactionId,
-  ]);
+  const waterfall = useMemo(
+    () => getWaterfall(data, transactionId),
+    [data, transactionId]
+  );
 
   return { waterfall, status, error, exceedsMax: data.trace.exceedsMax };
 }

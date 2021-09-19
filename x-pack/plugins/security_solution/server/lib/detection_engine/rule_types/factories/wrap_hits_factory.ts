@@ -14,44 +14,46 @@ import { filterDuplicateSignals } from '../../signals/filter_duplicate_signals';
 import type { ConfigType } from '../../../../config';
 import { WrappedRACAlert } from '../types';
 
-export const wrapHitsFactory = ({
-  logger,
-  ignoreFields,
-  mergeStrategy,
-  ruleSO,
-  spaceId,
-}: {
-  logger: Logger;
-  ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  ignoreFields: ConfigType['alertIgnoreFields'];
-  spaceId: string | null | undefined;
-}): WrapHits => (events, buildReasonMessage) => {
-  try {
-    const wrappedDocs: WrappedRACAlert[] = events.flatMap((doc) => [
-      {
-        _index: '',
-        _id: generateId(
-          doc._index,
-          doc._id,
-          String(doc._version),
-          ruleSO.attributes.params.ruleId ?? ''
-        ),
-        _source: buildBulkBody(
-          spaceId,
-          ruleSO,
-          doc,
-          mergeStrategy,
-          ignoreFields,
-          true,
-          buildReasonMessage
-        ),
-      },
-    ]);
+export const wrapHitsFactory =
+  ({
+    logger,
+    ignoreFields,
+    mergeStrategy,
+    ruleSO,
+    spaceId,
+  }: {
+    logger: Logger;
+    ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
+    mergeStrategy: ConfigType['alertMergeStrategy'];
+    ignoreFields: ConfigType['alertIgnoreFields'];
+    spaceId: string | null | undefined;
+  }): WrapHits =>
+  (events, buildReasonMessage) => {
+    try {
+      const wrappedDocs: WrappedRACAlert[] = events.flatMap((doc) => [
+        {
+          _index: '',
+          _id: generateId(
+            doc._index,
+            doc._id,
+            String(doc._version),
+            ruleSO.attributes.params.ruleId ?? ''
+          ),
+          _source: buildBulkBody(
+            spaceId,
+            ruleSO,
+            doc,
+            mergeStrategy,
+            ignoreFields,
+            true,
+            buildReasonMessage
+          ),
+        },
+      ]);
 
-    return filterDuplicateSignals(ruleSO.id, wrappedDocs, true);
-  } catch (error) {
-    logger.error(error);
-    return [];
-  }
-};
+      return filterDuplicateSignals(ruleSO.id, wrappedDocs, true);
+    } catch (error) {
+      logger.error(error);
+      return [];
+    }
+  };

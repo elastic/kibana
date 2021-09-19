@@ -15,7 +15,7 @@ describe('updateRules', () => {
   it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
     const rulesOptionsMock = getUpdateRulesOptionsMock();
     rulesOptionsMock.ruleUpdate.enabled = false;
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue(
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).get.mockResolvedValue(
       getAlertMock(getQueryRuleParams())
     );
 
@@ -32,7 +32,7 @@ describe('updateRules', () => {
     const rulesOptionsMock = getUpdateRulesOptionsMock();
     rulesOptionsMock.ruleUpdate.enabled = true;
 
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue({
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).get.mockResolvedValue({
       ...getAlertMock(getQueryRuleParams()),
       enabled: false,
     });
@@ -50,7 +50,7 @@ describe('updateRules', () => {
     const rulesOptionsMock = getUpdateMlRulesOptionsMock();
     rulesOptionsMock.ruleUpdate.enabled = true;
 
-    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue(
+    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).get.mockResolvedValue(
       getAlertMock(getMlRuleParams())
     );
 

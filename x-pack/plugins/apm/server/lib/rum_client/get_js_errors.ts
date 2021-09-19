@@ -107,9 +107,11 @@ export async function getJSErrors({
       return {
         count: impactedPages.pageCount.value,
         errorGroupId: key,
-        errorMessage: (sample.hits.hits[0]._source as {
-          error: { exception: Array<{ message: string }> };
-        }).error.exception?.[0].message,
+        errorMessage: (
+          sample.hits.hits[0]._source as {
+            error: { exception: Array<{ message: string }> };
+          }
+        ).error.exception?.[0].message,
       };
     }),
   };

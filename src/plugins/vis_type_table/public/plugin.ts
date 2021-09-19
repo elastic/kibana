@@ -34,7 +34,8 @@ export interface TablePluginStartDependencies {
 
 /** @internal */
 export class TableVisPlugin
-  implements AsyncPlugin<void, void, TablePluginSetupDependencies, TablePluginStartDependencies> {
+  implements AsyncPlugin<void, void, TablePluginSetupDependencies, TablePluginStartDependencies>
+{
   initializerContext: PluginInitializerContext<ClientConfigType>;
 
   constructor(initializerContext: PluginInitializerContext) {

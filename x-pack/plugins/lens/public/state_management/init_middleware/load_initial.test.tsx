@@ -80,7 +80,7 @@ describe('Mounter', () => {
           visualizationMap,
         },
         jest.fn(),
-        ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
+        { savedObjectId: defaultSavedObjectId } as unknown as LensEmbeddableInput
       );
     });
     expect(mockDatasource.initialize).toHaveBeenCalled();
@@ -201,7 +201,7 @@ describe('Mounter', () => {
             visualizationMap,
           },
           jest.fn(),
-          ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
+          { savedObjectId: defaultSavedObjectId } as unknown as LensEmbeddableInput
         );
       });
 
@@ -236,7 +236,7 @@ describe('Mounter', () => {
             visualizationMap,
           },
           jest.fn(),
-          ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
+          { savedObjectId: defaultSavedObjectId } as unknown as LensEmbeddableInput
         );
       });
 
@@ -249,7 +249,7 @@ describe('Mounter', () => {
             visualizationMap,
           },
           jest.fn(),
-          ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
+          { savedObjectId: defaultSavedObjectId } as unknown as LensEmbeddableInput
         );
       });
 
@@ -264,7 +264,7 @@ describe('Mounter', () => {
             visualizationMap,
           },
           jest.fn(),
-          ({ savedObjectId: '5678' } as unknown) as LensEmbeddableInput
+          { savedObjectId: '5678' } as unknown as LensEmbeddableInput
         );
       });
 
@@ -288,7 +288,7 @@ describe('Mounter', () => {
             visualizationMap,
           },
           redirectCallback,
-          ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
+          { savedObjectId: defaultSavedObjectId } as unknown as LensEmbeddableInput
         );
       });
       expect(services.attributeService.unwrapAttributes).toHaveBeenCalledWith({
@@ -310,7 +310,7 @@ describe('Mounter', () => {
             visualizationMap,
           },
           jest.fn(),
-          ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
+          { savedObjectId: defaultSavedObjectId } as unknown as LensEmbeddableInput
         );
       });
 

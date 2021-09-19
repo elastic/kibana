@@ -20,7 +20,7 @@ describe('GeoJsonFileSource', () => {
     it('should get null bounds', async () => {
       const geojsonFileSource = new GeoJsonFileSource({});
       expect(
-        await geojsonFileSource.getBoundsForFilters(({} as unknown) as BoundsFilters, () => {})
+        await geojsonFileSource.getBoundsForFilters({} as unknown as BoundsFilters, () => {})
       ).toEqual(null);
     });
 
@@ -51,7 +51,7 @@ describe('GeoJsonFileSource', () => {
 
       expect(geojsonFileSource.isBoundsAware()).toBe(true);
       expect(
-        await geojsonFileSource.getBoundsForFilters(({} as unknown) as BoundsFilters, () => {})
+        await geojsonFileSource.getBoundsForFilters({} as unknown as BoundsFilters, () => {})
       ).toEqual({
         maxLat: 3,
         maxLon: 2,

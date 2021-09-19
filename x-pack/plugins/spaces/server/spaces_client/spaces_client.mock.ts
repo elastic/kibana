@@ -11,7 +11,7 @@ import { DEFAULT_SPACE_ID } from '../../common/constants';
 import type { SpacesClient } from './spaces_client';
 
 const createSpacesClientMock = () =>
-  (({
+  ({
     getAll: jest.fn().mockResolvedValue([
       {
         id: DEFAULT_SPACE_ID,
@@ -31,7 +31,7 @@ const createSpacesClientMock = () =>
     update: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     delete: jest.fn(),
     disableLegacyUrlAliases: jest.fn(),
-  } as unknown) as jest.Mocked<SpacesClient>);
+  } as unknown as jest.Mocked<SpacesClient>);
 
 export const spacesClientMock = {
   create: createSpacesClientMock,

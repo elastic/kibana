@@ -189,11 +189,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         return field.aggregatable;
       });
 
-      return fields.map(
-        (field): IField => {
-          return this.createField({ fieldName: field.name });
-        }
-      );
+      return fields.map((field): IField => {
+        return this.createField({ fieldName: field.name });
+      });
     } catch (error) {
       // failed index-pattern retrieval will show up as error-message in the layer-toc-entry
       return [];
@@ -636,11 +634,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async getLeftJoinFields(): Promise<IField[]> {
     const indexPattern = await this.getIndexPattern();
     // Left fields are retrieved from _source.
-    return getSourceFields(indexPattern.fields).map(
-      (field): IField => {
-        return this.createField({ fieldName: field.name });
-      }
-    );
+    return getSourceFields(indexPattern.fields).map((field): IField => {
+      return this.createField({ fieldName: field.name });
+    });
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
@@ -897,7 +893,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       sessionId: searchFilters.searchSessionId,
       legacyHitsTotal: false,
     });
-    return !isTotalHitsGreaterThan((resp.hits.total as unknown) as TotalHits, maxResultWindow);
+    return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }
 }
 

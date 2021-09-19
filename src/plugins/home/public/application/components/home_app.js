@@ -27,14 +27,8 @@ const RedirectToDefaultApp = () => {
 };
 
 export function HomeApp({ directories, solutions }) {
-  const {
-    savedObjectsClient,
-    getBasePath,
-    addBasePath,
-    environmentService,
-    telemetry,
-    http,
-  } = getServices();
+  const { savedObjectsClient, getBasePath, addBasePath, environmentService, telemetry, http } =
+    getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
 

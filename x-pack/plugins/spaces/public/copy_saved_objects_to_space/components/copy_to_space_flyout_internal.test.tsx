@@ -257,13 +257,8 @@ describe.skip('CopyToSpaceFlyout', () => {
   });
 
   it('allows the form to be filled out', async () => {
-    const {
-      wrapper,
-      onClose,
-      mockSpacesManager,
-      mockToastNotifications,
-      savedObjectToCopy,
-    } = await setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy } =
+      await setup();
 
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {
@@ -319,13 +314,8 @@ describe.skip('CopyToSpaceFlyout', () => {
   });
 
   it('allows conflicts to be resolved', async () => {
-    const {
-      wrapper,
-      onClose,
-      mockSpacesManager,
-      mockToastNotifications,
-      savedObjectToCopy,
-    } = await setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy } =
+      await setup();
 
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {
@@ -464,13 +454,8 @@ describe.skip('CopyToSpaceFlyout', () => {
   });
 
   it('displays a warning when missing references are encountered', async () => {
-    const {
-      wrapper,
-      onClose,
-      mockSpacesManager,
-      mockToastNotifications,
-      savedObjectToCopy,
-    } = await setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy } =
+      await setup();
 
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {

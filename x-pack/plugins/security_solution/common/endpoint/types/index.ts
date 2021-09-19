@@ -850,8 +850,7 @@ type KbnConfigSchemaInputObjectTypeOf<P extends Record<string, unknown>> = {
   [K in Exclude<keyof P, keyof KbnConfigSchemaNonOptionalProps<P>>]?: KbnConfigSchemaInputTypeOf<
     P[K]
   >;
-} &
-  { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
+} & { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
 
 /**
  * Takes the props of a schema.object type, and returns a version that excludes
@@ -1084,7 +1083,8 @@ export interface HostPolicyResponseAppliedAction {
   message: string;
 }
 
-export type HostPolicyResponseConfiguration = HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
+export type HostPolicyResponseConfiguration =
+  HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;

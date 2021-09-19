@@ -33,48 +33,48 @@ type WithRuleExecutionLog = (args: {
   type: AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, TServices>
 ) => AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, TServices>;
 
-export const withRuleExecutionLogFactory: WithRuleExecutionLog = ({ logger, ruleDataService }) => (
-  type
-) => {
-  return {
-    ...type,
-    executor: async (options) => {
-      const ruleExecutionLogClient = new RuleExecutionLogClient({
-        ruleDataService,
-        savedObjectsClient: options.services.savedObjectsClient,
-      });
-      try {
-        await ruleExecutionLogClient.logStatusChange({
-          spaceId: options.spaceId,
-          ruleId: options.alertId,
-          newStatus: RuleExecutionStatus['going to run'],
+export const withRuleExecutionLogFactory: WithRuleExecutionLog =
+  ({ logger, ruleDataService }) =>
+  (type) => {
+    return {
+      ...type,
+      executor: async (options) => {
+        const ruleExecutionLogClient = new RuleExecutionLogClient({
+          ruleDataService,
+          savedObjectsClient: options.services.savedObjectsClient,
         });
+        try {
+          await ruleExecutionLogClient.logStatusChange({
+            spaceId: options.spaceId,
+            ruleId: options.alertId,
+            newStatus: RuleExecutionStatus['going to run'],
+          });
 
-        const state = await type.executor({
-          ...options,
-          services: {
-            ...options.services,
-            ruleExecutionLogClient,
-            logger,
-          },
-        });
+          const state = await type.executor({
+            ...options,
+            services: {
+              ...options.services,
+              ruleExecutionLogClient,
+              logger,
+            },
+          });
 
-        await ruleExecutionLogClient.logStatusChange({
-          spaceId: options.spaceId,
-          ruleId: options.alertId,
-          newStatus: RuleExecutionStatus.succeeded,
-        });
+          await ruleExecutionLogClient.logStatusChange({
+            spaceId: options.spaceId,
+            ruleId: options.alertId,
+            newStatus: RuleExecutionStatus.succeeded,
+          });
 
-        return state;
-      } catch (error) {
-        logger.error(error);
-        await ruleExecutionLogClient.logStatusChange({
-          spaceId: options.spaceId,
-          ruleId: options.alertId,
-          newStatus: RuleExecutionStatus.failed,
-          message: error.message,
-        });
-      }
-    },
+          return state;
+        } catch (error) {
+          logger.error(error);
+          await ruleExecutionLogClient.logStatusChange({
+            spaceId: options.spaceId,
+            ruleId: options.alertId,
+            newStatus: RuleExecutionStatus.failed,
+            message: error.message,
+          });
+        }
+      },
+    };
   };
-};

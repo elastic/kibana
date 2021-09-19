@@ -105,7 +105,7 @@ export const buildAlert = (
     []
   );
 
-  return ({
+  return {
     '@timestamp': new Date().toISOString(),
     [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
     [SPACE_IDS]: spaceId != null ? [spaceId] : [],
@@ -115,7 +115,7 @@ export const buildAlert = (
     [ALERT_DEPTH]: depth,
     [ALERT_REASON]: reason,
     ...flattenWithPrefix(ALERT_RULE_NAMESPACE, rule),
-  } as unknown) as RACAlert;
+  } as unknown as RACAlert;
 };
 
 /**

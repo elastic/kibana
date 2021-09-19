@@ -80,10 +80,10 @@ const seriesParam: SeriesParam = {
   valueAxis: defaultValueAxisId,
 };
 
-const vis = ({
+const vis = {
   type: {
     editorConfig: {},
   },
-} as any) as Vis;
+} as any as Vis;
 
 export { defaultValueAxisId, categoryAxis, valueAxis, seriesParam, vis };

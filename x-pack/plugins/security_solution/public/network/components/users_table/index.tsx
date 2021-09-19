@@ -119,10 +119,10 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const columns = useMemo(() => getUsersColumns(flowTarget, usersTableId), [
-    flowTarget,
-    usersTableId,
-  ]);
+  const columns = useMemo(
+    () => getUsersColumns(flowTarget, usersTableId),
+    [flowTarget, usersTableId]
+  );
 
   return (
     <PaginatedTable

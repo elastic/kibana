@@ -180,9 +180,9 @@ export const urlFactory = new ActionFactory(urlDrilldownActionFactory, {
   getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
 });
 
-export const mockActionFactories: ActionFactory[] = ([dashboardFactory, urlFactory] as Array<
+export const mockActionFactories: ActionFactory[] = [dashboardFactory, urlFactory] as Array<
   ActionFactory<any>
->) as ActionFactory[];
+> as ActionFactory[];
 
 export const mockSupportedTriggers: string[] = [
   VALUE_CLICK_TRIGGER,

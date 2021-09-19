@@ -39,9 +39,7 @@ export interface ComponentOpts {
   unmuteAlerts: (alerts: Alert[]) => Promise<void>;
   enableAlerts: (alerts: Alert[]) => Promise<void>;
   disableAlerts: (alerts: Alert[]) => Promise<void>;
-  deleteAlerts: (
-    alerts: Alert[]
-  ) => Promise<{
+  deleteAlerts: (alerts: Alert[]) => Promise<{
     successes: string[];
     errors: string[];
   }>;
@@ -51,9 +49,7 @@ export interface ComponentOpts {
   unmuteAlertInstance: (alert: Alert, alertInstanceId: string) => Promise<void>;
   enableAlert: (alert: Alert) => Promise<void>;
   disableAlert: (alert: Alert) => Promise<void>;
-  deleteAlert: (
-    alert: Alert
-  ) => Promise<{
+  deleteAlert: (alert: Alert) => Promise<{
     successes: string[];
     errors: string[];
   }>;

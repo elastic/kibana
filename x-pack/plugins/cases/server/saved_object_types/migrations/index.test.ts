@@ -221,9 +221,7 @@ describe('lens embeddable migrations for by value panels', () => {
       const result = migrations['7.14.0'](caseComment, contextMock);
 
       const parsedComment = parseCommentString(result.attributes.comment);
-      const lensVisualizations = (getLensVisualizations(
-        parsedComment.children
-      ) as unknown) as Array<{
+      const lensVisualizations = getLensVisualizations(parsedComment.children) as unknown as Array<{
         attributes: LensDocShape715 & { references: SavedObjectReference[] };
       }>;
 

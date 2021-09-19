@@ -39,9 +39,9 @@ describe('getAlertData useEffect handler', () => {
 
     loadAlert.mockImplementationOnce(async () => alert);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
 
     await getAlertData(
       alert.id,
@@ -85,9 +85,9 @@ describe('getAlertData useEffect handler', () => {
     loadAlertTypes.mockImplementation(async () => [alertType]);
     loadActionTypes.mockImplementation(async () => [actionType]);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
 
     await getAlertData(
       alert.id,
@@ -131,9 +131,9 @@ describe('getAlertData useEffect handler', () => {
       throw new Error('OMG');
     });
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getAlertData(
       alert.id,
       loadAlert,
@@ -177,9 +177,9 @@ describe('getAlertData useEffect handler', () => {
     });
     loadActionTypes.mockImplementation(async () => [actionType]);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getAlertData(
       alert.id,
       loadAlert,
@@ -227,9 +227,9 @@ describe('getAlertData useEffect handler', () => {
       throw new Error('OMG no action type');
     });
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getAlertData(
       alert.id,
       loadAlert,
@@ -275,9 +275,9 @@ describe('getAlertData useEffect handler', () => {
     loadAlertTypes.mockImplementation(async () => [alertType]);
     loadActionTypes.mockImplementation(async () => [actionType]);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getAlertData(
       alert.id,
       loadAlert,
@@ -334,9 +334,9 @@ describe('getAlertData useEffect handler', () => {
     loadAlertTypes.mockImplementation(async () => [alertType]);
     loadActionTypes.mockImplementation(async () => [availableActionType]);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getAlertData(
       alert.id,
       loadAlert,

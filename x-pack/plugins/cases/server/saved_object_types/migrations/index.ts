@@ -114,26 +114,25 @@ interface SanitizedCommentForSubCases {
   rule?: { id: string | null; name: string | null };
 }
 
-const migrateByValueLensVisualizations = (
-  migrate: MigrateFunction,
-  version: string
-): SavedObjectMigrationFn => (doc: any) => {
-  const parsedComment = parseCommentString(doc.attributes.comment);
-  const migratedComment = parsedComment.children.map((comment) => {
-    if (comment?.type === 'lens') {
-      // @ts-expect-error
-      return migrate(comment);
-    }
+const migrateByValueLensVisualizations =
+  (migrate: MigrateFunction, version: string): SavedObjectMigrationFn =>
+  (doc: any) => {
+    const parsedComment = parseCommentString(doc.attributes.comment);
+    const migratedComment = parsedComment.children.map((comment) => {
+      if (comment?.type === 'lens') {
+        // @ts-expect-error
+        return migrate(comment);
+      }
 
-    return comment;
-  });
+      return comment;
+    });
 
-  // @ts-expect-error
-  parsedComment.children = migratedComment;
-  doc.attributes.comment = stringifyComment(parsedComment);
+    // @ts-expect-error
+    parsedComment.children = migratedComment;
+    doc.attributes.comment = stringifyComment(parsedComment);
 
-  return doc;
-};
+    return doc;
+  };
 
 export interface CreateCommentsMigrationsDeps {
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];

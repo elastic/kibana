@@ -33,7 +33,7 @@ interface ShowShareModalProps {
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.dashboard) return false;
 
-  const dashboard = (anonymousUserCapabilities.dashboard as unknown) as DashboardAppCapabilities;
+  const dashboard = anonymousUserCapabilities.dashboard as unknown as DashboardAppCapabilities;
 
   return !!dashboard.show;
 };

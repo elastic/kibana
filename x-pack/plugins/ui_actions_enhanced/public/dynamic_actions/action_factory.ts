@@ -32,7 +32,8 @@ export class ActionFactory<
 > implements
     Omit<Presentable<FactoryContext>, 'getHref'>,
     Configurable<Config, FactoryContext>,
-    PersistableState<SerializedEvent> {
+    PersistableState<SerializedEvent>
+{
   constructor(
     protected readonly def: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>,
     protected readonly deps: ActionFactoryDeps

@@ -38,22 +38,24 @@ function getMockUsageCollection() {
   };
 }
 
-const getLicenseMock = (licenseType = 'platinum') => () => {
-  return Promise.resolve({
-    isAvailable: () => true,
-    license: { getType: () => licenseType },
-  } as FeaturesAvailability);
-};
+const getLicenseMock =
+  (licenseType = 'platinum') =>
+  () => {
+    return Promise.resolve({
+      isAvailable: () => true,
+      license: { getType: () => licenseType },
+    } as FeaturesAvailability);
+  };
 
 function getPluginsMock(
   { license, usageCollection = getMockUsageCollection() } = { license: 'platinum' }
 ) {
-  return ({
+  return {
     licensing: { license$: Rx.of(getLicenseMock(license)) },
     usageCollection,
     elasticsearch: {},
     security: {},
-  } as unknown) as ReportingSetupDeps & { usageCollection: UsageCollectionSetup };
+  } as unknown as ReportingSetupDeps & { usageCollection: UsageCollectionSetup };
 }
 
 const getResponseMock = (base = {}) => base;

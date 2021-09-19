@@ -89,8 +89,8 @@ interface TimelionSetupContract {
  * Represents Features Plugin instance that will be managed by the Kibana plugin system.
  */
 export class FeaturesPlugin
-  implements
-    Plugin<RecursiveReadonly<PluginSetupContract>, RecursiveReadonly<PluginStartContract>> {
+  implements Plugin<RecursiveReadonly<PluginSetupContract>, RecursiveReadonly<PluginStartContract>>
+{
   private readonly logger: Logger;
   private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
   private isTimelionEnabled: boolean = false;

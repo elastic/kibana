@@ -77,14 +77,8 @@ const mapDispatchToProps = (dispatch, { expressionIndex }) => ({
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { element, pageId, assets } = stateProps;
   const { argType, nextArgType } = ownProps;
-  const {
-    updateContext,
-    setArgument,
-    addArgument,
-    deleteArgument,
-    onAssetAdd,
-    ...dispatchers
-  } = dispatchProps;
+  const { updateContext, setArgument, addArgument, deleteArgument, onAssetAdd, ...dispatchers } =
+    dispatchProps;
 
   return {
     ...stateProps,

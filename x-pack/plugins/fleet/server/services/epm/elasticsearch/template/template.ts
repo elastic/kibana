@@ -394,9 +394,10 @@ function getBaseTemplate(
       `large amount of default fields detected for index template ${templateIndexPattern} in package ${packageName}, applying the first ${QUERY_DEFAULT_FIELD_LIMIT} fields`
     );
   }
-  const defaultFieldNames = (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT
-    ? defaultFields.slice(0, QUERY_DEFAULT_FIELD_LIMIT)
-    : defaultFields
+  const defaultFieldNames = (
+    defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT
+      ? defaultFields.slice(0, QUERY_DEFAULT_FIELD_LIMIT)
+      : defaultFields
   ).map((field) => field.name);
 
   return {

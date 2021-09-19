@@ -33,25 +33,24 @@ export const TEST_CASES: Record<string, BulkGetTestCase> = Object.freeze({
 
 export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_get');
-  const expectResponseBody = (
-    testCases: BulkGetTestCase | BulkGetTestCase[],
-    statusCode: 200 | 403
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
-    if (statusCode === 403) {
-      const types = testCaseArray.map((x) => x.type);
-      await expectSavedObjectForbidden(types)(response);
-    } else {
-      // permitted
-      const savedObjects = response.body.saved_objects;
-      expect(savedObjects).length(testCaseArray.length);
-      for (let i = 0; i < savedObjects.length; i++) {
-        const object = savedObjects[i];
-        const testCase = testCaseArray[i];
-        await expectResponses.permitted(object, testCase);
+  const expectResponseBody =
+    (testCases: BulkGetTestCase | BulkGetTestCase[], statusCode: 200 | 403): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
+      if (statusCode === 403) {
+        const types = testCaseArray.map((x) => x.type);
+        await expectSavedObjectForbidden(types)(response);
+      } else {
+        // permitted
+        const savedObjects = response.body.saved_objects;
+        expect(savedObjects).length(testCaseArray.length);
+        for (let i = 0; i < savedObjects.length; i++) {
+          const object = savedObjects[i];
+          const testCase = testCaseArray[i];
+          await expectResponses.permitted(object, testCase);
+        }
       }
-    }
-  };
+    };
   const createTestDefinitions = (
     testCases: BulkGetTestCase | BulkGetTestCase[],
     forbidden: boolean,
@@ -84,36 +83,34 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     ];
   };
 
-  const makeBulkGetTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: BulkGetTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeBulkGetTest =
+    (describeFn: Mocha.SuiteFunction) => (description: string, definition: BulkGetTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
-            .auth(user?.username, user?.password)
-            .send(test.request)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            await supertest
+              .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
+              .auth(user?.username, user?.password)
+              .send(test.request)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeBulkGetTest(describe);
   // @ts-ignore

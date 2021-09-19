@@ -101,7 +101,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
 
 export const useAppIndexPatternContext = (dataType?: AppDataType) => {
   const { loading, hasAppData, loadIndexPattern, indexPatterns } = useContext(
-    (IndexPatternContext as unknown) as Context<IIndexPatternContext>
+    IndexPatternContext as unknown as Context<IIndexPatternContext>
   );
 
   if (dataType && !indexPatterns?.[dataType] && !loading) {

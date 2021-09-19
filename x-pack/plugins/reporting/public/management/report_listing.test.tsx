@@ -301,15 +301,15 @@ describe('ReportListing', () => {
       navLinks: {},
       management: { data: { index_lifecycle_management: true } },
     };
-    ilmLocator = ({
+    ilmLocator = {
       getUrl: jest.fn(),
-    } as unknown) as LocatorPublic<any>;
+    } as unknown as LocatorPublic<any>;
 
-    urlService = ({
+    urlService = {
       locators: {
         get: () => ilmLocator,
       },
-    } as unknown) as SharePluginSetup['url'];
+    } as unknown as SharePluginSetup['url'];
     await runSetup();
   });
 
@@ -342,15 +342,15 @@ describe('ReportListing', () => {
   describe('ILM policy', () => {
     beforeEach(async () => {
       httpService = httpServiceMock.createSetupContract();
-      ilmLocator = ({
+      ilmLocator = {
         getUrl: jest.fn(),
-      } as unknown) as LocatorPublic<any>;
+      } as unknown as LocatorPublic<any>;
 
-      urlService = ({
+      urlService = {
         locators: {
           get: () => ilmLocator,
         },
-      } as unknown) as SharePluginSetup['url'];
+      } as unknown as SharePluginSetup['url'];
 
       await runSetup();
     });

@@ -76,9 +76,9 @@ export class TablePanelConfig extends Component<
     });
   };
 
-  handleTextChange = (name: keyof TimeseriesVisParams) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => this.props.onChange({ [name]: e.target.value });
+  handleTextChange =
+    (name: keyof TimeseriesVisParams) => (e: React.ChangeEvent<HTMLInputElement>) =>
+      this.props.onChange({ [name]: e.target.value });
 
   render() {
     const { selectedTab } = this.state;

@@ -157,16 +157,11 @@ export function ServiceInventory() {
     query: { environment, kuery },
   } = useApmParams('/services');
 
-  const {
-    mainStatisticsData,
-    mainStatisticsStatus,
-    comparisonData,
-  } = useServicesFetcher({ environment, kuery });
+  const { mainStatisticsData, mainStatisticsStatus, comparisonData } =
+    useServicesFetcher({ environment, kuery });
 
-  const {
-    anomalyDetectionJobsData,
-    anomalyDetectionJobsStatus,
-  } = useAnomalyDetectionJobsContext();
+  const { anomalyDetectionJobsData, anomalyDetectionJobsStatus } =
+    useAnomalyDetectionJobsContext();
 
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.userHasDismissedServiceInventoryMlCallout',

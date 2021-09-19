@@ -104,12 +104,11 @@ export const AnnotationRow = ({
   );
 
   const handleChange = useCallback(
-    (name: string) => (
-      event: Array<EuiComboBoxOptionOption<string>> | ChangeEvent<HTMLInputElement>
-    ) =>
-      onChange({
-        [name]: Array.isArray(event) ? event?.[0]?.value : event.target.value,
-      }),
+    (name: string) =>
+      (event: Array<EuiComboBoxOptionOption<string>> | ChangeEvent<HTMLInputElement>) =>
+        onChange({
+          [name]: Array.isArray(event) ? event?.[0]?.value : event.target.value,
+        }),
     [onChange]
   );
 

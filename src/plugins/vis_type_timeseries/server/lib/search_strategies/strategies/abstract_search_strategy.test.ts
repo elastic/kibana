@@ -26,7 +26,7 @@ describe('AbstractSearchStrategy', () => {
 
   beforeEach(() => {
     mockedFields = [];
-    requestContext = ({
+    requestContext = {
       core: {
         elasticsearch: {
           client: {
@@ -40,7 +40,7 @@ describe('AbstractSearchStrategy', () => {
       search: {
         search: jest.fn().mockReturnValue(from(Promise.resolve({}))),
       },
-    } as unknown) as VisTypeTimeseriesRequestHandlerContext;
+    } as unknown as VisTypeTimeseriesRequestHandlerContext;
     abstractSearchStrategy = new FooSearchStrategy();
   });
 
@@ -53,10 +53,10 @@ describe('AbstractSearchStrategy', () => {
   test('should return fields for wildcard', async () => {
     const fields = await abstractSearchStrategy.getFieldsForWildcard(
       { indexPatternString: '', indexPattern: undefined },
-      ({
+      {
         getDefault: jest.fn(),
         getFieldsForWildcard: jest.fn(() => Promise.resolve(mockedFields)),
-      } as unknown) as IndexPatternsService,
+      } as unknown as IndexPatternsService,
       (() => Promise.resolve({}) as unknown) as CachedIndexPatternFetcher
     );
 
@@ -68,7 +68,7 @@ describe('AbstractSearchStrategy', () => {
 
     const responses = await abstractSearchStrategy.search(
       requestContext,
-      ({
+      {
         body: {
           searchSession: {
             sessionId: '1',
@@ -76,7 +76,7 @@ describe('AbstractSearchStrategy', () => {
             isStored: true,
           },
         },
-      } as unknown) as VisTypeTimeseriesVisDataRequest,
+      } as unknown as VisTypeTimeseriesVisDataRequest,
       searches
     );
 

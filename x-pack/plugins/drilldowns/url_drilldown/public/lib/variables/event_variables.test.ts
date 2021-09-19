@@ -87,10 +87,10 @@ describe('ROW_CLICK_TRIGGER', () => {
   });
 
   test('getEventScopeValues() returns correct variables for row click trigger', () => {
-    const context = ({
+    const context = {
       embeddable: {},
       data: rowClickData as any,
-    } as unknown) as RowClickContext;
+    } as unknown as RowClickContext;
     const res = getEventScopeValues(context);
 
     expect(res).toEqual({

@@ -38,15 +38,8 @@ export const spacesManagementApp = Object.freeze({
       }),
 
       async mount({ element, setBreadcrumbs, history }) {
-        const [
-          [coreStart, { features }],
-          { SpacesGridPage },
-          { ManageSpacePage },
-        ] = await Promise.all([
-          getStartServices(),
-          import('./spaces_grid'),
-          import('./edit_space'),
-        ]);
+        const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
+          await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
 
         const spacesBreadcrumbs = [
           {

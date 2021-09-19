@@ -90,7 +90,7 @@ describe('cloneDescriptor', () => {
       });
       const layer = new MockLayer({
         layerDescriptor,
-        source: (new MockSource() as unknown) as ISource,
+        source: new MockSource() as unknown as ISource,
       });
       const clonedDescriptor = await layer.cloneDescriptor();
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
@@ -115,19 +115,19 @@ describe('cloneDescriptor', () => {
         joins: [
           {
             leftField: 'iso2',
-            right: ({
+            right: {
               id: '557d0f15',
               indexPatternId: 'myIndexPattern',
               indexPatternTitle: 'logs-*',
               term: 'myTermField',
               type: 'joinSource',
-            } as unknown) as ESTermSourceDescriptor,
+            } as unknown as ESTermSourceDescriptor,
           },
         ],
       });
       const layer = new MockLayer({
         layerDescriptor,
-        source: (new MockSource() as unknown) as ISource,
+        source: new MockSource() as unknown as ISource,
       });
       const clonedDescriptor = await layer.cloneDescriptor();
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
@@ -178,7 +178,7 @@ describe('isFittable', () => {
       });
       const layer = new MockLayer({
         layerDescriptor,
-        source: (new MockSource({ fitToBounds: test.fitToBounds }) as unknown) as ISource,
+        source: new MockSource({ fitToBounds: test.fitToBounds }) as unknown as ISource,
       });
       expect(await layer.isFittable()).toBe(test.canFit);
     });

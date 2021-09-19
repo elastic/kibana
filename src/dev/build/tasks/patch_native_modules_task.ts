@@ -54,8 +54,7 @@ const packages: Package[] = [
       // * gzip -c build/Release/re2.node > linux-arm64-83.gz
       // * upload to kibana-ci-proxy-cache bucket
       'linux-arm64': {
-        url:
-          'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.15.4/linux-arm64-83.gz',
+        url: 'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.15.4/linux-arm64-83.gz',
         sha256: '4eb524ca9a79dea9c07342e487fbe91591166fdbc022ae987104840df948a4e9',
       },
       'win32-x64': {

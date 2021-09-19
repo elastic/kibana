@@ -21,9 +21,8 @@ export interface GetOverviewFiltersPayload {
 
 export type OverviewFiltersPayload = GetOverviewFiltersPayload & Error & OverviewFilters;
 
-export const fetchOverviewFilters = createAction<GetOverviewFiltersPayload>(
-  'FETCH_OVERVIEW_FILTERS'
-);
+export const fetchOverviewFilters =
+  createAction<GetOverviewFiltersPayload>('FETCH_OVERVIEW_FILTERS');
 
 export const fetchOverviewFiltersFail = createAction<Error>('FETCH_OVERVIEW_FILTERS_FAIL');
 

@@ -45,7 +45,7 @@ describe('context app', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
-      setServices(({
+      setServices({
         data: {
           search: {
             searchSource: {
@@ -53,7 +53,7 @@ describe('context app', function () {
             },
           },
         },
-      } as unknown) as DiscoverServices);
+      } as unknown as DiscoverServices);
 
       fetchPredecessors = (
         indexPatternId,
@@ -237,7 +237,7 @@ describe('context app', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
-      setServices(({
+      setServices({
         data: {
           search: {
             searchSource: {
@@ -245,7 +245,7 @@ describe('context app', function () {
             },
           },
         },
-      } as unknown) as DiscoverServices);
+      } as unknown as DiscoverServices);
 
       fetchPredecessors = (
         indexPatternId,

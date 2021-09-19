@@ -20,13 +20,12 @@ export const createScriptedFieldsDeprecationsConfig: (
   core: CoreSetup
 ) => RegisterDeprecationsConfig = (core: CoreSetup) => ({
   getDeprecations: async (context: GetDeprecationsContext): Promise<DeprecationsDetails[]> => {
-    const finder = context.savedObjectsClient.createPointInTimeFinder<IndexPatternAttributesWithFields>(
-      {
+    const finder =
+      context.savedObjectsClient.createPointInTimeFinder<IndexPatternAttributesWithFields>({
         type: 'index-pattern',
         perPage: 1000,
         fields: ['title', 'fields'],
-      }
-    );
+      });
 
     const indexPatternsWithScriptedFields: IndexPatternAttributesWithFields[] = [];
     for await (const response of finder.find()) {

@@ -48,14 +48,15 @@ export function setupSavedObjects({
     request instanceof KibanaRequest ? request : KibanaRequest.from(request);
 
   savedObjects.setClientFactoryProvider(
-    (repositoryFactory) => ({ request, includedHiddenTypes }) => {
-      const kibanaRequest = getKibanaRequest(request);
-      return new SavedObjectsClient(
-        authz.mode.useRbacForRequest(kibanaRequest)
-          ? repositoryFactory.createInternalRepository(includedHiddenTypes)
-          : repositoryFactory.createScopedRepository(kibanaRequest, includedHiddenTypes)
-      );
-    }
+    (repositoryFactory) =>
+      ({ request, includedHiddenTypes }) => {
+        const kibanaRequest = getKibanaRequest(request);
+        return new SavedObjectsClient(
+          authz.mode.useRbacForRequest(kibanaRequest)
+            ? repositoryFactory.createInternalRepository(includedHiddenTypes)
+            : repositoryFactory.createScopedRepository(kibanaRequest, includedHiddenTypes)
+        );
+      }
   );
 
   savedObjects.addClientWrapper(Number.MAX_SAFE_INTEGER - 1, 'security', ({ client, request }) => {
@@ -66,9 +67,8 @@ export function setupSavedObjects({
           legacyAuditLogger,
           auditLogger: audit.asScoped(kibanaRequest),
           baseClient: client,
-          checkSavedObjectsPrivilegesAsCurrentUser: authz.checkSavedObjectsPrivilegesWithRequest(
-            kibanaRequest
-          ),
+          checkSavedObjectsPrivilegesAsCurrentUser:
+            authz.checkSavedObjectsPrivilegesWithRequest(kibanaRequest),
           errors: SavedObjectsClient.errors,
           getSpacesService,
         })

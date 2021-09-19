@@ -65,7 +65,7 @@ jest.mock('./output', () => {
 jest.mock('./agent_policy_update');
 
 function getAgentPolicyUpdateMock() {
-  return (agentPolicyUpdateEventHandler as unknown) as jest.Mock<
+  return agentPolicyUpdateEventHandler as unknown as jest.Mock<
     typeof agentPolicyUpdateEventHandler
   >;
 }
@@ -74,7 +74,7 @@ function getAgentPolicyCreateMock() {
   const soClient = savedObjectsClientMock.create();
   soClient.create.mockImplementation(async (type, attributes) => {
     return {
-      attributes: (attributes as unknown) as NewAgentPolicy,
+      attributes: attributes as unknown as NewAgentPolicy,
       id: 'mocked',
       type: 'mocked',
       references: [],

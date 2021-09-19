@@ -89,7 +89,7 @@ describe('.execute() & getHref', () => {
       getDashboardFilterFields: async () => [],
     });
     const drilldown = new EmbeddableToDashboardDrilldown({
-      start: ((() => ({
+      start: (() => ({
         core: {
           application: {
             navigateToApp,
@@ -110,7 +110,7 @@ describe('.execute() & getHref', () => {
           },
         },
         self: {},
-      })) as unknown) as StartServicesGetter<
+      })) as unknown as StartServicesGetter<
         Pick<StartDependencies, 'data' | 'uiActionsEnhanced' | 'dashboard'>
       >,
     });
@@ -122,7 +122,7 @@ describe('.execute() & getHref', () => {
       ...config,
     };
 
-    const context = ({
+    const context = {
       filters: filtersFromEvent,
       embeddable: {
         getInput: () => ({
@@ -133,7 +133,7 @@ describe('.execute() & getHref', () => {
         }),
       },
       timeFieldName,
-    } as unknown) as ApplyGlobalFilterActionContext & EnhancedEmbeddableContext;
+    } as unknown as ApplyGlobalFilterActionContext & EnhancedEmbeddableContext;
 
     await drilldown.execute(completeConfig, context);
 

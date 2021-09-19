@@ -22,13 +22,13 @@ export function getStubIndexPattern(
   fields: FieldSpec[] | IFieldType[],
   core: CoreSetup
 ): IndexPattern {
-  return (new StubIndexPattern(
+  return new StubIndexPattern(
     pattern,
     getConfig,
     timeField,
     fields,
     core
-  ) as unknown) as IndexPattern;
+  ) as unknown as IndexPattern;
 }
 
 export class StubIndexPattern {
@@ -82,9 +82,9 @@ export class StubIndexPattern {
     };
 
     this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
-    this.flattenHit = flattenHitWrapper((this as unknown) as IndexPattern, this.metaFields);
+    this.flattenHit = flattenHitWrapper(this as unknown as IndexPattern, this.metaFields);
     this.formatHit = formatHitProvider(
-      (this as unknown) as IndexPattern,
+      this as unknown as IndexPattern,
       registeredFieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
     );
     this.fieldsFetcher = { apiClient: { baseUrl: '' } };

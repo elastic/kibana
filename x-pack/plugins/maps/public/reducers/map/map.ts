@@ -226,14 +226,8 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
       };
       return { ...state, mapState: { ...state.mapState, ...newMapState } };
     case SET_QUERY:
-      const {
-        query,
-        timeFilters,
-        timeslice,
-        filters,
-        searchSessionId,
-        searchSessionMapBuffer,
-      } = action;
+      const { query, timeFilters, timeslice, filters, searchSessionId, searchSessionMapBuffer } =
+        action;
       return {
         ...state,
         mapState: {

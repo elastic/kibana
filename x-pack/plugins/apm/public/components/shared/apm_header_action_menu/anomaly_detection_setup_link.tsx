@@ -26,7 +26,8 @@ import { useTheme } from '../../../hooks/use_theme';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { getAPMHref } from '../Links/apm/APMLink';
 
-export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/anomaly-detection/jobs'>;
+export type AnomalyDetectionApiResponse =
+  APIReturnType<'GET /api/apm/settings/anomaly-detection/jobs'>;
 
 const DEFAULT_DATA = { jobs: [], hasLegacyJobs: false };
 

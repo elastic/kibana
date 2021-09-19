@@ -37,11 +37,8 @@ export const mountManagementSection = async ({
   mountParams,
   serviceRegistry,
 }: MountParams) => {
-  const [
-    coreStart,
-    { data, savedObjectsTaggingOss, spacesOss },
-    pluginStart,
-  ] = await core.getStartServices();
+  const [coreStart, { data, savedObjectsTaggingOss, spacesOss }, pluginStart] =
+    await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
   if (allowedObjectTypes === undefined) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);

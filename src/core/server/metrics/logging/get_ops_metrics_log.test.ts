@@ -41,7 +41,7 @@ function createMockOpsMetrics(testMetrics: Partial<OpsMetrics>): OpsMetrics {
     ...testMetrics,
   };
 }
-const testMetrics = ({
+const testMetrics = {
   process: {
     memory: { heap: { used_in_bytes: 100 } },
     uptime_in_millis: 1500,
@@ -54,7 +54,7 @@ const testMetrics = ({
       '15m': 30,
     },
   },
-} as unknown) as Partial<OpsMetrics>;
+} as unknown as Partial<OpsMetrics>;
 
 describe('getEcsOpsMetricsLog', () => {
   it('provides correctly formatted message', () => {
@@ -71,11 +71,11 @@ describe('getEcsOpsMetricsLog', () => {
 
   it('excludes values from the message if unavailable', () => {
     const baseMetrics = createBaseOpsMetrics();
-    const missingMetrics = ({
+    const missingMetrics = {
       ...baseMetrics,
       process: {},
       os: {},
-    } as unknown) as OpsMetrics;
+    } as unknown as OpsMetrics;
     const logMeta = getEcsOpsMetricsLog(missingMetrics);
     expect(logMeta.message).toMatchInlineSnapshot(`""`);
   });

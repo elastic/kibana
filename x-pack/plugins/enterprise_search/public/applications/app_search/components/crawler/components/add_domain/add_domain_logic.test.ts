@@ -389,9 +389,10 @@ describe('AddDomainLogic', () => {
         AddDomainLogic.actions.validateDomainInitialVerification('https://elastic.co', '/');
         await nextTick();
 
-        expect(
-          AddDomainLogic.actions.performDomainValidationStep
-        ).toHaveBeenCalledWith('initialValidation', ['url']);
+        expect(AddDomainLogic.actions.performDomainValidationStep).toHaveBeenCalledWith(
+          'initialValidation',
+          ['url']
+        );
       });
     });
 
@@ -402,9 +403,10 @@ describe('AddDomainLogic', () => {
         AddDomainLogic.actions.validateDomainContentVerification();
         await nextTick();
 
-        expect(
-          AddDomainLogic.actions.performDomainValidationStep
-        ).toHaveBeenCalledWith('contentVerification', ['url_request', 'url_content']);
+        expect(AddDomainLogic.actions.performDomainValidationStep).toHaveBeenCalledWith(
+          'contentVerification',
+          ['url_request', 'url_content']
+        );
       });
     });
 
@@ -415,9 +417,10 @@ describe('AddDomainLogic', () => {
         AddDomainLogic.actions.validateDomainIndexingRestrictions();
         await nextTick();
 
-        expect(
-          AddDomainLogic.actions.performDomainValidationStep
-        ).toHaveBeenCalledWith('indexingRestrictions', ['robots_txt']);
+        expect(AddDomainLogic.actions.performDomainValidationStep).toHaveBeenCalledWith(
+          'indexingRestrictions',
+          ['robots_txt']
+        );
       });
     });
 
@@ -428,9 +431,10 @@ describe('AddDomainLogic', () => {
         AddDomainLogic.actions.validateDomainNetworkConnectivity();
         await nextTick();
 
-        expect(
-          AddDomainLogic.actions.performDomainValidationStep
-        ).toHaveBeenCalledWith('networkConnectivity', ['dns', 'tcp']);
+        expect(AddDomainLogic.actions.performDomainValidationStep).toHaveBeenCalledWith(
+          'networkConnectivity',
+          ['dns', 'tcp']
+        );
       });
     });
 

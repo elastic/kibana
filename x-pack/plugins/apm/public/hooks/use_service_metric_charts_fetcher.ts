@@ -29,7 +29,11 @@ export function useServiceMetricChartsFetcher({
   } = useUrlParams();
   const { agentName, serviceName } = useApmServiceContext();
 
-  const { data = INITIAL_DATA, error, status } = useFetcher(
+  const {
+    data = INITIAL_DATA,
+    error,
+    status,
+  } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && agentName) {
         return callApmApi({

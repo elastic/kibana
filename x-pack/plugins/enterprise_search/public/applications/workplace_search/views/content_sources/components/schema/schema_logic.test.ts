@@ -40,12 +40,8 @@ import { SchemaLogic, dataTypeOptions } from './schema_logic';
 
 describe('SchemaLogic', () => {
   const { http } = mockHttpValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    flashSuccessToast,
-    setErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast, setErrorMessage } =
+    mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SchemaLogic);
 
   const defaultValues = {

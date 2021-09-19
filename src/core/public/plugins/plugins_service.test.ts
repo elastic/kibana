@@ -113,7 +113,7 @@ describe('PluginsService', () => {
     };
 
     // Reset these for each test.
-    mockPluginInitializers = new Map<PluginName, MockedPluginInitializer>(([
+    mockPluginInitializers = new Map<PluginName, MockedPluginInitializer>([
       [
         'pluginA',
         jest.fn(() => ({
@@ -142,7 +142,7 @@ describe('PluginsService', () => {
           stop: jest.fn(),
         })),
       ],
-    ] as unknown) as [[PluginName, any]]);
+    ] as unknown as [[PluginName, any]]);
   });
 
   describe('#getOpaqueIds()', () => {

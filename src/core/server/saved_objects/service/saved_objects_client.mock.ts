@@ -11,7 +11,7 @@ import { SavedObjectsErrorHelpers } from './lib/errors';
 import { savedObjectsPointInTimeFinderMock } from './lib/point_in_time_finder.mock';
 
 const create = () => {
-  const mock = ({
+  const mock = {
     errors: SavedObjectsErrorHelpers,
     create: jest.fn(),
     bulkCreate: jest.fn(),
@@ -29,7 +29,7 @@ const create = () => {
     removeReferencesTo: jest.fn(),
     collectMultiNamespaceReferences: jest.fn(),
     updateObjectsSpaces: jest.fn(),
-  } as unknown) as jest.Mocked<SavedObjectsClientContract>;
+  } as unknown as jest.Mocked<SavedObjectsClientContract>;
 
   mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({
     savedObjectsMock: mock,

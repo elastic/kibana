@@ -78,13 +78,8 @@ export function App({
     [dispatch]
   );
 
-  const {
-    persistedDoc,
-    isLinkedToOriginatingApp,
-    searchSessionId,
-    isLoading,
-    isSaveable,
-  } = useLensSelector((state) => state.lens);
+  const { persistedDoc, isLinkedToOriginatingApp, searchSessionId, isLoading, isSaveable } =
+    useLensSelector((state) => state.lens);
 
   const currentDoc = useLensSelector((state) =>
     selectSavedObjectFormat(state, datasourceMap, visualizationMap)

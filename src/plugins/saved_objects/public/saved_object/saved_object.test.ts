@@ -95,7 +95,7 @@ describe('Saved Object', () => {
 
   const initSavedObjectClass = () => {
     SavedObjectClass = createSavedObjectClass(
-      ({
+      {
         savedObjectsClient: savedObjectsClientStub,
         indexPatterns: dataStartMock.indexPatterns,
         search: {
@@ -106,7 +106,7 @@ describe('Saved Object', () => {
             createEmpty: createSearchSourceMock,
           },
         },
-      } as unknown) as SavedObjectKibanaServices,
+      } as unknown as SavedObjectKibanaServices,
       decoratorRegistry
     );
   };
@@ -661,13 +661,13 @@ describe('Saved Object', () => {
 
     it('passes references to search source parsing function', async () => {
       SavedObjectClass = createSavedObjectClass(
-        ({
+        {
           savedObjectsClient: savedObjectsClientStub,
           indexPatterns: dataStartMock.indexPatterns,
           search: {
             ...dataStartMock.search,
           },
-        } as unknown) as SavedObjectKibanaServices,
+        } as unknown as SavedObjectKibanaServices,
         decoratorRegistry
       );
       const savedObject = new SavedObjectClass({ type: 'dashboard', searchSource: true });

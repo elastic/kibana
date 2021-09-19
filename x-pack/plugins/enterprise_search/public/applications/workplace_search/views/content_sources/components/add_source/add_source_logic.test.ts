@@ -565,9 +565,7 @@ describe('AddSourceLogic', () => {
 
           expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
-          expect(
-            http.put
-          ).toHaveBeenCalledWith(
+          expect(http.put).toHaveBeenCalledWith(
             `/api/workplace_search/org/settings/connectors/${sourceConfigData.serviceType}`,
             { body: JSON.stringify(params) }
           );
@@ -677,9 +675,10 @@ describe('AddSourceLogic', () => {
 
         AddSourceLogic.actions.getSourceConnectData('github', jest.fn());
 
-        expect(
-          http.get
-        ).toHaveBeenCalledWith('/api/workplace_search/account/sources/github/prepare', { query });
+        expect(http.get).toHaveBeenCalledWith(
+          '/api/workplace_search/account/sources/github/prepare',
+          { query }
+        );
       });
 
       it('getSourceReConnectData', () => {

@@ -165,11 +165,8 @@ export class Execution<
    * Contract is a public representation of `Execution` instances. Contract we
    * can return to other plugins for their consumption.
    */
-  public readonly contract: ExecutionContract<
-    Input,
-    Output,
-    InspectorAdapters
-  > = new ExecutionContract<Input, Output, InspectorAdapters>(this);
+  public readonly contract: ExecutionContract<Input, Output, InspectorAdapters> =
+    new ExecutionContract<Input, Output, InspectorAdapters>(this);
 
   public readonly expression: string;
 
@@ -481,17 +478,19 @@ export class Execution<
       // Create the functions to resolve the argument ASTs into values
       // These are what are passed to the actual functions if you opt out of resolving
       const resolveArgFns = mapValues(dealiasedArgAsts, (asts, argName) =>
-        asts.map((item) => (subInput = input) =>
-          this.interpret(item, subInput).pipe(
-            pluck('result'),
-            map((output) => {
-              if (isExpressionValueError(output)) {
-                throw output.error;
-              }
+        asts.map(
+          (item) =>
+            (subInput = input) =>
+              this.interpret(item, subInput).pipe(
+                pluck('result'),
+                map((output) => {
+                  if (isExpressionValueError(output)) {
+                    throw output.error;
+                  }
 
-              return this.cast(output, argDefs[argName].types);
-            })
-          )
+                  return this.cast(output, argDefs[argName].types);
+                })
+              )
         )
       );
 

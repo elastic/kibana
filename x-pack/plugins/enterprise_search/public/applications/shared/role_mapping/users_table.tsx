@@ -64,7 +64,7 @@ export const UsersTable: React.FC<Props> = ({
   handleDeleteMapping,
 }) => {
   // 'accessItems' is needed because App Search has `engines` and Workplace Search has `groups`.
-  const users = ((singleUserRoleMappings as SharedUser[]).map((user) => ({
+  const users = (singleUserRoleMappings as SharedUser[]).map((user) => ({
     username: user.elasticsearchUser.username,
     email: user.elasticsearchUser.email,
     enabled: user.elasticsearchUser.enabled,
@@ -72,7 +72,7 @@ export const UsersTable: React.FC<Props> = ({
     id: user.roleMapping.id,
     accessItems: (user.roleMapping as SharedRoleMapping)[accessItemKey],
     invitation: user.invitation,
-  })) as unknown) as Array<Omit<SharedUser, 'elasticsearchUser | roleMapping'>>;
+  })) as unknown as Array<Omit<SharedUser, 'elasticsearchUser | roleMapping'>>;
 
   const [items, setItems] = useState(users);
 

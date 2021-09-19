@@ -42,9 +42,9 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     } as ActionTypeRegistryContract,
     charts: chartPluginMock.createStartContract(),
     kibanaFeatures: [],
-    element: ({
+    element: {
       style: { cursor: 'pointer' },
-    } as unknown) as HTMLElement,
+    } as unknown as HTMLElement,
   } as TriggersAndActionsUiServices;
 };
 

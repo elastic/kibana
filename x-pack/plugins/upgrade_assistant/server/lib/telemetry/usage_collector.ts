@@ -130,8 +130,8 @@ export function registerUpgradeAssistantUsageCollector({
   usageCollection,
   savedObjects,
 }: Dependencies) {
-  const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector<UpgradeAssistantTelemetry>(
-    {
+  const upgradeAssistantUsageCollector =
+    usageCollection.makeUsageCollector<UpgradeAssistantTelemetry>({
       type: 'upgrade-assistant-telemetry',
       isReady: () => true,
       schema: {
@@ -181,8 +181,7 @@ export function registerUpgradeAssistantUsageCollector({
         },
       },
       fetch: async () => fetchUpgradeAssistantMetrics(elasticsearch, savedObjects),
-    }
-  );
+    });
 
   usageCollection.registerCollector(upgradeAssistantUsageCollector);
 }

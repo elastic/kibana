@@ -101,7 +101,8 @@ export interface LensEmbeddableDeps {
 
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>
+{
   type = DOC_TYPE;
 
   deferEmbeddableLoad = true;
@@ -250,12 +251,12 @@ export class Embeddable
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
-    const attributes:
-      | LensSavedObjectAttributes
-      | false = await this.deps.attributeService.unwrapAttributes(input).catch((e: Error) => {
-      this.onFatalError(e);
-      return false;
-    });
+    const attributes: LensSavedObjectAttributes | false = await this.deps.attributeService
+      .unwrapAttributes(input)
+      .catch((e: Error) => {
+        this.onFatalError(e);
+        return false;
+      });
     if (!attributes || this.isDestroyed) {
       return;
     }
@@ -439,7 +440,7 @@ export class Embeddable
         true
       );
       if (this.input.onTableRowClick) {
-        this.input.onTableRowClick((event.data as unknown) as LensTableRowContextMenuEvent['data']);
+        this.input.onTableRowClick(event.data as unknown as LensTableRowContextMenuEvent['data']);
       }
     }
   };

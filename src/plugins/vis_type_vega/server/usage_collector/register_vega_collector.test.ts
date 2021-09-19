@@ -16,7 +16,7 @@ import { ConfigObservable } from '../types';
 
 describe('registerVegaUsageCollector', () => {
   const mockIndex = 'mock_index';
-  const mockDeps = { home: ({} as unknown) as HomeServerPluginSetup };
+  const mockDeps = { home: {} as unknown as HomeServerPluginSetup };
   const mockConfig = of({ kibana: { index: mockIndex } }) as ConfigObservable;
 
   it('makes a usage collector and registers it`', () => {

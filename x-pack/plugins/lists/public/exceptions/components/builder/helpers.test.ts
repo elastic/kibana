@@ -1554,11 +1554,8 @@ describe('Exception builder helpers', () => {
     // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
     // for context around the temporary `id`
     test('it correctly validates entries that include a temporary `id`', () => {
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        { ...getExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS },
-      ]);
+      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
+        filterExceptionItems([{ ...getExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS }]);
 
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS }]);
     });
@@ -1591,14 +1588,13 @@ describe('Exception builder helpers', () => {
         type: OperatorTypeEnum.MATCH,
         value: '',
       };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
+      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
+        filterExceptionItems([
+          {
+            ...rest,
+            entries: [...entries, mockEmptyException],
+          },
+        ]);
 
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
     });
@@ -1612,14 +1608,13 @@ describe('Exception builder helpers', () => {
         type: OperatorTypeEnum.MATCH,
         value: 'some value',
       };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
+      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
+        filterExceptionItems([
+          {
+            ...rest,
+            entries: [...entries, mockEmptyException],
+          },
+        ]);
 
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
     });
@@ -1633,14 +1628,13 @@ describe('Exception builder helpers', () => {
         type: OperatorTypeEnum.MATCH_ANY,
         value: ['some value'],
       };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
+      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
+        filterExceptionItems([
+          {
+            ...rest,
+            entries: [...entries, mockEmptyException],
+          },
+        ]);
 
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
     });
@@ -1652,14 +1646,13 @@ describe('Exception builder helpers', () => {
         field: '',
         type: OperatorTypeEnum.NESTED,
       };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
+      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
+        filterExceptionItems([
+          {
+            ...rest,
+            entries: [...entries, mockEmptyException],
+          },
+        ]);
 
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
     });
@@ -1671,14 +1664,13 @@ describe('Exception builder helpers', () => {
         field: 'host.name',
         type: OperatorTypeEnum.NESTED,
       };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
+      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
+        filterExceptionItems([
+          {
+            ...rest,
+            entries: [...entries, mockEmptyException],
+          },
+        ]);
 
       expect(output).toEqual([
         {
@@ -1698,14 +1690,13 @@ describe('Exception builder helpers', () => {
         field: 'host.name',
         type: OperatorTypeEnum.NESTED,
       };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
+      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
+        filterExceptionItems([
+          {
+            ...rest,
+            entries: [...entries, mockEmptyException],
+          },
+        ]);
 
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
     });

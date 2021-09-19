@@ -179,7 +179,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }
 
   const { indexPatternFieldEditor } = props.services;
-  const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const indexPatternFieldEditPermission =
+    indexPatternFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && props.useNewFieldsApi;
 
   const editField = (fieldName?: string) => {

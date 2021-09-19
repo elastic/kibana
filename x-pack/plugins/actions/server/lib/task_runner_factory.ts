@@ -102,7 +102,7 @@ export class TaskRunnerFactory {
 
         // Since we're using API keys and accessing elasticsearch can only be done
         // via a request, we're faking one with the proper authorization headers.
-        const fakeRequest = KibanaRequest.from(({
+        const fakeRequest = KibanaRequest.from({
           headers: requestHeaders,
           path: '/',
           route: { settings: {} },
@@ -114,7 +114,7 @@ export class TaskRunnerFactory {
               url: '/',
             },
           },
-        } as unknown) as Request);
+        } as unknown as Request);
 
         basePathService.set(fakeRequest, path);
 

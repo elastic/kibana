@@ -11,11 +11,11 @@ import { getPdfJobParams } from './utils';
 import { workpads } from '../../../../__fixtures__/workpads';
 import { IBasePath } from 'kibana/public';
 
-const basePath = ({
+const basePath = {
   prepend: jest.fn().mockImplementation((s) => `basepath/s/spacey/${s}`),
   get: () => 'basepath/s/spacey',
   serverBasePath: `basepath`,
-} as unknown) as IBasePath;
+} as unknown as IBasePath;
 const workpadSharingData = { workpad: workpads[0], pageCount: 12 };
 
 test('getPdfJobParams returns the correct job params for canvas layout', () => {

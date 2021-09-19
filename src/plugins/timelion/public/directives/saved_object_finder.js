@@ -255,9 +255,8 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
           };
 
           self.hitCountNoun = function () {
-            return (self.hitCount === 1
-              ? self.properties.noun
-              : self.properties.nouns
+            return (
+              self.hitCount === 1 ? self.properties.noun : self.properties.nouns
             ).toLowerCase();
           };
 

@@ -172,26 +172,24 @@ export async function getReportingUsage(
   return esClient
     .search(params)
     .then(({ body: response }) => handleResponse(response))
-    .then(
-      (usage: Partial<RangeStatSets>): ReportingUsageType => {
-        // Allow this to explicitly throw an exception if/when this config is deprecated,
-        // because we shouldn't collect browserType in that case!
-        const browserType = config.get('capture', 'browser', 'type');
+    .then((usage: Partial<RangeStatSets>): ReportingUsageType => {
+      // Allow this to explicitly throw an exception if/when this config is deprecated,
+      // because we shouldn't collect browserType in that case!
+      const browserType = config.get('capture', 'browser', 'type');
 
-        const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-        const availability = exportTypesHandler.getAvailability(
-          featureAvailability
-        ) as FeatureAvailabilityMap;
+      const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
+      const availability = exportTypesHandler.getAvailability(
+        featureAvailability
+      ) as FeatureAvailabilityMap;
 
-        const { last7Days, ...all } = usage;
+      const { last7Days, ...all } = usage;
 
-        return {
-          available: true,
-          browser_type: browserType,
-          enabled: true,
-          last7Days: decorateRangeStats(last7Days, availability),
-          ...decorateRangeStats(all, availability),
-        };
-      }
-    );
+      return {
+        available: true,
+        browser_type: browserType,
+        enabled: true,
+        last7Days: decorateRangeStats(last7Days, availability),
+        ...decorateRangeStats(all, availability),
+      };
+    });
 }

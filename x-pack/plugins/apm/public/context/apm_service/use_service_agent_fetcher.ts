@@ -16,7 +16,11 @@ const INITIAL_STATE = {
 export function useServiceAgentFetcher(serviceName?: string) {
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
-  const { data = INITIAL_STATE, error, status } = useFetcher(
+  const {
+    data = INITIAL_STATE,
+    error,
+    status,
+  } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({

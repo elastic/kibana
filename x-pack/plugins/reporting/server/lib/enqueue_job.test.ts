@@ -51,31 +51,31 @@ describe('Enqueue Job', () => {
     mockReporting = await createMockReportingCore(createMockConfigSchema());
     mockReporting.getExportTypesRegistry = () => mockExportTypesRegistry;
     mockReporting.getStore = () =>
-      Promise.resolve(({
+      Promise.resolve({
         addReport: jest
           .fn()
           .mockImplementation(
             (report) => new Report({ ...report, _index: '.reporting-foo-index-234' })
           ),
-      } as unknown) as ReportingStore);
+      } as unknown as ReportingStore);
 
     const scheduleMock = jest.fn().mockImplementation(() => ({
       id: '123-great-id',
     }));
 
-    await mockReporting.pluginStart(({
-      taskManager: ({
+    await mockReporting.pluginStart({
+      taskManager: {
         ensureScheduled: jest.fn(),
         schedule: scheduleMock,
-      } as unknown) as TaskManagerStartContract,
-    } as unknown) as ReportingInternalStart);
+      } as unknown as TaskManagerStartContract,
+    } as unknown as ReportingInternalStart);
   });
 
   it('returns a Report object', async () => {
     const report = await enqueueJob(
       mockReporting,
-      ({} as unknown) as KibanaRequest,
-      ({} as unknown) as ReportingRequestHandlerContext,
+      {} as unknown as KibanaRequest,
+      {} as unknown as ReportingRequestHandlerContext,
       false,
       'printablePdf',
       mockBaseParams,
@@ -121,8 +121,8 @@ describe('Enqueue Job', () => {
     mockBaseParams.version = undefined;
     const report = await enqueueJob(
       mockReporting,
-      ({} as unknown) as KibanaRequest,
-      ({} as unknown) as ReportingRequestHandlerContext,
+      {} as unknown as KibanaRequest,
+      {} as unknown as ReportingRequestHandlerContext,
       false,
       'printablePdf',
       mockBaseParams,

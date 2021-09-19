@@ -33,9 +33,9 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     savedSearchLoader: {} as DiscoverStart['savedSearchLoader'],
-    urlGenerator: ({
+    urlGenerator: {
       createUrl: jest.fn(),
-    } as unknown) as DiscoverStart['urlGenerator'],
+    } as unknown as DiscoverStart['urlGenerator'],
     locator: {
       getLocation: jest.fn(),
       getUrl: jest.fn(),

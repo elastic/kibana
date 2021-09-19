@@ -60,8 +60,7 @@ describe('crawler crawl rules routes', () => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path:
-          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
+        path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
       });
 
       registerCrawlerCrawlRulesRoutes({
@@ -105,8 +104,7 @@ describe('crawler crawl rules routes', () => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path:
-          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
+        path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
       });
 
       registerCrawlerCrawlRulesRoutes({

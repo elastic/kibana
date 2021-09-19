@@ -12,14 +12,14 @@ import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_object
 import { APMConfig } from '../..';
 
 function getMockSavedObjectsClient() {
-  return ({
+  return {
     get: jest.fn(() => ({
       attributes: {
         title: 'apm-*',
       },
     })),
     create: jest.fn(),
-  } as unknown) as InternalSavedObjectsClient;
+  } as unknown as InternalSavedObjectsClient;
 }
 
 describe('createStaticIndexPattern', () => {

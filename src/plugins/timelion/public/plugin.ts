@@ -46,7 +46,8 @@ export interface TimelionPluginStartDependencies {
 
 /** @internal */
 export class TimelionPlugin
-  implements Plugin<void, void, TimelionPluginSetupDependencies, TimelionPluginStartDependencies> {
+  implements Plugin<void, void, TimelionPluginSetupDependencies, TimelionPluginStartDependencies>
+{
   initializerContext: PluginInitializerContext;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
@@ -65,7 +66,11 @@ export class TimelionPlugin
   ) {
     const timelionPanels: Map<string, Panel> = new Map();
 
-    const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
+    const {
+      appMounted,
+      appUnMounted,
+      stop: stopUrlTracker,
+    } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/timelion'),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:timelion`,

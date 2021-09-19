@@ -60,7 +60,8 @@ export class VisTypeXyPlugin
       VisTypeXyPluginStart,
       VisTypeXyPluginSetupDependencies,
       VisTypeXyPluginStartDependencies
-    > {
+    >
+{
   public setup(
     core: VisTypeXyCoreSetup,
     { expressions, visualizations, charts, usageCollection }: VisTypeXyPluginSetupDependencies

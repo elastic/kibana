@@ -11,40 +11,37 @@ import { METRIC_TYPES } from '../../../../../common/enums';
 
 import type { TableResponseProcessorsFunction } from './types';
 
-export const stdMetric: TableResponseProcessorsFunction = ({
-  bucket,
-  panel,
-  series,
-  meta,
-  extractFields,
-}) => (next) => async (results) => {
-  const metric = getLastMetric(series);
+export const stdMetric: TableResponseProcessorsFunction =
+  ({ bucket, panel, series, meta, extractFields }) =>
+  (next) =>
+  async (results) => {
+    const metric = getLastMetric(series);
 
-  if (metric.type === METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
-    return next(results);
-  }
+    if (metric.type === METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
+      return next(results);
+    }
 
-  if (METRIC_TYPES.PERCENTILE_RANK === metric.type || METRIC_TYPES.PERCENTILE === metric.type) {
-    return next(results);
-  }
+    if (METRIC_TYPES.PERCENTILE_RANK === metric.type || METRIC_TYPES.PERCENTILE === metric.type) {
+      return next(results);
+    }
 
-  if (/_bucket$/.test(metric.type)) {
-    return next(results);
-  }
+    if (/_bucket$/.test(metric.type)) {
+      return next(results);
+    }
 
-  const fakeResp = {
-    aggregations: bucket,
-  };
+    const fakeResp = {
+      aggregations: bucket,
+    };
 
-  (await getSplits(fakeResp, panel, series, meta, extractFields)).forEach((split) => {
-    const data = mapEmptyToZero(metric, split.timeseries.buckets);
+    (await getSplits(fakeResp, panel, series, meta, extractFields)).forEach((split) => {
+      const data = mapEmptyToZero(metric, split.timeseries.buckets);
 
-    results.push({
-      id: split.id,
-      label: split.label,
-      data,
+      results.push({
+        id: split.id,
+        label: split.label,
+        data,
+      });
     });
-  });
 
-  return next(results);
-};
+    return next(results);
+  };

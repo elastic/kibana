@@ -29,9 +29,8 @@ const StickyFlexItem = styled(EuiFlexItem)`
 
 export const DateRangePicker = memo(() => {
   const dispatch = useDispatch();
-  const { page, pageSize, startDate, endDate, isInvalidDateRange } = useEndpointSelector(
-    getActivityLogDataPaging
-  );
+  const { page, pageSize, startDate, endDate, isInvalidDateRange } =
+    useEndpointSelector(getActivityLogDataPaging);
 
   const onChangeStartDate = useCallback(
     (date) => {

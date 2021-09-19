@@ -57,9 +57,8 @@ const MAX_LENGTH = 28;
 export const SourceContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { setActivePage, searchContentSourceDocuments, setContentFilterValue } = useActions(
-    SourceLogic
-  );
+  const { setActivePage, searchContentSourceDocuments, setContentFilterValue } =
+    useActions(SourceLogic);
 
   const {
     contentSource: { id, serviceType, urlField, titleField, urlFieldIsLinkable, isFederatedSource },

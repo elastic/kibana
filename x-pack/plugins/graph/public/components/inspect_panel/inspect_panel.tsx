@@ -57,11 +57,10 @@ export const InspectPanel = ({
 
   const services = useMemo(() => ({ uiSettings }), [uiSettings]);
 
-  const editorContent = useMemo(() => (selectedTabId === 'request' ? lastRequest : lastResponse), [
-    selectedTabId,
-    lastRequest,
-    lastResponse,
-  ]);
+  const editorContent = useMemo(
+    () => (selectedTabId === 'request' ? lastRequest : lastResponse),
+    [selectedTabId, lastRequest, lastResponse]
+  );
 
   if (showInspect) {
     return (

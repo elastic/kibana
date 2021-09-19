@@ -645,9 +645,10 @@ export interface Visualization<T = unknown> {
   /**
    * For consistency across different visualizations, the dimension configuration UI is standardized
    */
-  getConfiguration: (
-    props: VisualizationConfigProps<T>
-  ) => { groups: VisualizationDimensionGroupConfig[]; supportStaticValue?: boolean };
+  getConfiguration: (props: VisualizationConfigProps<T>) => {
+    groups: VisualizationDimensionGroupConfig[];
+    supportStaticValue?: boolean;
+  };
 
   /**
    * Header rendered as layer title This can be used for both static and dynamic content lioke

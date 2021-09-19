@@ -289,11 +289,11 @@ export class RulesClient {
     await this.validateActions(ruleType, data.actions);
 
     // Extract saved object references for this rule
-    const { references, params: updatedParams, actions } = await this.extractReferences(
-      ruleType,
-      data.actions,
-      validatedAlertTypeParams
-    );
+    const {
+      references,
+      params: updatedParams,
+      actions,
+    } = await this.extractReferences(ruleType, data.actions, validatedAlertTypeParams);
 
     const createTime = Date.now();
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
@@ -568,13 +568,11 @@ export class RulesClient {
     // Replace this when saved objects supports aggregations https://github.com/elastic/kibana/pull/64002
     const alertExecutionStatus = await Promise.all(
       AlertExecutionStatusValues.map(async (status: string) => {
-        const {
-          filter: authorizationFilter,
-          logSuccessfulAuthorization,
-        } = await this.authorization.getFindAuthorizationFilter(
-          AlertingAuthorizationEntity.Rule,
-          alertingAuthorizationFilterOpts
-        );
+        const { filter: authorizationFilter, logSuccessfulAuthorization } =
+          await this.authorization.getFindAuthorizationFilter(
+            AlertingAuthorizationEntity.Rule,
+            alertingAuthorizationFilterOpts
+          );
         const filter = options.filter
           ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
           : `alert.attributes.executionStatus.status:(${status})`;
@@ -612,11 +610,10 @@ export class RulesClient {
     let attributes: RawAlert;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
-        'alert',
-        id,
-        { namespace: this.namespace }
-      );
+      const decryptedAlert =
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+          namespace: this.namespace,
+        });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
       attributes = decryptedAlert.attributes;
@@ -691,11 +688,10 @@ export class RulesClient {
     let alertSavedObject: SavedObject<RawAlert>;
 
     try {
-      alertSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
-        'alert',
-        id,
-        { namespace: this.namespace }
-      );
+      alertSavedObject =
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+          namespace: this.namespace,
+        });
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
@@ -781,11 +777,11 @@ export class RulesClient {
     await this.validateActions(ruleType, data.actions);
 
     // Extract saved object references for this rule
-    const { references, params: updatedParams, actions } = await this.extractReferences(
-      ruleType,
-      data.actions,
-      validatedAlertTypeParams
-    );
+    const {
+      references,
+      params: updatedParams,
+      actions,
+    } = await this.extractReferences(ruleType, data.actions, validatedAlertTypeParams);
 
     const username = await this.getUserName();
 
@@ -870,11 +866,10 @@ export class RulesClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
-        'alert',
-        id,
-        { namespace: this.namespace }
-      );
+      const decryptedAlert =
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+          namespace: this.namespace,
+        });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
@@ -975,11 +970,10 @@ export class RulesClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
-        'alert',
-        id,
-        { namespace: this.namespace }
-      );
+      const decryptedAlert =
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+          namespace: this.namespace,
+        });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
@@ -1093,11 +1087,10 @@ export class RulesClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
-        'alert',
-        id,
-        { namespace: this.namespace }
-      );
+      const decryptedAlert =
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+          namespace: this.namespace,
+        });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;

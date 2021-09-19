@@ -102,7 +102,7 @@ describe('Table Vis - Controller', () => {
   });
 
   function getRangeVis(params?: object) {
-    return ({
+    return {
       type: tableVisLegacyTypeDefinition,
       params: Object.assign({}, tableVisLegacyTypeDefinition.visConfig?.defaults, params),
       data: {
@@ -121,7 +121,7 @@ describe('Table Vis - Controller', () => {
           },
         ]),
       },
-    } as unknown) as Vis;
+    } as unknown as Vis;
   }
 
   const dimensions = {

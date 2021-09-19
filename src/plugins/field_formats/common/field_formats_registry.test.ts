@@ -65,10 +65,8 @@ describe('FieldFormatsRegistry', () => {
     test('should register field formats', () => {
       fieldFormatsRegistry.register([StringFormat, BoolFormat]);
 
-      const registeredFieldFormatters: Map<
-        string,
-        FieldFormatInstanceType
-      > = getValueOfPrivateField(fieldFormatsRegistry, 'fieldFormats');
+      const registeredFieldFormatters: Map<string, FieldFormatInstanceType> =
+        getValueOfPrivateField(fieldFormatsRegistry, 'fieldFormats');
 
       expect(registeredFieldFormatters.size).toBe(2);
 

@@ -61,9 +61,9 @@ export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
   }),
 };
 
-export const PROPERTY_TITLES: Readonly<
-  { [K in keyof Omit<TrustedApp, 'id' | 'entries' | 'version'>]: string }
-> = {
+export const PROPERTY_TITLES: Readonly<{
+  [K in keyof Omit<TrustedApp, 'id' | 'entries' | 'version'>]: string;
+}> = {
   name: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.name', {
     defaultMessage: 'Name',
   }),
@@ -90,9 +90,9 @@ export const PROPERTY_TITLES: Readonly<
   }),
 };
 
-export const ENTRY_PROPERTY_TITLES: Readonly<
-  { [K in keyof Omit<MacosLinuxConditionEntry | WindowsConditionEntry, 'type'>]: string }
-> = {
+export const ENTRY_PROPERTY_TITLES: Readonly<{
+  [K in keyof Omit<MacosLinuxConditionEntry | WindowsConditionEntry, 'type'>]: string;
+}> = {
   field: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.entry.field', {
     defaultMessage: 'Field',
   }),

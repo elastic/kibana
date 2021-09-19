@@ -50,8 +50,7 @@ const mockedSavedObjects = [
         visState: JSON.stringify({
           type: 'vega',
           params: {
-            spec:
-              '{"$schema": "https://vega.github.io/schema/vega/v3.json" \n "config": { "kibana" : { "type": "map" }} }',
+            spec: '{"$schema": "https://vega.github.io/schema/vega/v3.json" \n "config": { "kibana" : { "type": "map" }} }',
           },
         }),
       },
@@ -69,7 +68,7 @@ const getMockCollectorFetchContext = (hits?: unknown[]) => {
 describe('Vega visualization usage collector', () => {
   const mockIndex = 'mock_index';
   const mockDeps = {
-    home: ({
+    home: {
       sampleData: {
         getSampleDatasets: jest.fn().mockReturnValue([
           {
@@ -90,7 +89,7 @@ describe('Vega visualization usage collector', () => {
           },
         ]),
       },
-    } as unknown) as HomeServerPluginSetup,
+    } as unknown as HomeServerPluginSetup,
   };
 
   test('Returns undefined when no results found (undefined)', async () => {

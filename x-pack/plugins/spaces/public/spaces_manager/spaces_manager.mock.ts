@@ -13,8 +13,8 @@ import type { Space } from 'src/plugins/spaces_oss/common';
 import type { SpacesManager } from './spaces_manager';
 
 function createSpacesManagerMock() {
-  return ({
-    onActiveSpaceChange$: (of(undefined) as unknown) as Observable<Space>,
+  return {
+    onActiveSpaceChange$: of(undefined) as unknown as Observable<Space>,
     getSpaces: jest.fn().mockResolvedValue([]),
     getSpace: jest.fn().mockResolvedValue(undefined),
     getActiveSpace: jest.fn().mockResolvedValue(undefined),
@@ -28,7 +28,7 @@ function createSpacesManagerMock() {
     resolveCopySavedObjectsErrors: jest.fn().mockResolvedValue(undefined),
     getShareSavedObjectPermissions: jest.fn().mockResolvedValue(undefined),
     redirectToSpaceSelector: jest.fn().mockResolvedValue(undefined),
-  } as unknown) as jest.Mocked<SpacesManager>;
+  } as unknown as jest.Mocked<SpacesManager>;
 }
 
 export const spacesManagerMock = {

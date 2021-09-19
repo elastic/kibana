@@ -47,14 +47,12 @@ export const asyncSearchServiceProvider = (
       };
 
       // 95th percentile to be displayed as a marker in the log log chart
-      const {
-        totalDocs,
-        percentiles: percentilesResponseThresholds,
-      } = await fetchTransactionDurationPercentiles(
-        esClient,
-        params,
-        params.percentileThreshold ? [params.percentileThreshold] : undefined
-      );
+      const { totalDocs, percentiles: percentilesResponseThresholds } =
+        await fetchTransactionDurationPercentiles(
+          esClient,
+          params,
+          params.percentileThreshold ? [params.percentileThreshold] : undefined
+        );
       const percentileThresholdValue =
         percentilesResponseThresholds[`${params.percentileThreshold}.0`];
       state.setPercentileThresholdValue(percentileThresholdValue);
@@ -79,10 +77,8 @@ export const asyncSearchServiceProvider = (
         return;
       }
 
-      const histogramRangeSteps = await fetchTransactionDurationHistogramRangeSteps(
-        esClient,
-        params
-      );
+      const histogramRangeSteps =
+        await fetchTransactionDurationHistogramRangeSteps(esClient, params);
       state.setProgress({ loadedHistogramStepsize: 1 });
 
       addLogMessage(`Loaded histogram range steps.`);
@@ -125,13 +121,12 @@ export const asyncSearchServiceProvider = (
 
       // Create an array of ranges [2, 4, 6, ..., 98]
       const percentileAggregationPercents = range(2, 100, 2);
-      const {
-        percentiles: percentilesRecords,
-      } = await fetchTransactionDurationPercentiles(
-        esClient,
-        params,
-        percentileAggregationPercents
-      );
+      const { percentiles: percentilesRecords } =
+        await fetchTransactionDurationPercentiles(
+          esClient,
+          params,
+          percentileAggregationPercents
+        );
       const percentiles = Object.values(percentilesRecords);
 
       addLogMessage(`Loaded percentiles.`);
@@ -165,14 +160,11 @@ export const asyncSearchServiceProvider = (
         return;
       }
 
-      const { expectations, ranges } = computeExpectationsAndRanges(
-        percentiles
-      );
+      const { expectations, ranges } =
+        computeExpectationsAndRanges(percentiles);
 
-      const {
-        fractions,
-        totalDocCount,
-      } = await fetchTransactionDurationFractions(esClient, params, ranges);
+      const { fractions, totalDocCount } =
+        await fetchTransactionDurationFractions(esClient, params, ranges);
 
       addLogMessage(`Loaded fractions and totalDocCount of ${totalDocCount}.`);
 

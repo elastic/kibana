@@ -56,12 +56,8 @@ const confirmModalOptionsDelete = {
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const {
-      uiSettings,
-      overlays,
-      chrome,
-      data,
-    } = useKibana<IndexPatternManagmentContext>().services;
+    const { uiSettings, overlays, chrome, data } =
+      useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')

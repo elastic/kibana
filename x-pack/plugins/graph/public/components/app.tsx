@@ -33,14 +33,8 @@ export interface GraphAppProps extends SearchBarProps {
 
 export function GraphApp(props: GraphAppProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const {
-    coreStart,
-    pluginDataStart,
-    storage,
-    reduxStore,
-    noIndexPatterns,
-    ...searchBarProps
-  } = props;
+  const { coreStart, pluginDataStart, storage, reduxStore, noIndexPatterns, ...searchBarProps } =
+    props;
 
   return (
     <I18nProvider>

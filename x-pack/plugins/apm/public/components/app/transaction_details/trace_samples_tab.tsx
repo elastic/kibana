@@ -34,10 +34,8 @@ function TraceSamplesTab({
     status: waterfallStatus,
   } = useWaterfallFetcher();
 
-  const [
-    transactionDistributionHasData,
-    setTransactionDistributionHasData,
-  ] = useState(false);
+  const [transactionDistributionHasData, setTransactionDistributionHasData] =
+    useState(false);
 
   return (
     <>

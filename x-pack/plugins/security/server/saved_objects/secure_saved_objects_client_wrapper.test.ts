@@ -48,12 +48,12 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
   const forbiddenError = new Error('Mock ForbiddenError');
   const generalError = new Error('Mock GeneralError');
 
-  const errors = ({
+  const errors = {
     decorateForbiddenError: jest.fn().mockReturnValue(forbiddenError),
     decorateGeneralError: jest.fn().mockReturnValue(generalError),
     createBadRequestError: jest.fn().mockImplementation((message) => new Error(message)),
     isNotFoundError: jest.fn().mockReturnValue(false),
-  } as unknown) as jest.Mocked<SavedObjectsClientContract['errors']>;
+  } as unknown as jest.Mocked<SavedObjectsClientContract['errors']>;
   const getSpacesService = jest.fn().mockReturnValue({
     namespaceToSpaceId: (namespace?: string) => (namespace ? namespace : 'default'),
   });
@@ -97,9 +97,9 @@ const expectForbiddenError = async (fn: Function, args: Record<string, any>, act
   await expect(fn.bind(client)(...Object.values(args))).rejects.toThrowError(
     clientOpts.forbiddenError
   );
-  const getCalls = (clientOpts.actions.savedObject.get as jest.MockedFunction<
-    SavedObjectActions['get']
-  >).mock.calls;
+  const getCalls = (
+    clientOpts.actions.savedObject.get as jest.MockedFunction<SavedObjectActions['get']>
+  ).mock.calls;
   const actions = clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mock.calls[0][0];
   const spaceId = args.options?.namespaces
     ? args.options?.namespaces[0]
@@ -125,9 +125,9 @@ const expectForbiddenError = async (fn: Function, args: Record<string, any>, act
 
 const expectSuccess = async (fn: Function, args: Record<string, any>, action?: string) => {
   const result = await fn.bind(client)(...Object.values(args));
-  const getCalls = (clientOpts.actions.savedObject.get as jest.MockedFunction<
-    SavedObjectActions['get']
-  >).mock.calls;
+  const getCalls = (
+    clientOpts.actions.savedObject.get as jest.MockedFunction<SavedObjectActions['get']>
+  ).mock.calls;
   const ACTION = getCalls[0][1];
   const types = getCalls.map((x) => x[0]);
   const spaceIds = args.options?.namespaces || [args.options?.namespace || 'default'];
@@ -154,9 +154,9 @@ const expectPrivilegeCheck = async (
   );
 
   await expect(fn.bind(client)(...Object.values(args))).rejects.toThrow(); // test is simpler with error case
-  const getResults = (clientOpts.actions.savedObject.get as jest.MockedFunction<
-    SavedObjectActions['get']
-  >).mock.results;
+  const getResults = (
+    clientOpts.actions.savedObject.get as jest.MockedFunction<SavedObjectActions['get']>
+  ).mock.results;
   const actions = getResults.map((x) => x.value);
 
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(1);
@@ -691,9 +691,7 @@ describe('#find', () => {
 
     expect(clientOpts.baseClient.find).not.toHaveBeenCalled();
     expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-    expect(
-      clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure
-    ).toHaveBeenCalledWith(
+    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
       USERNAME,
       'find',
       [type1],

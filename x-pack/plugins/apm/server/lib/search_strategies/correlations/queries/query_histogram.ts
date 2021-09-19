@@ -60,8 +60,9 @@ export const fetchTransactionDurationHistogram = async (
   }
 
   return (
-    (resp.body.aggregations
-      .transaction_duration_histogram as estypes.AggregationsMultiBucketAggregate<HistogramItem>)
-      .buckets ?? []
+    (
+      resp.body.aggregations
+        .transaction_duration_histogram as estypes.AggregationsMultiBucketAggregate<HistogramItem>
+    ).buckets ?? []
   );
 };

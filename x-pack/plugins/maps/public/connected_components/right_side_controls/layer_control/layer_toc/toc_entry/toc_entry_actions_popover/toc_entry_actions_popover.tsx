@@ -201,7 +201,9 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           disabled: !this.state.isFeatureEditingEnabled || this.props.editModeActiveForLayer,
           onClick: async () => {
             this._closePopover();
-            const supportedShapeTypes = await (this.props.layer.getSource() as ESSearchSource).getSupportedShapeTypes();
+            const supportedShapeTypes = await (
+              this.props.layer.getSource() as ESSearchSource
+            ).getSupportedShapeTypes();
             const supportsShapes =
               supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON) &&
               supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.LINE);

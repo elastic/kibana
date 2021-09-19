@@ -41,11 +41,8 @@ describe('renderApp', () => {
   });
 
   it('renders the app', () => {
-    const {
-      core,
-      config,
-      observabilityRuleTypeRegistry,
-    } = mockApmPluginContextValue;
+    const { core, config, observabilityRuleTypeRegistry } =
+      mockApmPluginContextValue;
 
     const plugins = {
       licensing: { license$: new Observable() },
@@ -67,7 +64,7 @@ describe('renderApp', () => {
     const data = dataPluginMock.createStartContract();
     const embeddable = embeddablePluginMock.createStartContract();
 
-    const pluginsStart = ({
+    const pluginsStart = {
       data,
       embeddable,
       observability: {
@@ -85,10 +82,10 @@ describe('renderApp', () => {
         getEditAlertFlyout: jest.fn(),
       },
       usageCollection: { reportUiCounter: () => {} },
-    } as unknown) as ApmPluginStartDeps;
+    } as unknown as ApmPluginStartDeps;
 
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
-    createCallApmApi((core as unknown) as CoreStart);
+    createCallApmApi(core as unknown as CoreStart);
 
     jest
       .spyOn(window.console, 'warn')

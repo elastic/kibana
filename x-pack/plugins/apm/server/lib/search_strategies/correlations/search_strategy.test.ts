@@ -126,14 +126,14 @@ describe('APM Correlations search strategy', () => {
       mockClientFieldCaps = jest.fn(clientFieldCapsMock);
       mockClientSearch = jest.fn(clientSearchMock);
       mockGetApmIndicesMock = jest.fn(getApmIndicesMock);
-      mockDeps = ({
+      mockDeps = {
         esClient: {
           asCurrentUser: {
             fieldCaps: mockClientFieldCaps,
             search: mockClientSearch,
           },
         },
-      } as unknown) as SearchStrategyDependencies;
+      } as unknown as SearchStrategyDependencies;
       params = {
         start: '2020',
         end: '2021',

@@ -82,7 +82,7 @@ export let callApmApi: APMClient = () => {
 export function createCallApmApi(core: CoreStart | CoreSetup) {
   callApmApi = ((options) => {
     const { endpoint, ...opts } = options;
-    const { params } = (options as unknown) as {
+    const { params } = options as unknown as {
       params?: Partial<Record<string, any>>;
     };
 

@@ -101,7 +101,8 @@ export function DiscoverSidebar({
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
   const { indexPatternFieldEditor } = services;
-  const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const indexPatternFieldEditPermission =
+    indexPatternFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
@@ -129,9 +130,10 @@ export function DiscoverSidebar({
     [documents, columns, selectedIndexPattern]
   );
 
-  const popularLimit = useMemo(() => services.uiSettings.get(FIELDS_LIMIT_SETTING), [
-    services.uiSettings,
-  ]);
+  const popularLimit = useMemo(
+    () => services.uiSettings.get(FIELDS_LIMIT_SETTING),
+    [services.uiSettings]
+  );
 
   const {
     selected: selectedFields,

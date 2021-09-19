@@ -30,7 +30,8 @@ import { getColumns } from './get_columns';
 import { ElasticDocsLink } from '../Links/ElasticDocsLink';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
-type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+type ApiResponse =
+  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 interface InitialState {
   requestId: string;

@@ -14,13 +14,13 @@ import { workpads } from '../../../__fixtures__/workpads';
 import { okResponse } from '../ok_response';
 import { getMockedRouterDeps } from '../test_helpers';
 
-const mockRouteContext = ({
+const mockRouteContext = {
   core: {
     savedObjects: {
       client: savedObjectsClientMock.create(),
     },
   },
-} as unknown) as RequestHandlerContext;
+} as unknown as RequestHandlerContext;
 
 const workpad = workpads[0];
 const now = new Date();

@@ -84,7 +84,8 @@ export class Plugin
       TriggersAndActionsUIPublicPluginStart,
       PluginsSetup,
       PluginsStart
-    > {
+    >
+{
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<AlertTypeModel>;
 

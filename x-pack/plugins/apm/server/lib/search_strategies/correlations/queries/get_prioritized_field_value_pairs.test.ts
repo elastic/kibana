@@ -14,9 +14,8 @@ describe('correlations', () => {
         { field: 'the-field-1', value: 'the-value-1' },
         { field: 'the-field-2', value: 'the-value-2' },
       ];
-      const prioritziedFieldValuePairs = getPrioritizedFieldValuePairs(
-        fieldValuePairs
-      );
+      const prioritziedFieldValuePairs =
+        getPrioritizedFieldValuePairs(fieldValuePairs);
       expect(prioritziedFieldValuePairs.map((d) => d.field)).toEqual([
         'the-field-1',
         'the-field-2',
@@ -28,9 +27,8 @@ describe('correlations', () => {
         { field: 'service.version', value: 'the-value-1' },
         { field: 'the-field-2', value: 'the-value-2' },
       ];
-      const prioritziedFieldValuePairs = getPrioritizedFieldValuePairs(
-        fieldValuePairs
-      );
+      const prioritziedFieldValuePairs =
+        getPrioritizedFieldValuePairs(fieldValuePairs);
       expect(prioritziedFieldValuePairs.map((d) => d.field)).toEqual([
         'service.version',
         'the-field-2',
@@ -42,9 +40,8 @@ describe('correlations', () => {
         { field: 'the-field-1', value: 'the-value-1' },
         { field: 'service.version', value: 'the-value-2' },
       ];
-      const prioritziedFieldValuePairs = getPrioritizedFieldValuePairs(
-        fieldValuePairs
-      );
+      const prioritziedFieldValuePairs =
+        getPrioritizedFieldValuePairs(fieldValuePairs);
       expect(prioritziedFieldValuePairs.map((d) => d.field)).toEqual([
         'service.version',
         'the-field-1',
@@ -57,9 +54,8 @@ describe('correlations', () => {
         { field: 'service.version', value: 'the-value-2' },
         { field: 'cloud.the-field-3', value: 'the-value-3' },
       ];
-      const prioritziedFieldValuePairs = getPrioritizedFieldValuePairs(
-        fieldValuePairs
-      );
+      const prioritziedFieldValuePairs =
+        getPrioritizedFieldValuePairs(fieldValuePairs);
       expect(prioritziedFieldValuePairs.map((d) => d.field)).toEqual([
         'service.version',
         'cloud.the-field-3',

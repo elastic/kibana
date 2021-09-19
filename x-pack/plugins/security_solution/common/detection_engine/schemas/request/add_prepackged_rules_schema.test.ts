@@ -613,9 +613,7 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(((message.schema as unknown) as AddPrepackagedRulesSchemaDecoded).enabled).toEqual(
-      false
-    );
+    expect((message.schema as unknown as AddPrepackagedRulesSchemaDecoded).enabled).toEqual(false);
   });
 
   test('rule_id is required', () => {
@@ -669,10 +667,8 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
 
-    const {
-      interval: expectedInterval,
-      ...expectedNoInterval
-    } = getAddPrepackagedRulesSchemaDecodedMock();
+    const { interval: expectedInterval, ...expectedNoInterval } =
+      getAddPrepackagedRulesSchemaDecodedMock();
     const expected: AddPrepackagedRulesSchemaDecoded = {
       ...expectedNoInterval,
       interval: '5m',
@@ -692,10 +688,8 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
 
-    const {
-      max_signals: expectedMaxSignals,
-      ...expectedNoMaxSignals
-    } = getAddPrepackagedRulesSchemaDecodedMock();
+    const { max_signals: expectedMaxSignals, ...expectedNoMaxSignals } =
+      getAddPrepackagedRulesSchemaDecodedMock();
     const expected: AddPrepackagedRulesSchemaDecoded = {
       ...expectedNoMaxSignals,
       max_signals: 100,
@@ -1193,10 +1187,8 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
 
-    const {
-      actions: expectedActions,
-      ...expectedNoActions
-    } = getAddPrepackagedRulesSchemaDecodedMock();
+    const { actions: expectedActions, ...expectedNoActions } =
+      getAddPrepackagedRulesSchemaDecodedMock();
     const expected: AddPrepackagedRulesSchemaDecoded = {
       ...expectedNoActions,
       actions: [],
@@ -1297,10 +1289,8 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
 
-    const {
-      throttle: expectedThrottle,
-      ...expectedNoThrottle
-    } = getAddPrepackagedRulesSchemaDecodedMock();
+    const { throttle: expectedThrottle, ...expectedNoThrottle } =
+      getAddPrepackagedRulesSchemaDecodedMock();
     const expected: AddPrepackagedRulesSchemaDecoded = {
       ...expectedNoThrottle,
       throttle: null,

@@ -17,9 +17,9 @@ afterAll(() => jest.clearAllMocks());
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
-const applicationStartMock = ({
+const applicationStartMock = {
   capabilities: { navLinks: { management: true, dev_tools: true } },
-} as unknown) as ApplicationStart;
+} as unknown as ApplicationStart;
 
 describe('overviewPageActions', () => {
   test('only add data button', () => {

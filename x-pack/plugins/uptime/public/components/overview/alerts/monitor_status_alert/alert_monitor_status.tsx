@@ -31,14 +31,8 @@ export interface AlertMonitorStatusProps {
 }
 
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {
-  const {
-    alertParams,
-    hasFilters,
-    isOldAlert,
-    setAlertParams,
-    snapshotCount,
-    snapshotLoading,
-  } = props;
+  const { alertParams, hasFilters, isOldAlert, setAlertParams, snapshotCount, snapshotLoading } =
+    props;
 
   const alertFilters = alertParams?.filters ?? {};
   const [newFilters, setNewFilters] = useState<string[]>(

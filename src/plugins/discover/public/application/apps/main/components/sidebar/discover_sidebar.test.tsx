@@ -43,9 +43,9 @@ function getCompProps(): DiscoverSidebarProps {
   );
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = (each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
+  const hits = each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
     Record<string, unknown>
-  >) as ElasticSearchHit[];
+  > as ElasticSearchHit[];
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,

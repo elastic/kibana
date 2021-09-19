@@ -51,7 +51,7 @@ export function Example() {
 
 export function WithErrors() {
   const waterfall = getWaterfall(
-    (traceWithErrors as unknown) as TraceAPIResponse,
+    traceWithErrors as unknown as TraceAPIResponse,
     '975c8d5bfd1dd20b'
   );
   return (

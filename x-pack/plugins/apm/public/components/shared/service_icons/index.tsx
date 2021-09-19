@@ -64,10 +64,8 @@ export function ServiceIcons({ serviceName }: Props) {
   const {
     urlParams: { start, end },
   } = useUrlParams();
-  const [
-    selectedIconPopover,
-    setSelectedIconPopover,
-  ] = useState<Icons | null>();
+  const [selectedIconPopover, setSelectedIconPopover] =
+    useState<Icons | null>();
 
   const theme = useTheme();
 

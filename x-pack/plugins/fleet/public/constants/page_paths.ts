@@ -80,10 +80,9 @@ export const INTEGRATIONS_ROUTING_PATHS = {
 
 export const pagePathGetters: {
   [key in StaticPage]: () => [string, string];
-} &
-  {
-    [key in DynamicPage]: (values: DynamicPagePathValues) => [string, string];
-  } = {
+} & {
+  [key in DynamicPage]: (values: DynamicPagePathValues) => [string, string];
+} = {
   base: () => [FLEET_BASE_PATH, '/'],
   overview: () => [FLEET_BASE_PATH, '/'],
   integrations: () => [INTEGRATIONS_BASE_PATH, '/'],
