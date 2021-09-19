@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { IFieldSubTypeNested } from '@kbn/es-query';
 
 import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline';
 import type { Sort } from '../../sort';
@@ -68,7 +69,8 @@ export const HeaderComponent: React.FC<Props> = ({ header, sort, timelineId }) =
 
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
   const { isLoading } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId ?? ''));
-  const showSortingCapability = !(header.subType && header.subType.nested);
+  const subTypeNested = header.subType as IFieldSubTypeNested;
+  const showSortingCapability = !subTypeNested?.nested;
 
   return (
     <>

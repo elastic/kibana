@@ -9,6 +9,7 @@
 import './test_script.scss';
 
 import React, { Component, Fragment } from 'react';
+import { IFieldSubTypeMulti } from '@kbn/es-query';
 
 import {
   EuiButton,
@@ -178,7 +179,8 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     this.props.indexPattern.fields
       .getAll()
       .filter((field) => {
-        const isMultiField = field.subType && field.subType.multi;
+        const subTypeMulti = field.subType as IFieldSubTypeMulti;
+        const isMultiField = subTypeMulti?.multi;
         return !field.name.startsWith('_') && !isMultiField && !field.scripted;
       })
       .forEach((field) => {

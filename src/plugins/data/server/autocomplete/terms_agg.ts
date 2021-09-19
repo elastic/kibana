@@ -9,6 +9,7 @@
 import { get, map } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
+import { IFieldSubTypeNested } from '@kbn/es-query';
 import { ConfigSchema } from '../../config';
 import { IFieldType } from '../../common';
 import { findIndexPatternById, getFieldByName } from '../data_views';
@@ -87,14 +88,14 @@ async function getBody(
       },
     },
   };
-
-  if (isFieldObject(field) && field.subType && field.subType.nested) {
+  const subTypeNested = isFieldObject(field) && (field?.subType as IFieldSubTypeNested);
+  if (isFieldObject(field) && subTypeNested && subTypeNested.nested) {
     return {
       ...body,
       aggs: {
         nestedSuggestions: {
           nested: {
-            path: field.subType.nested.path,
+            path: subTypeNested.nested.path,
           },
           aggs: body.aggs,
         },

@@ -10,6 +10,7 @@ import './discover_sidebar.scss';
 import { throttle } from 'lodash';
 import React, { useCallback, useEffect, useState, useMemo, useRef, memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { IFieldSubTypeMulti } from '@kbn/es-query';
 import {
   EuiAccordion,
   EuiFlexItem,
@@ -206,7 +207,8 @@ export function DiscoverSidebarComponent({
     }
     const map = new Map<string, Array<{ field: IndexPatternField; isSelected: boolean }>>();
     fields.forEach((field) => {
-      const parent = field.spec?.subType?.multi?.parent;
+      const subTypeMulti = field.spec?.subType as IFieldSubTypeMulti;
+      const parent = subTypeMulti?.multi?.parent;
       if (!parent) {
         return;
       }

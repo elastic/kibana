@@ -9,6 +9,7 @@
 import React from 'react';
 import { flatten } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { IFieldSubTypeNested } from '@kbn/es-query';
 import { escapeKuery } from './lib/escape_kuery';
 import { sortPrefixFirst } from './sort_prefix_first';
 import {
@@ -53,12 +54,13 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
     );
     const search = `${prefix}${suffix}`.trim().toLowerCase();
     const matchingFields = allFields.filter((field) => {
+      const subTypeNested = field?.subType as IFieldSubTypeNested;
       return (
         (!nestedPath ||
           (nestedPath &&
-            field.subType &&
-            field.subType.nested &&
-            field.subType.nested.path.includes(nestedPath))) &&
+            subTypeNested &&
+            subTypeNested.nested &&
+            subTypeNested.nested.path.includes(nestedPath))) &&
         field.name.toLowerCase().includes(search)
       );
     });

@@ -56,6 +56,7 @@ export const registerCreateScriptedFieldRoute = (
           throw new Error(`Field [name = ${field.name}] already exists.`);
         }
 
+        // @ts-expect-error
         indexPattern.fields.add({
           ...field,
           aggregatable: true,

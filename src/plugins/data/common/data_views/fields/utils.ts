@@ -7,6 +7,7 @@
  */
 
 import { getFilterableKbnTypeNames } from '@kbn/field-types';
+import { IFieldSubTypeNested } from '@kbn/es-query';
 import { IFieldType } from './types';
 
 const filterableTypes = getFilterableKbnTypeNames();
@@ -20,5 +21,6 @@ export function isFilterable(field: IFieldType): boolean {
 }
 
 export function isNestedField(field: IFieldType): boolean {
-  return !!field.subType?.nested;
+  const subTypeNested = field?.subType as IFieldSubTypeNested;
+  return !!subTypeNested?.nested;
 }

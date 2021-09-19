@@ -8,6 +8,7 @@
 
 import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { IFieldSubTypeNested } from '@kbn/es-query';
 
 import classNames from 'classnames';
 import {
@@ -425,10 +426,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private handleNestedFieldSyntaxNotification = (suggestion: QuerySuggestion) => {
-    if (
+    const subTypeNested =
       'field' in suggestion &&
-      suggestion.field.subType &&
-      suggestion.field.subType.nested &&
+      suggestion.field &&
+      (suggestion.field.subType as IFieldSubTypeNested);
+    if (
+      subTypeNested &&
+      subTypeNested.nested &&
       !this.services.storage.get('kibana.KQLNestedQuerySyntaxInfoOptOut')
     ) {
       const { notifications, docLinks } = this.services;

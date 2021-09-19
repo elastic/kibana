@@ -8,6 +8,7 @@
 import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import { asyncMap } from '@kbn/std';
+import { IFieldSubTypeMulti } from '@kbn/es-query';
 import { getIndexPatternService } from './kibana_services';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
@@ -98,7 +99,8 @@ export function supportsGeoTileAgg(field?: IndexPatternField): boolean {
 export function getSourceFields(fields: IndexPatternField[]): IndexPatternField[] {
   return fields.filter((field) => {
     // Multi fields are not stored in _source and only exist in index.
-    const isMultiField = field.subType && field.subType.multi;
+    const subTypeMulti = field.subType as IFieldSubTypeMulti;
+    const isMultiField = subTypeMulti.multi;
     return !isMultiField && !indexPatterns.isNestedField(field);
   });
 }

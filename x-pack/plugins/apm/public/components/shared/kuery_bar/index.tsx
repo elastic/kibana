@@ -14,6 +14,7 @@ import {
   esKuery,
   IndexPattern,
   QuerySuggestion,
+  IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -101,7 +102,7 @@ export function KueryBar(props: {
       const suggestions = (
         (await data.autocomplete.getQuerySuggestions({
           language: 'kuery',
-          indexPatterns: [indexPattern],
+          indexPatterns: [indexPattern as IIndexPattern],
           boolFilter:
             props.boolFilter ??
             getBoolFilter({
