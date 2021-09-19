@@ -416,6 +416,11 @@ export class DataViewsService {
   };
 
   private getSavedObjectAndInit = async (id: string): Promise<DataView> => {
+    const savedObject = await this.savedObjectsClient.get<DataViewAttributes>(
+      DATA_VIEW_SAVED_OBJECT_TYPE,
+      id
+    );
+    /*
     let savedObject: SavedObject<DataViewAttributes>;
     try {
       savedObject = await this.savedObjectsClient.get<DataViewAttributes>(
@@ -429,6 +434,7 @@ export class DataViewsService {
         'management/kibana/indexPatterns'
       );
     }
+    */
 
     if (!savedObject.version) {
       throw new SavedObjectNotFound(
