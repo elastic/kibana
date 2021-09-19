@@ -1741,83 +1741,6 @@
       },
       {
         "parentPluginId": "fieldFormats",
-        "id": "def-common.FieldFormatNotFoundError",
-        "type": "Class",
-        "tags": [],
-        "label": "FieldFormatNotFoundError",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatNotFoundError",
-            "text": "FieldFormatNotFoundError"
-          },
-          " extends Error"
-        ],
-        "path": "src/plugins/field_formats/common/errors.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.FieldFormatNotFoundError.formatId",
-            "type": "string",
-            "tags": [],
-            "label": "formatId",
-            "description": [],
-            "path": "src/plugins/field_formats/common/errors.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.FieldFormatNotFoundError.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/field_formats/common/errors.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.FieldFormatNotFoundError.Unnamed.$1",
-                "type": "string",
-                "tags": [],
-                "label": "message",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/field_formats/common/errors.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.FieldFormatNotFoundError.Unnamed.$2",
-                "type": "string",
-                "tags": [],
-                "label": "formatId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/field_formats/common/errors.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fieldFormats",
         "id": "def-common.FieldFormatsRegistry",
         "type": "Class",
         "tags": [],
@@ -2326,7 +2249,7 @@
             "children": [
               {
                 "parentPluginId": "fieldFormats",
-                "id": "def-common.formatId",
+                "id": "def-common.FieldFormatsRegistry.getInstance.$1",
                 "type": "string",
                 "tags": [],
                 "label": "formatId",
@@ -2336,7 +2259,7 @@
               },
               {
                 "parentPluginId": "fieldFormats",
-                "id": "def-common.params",
+                "id": "def-common.FieldFormatsRegistry.getInstance.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -2546,7 +2469,7 @@
             "children": [
               {
                 "parentPluginId": "fieldFormats",
-                "id": "def-common.fieldType",
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstance.$1",
                 "type": "Enum",
                 "tags": [],
                 "label": "fieldType",
@@ -2559,7 +2482,7 @@
               },
               {
                 "parentPluginId": "fieldFormats",
-                "id": "def-common.esTypes",
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstance.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "esTypes",
@@ -2573,7 +2496,7 @@
               },
               {
                 "parentPluginId": "fieldFormats",
-                "id": "def-common.params",
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstance.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -4255,7 +4178,7 @@
         "children": [
           {
             "parentPluginId": "fieldFormats",
-            "id": "def-common.key",
+            "id": "def-common.FieldFormatsGetConfigFn.$1",
             "type": "string",
             "tags": [],
             "label": "key",
@@ -4265,7 +4188,7 @@
           },
           {
             "parentPluginId": "fieldFormats",
-            "id": "def-common.defaultOverride",
+            "id": "def-common.FieldFormatsGetConfigFn.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "defaultOverride",
@@ -4406,7 +4329,7 @@
         "children": [
           {
             "parentPluginId": "fieldFormats",
-            "id": "def-common.mapping",
+            "id": "def-common.FormatFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "mapping",
@@ -4479,8 +4402,6 @@
           },
           ", metaParamsOptions?: Record<string, any>, defaultFieldConverters?: ",
           "FieldFormatInstanceType",
-          "[]) => void; register: (fieldFormats: ",
-          "FieldFormatInstanceType",
           "[]) => void; deserialize: ",
           {
             "pluginId": "fieldFormats",
@@ -4489,7 +4410,9 @@
             "section": "def-common.FormatFactory",
             "text": "FormatFactory"
           },
-          "; getDefaultConfig: (fieldType: ",
+          "; register: (fieldFormats: ",
+          "FieldFormatInstanceType",
+          "[]) => void; getDefaultConfig: (fieldType: ",
           "KBN_FIELD_TYPES",
           ", esTypes?: ",
           "ES_FIELD_TYPES",

@@ -17,12 +17,19 @@ import type { ConfigSchema, ConfigType } from './config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { KibanaConfigWriter } from './kibana_config_writer';
 import { defineRoutes } from './routes';
-import { VerificationCode } from './verification_code';
+import { VerificationService } from './verification_service';
+
+// List of the Elasticsearch hosts Kibana uses by default.
+const DEFAULT_ELASTICSEARCH_HOSTS = [
+  'http://localhost:9200',
+  // It's a default host we use in the official Kibana Docker image (see `kibana_yml.template.ts`).
+  ...(process.env.ELASTIC_CONTAINER ? ['http://elasticsearch:9200'] : []),
+];
 
 export class InteractiveSetupPlugin implements PrebootPlugin {
   readonly #logger: Logger;
   readonly #elasticsearch: ElasticsearchService;
-  readonly #verificationCode: VerificationCode;
+  readonly #verification: VerificationService;
 
   #elasticsearchConnectionStatusSubscription?: Subscription;
 
@@ -40,7 +47,7 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
     this.#elasticsearch = new ElasticsearchService(
       this.initializerContext.logger.get('elasticsearch')
     );
-    this.#verificationCode = new VerificationCode(
+    this.#verification = new VerificationService(
       this.initializerContext.logger.get('verification')
     );
   }
@@ -58,10 +65,18 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
     const shouldActiveSetupMode =
       !core.elasticsearch.config.credentialsSpecified &&
       core.elasticsearch.config.hosts.length === 1 &&
-      core.elasticsearch.config.hosts[0] === 'http://localhost:9200';
+      DEFAULT_ELASTICSEARCH_HOSTS.includes(core.elasticsearch.config.hosts[0]);
     if (!shouldActiveSetupMode) {
       this.#logger.debug(
         'Interactive setup mode will not be activated since Elasticsearch connection is already configured.'
+      );
+      return;
+    }
+
+    const verificationCode = this.#verification.setup();
+    if (!verificationCode) {
+      this.#logger.error(
+        'Interactive setup mode could not be activated. Ensure Kibana has permission to write to its config folder.'
       );
       return;
     }
@@ -86,6 +101,7 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
       elasticsearch: core.elasticsearch,
       connectionCheckInterval: this.#getConfig().connectionCheck.interval,
     });
+
     this.#elasticsearchConnectionStatusSubscription = elasticsearch.connectionStatus$.subscribe(
       (status) => {
         if (status === ElasticsearchConnectionStatus.Configured) {
@@ -97,10 +113,9 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
           this.#logger.debug(
             'Starting interactive setup mode since Kibana cannot to connect to Elasticsearch at http://localhost:9200.'
           );
-          const { code } = this.#verificationCode;
           const pathname = core.http.basePath.prepend('/');
           const { protocol, hostname, port } = core.http.getServerInfo();
-          const url = `${protocol}://${hostname}:${port}${pathname}?code=${code}`;
+          const url = `${protocol}://${hostname}:${port}${pathname}?code=${verificationCode.code}`;
 
           // eslint-disable-next-line no-console
           console.log(`
@@ -128,7 +143,7 @@ Go to ${chalk.cyanBright.underline(url)} to get started.
         preboot: { ...core.preboot, completeSetup },
         kibanaConfigWriter: new KibanaConfigWriter(configPath, this.#logger.get('kibana-config')),
         elasticsearch,
-        verificationCode: this.#verificationCode,
+        verificationCode,
         getConfig: this.#getConfig.bind(this),
       });
     });
@@ -148,5 +163,6 @@ Go to ${chalk.cyanBright.underline(url)} to get started.
     }
 
     this.#elasticsearch.stop();
+    this.#verification.stop();
   }
 }

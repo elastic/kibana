@@ -16,7 +16,7 @@ import { ExceptionBuilder } from '../../../../shared_imports';
 import { useAsync } from '@kbn/securitysolution-hook-utils';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndex } from '../../../containers/source';
-import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
+import { stubIndexPattern } from 'src/plugins/data/common/stubs';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
