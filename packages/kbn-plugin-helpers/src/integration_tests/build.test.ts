@@ -34,7 +34,8 @@ beforeEach(async () => {
 
 afterEach(async () => await del([PLUGIN_DIR, TMP_DIR]));
 
-it('builds a generated plugin into a viable archive', async () => {
+// https://github.com/elastic/kibana/issues/89079
+it.skip('builds a generated plugin into a viable archive', async () => {
   const generateProc = await execa(
     process.execPath,
     ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'],
