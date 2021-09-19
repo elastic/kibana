@@ -12,14 +12,22 @@ import type { estypes } from '@elastic/elasticsearch';
  * A field's sub type
  * @public
  */
-export type IFieldSubType = IFieldSubTypeMulti | IFieldSubTypeNested;
+export type IFieldSubType = IFieldSubTypeMultiOptional | IFieldSubTypeNestedOptional;
 
-export interface IFieldSubTypeMulti {
+export interface IFieldSubTypeMultiOptional {
   multi?: { parent: string };
 }
 
-export interface IFieldSubTypeNested {
+export interface IFieldSubTypeMulti {
+  multi: { parent: string };
+}
+
+export interface IFieldSubTypeNestedOptional {
   nested?: { path: string };
+}
+
+export interface IFieldSubTypeNested {
+  nested: { path: string };
 }
 
 /**

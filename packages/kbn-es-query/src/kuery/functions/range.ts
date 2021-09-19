@@ -12,9 +12,9 @@ import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript, RangeFilterParams } from '../../filters';
 import { getFields } from './utils/get_fields';
-import { getTimeZoneFromSettings } from '../../utils';
+import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IndexPatternBase, KueryNode, KueryQueryOptions, IFieldSubTypeNested } from '../..';
+import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
 
 export function buildNodeParams(fieldName: string, params: RangeFilterParams) {
   const paramsToMap = pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
@@ -67,7 +67,7 @@ export function toElasticsearchQuery(
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
-      const subTypeNested = field?.subType as IFieldSubTypeNested;
+      const subTypeNested = getDataViewFieldSubtypeNested(field);
       if (!(fullFieldNameArg.type === 'wildcard') || !subTypeNested?.nested || context!.nested) {
         return query;
       } else {

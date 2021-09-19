@@ -7,7 +7,8 @@
  */
 
 import { getFilterField, cleanFilter, Filter } from '../filters';
-import { IndexPatternBase, IFieldSubTypeNested } from './types';
+import { IndexPatternBase } from './types';
+import { getDataViewFieldSubtypeNested } from '../utils';
 
 /** @internal */
 export const handleNestedFilter = (filter: Filter, indexPattern?: IndexPatternBase) => {
@@ -22,19 +23,19 @@ export const handleNestedFilter = (filter: Filter, indexPattern?: IndexPatternBa
     (indexPatternField) => indexPatternField.name === fieldName
   );
 
-  const subTypeNested = field?.subType as IFieldSubTypeNested;
+  const subTypeNested = field && getDataViewFieldSubtypeNested(field);
 
-  if (!field || !field.subType || !subTypeNested.nested || !subTypeNested.nested.path) {
+  if (!subTypeNested) {
     return filter;
+  } else {
+    const query = cleanFilter(filter);
+
+    return {
+      meta: filter.meta,
+      nested: {
+        path: subTypeNested.nested.path,
+        query: query.query || query,
+      },
+    };
   }
-
-  const query = cleanFilter(filter);
-
-  return {
-    meta: filter.meta,
-    nested: {
-      path: subTypeNested.nested.path,
-      query: query.query || query,
-    },
-  };
 };

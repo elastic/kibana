@@ -7,10 +7,29 @@
  */
 
 import moment from 'moment-timezone';
+import { DataViewFieldBase, IFieldSubTypeNested, IFieldSubTypeMulti } from './es_query';
 
 /** @internal */
 export function getTimeZoneFromSettings(dateFormatTZ: string) {
   const detectedTimezone = moment.tz.guess();
 
   return dateFormatTZ === 'Browser' ? detectedTimezone : dateFormatTZ;
+}
+
+export function isDataViewFieldSubtypeNested(field: DataViewFieldBase) {
+  const subTypeNested = field?.subType as IFieldSubTypeNested;
+  return !!subTypeNested?.nested?.path;
+}
+
+export function getDataViewFieldSubtypeNested(field: DataViewFieldBase) {
+  return isDataViewFieldSubtypeNested(field) ? (field.subType as IFieldSubTypeNested) : undefined;
+}
+
+export function isDataViewFieldSubtypeMulti(field: DataViewFieldBase) {
+  const subTypeNested = getDataViewFieldSubtypeMulti(field);
+  return !!subTypeNested?.multi?.parent;
+}
+
+export function getDataViewFieldSubtypeMulti(field: DataViewFieldBase) {
+  return field?.subType as IFieldSubTypeMulti;
 }
