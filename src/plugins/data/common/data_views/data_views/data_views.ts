@@ -420,21 +420,6 @@ export class DataViewsService {
       DATA_VIEW_SAVED_OBJECT_TYPE,
       id
     );
-    /*
-    let savedObject: SavedObject<DataViewAttributes>;
-    try {
-      savedObject = await this.savedObjectsClient.get<DataViewAttributes>(
-        DATA_VIEW_SAVED_OBJECT_TYPE,
-        id
-      );
-    } catch (e) {
-      throw new SavedObjectNotFound(
-        DATA_VIEW_SAVED_OBJECT_TYPE,
-        id,
-        'management/kibana/indexPatterns'
-      );
-    }
-    */
 
     if (!savedObject.version) {
       throw new SavedObjectNotFound(

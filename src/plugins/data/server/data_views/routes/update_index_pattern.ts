@@ -145,6 +145,7 @@ export const registerUpdateIndexPatternRoute = (
         if (changeCount < 1) {
           throw new Error('Index pattern change set is empty.');
         }
+
         await indexPatternsService.updateSavedObject(indexPattern);
 
         if (doRefreshFields && refresh_fields) {
