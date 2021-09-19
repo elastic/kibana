@@ -19,6 +19,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+  const defaultSettings = {
+    defaultIndex: 'logstash-*',
+    'doc_table:legacy': false,
+  };
 
   const setTimeRange = async () => {
     const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
@@ -30,10 +34,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before('initialize tests', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-
       await kibanaServer.importExport.load(ecommerceSOPath);
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
+      await kibanaServer.uiSettings.replace(defaultSettings);
     });
+
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
@@ -61,8 +65,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it(`should unselect saved search when navigating to a 'new'`, async function () {
       await PageObjects.common.navigateToApp('discover');
-      await setTimeRange();
+      await PageObjects.discover.selectIndexPattern('ecommerce');
       await filterBar.addFilter('category', 'is', `Men's Shoes`);
+      await setTimeRange();
+
       await queryBar.setQuery('customer_gender:MALE');
       await PageObjects.discover.saveSearch('test-unselect-saved-search');
 

@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it(`should unselect saved query when navigating to a 'new'`, async function () {
-        await savedQueryManagementComponent.saveNewQuery(
+        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'test-unselect-saved-query',
           'mock',
           true,
