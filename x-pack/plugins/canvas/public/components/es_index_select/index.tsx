@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { pointseries } from './point_series';
-import { math } from './math';
-import { tagcloud } from './tagcloud';
-
-export const modelSpecs = [pointseries, math, tagcloud];
+export { ESIndexSelect } from './es_index_select';
+export { ESIndexSelect as ESIndexSelectComponent } from './es_index_select.component';
