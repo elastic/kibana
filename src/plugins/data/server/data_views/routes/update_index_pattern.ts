@@ -129,7 +129,6 @@ export const registerUpdateIndexPatternRoute = (
           changeCount++;
           doRefreshFields = true;
           indexPattern.fields.replaceAll(
-            // @ts-expect-error
             Object.values(fields || {}).map((field) => ({
               ...field,
               aggregatable: true,

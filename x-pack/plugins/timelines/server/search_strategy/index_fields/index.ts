@@ -171,7 +171,6 @@ export const createFieldItem = (
   if (isEmpty(beatIndex.category)) {
     beatIndex.category = splitIndexName[0];
   }
-  // @ts-expect-error
   return {
     ...beatIndex,
     ...index,

@@ -57,7 +57,6 @@ export const registerPutScriptedFieldRoute = (
           indexPattern.fields.remove(oldFieldObject);
         }
 
-        // @ts-expect-error
         indexPattern.fields.add({
           ...field,
           aggregatable: true,

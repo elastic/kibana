@@ -15,11 +15,11 @@ import type { estypes } from '@elastic/elasticsearch';
 export type IFieldSubType = IFieldSubTypeMulti | IFieldSubTypeNested;
 
 export interface IFieldSubTypeMulti {
-  multi: { parent: string };
+  multi?: { parent: string };
 }
 
 export interface IFieldSubTypeNested {
-  nested: { path: string };
+  nested?: { path: string };
 }
 
 /**
