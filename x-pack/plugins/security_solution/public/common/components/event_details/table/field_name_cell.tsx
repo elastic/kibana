@@ -34,7 +34,7 @@ export const FieldNameCell = React.memo(
     // const showPlainTextName =
     //   (data.isObjectArray && data.type !== 'geo_point') || fieldFromBrowserField == null;
     const subTypeMulti = fieldMapping?.spec?.subType as IFieldSubTypeMulti;
-    const isMultiField = !!subTypeMulti.multi;
+    const isMultiField = !!subTypeMulti?.multi;
     return (
       <>
         <EuiFlexItem grow={false} className="eventFieldsTable__fieldIcon">
