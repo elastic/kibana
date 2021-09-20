@@ -16,26 +16,22 @@ export function getTimeZoneFromSettings(dateFormatTZ: string) {
   return dateFormatTZ === 'Browser' ? detectedTimezone : dateFormatTZ;
 }
 
-interface AnythingWithSubtype {
-  subType?: DataViewFieldBase['subType'];
-}
+type HasSubtype = Pick<DataViewFieldBase, 'subType'>;
 
-type ObjectWithSubtype = DataViewFieldBase | AnythingWithSubtype;
-
-export function isDataViewFieldSubtypeNested(field: ObjectWithSubtype) {
+export function isDataViewFieldSubtypeNested(field: HasSubtype) {
   const subTypeNested = field?.subType as IFieldSubTypeNested;
   return !!subTypeNested?.nested?.path;
 }
 
-export function getDataViewFieldSubtypeNested(field: ObjectWithSubtype) {
+export function getDataViewFieldSubtypeNested(field: HasSubtype) {
   return isDataViewFieldSubtypeNested(field) ? (field.subType as IFieldSubTypeNested) : undefined;
 }
 
-export function isDataViewFieldSubtypeMulti(field: ObjectWithSubtype) {
+export function isDataViewFieldSubtypeMulti(field: HasSubtype) {
   const subTypeNested = field?.subType as IFieldSubTypeMulti;
   return !!subTypeNested?.multi?.parent;
 }
 
-export function getDataViewFieldSubtypeMulti(field: ObjectWithSubtype) {
+export function getDataViewFieldSubtypeMulti(field: HasSubtype) {
   return isDataViewFieldSubtypeMulti(field) ? (field.subType as IFieldSubTypeMulti) : undefined;
 }
