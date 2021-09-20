@@ -392,9 +392,12 @@ export class VisualizeEmbeddable
         query: this.input.query,
         filters: this.input.filters,
       },
+      variables: {
+        uiState: this.vis.uiState.toJSON(),
+      },
+      uiState: this.vis.uiState,
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
-      uiState: this.vis.uiState,
       interactive: !this.input.disableTriggers,
       inspectorAdapters: this.inspectorAdapters,
       executionContext: context,

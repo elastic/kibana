@@ -23,6 +23,7 @@ export interface ExpressionRenderHandlerParams {
   syncColors?: boolean;
   interactive?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
+  variables?: Record<string, any>;
 }
 
 export interface ExpressionRendererEvent {
@@ -57,6 +58,7 @@ export class ExpressionRenderHandler {
       syncColors,
       interactive,
       hasCompatibleActions = async () => false,
+      variables,
     }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
@@ -101,6 +103,7 @@ export class ExpressionRenderHandler {
         return interactive ?? true;
       },
       hasCompatibleActions,
+      variables,
     };
   }
 
@@ -131,7 +134,7 @@ export class ExpressionRenderHandler {
           ...this.handlers,
           uiState,
         } as any);
-    } catch (e) {
+    } catch (e: any) {
       return this.handleRenderError(e);
     }
   };

@@ -70,7 +70,7 @@ export interface IInterpreterRenderHandlers {
   event: (event: any) => void;
   hasCompatibleActions?: (event: any) => Promise<boolean>;
   getRenderMode: () => RenderMode;
-
+  variables?: Record<string, any>;
   /**
    * The chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing.
    */

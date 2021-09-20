@@ -52,13 +52,8 @@ export class ExpressionLoader {
       map(() => void 0)
     );
 
-    this.renderHandler = new ExpressionRenderHandler(element, {
-      interactive: params?.interactive,
-      onRenderError: params && params.onRenderError,
-      renderMode: params?.renderMode,
-      syncColors: params?.syncColors,
-      hasCompatibleActions: params?.hasCompatibleActions,
-    });
+    this.renderHandler = this.createHandlersLoader(element, params ?? {});
+
     this.render$ = this.renderHandler.render$;
     this.update$ = this.renderHandler.update$;
     this.events$ = this.renderHandler.events$;
@@ -116,6 +111,7 @@ export class ExpressionLoader {
 
   update(expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams): void {
     this.setParams(params);
+    this.renderHandler = this.createHandlersLoader(this.renderHandler.getElement(), params ?? {});
 
     this.loadingSubject.next(true);
     if (expression) {
@@ -123,6 +119,17 @@ export class ExpressionLoader {
     } else if (this.data) {
       this.render(this.data);
     }
+  }
+
+  private createHandlersLoader(element: HTMLElement, params: IExpressionLoaderParams) {
+    return new ExpressionRenderHandler(element, {
+      interactive: params?.interactive,
+      onRenderError: params && params.onRenderError,
+      renderMode: params?.renderMode,
+      syncColors: params?.syncColors,
+      hasCompatibleActions: params?.hasCompatibleActions,
+      variables: params?.variables ?? {},
+    });
   }
 
   private loadData = (
