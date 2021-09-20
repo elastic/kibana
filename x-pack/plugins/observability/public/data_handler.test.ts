@@ -30,7 +30,7 @@ describe('registerDataHandler', () => {
   const originalConsole = global.console;
   beforeAll(() => {
     // mocks console to avoid polluting the test output
-    global.console = ({ error: jest.fn() } as unknown) as typeof console;
+    global.console = { error: jest.fn() } as unknown as typeof console;
   });
 
   afterAll(() => {

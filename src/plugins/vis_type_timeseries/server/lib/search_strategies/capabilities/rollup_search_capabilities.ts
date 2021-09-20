@@ -112,9 +112,11 @@ export class RollupSearchCapabilities extends DefaultSearchCapabilities {
       unit: parsedRollupJobInterval!.unit,
     });
 
-    const { value, unit } = (isCalendarInterval(parsedRollupJobInterval!)
-      ? getValidCalendarInterval
-      : getValidFixedInterval)();
+    const { value, unit } = (
+      isCalendarInterval(parsedRollupJobInterval!)
+        ? getValidCalendarInterval
+        : getValidFixedInterval
+    )();
 
     return `${value}${unit}`;
   }

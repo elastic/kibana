@@ -268,16 +268,14 @@ export const AnomaliesTable = (props: Props) => {
     fetchPreviousPage: k8sPreviousPage,
     isLoadingMetricsK8sAnomalies: k8sLoading,
   } = useMetricsK8sAnomaliesResults(anomalyParams);
-  const page = useMemo(() => (jobType === 'hosts' ? hostPage : k8sPage), [
-    jobType,
-    hostPage,
-    k8sPage,
-  ]);
-  const isLoading = useMemo(() => (jobType === 'hosts' ? hostLoading : k8sLoading), [
-    jobType,
-    hostLoading,
-    k8sLoading,
-  ]);
+  const page = useMemo(
+    () => (jobType === 'hosts' ? hostPage : k8sPage),
+    [jobType, hostPage, k8sPage]
+  );
+  const isLoading = useMemo(
+    () => (jobType === 'hosts' ? hostLoading : k8sLoading),
+    [jobType, hostLoading, k8sLoading]
+  );
   const fetchNextPage = useMemo(
     () => (jobType === 'hosts' ? hostFetchNextPage : k8sFetchNextPage),
     [jobType, hostFetchNextPage, k8sFetchNextPage]
