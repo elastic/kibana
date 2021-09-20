@@ -9,6 +9,7 @@
 import { resolve } from 'path';
 import { writeFile, mkdir } from 'fs';
 import { promisify } from 'util';
+import { delay } from 'bluebird';
 
 import del from 'del';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -50,7 +51,7 @@ export async function FailureDebuggingProvider({ getService }: FtrProviderContex
   async function onFailure(_: any, test: Test) {
     // Replace characters in test names which can't be used in filenames, like *
     const name = test.fullTitle().replace(/([^ a-zA-Z0-9-]+)/g, '_');
-
+    await delay(5 * 60 * 1000);
     await Promise.all([screenshots.takeForFailure(name), logCurrentUrl(), savePageHtml(name)]);
   }
 

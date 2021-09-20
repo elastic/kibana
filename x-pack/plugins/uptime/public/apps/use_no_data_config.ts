@@ -23,7 +23,7 @@ export function useNoDataConfig(): KibanaPageTemplateProps['noDataConfig'] {
   const { data } = useSelector(indexStatusSelector);
 
   // Returns no data config when there is no historical data
-  if (!data?.indexExists) {
+  if (data && !data.indexExists) {
     return {
       solution: i18n.translate('xpack.uptime.noDataConfig.solutionName', {
         defaultMessage: 'Observability',
