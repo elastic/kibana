@@ -33,27 +33,26 @@ const createAuthorizationContextValue = (privileges: Privileges) => {
   } as Authorization;
 };
 
-export const WithAppDependencies = (
-  Comp: any,
-  { privileges, ...overrides }: Record<string, unknown> = {}
-) => (props: Record<string, unknown>) => {
-  apiService.setup((mockHttpClient as unknown) as HttpSetup);
-  breadcrumbService.setup(() => '');
+export const WithAppDependencies =
+  (Comp: any, { privileges, ...overrides }: Record<string, unknown> = {}) =>
+  (props: Record<string, unknown>) => {
+    apiService.setup(mockHttpClient as unknown as HttpSetup);
+    breadcrumbService.setup(() => '');
 
-  const appContextMock = getAppContextMock() as unknown as AppDependencies;
+    const appContextMock = getAppContextMock() as unknown as AppDependencies;
 
-  return (
-    <AuthorizationContext.Provider
-      value={createAuthorizationContextValue(privileges as Privileges)}
-    >
-      <AppContextProvider value={merge(appContextMock, overrides)}>
-        <GlobalFlyoutProvider>
-          <Comp {...props} />
-        </GlobalFlyoutProvider>
-      </AppContextProvider>
-    </AuthorizationContext.Provider>
-  );
-};
+    return (
+      <AuthorizationContext.Provider
+        value={createAuthorizationContextValue(privileges as Privileges)}
+      >
+        <AppContextProvider value={merge(appContextMock, overrides)}>
+          <GlobalFlyoutProvider>
+            <Comp {...props} />
+          </GlobalFlyoutProvider>
+        </AppContextProvider>
+      </AuthorizationContext.Provider>
+    );
+  };
 
 export const setupEnvironment = () => {
   const { server, setServerAsync, httpRequestsMockHelpers } = initHttpRequests();
