@@ -18,15 +18,4 @@ node scripts/build_kibana_platform_plugins \
   --scan-dir "$XPACK_DIR/test/licensing_plugin/plugins" \
   --scan-dir "$XPACK_DIR/test/usage_collection/plugins" \
   --scan-dir "$XPACK_DIR/test/security_functional/fixtures/common" \
-  --scan-dir "$XPACK_DIR/examples" \
-  --verbose
-
-echo "--- Archive built plugins"
-shopt -s globstar
-tar -zcf \
-  target/kibana-default-plugins.tar.gz \
-  x-pack/plugins/**/target/public \
-  x-pack/test/**/target/public \
-  examples/**/target/public \
-  x-pack/examples/**/target/public \
-  test/**/target/public
+  --scan-dir "$XPACK_DIR/examples"

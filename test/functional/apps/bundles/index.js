@@ -14,7 +14,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('bundle compression', function () {
-    this.tags('ciGroup12');
+    this.tags('ciGroup11');
 
     let buildNum;
     before(async () => {
