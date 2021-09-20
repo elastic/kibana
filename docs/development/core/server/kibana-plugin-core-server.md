@@ -146,6 +146,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBaseOptions](./kibana-plugin-core-server.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-core-server.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkGetObject](./kibana-plugin-core-server.savedobjectsbulkgetobject.md) |  |
+|  [SavedObjectsBulkResolveObject](./kibana-plugin-core-server.savedobjectsbulkresolveobject.md) |  |
+|  [SavedObjectsBulkResolveResponse](./kibana-plugin-core-server.savedobjectsbulkresolveresponse.md) |  |
 |  [SavedObjectsBulkResponse](./kibana-plugin-core-server.savedobjectsbulkresponse.md) |  |
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-core-server.savedobjectsbulkupdateobject.md) |  |
 |  [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-server.savedobjectsbulkupdateoptions.md) |  |

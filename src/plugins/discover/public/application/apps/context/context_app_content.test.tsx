@@ -48,15 +48,15 @@ describe('ContextAppContent test', () => {
       },
       sort: [1603114502000, 2092],
     };
-    defaultProps = ({
+    defaultProps = {
       columns: ['order_date', '_source'],
       indexPattern: indexPatternMock,
-      appState: ({} as unknown) as AppState,
-      stateContainer: ({} as unknown) as GetStateReturn,
+      appState: {} as unknown as AppState,
+      stateContainer: {} as unknown as GetStateReturn,
       anchorStatus: LoadingStatus.LOADED,
       predecessorsStatus: LoadingStatus.LOADED,
       successorsStatus: LoadingStatus.LOADED,
-      rows: ([hit] as unknown) as EsHitRecordList,
+      rows: [hit] as unknown as EsHitRecordList,
       predecessors: [],
       successors: [],
       defaultStepSize: 5,
@@ -72,7 +72,7 @@ describe('ContextAppContent test', () => {
       isLegacy: true,
       setAppState: () => {},
       addFilter: () => {},
-    } as unknown) as ContextAppContentProps;
+    } as unknown as ContextAppContentProps;
   });
 
   it('should render legacy table correctly', () => {

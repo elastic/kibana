@@ -114,8 +114,8 @@ export async function mountApp({
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
-    allowByValueEmbeddables: initializerContext.config.get<DashboardFeatureFlagConfig>()
-      .allowByValueEmbeddables,
+    allowByValueEmbeddables:
+      initializerContext.config.get<DashboardFeatureFlagConfig>().allowByValueEmbeddables,
     dashboardCapabilities: {
       hideWriteControls: dashboardConfig.getHideWriteControls(),
       show: Boolean(coreStart.application.capabilities.dashboard.show),

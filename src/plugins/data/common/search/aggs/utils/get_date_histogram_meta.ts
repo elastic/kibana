@@ -25,7 +25,7 @@ export const getDateHistogramMetaDataByDatatableColumn = (
 ) => {
   if (column.meta.source !== 'esaggs') return;
   if (column.meta.sourceParams?.type !== BUCKET_TYPES.DATE_HISTOGRAM) return;
-  const params = (column.meta.sourceParams.params as unknown) as AggParamsDateHistogram;
+  const params = column.meta.sourceParams.params as unknown as AggParamsDateHistogram;
 
   let interval: string | undefined;
   if (params.used_interval && params.used_interval !== 'auto') {

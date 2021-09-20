@@ -120,7 +120,8 @@ export class MapsPlugin
       MapsPluginStart,
       MapsPluginSetupDependencies,
       MapsPluginStartDependencies
-    > {
+    >
+{
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
 
   constructor(initializerContext: PluginInitializerContext<MapsXPackConfig>) {

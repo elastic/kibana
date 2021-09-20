@@ -14,45 +14,47 @@ import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
-const getJobParams = (
-  apiClient: ReportingAPIClient,
-  opts: JobParamsProviderOptions,
-  type: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
-) => () => {
-  const {
-    objectType,
-    sharingData: { title, layout, locatorParams },
-  } = opts;
+const getJobParams =
+  (
+    apiClient: ReportingAPIClient,
+    opts: JobParamsProviderOptions,
+    type: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
+  ) =>
+  () => {
+    const {
+      objectType,
+      sharingData: { title, layout, locatorParams },
+    } = opts;
 
-  const baseParams = {
-    objectType,
-    layout,
-    title,
+    const baseParams = {
+      objectType,
+      layout,
+      title,
+    };
+
+    if (type === 'printablePdfV2') {
+      // multi locator for PDF V2
+      return { ...baseParams, locatorParams: [locatorParams] };
+    } else if (type === 'pngV2') {
+      // single locator for PNG V2
+      return { ...baseParams, locatorParams };
+    }
+
+    // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
+    // Replace hashes with original RISON values.
+    const relativeUrl = opts.shareableUrl.replace(
+      window.location.origin + apiClient.getServerBasePath(),
+      ''
+    );
+
+    if (type === 'printablePdf') {
+      // multi URL for PDF
+      return { ...baseParams, relativeUrls: [relativeUrl] };
+    }
+
+    // single URL for PNG
+    return { ...baseParams, relativeUrl };
   };
-
-  if (type === 'printablePdfV2') {
-    // multi locator for PDF V2
-    return { ...baseParams, locatorParams: [locatorParams] };
-  } else if (type === 'pngV2') {
-    // single locator for PNG V2
-    return { ...baseParams, locatorParams };
-  }
-
-  // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
-  // Replace hashes with original RISON values.
-  const relativeUrl = opts.shareableUrl.replace(
-    window.location.origin + apiClient.getServerBasePath(),
-    ''
-  );
-
-  if (type === 'printablePdf') {
-    // multi URL for PDF
-    return { ...baseParams, relativeUrls: [relativeUrl] };
-  }
-
-  // single URL for PNG
-  return { ...baseParams, relativeUrl };
-};
 
 export const reportingScreenshotShareProvider = ({
   apiClient,
@@ -113,7 +115,7 @@ export const reportingScreenshotShareProvider = ({
       return [];
     }
 
-    const { sharingData } = (shareOpts as unknown) as { sharingData: ReportingSharingData };
+    const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
     const shareActions = [];
 
     const pngPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pngReportsButtonLabel', {
