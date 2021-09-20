@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { AppLogic } from '../../app_logic';
-import noSharedSourcesIcon from '../../assets/share_circle.svg';
+import noOrgSourcesIcon from '../../assets/share_circle.svg';
 import { PersonalDashboardLayout } from '../../components/layout';
 import { ContentSection } from '../../components/shared/content_section';
 import { SourcesTable } from '../../components/shared/sources_table';
@@ -27,10 +27,10 @@ import {
   PRIVATE_LINK_TITLE,
   PRIVATE_HEADER_TITLE,
   PRIVATE_HEADER_DESCRIPTION,
-  PRIVATE_SHARED_SOURCES_TITLE,
+  PRIVATE_ORG_SOURCES_TITLE,
   PRIVATE_EMPTY_TITLE,
-  SHARED_EMPTY_TITLE,
-  SHARED_EMPTY_DESCRIPTION,
+  ORG_SOURCES_EMPTY_TITLE,
+  ORG_SOURCES_EMPTY_DESCRIPTION,
   LICENSE_CALLOUT_TITLE,
   LICENSE_CALLOUT_DESCRIPTION,
 } from './constants';
@@ -46,18 +46,17 @@ export const PrivateSources: React.FC = () => {
     return resetSourcesState;
   }, []);
 
-  const { dataLoading, contentSources, serviceTypes, privateContentSources } = useValues(
-    SourcesLogic
-  );
+  const { dataLoading, contentSources, serviceTypes, privateContentSources } =
+    useValues(SourcesLogic);
 
   const {
-    account: { canCreatePersonalSources, groups },
+    account: { canCreatePrivateSources, groups },
   } = useValues(AppLogic);
 
   const hasConfiguredConnectors = serviceTypes.some(({ configured }) => configured);
-  const canAddSources = canCreatePersonalSources && hasConfiguredConnectors;
+  const canAddSources = canCreatePrivateSources && hasConfiguredConnectors;
   const hasPrivateSources = privateContentSources?.length > 0;
-  const hasSharedSources = contentSources.length > 0;
+  const hasOrgSources = contentSources.length > 0;
 
   const licenseCallout = (
     <>
@@ -106,30 +105,30 @@ export const PrivateSources: React.FC = () => {
     </ContentSection>
   );
 
-  const sharedSourcesEmptyState = (
+  const orgSourcesEmptyState = (
     <EuiPanel hasShadow={false} color="subdued">
       <EuiSpacer size="xxl" />
       <EuiEmptyPrompt
-        iconType={noSharedSourcesIcon}
-        title={<h2>{SHARED_EMPTY_TITLE}</h2>}
-        body={<p>{SHARED_EMPTY_DESCRIPTION}</p>}
+        iconType={noOrgSourcesIcon}
+        title={<h2>{ORG_SOURCES_EMPTY_TITLE}</h2>}
+        body={<p>{ORG_SOURCES_EMPTY_DESCRIPTION}</p>}
       />
       <EuiSpacer size="xxl" />
     </EuiPanel>
   );
 
-  const sharedSourcesTable = (
+  const orgSourcesTable = (
     <SourcesTable showDetails={false} isOrganization={false} sources={contentSources} />
   );
 
-  const sharedSourcesSection = (
+  const orgSourcesSection = (
     <ContentSection
       isOrganization={false}
-      title={PRIVATE_SHARED_SOURCES_TITLE}
+      title={PRIVATE_ORG_SOURCES_TITLE}
       description={
-        hasSharedSources && (
+        hasOrgSources && (
           <FormattedMessage
-            id="xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.description"
+            id="xpack.enterpriseSearch.workplaceSearch.sources.private.privateOrg.header.description"
             defaultMessage="You have access to the following sources through {newline}the {groups, plural, one {group} other {groups}} {groupsSentence}."
             values={{
               groups: groups.length,
@@ -140,7 +139,7 @@ export const PrivateSources: React.FC = () => {
         )
       }
     >
-      {hasSharedSources ? sharedSourcesTable : sharedSourcesEmptyState}
+      {hasOrgSources ? orgSourcesTable : orgSourcesEmptyState}
     </ContentSection>
   );
 
@@ -148,8 +147,8 @@ export const PrivateSources: React.FC = () => {
     <PersonalDashboardLayout pageChrome={[NAV.SOURCES]} isLoading={dataLoading}>
       <SourcesView>
         {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
-        {canCreatePersonalSources && privateSourcesSection}
-        {sharedSourcesSection}
+        {canCreatePrivateSources && privateSourcesSection}
+        {orgSourcesSection}
       </SourcesView>
     </PersonalDashboardLayout>
   );

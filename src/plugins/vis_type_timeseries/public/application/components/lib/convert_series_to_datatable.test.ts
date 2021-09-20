@@ -158,7 +158,7 @@ describe('convert series to datatables', () => {
         },
       ],
     } as TimeseriesVisParams;
-    const series = ([
+    const series = [
       {
         id: 'series1:0',
         label: 0,
@@ -187,7 +187,7 @@ describe('convert series to datatables', () => {
         seriesId: 'series1',
         isSplitByTerms: true,
       },
-    ] as unknown) as PanelData[];
+    ] as unknown as PanelData[];
     test('creates one table for one layer series with the correct columns', async () => {
       const tables = await convertSeriesToDataTable(model, series, indexPattern);
       expect(Object.keys(tables).sort()).toEqual([model.series[0].id].sort());

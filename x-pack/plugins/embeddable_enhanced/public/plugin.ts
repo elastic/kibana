@@ -48,7 +48,8 @@ export interface SetupContract {}
 export interface StartContract {}
 
 export class EmbeddableEnhancedPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
+{
   constructor(protected readonly context: PluginInitializerContext) {}
 
   private uiActions?: StartDependencies['uiActionsEnhanced'];
