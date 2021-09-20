@@ -38,8 +38,10 @@ describe('deprecation logging API', () => {
 
   describe('GET /api/upgrade_assistant/deprecation_logging', () => {
     it('returns that indexing and writing logs is enabled', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-        .getSettings as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
+          .getSettings as jest.Mock
+      ).mockResolvedValue({
         body: {
           default: {
             cluster: { deprecation_indexing: { enabled: 'true' } },
@@ -60,8 +62,10 @@ describe('deprecation logging API', () => {
     });
 
     it('returns an error if it throws', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-        .getSettings as jest.Mock).mockRejectedValue(new Error('scary error!'));
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
+          .getSettings as jest.Mock
+      ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
           method: 'get',
@@ -73,8 +77,10 @@ describe('deprecation logging API', () => {
 
   describe('PUT /api/upgrade_assistant/deprecation_logging', () => {
     it('returns that indexing and writing logs is enabled', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-        .putSettings as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
+          .putSettings as jest.Mock
+      ).mockResolvedValue({
         body: {
           default: {
             logger: { deprecation: 'WARN' },
@@ -95,8 +101,10 @@ describe('deprecation logging API', () => {
     });
 
     it('returns an error if it throws', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-        .putSettings as jest.Mock).mockRejectedValue(new Error('scary error!'));
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
+          .putSettings as jest.Mock
+      ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
           method: 'put',
@@ -110,12 +118,14 @@ describe('deprecation logging API', () => {
     const MOCK_FROM_DATE = '2021-08-23T07:32:34.782Z';
 
     it('returns count of deprecations', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices
-        .exists as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices.exists as jest.Mock
+      ).mockResolvedValue({
         body: true,
       });
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser
-        .count as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.count as jest.Mock
+      ).mockResolvedValue({
         body: { count: 10 },
       });
 
@@ -133,8 +143,9 @@ describe('deprecation logging API', () => {
     });
 
     it('returns zero matches when deprecation logs index is not created', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices
-        .exists as jest.Mock).mockResolvedValue({
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices.exists as jest.Mock
+      ).mockResolvedValue({
         body: false,
       });
 
@@ -152,8 +163,9 @@ describe('deprecation logging API', () => {
     });
 
     it('returns an error if it throws', async () => {
-      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices
-        .exists as jest.Mock).mockRejectedValue(new Error('scary error!'));
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices.exists as jest.Mock
+      ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
           method: 'get',

@@ -20,13 +20,13 @@ const mockedExpressionService = {
 
 const savedObjectsClient = savedObjectsClientMock.create();
 
-const mockContext = ({
+const mockContext = {
   core: {
     savedObjects: {
       client: savedObjectsClient,
     },
   },
-} as unknown) as RequestHandlerContext;
+} as unknown as RequestHandlerContext;
 
 const workpadRouteContext = createWorkpadRouteContext({
   expressions: mockedExpressionService as any,

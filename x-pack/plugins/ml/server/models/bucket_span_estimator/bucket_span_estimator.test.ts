@@ -17,10 +17,10 @@ const callAs = {
   cluster: { getSettings: () => Promise.resolve({ body: {} }) },
 };
 
-const mlClusterClient = ({
+const mlClusterClient = {
   asCurrentUser: callAs,
   asInternalUser: callAs,
-} as unknown) as IScopedClusterClient;
+} as unknown as IScopedClusterClient;
 
 // mock configuration to be passed to the estimator
 const formConfig: BucketSpanEstimatorData = {
