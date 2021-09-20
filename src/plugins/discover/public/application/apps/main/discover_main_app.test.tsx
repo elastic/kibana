@@ -22,9 +22,9 @@ setHeaderActionMenuMounter(jest.fn());
 describe('DiscoverMainApp', () => {
   test('renders', () => {
     const { history } = createSearchSessionMock();
-    const indexPatternList = ([indexPatternMock].map((ip) => {
+    const indexPatternList = [indexPatternMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
-    }) as unknown) as Array<SavedObject<IndexPatternAttributes>>;
+    }) as unknown as Array<SavedObject<IndexPatternAttributes>>;
 
     const props = {
       indexPatternList,

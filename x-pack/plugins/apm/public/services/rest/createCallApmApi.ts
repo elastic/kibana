@@ -54,9 +54,8 @@ export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   _inspect?: InspectResponse;
 };
 
-export type APIClientRequestParamsOf<
-  TEndpoint extends APIEndpoint
-> = ClientRequestParamsOf<APMServerRouteRepository, TEndpoint>;
+export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> =
+  ClientRequestParamsOf<APMServerRouteRepository, TEndpoint>;
 
 export type AbstractAPMRepository = ServerRouteRepository<
   APMRouteHandlerResources,
@@ -81,7 +80,7 @@ export let callApmApi: APMClient = () => {
 export function createCallApmApi(core: CoreStart | CoreSetup) {
   callApmApi = ((options) => {
     const { endpoint, ...opts } = options;
-    const { params } = (options as unknown) as {
+    const { params } = options as unknown as {
       params?: Partial<Record<string, any>>;
     };
 
