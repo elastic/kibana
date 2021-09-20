@@ -138,9 +138,8 @@ export const fullPolicy: (s: Immutable<PolicyDetailsState>) => PolicyConfig = cr
   }
 );
 
-const fullWindowsPolicySettings: (
-  s: PolicyDetailsState
-) => PolicyConfig['windows'] = createSelector(fullPolicy, (policy) => policy?.windows);
+const fullWindowsPolicySettings: (s: PolicyDetailsState) => PolicyConfig['windows'] =
+  createSelector(fullPolicy, (policy) => policy?.windows);
 
 const fullMacPolicySettings: (s: PolicyDetailsState) => PolicyConfig['mac'] = createSelector(
   fullPolicy,

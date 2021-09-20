@@ -48,11 +48,8 @@ export const FlyoutHome = (props: Props) => {
     setupStatus: k8sSetupStatus,
     jobSummaries: k8sJobSummaries,
   } = useMetricK8sModuleContext();
-  const {
-    hasInfraMLCapabilities,
-    hasInfraMLReadCapabilities,
-    hasInfraMLSetupCapabilities,
-  } = useInfraMLCapabilitiesContext();
+  const { hasInfraMLCapabilities, hasInfraMLReadCapabilities, hasInfraMLSetupCapabilities } =
+    useInfraMLCapabilitiesContext();
 
   const createHosts = useCallback(() => {
     goToSetup('hosts');
