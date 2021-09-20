@@ -48,10 +48,13 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 
   const getSavedQuery = async (id: string) => {
-    const savedObject = await context.core.savedObjects.client.get<SavedQueryAttributes>(
-      'query',
-      id
-    );
+    const { saved_object: savedObject, outcome } =
+      await context.core.savedObjects.client.resolve<SavedQueryAttributes>('query', id);
+    if (outcome === 'conflict') {
+      throw new Error(`Multiple saved queries found with ID: ${id} (legacy URL alias conflict)`);
+    } else if (savedObject.error) {
+      throw new Error(savedObject.error.message);
+    }
     return toSavedQuery(savedObject);
   };
 
@@ -63,15 +66,13 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 
   const findSavedQueries = async ({ page = 1, perPage = 50, search = '' }) => {
-    const {
-      total,
-      saved_objects: savedObjects,
-    } = await context.core.savedObjects.client.find<SavedQueryAttributes>({
-      type: 'query',
-      page,
-      perPage,
-      search,
-    });
+    const { total, saved_objects: savedObjects } =
+      await context.core.savedObjects.client.find<SavedQueryAttributes>({
+        type: 'query',
+        page,
+        perPage,
+        search,
+      });
 
     const savedQueries = savedObjects.map(toSavedQuery);
 

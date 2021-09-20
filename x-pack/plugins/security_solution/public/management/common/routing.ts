@@ -38,7 +38,7 @@ type Exact<T, Shape> = T extends Shape ? ExactKeys<T, Shape> : never;
  */
 const querystringStringify = <ExpectedType, ArgType>(
   params: Exact<ExpectedType, ArgType>
-): string => querystring.stringify((params as unknown) as querystring.ParsedUrlQueryInput);
+): string => querystring.stringify(params as unknown as querystring.ParsedUrlQueryInput);
 
 /** Make `selected_endpoint` required */
 type EndpointDetailsUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint'> &

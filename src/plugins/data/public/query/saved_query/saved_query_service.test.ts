@@ -56,7 +56,7 @@ const mockSavedObjectsClient = {
   create: jest.fn(),
   error: jest.fn(),
   find: jest.fn(),
-  get: jest.fn(),
+  resolve: jest.fn(),
   delete: jest.fn(),
 };
 
@@ -82,7 +82,7 @@ describe('saved query service', () => {
   afterEach(() => {
     mockSavedObjectsClient.create.mockReset();
     mockSavedObjectsClient.find.mockReset();
-    mockSavedObjectsClient.get.mockReset();
+    mockSavedObjectsClient.resolve.mockReset();
     mockSavedObjectsClient.delete.mockReset();
     mockFilterManager.extract.mockClear();
     mockFilterManager.inject.mockClear();
@@ -292,29 +292,44 @@ describe('saved query service', () => {
 
   describe('getSavedQuery', function () {
     it('should retrieve a saved query by id', async () => {
-      mockSavedObjectsClient.get.mockReturnValue({ id: 'foo', attributes: savedQueryAttributes });
+      mockSavedObjectsClient.resolve.mockReturnValue({
+        saved_object: {
+          id: 'foo',
+          attributes: savedQueryAttributes,
+        },
+        outcome: 'exactMatch',
+      });
 
       const response = await getSavedQuery('foo');
       expect(response).toEqual({ id: 'foo', attributes: savedQueryAttributes });
     });
     it('should only return saved queries', async () => {
-      mockSavedObjectsClient.get.mockReturnValue({ id: 'foo', attributes: savedQueryAttributes });
+      mockSavedObjectsClient.resolve.mockReturnValue({
+        saved_object: {
+          id: 'foo',
+          attributes: savedQueryAttributes,
+        },
+        outcome: 'exactMatch',
+      });
 
       await getSavedQuery('foo');
-      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('query', 'foo');
+      expect(mockSavedObjectsClient.resolve).toHaveBeenCalledWith('query', 'foo');
     });
 
     it('should parse a json query', async () => {
-      mockSavedObjectsClient.get.mockReturnValue({
-        id: 'food',
-        attributes: {
-          title: 'food',
-          description: 'bar',
-          query: {
-            language: 'kuery',
-            query: '{"x": "y"}',
+      mockSavedObjectsClient.resolve.mockReturnValue({
+        saved_object: {
+          id: 'food',
+          attributes: {
+            title: 'food',
+            description: 'bar',
+            query: {
+              language: 'kuery',
+              query: '{"x": "y"}',
+            },
           },
         },
+        outcome: 'exactMatch',
       });
 
       const response = await getSavedQuery('food');
@@ -322,16 +337,19 @@ describe('saved query service', () => {
     });
 
     it('should handle null string', async () => {
-      mockSavedObjectsClient.get.mockReturnValue({
-        id: 'food',
-        attributes: {
-          title: 'food',
-          description: 'bar',
-          query: {
-            language: 'kuery',
-            query: 'null',
+      mockSavedObjectsClient.resolve.mockReturnValue({
+        saved_object: {
+          id: 'food',
+          attributes: {
+            title: 'food',
+            description: 'bar',
+            query: {
+              language: 'kuery',
+              query: 'null',
+            },
           },
         },
+        outcome: 'exactMatch',
       });
 
       const response = await getSavedQuery('food');
@@ -339,16 +357,19 @@ describe('saved query service', () => {
     });
 
     it('should handle null quoted string', async () => {
-      mockSavedObjectsClient.get.mockReturnValue({
-        id: 'food',
-        attributes: {
-          title: 'food',
-          description: 'bar',
-          query: {
-            language: 'kuery',
-            query: '"null"',
+      mockSavedObjectsClient.resolve.mockReturnValue({
+        saved_object: {
+          id: 'food',
+          attributes: {
+            title: 'food',
+            description: 'bar',
+            query: {
+              language: 'kuery',
+              query: '"null"',
+            },
           },
         },
+        outcome: 'exactMatch',
       });
 
       const response = await getSavedQuery('food');
@@ -356,16 +377,19 @@ describe('saved query service', () => {
     });
 
     it('should not lose quotes', async () => {
-      mockSavedObjectsClient.get.mockReturnValue({
-        id: 'food',
-        attributes: {
-          title: 'food',
-          description: 'bar',
-          query: {
-            language: 'kuery',
-            query: '"Bob"',
+      mockSavedObjectsClient.resolve.mockReturnValue({
+        saved_object: {
+          id: 'food',
+          attributes: {
+            title: 'food',
+            description: 'bar',
+            query: {
+              language: 'kuery',
+              query: '"Bob"',
+            },
           },
         },
+        outcome: 'exactMatch',
       });
 
       const response = await getSavedQuery('food');
@@ -373,13 +397,28 @@ describe('saved query service', () => {
     });
 
     it('should inject references', async () => {
-      mockSavedObjectsClient.get.mockReturnValue({
+      mockSavedObjectsClient.resolve.mockReturnValue({
         id: 'food',
         attributes: savedQueryAttributesWithFilters,
       });
 
       await getSavedQuery('food');
       expect(mockFilterManager.inject).toHaveBeenCalled();
+    });
+
+    it('should throw if conflict', async () => {
+      mockSavedObjectsClient.resolve.mockReturnValue({
+        saved_object: {
+          id: 'foo',
+          attributes: savedQueryAttributes,
+        },
+        outcome: 'conflict',
+      });
+
+      const result = getSavedQuery('food');
+      expect(result).rejects.toMatchInlineSnapshot(
+        `[Error: Multiple saved queries found with ID: food (legacy URL alias conflict)]`
+      );
     });
   });
 

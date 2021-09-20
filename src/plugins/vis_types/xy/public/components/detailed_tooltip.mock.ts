@@ -148,8 +148,7 @@ export const aspectsWithSplitRow = {
 
 export const header = {
   seriesIdentifier: {
-    key:
-      'groupId{__pseudo_stacked_group-ValueAxis-1__}spec{area-col-1-1}yAccessor{col-1-1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+    key: 'groupId{__pseudo_stacked_group-ValueAxis-1__}spec{area-col-1-1}yAccessor{col-1-1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
     specId: 'area-col-1-1',
     yAccessor: 'col-1-1',
     splitAccessors: {},
@@ -169,8 +168,7 @@ export const header = {
 
 export const value = {
   seriesIdentifier: {
-    key:
-      'groupId{__pseudo_stacked_group-ValueAxis-1__}spec{area-col-1-1}yAccessor{col-1-1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+    key: 'groupId{__pseudo_stacked_group-ValueAxis-1__}spec{area-col-1-1}yAccessor{col-1-1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
     specId: 'area-col-1-1',
     yAccessor: 'col-1-1',
     splitAccessors: [],

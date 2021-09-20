@@ -26,12 +26,11 @@ export default ({ getService }: FtrProviderContext) => {
   const ALERT_VERSION = Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'); // required for optimistic concurrency control
 
   const getAPMIndexName = async (user: User) => {
-    const {
-      body: indexNames,
-    }: { body: { index_name: string[] | undefined } } = await supertestWithoutAuth
-      .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
-      .set('kbn-xsrf', 'true')
-      .expect(200);
+    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
+      await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
     const observabilityIndex = indexNames?.index_name?.find(
       (indexName) => indexName === APM_ALERT_INDEX
     );
@@ -39,12 +38,11 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const getSecuritySolutionIndexName = async (user: User) => {
-    const {
-      body: indexNames,
-    }: { body: { index_name: string[] | undefined } } = await supertestWithoutAuth
-      .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
-      .set('kbn-xsrf', 'true')
-      .expect(200);
+    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
+      await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
     const securitySolution = indexNames?.index_name?.find((indexName) =>
       indexName.startsWith(SECURITY_SOLUTION_ALERT_INDEX)
     );

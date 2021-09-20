@@ -29,7 +29,7 @@ import { CRAWLER_TITLE } from './constants';
 import { CrawlerLogic } from './crawler_logic';
 
 export const CrawlerOverview: React.FC = () => {
-  const { crawlRequests, dataLoading, domains } = useValues(CrawlerLogic);
+  const { events, dataLoading, domains } = useValues(CrawlerLogic);
 
   return (
     <AppSearchPageTemplate
@@ -96,7 +96,7 @@ export const CrawlerOverview: React.FC = () => {
           </EuiFlexGroup>
         </>
       )}
-      {(crawlRequests.length > 0 || domains.length > 0) && (
+      {(events.length > 0 || domains.length > 0) && (
         <>
           <EuiSpacer size="xl" />
           <EuiTitle size="s">

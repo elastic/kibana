@@ -19,20 +19,22 @@ import { DimensionEditor } from './dimension_editor';
 import type { DateRange } from '../../../common';
 import { getOperationSupportMatrix } from './operation_support';
 
-export type IndexPatternDimensionTriggerProps = DatasourceDimensionTriggerProps<IndexPatternPrivateState> & {
-  uniqueLabel: string;
-};
+export type IndexPatternDimensionTriggerProps =
+  DatasourceDimensionTriggerProps<IndexPatternPrivateState> & {
+    uniqueLabel: string;
+  };
 
-export type IndexPatternDimensionEditorProps = DatasourceDimensionEditorProps<IndexPatternPrivateState> & {
-  uiSettings: IUiSettingsClient;
-  storage: IStorageWrapper;
-  savedObjectsClient: SavedObjectsClientContract;
-  layerId: string;
-  http: HttpSetup;
-  data: DataPublicPluginStart;
-  uniqueLabel: string;
-  dateRange: DateRange;
-};
+export type IndexPatternDimensionEditorProps =
+  DatasourceDimensionEditorProps<IndexPatternPrivateState> & {
+    uiSettings: IUiSettingsClient;
+    storage: IStorageWrapper;
+    savedObjectsClient: SavedObjectsClientContract;
+    layerId: string;
+    http: HttpSetup;
+    data: DataPublicPluginStart;
+    uniqueLabel: string;
+    dateRange: DateRange;
+  };
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows

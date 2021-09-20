@@ -167,7 +167,7 @@ export class TelemetryEndpointTask {
       return 0;
     }
 
-    const { body: endpointMetricsResponse } = (endpointData.endpointMetrics as unknown) as {
+    const { body: endpointMetricsResponse } = endpointData.endpointMetrics as unknown as {
       body: EndpointMetricsAggregation;
     };
 
@@ -250,7 +250,7 @@ export class TelemetryEndpointTask {
      * the last 24h or no failures/warnings in the policy applied.
      *
      */
-    const { body: failedPolicyResponses } = (endpointData.epPolicyResponse as unknown) as {
+    const { body: failedPolicyResponses } = endpointData.epPolicyResponse as unknown as {
       body: EndpointPolicyResponseAggregation;
     };
 

@@ -26,7 +26,7 @@ import {
   onRedirectNoIndexPattern,
   IndexPatternsApiClient,
   UiSettingsPublicToCommon,
-} from './index_patterns';
+} from './data_views';
 import {
   setIndexPatterns,
   setNotifications,
@@ -44,8 +44,8 @@ import {
   createSelectRangeAction,
 } from './actions';
 import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
-import { SavedObjectsClientPublicToCommon } from './index_patterns';
-import { getIndexPatternLoad } from './index_patterns/expressions';
+import { SavedObjectsClientPublicToCommon } from './data_views';
+import { getIndexPatternLoad } from './data_views/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
@@ -58,7 +58,8 @@ export class DataPublicPlugin
       DataPublicPluginStart,
       DataSetupDependencies,
       DataStartDependencies
-    > {
+    >
+{
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly queryService: QueryService;

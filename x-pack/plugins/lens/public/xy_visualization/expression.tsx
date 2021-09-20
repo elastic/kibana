@@ -516,6 +516,7 @@ export function XYChart({
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
         }}
+        allowBrushingLastHistogramBucket={Boolean(isTimeViz)}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
         onBrushEnd={interactive ? brushHandler : undefined}
