@@ -12,7 +12,7 @@ import { Query, fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } f
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DatavisualizerFieldTypeFilter } from './field_type_filter';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataViewField, IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { JobFieldType } from '../../../../../common/types';
 import {
   ErrorMessage,
@@ -21,6 +21,7 @@ import {
 } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import './_index.scss';
+import { createCombinedQuery } from '../../utils/saved_search_utils';
 interface Props {
   indexPattern: IndexPattern;
   searchString: Query['query'];
@@ -44,6 +45,7 @@ interface Props {
     queryLanguage: SearchQueryLanguage;
   }): void;
   showEmptyFields: boolean;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 export const SearchPanel: FC<Props> = ({
@@ -63,6 +65,7 @@ export const SearchPanel: FC<Props> = ({
 }) => {
   const {
     services: {
+      uiSettings,
       notifications: { toasts },
       data: {
         ui: { SearchBar },
@@ -75,6 +78,9 @@ export const SearchPanel: FC<Props> = ({
     query: searchString || '',
     language: searchQueryLanguage,
   });
+  const [filters, setFilters] = useState([]);
+  // const [query, setQuery] = useState();
+
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
   useEffect(() => {
@@ -85,6 +91,8 @@ export const SearchPanel: FC<Props> = ({
   }, [searchQueryLanguage, searchString]);
 
   const searchHandler = (query?: Query) => {
+    console.log('searchHandler query', query);
+
     if (!query) return;
     let filterQuery;
     try {
@@ -111,6 +119,24 @@ export const SearchPanel: FC<Props> = ({
     }
   };
 
+  // useEffect(() => {
+  //   console.log('useEffect filters', filters);
+  //   const userQuery = query ?? searchInput;
+  //   const combinedQuery = createCombinedQuery(
+  //     userQuery,
+  //     Array.isArray(filters) ? filters : [],
+  //     indexPattern,
+  //     uiSettings
+  //   );
+  //   console.log('combinedQuery', combinedQuery);
+  //
+  //   setSearchParams({
+  //     searchQuery: combinedQuery,
+  //     searchString: userQuery.query,
+  //     queryLanguage: userQuery.language as SearchQueryLanguage,
+  //   });
+  // }, [filters, query]);
+
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -127,6 +153,11 @@ export const SearchPanel: FC<Props> = ({
           showQueryInput={true}
           query={searchInput}
           onQuerySubmit={(params) => searchHandler(params.query)}
+          // onQueryChange={(params) => console.log('params', params)}
+          onFiltersUpdated={(filters) => {
+            console.log('onFiltersUpdated', filters);
+            setFilters(filters);
+          }}
           indexPatterns={[indexPattern]}
           placeholder={i18n.translate('xpack.dataVisualizer.searchPanel.queryBarPlaceholderText', {
             defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',

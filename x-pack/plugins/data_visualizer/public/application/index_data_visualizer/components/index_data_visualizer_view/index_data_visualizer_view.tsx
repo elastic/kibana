@@ -29,6 +29,7 @@ import {
   UI_SETTINGS,
   Query,
   IndexPattern,
+  generateFilters,
 } from '../../../../../../../../src/plugins/data/public';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
@@ -69,6 +70,7 @@ import { extractSearchData } from '../../utils/saved_search_utils';
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
+import { DataViewField } from '../../../../../../../../src/plugins/data/common';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -131,7 +133,7 @@ const restorableDefaults = getDefaultDataVisualizerListState();
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
-  const { docLinks, notifications, uiSettings } = services;
+  const { docLinks, notifications, uiSettings, data } = services;
   const { toasts } = notifications;
 
   const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(
@@ -306,6 +308,26 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
+
+  const onAddFilter = useCallback(
+    (field: DataViewField | string, values: string, operation: '+' | '-') => {
+      // const fieldName = typeof field === 'string' ? field : field.name;
+      // popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
+      const newFilters = generateFilters(
+        data.query.filterManager,
+        field,
+        values,
+        operation,
+        String(currentIndexPattern.id)
+      );
+      // if (trackUiMetric) {
+      //   trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
+      // }
+
+      return data.query.filterManager.addFilters(newFilters);
+    },
+    [data.query]
+  );
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -753,13 +775,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               item={item}
               indexPattern={currentIndexPattern}
               combinedQuery={{ searchQueryLanguage, searchString }}
+              onAddFilter={onAddFilter}
             />
           );
         }
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentIndexPattern, searchQueryLanguage, searchString]
+    [currentIndexPattern, searchQueryLanguage, searchString, onAddFilter]
   );
 
   // Some actions open up fly-out or popup
@@ -879,6 +902,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     visibleFieldNames={visibleFieldNames}
                     setVisibleFieldNames={setVisibleFieldNames}
                     showEmptyFields={showEmptyFields}
+                    onAddFilter={onAddFilter}
                   />
                   <EuiSpacer size={'l'} />
                   <FieldCountPanel
