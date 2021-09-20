@@ -182,6 +182,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
       expect(exists('externalLinksTitle')).toBe(false);
       expect(exists('deprecationsCountTitle')).toBe(false);
+      expect(exists('apiCompatibilityNoteTitle')).toBe(false);
     });
   });
 
@@ -368,6 +369,24 @@ describe('Overview - Fix deprecation logs step', () => {
 
         expect(exists('fixLogsStep-incomplete')).toBe(true);
       });
+    });
+  });
+
+  describe('Step 4 - API compatibility header', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
+    });
+
+    test('It shows copy with compatibility api header advice', async () => {
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { exists, component } = testBed;
+
+      component.update();
+
+      expect(exists('apiCompatibilityNoteTitle')).toBe(true);
     });
   });
 });
