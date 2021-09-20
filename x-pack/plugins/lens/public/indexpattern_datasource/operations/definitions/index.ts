@@ -607,13 +607,11 @@ export const operationDefinitions = internalOperationDefinitions as GenericOpera
  * (e.g. `import { termsOperation } from './operations/definitions'`). This map is
  * intended to be used in situations where the operation type is not known during compile time.
  */
-export const operationDefinitionMap: Record<
-  string,
-  GenericOperationDefinition
-> = internalOperationDefinitions.reduce(
-  (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
-  {}
-);
+export const operationDefinitionMap: Record<string, GenericOperationDefinition> =
+  internalOperationDefinitions.reduce(
+    (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
+    {}
+  );
 
 /**
  * Cannot map the prev names, but can guarantee the new names are matching up using the type system

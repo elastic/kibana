@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import type { PluginInfo } from './get_plugin_bundle_paths';
 
 export const getJsDependencyPaths = (
@@ -14,10 +15,8 @@ export const getJsDependencyPaths = (
   bundlePaths: Map<string, PluginInfo>
 ) => {
   return [
-    ...UiSharedDeps.jsDepFilenames.map(
-      (filename) => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
-    ),
-    `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
+    `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.dllFilename}`,
+    `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.jsFilename}`,
     `${regularBundlePath}/core/core.entry.js`,
     ...[...bundlePaths.values()].map((plugin) => plugin.bundlePath),
   ];

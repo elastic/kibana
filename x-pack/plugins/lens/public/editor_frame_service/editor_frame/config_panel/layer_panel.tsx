@@ -89,10 +89,10 @@ export function LayerPanel(
   }, [activeVisualization.id]);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
-  const registerLayerRef = useCallback((el) => registerNewLayerRef(layerId, el), [
-    layerId,
-    registerNewLayerRef,
-  ]);
+  const registerLayerRef = useCallback(
+    (el) => registerNewLayerRef(layerId, el),
+    [layerId, registerNewLayerRef]
+  );
 
   const layerVisualizationConfigProps = {
     layerId,
@@ -125,7 +125,11 @@ export function LayerPanel(
     dateRange,
   };
 
-  const { groups, supportStaticValue, supportFieldFormat = true } = useMemo(
+  const {
+    groups,
+    supportStaticValue,
+    supportFieldFormat = true,
+  } = useMemo(
     () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -167,7 +171,7 @@ export function LayerPanel(
         columnId,
         groupId,
         layerId: targetLayerId,
-      } = (targetItem as unknown) as DraggedOperation;
+      } = targetItem as unknown as DraggedOperation;
       if (dropType === 'reorder' || dropType === 'field_replace' || dropType === 'field_add') {
         setNextFocusedButtonId(droppedItem.id);
       } else {

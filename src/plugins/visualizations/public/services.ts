@@ -36,9 +36,8 @@ export const [getApplication, setApplication] = createGetterSetter<ApplicationSt
 
 export const [getEmbeddable, setEmbeddable] = createGetterSetter<EmbeddableStart>('Embeddable');
 
-export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObjectsStart>(
-  'SavedObjects'
-);
+export const [getSavedObjects, setSavedObjects] =
+  createGetterSetter<SavedObjectsStart>('SavedObjects');
 
 export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');
 
@@ -48,27 +47,22 @@ export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContr
 
 export const [getSearch, setSearch] = createGetterSetter<DataPublicPluginStart['search']>('Search');
 
-export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionSetup>(
-  'UsageCollection'
-);
+export const [getUsageCollector, setUsageCollector] =
+  createGetterSetter<UsageCollectionSetup>('UsageCollection');
 
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');
 
 export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UiActions');
 
-export const [
-  getSavedVisualizationsLoader,
-  setSavedVisualizationsLoader,
-] = createGetterSetter<SavedVisualizationsLoader>('SavedVisualisationsLoader');
+export const [getSavedVisualizationsLoader, setSavedVisualizationsLoader] =
+  createGetterSetter<SavedVisualizationsLoader>('SavedVisualisationsLoader');
 
-export const [getAggs, setAggs] = createGetterSetter<DataPublicPluginStart['search']['aggs']>(
-  'AggConfigs'
-);
+export const [getAggs, setAggs] =
+  createGetterSetter<DataPublicPluginStart['search']['aggs']>('AggConfigs');
 
 export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
 
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
 
-export const [getSavedSearchLoader, setSavedSearchLoader] = createGetterSetter<SavedObjectLoader>(
-  'savedSearchLoader'
-);
+export const [getSavedSearchLoader, setSavedSearchLoader] =
+  createGetterSetter<SavedObjectLoader>('savedSearchLoader');

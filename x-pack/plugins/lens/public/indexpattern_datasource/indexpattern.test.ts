@@ -216,7 +216,7 @@ describe('IndexPattern Data Source', () => {
         operationType: 'count',
         sourceField: 'Records',
       };
-      const map = indexPatternDatasource.uniqueLabels(({
+      const map = indexPatternDatasource.uniqueLabels({
         layers: {
           a: {
             columnOrder: ['a', 'b'],
@@ -238,7 +238,7 @@ describe('IndexPattern Data Source', () => {
             indexPatternId: 'foo',
           },
         },
-      } as unknown) as IndexPatternPrivateState);
+      } as unknown as IndexPatternPrivateState);
 
       expect(map).toMatchInlineSnapshot(`
         Object {
@@ -1410,7 +1410,7 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      const warnings = indexPatternDatasource.getWarningMessages!(state, ({
+      const warnings = indexPatternDatasource.getWarningMessages!(state, {
         activeData: {
           first: {
             type: 'datatable',
@@ -1433,7 +1433,7 @@ describe('IndexPattern Data Source', () => {
             ],
           },
         },
-      } as unknown) as FramePublicAPI);
+      } as unknown as FramePublicAPI);
       expect(warnings!.length).toBe(2);
       expect((warnings![0] as React.ReactElement).props.id).toEqual(
         'xpack.lens.indexPattern.timeShiftSmallWarning'

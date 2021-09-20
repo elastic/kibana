@@ -143,9 +143,9 @@ describe('getRuleData useEffect handler', () => {
 
     loadAlert.mockImplementationOnce(async () => rule);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
 
     await getRuleData(
       rule.id,
@@ -191,9 +191,9 @@ describe('getRuleData useEffect handler', () => {
     loadAlertTypes.mockImplementation(async () => [ruleType]);
     loadActionTypes.mockImplementation(async () => [connectorType]);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
 
     await getRuleData(
       rule.id,
@@ -241,9 +241,9 @@ describe('getRuleData useEffect handler', () => {
     });
     resolveRule.mockImplementationOnce(async () => rule);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getRuleData(
       rule.id,
       loadAlert,
@@ -285,9 +285,9 @@ describe('getRuleData useEffect handler', () => {
       throw new Error('OMG');
     });
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getRuleData(
       rule.id,
       loadAlert,
@@ -332,9 +332,9 @@ describe('getRuleData useEffect handler', () => {
     });
     loadActionTypes.mockImplementation(async () => [connectorType]);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getRuleData(
       rule.id,
       loadAlert,
@@ -383,9 +383,9 @@ describe('getRuleData useEffect handler', () => {
       throw new Error('OMG no connector type');
     });
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getRuleData(
       rule.id,
       loadAlert,
@@ -432,9 +432,9 @@ describe('getRuleData useEffect handler', () => {
     loadAlertTypes.mockImplementation(async () => [ruleType]);
     loadActionTypes.mockImplementation(async () => [connectorType]);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getRuleData(
       rule.id,
       loadAlert,
@@ -492,9 +492,9 @@ describe('getRuleData useEffect handler', () => {
     loadAlertTypes.mockImplementation(async () => [ruleType]);
     loadActionTypes.mockImplementation(async () => [availableConnectorType]);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
     await getRuleData(
       rule.id,
       loadAlert,

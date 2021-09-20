@@ -275,10 +275,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     };
   }, [appId, casePermissions, afterCaseSelection, selectedEvent]);
 
-  const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
-    deletedEventIds,
-    events,
-  ]);
+  const nonDeletedEvents = useMemo(
+    () => events.filter((e) => !deletedEventIds.includes(e._id)),
+    [deletedEventIds, events]
+  );
 
   const filterQuery = useMemo(
     () =>

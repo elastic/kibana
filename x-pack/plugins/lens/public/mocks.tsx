@@ -205,7 +205,7 @@ export const lensPluginMock = {
   createStartContract,
 };
 
-export const defaultDoc = ({
+export const defaultDoc = {
   savedObjectId: '1234',
   title: 'An extremely cool default document!',
   expression: 'definitely a valid expression',
@@ -219,7 +219,7 @@ export const defaultDoc = ({
     visualization: {},
   },
   references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-} as unknown) as Document;
+} as unknown as Document;
 
 export function createMockTimefilter() {
   const unsubscribe = jest.fn();
@@ -304,7 +304,7 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
       getDefaultQuery: jest.fn(() => ({ query: '', language: 'lucene' })),
     };
   }
-  return ({
+  return {
     query: {
       filterManager: createMockFilterManager(),
       timefilter: {
@@ -323,7 +323,7 @@ export function mockDataPlugin(sessionIdSubject = new Subject<string>()) {
     fieldFormats: {
       deserialize: jest.fn(),
     },
-  } as unknown) as DataPublicPluginStart;
+  } as unknown as DataPublicPluginStart;
 }
 
 export function makeDefaultServices(
@@ -373,7 +373,7 @@ export function makeDefaultServices(
       },
     });
     attributeServiceMock.wrapAttributes = jest.fn().mockResolvedValue({
-      savedObjectId: ((doc as unknown) as LensByReferenceInput).savedObjectId,
+      savedObjectId: (doc as unknown as LensByReferenceInput).savedObjectId,
     });
 
     return attributeServiceMock;
@@ -505,10 +505,10 @@ export const mountWithProvider = async (
   let instance: ReactWrapper = {} as ReactWrapper;
 
   await act(async () => {
-    instance = mount(component, ({
+    instance = mount(component, {
       wrappingComponent,
       ...restOptions,
-    } as unknown) as ReactWrapper);
+    } as unknown as ReactWrapper);
   });
   return { instance, lensStore };
 };

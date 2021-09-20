@@ -1257,18 +1257,18 @@ describe('xy_visualization', () => {
       };
       datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
         id === 'a'
-          ? (({
+          ? ({
               dataType: 'date',
               scale: 'interval',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
         id === 'e'
-          ? (({
+          ? ({
               dataType: 'number',
               scale: 'interval',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       expect(
@@ -1313,18 +1313,18 @@ describe('xy_visualization', () => {
       };
       datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
         id === 'a'
-          ? (({
+          ? ({
               dataType: 'date',
               scale: 'interval',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
         id === 'e'
-          ? (({
+          ? ({
               dataType: 'string',
               scale: 'ordinal',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       expect(
