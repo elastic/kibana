@@ -189,13 +189,13 @@ export const createIncident = async ({
 
   if (externalId) {
     try {
-      currentIncident = ((await actionsClient.execute({
+      currentIncident = (await actionsClient.execute({
         actionId: connector.id,
         params: {
           subAction: 'getIncident',
           subActionParams: { externalId },
         },
-      })) as unknown) as ExternalServiceParams | undefined;
+      })) as unknown as ExternalServiceParams | undefined;
     } catch (ex) {
       throw new Error(
         `Retrieving Incident by id ${externalId} from ${connector.actionTypeId} failed with exception: ${ex}`

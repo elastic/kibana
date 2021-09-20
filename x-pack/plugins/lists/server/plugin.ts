@@ -28,7 +28,8 @@ import { initSavedObjects } from './saved_objects';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
 
 export class ListPlugin
-  implements Plugin<Promise<ListPluginSetup>, ListsPluginStart, {}, PluginsStart> {
+  implements Plugin<Promise<ListPluginSetup>, ListsPluginStart, {}, PluginsStart>
+{
   private readonly logger: Logger;
   private readonly config: ConfigType;
   private spaces: SpacesServiceStart | undefined | null;

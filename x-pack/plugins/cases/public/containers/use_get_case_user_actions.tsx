@@ -269,9 +269,8 @@ export const useGetCaseUserActions = (
   caseConnectorId: string,
   subCaseId?: string
 ): UseGetCaseUserActions => {
-  const [caseUserActionsState, setCaseUserActionsState] = useState<CaseUserActionsState>(
-    initialData
-  );
+  const [caseUserActionsState, setCaseUserActionsState] =
+    useState<CaseUserActionsState>(initialData);
   const abortCtrlRef = useRef(new AbortController());
   const isCancelledRef = useRef(false);
   const toasts = useToasts();

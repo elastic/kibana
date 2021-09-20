@@ -1113,7 +1113,7 @@ describe('CasesService', () => {
 
       it('defaults to the none connector and null external_services when attributes is undefined', async () => {
         unsecuredSavedObjectsClient.get.mockReturnValue(
-          Promise.resolve(({
+          Promise.resolve({
             references: [
               {
                 id: '1',
@@ -1121,7 +1121,7 @@ describe('CasesService', () => {
                 type: ACTION_SAVED_OBJECT_TYPE,
               },
             ],
-          } as unknown) as SavedObject<ESCaseAttributes>)
+          } as unknown as SavedObject<ESCaseAttributes>)
         );
         const res = await service.getCase({ unsecuredSavedObjectsClient, id: 'a' });
 
