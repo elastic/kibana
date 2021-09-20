@@ -23,7 +23,7 @@ import {
   TimeRange,
 } from '../../../common';
 import { FieldFormatsStart } from '../../../../field_formats/server';
-import { IndexPatternsServiceStart } from '../../index_patterns';
+import { IndexPatternsServiceStart } from '../../data_views';
 import { AggsSetup, AggsStart } from './types';
 
 /** @internal */

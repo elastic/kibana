@@ -93,6 +93,32 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
     });
 
+    describe('#bulkResolve', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(client.bulkResolve([], { namespace: 'bar' })).rejects.toThrow(
+          ERROR_NAMESPACE_SPECIFIED
+        );
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { resolved_objects: [] };
+        baseClient.bulkResolve.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-expect-error
+        const actualReturnValue = await client.bulkResolve([], options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.bulkResolve).toHaveBeenCalledWith([], {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
+
     describe('#resolve', () => {
       test(`throws error if options.namespace is specified`, async () => {
         const { client } = createSpacesSavedObjectsClient();
