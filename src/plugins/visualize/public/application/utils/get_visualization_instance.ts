@@ -18,6 +18,7 @@ import { SavedObject } from 'src/plugins/saved_objects/public';
 import { cloneDeep } from 'lodash';
 import { ExpressionValueError } from 'src/plugins/expressions/public';
 import { createSavedSearchesLoader } from '../../../../discover/public';
+import { getSavedVisualization } from '../../../../visualizations/public';
 import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '../../../../kibana_utils/common';
 import { VisualizeServices } from '../types';
 
@@ -33,8 +34,12 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const { data, createVisEmbeddableFromObject, savedObjects, savedObjectsPublic } =
-    visualizeServices;
+  const {
+    data,
+    createVisEmbeddableFromObject,
+    savedObjects,
+    savedObjectsPublic,
+  } = visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
     id: '',
     timeRange: data.query.timefilter.timefilter.getTime(),
@@ -45,7 +50,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   embeddableHandler.getOutput$().subscribe((output) => {
     if (output.error && !isErrorRelatedToRuntimeFields(output.error)) {
       data.search.showError(
-        (output.error as unknown as ExpressionValueError['error']).original || output.error
+        ((output.error as unknown) as ExpressionValueError['error']).original || output.error
       );
     }
   });
@@ -107,8 +112,11 @@ export const getVisualizationInstance = async (
    */
   opts?: Record<string, unknown> | string
 ) => {
-  const { visualizations, savedVisualizations } = visualizeServices;
-  const savedVis: VisSavedObject = await savedVisualizations.get(opts);
+  const { visualizations, data, savedObjects } = visualizeServices;
+  const savedVis: VisSavedObject = await getSavedVisualization(
+    { search: data.search, savedObjectsClient: savedObjects.client, dataViews: data.dataViews },
+    opts
+  );
 
   if (typeof opts !== 'string') {
     savedVis.searchSourceFields = { index: opts?.indexPattern } as SearchSourceFields;

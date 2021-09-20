@@ -49,3 +49,9 @@ export {
   FakeParams,
   HistogramParams,
 } from '../common/expression_functions/xy_dimension';
+export {
+  convertToSerializedVis,
+  convertFromSerializedVis,
+  getSavedVisualization,
+  saveVisualization
+} from './utils/saved_visualize_utils';

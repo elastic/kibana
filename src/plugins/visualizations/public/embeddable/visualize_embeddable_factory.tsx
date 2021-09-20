@@ -46,7 +46,7 @@ import {
   extractTimeSeriesReferences,
   injectTimeSeriesReferences,
   injectControlsReferences,
-} from '../saved_visualizations/saved_visualization_references';
+} from '../utils/saved_visualization_references';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { checkForDuplicateTitle } from '../../../saved_objects/public';

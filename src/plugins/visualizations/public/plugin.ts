@@ -43,7 +43,7 @@ import { showNewVisModal } from './wizard';
 import {
   convertFromSerializedVis,
   convertToSerializedVis,
-} from './saved_visualizations/_saved_vis';
+} from './utils/saved_visualize_utils';
 
 import { createSavedSearchesLoader } from '../../discover/public';
 

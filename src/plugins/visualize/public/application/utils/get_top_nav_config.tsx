@@ -14,7 +14,11 @@ import { parse } from 'query-string';
 
 import { Capabilities } from 'src/core/public';
 import { TopNavMenuData } from 'src/plugins/navigation/public';
-import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
+import {
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VisualizeInput,
+  saveVisualization,
+} from '../../../../visualizations/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
@@ -64,7 +68,7 @@ const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashb
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.visualize) return false;
 
-  const visualize = anonymousUserCapabilities.visualize as unknown as VisualizeCapabilities;
+  const visualize = (anonymousUserCapabilities.visualize as unknown) as VisualizeCapabilities;
 
   return !!visualize.show;
 };
@@ -99,6 +103,7 @@ export const getTopNavConfig = (
     presentationUtil,
     usageCollection,
     getKibanaVersion,
+    savedObjects,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -129,7 +134,9 @@ export const getTopNavConfig = (
     setHasUnsavedChanges(false);
 
     try {
-      const id = await savedVis.save(saveOptions);
+      const id = await saveVisualization(savedVis, saveOptions, {
+        savedObjectsClient: savedObjects.client,
+      });
 
       if (id) {
         toastNotifications.addSuccess({

@@ -16,7 +16,7 @@
 import type { SavedObjectsStart, SavedObject } from '../../../../plugins/saved_objects/public';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
-import { extractReferences, injectReferences } from './saved_visualization_references';
+import { extractReferences, injectReferences } from '../utils/saved_visualization_references';
 import { createSavedSearchesLoader } from '../../../discover/public';
 import type { SavedObjectsClientContract } from '../../../../core/public';
 import type { IndexPatternsContract } from '../../../../plugins/data/public';
