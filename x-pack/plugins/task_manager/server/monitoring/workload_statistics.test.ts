@@ -775,26 +775,7 @@ describe('estimateRecurringTaskScheduling', () => {
     schedule[6].nonRecurring = 3;
 
     expect(estimateRecurringTaskScheduling(schedule, 3000)).toEqual([
-      1,
-      1,
-      0,
-      1,
-      4,
-      2,
-      6,
-      3,
-      3,
-      2,
-      4,
-      2,
-      3,
-      3,
-      3,
-      2,
-      4,
-      2,
-      3,
-      3,
+      1, 1, 0, 1, 4, 2, 6, 3, 3, 2, 4, 2, 3, 3, 3, 2, 4, 2, 3, 3,
     ]);
   });
 });

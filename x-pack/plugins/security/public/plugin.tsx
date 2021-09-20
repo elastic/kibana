@@ -55,7 +55,8 @@ export class SecurityPlugin
       SecurityPluginStart,
       PluginSetupDependencies,
       PluginStartDependencies
-    > {
+    >
+{
   private sessionTimeout!: SessionTimeout;
   private readonly authenticationService = new AuthenticationService();
   private readonly navControlService = new SecurityNavControlService();

@@ -46,9 +46,7 @@ export interface LensAppState extends EditorFrameState {
   sharingSavedObjectProps?: Omit<SharingSavedObjectProps, 'errorJSON'>;
 }
 
-export type DispatchSetState = (
-  state: Partial<LensAppState>
-) => {
+export type DispatchSetState = (state: Partial<LensAppState>) => {
   payload: Partial<LensAppState>;
   type: string;
 };
