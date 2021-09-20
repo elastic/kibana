@@ -19,9 +19,10 @@ const getMockedContext = (context: any) =>
     ...context,
   } as WorkpadRoutingContextType);
 
-const getContextWrapper: (context: WorkpadRoutingContextType) => FC = (context) => ({
-  children,
-}) => <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>;
+const getContextWrapper: (context: WorkpadRoutingContextType) => FC =
+  (context) =>
+  ({ children }) =>
+    <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>;
 
 describe('useAutoplayHelper', () => {
   beforeEach(() => jest.useFakeTimers());

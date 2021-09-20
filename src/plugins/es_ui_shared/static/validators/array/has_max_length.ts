@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const hasMaxLengthArray = (length = 5) => (value: any[]): boolean => value.length <= length;
+export const hasMaxLengthArray =
+  (length = 5) =>
+  (value: any[]): boolean =>
+    value.length <= length;
