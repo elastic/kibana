@@ -8,6 +8,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const OPEN_ALERTS_ROWS_COUNT = 12;
+
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
@@ -29,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('is filtered to only show "open" alerts by default', async () => {
       await retry.try(async () => {
         const tableRows = await observability.alerts.getTableCellsInRows();
-        expect(tableRows.length).to.be(12);
+        expect(tableRows.length).to.be(OPEN_ALERTS_ROWS_COUNT);
       });
     });
 
