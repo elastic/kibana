@@ -18,6 +18,8 @@ const ACTIVE_ALERTS_CELL_COUNT = 48;
 const RECOVERED_ALERTS_CELL_COUNT = 24;
 const TOTAL_ALERTS_CELL_COUNT = 72;
 
+const OPEN_ALERTS_ROWS_COUNT = 12;
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
@@ -203,9 +205,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('Pagination', () => {
         describe('Page size selector', () => {
           // less than 10
-          it('Does not render page size selector', async () => {});
+          it('Does not render page size selector', async () => {
+            await observability.alerts.setWorkflowStatusFilter('closed');
 
-          it('Renders page size selector', async () => {});
+            await retry.try(async () => {
+              const pageSizeSelector = await observability.alerts.getPageSizeSelector();
+              expect(pageSizeSelector).to.be.empty();
+            });
+          });
+
+          it('Renders page size selector', async () => {
+            await retry.try(async () => {
+              const pageSizeSelector = await observability.alerts.getPageSizeSelector();
+              expect(pageSizeSelector).to.not.be.empty();
+            });
+          });
+
+          it('Default rows per page selector is 50', async () => {});
 
           it('Page size selector works', async () => {});
         });

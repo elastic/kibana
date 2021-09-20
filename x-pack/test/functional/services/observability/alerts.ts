@@ -19,6 +19,11 @@ const DATE_WITH_DATA = {
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const COPY_TO_CLIPBOARD_BUTTON_SELECTOR = 'copy-to-clipboard';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
+const ALERTS_ROWS_PER_PAGE_SELECTOR = 'tablePaginationPopoverButton';
+const ALERTS_PAGINATION_BUTTON_PREVIOUS = 'pagination-button-previous';
+const ALERTS_PAGINATION_BUTTON_NEXT = 'pagination-button-next';
+const ALERTS_PAGINATION_BUTTON_ONE = 'pagination-button-0';
+const ALERTS_PAGINATION_BUTTON_TWO = 'pagination-button-1';
 
 const ACTION_COLUMN_INDEX = 1;
 
@@ -156,6 +161,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     await actionsOverflowButton.click();
   };
 
+  // Workflow status
   const setWorkflowStatusForRow = async (rowIndex: number, workflowStatus: WorkflowStatus) => {
     await openActionsMenuForRow(rowIndex);
 
@@ -175,6 +181,11 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
       `workflow-status-filter-${workflowStatus}-button`
     );
     await buttonGroupButton.click();
+  };
+
+  // Pagination
+  const getPageSizeSelector = async () => {
+    return await testSubjects.find(ALERTS_ROWS_PER_PAGE_SELECTOR);
   };
 
   return {
@@ -201,5 +212,6 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     setWorkflowStatusFilter,
     submitQuery,
     typeInQueryBar,
+    getPageSizeSelector,
   };
 }
