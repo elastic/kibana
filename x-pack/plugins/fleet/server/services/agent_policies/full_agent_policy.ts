@@ -21,7 +21,7 @@ import {
   storedPackagePoliciesToAgentPermissions,
   DEFAULT_PERMISSIONS,
 } from '../package_policies_to_agent_permissions';
-import { storedPackagePoliciesToAgentInputs, dataTypes } from '../../../common';
+import { storedPackagePoliciesToAgentInputs, dataTypes, outputType } from '../../../common';
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
 
@@ -124,7 +124,7 @@ export async function getFullAgentPolicy(
     cluster: DEFAULT_PERMISSIONS.cluster,
   };
 
-  // TODO: fetch this from the elastic agent package
+  // TODO: fetch this from the elastic agent package https://github.com/elastic/kibana/issues/107738
   const monitoringNamespace = fullAgentPolicy.agent?.monitoring.namespace;
   const monitoringPermissions: FullAgentPolicyOutputPermissions =
     monitoringOutputId === dataOutputId
@@ -138,7 +138,7 @@ export async function getFullAgentPolicy(
     fullAgentPolicy.agent?.monitoring.enabled &&
     monitoringNamespace &&
     monitoringOutput &&
-    monitoringOutput.type === 'elasticsearch'
+    monitoringOutput.type === outputType.Elasticsearch
   ) {
     let names: string[] = [];
     if (fullAgentPolicy.agent.monitoring.logs) {
@@ -165,7 +165,7 @@ export async function getFullAgentPolicy(
     NonNullable<FullAgentPolicy['output_permissions']>
   >((outputPermissions, outputId) => {
     const output = fullAgentPolicy.outputs[outputId];
-    if (output && output.type === 'elasticsearch') {
+    if (output && output.type === outputType.Elasticsearch) {
       outputPermissions[outputId] =
         outputId === getOutputIdForAgentPolicy(dataOutput)
           ? dataPermissions
