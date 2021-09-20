@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Capabilities, IUiSettingsClient } from 'kibana/public';
-import { ISearchSource } from '../../../../../../data/common';
+import type { Capabilities } from 'kibana/public';
+import type { IndexPattern, ISearchSource } from 'src/plugins/data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
+import type { DiscoverServices } from '../../../../build_services';
 import type { SavedSearch, SortOrder } from '../../../../saved_searches/types';
 import { getSortForSearchSource } from '../components/doc_table';
 import { AppState } from '../services/discover_state';
@@ -19,14 +20,21 @@ import { AppState } from '../services/discover_state';
 export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: AppState | SavedSearch,
-  config: IUiSettingsClient
+  indexPattern: IndexPattern,
+  services: DiscoverServices
 ) {
+  const { uiSettings: config, data } = services;
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
 
   searchSource.setField(
     'sort',
     getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))
+  );
+  // When sharing externally we preserve relative time values
+  searchSource.setField(
+    'filter',
+    data.query.timefilter.timefilter.createRelativeFilter(indexPattern)
   );
   searchSource.removeField('highlight');
   searchSource.removeField('highlightAll');
