@@ -23,24 +23,36 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
+  // const config = getService('config');
   const supertest = getService('supertest');
+  /*
+  const isRuleRegistryEnabled = config
+    .get('xpack.securitySolution.enableExperimental')
+    .contains('ruleRegistryEnabled');
+  const testIfRuleRegistryDisabled = isRuleRegistryEnabled ? it.skip : it;
+  */
 
   describe('create_lists', () => {
+    /*
     describe('validation errors', () => {
-      it('should give an error that the index must exist first if it does not exist before creating a list', async () => {
-        const { body } = await supertest
-          .post(LIST_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getCreateMinimalListSchemaMock())
-          .expect(400);
+      testIfRuleRegistryDisabled(
+        'should give an error that the index must exist first if it does not exist before creating a list',
+        async () => {
+          const { body } = await supertest
+            .post(LIST_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getCreateMinimalListSchemaMock())
+            .expect(400);
 
-        expect(body).to.eql({
-          message:
-            'To create a list, the index must exist first. Index ".lists-default" does not exist',
-          status_code: 400,
-        });
-      });
+          expect(body).to.eql({
+            message:
+              'To create a list, the index must exist first. Index ".lists-default" does not exist',
+            status_code: 400,
+          });
+        }
+      );
     });
+    */
 
     describe('creating lists', () => {
       beforeEach(async () => {

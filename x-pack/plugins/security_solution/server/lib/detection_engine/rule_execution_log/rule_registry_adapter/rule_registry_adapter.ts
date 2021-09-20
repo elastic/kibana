@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
+import { isEmpty, merge } from 'lodash';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { RuleRegistryLogClient } from './rule_registry_log_client/rule_registry_log_client';
 import {
@@ -37,13 +37,15 @@ export class RuleRegistryAdapter implements IRuleExecutionLogClient {
       spaceId,
     });
 
-    return logs[ruleId].map((log) => ({
-      id: '',
-      type: '',
-      score: 0,
-      attributes: log,
-      references: [],
-    }));
+    return !isEmpty(logs)
+      ? logs[ruleId].map((log) => ({
+          id: '',
+          type: '',
+          score: 0,
+          attributes: log,
+          references: [],
+        }))
+      : [];
   }
 
   public async findBulk({ ruleIds, logsCount = 1, spaceId }: FindBulkExecutionLogArgs) {

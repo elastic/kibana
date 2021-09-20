@@ -6,8 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
-import { ConfigType } from '../../../../config';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
@@ -21,7 +19,10 @@ import {
   QuerySignalsSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 
-export const querySignalsRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const querySignalsRoute = (
+  router: SecuritySolutionPluginRouter,
+  isRuleRegistryEnabled: boolean
+) => {
   router.post(
     {
       path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -53,12 +54,11 @@ export const querySignalsRoute = (router: SecuritySolutionPluginRouter, config: 
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const siemClient = context.securitySolution!.getAppClient();
 
-      // TODO: Once we are past experimental phase this code should be removed
-      const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
-
       try {
         const { body } = await esClient.search({
-          index: ruleRegistryEnabled ? DEFAULT_ALERTS_INDEX : siemClient.getSignalsIndex(),
+          index: isRuleRegistryEnabled
+            ? `${DEFAULT_ALERTS_INDEX}-default-*`
+            : siemClient.getSignalsIndex(),
           body: {
             query,
             // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }

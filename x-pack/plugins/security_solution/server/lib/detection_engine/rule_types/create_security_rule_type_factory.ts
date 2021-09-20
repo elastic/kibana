@@ -68,7 +68,11 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
 
       const esClient = scopedClusterClient.asCurrentUser;
 
-      const ruleStatusClient = new RuleExecutionLogClient({ savedObjectsClient, ruleDataService });
+      const ruleStatusClient = new RuleExecutionLogClient({
+        isRuleRegistryEnabled: true,
+        savedObjectsClient,
+        ruleDataService,
+      });
       const ruleSO = await savedObjectsClient.get('alert', alertId);
 
       const {
@@ -316,9 +320,11 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
             }
           }
 
+          // const outputIndex = (result.createdSignals[0] as Array<{ _index: string }>)[0]._index;
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
           logger.debug(
             buildRuleMessage(
+              // `[+] Finished indexing ${createdSignalsCount} signals into ${outputIndex}`
               `[+] Finished indexing ${createdSignalsCount} signals into ${ruleDataClient.indexName}`
             )
           );

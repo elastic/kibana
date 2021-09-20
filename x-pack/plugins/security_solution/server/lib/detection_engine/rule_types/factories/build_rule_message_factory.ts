@@ -24,5 +24,5 @@ export const buildRuleMessageFactory = ({
     `name: "${name}"`,
     `id: "${id}"`,
     `rule id: "${ruleId ?? '(unknown rule id)'}"`,
-    `signals index alias: "${index}"`,
+    `signals index alias: "${index}"`, // TODO: do we want the alias here?
   ].join(' ');

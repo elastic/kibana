@@ -23,10 +23,18 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  // const config = getService('config');
   const esArchiver = getService('esArchiver');
+  const supertest = getService('supertest');
+
+  /*
+  const isRuleRegistryEnabled = config
+    .get('xpack.securitySolution.enableExperimental')
+    .contains('ruleRegistryEnabled');
+  */
 
   describe('create_rules_bulk', () => {
+    /*
     describe('validation errors', () => {
       it('should give a 200 even if the index does not exist as all bulks return a 200 but have an error of 409 bad request in the body', async () => {
         const { body } = await supertest
@@ -35,18 +43,21 @@ export default ({ getService }: FtrProviderContext): void => {
           .send([getSimpleRule()])
           .expect(200);
 
-        expect(body).to.eql([
-          {
-            error: {
-              message:
-                'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-              status_code: 400,
+        if (!isRuleRegistryEnabled) {
+          expect(body).to.eql([
+            {
+              error: {
+                message:
+                  'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
+                status_code: 400,
+              },
+              rule_id: 'rule-1',
             },
-            rule_id: 'rule-1',
-          },
-        ]);
+          ]);
+        }
       });
     });
+    */
 
     describe('creating rules in bulk', () => {
       before(async () => {

@@ -135,6 +135,7 @@ export const signalRulesAlertType = ({
       let hasError: boolean = false;
       let result = createSearchAfterReturnType();
       const ruleStatusClient = new RuleExecutionLogClient({
+        isRuleRegistryEnabled: false,
         ruleDataService,
         savedObjectsClient: services.savedObjectsClient,
       });

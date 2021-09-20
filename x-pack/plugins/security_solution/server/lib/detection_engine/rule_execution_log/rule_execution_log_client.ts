@@ -20,17 +20,20 @@ import {
 } from './types';
 
 export interface RuleExecutionLogClientArgs {
+  isRuleRegistryEnabled: boolean;
   ruleDataService: IRuleDataPluginService;
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-const RULE_REGISTRY_LOG_ENABLED = false;
-
 export class RuleExecutionLogClient implements IRuleExecutionLogClient {
   private client: IRuleExecutionLogClient;
 
-  constructor({ ruleDataService, savedObjectsClient }: RuleExecutionLogClientArgs) {
-    if (RULE_REGISTRY_LOG_ENABLED) {
+  constructor({
+    isRuleRegistryEnabled,
+    ruleDataService,
+    savedObjectsClient,
+  }: RuleExecutionLogClientArgs) {
+    if (isRuleRegistryEnabled) {
       this.client = new RuleRegistryAdapter(ruleDataService);
     } else {
       this.client = new SavedObjectsAdapter(savedObjectsClient);

@@ -62,6 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should find all the "hosts" from a "agent" index when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['agent']);
         const { id } = await createRule(supertest, rule);
+        console.log(id);
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);

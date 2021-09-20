@@ -6,8 +6,6 @@
  */
 
 import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
-import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
-import { ConfigType } from '../../../../config';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DEFAULT_ALERTS_INDEX, DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 
@@ -17,7 +15,10 @@ import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
 import { fieldAliasesOutdated } from './check_template_version';
 
-export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const readIndexRoute = (
+  router: SecuritySolutionPluginRouter,
+  isRuleRegistryEnabled: boolean
+) => {
   router.get(
     {
       path: DETECTION_ENGINE_INDEX_URL,
@@ -38,8 +39,6 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: Con
         }
 
         // TODO: Once we are past experimental phase this code should be removed
-        const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
-
         const index = siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(esClient, index);
 
@@ -66,12 +65,12 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: Con
           }
           return response.ok({
             body: {
-              name: ruleRegistryEnabled ? DEFAULT_ALERTS_INDEX : index,
+              name: isRuleRegistryEnabled ? DEFAULT_ALERTS_INDEX : index,
               index_mapping_outdated: mappingOutdated || aliasesOutdated,
             },
           });
         } else {
-          if (ruleRegistryEnabled) {
+          if (isRuleRegistryEnabled) {
             return response.ok({
               body: {
                 name: DEFAULT_ALERTS_INDEX,

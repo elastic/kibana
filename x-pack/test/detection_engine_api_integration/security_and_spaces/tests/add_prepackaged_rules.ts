@@ -21,25 +21,37 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  // const config = getService('config');
   const es = getService('es');
+  const supertest = getService('supertest');
+  /*
+  const isRuleRegistryEnabled = config
+    .get('xpack.securitySolution.enableExperimental')
+    .contains('ruleRegistryEnabled');
+  const testIfRuleRegistryDisabled = isRuleRegistryEnabled ? it.skip : it;
+  */
 
   describe('add_prepackaged_rules', () => {
+    /*
     describe('validation errors', () => {
-      it('should give an error that the index must exist first if it does not exist before adding prepackaged rules', async () => {
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_PREPACKAGED_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(400);
+      testIfRuleRegistryDisabled(
+        'should give an error that the index must exist first if it does not exist before adding prepackaged rules',
+        async () => {
+          const { body } = await supertest
+            .put(DETECTION_ENGINE_PREPACKAGED_URL)
+            .set('kbn-xsrf', 'true')
+            .send()
+            .expect(400);
 
-        expect(body).to.eql({
-          message:
-            'Pre-packaged rules cannot be installed until the signals index is created: .siem-signals-default',
-          status_code: 400,
-        });
-      });
+          expect(body).to.eql({
+            message:
+              'Pre-packaged rules cannot be installed until the signals index is created: .siem-signals-default',
+            status_code: 400,
+          });
+        }
+      );
     });
+    */
 
     describe('creating prepackaged rules', () => {
       beforeEach(async () => {

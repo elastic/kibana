@@ -139,6 +139,7 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
       return {};
     }
 
+    // Failing here?
     invariant(result.aggregations, 'Search response should contain aggregations');
 
     return Object.fromEntries(

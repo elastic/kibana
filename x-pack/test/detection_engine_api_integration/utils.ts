@@ -276,7 +276,7 @@ export const getQuerySignalsId = (ids: string[], size = 10) => ({
   size,
   query: {
     terms: {
-      'signal.rule.id': ids,
+      'kibana.alert.rule.uuid': ids,
     },
   },
 });

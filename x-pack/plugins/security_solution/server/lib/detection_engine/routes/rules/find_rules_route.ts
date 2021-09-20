@@ -67,6 +67,7 @@ export const findRulesRoute = (
           logsCount: 1,
           spaceId: context.securitySolution.getSpaceId(),
         });
+
         const transformed = transformFindAlerts(rules, ruleStatuses);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
