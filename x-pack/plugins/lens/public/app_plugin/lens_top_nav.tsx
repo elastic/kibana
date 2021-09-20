@@ -255,7 +255,7 @@ export const LensTopNavMenu = ({
           },
         },
         actions: {
-          inspect: lensInspector.inspect,
+          inspect: () => lensInspector.inspect({ title }),
           exportToCSV: () => {
             if (!activeData) {
               return;
@@ -335,7 +335,7 @@ export const LensTopNavMenu = ({
       setIsSaveModalVisible,
       uiSettings,
       unsavedTitle,
-      lensInspector.inspect,
+      lensInspector,
     ]
   );
 

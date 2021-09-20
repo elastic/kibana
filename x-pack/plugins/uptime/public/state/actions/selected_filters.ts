@@ -9,7 +9,7 @@ import { createAction } from 'redux-actions';
 
 export interface SelectedFilters {
   locations: string[];
-  ports: number[];
+  ports: string[];
   schemes: string[];
   tags: string[];
 }

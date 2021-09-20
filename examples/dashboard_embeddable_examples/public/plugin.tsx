@@ -33,7 +33,8 @@ export class DashboardEmbeddableExamples implements Plugin<void, void, {}, Start
         return renderApp(
           {
             basename: params.appBasePath,
-            DashboardContainerByValueRenderer: depsStart.dashboard.getDashboardContainerByValueRenderer(),
+            DashboardContainerByValueRenderer:
+              depsStart.dashboard.getDashboardContainerByValueRenderer(),
           },
           params.element
         );

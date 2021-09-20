@@ -11,10 +11,7 @@ import { HttpStart } from 'kibana/public';
 
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
@@ -27,7 +24,7 @@ import {
   OnChangeProps,
 } from './exception_items_renderer';
 
-const mockHttpService: HttpStart = ({
+const mockHttpService: HttpStart = {
   addLoadingCountSource: (): void => {},
   anonymousPaths: {
     isAnonymous: (): void => {},
@@ -47,8 +44,8 @@ const mockHttpService: HttpStart = ({
   patch: (): void => {},
   post: (): void => {},
   put: (): void => {},
-} as unknown) as HttpStart;
-const mockAutocompleteService = ({
+} as unknown as HttpStart;
+const mockAutocompleteService = {
   getValueSuggestions: () =>
     new Promise((resolve) => {
       setTimeout(() => {
@@ -62,7 +59,7 @@ const mockAutocompleteService = ({
         ]);
       }, 300);
     }),
-} as unknown) as AutocompleteStart;
+} as unknown as AutocompleteStart;
 
 addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>);
 

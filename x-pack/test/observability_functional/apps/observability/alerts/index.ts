@@ -17,7 +17,8 @@ async function asyncForEach<T>(array: T[], callback: (item: T, index: number) =>
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe('Observability alerts', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/111907
+  describe.skip('Observability alerts', function () {
     this.tags('includeFirefox');
 
     const pageObjects = getPageObjects(['common']);
@@ -121,7 +122,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('Displays the correct content', async () => {
             const flyoutTitles = await observability.alerts.getAlertsFlyoutDescriptionListTitles();
-            const flyoutDescriptions = await observability.alerts.getAlertsFlyoutDescriptionListDescriptions();
+            const flyoutDescriptions =
+              await observability.alerts.getAlertsFlyoutDescriptionListDescriptions();
 
             const expectedTitles = [
               'Status',

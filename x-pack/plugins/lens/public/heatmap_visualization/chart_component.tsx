@@ -125,7 +125,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const tableId = Object.keys(data.tables)[0];
   const table = data.tables[tableId];
 
-  const paletteParams = args.palette?.params as CustomPaletteState;
+  const paletteParams = args.palette?.params;
 
   const xAxisColumnIndex = table.columns.findIndex((v) => v.id === args.xAccessor);
   const yAxisColumnIndex = table.columns.findIndex((v) => v.id === args.yAccessor);
@@ -134,10 +134,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const yAxisColumn = table.columns[yAxisColumnIndex];
   const valueColumn = table.columns.find((v) => v.id === args.valueAccessor);
 
-  const minMaxByColumnId = useMemo(() => findMinMaxByColumnId([args.valueAccessor!], table), [
-    args.valueAccessor,
-    table,
-  ]);
+  const minMaxByColumnId = useMemo(
+    () => findMinMaxByColumnId([args.valueAccessor!], table),
+    [args.valueAccessor, table]
+  );
 
   if (!xAxisColumn || !valueColumn) {
     // Chart is not ready

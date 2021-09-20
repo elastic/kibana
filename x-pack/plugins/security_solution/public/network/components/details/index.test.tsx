@@ -47,10 +47,10 @@ describe('IP Overview Component', () => {
       ip: '10.10.10.10',
       isInDetailsSidePanel: false,
       isLoadingAnomaliesData: false,
-      narrowDateRange: (jest.fn() as unknown) as NarrowDateRange,
+      narrowDateRange: jest.fn() as unknown as NarrowDateRange,
       startDate: '2019-06-15T06:00:00.000Z',
       type: networkModel.NetworkType.details,
-      updateFlowTargetAction: (jest.fn() as unknown) as ActionCreator<{
+      updateFlowTargetAction: jest.fn() as unknown as ActionCreator<{
         flowTarget: FlowTarget;
       }>,
     };
