@@ -86,8 +86,7 @@ export const simpleTrace = {
       },
       service: {
         node: {
-          name:
-            '4cf84d094553201997ddb7fea344b7c6ef18dcb8233eba39278946ee8449794e',
+          name: '4cf84d094553201997ddb7fea344b7c6ef18dcb8233eba39278946ee8449794e',
         },
         environment: 'production',
         name: 'opbeans-java',
@@ -192,8 +191,7 @@ export const simpleTrace = {
       '@timestamp': '2020-03-23T15:04:28.787Z',
       service: {
         node: {
-          name:
-            'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
+          name: 'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
         },
         environment: 'production',
         framework: {
@@ -257,8 +255,7 @@ export const simpleTrace = {
       '@timestamp': '2020-03-23T15:04:28.788Z',
       service: {
         node: {
-          name:
-            'a636915f1f6eec81ab44342b13a3ea9597ef03a24391e4e55f34ae2e20b30f51',
+          name: 'a636915f1f6eec81ab44342b13a3ea9597ef03a24391e4e55f34ae2e20b30f51',
         },
         environment: 'production',
         framework: {
@@ -338,8 +335,7 @@ export const simpleTrace = {
       },
       service: {
         node: {
-          name:
-            '4cf84d094553201997ddb7fea344b7c6ef18dcb8233eba39278946ee8449794e',
+          name: '4cf84d094553201997ddb7fea344b7c6ef18dcb8233eba39278946ee8449794e',
         },
         environment: 'production',
         name: 'opbeans-java',
@@ -363,8 +359,7 @@ export const simpleTrace = {
         architecture: 'amd64',
       },
       connection: {
-        hash:
-          "{service.environment:'production'}/{service.name:'opbeans-java'}/{span.subtype:'http'}/{destination.address:'opbeans-go'}/{span.type:'external'}",
+        hash: "{service.environment:'production'}/{service.name:'opbeans-java'}/{span.subtype:'http'}/{destination.address:'opbeans-go'}/{span.type:'external'}",
       },
       transaction: {
         id: '49809ad3c26adf74',
@@ -415,8 +410,7 @@ export const simpleTrace = {
       '@timestamp': '2020-03-23T15:04:28.787Z',
       service: {
         node: {
-          name:
-            'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
+          name: 'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
         },
         environment: 'production',
         name: 'opbeans-go',
@@ -482,8 +476,7 @@ export const simpleTrace = {
       '@timestamp': '2020-03-23T15:04:28.790Z',
       service: {
         node: {
-          name:
-            'a636915f1f6eec81ab44342b13a3ea9597ef03a24391e4e55f34ae2e20b30f51',
+          name: 'a636915f1f6eec81ab44342b13a3ea9597ef03a24391e4e55f34ae2e20b30f51',
         },
         environment: 'production',
         framework: {
@@ -536,7 +529,7 @@ export const simpleTrace = {
   errorDocs: [],
 } as TraceAPIResponse;
 
-export const traceWithErrors = ({
+export const traceWithErrors = {
   traceDocs: [
     {
       container: {
@@ -588,8 +581,7 @@ export const traceWithErrors = ({
       },
       service: {
         node: {
-          name:
-            '4cf84d094553201997ddb7fea344b7c6ef18dcb8233eba39278946ee8449794e',
+          name: '4cf84d094553201997ddb7fea344b7c6ef18dcb8233eba39278946ee8449794e',
         },
         environment: 'production',
         name: 'opbeans-java',
@@ -694,8 +686,7 @@ export const traceWithErrors = ({
       '@timestamp': '2020-03-23T15:04:28.787Z',
       service: {
         node: {
-          name:
-            'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
+          name: 'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
         },
         environment: 'production',
         framework: {
@@ -759,8 +750,7 @@ export const traceWithErrors = ({
       '@timestamp': '2020-03-23T15:04:28.788Z',
       service: {
         node: {
-          name:
-            'a636915f1f6eec81ab44342b13a3ea9597ef03a24391e4e55f34ae2e20b30f51',
+          name: 'a636915f1f6eec81ab44342b13a3ea9597ef03a24391e4e55f34ae2e20b30f51',
         },
         environment: 'production',
         framework: {
@@ -840,8 +830,7 @@ export const traceWithErrors = ({
       },
       service: {
         node: {
-          name:
-            '4cf84d094553201997ddb7fea344b7c6ef18dcb8233eba39278946ee8449794e',
+          name: '4cf84d094553201997ddb7fea344b7c6ef18dcb8233eba39278946ee8449794e',
         },
         environment: 'production',
         name: 'opbeans-java',
@@ -865,8 +854,7 @@ export const traceWithErrors = ({
         architecture: 'amd64',
       },
       connection: {
-        hash:
-          "{service.environment:'production'}/{service.name:'opbeans-java'}/{span.subtype:'http'}/{destination.address:'opbeans-go'}/{span.type:'external'}",
+        hash: "{service.environment:'production'}/{service.name:'opbeans-java'}/{span.subtype:'http'}/{destination.address:'opbeans-go'}/{span.type:'external'}",
       },
       transaction: {
         id: '49809ad3c26adf74',
@@ -917,8 +905,7 @@ export const traceWithErrors = ({
       '@timestamp': '2020-03-23T15:04:28.787Z',
       service: {
         node: {
-          name:
-            'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
+          name: 'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
         },
         environment: 'production',
         name: 'opbeans-go',
@@ -984,8 +971,7 @@ export const traceWithErrors = ({
       '@timestamp': '2020-03-23T15:04:28.790Z',
       service: {
         node: {
-          name:
-            'a636915f1f6eec81ab44342b13a3ea9597ef03a24391e4e55f34ae2e20b30f51',
+          name: 'a636915f1f6eec81ab44342b13a3ea9597ef03a24391e4e55f34ae2e20b30f51',
         },
         environment: 'production',
         framework: {
@@ -1063,8 +1049,7 @@ export const traceWithErrors = ({
       '@timestamp': '2020-03-23T16:04:28.787Z',
       service: {
         node: {
-          name:
-            'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
+          name: 'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
         },
         environment: 'production',
         name: 'opbeans-go',
@@ -1113,8 +1098,7 @@ export const traceWithErrors = ({
       '@timestamp': '2020-03-23T16:04:28.790Z',
       service: {
         node: {
-          name:
-            'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
+          name: 'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
         },
         environment: 'production',
         name: 'opbeans-python',
@@ -1133,7 +1117,7 @@ export const traceWithErrors = ({
       },
     },
   ],
-} as unknown) as TraceAPIResponse;
+} as unknown as TraceAPIResponse;
 
 export const traceChildStartBeforeParent = {
   traceDocs: [
@@ -1187,8 +1171,7 @@ export const traceChildStartBeforeParent = {
       },
       service: {
         node: {
-          name:
-            '4cf84d094553201997ddb7fea344b7c6ef18dcb8233eba39278946ee8449794e',
+          name: '4cf84d094553201997ddb7fea344b7c6ef18dcb8233eba39278946ee8449794e',
         },
         environment: 'production',
         name: 'opbeans-java',
@@ -1293,8 +1276,7 @@ export const traceChildStartBeforeParent = {
       '@timestamp': '2020-03-23T15:04:28.787Z',
       service: {
         node: {
-          name:
-            'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
+          name: 'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
         },
         environment: 'production',
         framework: {
@@ -1358,8 +1340,7 @@ export const traceChildStartBeforeParent = {
       '@timestamp': '2020-03-23T15:04:28.788Z',
       service: {
         node: {
-          name:
-            'a636915f1f6eec81ab44342b13a3ea9597ef03a24391e4e55f34ae2e20b30f51',
+          name: 'a636915f1f6eec81ab44342b13a3ea9597ef03a24391e4e55f34ae2e20b30f51',
         },
         environment: 'production',
         framework: {
@@ -1439,8 +1420,7 @@ export const traceChildStartBeforeParent = {
       },
       service: {
         node: {
-          name:
-            '4cf84d094553201997ddb7fea344b7c6ef18dcb8233eba39278946ee8449794e',
+          name: '4cf84d094553201997ddb7fea344b7c6ef18dcb8233eba39278946ee8449794e',
         },
         environment: 'production',
         name: 'opbeans-java',
@@ -1464,8 +1444,7 @@ export const traceChildStartBeforeParent = {
         architecture: 'amd64',
       },
       connection: {
-        hash:
-          "{service.environment:'production'}/{service.name:'opbeans-java'}/{span.subtype:'http'}/{destination.address:'opbeans-go'}/{span.type:'external'}",
+        hash: "{service.environment:'production'}/{service.name:'opbeans-java'}/{span.subtype:'http'}/{destination.address:'opbeans-go'}/{span.type:'external'}",
       },
       transaction: {
         id: '49809ad3c26adf74',
@@ -1516,8 +1495,7 @@ export const traceChildStartBeforeParent = {
       '@timestamp': '2020-03-23T15:04:28.787Z',
       service: {
         node: {
-          name:
-            'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
+          name: 'e948a08b8f5efe99b5da01f50da48c7d8aee3bbf4701f3da85ebe760c2ffef29',
         },
         environment: 'production',
         name: 'opbeans-go',
@@ -1583,8 +1561,7 @@ export const traceChildStartBeforeParent = {
       '@timestamp': '2020-03-23T15:04:28.790Z',
       service: {
         node: {
-          name:
-            'a636915f1f6eec81ab44342b13a3ea9597ef03a24391e4e55f34ae2e20b30f51',
+          name: 'a636915f1f6eec81ab44342b13a3ea9597ef03a24391e4e55f34ae2e20b30f51',
         },
         environment: 'production',
         framework: {
@@ -1684,8 +1661,7 @@ export const inferredSpans = {
       },
       service: {
         node: {
-          name:
-            'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
+          name: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
         },
         environment: 'production',
         name: 'opbeans-java',
@@ -1800,8 +1776,7 @@ export const inferredSpans = {
       },
       service: {
         node: {
-          name:
-            'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
+          name: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
         },
         environment: 'production',
         name: 'opbeans-java',
@@ -1878,8 +1853,7 @@ export const inferredSpans = {
       },
       service: {
         node: {
-          name:
-            'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
+          name: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
         },
         environment: 'production',
         name: 'opbeans-java',
@@ -1979,8 +1953,7 @@ export const inferredSpans = {
       },
       service: {
         node: {
-          name:
-            'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
+          name: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
         },
         environment: 'production',
         name: 'opbeans-java',
@@ -2057,8 +2030,7 @@ export const inferredSpans = {
       },
       service: {
         node: {
-          name:
-            'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
+          name: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
         },
         environment: 'production',
         name: 'opbeans-java',
@@ -2139,8 +2111,7 @@ export const inferredSpans = {
       },
       service: {
         node: {
-          name:
-            'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
+          name: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
         },
         environment: 'production',
         name: 'opbeans-java',
@@ -2237,8 +2208,7 @@ export const inferredSpans = {
       },
       service: {
         node: {
-          name:
-            'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
+          name: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad',
         },
         environment: 'production',
         name: 'opbeans-java',
