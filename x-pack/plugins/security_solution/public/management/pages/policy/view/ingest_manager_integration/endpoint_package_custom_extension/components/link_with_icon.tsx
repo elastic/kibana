@@ -13,18 +13,27 @@ import {
   LinkToAppProps,
 } from '../../../../../../../common/components/endpoint/link_to_app';
 
-const LinkLabel = styled.span`
+const LinkLabel = styled.span<{
+  size?: 'm' | 'l';
+}>`
   display: inline-block;
   padding-right: ${(props) => props.theme.eui.paddingSizes.s};
+  font-size: ${({ size }) => (size === 'm' ? '12px' : 'innherit')};
 `;
 
-export const LinkWithIcon: FC<LinkToAppProps> = memo(({ children, ...props }) => {
-  return (
-    <LinkToApp {...props}>
-      <LinkLabel>{children}</LinkLabel>
-      <EuiIcon type="popout" />
-    </LinkToApp>
-  );
-});
+interface CustomProps {
+  size: 'm' | 'l';
+}
+
+export const LinkWithIcon: FC<LinkToAppProps & CustomProps> = memo(
+  ({ children, size, ...props }) => {
+    return (
+      <LinkToApp {...props}>
+        <LinkLabel size={size}>{children}</LinkLabel>
+        <EuiIcon type={size === 'm' ? 'arrowRight' : 'popout'} />
+      </LinkToApp>
+    );
+  }
+);
 
 LinkWithIcon.displayName = 'LinkWithIcon';

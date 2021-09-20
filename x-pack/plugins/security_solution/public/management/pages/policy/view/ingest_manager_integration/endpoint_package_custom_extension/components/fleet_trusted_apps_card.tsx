@@ -65,21 +65,23 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
       };
     }, [toasts, trustedAppsApi, policyId]);
 
+    const getTitleMessage = () => (
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsLabel"
+        defaultMessage="Trusted Applications"
+      />
+    );
+
     return (
       <EuiPanel paddingSize="l" data-test-subj="fleetTrustedAppsCard">
         <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center" cardSize={cardSize}>
           <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
             <EuiText>
-              <h4>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsLabel"
-                  defaultMessage="Trusted Applications"
-                />
-              </h4>
+              {cardSize === 'l' ? <h4>{getTitleMessage()}</h4> : <h5>{getTitleMessage()}</h5>}
             </EuiText>
           </StyledEuiFlexGridItem>
           <StyledEuiFlexGridItem gridarea="summary">
-            <ExceptionItemsSummary stats={stats} multiRow={cardSize === 'm'} />
+            <ExceptionItemsSummary stats={stats} small={cardSize === 'm'} />
           </StyledEuiFlexGridItem>
           <StyledEuiFlexGridItem gridarea="link" alignitems="flex-end">
             {customLink}

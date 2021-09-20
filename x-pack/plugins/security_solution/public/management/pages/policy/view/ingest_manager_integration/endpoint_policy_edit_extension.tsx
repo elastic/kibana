@@ -143,6 +143,7 @@ const WrappedPolicyDetailsForm = memo<{
         appPath={policyTrustedAppsPath}
         appState={policyTrustedAppRouteState}
         data-test-subj="linkToTrustedApps"
+        size="m"
       >
         <FormattedMessage
           id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
