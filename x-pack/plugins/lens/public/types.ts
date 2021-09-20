@@ -664,9 +664,7 @@ export interface Visualization<T = unknown> {
   /**
    * For consistency across different visualizations, the dimension configuration UI is standardized
    */
-  getConfiguration: (
-    props: VisualizationConfigProps<T>
-  ) => {
+  getConfiguration: (props: VisualizationConfigProps<T>) => {
     groups: VisualizationDimensionGroupConfig[];
     supportStaticValue?: boolean;
     supportFieldFormat?: boolean;
