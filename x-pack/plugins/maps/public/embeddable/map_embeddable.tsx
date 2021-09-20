@@ -357,16 +357,20 @@ export class MapEmbeddable
 
     const sharingSavedObjectProps = this._savedMap.getSharingSavedObjectProps();
     const spaces = getSpacesApi();
-    const content = sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict'
-      ? <div className="mapEmbeddedError">
+    const content =
+      sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
+        <div className="mapEmbeddedError">
           <EuiEmptyPrompt
             iconType="alert"
             iconColor="danger"
             data-test-subj="embeddable-maps-failure"
-            body={spaces.ui.components.getSavedObjectConflictMessage({ json: sharingSavedObjectProps.errorJSON! })}
+            body={spaces.ui.components.getSavedObjectConflictMessage({
+              json: sharingSavedObjectProps.errorJSON!,
+            })}
           />
         </div>
-      : <MapContainer
+      ) : (
+        <MapContainer
           onSingleValueTrigger={this.onSingleValueTrigger}
           addFilters={this.input.hideFilterActions ? null : this.addFilters}
           getFilterActions={this.getFilterActions}
@@ -376,14 +380,13 @@ export class MapEmbeddable
           description={this.getDescription()}
           waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this._savedMap.getStore())}
           isSharable={this._isSharable}
-        />;
+        />
+      );
 
     const I18nContext = getCoreI18n().Context;
     render(
       <Provider store={this._savedMap.getStore()}>
-        <I18nContext>
-          {content}
-        </I18nContext>
+        <I18nContext>{content}</I18nContext>
       </Provider>,
       this._domNode
     );

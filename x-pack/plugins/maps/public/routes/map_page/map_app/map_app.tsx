@@ -359,10 +359,7 @@ export class MapApp extends React.Component<Props, State> {
       const newPath = getHttp().basePath.prepend(
         `${getFullPath(newObjectId)}${this.props.history.location.search}`
       );
-      await spaces.ui.redirectLegacyUrl(
-        newPath,
-        getMapEmbeddableDisplayName()
-      );
+      await spaces.ui.redirectLegacyUrl(newPath, getMapEmbeddableDisplayName());
       return;
     }
 

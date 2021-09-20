@@ -24,7 +24,7 @@ export interface SharingSavedObjectProps {
 
 type MapDoc = MapSavedObjectAttributes & {
   sharingSavedObjectProps?: SharingSavedObjectProps;
-  references?: SavedObjectReference[]; 
+  references?: SavedObjectReference[];
 };
 
 export type MapAttributeService = AttributeService<MapDoc, MapByValueInput, MapByReferenceInput>;
@@ -96,7 +96,7 @@ export function getMapAttributeService(): MapAttributeService {
                   targetSpace: (await getSpacesApi()!.getActiveSpace()).id,
                 })
               : undefined,
-        }
+        },
       };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
