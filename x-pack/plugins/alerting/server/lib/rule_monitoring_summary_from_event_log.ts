@@ -38,6 +38,8 @@ export function ruleMonitoringSummaryFromEventLog(
     throttle: rule.throttle,
     enabled: rule.enabled,
     executions: [],
+    avg_delay: 0,
+    avg_duration: 0,
   };
 
   // loop through the events

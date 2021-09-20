@@ -27,35 +27,35 @@ type WithRuleMonitoringSummaryProps = {
   ruleType: RuleType;
 } & Pick<RuleApis, 'loadRuleMonitoringSummary'>;
 
-export const RuleMonitoringSummaryRoute: React.FunctionComponent<WithRuleMonitoringSummaryProps> = ({
-  rule,
-  ruleType,
-  loadRuleMonitoringSummary,
-}) => {
-  const {
-    notifications: { toasts },
-  } = useKibana().services;
+export const RuleMonitoringSummaryRoute: React.FunctionComponent<WithRuleMonitoringSummaryProps> =
+  ({ rule, ruleType, loadRuleMonitoringSummary }) => {
+    const {
+      notifications: { toasts },
+    } = useKibana().services;
 
-  const [
-    ruleMonitoringSummary,
-    setRuleMonitoringSummary,
-  ] = useState<RuleMonitoringSummaryInterface | null>(null);
+    const [ruleMonitoringSummary, setRuleMonitoringSummary] =
+      useState<RuleMonitoringSummaryInterface | null>(null);
 
-  useEffect(() => {
-    getRuleMonitoringSummary(rule.id, loadRuleMonitoringSummary, setRuleMonitoringSummary, toasts);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rule]);
+    useEffect(() => {
+      getRuleMonitoringSummary(
+        rule.id,
+        loadRuleMonitoringSummary,
+        setRuleMonitoringSummary,
+        toasts
+      );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rule]);
 
-  return ruleMonitoringSummary ? (
-    <RuleMonitoringSummary
-      rule={rule}
-      ruleType={ruleType}
-      ruleMonitoringSummary={ruleMonitoringSummary}
-    />
-  ) : (
-    <CenterJustifiedSpinner />
-  );
-};
+    return ruleMonitoringSummary ? (
+      <RuleMonitoringSummary
+        rule={rule}
+        ruleType={ruleType}
+        ruleMonitoringSummary={ruleMonitoringSummary}
+      />
+    ) : (
+      <CenterJustifiedSpinner />
+    );
+  };
 
 export async function getRuleMonitoringSummary(
   ruleId: string,

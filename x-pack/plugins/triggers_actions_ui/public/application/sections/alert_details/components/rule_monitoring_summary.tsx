@@ -6,17 +6,12 @@
  */
 
 import React, { useState } from 'react';
-import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiHealth, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiToolTip } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { padStart, chunk } from 'lodash';
-import {
-  ActionGroup,
-  AlertInstanceStatusValues,
-  RuleExecutionSummary,
-} from '../../../../../../alerting/common';
+import { chunk } from 'lodash';
+import { RuleExecutionSummary } from '../../../../../../alerting/common';
 import {
   Alert as Rule,
   RuleMonitoringSummary as RuleMonitoringSummaryInterface,
@@ -29,14 +24,8 @@ import './alert_instances.scss';
 interface RuleMonitoringSummaryProps {
   rule: Rule;
   ruleType: RuleType;
-  ruleMonitoringSumnmary: RuleMonitoringSummaryInterface;
+  ruleMonitoringSummary: RuleMonitoringSummaryInterface;
   durationEpoch?: number;
-}
-
-function durationAsString(duration: Duration): string {
-  return [duration.hours(), duration.minutes(), duration.seconds()]
-    .map((value) => padStart(`${value}`, 2, '0'))
-    .join(':');
 }
 
 export function RuleMonitoringSummary({
