@@ -35,7 +35,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
 
   const { indexPatterns } = useAppIndexPatternContext();
 
-  const onChange = (value: string) => {
+  const onChange = (value?: string) => {
     setSeries(seriesId, {
       ...series,
       selectedMetricField: value,
@@ -108,7 +108,12 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
         </EuiPopover>
       )}
       {series.selectedMetricField && (
-        <EuiBadge>
+        <EuiBadge
+          iconType="cross"
+          iconSide="right"
+          iconOnClick={() => onChange(undefined)}
+          iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
+        >
           {
             seriesConfig?.metricOptions?.find((option) => option.id === series.selectedMetricField)
               ?.label
@@ -123,5 +128,12 @@ const SELECT_REPORT_METRIC_LABEL = i18n.translate(
   'xpack.observability.expView.seriesEditor.selectReportMetric',
   {
     defaultMessage: 'Select report metric',
+  }
+);
+
+const REMOVE_REPORT_METRIC_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesEditor.removeReportMetric',
+  {
+    defaultMessage: 'Remove report metric',
   }
 );
