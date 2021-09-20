@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ALERT_SEVERITY_WARNING, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';
-import { fromKueryExpression, toElasticsearchQuery, DataViewBase } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { UptimeAlertTypeFactory } from './types';
 import {
@@ -111,10 +111,7 @@ export const generateFilterDSL = async (
 
   const combinedString = combineFiltersAndUserSearch(filterString, search);
 
-  return toElasticsearchQuery(
-    fromKueryExpression(combinedString ?? ''),
-    (await getIndexPattern()) as DataViewBase
-  );
+  return toElasticsearchQuery(fromKueryExpression(combinedString ?? ''), await getIndexPattern());
 };
 
 export const formatFilterString = async (

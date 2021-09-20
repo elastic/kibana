@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 import type { estypes } from '@elastic/elasticsearch';
-// import type { DataViewFieldBase, IFieldSubType, DataViewBase } from '@kbn/es-query';
-import type { DataViewFieldBase, DataViewBase } from '@kbn/es-query';
+import type { DataViewFieldBase, IFieldSubType, DataViewBase } from '@kbn/es-query';
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
@@ -197,7 +196,7 @@ export interface FieldSpecExportFmt {
   searchable: boolean;
   aggregatable: boolean;
   readFromDocValues?: boolean;
-  // subType?: IFieldSubType;
+  subType?: IFieldSubType;
   format?: SerializedFieldFormat;
   indexed?: boolean;
 }

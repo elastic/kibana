@@ -9,6 +9,12 @@
 /* eslint-disable max-classes-per-file */
 
 import { KbnFieldType, getKbnFieldType, castEsToKbnFieldTypeName } from '@kbn/field-types';
+import {
+  isDataViewFieldSubtypeMulti,
+  isDataViewFieldSubtypeNested,
+  getDataViewFieldSubtypeMulti,
+  getDataViewFieldSubtypeNested,
+} from '@kbn/es-query';
 import type { RuntimeField } from '../types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import type { IFieldType } from './types';
@@ -157,6 +163,22 @@ export class DataViewField implements IFieldType {
   public get visualizable() {
     const notVisualizableFieldTypes: string[] = [KBN_FIELD_TYPES.UNKNOWN, KBN_FIELD_TYPES.CONFLICT];
     return this.aggregatable && !notVisualizableFieldTypes.includes(this.spec.type);
+  }
+
+  public isSubtypeNested() {
+    return isDataViewFieldSubtypeNested(this);
+  }
+
+  public isSubtypeMulti() {
+    return isDataViewFieldSubtypeMulti(this);
+  }
+
+  public getSubtypeNested() {
+    return getDataViewFieldSubtypeNested(this);
+  }
+
+  public getSubtypeMulti() {
+    return getDataViewFieldSubtypeMulti(this);
   }
 
   public deleteCount() {

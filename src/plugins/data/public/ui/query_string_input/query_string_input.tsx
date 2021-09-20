@@ -8,7 +8,6 @@
 
 import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { IFieldSubTypeNested } from '@kbn/es-query';
 
 import classNames from 'classnames';
 import {
@@ -38,7 +37,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
-import { KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../common';
+import { KIBANA_USER_QUERY_LANGUAGE_KEY, getFieldSubtypeNested } from '../../../common';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -426,10 +425,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private handleNestedFieldSyntaxNotification = (suggestion: QuerySuggestion) => {
-    const subTypeNested =
-      'field' in suggestion &&
-      suggestion.field &&
-      (suggestion.field.subType as IFieldSubTypeNested);
+    const subTypeNested = 'field' in suggestion && getFieldSubtypeNested(suggestion.field);
     if (
       subTypeNested &&
       subTypeNested.nested &&

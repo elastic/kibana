@@ -11,7 +11,6 @@ import './field_name.scss';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { IFieldSubTypeMulti } from '@kbn/es-query';
 import { FieldIcon, FieldIconProps } from '../../../../../kibana_react/public';
 import { getFieldTypeName } from './field_type_name';
 import { IndexPatternField } from '../../../../../data/public';
@@ -35,8 +34,7 @@ export function FieldName({
   const displayName =
     fieldMapping && fieldMapping.displayName ? fieldMapping.displayName : fieldName;
   const tooltip = displayName !== fieldName ? `${fieldName} (${displayName})` : fieldName;
-  const subTypeMulti = fieldMapping?.spec?.subType as IFieldSubTypeMulti;
-  const isMultiField = !!subTypeMulti?.multi;
+  const isMultiField = fieldMapping?.isSubtypeMulti();
 
   return (
     <Fragment>

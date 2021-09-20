@@ -7,7 +7,12 @@
  */
 
 import { getFilterableKbnTypeNames } from '@kbn/field-types';
-import { IFieldSubTypeNested } from '@kbn/es-query';
+import {
+  isDataViewFieldSubtypeNested,
+  isDataViewFieldSubtypeMulti,
+  getDataViewFieldSubtypeMulti,
+  getDataViewFieldSubtypeNested,
+} from '@kbn/es-query';
 import { IFieldType } from './types';
 
 const filterableTypes = getFilterableKbnTypeNames();
@@ -20,7 +25,7 @@ export function isFilterable(field: IFieldType): boolean {
   );
 }
 
-export function isNestedField(field: IFieldType): boolean {
-  const subTypeNested = field?.subType as IFieldSubTypeNested;
-  return !!subTypeNested?.nested;
-}
+export const isNestedField = isDataViewFieldSubtypeNested;
+export const isMultiField = isDataViewFieldSubtypeMulti;
+export const getFieldSubtypeMulti = getDataViewFieldSubtypeMulti;
+export const getFieldSubtypeNested = getDataViewFieldSubtypeNested;

@@ -28,7 +28,12 @@ import {
   exceptionListItemSchema,
   nestedEntryItem,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { IndexPatternBase, IndexPatternFieldBase, IFieldSubTypeNested } from '@kbn/es-query';
+import {
+  IndexPatternBase,
+  IndexPatternFieldBase,
+  getDataViewFieldSubtypeNested,
+  isDataViewFieldSubtypeNested,
+} from '@kbn/es-query';
 
 import {
   EXCEPTION_OPERATORS,
@@ -297,10 +302,9 @@ export const getFilteredIndexPatterns = (
       ...indexPatterns,
       fields: indexPatterns.fields
         .filter((indexField) => {
-          const subTypeNested = indexField?.subType as IFieldSubTypeNested;
+          const subTypeNested = getDataViewFieldSubtypeNested(indexField);
           const fieldHasCommonParentPath =
-            subTypeNested != null &&
-            subTypeNested.nested != null &&
+            subTypeNested &&
             item.parent != null &&
             subTypeNested.nested.path === item.parent.parent.field;
 
@@ -318,10 +322,7 @@ export const getFilteredIndexPatterns = (
     // when user selects to add a nested entry, only nested fields are shown as options
     return {
       ...indexPatterns,
-      fields: indexPatterns.fields.filter((field) => {
-        const subTypeNested = field?.subType as IFieldSubTypeNested;
-        return subTypeNested != null && subTypeNested.nested != null;
-      }),
+      fields: indexPatterns.fields.filter((field) => isDataViewFieldSubtypeNested(field)),
     };
   } else {
     return indexPatterns;
@@ -348,9 +349,8 @@ export const getEntryOnFieldChange = (
     // a user selects "exists", as soon as they make a selection
     // we can now identify the 'parent' and 'child' this is where
     // we first convert the entry into type "nested"
-    const subTypeNested = newField?.subType as IFieldSubTypeNested;
-    const newParentFieldValue =
-      subTypeNested != null && subTypeNested.nested != null ? subTypeNested.nested.path : '';
+    const subTypeNested = getDataViewFieldSubtypeNested(newField);
+    const newParentFieldValue = subTypeNested?.nested.path || '';
 
     return {
       index: entryIndex,

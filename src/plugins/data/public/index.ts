@@ -38,7 +38,13 @@ export const exporters = {
  * Index patterns:
  */
 
-import { isNestedField, isFilterable } from '../common';
+import {
+  isNestedField,
+  isFilterable,
+  isMultiField,
+  getFieldSubtypeNested,
+  getFieldSubtypeMulti,
+} from '../common';
 
 import {
   ILLEGAL_CHARACTERS_KEY,
@@ -61,6 +67,9 @@ export const indexPatterns = {
   isDefault,
   isFilterable,
   isNestedField,
+  isMultiField,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
   validate: validateDataView,
   flattenHitWrapper,
 };
