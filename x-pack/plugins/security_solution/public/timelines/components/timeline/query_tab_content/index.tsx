@@ -201,18 +201,19 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     getManageTimeline(state, timelineId ?? '')
   );
 
-  const filterManager = useMemo(() => activeFilterManager ?? new FilterManager(uiSettings), [
-    activeFilterManager,
-    uiSettings,
-  ]);
+  const filterManager = useMemo(
+    () => activeFilterManager ?? new FilterManager(uiSettings),
+    [activeFilterManager, uiSettings]
+  );
 
   const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
     query: string;
     language: KueryFilterQueryKind;
-  } = useMemo(() => ({ query: kqlQueryExpression.trim(), language: 'kuery' }), [
-    kqlQueryExpression,
-  ]);
+  } = useMemo(
+    () => ({ query: kqlQueryExpression.trim(), language: 'kuery' }),
+    [kqlQueryExpression]
+  );
 
   const combinedQueries = combineQueries({
     config: esQueryConfig,
@@ -272,24 +273,22 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     );
   }, [activeFilterManager, dispatch, filterManager, timelineId, uiSettings]);
 
-  const [
-    isQueryLoading,
-    { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch },
-  ] = useTimelineEvents({
-    docValueFields,
-    endDate: end,
-    id: timelineId,
-    indexNames: selectedPatterns,
-    fields: getTimelineQueryFields(),
-    language: kqlQuery.language,
-    limit: itemsPerPage,
-    filterQuery: combinedQueries?.filterQuery,
-    startDate: start,
-    runtimeMappings,
-    skip: !canQueryTimeline,
-    sort: timelineQuerySortField,
-    timerangeKind,
-  });
+  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+    useTimelineEvents({
+      docValueFields,
+      endDate: end,
+      id: timelineId,
+      indexNames: selectedPatterns,
+      fields: getTimelineQueryFields(),
+      language: kqlQuery.language,
+      limit: itemsPerPage,
+      filterQuery: combinedQueries?.filterQuery,
+      runtimeMappings,
+      startDate: start,
+      skip: !canQueryTimeline,
+      sort: timelineQuerySortField,
+      timerangeKind,
+    });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, timelineId });

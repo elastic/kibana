@@ -30,7 +30,7 @@ const mockMbMapBounds = {
 const layerId = 'tfi3f';
 
 const mockMbMapHandlers: { [key: string]: () => void } = {};
-const mockMBMap = ({
+const mockMBMap = {
   project: (lonLatArray: [number, number]) => {
     const lonDistanceFromCenter = Math.abs(lonLatArray[0] - mapCenter[0]);
     const latDistanceFromCenter = Math.abs(lonLatArray[1] - mapCenter[1]);
@@ -61,7 +61,7 @@ const mockMBMap = ({
       },
     };
   },
-} as unknown) as MbMap;
+} as unknown as MbMap;
 
 const defaultProps = {
   mbMap: mockMBMap,

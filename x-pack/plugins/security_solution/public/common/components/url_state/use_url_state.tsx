@@ -9,7 +9,7 @@ import { difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { useKibana } from '../../lib/kibana';
 import { CONSTANTS, UrlStateType } from './constants';
 import {
@@ -32,9 +32,6 @@ import {
   UrlState,
 } from './types';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
-import { timelineActions } from '../../../timelines/store/timeline';
-import { TimelineId } from '../../../../../timelines/common';
-
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
   useEffect(() => {
@@ -61,20 +58,20 @@ const updateTimelineAtinitialization = (
 export const useUrlStateHooks = ({
   detailName,
   indexPattern,
-  history,
   navTabs,
   pageName,
-  pathName,
-  search,
   setInitialStateFromUrl,
   updateTimeline,
   updateTimelineIsLoading,
   urlState,
+  search,
+  pathName,
+  history,
 }: UrlStateContainerPropTypes) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const { filterManager, savedQueries } = useKibana().services.data.query;
+  const { pathname: browserPathName } = useLocation();
   const prevProps = usePrevious({ pathName, pageName, urlState });
-  const dispatch = useDispatch();
 
   const handleInitialize = (type: UrlStateType, needUpdate?: boolean) => {
     let mySearch = search;
@@ -176,6 +173,14 @@ export const useUrlStateHooks = ({
   };
 
   useEffect(() => {
+    // When browser location and store location are out of sync, skip the execution.
+    //  It happens in three scenarios:
+    //  * When changing urlState and quickly moving to a new location.
+    //  * Redirects as "security/hosts" -> "security/hosts/allHosts"
+    //  * It also happens once on every location change because browserPathName gets updated before pathName
+    // *Warning*: Removing this return would cause redirect loops that crashes the APP.
+    if (browserPathName !== pathName) return;
+
     const type: UrlStateType = getUrlType(pageName);
     if (isInitializing && pageName != null && pageName !== '') {
       handleInitialize(type);
@@ -227,10 +232,9 @@ export const useUrlStateHooks = ({
       });
     } else if (pathName !== prevProps.pathName) {
       handleInitialize(type, isDetectionsPages(pageName));
-      dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInitializing, history, pathName, pageName, prevProps, urlState, dispatch]);
+  }, [isInitializing, history, pathName, pageName, prevProps, urlState, browserPathName]);
 
   useEffect(() => {
     document.title = `${getTitle(pageName, detailName, navTabs)} - Kibana`;

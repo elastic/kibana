@@ -809,9 +809,9 @@ describe('Fields Provider', () => {
       },
     ]);
 
-    const deps = ({
+    const deps = {
       esClient: { asCurrentUser: { search: esClientSearchMock } },
-    } as unknown) as SearchStrategyDependencies;
+    } as unknown as SearchStrategyDependencies;
 
     beforeAll(() => {
       getFieldsForWildcardMock.mockResolvedValue([]);

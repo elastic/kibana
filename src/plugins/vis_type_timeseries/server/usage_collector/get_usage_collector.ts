@@ -53,7 +53,7 @@ const doTelemetryForByValueVisualizations = async (
   const byValueVisualizations = await findByValueEmbeddables(soClient, 'visualization');
 
   for (const item of byValueVisualizations) {
-    telemetryUseLastValueMode((item.savedVis as unknown) as SavedVisState);
+    telemetryUseLastValueMode(item.savedVis as unknown as SavedVisState);
   }
 };
 

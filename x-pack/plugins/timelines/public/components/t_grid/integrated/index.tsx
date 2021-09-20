@@ -216,10 +216,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     [isLoadingIndexPattern, combinedQueries, start, end]
   );
 
-  const fields = useMemo(() => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])], [
-    columnsHeader,
-    queryFields,
-  ]);
+  const fields = useMemo(
+    () => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])],
+    [columnsHeader, queryFields]
+  );
 
   const sortField = useMemo(
     () =>
@@ -231,26 +231,24 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     [sort]
   );
 
-  const [
-    loading,
-    { events, loadPage, pageInfo, refetch, totalCount = 0, inspect },
-  ] = useTimelineEvents({
-    // We rely on entityType to determine Events vs Alerts
-    alertConsumers: SECURITY_ALERTS_CONSUMERS,
-    data,
-    docValueFields,
-    endDate: end,
-    entityType,
-    fields,
-    filterQuery: combinedQueries!.filterQuery,
-    id,
-    indexNames,
-    limit: itemsPerPage,
-    runtimeMappings,
-    skip: !canQueryTimeline,
-    sort: sortField,
-    startDate: start,
-  });
+  const [loading, { events, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
+    useTimelineEvents({
+      // We rely on entityType to determine Events vs Alerts
+      alertConsumers: SECURITY_ALERTS_CONSUMERS,
+      data,
+      docValueFields,
+      endDate: end,
+      entityType,
+      fields,
+      filterQuery: combinedQueries!.filterQuery,
+      id,
+      indexNames,
+      limit: itemsPerPage,
+      runtimeMappings,
+      skip: !canQueryTimeline,
+      sort: sortField,
+      startDate: start,
+    });
 
   const filterQuery = useMemo(
     () =>
@@ -276,10 +274,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const hasAlerts = totalCountMinusDeleted > 0;
 
-  const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
-    deletedEventIds,
-    events,
-  ]);
+  const nonDeletedEvents = useMemo(
+    () => events.filter((e) => !deletedEventIds.includes(e._id)),
+    [deletedEventIds, events]
+  );
 
   useEffect(() => {
     setIsQueryLoading(loading);
@@ -298,6 +296,17 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     setQuery(inspect, loading, refetch);
   }, [inspect, loading, refetch, setQuery]);
   const timelineContext = useMemo(() => ({ timelineId: id }), [id]);
+
+  // Clear checkbox selection when new events are fetched
+  useEffect(() => {
+    dispatch(tGridActions.clearSelected({ id }));
+    dispatch(
+      tGridActions.setTGridSelectAll({
+        id,
+        selectAll: false,
+      })
+    );
+  }, [nonDeletedEvents, dispatch, id]);
 
   return (
     <InspectButtonContainer>
