@@ -6,6 +6,7 @@
  */
 
 import React, { useState, ChangeEvent, useEffect } from 'react';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFieldText,
@@ -22,6 +23,15 @@ interface Props {
   seriesId: number;
   series: SeriesUrl;
 }
+
+export const StyledText = styled(EuiText)`
+  &.euiText.euiText--constrainedWidth {
+    max-width: 200px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+`;
 
 export function SeriesName({ series, seriesId }: Props) {
   const { setSeries } = useSeriesStorage();
@@ -44,16 +54,16 @@ export function SeriesName({ series, seriesId }: Props) {
   }, [series.name]);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       {isEditingEnabled ? (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiOutsideClickDetector onOutsideClick={() => setIsEditingEnabled(false)}>
             <EuiFieldText value={value} onChange={onChange} fullWidth onBlur={onSave} />
           </EuiOutsideClickDetector>
         </EuiFlexItem>
       ) : (
-        <EuiFlexItem>
-          <EuiText>{value}</EuiText>
+        <EuiFlexItem grow={false}>
+          <StyledText grow={false}>{value}</StyledText>
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
