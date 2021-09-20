@@ -2,7 +2,7 @@
 
 if (!env.ghprbPullId) {
   print "Non-PR builds are now in Buildkite."
-  return;
+  return
 }
 
 library 'kibana-pipeline-library'
