@@ -196,130 +196,272 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           esClient: services.scopedClusterClient.asCurrentUser,
           updatedByUser,
           spaceId,
-          lists,
-          savedObjectClient: options.services.savedObjectsClient,
+          state,
+          updatedBy: updatedByUser,
+        } = options;
+        let runState = state;
+        const { from, maxSignals, meta, ruleId, timestampOverride, to } = params;
+        const { alertWithPersistence, savedObjectsClient, scopedClusterClient } = services;
+        const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
+
+        const esClient = scopedClusterClient.asCurrentUser;
+
+        const ruleStatusClient = new RuleExecutionLogClient({
+          savedObjectsClient,
+          ruleDataService,
+        });
+        const ruleSO = await savedObjectsClient.get('alert', alertId);
+
+        const {
+          actions,
+          name,
+          schedule: { interval },
+        } = ruleSO.attributes;
+        const refresh = actions.length ? 'wait_for' : false;
+
+        const buildRuleMessage = buildRuleMessageFactory({
+          id: alertId,
+          ruleId,
+          name,
+          index: ruleDataClient.indexName,
         });
 
-        const exceptionItems = await getExceptions({
-          client: exceptionsClient,
-          lists: (params.exceptionsList as ListArray) ?? [],
-        });
+        logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
+        logger.debug(buildRuleMessage(`interval: ${interval}`));
 
-        const bulkCreate = bulkCreateFactory(
-          logger,
-          alertWithPersistence,
-          buildRuleMessage,
-          refresh
-        );
-
-        const wrapHits = wrapHitsFactory({
-          logger,
-          ignoreFields,
-          mergeStrategy,
-          ruleSO,
+        let wroteWarningStatus = false;
+        await ruleStatusClient.logStatusChange({
           spaceId,
+          ruleId: alertId,
+          newStatus: RuleExecutionStatus['going to run'],
         });
 
-        const wrapSequences = wrapSequencesFactory({
-          logger,
-          ignoreFields,
-          mergeStrategy,
-          ruleSO,
-          spaceId,
-        });
+        let result = createResultObject(state);
 
-        for (const tuple of tuples) {
-          const runResult = await type.executor({
-            ...options,
-            services,
-            state: runState,
-            runOpts: {
-              buildRuleMessage,
-              bulkCreate,
-              exceptionItems,
-              listClient,
-              rule: ruleSO,
-              searchAfterSize,
-              tuple,
-              wrapHits,
-              wrapSequences,
-            },
-          });
+        // check if rule has permissions to access given index pattern
+        // move this collection of lines into a function in utils
+        // so that we can use it in create rules route, bulk, etc.
+        try {
+          if (!isMachineLearningParams(params)) {
+            const index = params.index;
+            const hasTimestampOverride = !!timestampOverride;
 
-          const createdSignals = result.createdSignals.concat(runResult.createdSignals);
-          const warningMessages = result.warningMessages.concat(runResult.warningMessages);
-          result = {
-            bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
-            createdSignals,
-            createdSignalsCount: createdSignals.length,
-            errors: result.errors.concat(runResult.errors),
-            lastLookbackDate: runResult.lastLookbackDate,
-            searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
-            state: runState,
-            success: result.success && runResult.success,
-            warning: warningMessages.length > 0,
-            warningMessages,
-          };
-          runState = runResult.state;
+            const inputIndices = params.index ?? [];
+
+            const [privileges, timestampFieldCaps] = await Promise.all([
+              checkPrivilegesFromEsClient(esClient, inputIndices),
+              esClient.fieldCaps({
+                index: index ?? ['*'],
+                fields: hasTimestampOverride
+                  ? [TIMESTAMP, timestampOverride as string]
+                  : [TIMESTAMP],
+                include_unmapped: true,
+              }),
+            ]);
+
+            fold<Error, Promise<boolean>, void>(
+              async (error: Error) => logger.error(buildRuleMessage(error.message)),
+              async (status: Promise<boolean>) => (wroteWarningStatus = await status)
+            )(
+              flow(
+                () =>
+                  tryCatch(
+                    () =>
+                      hasReadIndexPrivileges({
+                        spaceId,
+                        ruleId: alertId,
+                        privileges,
+                        logger,
+                        buildRuleMessage,
+                        ruleStatusClient,
+                      }),
+                    toError
+                  ),
+                chain((wroteStatus: unknown) =>
+                  tryCatch(
+                    () =>
+                      hasTimestampFields({
+                        spaceId,
+                        ruleId: alertId,
+                        wroteStatus: wroteStatus as boolean,
+                        timestampField: hasTimestampOverride
+                          ? (timestampOverride as string)
+                          : '@timestamp',
+                        ruleName: name,
+                        timestampFieldCapsResponse: timestampFieldCaps,
+                        inputIndices,
+                        ruleStatusClient,
+                        logger,
+                        buildRuleMessage,
+                      }),
+                    toError
+                  )
+                )
+              )() as Either<Error, Promise<boolean>>
+            );
+          }
+        } catch (exc) {
+          logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
         }
-
-        if (result.warningMessages.length) {
-          const warningMessage = buildRuleMessage(result.warningMessages.join());
+        let hasError = false;
+        const { tuples, remainingGap } = getRuleRangeTuples({
+          logger,
+          previousStartedAt,
+          from: from as string,
+          to: to as string,
+          interval,
+          maxSignals: DEFAULT_MAX_SIGNALS,
+          buildRuleMessage,
+        });
+        if (remainingGap.asMilliseconds() > 0) {
+          const gapString = remainingGap.humanize();
+          const gapMessage = buildRuleMessage(
+            `${gapString} (${remainingGap.asMilliseconds()}ms) were not queried between this rule execution and the last execution, so signals may have been missed.`,
+            'Consider increasing your look behind time or adding more Kibana instances.'
+          );
+          logger.warn(gapMessage);
+          hasError = true;
           await ruleStatusClient.logStatusChange({
             spaceId,
             ruleId: alertId,
-            newStatus: RuleExecutionStatus['partial failure'],
-            message: warningMessage,
+            newStatus: RuleExecutionStatus.failed,
+            message: gapMessage,
+            metrics: { gap: gapString },
           });
         }
 
-        if (result.success) {
-          const createdSignalsCount = result.createdSignals.length;
+        try {
+          const { listClient, exceptionsClient } = getListClient({
+            esClient: services.scopedClusterClient.asCurrentUser,
+            updatedByUser,
+            spaceId,
+            lists,
+            savedObjectClient: options.services.savedObjectsClient,
+          });
 
-          if (actions.length) {
-            const notificationRuleParams: NotificationRuleTypeParams = ({
-              ...params,
-              name: name as string,
-              id: ruleSO.id as string,
-            } as unknown) as NotificationRuleTypeParams;
+          const exceptionItems = await getExceptions({
+            client: exceptionsClient,
+            lists: (params.exceptionsList as ListArray) ?? [],
+          });
 
-            const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
-            const toInMs = parseScheduleDates('now')?.format('x');
-            const resultsLink = getNotificationResultsLink({
-              from: fromInMs,
-              to: toInMs,
-              id: ruleSO.id,
-              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
-                ?.kibana_siem_app_url,
+          const bulkCreate = bulkCreateFactory(
+            logger,
+            alertWithPersistence,
+            buildRuleMessage,
+            refresh
+          );
+
+          const wrapHits = wrapHitsFactory({
+            logger,
+            ignoreFields,
+            mergeStrategy,
+            ruleSO,
+            spaceId,
+          });
+
+          const wrapSequences = wrapSequencesFactory({
+            logger,
+            ignoreFields,
+            mergeStrategy,
+            ruleSO,
+            spaceId,
+          });
+
+          for (const tuple of tuples) {
+            const runResult = await type.executor({
+              ...options,
+              services,
+              state: runState,
+              runOpts: {
+                buildRuleMessage,
+                bulkCreate,
+                exceptionItems,
+                listClient,
+                rule: ruleSO,
+                searchAfterSize,
+                tuple,
+                wrapHits,
+                wrapSequences,
+              },
             });
 
-            logger.info(buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`));
+            const createdSignals = result.createdSignals.concat(runResult.createdSignals);
+            const warningMessages = result.warningMessages.concat(runResult.warningMessages);
+            result = {
+              bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
+              createdSignals,
+              createdSignalsCount: createdSignals.length,
+              errors: result.errors.concat(runResult.errors),
+              lastLookbackDate: runResult.lastLookbackDate,
+              searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
+              state: runState,
+              success: result.success && runResult.success,
+              warning: warningMessages.length > 0,
+              warningMessages,
+            };
+            runState = runResult.state;
+          }
 
-            if (ruleSO.attributes.throttle != null) {
-              await scheduleThrottledNotificationActions({
-                alertInstance: services.alertInstanceFactory(alertId),
-                throttle: ruleSO.attributes.throttle,
-                startedAt,
+          if (result.warningMessages.length) {
+            const warningMessage = buildRuleMessage(result.warningMessages.join());
+            await ruleStatusClient.logStatusChange({
+              spaceId,
+              ruleId: alertId,
+              newStatus: RuleExecutionStatus['partial failure'],
+              message: warningMessage,
+            });
+          }
+
+          if (result.success) {
+            const createdSignalsCount = result.createdSignals.length;
+
+            if (actions.length) {
+              const notificationRuleParams: NotificationRuleTypeParams = {
+                ...params,
+                name: name as string,
+                id: ruleSO.id as string,
+              } as unknown as NotificationRuleTypeParams;
+
+              const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
+              const toInMs = parseScheduleDates('now')?.format('x');
+              const resultsLink = getNotificationResultsLink({
+                from: fromInMs,
+                to: toInMs,
                 id: ruleSO.id,
                 kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
                   ?.kibana_siem_app_url,
-                outputIndex: ruleDataClient.indexName,
-                ruleId,
-                esClient: services.scopedClusterClient.asCurrentUser,
-                notificationRuleParams,
               });
-            } else if (createdSignalsCount) {
-              const alertInstance = services.alertInstanceFactory(alertId);
-              scheduleNotificationActions({
-                alertInstance,
-                signalsCount: createdSignalsCount,
-                signals: result.createdSignals,
-                resultsLink,
-                ruleParams: notificationRuleParams,
-              });
-            }
-          }
 
+              logger.info(
+                buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`)
+              );
+
+              if (ruleSO.attributes.throttle != null) {
+                await scheduleThrottledNotificationActions({
+                  alertInstance: services.alertInstanceFactory(alertId),
+                  throttle: ruleSO.attributes.throttle,
+                  startedAt,
+                  id: ruleSO.id,
+                  kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                    ?.kibana_siem_app_url,
+                  outputIndex: ruleDataClient.indexName,
+                  ruleId,
+                  esClient: services.scopedClusterClient.asCurrentUser,
+                  notificationRuleParams,
+                });
+              } else if (createdSignalsCount) {
+                const alertInstance = services.alertInstanceFactory(alertId);
+                scheduleNotificationActions({
+                  alertInstance,
+                  signalsCount: createdSignalsCount,
+                  signals: result.createdSignals,
+                  resultsLink,
+                  ruleParams: notificationRuleParams,
+                });
+              }
+            }
+
+<<<<<<< HEAD
           // const outputIndex = (result.createdSignals[0] as Array<{ _index: string }>)[0]._index;
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
           logger.debug(
@@ -328,13 +470,50 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
               `[+] Finished indexing ${createdSignalsCount} signals into ${ruleDataClient.indexName}`
             )
           );
+=======
+            logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
+            logger.debug(
+              buildRuleMessage(
+                `[+] Finished indexing ${createdSignalsCount} signals into ${ruleDataClient.indexName}`
+              )
+            );
 
-          if (!hasError && !wroteWarningStatus && !result.warning) {
+            if (!hasError && !wroteWarningStatus && !result.warning) {
+              await ruleStatusClient.logStatusChange({
+                spaceId,
+                ruleId: alertId,
+                newStatus: RuleExecutionStatus.succeeded,
+                message: 'succeeded',
+                metrics: {
+                  bulkCreateTimeDurations: result.bulkCreateTimes,
+                  searchAfterTimeDurations: result.searchAfterTimes,
+                  lastLookBackDate: result.lastLookbackDate?.toISOString(),
+                },
+              });
+            }
+>>>>>>> 7bcef120084e90a3306e7dabcd80e3ede116b500
+
+            // adding this log line so we can get some information from cloud
+            logger.info(
+              buildRuleMessage(
+                `[+] Finished indexing ${createdSignalsCount} ${
+                  !isEmpty(tuples)
+                    ? `signals searched between date ranges ${JSON.stringify(tuples, null, 2)}`
+                    : ''
+                }`
+              )
+            );
+          } else {
+            const errorMessage = buildRuleMessage(
+              'Bulk Indexing of signals failed:',
+              result.errors.join()
+            );
+            logger.error(errorMessage);
             await ruleStatusClient.logStatusChange({
               spaceId,
               ruleId: alertId,
-              newStatus: RuleExecutionStatus.succeeded,
-              message: 'succeeded',
+              newStatus: RuleExecutionStatus.failed,
+              message: errorMessage,
               metrics: {
                 bulkCreateTimeDurations: result.bulkCreateTimes,
                 searchAfterTimeDurations: result.searchAfterTimes,
@@ -342,28 +521,19 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
               },
             });
           }
+        } catch (error) {
+          const errorMessage = error.message ?? '(no error message given)';
+          const message = buildRuleMessage(
+            'An error occurred during rule execution:',
+            `message: "${errorMessage}"`
+          );
 
-          // adding this log line so we can get some information from cloud
-          logger.info(
-            buildRuleMessage(
-              `[+] Finished indexing ${createdSignalsCount} ${
-                !isEmpty(tuples)
-                  ? `signals searched between date ranges ${JSON.stringify(tuples, null, 2)}`
-                  : ''
-              }`
-            )
-          );
-        } else {
-          const errorMessage = buildRuleMessage(
-            'Bulk Indexing of signals failed:',
-            result.errors.join()
-          );
-          logger.error(errorMessage);
+          logger.error(message);
           await ruleStatusClient.logStatusChange({
             spaceId,
             ruleId: alertId,
             newStatus: RuleExecutionStatus.failed,
-            message: errorMessage,
+            message,
             metrics: {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,
@@ -371,28 +541,8 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
             },
           });
         }
-      } catch (error) {
-        const errorMessage = error.message ?? '(no error message given)';
-        const message = buildRuleMessage(
-          'An error occurred during rule execution:',
-          `message: "${errorMessage}"`
-        );
 
-        logger.error(message);
-        await ruleStatusClient.logStatusChange({
-          spaceId,
-          ruleId: alertId,
-          newStatus: RuleExecutionStatus.failed,
-          message,
-          metrics: {
-            bulkCreateTimeDurations: result.bulkCreateTimes,
-            searchAfterTimeDurations: result.searchAfterTimes,
-            lastLookBackDate: result.lastLookbackDate?.toISOString(),
-          },
-        });
-      }
-
-      return result.state;
-    },
-  });
-};
+        return result.state;
+      },
+    });
+  };

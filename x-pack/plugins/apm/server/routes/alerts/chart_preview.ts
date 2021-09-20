@@ -90,8 +90,9 @@ const transactionDurationChartPreview = createApmServerRoute({
   },
 });
 
-export const alertsChartPreviewRouteRepository = createApmServerRouteRepository()
-  .add(transactionErrorRateChartPreview)
-  .add(transactionDurationChartPreview)
-  .add(transactionErrorCountChartPreview)
-  .add(transactionDurationChartPreview);
+export const alertsChartPreviewRouteRepository =
+  createApmServerRouteRepository()
+    .add(transactionErrorRateChartPreview)
+    .add(transactionDurationChartPreview)
+    .add(transactionErrorCountChartPreview)
+    .add(transactionDurationChartPreview);

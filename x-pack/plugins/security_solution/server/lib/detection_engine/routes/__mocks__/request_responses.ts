@@ -450,12 +450,13 @@ export const getMockPrivilegesResult = () => ({
   application: {},
 });
 
-export const getEmptySavedObjectsResponse = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
-  page: 1,
-  per_page: 1,
-  total: 0,
-  saved_objects: [],
-});
+export const getEmptySavedObjectsResponse =
+  (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+    page: 1,
+    per_page: 1,
+    total: 0,
+    saved_objects: [],
+  });
 
 export const getRuleExecutionStatuses = (): Array<
   SavedObjectsFindResult<IRuleStatusSOAttributes>
