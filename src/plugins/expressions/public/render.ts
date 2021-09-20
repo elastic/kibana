@@ -46,7 +46,7 @@ export class ExpressionRenderHandler {
   private renderCount: number = 0;
   private renderSubject: Rx.BehaviorSubject<number | null>;
   private eventsSubject: Rx.Subject<unknown>;
-  private updateSubject: Rx.Subject<UpdateValue | null>;
+  private updateSubject: Rx.BehaviorSubject<UpdateValue | null>;
   private handlers: IInterpreterRenderHandlers;
   private onRenderError: RenderErrorHandlerFnType;
 
@@ -73,7 +73,7 @@ export class ExpressionRenderHandler {
       .asObservable()
       .pipe(filter((_) => _ !== null)) as Observable<any>;
 
-    this.updateSubject = new Rx.Subject();
+    this.updateSubject = new Rx.BehaviorSubject<UpdateValue | null>(null);
     this.update$ = this.updateSubject.asObservable();
 
     this.handlers = {
@@ -87,8 +87,18 @@ export class ExpressionRenderHandler {
       reload: () => {
         this.updateSubject.next(null);
       },
-      update: (params: UpdateValue) => {
-        this.updateSubject.next(params);
+      update: (updatedParams: UpdateValue) => {
+        this.updateSubject.next(updatedParams);
+      },
+      updateVariables: (newVariables: UpdateValue['newParams']['variables']) => {
+        const { newParams = {}, newExpression = '' } = this.updateSubject.getValue() ?? {};
+        this.updateSubject.next({
+          newExpression,
+          newParams: {
+            ...newParams,
+            variables: { ...(newParams.variables ?? {}), ...newVariables },
+          },
+        });
       },
       event: (data) => {
         this.eventsSubject.next(data);
