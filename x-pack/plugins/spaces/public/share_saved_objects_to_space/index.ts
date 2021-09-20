@@ -11,4 +11,5 @@ export type {
   LegacyUrlConflictProps,
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
+  SavedObjectConflictMessageProps,
 } from './types';

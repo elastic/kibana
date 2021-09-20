@@ -14,12 +14,9 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { SavedObjectConflictMessageProps } from '../types';
 
-export interface Props {
-  json: string;
-}
-
-export const SavedObjectConflictMessage = ({ json }: Props) => {
+export const SavedObjectConflictMessage = ({ json }: SavedObjectConflictMessageProps) => {
   const [expandError, setExpandError] = useState(false);
   return (
     <>
