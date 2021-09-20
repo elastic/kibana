@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +30,7 @@ import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../.
 import { PolicyArtifactsList } from '../../artifacts/list';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
+  const [_, setSelectedArtifactIds] = useState<string[]>([]);
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const availableArtifactsList = usePolicyDetailsSelector(getAvailableArtifactsList);
@@ -62,6 +63,39 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
     [handleListFlyoutOpen]
   );
 
+  const addArtifactsFlyout = useMemo(
+    () => (
+      <EuiFlyout onClose={handleListFlyoutClose}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.title"
+                defaultMessage="Assign trusted applications"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.subtitle"
+            defaultMessage="Select trusted applications to add to {policyName}"
+            values={{ policyName }}
+          />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <PolicyArtifactsList
+            artifacts={availableArtifactsList}
+            defaultSelectedArtifactIds={[]}
+            isListLoading={isAvailableArtifactsListLoading}
+            isSubmitLoading={false}
+            selectedArtifactsUpdated={(artifactIds) => setSelectedArtifactIds(artifactIds)}
+          />
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    ),
+    [availableArtifactsList, handleListFlyoutClose, isAvailableArtifactsListLoading, policyName]
+  );
+
   return (
     <div>
       <EuiPageHeader alignItems="center">
@@ -86,35 +120,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         {/* TODO: To be implemented */}
         {'Policy trusted apps layout content'}
       </EuiPageContent>
-      {showListFlyout ? (
-        <EuiFlyout onClose={handleListFlyoutClose}>
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.title"
-                  defaultMessage="Assign trusted applications"
-                />
-              </h2>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.subtitle"
-              defaultMessage="Select trusted applications to add to {policyName}"
-              values={{ policyName }}
-            />
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            {/* TODO: To be done... */}
-            <PolicyArtifactsList
-              artifacts={availableArtifactsList}
-              selectedArtifactIds={[]}
-              isListLoading={isAvailableArtifactsListLoading}
-              isSubmitLoading={false}
-            />
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      ) : null}
+      {showListFlyout ? addArtifactsFlyout : null}
     </div>
   );
 });

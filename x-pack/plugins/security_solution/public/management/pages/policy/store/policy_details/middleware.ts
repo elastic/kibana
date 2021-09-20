@@ -108,7 +108,6 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       isOnPolicyTrustedAppsPage(state) &&
       getCurrentArtifactsLocation(state).show === 'list'
     ) {
-      const location = getCurrentArtifactsLocation(state);
       const policyId = policyIdFromParams(state);
 
       dispatch({
@@ -126,7 +125,13 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 
       dispatch({
         type: 'policyArtifactsAvailableListPageDataChanged',
-        payload: createLoadedResourceState(trustedApps),
+        payload: createLoadedResourceState({
+          items: trustedApps.data,
+          pageIndex: 1,
+          pageSize: 100,
+          totalItemsCount: trustedApps.total,
+          timestamp: Date.now(),
+        }),
       });
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
       const { id } = policyDetails(state) as PolicyData;

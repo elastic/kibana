@@ -5,33 +5,58 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 
-import { Immutable } from '../../../../../../../common/endpoint/types';
+import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';
 import { TrustedAppsListData } from '../../../../trusted_apps/state';
 import { Loader } from '../../../../../../common/components/loader';
+import { ArtifactEntryCardMinified } from '../../../../../components/artifact_entry_card';
 
 interface PolicyArtifactsListProps {
   artifacts: Immutable<TrustedAppsListData | undefined>; // Or other artifacts type like Event Filters or Endpoint Exceptions
-  selectedArtifactIds: string[];
+  defaultSelectedArtifactIds: string[];
+  selectedArtifactsUpdated: (ids: string[]) => void;
   isListLoading: boolean;
   isSubmitLoading: boolean;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
-  ({ artifacts, isListLoading }) => {
+  ({ artifacts, isListLoading, defaultSelectedArtifactIds, selectedArtifactsUpdated }) => {
+    const [selectedArtifactIdsByKey, setSelectedArtifactIdsByKey] = useState(
+      defaultSelectedArtifactIds.reduce(
+        (acc: { [key: string]: boolean }, current) => ({ ...acc, [current]: true }),
+        {}
+      )
+    );
+
+    useEffect(() => {
+      const selectedArray: string[] = [];
+
+      Object.keys(selectedArtifactIdsByKey).forEach((key) => {
+        if (selectedArtifactIdsByKey[key]) {
+          selectedArray.push(key);
+        }
+      });
+      selectedArtifactsUpdated(selectedArray);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedArtifactIdsByKey]);
+
     const availableList = useMemo(() => {
       if (!artifacts || !artifacts.items.length) return null;
-      const items = Array.from(artifacts.items);
-      return (
-        <>
-          {items.map((artifact) => (
-            <div key={artifact.id}>{artifact.name}</div>
-          ))}
-        </>
-      );
-    }, [artifacts]);
-    return isListLoading ? <Loader size="xl" /> : null;
+      const items = Array.from(artifacts.items) as TrustedApp[];
+      return items.map((artifact) => (
+        <ArtifactEntryCardMinified
+          key={artifact.id}
+          item={artifact}
+          isSelected={selectedArtifactIdsByKey[artifact.id] || false}
+          onToggleSelectedArtifact={(selected) =>
+            setSelectedArtifactIdsByKey({ ...selectedArtifactIdsByKey, [artifact.id]: selected })
+          }
+        />
+      ));
+    }, [artifacts, selectedArtifactIdsByKey]);
+
+    return isListLoading ? <Loader size="xl" /> : <div>{availableList}</div>;
   }
 );
 

@@ -11,7 +11,7 @@ import { PolicyData, UIPolicyConfig } from '../../../../../../common/endpoint/ty
 import { ServerApiError } from '../../../../../common/types';
 import { PolicyDetailsState } from '../../types';
 import { AsyncResourceState } from '../../../../state';
-import { TrustedAppsListData } from '../../trusted_apps/state';
+import { TrustedAppsListData } from '../../../trusted_apps/state';
 
 export interface ServerReturnedPolicyDetailsData {
   type: 'serverReturnedPolicyDetailsData';
