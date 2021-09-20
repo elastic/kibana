@@ -8,50 +8,61 @@
 import { i18n } from '@kbn/i18n';
 import { ToastsApi } from 'kibana/public';
 import React, { useState, useEffect } from 'react';
-import { EuiBasicTable, EuiHealth, EuiSpacer, EuiToolTip } from '@elastic/eui';
 
-import { Alert as Rule, AlertType as RuleType } from '../../../../types';
+import {
+  Alert as Rule,
+  AlertType as RuleType,
+  RuleMonitoringSummary as RuleMonitoringSummaryInterface,
+} from '../../../../types';
 import {
   ComponentOpts as RuleApis,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { RuleMonitoringSummary } from './rule_monitoring_summary';
 
 type WithRuleMonitoringSummaryProps = {
   rule: Rule;
   ruleType: RuleType;
 } & Pick<RuleApis, 'loadRuleMonitoringSummary'>;
 
-export const RuleMonitoringSummary: React.FunctionComponent<WithRuleMonitoringSummaryProps> = ({
-  rule,
-  ruleType,
-  loadRuleMonitoringSummary,
-}) => {
-  const {
-    notifications: { toasts },
-  } = useKibana().services;
+export const RuleMonitoringSummaryRoute: React.FunctionComponent<WithRuleMonitoringSummaryProps> =
+  ({ rule, ruleType, loadRuleMonitoringSummary }) => {
+    const {
+      notifications: { toasts },
+    } = useKibana().services;
 
-  const [ruleMonitoringSummary, setRuleMonitoringSummary] = useState<any | null>(null);
+    const [ruleMonitoringSummary, setRuleMonitoringSummary] =
+      useState<RuleMonitoringSummaryInterface | null>(null);
 
-  useEffect(() => {
-    getRuleMonitoringSummary(rule.id, loadRuleMonitoringSummary, setRuleMonitoringSummary, toasts);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rule]);
+    useEffect(() => {
+      getRuleMonitoringSummary(
+        rule.id,
+        loadRuleMonitoringSummary,
+        setRuleMonitoringSummary,
+        toasts
+      );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rule]);
 
-  return ruleMonitoringSummary ? (
-    <>
-      <EuiSpacer size="xl" />
-    </>
-  ) : (
-    <CenterJustifiedSpinner />
-  );
-};
+    return ruleMonitoringSummary ? (
+      <RuleMonitoringSummary
+        rule={rule}
+        ruleType={ruleType}
+        ruleMonitoringSummary={ruleMonitoringSummary}
+      />
+    ) : (
+      <CenterJustifiedSpinner />
+    );
+  };
 
 export async function getRuleMonitoringSummary(
   ruleId: string,
   loadRuleMonitoringSummary: RuleApis['loadRuleMonitoringSummary'],
-  setRuleMonitoringSummary: React.Dispatch<React.SetStateAction<any | null>>,
+  setRuleMonitoringSummary: React.Dispatch<
+    React.SetStateAction<RuleMonitoringSummaryInterface | null>
+  >,
   toasts: Pick<ToastsApi, 'addDanger'>
 ) {
   try {
@@ -72,4 +83,6 @@ export async function getRuleMonitoringSummary(
   }
 }
 
-export const RuleMonitoringSummaryWithApi = withBulkAlertOperations(RuleMonitoringSummary);
+export const RuleMonitoringSummaryRouteWithApi = withBulkAlertOperations(
+  RuleMonitoringSummaryRoute
+);

@@ -44,6 +44,8 @@ export interface RuleMonitoringSummary {
   enabled: boolean;
   start_date: string;
   end_date: string;
+  avg_duration: number;
+  avg_delay: number;
   executions: RuleExecutionSummary[];
 }
 
