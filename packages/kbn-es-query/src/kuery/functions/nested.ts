@@ -26,7 +26,7 @@ export function toElasticsearchQuery(
   context: Record<string, any> = {}
 ): estypes.QueryDslQueryContainer {
   const [path, child] = node.arguments;
-  const stringPath = (ast.toElasticsearchQuery(path) as unknown) as string;
+  const stringPath = ast.toElasticsearchQuery(path) as unknown as string;
   const fullPath = context?.nested?.path ? `${context.nested.path}.${stringPath}` : stringPath;
 
   return {

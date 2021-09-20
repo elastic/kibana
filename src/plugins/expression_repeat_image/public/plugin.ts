@@ -29,7 +29,8 @@ export class ExpressionRepeatImagePlugin
       ExpressionRepeatImagePluginStart,
       SetupDeps,
       StartDeps
-    > {
+    >
+{
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRepeatImagePluginSetup {
     expressions.registerFunction(repeatImageFunction);
     expressions.registerRenderer(repeatImageRenderer);
