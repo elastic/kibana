@@ -112,7 +112,10 @@ const i18nTexts = {
       values={{
         docsLink: (
           <EuiLink href={docsLink} target="_blank" data-test-subj="setUpgradeModeDocsLink">
-            Documentation
+            <FormattedMessage
+              id="xpack.upgradeAssistant.esDeprecations.mlSnapshots.upgradeModeEnabledDocsLink"
+              defaultMessage="Documentation"
+            />
           </EuiLink>
         ),
       }}
