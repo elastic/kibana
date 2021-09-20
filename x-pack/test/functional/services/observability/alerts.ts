@@ -17,6 +17,7 @@ const DATE_WITH_DATA = {
 };
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
+const COPY_TO_CLIPBOARD_BUTTON_SELECTOR = 'copy-to-clipboard';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 
 const ACTION_COLUMN_INDEX = 1;
@@ -77,7 +78,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
   };
 
   const clearQueryBar = async () => {
-    return await (await getQueryBar()).clearValueWithKeyboard({ charByChar: true });
+    return await (await getQueryBar()).clearValueWithKeyboard();
   };
 
   const typeInQueryBar = async (query: string) => {
@@ -132,6 +133,20 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListDescription', flyout);
   };
 
+  // Cell actions
+
+  const copyToClipboardButtonExists = async () => {
+    return await testSubjects.exists(COPY_TO_CLIPBOARD_BUTTON_SELECTOR);
+  };
+
+  const getCopyToClipboardButton = async () => {
+    return await testSubjects.find(COPY_TO_CLIPBOARD_BUTTON_SELECTOR);
+  };
+
+  const getFilterForValueButton = async () => {
+    return await testSubjects.find('filter-for-value');
+  };
+
   const openActionsMenuForRow = async (rowIndex: number) => {
     const rows = await getTableCellsInRows();
     const actionsOverflowButton = await testSubjects.findDescendant(
@@ -163,6 +178,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
   };
 
   return {
+    getQueryBar,
     clearQueryBar,
     closeAlertsFlyout,
     getAlertsFlyout,
@@ -171,6 +187,9 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     getAlertsFlyoutOrFail,
     getAlertsFlyoutTitle,
     getAlertsFlyoutViewInAppButtonOrFail,
+    getCopyToClipboardButton,
+    getFilterForValueButton,
+    copyToClipboardButtonExists,
     getNoDataStateOrFail,
     getTableCells,
     getTableCellsInRows,
