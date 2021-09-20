@@ -49,7 +49,10 @@ const i18nTexts = {
       values={{
         learnMoreLink: (
           <EuiLink href={docLink} target="_blank">
-            Learn more
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overview.apiCompatibilityNoteLink"
+              defaultMessage="Learn more"
+            />
           </EuiLink>
         ),
       }}
