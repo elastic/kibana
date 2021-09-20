@@ -334,10 +334,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       getManageTimeline(state, id)
     );
 
-    const alertCountText = useMemo(() => `${totalItems.toLocaleString()} ${unit(totalItems)}`, [
-      totalItems,
-      unit,
-    ]);
+    const alertCountText = useMemo(
+      () => `${totalItems.toLocaleString()} ${unit(totalItems)}`,
+      [totalItems, unit]
+    );
 
     const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
 
@@ -717,20 +717,16 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const onChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => {
-        clearSelected({ id });
-        dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
         dispatch(tGridActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }));
       },
-      [id, dispatch, clearSelected]
+      [id, dispatch]
     );
 
     const onChangePage = useCallback(
       (page) => {
-        clearSelected({ id });
-        dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
         loadPage(page);
       },
-      [id, loadPage, dispatch, clearSelected]
+      [loadPage]
     );
 
     const height = useDataGridHeightHack(pageSize, data.length);

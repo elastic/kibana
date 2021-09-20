@@ -254,20 +254,17 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        name:
-          'aa810aa2-29c9-4a75-b39e-f4f267de1732:control_aa810aa2-29c9-4a75-b39e-f4f267de1732_0_index_pattern',
+        name: 'aa810aa2-29c9-4a75-b39e-f4f267de1732:control_aa810aa2-29c9-4a75-b39e-f4f267de1732_0_index_pattern',
         type: 'index-pattern',
       },
       {
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        name:
-          'aa810aa2-29c9-4a75-b39e-f4f267de1732:control_aa810aa2-29c9-4a75-b39e-f4f267de1732_1_index_pattern',
+        name: 'aa810aa2-29c9-4a75-b39e-f4f267de1732:control_aa810aa2-29c9-4a75-b39e-f4f267de1732_1_index_pattern',
         type: 'index-pattern',
       },
       {
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        name:
-          'aa810aa2-29c9-4a75-b39e-f4f267de1732:control_aa810aa2-29c9-4a75-b39e-f4f267de1732_2_index_pattern',
+        name: 'aa810aa2-29c9-4a75-b39e-f4f267de1732:control_aa810aa2-29c9-4a75-b39e-f4f267de1732_2_index_pattern',
         type: 'index-pattern',
       },
       {
@@ -277,8 +274,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        name:
-          '086ac2e9-dd16-4b45-92b8-1e43ff7e3f65:indexpattern-datasource-layer-03c34665-471c-49c7-acf1-5a11f517421c',
+        name: '086ac2e9-dd16-4b45-92b8-1e43ff7e3f65:indexpattern-datasource-layer-03c34665-471c-49c7-acf1-5a11f517421c',
         type: 'index-pattern',
       },
       {
@@ -288,8 +284,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        name:
-          '9271deff-5a61-4665-83fc-f9fdc6bf0c0b:indexpattern-datasource-layer-b4712d43-1e84-4f5b-878d-8e38ba748317',
+        name: '9271deff-5a61-4665-83fc-f9fdc6bf0c0b:indexpattern-datasource-layer-b4712d43-1e84-4f5b-878d-8e38ba748317',
         type: 'index-pattern',
       },
       {
@@ -299,8 +294,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        name:
-          'aa591c29-1a31-4ee1-a71d-b829c06fd162:indexpattern-datasource-layer-b4712d43-1e84-4f5b-878d-8e38ba748317',
+        name: 'aa591c29-1a31-4ee1-a71d-b829c06fd162:indexpattern-datasource-layer-b4712d43-1e84-4f5b-878d-8e38ba748317',
         type: 'index-pattern',
       },
       {
@@ -315,8 +309,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        name:
-          'b766e3b8-4544-46ed-99e6-9ecc4847e2a2:indexpattern-datasource-layer-b4712d43-1e84-4f5b-878d-8e38ba748317',
+        name: 'b766e3b8-4544-46ed-99e6-9ecc4847e2a2:indexpattern-datasource-layer-b4712d43-1e84-4f5b-878d-8e38ba748317',
         type: 'index-pattern',
       },
       {
@@ -326,8 +319,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        name:
-          '2e33ade5-96e5-40b4-b460-493e5d4fa834:indexpattern-datasource-layer-b4712d43-1e84-4f5b-878d-8e38ba748317',
+        name: '2e33ade5-96e5-40b4-b460-493e5d4fa834:indexpattern-datasource-layer-b4712d43-1e84-4f5b-878d-8e38ba748317',
         type: 'index-pattern',
       },
       {
@@ -342,8 +334,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        name:
-          'fb86b32f-fb7a-45cf-9511-f366fef51bbd:indexpattern-datasource-layer-f26e8f7a-4118-4227-bea0-5c02d8b270f7',
+        name: 'fb86b32f-fb7a-45cf-9511-f366fef51bbd:indexpattern-datasource-layer-f26e8f7a-4118-4227-bea0-5c02d8b270f7',
         type: 'index-pattern',
       },
       {
@@ -353,8 +344,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        name:
-          '5d53db36-2d5a-4adc-af7b-cec4c1a294e0:indexpattern-datasource-layer-0c8e136b-a822-4fb3-836d-e06cbea4eea4',
+        name: '5d53db36-2d5a-4adc-af7b-cec4c1a294e0:indexpattern-datasource-layer-0c8e136b-a822-4fb3-836d-e06cbea4eea4',
         type: 'index-pattern',
       },
       {
@@ -369,8 +359,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        name:
-          '0cc42484-16f7-42ec-b38c-9bf8be69cde7:indexpattern-datasource-layer-e80cc05e-c52a-4e5f-ac71-4b37274867f5',
+        name: '0cc42484-16f7-42ec-b38c-9bf8be69cde7:indexpattern-datasource-layer-e80cc05e-c52a-4e5f-ac71-4b37274867f5',
         type: 'index-pattern',
       },
       {
@@ -380,8 +369,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        name:
-          '392b4936-f753-47bc-a98d-a4e41a0a4cd4:indexpattern-datasource-layer-8fa993db-c147-4954-adf7-4ff264d42576',
+        name: '392b4936-f753-47bc-a98d-a4e41a0a4cd4:indexpattern-datasource-layer-8fa993db-c147-4954-adf7-4ff264d42576',
         type: 'index-pattern',
       },
     ],

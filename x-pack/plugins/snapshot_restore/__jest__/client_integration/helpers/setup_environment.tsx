@@ -70,8 +70,9 @@ export const setupEnvironment = () => {
   this.terminate = () => {};
 };
 
-export const WithAppDependencies = (Comp: any) => (props: any) => (
-  <AppContextProvider value={appDependencies as any}>
-    <Comp {...props} />
-  </AppContextProvider>
-);
+export const WithAppDependencies = (Comp: any) => (props: any) =>
+  (
+    <AppContextProvider value={appDependencies as any}>
+      <Comp {...props} />
+    </AppContextProvider>
+  );

@@ -44,14 +44,8 @@ const StickyFlexItem = styled(EuiFlexItem)`
 
 export const DateRangePicker = memo(() => {
   const dispatch = useDispatch();
-  const {
-    page,
-    pageSize,
-    startDate,
-    endDate,
-    autoRefreshOptions,
-    recentlyUsedDateRanges,
-  } = useEndpointSelector(getActivityLogDataPaging);
+  const { page, pageSize, startDate, endDate, autoRefreshOptions, recentlyUsedDateRanges } =
+    useEndpointSelector(getActivityLogDataPaging);
 
   const activityLogLoading = useEndpointSelector(getActivityLogRequestLoading);
 
