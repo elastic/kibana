@@ -261,7 +261,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
               );
             }}
             selectedOptions={
-              ((currentColumn.params?.sortField
+              (currentColumn.params?.sortField
                 ? [
                     {
                       label:
@@ -270,7 +270,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
                       value: currentColumn.params.sortField,
                     },
                   ]
-                : []) as unknown) as EuiComboBoxOptionOption[]
+                : []) as unknown as EuiComboBoxOptionOption[]
             }
           />
         </EuiFormRow>

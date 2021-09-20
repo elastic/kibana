@@ -251,6 +251,11 @@ const getSavedObjectTypes = (
                   properties: {
                     dataset: { type: 'keyword' },
                     type: { type: 'keyword' },
+                    elasticsearch: {
+                      properties: {
+                        privileges: { type: 'flattened' },
+                      },
+                    },
                   },
                 },
                 vars: { type: 'flattened' },
