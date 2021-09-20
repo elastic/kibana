@@ -5,15 +5,12 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiSpacer,
-  EuiLink,
-} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import type { SavedObjectConflictMessageProps } from '../types';
 
 export const SavedObjectConflictMessage = ({ json }: SavedObjectConflictMessageProps) => {

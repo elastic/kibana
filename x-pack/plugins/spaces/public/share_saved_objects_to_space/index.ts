@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export { getShareToSpaceFlyoutComponent, getLegacyUrlConflict, getSavedObjectConflictMessage } from './components';
+export {
+  getShareToSpaceFlyoutComponent,
+  getLegacyUrlConflict,
+  getSavedObjectConflictMessage,
+} from './components';
 export { createRedirectLegacyUrl } from './utils';
 export type {
   LegacyUrlConflictProps,

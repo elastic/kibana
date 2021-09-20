@@ -12,8 +12,8 @@ import type { CoreStart } from 'src/core/public';
 import type { CopyToSpaceFlyoutProps } from '../copy_saved_objects_to_space';
 import type {
   LegacyUrlConflictProps,
-  ShareToSpaceFlyoutProps,
   SavedObjectConflictMessageProps,
+  ShareToSpaceFlyoutProps,
 } from '../share_saved_objects_to_space';
 import type { SpaceAvatarProps } from '../space_avatar';
 import type { SpaceListProps } from '../space_list';

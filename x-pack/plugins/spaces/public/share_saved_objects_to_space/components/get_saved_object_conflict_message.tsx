@@ -9,7 +9,9 @@ import React from 'react';
 
 import type { SavedObjectConflictMessageProps } from '../types';
 
-export const getSavedObjectConflictMessage = async (): Promise<React.FC<SavedObjectConflictMessageProps>> => {
+export const getSavedObjectConflictMessage = async (): Promise<
+  React.FC<SavedObjectConflictMessageProps>
+> => {
   const { SavedObjectConflictMessage } = await import('./saved_object_conflict_message');
   return (props: SavedObjectConflictMessageProps) => {
     return <SavedObjectConflictMessage {...props} />;
