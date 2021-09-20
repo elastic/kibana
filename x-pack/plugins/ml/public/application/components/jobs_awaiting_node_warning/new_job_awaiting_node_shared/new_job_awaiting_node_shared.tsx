@@ -10,10 +10,10 @@ import { estypes } from '@elastic/elasticsearch';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { JOB_STATE } from '../../../../common/constants/states';
-import { mlApiServicesProvider } from '../../services/ml_api_service';
-import { HttpService } from '../../services/http_service';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { JOB_STATE } from '../../../../../common/constants/states';
+import { mlApiServicesProvider } from '../../../services/ml_api_service';
+import { HttpService } from '../../../services/http_service';
 
 interface Props {
   jobIds: string[];
@@ -23,7 +23,7 @@ function isJobAwaitingNodeAssignment(job: estypes.MlJobStats) {
   return job.node === undefined && job.state === JOB_STATE.OPENING;
 }
 
-export const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
+const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
   const { http } = useKibana().services;
   const ml = mlApiServicesProvider(new HttpService(http!));
 
@@ -86,3 +86,6 @@ export const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
     </>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default MLJobsAwaitingNodeWarning;
