@@ -14,10 +14,6 @@ import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
 // Custom cards require all the props the EuiCard does
 type NoDataCard = EuiCardProps & NoDataPageActions;
 
-const defaultCTATitle = i18n.translate('kibana-react.noDataPage.noDataCard.title', {
-  defaultMessage: 'No data',
-});
-
 export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
   recommended,
   title,
@@ -31,7 +27,9 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
   return (
     <EuiCard
       paddingSize="l"
-      title={title || defaultCTATitle}
+      // TODO: we should require both title and description to be passed in by consumers since defaults are not adequate.
+      // see comment: https://github.com/elastic/kibana/pull/111261/files#r708399140
+      title={title!}
       description={i18n.translate('kibana-react.noDataPage.noDataCard.description', {
         defaultMessage: `Proceed without collecting data`,
       })}
