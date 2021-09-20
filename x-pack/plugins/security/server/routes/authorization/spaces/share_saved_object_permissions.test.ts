@@ -20,11 +20,11 @@ describe('Share Saved Object Permissions', () => {
   let router: jest.Mocked<SecurityRouter>;
   let routeParamsMock: DeeplyMockedKeys<RouteDefinitionParams>;
 
-  const mockContext = ({
+  const mockContext = {
     licensing: {
       license: { check: jest.fn().mockReturnValue({ state: 'valid' }) },
     },
-  } as unknown) as SecurityRequestHandlerContext;
+  } as unknown as SecurityRequestHandlerContext;
 
   beforeEach(() => {
     routeParamsMock = routeDefinitionParamsMock.create();
@@ -53,9 +53,9 @@ describe('Share Saved Object Permissions', () => {
     it('returns `true` when the user is authorized globally', async () => {
       const checkPrivilegesWithRequest = jest.fn().mockResolvedValue({ hasAllRequested: true });
 
-      routeParamsMock.authz.checkPrivilegesWithRequest.mockReturnValue(({
+      routeParamsMock.authz.checkPrivilegesWithRequest.mockReturnValue({
         globally: checkPrivilegesWithRequest,
-      } as unknown) as CheckPrivileges);
+      } as unknown as CheckPrivileges);
 
       const request = httpServerMock.createKibanaRequest({
         query: {
@@ -83,9 +83,9 @@ describe('Share Saved Object Permissions', () => {
     it('returns `false` when the user is not authorized globally', async () => {
       const checkPrivilegesWithRequest = jest.fn().mockResolvedValue({ hasAllRequested: false });
 
-      routeParamsMock.authz.checkPrivilegesWithRequest.mockReturnValue(({
+      routeParamsMock.authz.checkPrivilegesWithRequest.mockReturnValue({
         globally: checkPrivilegesWithRequest,
-      } as unknown) as CheckPrivileges);
+      } as unknown as CheckPrivileges);
 
       const request = httpServerMock.createKibanaRequest({
         query: {

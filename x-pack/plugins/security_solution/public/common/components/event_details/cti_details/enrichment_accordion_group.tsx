@@ -84,9 +84,13 @@ const EnrichmentAccordion: React.FC<{
   enrichment: CtiEnrichment;
   index: number;
 }> = ({ enrichment, index }) => {
-  const { id = `threat-details-item`, field, provider, type, value } = getEnrichmentIdentifiers(
-    enrichment
-  );
+  const {
+    id = `threat-details-item`,
+    field,
+    provider,
+    type,
+    value,
+  } = getEnrichmentIdentifiers(enrichment);
   const accordionId = `${id}${field}`;
   return (
     <StyledEuiAccordion
