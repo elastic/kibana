@@ -34,17 +34,10 @@ export const Workpad: FC<ContainerProps> = (props) => {
   const dispatch = useDispatch();
   const [grid, setGrid] = useState<boolean>(false);
   const [transition, setTransition] = useState<any | null>(null);
-  const [prevSelectedPageNumber, setPrevSelectedPageNumber] = useState<number>(0);
+  const [prevSelectedPageNumber] = useState<number>(0);
 
-  const {
-    isFullscreen,
-    setFullscreen,
-    undo,
-    redo,
-    autoplayInterval,
-    nextPage,
-    previousPage,
-  } = useContext(WorkpadRoutingContext);
+  const { isFullscreen, setFullscreen, undo, redo, autoplayInterval, nextPage, previousPage } =
+    useContext(WorkpadRoutingContext);
 
   const platformService = usePlatformService();
 

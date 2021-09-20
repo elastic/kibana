@@ -9,7 +9,6 @@ import React, { FC, MouseEventHandler, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Sidebar } from '../../components/sidebar';
 import { Toolbar } from '../../components/toolbar';
-// @ts-expect-error Untyped local
 import { Workpad } from '../workpad';
 import { WorkpadHeader } from '../workpad_header';
 import { CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR } from '../../../common/lib/constants';

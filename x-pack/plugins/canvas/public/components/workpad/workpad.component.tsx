@@ -6,11 +6,11 @@
  */
 
 import React, { FC } from 'react';
-import PropTypes from 'prop-types';
+// @ts-expect-error
 import Style from 'style-it';
+// @ts-expect-error
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
-import { isTextInput } from '../../lib/is_text_input';
 import { HEADER_BANNER_HEIGHT, WORKPAD_CANVAS_BUFFER } from '../../../common/lib/constants';
 import { CommitFn, CanvasPage } from '../../../types';
 import { WorkpadShortcuts } from './workpad_shortcuts.component';
