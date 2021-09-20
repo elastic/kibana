@@ -203,13 +203,17 @@ export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable` as cons
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine' as const;
 export const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules` as const;
-export const DETECTION_ENGINE_PREPACKAGED_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged` as const;
+export const DETECTION_ENGINE_PREPACKAGED_URL =
+  `${DETECTION_ENGINE_RULES_URL}/prepackaged` as const;
 export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges` as const;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index` as const;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const;
-export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses` as const;
-export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status` as const;
-export const DETECTION_ENGINE_RULES_BULK_ACTION = `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
+export const DETECTION_ENGINE_RULES_STATUS_URL =
+  `${DETECTION_ENGINE_RULES_URL}/_find_statuses` as const;
+export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
+  `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status` as const;
+export const DETECTION_ENGINE_RULES_BULK_ACTION =
+  `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 
 export const TIMELINE_URL = '/api/timeline' as const;
 export const TIMELINES_URL = '/api/timelines' as const;
@@ -228,11 +232,15 @@ export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SIGNALS_INDEX_KEY = 'signalsIndex' as const;
 
 export const DETECTION_ENGINE_SIGNALS_URL = `${DETECTION_ENGINE_URL}/signals` as const;
-export const DETECTION_ENGINE_SIGNALS_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/status` as const;
+export const DETECTION_ENGINE_SIGNALS_STATUS_URL =
+  `${DETECTION_ENGINE_SIGNALS_URL}/status` as const;
 export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/search` as const;
-export const DETECTION_ENGINE_SIGNALS_MIGRATION_URL = `${DETECTION_ENGINE_SIGNALS_URL}/migration` as const;
-export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/migration_status` as const;
-export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL = `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration` as const;
+export const DETECTION_ENGINE_SIGNALS_MIGRATION_URL =
+  `${DETECTION_ENGINE_SIGNALS_URL}/migration` as const;
+export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL =
+  `${DETECTION_ENGINE_SIGNALS_URL}/migration_status` as const;
+export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL =
+  `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration` as const;
 
 export const ALERTS_AS_DATA_URL = '/internal/rac/alerts' as const;
 export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
@@ -295,4 +303,5 @@ export const showAllOthersBucket: string[] = [
  */
 export const ELASTIC_NAME = 'estc' as const;
 
-export const TRANSFORM_STATS_URL = `/api/transform/transforms/${metadataTransformPattern}-*/_stats` as const;
+export const TRANSFORM_STATS_URL =
+  `/api/transform/transforms/${metadataTransformPattern}-*/_stats` as const;

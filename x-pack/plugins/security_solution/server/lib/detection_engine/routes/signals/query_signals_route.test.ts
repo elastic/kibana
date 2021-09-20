@@ -14,7 +14,7 @@ import {
   getSignalsAggsAndQueryRequest,
   getEmptySignalsResponse,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock, createMockConfig } from '../__mocks__';
+import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
@@ -31,7 +31,7 @@ describe('query for signal', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise(getEmptySignalsResponse())
     );
 
-    querySignalsRoute(server.router, createMockConfig());
+    querySignalsRoute(server.router, true);
   });
 
   describe('query and agg on signals index', () => {

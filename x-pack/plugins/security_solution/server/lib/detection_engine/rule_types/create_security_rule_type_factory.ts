@@ -39,162 +39,19 @@ import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 
 /* eslint-disable complexity */
-export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
-  lists,
-  logger,
-  mergeStrategy,
-  ignoreFields,
-  ruleDataClient,
-  ruleDataService,
-}) => (type) => {
-  const persistenceRuleType = createPersistenceRuleTypeFactory({ ruleDataClient, logger });
-  return persistenceRuleType({
-    ...type,
-    async executor(options) {
-      const {
-        alertId,
-        params,
-        previousStartedAt,
-        startedAt,
-        services,
-        spaceId,
-        state,
-        updatedBy: updatedByUser,
-      } = options;
-      let runState = state;
-      const { from, maxSignals, meta, ruleId, timestampOverride, to } = params;
-      const { alertWithPersistence, savedObjectsClient, scopedClusterClient } = services;
-      const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-
-      const esClient = scopedClusterClient.asCurrentUser;
-
-      const ruleStatusClient = new RuleExecutionLogClient({
-        isRuleRegistryEnabled: true,
-        savedObjectsClient,
-        ruleDataService,
-      });
-      const ruleSO = await savedObjectsClient.get('alert', alertId);
-
-      const {
-        actions,
-        name,
-        schedule: { interval },
-      } = ruleSO.attributes;
-      const refresh = actions.length ? 'wait_for' : false;
-
-      const buildRuleMessage = buildRuleMessageFactory({
-        id: alertId,
-        ruleId,
-        name,
-        index: ruleDataClient.indexName,
-      });
-
-      logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
-      logger.debug(buildRuleMessage(`interval: ${interval}`));
-
-      let wroteWarningStatus = false;
-      await ruleStatusClient.logStatusChange({
-        spaceId,
-        ruleId: alertId,
-        newStatus: RuleExecutionStatus['going to run'],
-      });
-
-      let result = createResultObject(state);
-
-      // check if rule has permissions to access given index pattern
-      // move this collection of lines into a function in utils
-      // so that we can use it in create rules route, bulk, etc.
-      try {
-        if (!isMachineLearningParams(params)) {
-          const index = params.index;
-          const hasTimestampOverride = !!timestampOverride;
-
-          const inputIndices = params.index ?? [];
-
-          const [privileges, timestampFieldCaps] = await Promise.all([
-            checkPrivilegesFromEsClient(esClient, inputIndices),
-            esClient.fieldCaps({
-              index: index ?? ['*'],
-              fields: hasTimestampOverride ? [TIMESTAMP, timestampOverride as string] : [TIMESTAMP],
-              include_unmapped: true,
-            }),
-          ]);
-
-          fold<Error, Promise<boolean>, void>(
-            async (error: Error) => logger.error(buildRuleMessage(error.message)),
-            async (status: Promise<boolean>) => (wroteWarningStatus = await status)
-          )(
-            flow(
-              () =>
-                tryCatch(
-                  () =>
-                    hasReadIndexPrivileges({
-                      spaceId,
-                      ruleId: alertId,
-                      privileges,
-                      logger,
-                      buildRuleMessage,
-                      ruleStatusClient,
-                    }),
-                  toError
-                ),
-              chain((wroteStatus: unknown) =>
-                tryCatch(
-                  () =>
-                    hasTimestampFields({
-                      spaceId,
-                      ruleId: alertId,
-                      wroteStatus: wroteStatus as boolean,
-                      timestampField: hasTimestampOverride
-                        ? (timestampOverride as string)
-                        : '@timestamp',
-                      ruleName: name,
-                      timestampFieldCapsResponse: timestampFieldCaps,
-                      inputIndices,
-                      ruleStatusClient,
-                      logger,
-                      buildRuleMessage,
-                    }),
-                  toError
-                )
-              )
-            )() as Either<Error, Promise<boolean>>
-          );
-        }
-      } catch (exc) {
-        logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
-      }
-      let hasError = false;
-      const { tuples, remainingGap } = getRuleRangeTuples({
-        logger,
-        previousStartedAt,
-        from: from as string,
-        to: to as string,
-        interval,
-        maxSignals: DEFAULT_MAX_SIGNALS,
-        buildRuleMessage,
-      });
-      if (remainingGap.asMilliseconds() > 0) {
-        const gapString = remainingGap.humanize();
-        const gapMessage = buildRuleMessage(
-          `${gapString} (${remainingGap.asMilliseconds()}ms) were not queried between this rule execution and the last execution, so signals may have been missed.`,
-          'Consider increasing your look behind time or adding more Kibana instances.'
-        );
-        logger.warn(gapMessage);
-        hasError = true;
-        await ruleStatusClient.logStatusChange({
-          spaceId,
-          ruleId: alertId,
-          newStatus: RuleExecutionStatus.failed,
-          message: gapMessage,
-          metrics: { gap: gapString },
-        });
-      }
-
-      try {
-        const { listClient, exceptionsClient } = getListClient({
-          esClient: services.scopedClusterClient.asCurrentUser,
-          updatedByUser,
+export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory =
+  ({ lists, logger, mergeStrategy, ignoreFields, ruleDataClient, ruleDataService }) =>
+  (type) => {
+    const persistenceRuleType = createPersistenceRuleTypeFactory({ ruleDataClient, logger });
+    return persistenceRuleType({
+      ...type,
+      async executor(options) {
+        const {
+          alertId,
+          params,
+          previousStartedAt,
+          startedAt,
+          services,
           spaceId,
           state,
           updatedBy: updatedByUser,
@@ -209,6 +66,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         const ruleStatusClient = new RuleExecutionLogClient({
           savedObjectsClient,
           ruleDataService,
+          isRuleRegistryEnabled: true,
         });
         const ruleSO = await savedObjectsClient.get('alert', alertId);
 
@@ -461,16 +319,6 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
               }
             }
 
-<<<<<<< HEAD
-          // const outputIndex = (result.createdSignals[0] as Array<{ _index: string }>)[0]._index;
-          logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
-          logger.debug(
-            buildRuleMessage(
-              // `[+] Finished indexing ${createdSignalsCount} signals into ${outputIndex}`
-              `[+] Finished indexing ${createdSignalsCount} signals into ${ruleDataClient.indexName}`
-            )
-          );
-=======
             logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
             logger.debug(
               buildRuleMessage(
@@ -491,7 +339,6 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
                 },
               });
             }
->>>>>>> 7bcef120084e90a3306e7dabcd80e3ede116b500
 
             // adding this log line so we can get some information from cloud
             logger.info(
