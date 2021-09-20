@@ -14,6 +14,7 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 import { History } from 'history';
+import { setVersion } from './set_version';
 
 export interface KibanaUtilsSetup {
   setVersion: (history: ScopedHistory) => void;
@@ -41,14 +42,6 @@ export class KibanaUtilsPublicPlugin implements Plugin<KibanaUtilsSetup, KibanaU
   public stop() {}
 
   private setVersion = (history: Pick<History, 'location' | 'replace'>) => {
-    const search = new URLSearchParams(history.location.search);
-    if (search.get('_v') === this.version) return;
-    search.set('_v', this.version);
-    const path =
-      history.location.pathname +
-      '?' +
-      search.toString() +
-      (history.location.hash ? '#' : history.location.hash);
-    history.replace(path);
+    setVersion(history, this.version);
   };
 }
