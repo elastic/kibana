@@ -40,7 +40,7 @@ function createTestJobAndDatafeed() {
         categorization_examples_limit: 4,
       },
     },
-    datafeed: ({
+    datafeed: {
       datafeed_id: `datafeed-${jobId}`,
       job_id: jobId,
       query: {
@@ -56,7 +56,7 @@ function createTestJobAndDatafeed() {
       },
       query_delay: '120s',
       indices: ['ft_ecommerce'],
-    } as unknown) as estypes.MlDatafeed,
+    } as unknown as estypes.MlDatafeed,
   };
 }
 
