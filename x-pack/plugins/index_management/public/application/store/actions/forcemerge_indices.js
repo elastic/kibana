@@ -13,19 +13,24 @@ import { notificationService } from '../../services/notification';
 
 export const forcemergeIndicesStart = createAction('INDEX_MANAGEMENT_FORCEMERGE_INDICES_START');
 
-export const forcemergeIndices = ({ indexNames, maxNumSegments }) => async (dispatch) => {
-  dispatch(forcemergeIndicesStart({ indexNames }));
-  try {
-    await request(indexNames, maxNumSegments);
-  } catch (error) {
-    notificationService.showDangerToast(error.message);
-    return dispatch(clearRowStatus({ indexNames }));
-  }
-  dispatch(reloadIndices(indexNames));
-  notificationService.showSuccessToast(
-    i18n.translate('xpack.idxMgmt.forceMergeIndicesAction.successfullyForceMergedIndicesMessage', {
-      defaultMessage: 'Successfully force merged: [{indexNames}]',
-      values: { indexNames: indexNames.join(', ') },
-    })
-  );
-};
+export const forcemergeIndices =
+  ({ indexNames, maxNumSegments }) =>
+  async (dispatch) => {
+    dispatch(forcemergeIndicesStart({ indexNames }));
+    try {
+      await request(indexNames, maxNumSegments);
+    } catch (error) {
+      notificationService.showDangerToast(error.message);
+      return dispatch(clearRowStatus({ indexNames }));
+    }
+    dispatch(reloadIndices(indexNames));
+    notificationService.showSuccessToast(
+      i18n.translate(
+        'xpack.idxMgmt.forceMergeIndicesAction.successfullyForceMergedIndicesMessage',
+        {
+          defaultMessage: 'Successfully force merged: [{indexNames}]',
+          values: { indexNames: indexNames.join(', ') },
+        }
+      )
+    );
+  };

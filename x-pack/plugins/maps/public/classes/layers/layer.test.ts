@@ -64,7 +64,7 @@ describe('isFittable', () => {
       });
       const layer = new MockLayer({
         layerDescriptor,
-        source: (new MockSource({ fitToBounds: test.fitToBounds }) as unknown) as ISource,
+        source: new MockSource({ fitToBounds: test.fitToBounds }) as unknown as ISource,
       });
       expect(await layer.isFittable()).toBe(test.canFit);
     });

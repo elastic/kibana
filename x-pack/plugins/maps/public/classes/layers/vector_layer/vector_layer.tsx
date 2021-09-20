@@ -171,7 +171,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
             'Cannot clone table-source. Should only be used in MapEmbeddable, not in UX'
           );
         }
-        const termSourceDescriptor: ESTermSourceDescriptor = joinDescriptor.right as ESTermSourceDescriptor;
+        const termSourceDescriptor: ESTermSourceDescriptor =
+          joinDescriptor.right as ESTermSourceDescriptor;
 
         // todo: must tie this to generic thing
         const originalJoinId = joinDescriptor.right.id!;
@@ -309,11 +310,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const sourceDataRequest = this.getSourceDataRequest();
-    const {
-      tooltipContent,
-      areResultsTrimmed,
-      isDeprecated,
-    } = this.getSource().getSourceTooltipContent(sourceDataRequest);
+    const { tooltipContent, areResultsTrimmed, isDeprecated } =
+      this.getSource().getSourceTooltipContent(sourceDataRequest);
     return {
       icon: isDeprecated ? (
         <EuiIcon type="alert" color="danger" />

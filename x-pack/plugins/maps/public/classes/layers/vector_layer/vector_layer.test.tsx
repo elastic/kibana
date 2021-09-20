@@ -85,7 +85,7 @@ describe('cloneDescriptor', () => {
       });
       const layer = new VectorLayer({
         layerDescriptor,
-        source: (new MockSource() as unknown) as IVectorSource,
+        source: new MockSource() as unknown as IVectorSource,
       });
       const clonedDescriptor = await layer.cloneDescriptor();
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
@@ -110,19 +110,19 @@ describe('cloneDescriptor', () => {
         joins: [
           {
             leftField: 'iso2',
-            right: ({
+            right: {
               id: '557d0f15',
               indexPatternId: 'myIndexPattern',
               indexPatternTitle: 'logs-*',
               term: 'myTermField',
               type: 'joinSource',
-            } as unknown) as ESTermSourceDescriptor,
+            } as unknown as ESTermSourceDescriptor,
           },
         ],
       });
       const layer = new VectorLayer({
         layerDescriptor,
-        source: (new MockSource() as unknown) as IVectorSource,
+        source: new MockSource() as unknown as IVectorSource,
       });
       const clonedDescriptor = await layer.cloneDescriptor();
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
