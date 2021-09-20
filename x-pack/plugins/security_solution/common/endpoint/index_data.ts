@@ -119,12 +119,12 @@ export async function indexHostsAndAlerts(
 const getEndpointPackageInfo = async (
   kbnClient: KbnClient
 ): Promise<GetPackagesResponse['response'][0]> => {
-  const endpointPackage = ((await kbnClient.request({
-    path: `${EPM_API_ROUTES.LIST_PATTERN}?category=security`,
-    method: 'GET',
-  })) as AxiosResponse<GetPackagesResponse>).data.response.find(
-    (epmPackage) => epmPackage.name === 'endpoint'
-  );
+  const endpointPackage = (
+    (await kbnClient.request({
+      path: `${EPM_API_ROUTES.LIST_PATTERN}?category=security`,
+      method: 'GET',
+    })) as AxiosResponse<GetPackagesResponse>
+  ).data.response.find((epmPackage) => epmPackage.name === 'endpoint');
 
   if (!endpointPackage) {
     throw new Error('EPM Endpoint package was not found!');

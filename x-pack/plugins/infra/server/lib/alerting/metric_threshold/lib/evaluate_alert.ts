@@ -227,7 +227,7 @@ const getMetric: (
 
     return {
       [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(
-        (result.aggregations! as unknown) as Aggregation,
+        result.aggregations! as unknown as Aggregation,
         aggType,
         dropPartialBucketsOptions,
         calculatedTimerange,
@@ -257,16 +257,18 @@ interface DropPartialBucketOptions {
   bucketSizeInMillis: number;
 }
 
-const dropPartialBuckets = ({ from, to, bucketSizeInMillis }: DropPartialBucketOptions) => (
-  row: {
-    key: string;
-    value: number | null;
-  } | null
-) => {
-  if (row == null) return null;
-  const timestamp = new Date(row.key).valueOf();
-  return timestamp >= from && timestamp + bucketSizeInMillis <= to;
-};
+const dropPartialBuckets =
+  ({ from, to, bucketSizeInMillis }: DropPartialBucketOptions) =>
+  (
+    row: {
+      key: string;
+      value: number | null;
+    } | null
+  ) => {
+    if (row == null) return null;
+    const timestamp = new Date(row.key).valueOf();
+    return timestamp >= from && timestamp + bucketSizeInMillis <= to;
+  };
 
 const getValuesFromAggregations = (
   aggregations: Aggregation | undefined,

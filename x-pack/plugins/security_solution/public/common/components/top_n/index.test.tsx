@@ -94,8 +94,7 @@ const state: State = {
         id: TimelineId.active,
         dataProviders: [
           {
-            id:
-              'draggable-badge-default-draggable-netflow-renderer-timeline-1-_qpBe3EBD7k-aQQL7v7--_qpBe3EBD7k-aQQL7v7--network_transport-tcp',
+            id: 'draggable-badge-default-draggable-netflow-renderer-timeline-1-_qpBe3EBD7k-aQQL7v7--_qpBe3EBD7k-aQQL7v7--network_transport-tcp',
             name: 'tcp',
             enabled: true,
             excluded: false,
