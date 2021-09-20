@@ -101,7 +101,9 @@ export class SavedMap {
       const doc = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
       const { references, sharingSavedObjectProps, ...savedObjectAttributes } = doc;
       this._attributes = savedObjectAttributes;
-      this._sharingSavedObjectProps = sharingSavedObjectProps;
+      if (sharingSavedObjectProps) {
+        this._sharingSavedObjectProps = sharingSavedObjectProps;
+      }
       const savedObjectsTagging = getSavedObjectsTagging();
       if (savedObjectsTagging && references && references.length) {
         this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);

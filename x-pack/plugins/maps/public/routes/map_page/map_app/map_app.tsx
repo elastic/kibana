@@ -16,6 +16,7 @@ import type { Query, Filter, TimeRange, IndexPattern } from 'src/plugins/data/co
 import {
   getData,
   getCoreChrome,
+  getHttp,
   getMapsCapabilities,
   getNavigation,
   getSpacesApi,
@@ -87,6 +88,7 @@ export interface Props {
   isSaveDisabled: boolean;
   query: Query | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  history: AppMountParameters['history'];
 }
 
 export interface State {
@@ -346,6 +348,21 @@ export class MapApp extends React.Component<Props, State> {
     }
 
     if (!this._isMounted) {
+      return;
+    }
+
+    const sharingSavedObjectProps = this.props.savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
+      // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newPath = getHttp().basePath.prepend(
+        `${getFullPath(newObjectId)}${this.props.history.location.search}`
+      );
+      await spaces.ui.redirectLegacyUrl(
+        newPath,
+        getMapEmbeddableDisplayName()
+      );
       return;
     }
 

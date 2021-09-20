@@ -16,7 +16,7 @@ import { extractReferences, injectReferences } from '../common/migrations/refere
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 import { getSpacesApi } from './kibana_services';
 
-interface SharingSavedObjectProps {
+export interface SharingSavedObjectProps {
   outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
   aliasTargetId?: string;
   errorJSON?: string;
@@ -93,7 +93,7 @@ export function getMapAttributeService(): MapAttributeService {
               ? JSON.stringify({
                   targetType: MAP_SAVED_OBJECT_TYPE,
                   sourceId: savedObjectId,
-                  targetSpace: (await getSpacesApi().getActiveSpace()).id,
+                  targetSpace: (await getSpacesApi()!.getActiveSpace()).id,
                 })
               : undefined,
         }
