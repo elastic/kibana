@@ -117,7 +117,7 @@ Platform::
 Security::
 * Respect `auth_provider_hint` if session is not authenticated {kibana-pull}111521[#111521]
 Uptime::
-* Search filter input - remove undesired blur {kibana-pull}110314[#110314]
+* Removes blurring on URL filter selections {kibana-pull}110314[#110314]
 
 [[release-notes-7.14.1]]
 == {kib} 7.14.1
