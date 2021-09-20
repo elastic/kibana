@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { escapeSearchReservedChars } from './util';
+import { escapeSearchReservedChars, validateSlug } from './util';
 
 describe('escapeSearchReservedChars', () => {
   it('should escape search reserved chars', () => {
@@ -31,5 +31,39 @@ describe('escapeSearchReservedChars', () => {
     expect(escapeSearchReservedChars('my-dashboard-link')).toEqual('my\\-dashboard\\-link');
     expect(escapeSearchReservedChars('link-v1.0.0')).toEqual('link\\-v1.0.0');
     expect(escapeSearchReservedChars('simple_link')).toEqual('simple_link');
+  });
+});
+
+describe('validateSlug', () => {
+  it('validates slugs that contain [a-zA-Z0-9.-_] chars', () => {
+    validateSlug('asdf');
+    validateSlug('asdf-asdf');
+    validateSlug('asdf-asdf-333');
+    validateSlug('my-custom-slug');
+    validateSlug('my.slug');
+    validateSlug('my_super-custom.slug');
+  });
+
+  it('throws on slugs which contain invalid characters', () => {
+    expect(() => validateSlug('hello-tom&herry')).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid [slug = hello-tom&herry]."`
+    );
+    expect(() => validateSlug('foo(bar)')).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid [slug = foo(bar)]."`
+    );
+  });
+
+  it('throws if slug is shorter than 3 chars', () => {
+    expect(() => validateSlug('ab')).toThrowErrorMatchingInlineSnapshot(`"Invalid [slug = ab]."`);
+  });
+
+  it('throws if slug is longer than 255 chars', () => {
+    expect(() =>
+      validateSlug(
+        'aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa'
+      )
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid [slug = aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa-aaaaaaaaaa]."`
+    );
   });
 });
