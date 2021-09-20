@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { xor } from 'lodash';
+import { mean, xor } from 'lodash';
 import {
   SanitizedAlert as SanitizedRule,
   RuleMonitoringSummary,
@@ -105,6 +105,13 @@ export function ruleMonitoringSummaryFromEventLog(
     execution.num_active_alerts -= execution.num_new_alerts;
     execution.active_alert_ids = xor(execution.active_alert_ids, execution.new_alert_ids);
   }
+
+  summary.avg_duration = mean(
+    summary.executions.map((execution) => execution.duration).filter((duration) => null != duration)
+  );
+  summary.avg_delay = mean(
+    summary.executions.map((execution) => execution.delay).filter((delay) => null != delay)
+  );
 
   // reverse the executions so the newest is first
   summary.executions = summary.executions.reverse();

@@ -40,7 +40,7 @@ import { routeToRuleDetails } from '../../../constants';
 import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { alertReducer } from '../../alert_form/alert_reducer';
-import { RuleMonitoringSummaryWithApi } from './rule_monitoring';
+import { RuleMonitoringSummaryRouteWithApi } from './rule_monitoring_summary_route';
 
 type Section = 'details' | 'monitoring';
 
@@ -437,7 +437,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
         <EuiPageContentBody>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <RuleMonitoringSummaryWithApi rule={alert} ruleType={alertType} />
+              <RuleMonitoringSummaryRouteWithApi rule={alert} ruleType={alertType} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageContentBody>
