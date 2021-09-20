@@ -19,7 +19,7 @@ export const ADD_SOURCE_ORG_SOURCE_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.addSourceList.orgSourceDescription',
   {
     defaultMessage:
-      'Shared content sources are available to your entire organization or can be assigned to specific user groups.',
+      'Organizational content sources are available to your entire organization or can be assigned to specific user groups.',
   }
 );
 
@@ -41,7 +41,7 @@ export const ADD_SOURCE_NO_SOURCES_TITLE = i18n.translate(
 export const ADD_SOURCE_ORG_SOURCES_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.addSourceList.orgSourcesTitle',
   {
-    defaultMessage: 'Add a shared content source',
+    defaultMessage: 'Add an organizational content source',
   }
 );
 

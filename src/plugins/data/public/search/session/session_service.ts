@@ -108,13 +108,10 @@ export class SessionService {
     private readonly nowProvider: NowProviderInternalContract,
     { freezeState = true }: { freezeState: boolean } = { freezeState: true }
   ) {
-    const {
-      stateContainer,
-      sessionState$,
-      sessionMeta$,
-    } = createSessionStateContainer<TrackSearchDescriptor>({
-      freeze: freezeState,
-    });
+    const { stateContainer, sessionState$, sessionMeta$ } =
+      createSessionStateContainer<TrackSearchDescriptor>({
+        freeze: freezeState,
+      });
     this.state$ = sessionState$;
     this.state = stateContainer;
     this.sessionMeta$ = sessionMeta$;
@@ -332,8 +329,8 @@ export class SessionService {
     const searchSessionSavedObject = await this.sessionsClient.create({
       name: formattedName,
       appId: currentSessionApp,
-      restoreState: (restoreState as unknown) as Record<string, unknown>,
-      initialState: (initialState as unknown) as Record<string, unknown>,
+      restoreState: restoreState as unknown as Record<string, unknown>,
+      initialState: initialState as unknown as Record<string, unknown>,
       urlGeneratorId,
       sessionId,
     });

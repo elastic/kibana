@@ -25,69 +25,69 @@ describe('getDataRequest', () => {
     dataId: 'source',
   } as DataRequestDescriptor;
   test('Should return undefined if layer not found', () => {
-    const state = ({
+    const state = {
       layerList: [],
-    } as unknown) as MapState;
+    } as unknown as MapState;
 
     expect(getDataRequest(state, 'layer1', 'source')).toBeUndefined();
   });
 
   test('Should return undefined if __dataRequests not provided for layer', () => {
-    const state = ({
+    const state = {
       layerList: [{ id: 'layer1' }],
-    } as unknown) as MapState;
+    } as unknown as MapState;
 
     expect(getDataRequest(state, 'layer1', 'source')).toBeUndefined();
   });
 
   test('Should return undefined if no data requests matching dataRequestId', () => {
-    const state = ({
+    const state = {
       layerList: [
         {
           id: 'layer1',
           __dataRequests: [SOURCE_DATA_REQUEST_DESCRIPTOR],
         },
       ],
-    } as unknown) as MapState;
+    } as unknown as MapState;
 
     expect(getDataRequest(state, 'layer1', 'join')).toBeUndefined();
   });
 
   test('Should return data request with dataRequestId match', () => {
-    const state = ({
+    const state = {
       layerList: [
         {
           id: 'layer1',
           __dataRequests: [SOURCE_DATA_REQUEST_DESCRIPTOR],
         },
       ],
-    } as unknown) as MapState;
+    } as unknown as MapState;
 
     expect(getDataRequest(state, 'layer1', 'source')).toEqual(SOURCE_DATA_REQUEST_DESCRIPTOR);
   });
 
   test('Should return undefined with dataRequestId match and requestToken mismatch', () => {
-    const state = ({
+    const state = {
       layerList: [
         {
           id: 'layer1',
           __dataRequests: [SOURCE_DATA_REQUEST_DESCRIPTOR],
         },
       ],
-    } as unknown) as MapState;
+    } as unknown as MapState;
 
     expect(getDataRequest(state, 'layer1', 'source', Symbol('another_request'))).toBeUndefined();
   });
 
   test('Should return data request with dataRequestId match and requestToken match', () => {
-    const state = ({
+    const state = {
       layerList: [
         {
           id: 'layer1',
           __dataRequests: [SOURCE_DATA_REQUEST_DESCRIPTOR],
         },
       ],
-    } as unknown) as MapState;
+    } as unknown as MapState;
 
     expect(getDataRequest(state, 'layer1', 'source', REQUEST_TOKEN)).toEqual(
       SOURCE_DATA_REQUEST_DESCRIPTOR
@@ -102,23 +102,23 @@ describe('setDataRequest', () => {
   } as DataRequestDescriptor;
 
   test('Should return unmodified state if layer not found', () => {
-    const state = ({
+    const state = {
       layerList: [],
-    } as unknown) as MapState;
+    } as unknown as MapState;
     const stateClone = _.cloneDeep(state);
     expect(setDataRequest(state, 'layer1', UPDATED_DATA_REQUEST_DESCRIPTOR)).toEqual(state);
     expect(state).toEqual(stateClone);
   });
 
   test('Should add data request if data request not found', () => {
-    const state = ({
+    const state = {
       layerList: [
         {
           id: 'layer1',
           __dataRequests: [],
         },
       ],
-    } as unknown) as MapState;
+    } as unknown as MapState;
     const stateClone = _.cloneDeep(state);
     expect(setDataRequest(state, 'layer1', UPDATED_DATA_REQUEST_DESCRIPTOR)).toEqual({
       layerList: [
@@ -132,14 +132,14 @@ describe('setDataRequest', () => {
   });
 
   test('Should update data request', () => {
-    const state = ({
+    const state = {
       layerList: [
         {
           id: 'layer1',
           __dataRequests: [{ dataId: 'source' }],
         },
       ],
-    } as unknown) as MapState;
+    } as unknown as MapState;
     const stateClone = _.cloneDeep(state);
     expect(setDataRequest(state, 'layer1', UPDATED_DATA_REQUEST_DESCRIPTOR)).toEqual({
       layerList: [
@@ -160,9 +160,9 @@ describe('startDataRequest', () => {
   } as DataRequestMeta;
 
   test('Should return unmodified state if layer not found', () => {
-    const state = ({
+    const state = {
       layerList: [],
-    } as unknown) as MapState;
+    } as unknown as MapState;
     const stateClone = _.cloneDeep(state);
     expect(startDataRequest(state, 'layer1', 'source', REQUEST_TOKEN, DATA_META_AT_START)).toEqual(
       state
@@ -171,13 +171,13 @@ describe('startDataRequest', () => {
   });
 
   test('Should add data request if no data requests for dataRequestId', () => {
-    const state = ({
+    const state = {
       layerList: [
         {
           id: 'layer1',
         },
       ],
-    } as unknown) as MapState;
+    } as unknown as MapState;
     const stateClone = _.cloneDeep(state);
     expect(startDataRequest(state, 'layer1', 'source', REQUEST_TOKEN, DATA_META_AT_START)).toEqual({
       layerList: [
@@ -197,7 +197,7 @@ describe('startDataRequest', () => {
   });
 
   test('Should update existing data request for onStartLoading event', () => {
-    const state = ({
+    const state = {
       layerList: [
         {
           id: 'layer1',
@@ -210,7 +210,7 @@ describe('startDataRequest', () => {
           ],
         },
       ],
-    } as unknown) as MapState;
+    } as unknown as MapState;
     const stateClone = _.cloneDeep(state);
     expect(startDataRequest(state, 'layer1', 'source', REQUEST_TOKEN, DATA_META_AT_START)).toEqual({
       layerList: [
@@ -234,16 +234,16 @@ describe('stopDataRequest', () => {
   const REQUEST_TOKEN = Symbol('request');
 
   test('Should return unmodified state if layer not found', () => {
-    const state = ({
+    const state = {
       layerList: [],
-    } as unknown) as MapState;
+    } as unknown as MapState;
     const stateClone = _.cloneDeep(state);
     expect(stopDataRequest(state, 'layer1', 'source', REQUEST_TOKEN)).toEqual(state);
     expect(state).toEqual(stateClone);
   });
 
   test('Should return unmodified state if data request not found (unmatching request token)', () => {
-    const state = ({
+    const state = {
       layerList: [
         {
           id: 'layer1',
@@ -255,14 +255,14 @@ describe('stopDataRequest', () => {
           ],
         },
       ],
-    } as unknown) as MapState;
+    } as unknown as MapState;
     const stateClone = _.cloneDeep(state);
     expect(stopDataRequest(state, 'layer1', 'source', REQUEST_TOKEN)).toEqual(state);
     expect(state).toEqual(stateClone);
   });
 
   test('Should update data request with response meta and data', () => {
-    const state = ({
+    const state = {
       layerList: [
         {
           id: 'layer1',
@@ -276,7 +276,7 @@ describe('stopDataRequest', () => {
           ],
         },
       ],
-    } as unknown) as MapState;
+    } as unknown as MapState;
     const stateClone = _.cloneDeep(state);
     const reponseMeta = { responseProp1: 'response' } as DataRequestMeta;
     const data = { prop1: 'new data' };
@@ -306,30 +306,30 @@ describe('updateSourceDataRequest', () => {
   };
 
   test('Should return unmodified state if layer not found', () => {
-    const state = ({
+    const state = {
       layerList: [],
-    } as unknown) as MapState;
+    } as unknown as MapState;
     const stateClone = _.cloneDeep(state);
     expect(updateSourceDataRequest(state, 'layer1', NEW_DATA)).toEqual(state);
     expect(state).toEqual(stateClone);
   });
 
   test('Should return unmodified state if source data request not found', () => {
-    const state = ({
+    const state = {
       layerList: [
         {
           id: 'layer1',
           __dataRequests: [],
         },
       ],
-    } as unknown) as MapState;
+    } as unknown as MapState;
     const stateClone = _.cloneDeep(state);
     expect(updateSourceDataRequest(state, 'layer1', NEW_DATA)).toEqual(state);
     expect(state).toEqual(stateClone);
   });
 
   test('Should update source data request', () => {
-    const state = ({
+    const state = {
       layerList: [
         {
           id: 'layer1',
@@ -341,7 +341,7 @@ describe('updateSourceDataRequest', () => {
           ],
         },
       ],
-    } as unknown) as MapState;
+    } as unknown as MapState;
     const stateClone = _.cloneDeep(state);
     expect(updateSourceDataRequest(state, 'layer1', NEW_DATA)).toEqual({
       layerList: [

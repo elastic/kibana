@@ -25,9 +25,9 @@ const mockIndexPattern = {
   getComputedFields: () => [],
 } as never;
 const getMock = jest.fn(() => Promise.resolve(mockIndexPattern));
-const mockIndexPatternService = ({
+const mockIndexPatternService = {
   get: getMock,
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 (getServices as jest.Mock).mockImplementation(() => ({
   uiSettings: {
