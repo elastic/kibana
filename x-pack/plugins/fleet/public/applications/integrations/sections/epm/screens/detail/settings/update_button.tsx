@@ -109,12 +109,14 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   }, [packagePolicyIds]);
 
   const packagePolicyCount = useMemo(() => packagePolicyIds.length, [packagePolicyIds]);
-  const agentCount = useMemo(() => sumBy(agentPolicyData?.items, ({ agents }) => agents ?? 0), [
-    agentPolicyData,
-  ]);
-  const conflictCount = useMemo(() => dryRunData?.filter((item) => item.hasErrors).length, [
-    dryRunData,
-  ]);
+  const agentCount = useMemo(
+    () => sumBy(agentPolicyData?.items, ({ agents }) => agents ?? 0),
+    [agentPolicyData]
+  );
+  const conflictCount = useMemo(
+    () => dryRunData?.filter((item) => item.hasErrors).length,
+    [dryRunData]
+  );
 
   const handleUpgradePackagePoliciesChange = useCallback(() => {
     setUpgradePackagePolicies((prev) => !prev);

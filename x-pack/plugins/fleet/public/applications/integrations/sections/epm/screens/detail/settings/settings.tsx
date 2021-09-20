@@ -98,9 +98,10 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
   const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
   const packageHasUsages = !!packagePoliciesData?.total;
 
-  const packagePolicyIds = useMemo(() => packagePoliciesData?.items.map(({ id }) => id), [
-    packagePoliciesData,
-  ]);
+  const packagePolicyIds = useMemo(
+    () => packagePoliciesData?.items.map(({ id }) => id),
+    [packagePoliciesData]
+  );
 
   useEffect(() => {
     const fetchDryRunData = async () => {
