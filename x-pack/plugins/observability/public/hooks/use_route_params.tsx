@@ -46,8 +46,8 @@ export function useRouteParams<T extends keyof typeof routes>(pathName: T): Rout
     console.error(PathReporter.report(pathResult)[0]);
   }
 
-  return ({
+  return {
     query: isLeft(queryResult) ? {} : queryResult.right,
     path: isLeft(pathResult) ? {} : pathResult.right,
-  } as unknown) as RouteParams<T>;
+  } as unknown as RouteParams<T>;
 }

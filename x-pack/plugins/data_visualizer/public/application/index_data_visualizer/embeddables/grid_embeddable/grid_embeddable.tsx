@@ -144,10 +144,10 @@ const useDataVisualizerGridData = (
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
 
-  const dataLoader = useMemo(() => new DataLoader(currentIndexPattern, toasts), [
-    currentIndexPattern,
-    toasts,
-  ]);
+  const dataLoader = useMemo(
+    () => new DataLoader(currentIndexPattern, toasts),
+    [currentIndexPattern, toasts]
+  );
 
   const timefilter = useTimefilter({
     timeRangeSelector: currentIndexPattern?.timeFieldName !== undefined,
@@ -175,9 +175,10 @@ const useDataVisualizerGridData = (
     });
   }, [uiSettings]);
 
-  const indexPatternFields: IndexPatternField[] = useMemo(() => currentIndexPattern.fields, [
-    currentIndexPattern,
-  ]);
+  const indexPatternFields: IndexPatternField[] = useMemo(
+    () => currentIndexPattern.fields,
+    [currentIndexPattern]
+  );
 
   async function loadOverallStats() {
     const tf = timefilter as any;
@@ -636,9 +637,8 @@ export const DiscoverWrapper = ({
   input: DataVisualizerGridEmbeddableInput;
   onOutputChange?: (ouput: any) => void;
 }) => {
-  const [dataVisualizerListState, setDataVisualizerListState] = useState<
-    Required<DataVisualizerIndexBasedAppState>
-  >(restorableDefaults);
+  const [dataVisualizerListState, setDataVisualizerListState] =
+    useState<Required<DataVisualizerIndexBasedAppState>>(restorableDefaults);
 
   const onTableChange = useCallback(
     (update: DataVisualizerTableState) => {

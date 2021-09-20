@@ -28,7 +28,7 @@ import { DataDocuments$ } from '../../services/use_saved_search';
 import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
 import { DISCOVER_VIEW_MODE } from '../view_mode_toggle';
 
-const mockServices = ({
+const mockServices = {
   history: () => ({
     location: {
       search: '',
@@ -49,7 +49,7 @@ const mockServices = ({
       }
     },
   },
-} as unknown) as DiscoverServices;
+} as unknown as DiscoverServices;
 
 const mockfieldCounts: Record<string, number> = {};
 const mockCalcFieldCounts = jest.fn(() => {
@@ -73,9 +73,9 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   const indexPattern = stubLogstashIndexPattern;
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = (each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
+  const hits = each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
     Record<string, unknown>
-  >) as ElasticSearchHit[];
+  > as ElasticSearchHit[];
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,

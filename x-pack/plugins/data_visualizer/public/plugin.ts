@@ -48,7 +48,8 @@ export class DataVisualizerPlugin
       DataVisualizerPluginStart,
       DataVisualizerSetupDependencies,
       DataVisualizerStartDependencies
-    > {
+    >
+{
   public setup(
     core: CoreSetup<DataVisualizerStartDependencies, DataVisualizerPluginStart>,
     plugins: DataVisualizerSetupDependencies

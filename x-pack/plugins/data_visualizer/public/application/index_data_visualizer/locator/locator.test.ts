@@ -22,8 +22,7 @@ describe('Index data visualizer locator', () => {
 
     expect(location).toMatchObject({
       app: 'ml',
-      path:
-        '/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_a=(DATA_VISUALIZER_INDEX_VIEWER:())&_g=(refreshInterval:(pause:!f,value:300),time:(from:now-30m,to:now))',
+      path: '/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_a=(DATA_VISUALIZER_INDEX_VIEWER:())&_g=(refreshInterval:(pause:!f,value:300),time:(from:now-30m,to:now))',
       state: {},
     });
   });
@@ -36,8 +35,7 @@ describe('Index data visualizer locator', () => {
 
     expect(location).toMatchObject({
       app: 'ml',
-      path:
-        '/jobs/new_job/datavisualizer?savedSearchId=45014020-dffa-11eb-b120-a105fbbe93b3&_a=(DATA_VISUALIZER_INDEX_VIEWER:())&_g=()',
+      path: '/jobs/new_job/datavisualizer?savedSearchId=45014020-dffa-11eb-b120-a105fbbe93b3&_a=(DATA_VISUALIZER_INDEX_VIEWER:())&_g=()',
       state: {},
     });
   });
@@ -51,8 +49,7 @@ describe('Index data visualizer locator', () => {
 
     expect(location).toMatchObject({
       app: 'ml',
-      path:
-        "/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_a=(DATA_VISUALIZER_INDEX_VIEWER:(visibleFieldNames:!('@timestamp',responsetime),visibleFieldTypes:!(number)))&_g=()",
+      path: "/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_a=(DATA_VISUALIZER_INDEX_VIEWER:(visibleFieldNames:!('@timestamp',responsetime),visibleFieldTypes:!(number)))&_g=()",
     });
   });
 
@@ -79,8 +76,7 @@ describe('Index data visualizer locator', () => {
 
     expect(location).toMatchObject({
       app: 'ml',
-      path:
-        "/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_a=(DATA_VISUALIZER_INDEX_VIEWER:(searchQuery:(bool:(minimum_should_match:1,should:!((match:(region:ap-northwest-1))))),searchQueryLanguage:kuery,searchString:'region : ap-northwest-1'))&_g=()",
+      path: "/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_a=(DATA_VISUALIZER_INDEX_VIEWER:(searchQuery:(bool:(minimum_should_match:1,should:!((match:(region:ap-northwest-1))))),searchQueryLanguage:kuery,searchString:'region : ap-northwest-1'))&_g=()",
       state: {},
     });
   });
@@ -102,8 +98,7 @@ describe('Index data visualizer locator', () => {
 
     expect(location).toMatchObject({
       app: 'ml',
-      path:
-        "/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_a=(DATA_VISUALIZER_INDEX_VIEWER:(searchQuery:(query_string:(analyze_wildcard:!t,query:'region: ap-northwest-1')),searchQueryLanguage:lucene,searchString:'region : ap-northwest-1'))&_g=()",
+      path: "/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_a=(DATA_VISUALIZER_INDEX_VIEWER:(searchQuery:(query_string:(analyze_wildcard:!t,query:'region: ap-northwest-1')),searchQueryLanguage:lucene,searchString:'region : ap-northwest-1'))&_g=()",
       state: {},
     });
   });

@@ -20,7 +20,8 @@ import {
 import { DataVisualizerPluginStart, DataVisualizerStartDependencies } from '../../../../plugin';
 
 export class DataVisualizerGridEmbeddableFactory
-  implements EmbeddableFactoryDefinition<DataVisualizerGridEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<DataVisualizerGridEmbeddableInput>
+{
   public readonly type = DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE;
 
   public readonly grouping = [

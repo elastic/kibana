@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
-import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
+import orgSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
 import { ContentSection } from '../../components/shared/content_section';
 import { ADD_SOURCE_PATH, USERS_AND_ROLES_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
@@ -33,7 +33,7 @@ import { OverviewLogic } from './overview_logic';
 
 const SOURCES_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingSourcesCard.title',
-  { defaultMessage: 'Shared sources' }
+  { defaultMessage: 'Organizational sources' }
 );
 
 const USERS_TITLE = i18n.translate(
@@ -53,7 +53,7 @@ const INVITE_MORE_USERS_BUTTON = i18n.translate(
 
 const ONBOARDING_SOURCES_CARD_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingSourcesCard.description',
-  { defaultMessage: 'Add shared sources for your organization to start searching.' }
+  { defaultMessage: 'Add organizational sources for your organization to start searching.' }
 );
 
 const ADD_FIRST_SOURCES_BUTTON = i18n.translate(
@@ -87,7 +87,7 @@ export const OnboardingSteps: React.FC = () => {
     'xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.description',
     {
       defaultMessage:
-        'You have added {sourcesCount, number} shared {sourcesCount, plural, one {source} other {sources}}. Happy searching.',
+        'You have added {sourcesCount, number} organizational {sourcesCount, plural, one {source} other {sources}}. Happy searching.',
       values: { sourcesCount },
     }
   );
@@ -97,8 +97,8 @@ export const OnboardingSteps: React.FC = () => {
       <EuiFlexGrid columns={2}>
         <OnboardingCard
           title={SOURCES_TITLE}
-          testSubj="sharedSourcesButton"
-          icon={sharedSourcesIcon}
+          testSubj="orgSourcesButton"
+          icon={orgSourcesIcon}
           description={
             hasOrgSources ? SOURCES_CARD_DESCRIPTION : ONBOARDING_SOURCES_CARD_DESCRIPTION
           }

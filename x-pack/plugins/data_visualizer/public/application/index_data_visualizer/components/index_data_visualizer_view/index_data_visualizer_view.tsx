@@ -166,10 +166,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     autoRefreshSelector: true,
   });
 
-  const dataLoader = useMemo(() => new DataLoader(currentIndexPattern, toasts), [
-    currentIndexPattern,
-    toasts,
-  ]);
+  const dataLoader = useMemo(
+    () => new DataLoader(currentIndexPattern, toasts),
+    [currentIndexPattern, toasts]
+  );
 
   useEffect(() => {
     if (globalState?.time !== undefined) {

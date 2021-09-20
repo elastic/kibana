@@ -65,7 +65,8 @@ export interface IndexDataVisualizerLocatorParams extends SerializableRecord {
 export type IndexDataVisualizerLocator = LocatorPublic<IndexDataVisualizerLocatorParams>;
 
 export class IndexDataVisualizerLocatorDefinition
-  implements LocatorDefinition<IndexDataVisualizerLocatorParams> {
+  implements LocatorDefinition<IndexDataVisualizerLocatorParams>
+{
   public readonly id = DATA_VISUALIZER_APP_LOCATOR;
 
   constructor() {}

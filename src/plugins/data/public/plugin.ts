@@ -58,7 +58,8 @@ export class DataPublicPlugin
       DataPublicPluginStart,
       DataSetupDependencies,
       DataStartDependencies
-    > {
+    >
+{
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly queryService: QueryService;
