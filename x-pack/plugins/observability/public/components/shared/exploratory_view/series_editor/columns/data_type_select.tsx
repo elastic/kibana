@@ -6,7 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem, EuiBadge } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPopover,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiBadge,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { AppDataType, SeriesUrl } from '../../types';
@@ -113,7 +120,11 @@ export function DataTypesSelect({ seriesId, series }: Props) {
           </EuiListGroup>
         </EuiPopover>
       )}
-      {series.dataType && <EuiBadge>{DataTypesLabels[series.dataType as DataTypes]}</EuiBadge>}
+      {series.dataType && (
+        <EuiToolTip position="top" content={SELECT_DATA_TYPE_TOOLTIP}>
+          <EuiBadge>{DataTypesLabels[series.dataType as DataTypes]}</EuiBadge>
+        </EuiToolTip>
+      )}
     </>
   );
 }
@@ -122,5 +133,12 @@ const SELECT_DATA_TYPE_LABEL = i18n.translate(
   'xpack.observability.overview.exploratoryView.selectDataType',
   {
     defaultMessage: 'Select data type',
+  }
+);
+
+const SELECT_DATA_TYPE_TOOLTIP = i18n.translate(
+  'xpack.observability.overview.exploratoryView.selectDataTypeTooltip',
+  {
+    defaultMessage: 'Data type cannot be edited.',
   }
 );
