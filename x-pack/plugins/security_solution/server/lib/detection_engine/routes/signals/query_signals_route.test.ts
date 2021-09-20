@@ -18,6 +18,8 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
 describe('query for signal', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -31,7 +33,10 @@ describe('query for signal', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise(getEmptySignalsResponse())
     );
 
-    querySignalsRoute(server.router, true);
+    const ruleDataClient = ruleRegistryMocks.createRuleDataClient(
+      '.alerts-security.alerts'
+    ) as IRuleDataClient;
+    querySignalsRoute(server.router, ruleDataClient);
   });
 
   describe('query and agg on signals index', () => {
