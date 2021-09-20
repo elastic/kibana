@@ -112,32 +112,21 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
       <div className={'dataVisualizerMapWrapper'}>
         <EmbeddedMapComponent layerList={layerList} />
       </div>
-      <div>
-        <EuiText size="xs" textAlign={'center'}>
-          <FormattedMessage
-            id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"
-            defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
-            values={{
-              topValuesSamplerShardSize,
-            }}
-          />
-        </EuiText>
-      </div>
 
-      {/* {isTopValuesSampled === true && (*/}
-      {/*  <>*/}
-      {/*    <EuiSpacer size="xs" />*/}
-      {/*    <EuiText size="xs" textAlign={'center'}>*/}
-      {/*      <FormattedMessage*/}
-      {/*        id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"*/}
-      {/*        defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"*/}
-      {/*        values={{*/}
-      {/*          topValuesSamplerShardSize,*/}
-      {/*        }}*/}
-      {/*      />*/}
-      {/*    </EuiText>*/}
-      {/*  </>*/}
-      {/* )}*/}
+      {isTopValuesSampled === true && (
+        <div>
+          <EuiSpacer size={'s'} />
+          <EuiText size="xs" textAlign={'center'}>
+            <FormattedMessage
+              id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"
+              defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
+              values={{
+                topValuesSamplerShardSize,
+              }}
+            />
+          </EuiText>
+        </div>
+      )}
     </ExpandedRowPanel>
   );
 };
