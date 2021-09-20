@@ -7,6 +7,7 @@
 
 import { get, isEqual } from 'lodash';
 import expect from '@kbn/expect';
+import { ALERT_REASON, ALERT_RULE_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DETECTION_ENGINE_RULES_STATUS_URL } from '../../../../plugins/security_solution/common/constants';
@@ -26,6 +27,13 @@ import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/securit
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
 import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
 import { ENRICHMENT_TYPES } from '../../../../plugins/security_solution/common/cti/constants';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_TIME,
+} from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
+import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 
 const format = (value: unknown): string => JSON.stringify(value, null, 2);
 
@@ -174,7 +182,8 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
         const fullSource = signalsOpen.hits.hits.find(
-          (signal) => signal._source?.signal.parents[0].id === '7yJ-B2kBR346wHgnhlMn'
+          (signal) =>
+            (signal._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
         );
         const fullSignal = fullSource?._source;
         if (!fullSignal) {
@@ -263,44 +272,28 @@ export default ({ getService }: FtrProviderContext) => {
             id: '0',
             name: 'root',
           },
-          signal: {
-            _meta: {
-              version: SIGNALS_TEMPLATE_VERSION,
-            },
-            ancestors: [
-              {
-                id: '7yJ-B2kBR346wHgnhlMn',
-                type: 'event',
-                index: 'auditbeat-8.0.0-2019.02.19-000001',
-                depth: 0,
-              },
-            ],
-            depth: 1,
-            original_event: {
-              action: 'error',
-              category: 'user-login',
-              module: 'auditd',
-            },
-            original_time: fullSignal.signal.original_time,
-            parent: {
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
+          [ALERT_ANCESTORS]: [
+            {
               id: '7yJ-B2kBR346wHgnhlMn',
               type: 'event',
               index: 'auditbeat-8.0.0-2019.02.19-000001',
               depth: 0,
             },
-            parents: [
-              {
-                id: '7yJ-B2kBR346wHgnhlMn',
-                type: 'event',
-                index: 'auditbeat-8.0.0-2019.02.19-000001',
-                depth: 0,
-              },
-            ],
-            reason:
-              'user-login event by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
-            rule: fullSignal.signal.rule,
-            status: 'open',
+          ],
+          [ALERT_DEPTH]: 1,
+          [ALERT_ORIGINAL_EVENT]: {
+            action: 'error',
+            category: 'user-login',
+            module: 'auditd',
           },
+          [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+          [ALERT_REASON]:
+            'user-login event by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
+          [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
+          [ALERT_STATUS]: 'open',
           threat: {
             enrichments: get(fullSignal, 'threat.enrichments'),
           },

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_STATUS } from '@kbn/rule-data-utils';
 
 import type { estypes } from '@elastic/elasticsearch';
 import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
@@ -18,7 +19,6 @@ import {
   createSignalsIndex,
   deleteSignalsIndex,
   setSignalStatus,
-  getSignalStatusEmptyResponse,
   getQuerySignalIds,
   deleteAllAlerts,
   createRule,
@@ -27,6 +27,7 @@ import {
   waitForRuleSuccessOrStatus,
   getRuleForSignalTesting,
 } from '../../utils';
+import { RACAlert } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -34,37 +35,6 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
   describe('open_close_signals', () => {
-    describe('validation checks', () => {
-      it('should not give errors when querying and the signals index does not exist yet', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(setSignalStatus({ signalIds: ['123'], status: 'open' }))
-          .expect(200);
-
-        // remove any server generated items that are indeterministic
-        delete body.took;
-
-        expect(body).to.eql(getSignalStatusEmptyResponse());
-      });
-
-      it('should not give errors when querying and the signals index does exist and is empty', async () => {
-        await createSignalsIndex(supertest);
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(setSignalStatus({ signalIds: ['123'], status: 'open' }))
-          .expect(200);
-
-        // remove any server generated items that are indeterministic
-        delete body.took;
-
-        expect(body).to.eql(getSignalStatusEmptyResponse());
-
-        await deleteSignalsIndex(supertest);
-      });
-    });
-
     describe('tests with auditbeat data', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
@@ -100,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const everySignalOpen = signalsOpen.hits.hits.every(
-          (hit) => hit._source?.signal?.status === 'open'
+          (hit) => hit._source?.[ALERT_STATUS] === 'open'
         );
         expect(everySignalOpen).to.eql(true);
       });
@@ -148,15 +118,14 @@ export default ({ getService }: FtrProviderContext) => {
           .send(setSignalStatus({ signalIds, status: 'closed' }))
           .expect(200);
 
-        const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-          await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(signalIds))
-            .expect(200);
+        const { body: signalsClosed }: { body: estypes.SearchResponse<RACAlert> } = await supertest
+          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getQuerySignalIds(signalIds))
+          .expect(200);
 
         const everySignalClosed = signalsClosed.hits.hits.every(
-          (hit) => hit._source?.signal?.status === 'closed'
+          (hit) => hit._source?.[ALERT_STATUS] === 'closed'
         );
         expect(everySignalClosed).to.eql(true);
       });

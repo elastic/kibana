@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
-        const signal = signalsOpen.hits.hits[0]._source?.signal;
+        const signal = signalsOpen.hits.hits[0]._source!;
 
         expect(signal).eql({
           [ALERT_ANCESTORS]: [
@@ -1037,7 +1037,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
-        const signal = signalsOpen.hits.hits[0]._source?.signal;
+        const signal = signalsOpen.hits.hits[0]._source!;
         expect(signal).eql({
           [ALERT_ANCESTORS]: [
             {

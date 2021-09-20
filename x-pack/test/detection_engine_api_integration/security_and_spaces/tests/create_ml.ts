@@ -6,6 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  ALERT_REASON,
+  ALERT_RULE_NAMESPACE,
+  ALERT_RULE_UPDATED_AT,
+  ALERT_STATUS,
+} from '@kbn/rule-data-utils';
 
 import { MachineLearningCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -24,6 +30,12 @@ import {
   importFile,
 } from '../../../lists_api_integration/utils';
 import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+import { flattenWithPrefix } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/factories/utils/flatten_with_prefix';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_TIME,
+} from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -131,68 +143,52 @@ export default ({ getService }: FtrProviderContext) => {
         process: { name: ['store'] },
         host: { name: ['mothra'] },
         event: { kind: 'signal' },
-        signal: {
-          _meta: { version: SIGNALS_TEMPLATE_VERSION },
-          parents: [
-            {
-              id: 'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
-              type: 'event',
-              index: '.ml-anomalies-custom-linux_anomalous_network_activity_ecs',
-              depth: 0,
-            },
-          ],
-          ancestors: [
-            {
-              id: 'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
-              type: 'event',
-              index: '.ml-anomalies-custom-linux_anomalous_network_activity_ecs',
-              depth: 0,
-            },
-          ],
-          status: 'open',
-          rule: {
-            id: createdRule.id,
-            rule_id: createdRule.rule_id,
-            created_at: createdRule.created_at,
-            updated_at: signal._source?.signal.rule.updated_at,
-            actions: [],
-            interval: '5m',
-            name: 'Test ML rule',
-            tags: [],
-            enabled: true,
-            created_by: 'elastic',
-            updated_by: 'elastic',
-            throttle: null,
-            description: 'Test ML rule description',
-            risk_score: 50,
-            severity: 'critical',
-            output_index: '.siem-signals-default',
-            author: [],
-            false_positives: [],
-            from: '1900-01-01T00:00:00.000Z',
-            max_signals: 100,
-            risk_score_mapping: [],
-            severity_mapping: [],
-            threat: [],
-            to: 'now',
-            references: [],
-            version: 1,
-            exceptions_list: [],
-            immutable: false,
-            type: 'machine_learning',
-            anomaly_threshold: 30,
-            machine_learning_job_id: ['linux_anomalous_network_activity_ecs'],
-          },
-          depth: 1,
-          parent: {
+        _meta: { version: SIGNALS_TEMPLATE_VERSION },
+        [ALERT_ANCESTORS]: [
+          {
             id: 'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
             type: 'event',
             index: '.ml-anomalies-custom-linux_anomalous_network_activity_ecs',
             depth: 0,
           },
-          reason: `event with process store, by root on mothra created critical alert Test ML rule.`,
-          original_time: '2020-11-16T22:58:08.000Z',
-        },
+        ],
+        [ALERT_STATUS]: 'open',
+        ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
+          id: createdRule.id,
+          rule_id: createdRule.rule_id,
+          created_at: createdRule.created_at,
+          updated_at: signal._source?.[ALERT_RULE_UPDATED_AT],
+          actions: [],
+          interval: '5m',
+          name: 'Test ML rule',
+          tags: [],
+          enabled: true,
+          created_by: 'elastic',
+          updated_by: 'elastic',
+          throttle: null,
+          description: 'Test ML rule description',
+          risk_score: 50,
+          severity: 'critical',
+          output_index: '.siem-signals-default',
+          author: [],
+          false_positives: [],
+          from: '1900-01-01T00:00:00.000Z',
+          max_signals: 100,
+          risk_score_mapping: [],
+          severity_mapping: [],
+          threat: [],
+          to: 'now',
+          references: [],
+          version: 1,
+          exceptions_list: [],
+          immutable: false,
+          type: 'machine_learning',
+          anomaly_threshold: 30,
+          machine_learning_job_id: ['linux_anomalous_network_activity_ecs'],
+        }),
+        [ALERT_DEPTH]: 1,
+        [ALERT_REASON]: `event with process store, by root on mothra created critical alert Test ML rule.`,
+        [ALERT_ORIGINAL_TIME]: '2020-11-16T22:58:08.000Z',
         all_field_values: [
           'store',
           'linux_anomalous_network_activity_ecs',

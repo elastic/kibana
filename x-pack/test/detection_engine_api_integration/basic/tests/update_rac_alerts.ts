@@ -15,7 +15,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteSignalsIndex,
-  getSignalStatusEmptyResponse,
   getQuerySignalIds,
   deleteAllAlerts,
   createRule,
@@ -31,26 +30,6 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
   describe('open_close_signals', () => {
-    describe('validation checks', () => {
-      it.skip('should not give errors when querying and the signals index does not exist yet', async () => {
-        const { body } = await supertest
-          .post(RAC_ALERTS_BULK_UPDATE_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: ['123'], status: 'open', index: '.siem-signals-default' });
-        // remove any server generated items that are indeterministic
-        delete body.took;
-        expect(body).to.eql(getSignalStatusEmptyResponse());
-      });
-      it('should not give errors when querying and the signals index does exist and is empty', async () => {
-        await createSignalsIndex(supertest);
-        await supertest
-          .post(RAC_ALERTS_BULK_UPDATE_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: ['123'], status: 'open', index: '.siem-signals-default' })
-          .expect(200);
-      });
-    });
-
     describe('tests with auditbeat data', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
