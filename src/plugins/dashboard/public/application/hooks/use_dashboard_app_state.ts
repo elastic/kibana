@@ -38,6 +38,7 @@ import {
   syncDashboardUrlState,
   diffDashboardState,
   areTimeRangesEqual,
+  areRefreshIntervalsEqual,
 } from '../lib';
 
 export interface UseDashboardStateProps {
@@ -249,13 +250,17 @@ export const useDashboardAppState = ({
           if (current.viewMode === ViewMode.EDIT) {
             savedTimeChanged =
               lastSaved.timeRestore &&
-              !areTimeRangesEqual(
+              (!areTimeRangesEqual(
                 {
                   from: savedDashboard?.timeFrom,
                   to: savedDashboard?.timeTo,
                 },
                 timefilter.getTime()
-              );
+              ) ||
+                !areRefreshIntervalsEqual(
+                  savedDashboard?.refreshInterval,
+                  timefilter.getRefreshInterval()
+                ));
           }
           const hasUnsavedChanges = Object.keys(unsavedChanges).length > 0 || savedTimeChanged;
           setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
