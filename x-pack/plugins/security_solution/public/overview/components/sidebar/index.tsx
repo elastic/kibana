@@ -12,9 +12,8 @@ import { FilterMode as RecentTimelinesFilterMode } from '../recent_timelines/typ
 import { Sidebar } from './sidebar';
 
 export const StatefulSidebar = React.memo(() => {
-  const [recentTimelinesFilterBy, setRecentTimelinesFilterBy] = useState<RecentTimelinesFilterMode>(
-    'favorites'
-  );
+  const [recentTimelinesFilterBy, setRecentTimelinesFilterBy] =
+    useState<RecentTimelinesFilterMode>('favorites');
 
   return (
     <Sidebar

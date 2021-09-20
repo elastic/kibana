@@ -30,10 +30,8 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
   const [showFlyout, setShowFlyout] = useState(false);
   const snapshotState = useMlSnapshotContext();
 
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const closeFlyout = useCallback(() => {
     setShowFlyout(false);

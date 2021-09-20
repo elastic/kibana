@@ -69,11 +69,12 @@ export const getThresholdSignalHistory = async ({
               // Pre-7.12 signals
               {
                 field:
-                  (((hit._source.signal?.rule as RulesSchema).threshold as unknown) as {
-                    field: string;
-                  }).field ?? '',
-                value: ((hit._source.signal?.threshold_result as unknown) as { value: string })
-                  .value,
+                  (
+                    (hit._source.signal?.rule as RulesSchema).threshold as unknown as {
+                      field: string;
+                    }
+                  ).field ?? '',
+                value: (hit._source.signal?.threshold_result as unknown as { value: string }).value,
               },
             ];
 

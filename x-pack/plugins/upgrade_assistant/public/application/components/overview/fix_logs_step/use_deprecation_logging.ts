@@ -44,10 +44,8 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
 
   useEffect(() => {
     if (!isLoading && data) {
-      const {
-        isDeprecationLogIndexingEnabled: isIndexingEnabled,
-        isDeprecationLoggingEnabled,
-      } = data;
+      const { isDeprecationLogIndexingEnabled: isIndexingEnabled, isDeprecationLoggingEnabled } =
+        data;
       setIsDeprecationLogIndexingEnabled(isIndexingEnabled);
 
       if (!isIndexingEnabled && isDeprecationLoggingEnabled) {
@@ -59,12 +57,10 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
   const toggleLogging = async () => {
     setIsUpdating(true);
 
-    const {
-      data: updatedLoggingState,
-      error: updateDeprecationError,
-    } = await api.updateDeprecationLogging({
-      isEnabled: !isDeprecationLogIndexingEnabled,
-    });
+    const { data: updatedLoggingState, error: updateDeprecationError } =
+      await api.updateDeprecationLogging({
+        isEnabled: !isDeprecationLogIndexingEnabled,
+      });
 
     setIsUpdating(false);
     setOnlyDeprecationLogWritingEnabled(false);

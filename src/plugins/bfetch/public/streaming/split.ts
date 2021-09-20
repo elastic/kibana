@@ -22,27 +22,27 @@ import { filter } from 'rxjs/operators';
  *     asdf -> fdf -> aaa -> dfsdf
  *
  */
-export const split = (delimiter: string = '\n') => (
-  in$: Observable<string>
-): Observable<string> => {
-  const out$ = new Subject<string>();
-  let startingText = '';
+export const split =
+  (delimiter: string = '\n') =>
+  (in$: Observable<string>): Observable<string> => {
+    const out$ = new Subject<string>();
+    let startingText = '';
 
-  in$.subscribe(
-    (chunk) => {
-      const messages = (startingText + chunk).split(delimiter);
+    in$.subscribe(
+      (chunk) => {
+        const messages = (startingText + chunk).split(delimiter);
 
-      // We don't want to send the last message here, since it may or
-      // may not be a partial message.
-      messages.slice(0, -1).forEach(out$.next.bind(out$));
-      startingText = messages.length ? messages[messages.length - 1] : '';
-    },
-    out$.error.bind(out$),
-    () => {
-      out$.next(startingText);
-      out$.complete();
-    }
-  );
+        // We don't want to send the last message here, since it may or
+        // may not be a partial message.
+        messages.slice(0, -1).forEach(out$.next.bind(out$));
+        startingText = messages.length ? messages[messages.length - 1] : '';
+      },
+      out$.error.bind(out$),
+      () => {
+        out$.next(startingText);
+        out$.complete();
+      }
+    );
 
-  return out$.pipe(filter<string>(Boolean));
-};
+    return out$.pipe(filter<string>(Boolean));
+  };
