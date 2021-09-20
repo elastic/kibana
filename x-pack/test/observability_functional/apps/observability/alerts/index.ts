@@ -188,9 +188,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('Filter for value works', async () => {
           await (await observability.alerts.getFilterForValueButton()).click();
-          const queryBarValue = await (await observability.alerts.getQueryBar()).getAttribute(
-            'value'
-          );
+          const queryBarValue = await (
+            await observability.alerts.getQueryBar()
+          ).getAttribute('value');
           expect(queryBarValue).to.be('kibana.alert.status: "active"');
           // Wait for request
           await retry.try(async () => {
