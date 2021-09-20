@@ -43,10 +43,8 @@ export const find = async (
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const {
-      filter: authorizationFilter,
-      ensureSavedObjectsAreAuthorized,
-    } = await authorization.getAuthorizationFilter(Operations.findCases);
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.findCases);
 
     const queryArgs = {
       tags: queryParams.tags,
