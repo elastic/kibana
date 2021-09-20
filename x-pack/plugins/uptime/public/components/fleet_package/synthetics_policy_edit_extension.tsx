@@ -77,6 +77,7 @@ export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionP
       [DataStream.BROWSER]: {
         ...browserSimpleFields,
         ...browserAdvancedFields,
+        ...tlsFields,
         [ConfigKeys.NAME]: newPolicy.name,
       } as BrowserFields,
     };

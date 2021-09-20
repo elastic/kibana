@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useEffect, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
 import { ConfigKeys, Validation } from '../types';
@@ -17,10 +17,12 @@ import { SourceField } from './source_field';
 
 interface Props {
   validate: Validation;
+  setShowTLS: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const BrowserSimpleFields = memo<Props>(({ validate }) => {
+export const BrowserSimpleFields = memo<Props>(({ validate, setShowTLS }) => {
   const { fields, setFields, defaultValues } = useBrowserSimpleFieldsContext();
+  const [isInlineScript, setIsInlineScript] = useState(Boolean(fields[ConfigKeys.SOURCE_INLINE]));
   const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
     setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
   };
@@ -38,6 +40,10 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
     },
     [setFields]
   );
+
+  useEffect(() => {
+    setShowTLS(!isInlineScript);
+  }, [isInlineScript, setShowTLS]);
 
   return (
     <>
@@ -78,6 +84,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
       >
         <SourceField
           onChange={onChangeSourceField}
+          setIsInlineScript={setIsInlineScript}
           defaultConfig={useMemo(
             () => ({
               zipUrl: defaultValues[ConfigKeys.SOURCE_ZIP_URL],

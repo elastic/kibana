@@ -14,6 +14,7 @@ import {
 } from '../common/normalizers';
 
 import { defaultBrowserSimpleFields, defaultBrowserAdvancedFields } from '../contexts';
+import { tlsNormalizers } from '../tls/normalizers';
 
 export type BrowserNormalizerMap = Record<keyof BrowserFields, Normalizer>;
 
@@ -40,4 +41,5 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKeys.SCREENSHOTS]: getBrowserNormalizer(ConfigKeys.SCREENSHOTS),
   [ConfigKeys.SYNTHETICS_ARGS]: getBrowserJsonToJavascriptNormalizer(ConfigKeys.SYNTHETICS_ARGS),
   ...commonNormalizers,
+  ...tlsNormalizers,
 };

@@ -12,6 +12,7 @@ import {
   arrayToJsonFormatter,
   stringToJsonFormatter,
 } from '../common/formatters';
+import { tlsFormatters } from '../tls/formatters';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
@@ -26,4 +27,5 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKeys.SYNTHETICS_ARGS]: (fields) =>
     arrayToJsonFormatter(fields[ConfigKeys.SYNTHETICS_ARGS]),
   ...commonFormatters,
+  ...tlsFormatters,
 };

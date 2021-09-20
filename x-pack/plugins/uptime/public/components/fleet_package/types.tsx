@@ -203,7 +203,7 @@ export interface IBrowserAdvancedFields {
 export type HTTPFields = IHTTPSimpleFields & IHTTPAdvancedFields & ITLSFields;
 export type TCPFields = ITCPSimpleFields & ITCPAdvancedFields & ITLSFields;
 export type ICMPFields = IICMPSimpleFields;
-export type BrowserFields = IBrowserSimpleFields & IBrowserAdvancedFields;
+export type BrowserFields = IBrowserSimpleFields & IBrowserAdvancedFields & ITLSFields;
 
 export type ICustomFields = HTTPFields &
   TCPFields &

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, memo } from 'react';
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -14,7 +14,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiDescribedFormGroup,
-  EuiCheckbox,
+  EuiSwitch,
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
@@ -48,7 +48,19 @@ export const CustomFields = memo<Props>(
 
     const isHTTP = monitorType === DataStream.HTTP;
     const isTCP = monitorType === DataStream.TCP;
+    const isICMP = monitorType === DataStream.ICMP;
     const isBrowser = monitorType === DataStream.BROWSER;
+
+    const [showTLS, setShowTLS] = useState<boolean>(!isICMP);
+
+    useEffect(() => {
+      if (!showTLS && monitorType !== DataStream.ICMP) {
+        setShowTLS(true);
+      }
+      if (monitorType === DataStream.ICMP) {
+        setShowTLS(false);
+      }
+    }, [monitorType, showTLS]);
 
     const dataStreamOptions = useMemo(() => {
       const dataStreamToString = [
@@ -69,7 +81,7 @@ export const CustomFields = memo<Props>(
         case DataStream.TCP:
           return <TCPSimpleFields validate={validate} />;
         case DataStream.BROWSER:
-          return <BrowserSimpleFields validate={validate} />;
+          return <BrowserSimpleFields validate={validate} setShowTLS={setShowTLS} />;
         default:
           return null;
       }
@@ -156,7 +168,7 @@ export const CustomFields = memo<Props>(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiDescribedFormGroup>
-        {(isHTTP || isTCP) && (
+        {showTLS && (
           <EuiDescribedFormGroup
             title={
               <h4>
@@ -172,10 +184,10 @@ export const CustomFields = memo<Props>(
                 defaultMessage="Configure TLS options, including verification mode, certificate authorities, and client certificates."
               />
             }
-            data-test-subj="syntheticsIsTLSEnabled"
           >
-            <EuiCheckbox
+            <EuiSwitch
               id={'uptimeFleetIsTLSEnabled'}
+              data-test-subj="syntheticsIsTLSEnabled"
               checked={isTLSEnabled}
               label={
                 <FormattedMessage

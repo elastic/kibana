@@ -36,6 +36,7 @@ interface SourceConfig {
 interface Props {
   onChange: (sourceConfig: SourceConfig) => void;
   defaultConfig: SourceConfig;
+  setIsInlineScript: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const defaultValues = {
@@ -47,7 +48,11 @@ const defaultValues = {
   params: '',
 };
 
-export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) => {
+export const SourceField = ({
+  onChange,
+  defaultConfig = defaultValues,
+  setIsInlineScript,
+}: Props) => {
   const [sourceType, setSourceType] = useState<SourceType>(
     defaultConfig.inlineScript ? SourceType.INLINE : SourceType.ZIP
   );
@@ -246,6 +251,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
       autoFocus="selected"
       onTabClick={(tab) => {
         setSourceType(tab.id as SourceType);
+        setIsInlineScript(tab.id === SourceType.INLINE);
         if (tab.id !== sourceType) {
           setConfig(defaultValues);
         }
