@@ -48,6 +48,15 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title', 'connector', 'settings, owner]`, async () => {
+      const { id: connectorId, ...restConnector } = userActionPostResp.connector;
+
+      const userActionNewValueNoId = {
+        ...userActionPostResp,
+        connector: {
+          ...restConnector,
+        },
+      };
+
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -73,7 +82,10 @@ export default ({ getService }: FtrProviderContext): void => {
       ]);
       expect(body[0].action).to.eql('create');
       expect(body[0].old_value).to.eql(null);
-      expect(JSON.parse(body[0].new_value)).to.eql(userActionPostResp);
+      expect(body[0].old_val_connector_id).to.eql(null);
+      // this will be null because it is for the none connector
+      expect(body[0].new_val_connector_id).to.eql(null);
+      expect(JSON.parse(body[0].new_value)).to.eql(userActionNewValueNoId);
     });
 
     it(`on close case, user action: 'update' should be called with actionFields: ['status']`, async () => {
@@ -147,18 +159,19 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.length).to.eql(2);
       expect(body[1].action_field).to.eql(['connector']);
       expect(body[1].action).to.eql('update');
+      // this is null because it is the none connector
+      expect(body[1].old_val_connector_id).to.eql(null);
       expect(JSON.parse(body[1].old_value)).to.eql({
-        id: 'none',
         name: 'none',
         type: '.none',
         fields: null,
       });
       expect(JSON.parse(body[1].new_value)).to.eql({
-        id: '123',
         name: 'Connector',
         type: '.jira',
         fields: { issueType: 'Task', priority: 'High', parent: null },
       });
+      expect(body[1].new_val_connector_id).to.eql('123');
     });
 
     it(`on update tags, user action: 'add' and 'delete' should be called with actionFields: ['tags']`, async () => {
