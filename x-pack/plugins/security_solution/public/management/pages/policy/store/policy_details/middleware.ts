@@ -26,9 +26,9 @@ import {
   sendPutPackagePolicy,
 } from '../services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
-import { ImmutableMiddlewareFactory } from '../../../../../common/store';
+import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../../common/store';
 import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
-import { TrustedAppsHttpService } from '../../../trusted_apps/service';
+import { TrustedAppsHttpService, TrustedAppsService } from '../../../trusted_apps/service';
 import {
   createLoadedResourceState,
   createLoadingResourceState,
@@ -36,12 +36,17 @@ import {
 } from '../../../../state';
 import { parseQueryFilterToKQL } from '../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
+import { PolicyDetailsAction } from '.';
 
-const searchTrustedApps = async (state, trustedAppsService, dispatch) => {
+const searchTrustedApps = async (
+  store: ImmutableMiddlewareAPI<PolicyDetailsState, PolicyDetailsAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const state = store.getState();
   const location = getCurrentArtifactsLocation(state);
   const policyId = policyIdFromParams(state);
 
-  dispatch({
+  store.dispatch({
     type: 'policyArtifactsAvailableListPageDataChanged',
     // Ignore will be fixed with when AsyncResourceState is refactored (#830)
     // @ts-ignore
@@ -61,7 +66,7 @@ const searchTrustedApps = async (state, trustedAppsService, dispatch) => {
     kuery: kuery.join(' AND '),
   });
 
-  dispatch({
+  store.dispatch({
     type: 'policyArtifactsAvailableListPageDataChanged',
     payload: createLoadedResourceState({
       items: trustedApps.data,
@@ -69,6 +74,9 @@ const searchTrustedApps = async (state, trustedAppsService, dispatch) => {
       pageSize: 100,
       totalItemsCount: trustedApps.total,
       timestamp: Date.now(),
+      filter: location.filter,
+      excludedPolicies: '',
+      includedPolicies: policyId,
     }),
   });
 };
@@ -78,9 +86,9 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 ) => {
   const http = coreStart.http;
   const trustedAppsService = new TrustedAppsHttpService(http);
-  return ({ getState, dispatch }) => (next) => async (action) => {
+  return (store) => (next) => async (action) => {
     next(action);
-    const state = getState();
+    const state = store.getState();
 
     if (action.type === 'userChangedUrl' && needsToRefresh(state) && isOnPolicyDetailsPage(state)) {
       const id = policyIdFromParams(state);
@@ -116,14 +124,14 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
           policyItem.inputs[0].config.policy.value.linux.popup.behavior_protection.message = DefaultPolicyRuleNotificationMessage;
         }
       } catch (error) {
-        dispatch({
+        store.dispatch({
           type: 'serverFailedToReturnPolicyDetailsData',
           payload: error.body || error,
         });
         return;
       }
 
-      dispatch({
+      store.dispatch({
         type: 'serverReturnedPolicyDetailsData',
         payload: {
           policyItem,
@@ -134,7 +142,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       // page is populated with the main content
       if (policyItem.policy_id) {
         const { results } = await sendGetFleetAgentStatusForPolicy(http, policyItem.policy_id);
-        dispatch({
+        store.dispatch({
           type: 'serverReturnedPolicyDetailsAgentSummaryData',
           payload: {
             agentStatusSummary: results,
@@ -146,7 +154,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       isOnPolicyTrustedAppsPage(state) &&
       getCurrentArtifactsLocation(state).show === 'list'
     ) {
-      searchTrustedApps(state, trustedAppsService, dispatch);
+      searchTrustedApps(store, trustedAppsService);
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
       const { id } = policyDetails(state) as PolicyData;
       const updatedPolicyItem = policyDetailsForUpdate(state) as NewPolicyData;
@@ -175,7 +183,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
           }
         );
       } catch (error) {
-        dispatch({
+        store.dispatch({
           type: 'serverReturnedPolicyDetailsUpdateFailure',
           payload: {
             success: false,
@@ -185,7 +193,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
         return;
       }
 
-      dispatch({
+      store.dispatch({
         type: 'serverReturnedUpdatedPolicyDetailsData',
         payload: {
           policyItem: apiResponse.item,
