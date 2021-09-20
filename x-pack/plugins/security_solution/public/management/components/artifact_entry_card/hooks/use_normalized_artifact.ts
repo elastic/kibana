@@ -10,7 +10,8 @@
 import { useMemo } from 'react';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { AnyArtifact, ArtifactInfo } from '../types';
-import { TrustedApp } from '../../../../../common/endpoint/types';
+import { EffectScope, TrustedApp } from '../../../../../common/endpoint/types';
+import { tagsToEffectScope } from '../../../../../common/endpoint/service/trusted_apps/mapping';
 
 /**
  * Takes in any artifact and return back a new data structure used internally with by the card's components
@@ -35,18 +36,22 @@ export const useNormalizedArtifact = (item: AnyArtifact): ArtifactInfo => {
       updated_at,
       updated_by,
       description,
-      entries: (entries as unknown) as ArtifactInfo['entries'],
+      entries: entries as unknown as ArtifactInfo['entries'],
       os: isTrustedApp(item) ? item.os : getOsFromExceptionItem(item),
-      effectScope: isTrustedApp(item) ? item.effectScope : { type: 'global' },
+      effectScope: isTrustedApp(item) ? item.effectScope : getEffectScopeFromExceptionItem(item),
     };
   }, [item]);
 };
 
-const isTrustedApp = (item: AnyArtifact): item is TrustedApp => {
+export const isTrustedApp = (item: AnyArtifact): item is TrustedApp => {
   return 'effectScope' in item;
 };
 
 const getOsFromExceptionItem = (item: ExceptionListItemSchema): string => {
   // FYI: Exceptions seem to allow for items to be assigned to more than one OS, unlike Event Filters and Trusted Apps
   return item.os_types.join(', ');
+};
+
+const getEffectScopeFromExceptionItem = (item: ExceptionListItemSchema): EffectScope => {
+  return tagsToEffectScope(item.tags);
 };

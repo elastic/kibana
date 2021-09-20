@@ -96,7 +96,7 @@ export class LegacyLoggingServer {
       },
     });
 
-    setupLogging((this as unknown) as Server, loggingConfig, 2147483647);
+    setupLogging(this as unknown as Server, loggingConfig, 2147483647);
   }
 
   public register({ plugin: { register }, options }: PluginRegisterParams): Promise<void> {

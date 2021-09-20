@@ -54,33 +54,31 @@ export const applyFormatterIfComplexField = (aspect: Aspect, value: unknown) =>
  * @param aspect
  * @param isComplex - forces to be functional/complex accessor
  */
-export const getComplexAccessor = (fieldName: string) => (
-  aspect: Aspect,
-  index?: number
-): AccessorFn | undefined => {
-  // SHARD_DELAY is used only for dev purpose and need to handle separately.
-  if (aspect.accessor === null || aspect.accessor === undefined || aspect.title === SHARD_DELAY) {
-    return;
-  }
-  const accessor = aspect.accessor;
-
-  const fn: AccessorFn = (d) => {
-    const v = d[accessor];
-    if (v === undefined) {
+export const getComplexAccessor =
+  (fieldName: string) =>
+  (aspect: Aspect, index?: number): AccessorFn | undefined => {
+    // SHARD_DELAY is used only for dev purpose and need to handle separately.
+    if (aspect.accessor === null || aspect.accessor === undefined || aspect.title === SHARD_DELAY) {
       return;
     }
-    // Because of the specific logic of chart, it cannot compare complex values to display,
-    // thats why it is necessary to apply formatters before its comparison while rendering.
-    // What about simple values, formatting them at this step is breaking the logic of intervals (xDomain).
-    // If the value will be formatted on this step, it will be rendered without any respect to the passed bounds
-    // and the chart will render not all the range, but only the part of range, which contains data.
-    return applyFormatterIfComplexField(aspect, v);
+    const accessor = aspect.accessor;
+
+    const fn: AccessorFn = (d) => {
+      const v = d[accessor];
+      if (v === undefined) {
+        return;
+      }
+      // Because of the specific logic of chart, it cannot compare complex values to display,
+      // thats why it is necessary to apply formatters before its comparison while rendering.
+      // What about simple values, formatting them at this step is breaking the logic of intervals (xDomain).
+      // If the value will be formatted on this step, it will be rendered without any respect to the passed bounds
+      // and the chart will render not all the range, but only the part of range, which contains data.
+      return applyFormatterIfComplexField(aspect, v);
+    };
+    fn.fieldName = getFieldName(fieldName, index);
+
+    return fn;
   };
-
-  fn.fieldName = getFieldName(fieldName, index);
-
-  return fn;
-};
 
 export const getSplitSeriesAccessorFnMap = (
   splitSeriesAccessors: Array<Accessor | AccessorFn>
@@ -101,12 +99,14 @@ export const getSplitSeriesAccessorFnMap = (
 export const isPercentileIdEqualToSeriesId = (columnId: number | string, seriesColumnId: string) =>
   columnId.toString().split('.')[0] === seriesColumnId;
 
-export const isValidSeriesForDimension = (seriesColumnId: string) => ({
-  id,
-  accessor,
-}: {
-  id?: string | number;
-  accessor?: string | number | DatatableColumn | null;
-}) =>
-  (id === seriesColumnId || isPercentileIdEqualToSeriesId(id ?? '', seriesColumnId)) &&
-  accessor !== null;
+export const isValidSeriesForDimension =
+  (seriesColumnId: string) =>
+  ({
+    id,
+    accessor,
+  }: {
+    id?: string | number;
+    accessor?: string | number | DatatableColumn | null;
+  }) =>
+    (id === seriesColumnId || isPercentileIdEqualToSeriesId(id ?? '', seriesColumnId)) &&
+    accessor !== null;
