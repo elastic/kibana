@@ -50,7 +50,8 @@ export class RuleRegistryPlugin
       RuleRegistryPluginStartContract,
       RuleRegistryPluginSetupDependencies,
       RuleRegistryPluginStartDependencies
-    > {
+    >
+{
   private readonly config: RuleRegistryPluginConfig;
   private readonly legacyConfig: SharedGlobalConfig;
   private readonly logger: Logger;

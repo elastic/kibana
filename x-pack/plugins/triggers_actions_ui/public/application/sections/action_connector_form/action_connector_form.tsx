@@ -56,12 +56,12 @@ export async function getConnectorErrors<ConnectorConfig, ConnectorSecrets>(
   actionTypeModel: ActionTypeModel
 ) {
   const connectorValidationResult = await actionTypeModel?.validateConnector(connector);
-  const configErrors = (connectorValidationResult.config
-    ? connectorValidationResult.config.errors
-    : {}) as IErrorObject;
-  const secretsErrors = (connectorValidationResult.secrets
-    ? connectorValidationResult.secrets.errors
-    : {}) as IErrorObject;
+  const configErrors = (
+    connectorValidationResult.config ? connectorValidationResult.config.errors : {}
+  ) as IErrorObject;
+  const secretsErrors = (
+    connectorValidationResult.secrets ? connectorValidationResult.secrets.errors : {}
+  ) as IErrorObject;
   const connectorBaseErrors = validateBaseProperties(connector).errors;
   const connectorErrors = {
     ...configErrors,

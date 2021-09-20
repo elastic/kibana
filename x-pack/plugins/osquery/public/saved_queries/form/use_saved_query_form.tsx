@@ -34,9 +34,10 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
     if (defaultValue && defaultValue.id) res.delete(defaultValue.id);
     return res;
   }, [ids, defaultValue]);
-  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(() => createFormSchema(idSet), [
-    idSet,
-  ]);
+  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(
+    () => createFormSchema(idSet),
+    [idSet]
+  );
   return useForm({
     id: SAVED_QUERY_FORM_ID + uuid.v4(),
     schema: formSchema,

@@ -85,7 +85,8 @@ interface Params {
 export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
 
 export class DiscoverUrlGenerator
-  implements UrlGeneratorsDefinition<typeof DISCOVER_APP_URL_GENERATOR> {
+  implements UrlGeneratorsDefinition<typeof DISCOVER_APP_URL_GENERATOR>
+{
   constructor(private readonly params: Params) {}
 
   public readonly id = DISCOVER_APP_URL_GENERATOR;

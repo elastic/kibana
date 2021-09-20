@@ -44,13 +44,8 @@ export type CoreQueryParams = TypeOf<typeof CoreQueryParamsSchema>;
 // above.
 // Using direct type not allowed, circular reference, so body is typed to unknown.
 export function validateCoreQueryBody(anyParams: unknown): string | undefined {
-  const {
-    aggType,
-    aggField,
-    groupBy,
-    termField,
-    termSize,
-  }: CoreQueryParams = anyParams as CoreQueryParams;
+  const { aggType, aggField, groupBy, termField, termSize }: CoreQueryParams =
+    anyParams as CoreQueryParams;
   if (aggType !== 'count' && !aggField) {
     return i18n.translate(
       'xpack.triggersActionsUI.data.coreQueryParams.aggTypeRequiredErrorMessage',
