@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { APP_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
