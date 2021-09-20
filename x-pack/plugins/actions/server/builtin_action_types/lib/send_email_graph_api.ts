@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// @ts-expect-error missing type def
+import stringify from 'json-stringify-safe';
 import axios, { AxiosResponse } from 'axios';
 import { Logger } from '../../../../../../src/core/server';
 import { request } from './axios_utils';
@@ -40,10 +42,11 @@ export async function sendEmailGraphApi(
     configurationUtilities,
     validateStatus: () => true,
   });
+  console.log(res);
   if (res.status === 202) {
     return res;
   }
-  const errString = JSON.stringify(res.data);
+  const errString = stringify(res.data);
   logger.warn(
     `error thrown sending Microsoft Exchange email for clientID: ${sendEmailOptions.options.transport.clientId}: ${errString}`
   );

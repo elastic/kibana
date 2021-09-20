@@ -14,7 +14,7 @@ import {
   GenericValidationResult,
 } from '../../../../types';
 import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
-export const EXCHANGE_SERVER_SERVICE = 'exchnage_server';
+import { AdditionalEmailServices } from '../../../../../../actions/common';
 
 const emailServices: EuiSelectOption[] = [
   {
@@ -126,7 +126,7 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
       if (action.config.from && !action.config.from.trim().match(mailformat)) {
         configErrors.from.push(translations.SENDER_NOT_VALID);
       }
-      if (action.config.service !== EXCHANGE_SERVER_SERVICE) {
+      if (action.config.service !== AdditionalEmailServices.EXCHANGE) {
         if (!action.config.port) {
           configErrors.port.push(translations.PORT_REQUIRED);
         }
