@@ -198,14 +198,14 @@ const getSavedObjectTypes = (
     },
     mappings: {
       properties: {
-        output_id: { type: 'keyword' },
+        output_id: { type: 'keyword', index: false },
         name: { type: 'keyword' },
         type: { type: 'keyword' },
         is_default: { type: 'boolean' },
         hosts: { type: 'keyword' },
         ca_sha256: { type: 'keyword', index: false },
-        config: { type: 'flattened', index: false },
-        config_yaml: { type: 'text', index: false },
+        config: { type: 'flattened' },
+        config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
       },
     },

@@ -492,21 +492,18 @@ describe('output preconfiguration', () => {
     mockedOutputService.create.mockReset();
     mockedOutputService.update.mockReset();
     mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
-    mockedOutputService.get.mockImplementation(async (soClient, id): Promise<Output> => {
-      switch (id) {
-        case 'existing-output-1':
-          return {
-            id: 'existing-output-1',
-            is_default: false,
-            name: 'Output 1',
-            // @ts-ignore
-            type: 'elasticsearch',
-            hosts: ['http://es.co:80'],
-            is_preconfigured: true,
-          };
-        default:
-          throw soClient.errors.createGenericNotFoundError(id);
-      }
+    mockedOutputService.bulkGet.mockImplementation(async (soClient, id): Promise<Output[]> => {
+      return [
+        {
+          id: 'existing-output-1',
+          is_default: false,
+          name: 'Output 1',
+          // @ts-ignore
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+          is_preconfigured: true,
+        },
+      ];
     });
   });
 
