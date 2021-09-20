@@ -45,7 +45,7 @@ export function ExpandedSeriesRow(seriesProps: Props) {
     <div style={{ width: '100%' }}>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem>
-          <EuiFormRow label="Date" fullWidth>
+          <EuiFormRow label={DATE_LABEL} fullWidth>
             <DatePickerCol {...seriesProps} />
           </EuiFormRow>
         </EuiFlexItem>
@@ -55,8 +55,8 @@ export function ExpandedSeriesRow(seriesProps: Props) {
       </EuiFlexGroup>
       <EuiHorizontalRule />
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiFormRow label={FILTERS_LABEL}>
+        <EuiFlexItem>
+          <EuiFormRow label={FILTERS_LABEL} fullWidth>
             <SeriesFilter seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
           </EuiFormRow>
         </EuiFlexItem>
@@ -92,4 +92,8 @@ const FILTERS_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.
 
 const OPERATION_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.operation', {
   defaultMessage: 'Operation',
+});
+
+const DATE_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.date', {
+  defaultMessage: 'Date',
 });
