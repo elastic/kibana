@@ -15,9 +15,17 @@ import { Link } from '../link_panel/link';
 import * as i18n from './translations';
 import { VIEW_DASHBOARD } from '../overview_cti_links/translations';
 import { QUERY_ID as RiskyHostsQueryId } from '../../containers/overview_risky_host_links/use_risky_host_links';
+import { NavigateToHost } from './navigate_to_host';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
-  { name: 'Host Name', field: 'title', sortable: true, truncateText: true, width: '55%' },
+  {
+    name: 'Host Name',
+    field: 'title',
+    sortable: true,
+    truncateText: true,
+    width: '55%',
+    render: (name) => (<NavigateToHost name={name} />) as JSX.Element,
+  },
   {
     align: 'right',
     field: 'count',

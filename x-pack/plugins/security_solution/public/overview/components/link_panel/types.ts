@@ -11,6 +11,7 @@ export interface LinkPanelListItem {
   count: number;
   path: string;
   title: string;
+  hostPath?: string;
 }
 
 export interface LinkPanelViewProps {
