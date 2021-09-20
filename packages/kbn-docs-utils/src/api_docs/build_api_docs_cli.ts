@@ -74,15 +74,11 @@ export function runBuildApiDocsCli() {
       }
       const collectReferences = flags.references as boolean;
 
-      const {
-        pluginApiMap,
-        missingApiItems,
-        unReferencedDeprecations,
-        referencedDeprecations,
-      } = getPluginApiMap(project, plugins, log, {
-        collectReferences,
-        pluginFilter: pluginFilter as string[],
-      });
+      const { pluginApiMap, missingApiItems, unReferencedDeprecations, referencedDeprecations } =
+        getPluginApiMap(project, plugins, log, {
+          collectReferences,
+          pluginFilter: pluginFilter as string[],
+        });
 
       const reporter = CiStatsReporter.fromEnv(log);
       plugins.forEach((plugin) => {

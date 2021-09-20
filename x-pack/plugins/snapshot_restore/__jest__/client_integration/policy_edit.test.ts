@@ -186,15 +186,8 @@ describe('<PolicyEdit />', () => {
 
         const latestRequest = server.requests[server.requests.length - 1];
 
-        const {
-          name,
-          isManagedPolicy,
-          schedule,
-          repository,
-          retention,
-          config,
-          snapshotName,
-        } = POLICY_EDIT;
+        const { name, isManagedPolicy, schedule, repository, retention, config, snapshotName } =
+          POLICY_EDIT;
 
         const expected = {
           name,

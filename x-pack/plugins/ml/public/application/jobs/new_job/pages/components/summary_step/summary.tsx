@@ -50,9 +50,8 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
 
   const navigateToPath = useNavigateToPath();
 
-  const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } =
+    useContext(JobCreatorContext);
   const [progress, setProgress] = useState(resultsLoader.progress);
   const [creatingJob, setCreatingJob] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
