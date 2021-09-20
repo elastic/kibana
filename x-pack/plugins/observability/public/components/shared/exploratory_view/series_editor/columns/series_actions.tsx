@@ -17,8 +17,10 @@ interface Props {
   seriesId: number;
   series: SeriesUrl;
   seriesConfig?: SeriesConfig;
+  onEditClick?: () => void;
 }
-export function SeriesActions({ seriesId, series, seriesConfig }: Props) {
+
+export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: Props) {
   const { setSeries, allSeries } = useSeriesStorage();
 
   const { href: discoverHref } = useDiscoverLink({ series, seriesConfig });
@@ -40,7 +42,24 @@ export function SeriesActions({ seriesId, series, seriesConfig }: Props) {
   };
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="flexEnd">
+    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="flexEnd" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={i18n.translate('xpack.observability.seriesEditor.edit', {
+            defaultMessage: 'Edit series',
+          })}
+        >
+          <EuiButtonIcon
+            iconType="pencil"
+            color="text"
+            aria-label={i18n.translate('xpack.observability.seriesEditor.edit', {
+              defaultMessage: 'edit series',
+            })}
+            size="s"
+            onClick={onEditClick}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={i18n.translate('xpack.observability.seriesEditor.sampleDocuments', {
