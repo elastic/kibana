@@ -89,10 +89,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
 
   const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, commonUI);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
-  const dataVisualizerIndexPatternManagement = MachineLearningDataVisualizerIndexPatternManagementProvider(
-    context,
-    dataVisualizerTable
-  );
+  const dataVisualizerIndexPatternManagement =
+    MachineLearningDataVisualizerIndexPatternManagementProvider(context, dataVisualizerTable);
 
   const jobAnnotations = MachineLearningJobAnnotationsProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);

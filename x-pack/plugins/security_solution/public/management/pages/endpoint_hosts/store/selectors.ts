@@ -70,11 +70,8 @@ export const policyItemsLoading = (state: Immutable<EndpointState>) => state.pol
 export const selectedPolicyId = (state: Immutable<EndpointState>) => state.selectedPolicyId;
 
 export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.endpointPackageInfo;
-export const getIsEndpointPackageInfoUninitialized: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(endpointPackageInfo, (packageInfo) =>
-  isUninitialisedResourceState(packageInfo)
-);
+export const getIsEndpointPackageInfoUninitialized: (state: Immutable<EndpointState>) => boolean =
+  createSelector(endpointPackageInfo, (packageInfo) => isUninitialisedResourceState(packageInfo));
 
 export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.isAutoRefreshEnabled;
 
@@ -146,8 +143,9 @@ export const policyResponseFailedOrWarningActionCount: (
     Object.entries(applied.response.configurations).map(([key, val]) => {
       let count = 0;
       for (const action of val.concerned_actions) {
-        const actionStatus = applied.actions.find((policyActions) => policyActions.name === action)
-          ?.status;
+        const actionStatus = applied.actions.find(
+          (policyActions) => policyActions.name === action
+        )?.status;
         if (
           actionStatus === HostPolicyResponseActionStatus.failure ||
           actionStatus === HostPolicyResponseActionStatus.warning
@@ -252,11 +250,10 @@ export const hasSelectedEndpoint: (state: Immutable<EndpointState>) => boolean =
 );
 
 /** What policy details panel view to show */
-export const showView: (
-  state: EndpointState
-) => EndpointIndexUIQueryParams['show'] = createSelector(uiQueryParams, (searchParams) => {
-  return searchParams.show ?? 'details';
-});
+export const showView: (state: EndpointState) => EndpointIndexUIQueryParams['show'] =
+  createSelector(uiQueryParams, (searchParams) => {
+    return searchParams.show ?? 'details';
+  });
 
 /**
  * Returns the selected endpoint's elastic agent Id
@@ -321,7 +318,7 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
   ({ admin_query: adminQuery }) => {
     const decodedQuery: Query = { query: '', language: 'kuery' };
     if (adminQuery) {
-      const urlDecodedQuery = (decode(adminQuery) as unknown) as Query;
+      const urlDecodedQuery = decode(adminQuery) as unknown as Query;
       if (urlDecodedQuery && typeof urlDecodedQuery.query === 'string') {
         decodedQuery.query = urlDecodedQuery.query;
       }
@@ -343,17 +340,15 @@ export const getCurrentIsolationRequestState = (
   return state.isolationRequestState;
 };
 
-export const getIsIsolationRequestPending: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(getCurrentIsolationRequestState, (isolateHost) =>
-  isLoadingResourceState(isolateHost)
-);
+export const getIsIsolationRequestPending: (state: Immutable<EndpointState>) => boolean =
+  createSelector(getCurrentIsolationRequestState, (isolateHost) =>
+    isLoadingResourceState(isolateHost)
+  );
 
-export const getWasIsolationRequestSuccessful: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(getCurrentIsolationRequestState, (isolateHost) =>
-  isLoadedResourceState(isolateHost)
-);
+export const getWasIsolationRequestSuccessful: (state: Immutable<EndpointState>) => boolean =
+  createSelector(getCurrentIsolationRequestState, (isolateHost) =>
+    isLoadedResourceState(isolateHost)
+  );
 
 export const getIsolationRequestError: (
   state: Immutable<EndpointState>
@@ -363,11 +358,10 @@ export const getIsolationRequestError: (
   }
 });
 
-export const getIsOnEndpointDetailsActivityLog: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(uiQueryParams, (searchParams) => {
-  return searchParams.show === EndpointDetailsTabsTypes.activityLog;
-});
+export const getIsOnEndpointDetailsActivityLog: (state: Immutable<EndpointState>) => boolean =
+  createSelector(uiQueryParams, (searchParams) => {
+    return searchParams.show === EndpointDetailsTabsTypes.activityLog;
+  });
 
 export const getActivityLogDataPaging = (
   state: Immutable<EndpointState>
@@ -386,23 +380,14 @@ export const getLastLoadedActivityLogData: (
   return getLastLoadedResourceState(activityLog)?.data;
 });
 
-export const getActivityLogUninitialized: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(getActivityLogData, (activityLog) =>
-  isUninitialisedResourceState(activityLog)
-);
+export const getActivityLogUninitialized: (state: Immutable<EndpointState>) => boolean =
+  createSelector(getActivityLogData, (activityLog) => isUninitialisedResourceState(activityLog));
 
-export const getActivityLogRequestLoading: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(getActivityLogData, (activityLog) =>
-  isLoadingResourceState(activityLog)
-);
+export const getActivityLogRequestLoading: (state: Immutable<EndpointState>) => boolean =
+  createSelector(getActivityLogData, (activityLog) => isLoadingResourceState(activityLog));
 
-export const getActivityLogRequestLoaded: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(getActivityLogData, (activityLog) =>
-  isLoadedResourceState(activityLog)
-);
+export const getActivityLogRequestLoaded: (state: Immutable<EndpointState>) => boolean =
+  createSelector(getActivityLogData, (activityLog) => isLoadedResourceState(activityLog));
 
 export const getActivityLogIterableData: (
   state: Immutable<EndpointState>
@@ -411,13 +396,12 @@ export const getActivityLogIterableData: (
   return isLoadedResourceState(activityLog) ? activityLog.data.data : emptyArray;
 });
 
-export const getActivityLogError: (
-  state: Immutable<EndpointState>
-) => ServerApiError | undefined = createSelector(getActivityLogData, (activityLog) => {
-  if (isFailedResourceState(activityLog)) {
-    return activityLog.error;
-  }
-});
+export const getActivityLogError: (state: Immutable<EndpointState>) => ServerApiError | undefined =
+  createSelector(getActivityLogData, (activityLog) => {
+    if (isFailedResourceState(activityLog)) {
+      return activityLog.error;
+    }
+  });
 
 // returns a true if either lgo is uninitialised
 // or if it has failed an api call after having fetched a non empty log list earlier

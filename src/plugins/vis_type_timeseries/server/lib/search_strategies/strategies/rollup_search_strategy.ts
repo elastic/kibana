@@ -36,11 +36,10 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     indexPattern: string
   ) {
     try {
-      const {
-        body,
-      } = await requestContext.core.elasticsearch.client.asCurrentUser.rollup.getRollupIndexCaps({
-        index: indexPattern,
-      });
+      const { body } =
+        await requestContext.core.elasticsearch.client.asCurrentUser.rollup.getRollupIndexCaps({
+          index: indexPattern,
+        });
 
       return body;
     } catch (e) {
