@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { Filter } from '@kbn/es-query';
 import { get, uniq } from 'lodash';
+import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
   ELASTICSEARCH_SYSTEM_ID,
@@ -15,15 +17,31 @@ import {
   LOGSTASH_SYSTEM_ID,
   KIBANA_STATS_TYPE_MONITORING,
 } from '../../../../common/constants';
+import { LegacyRequest } from '../../../types';
 import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
+
+interface Bucket {
+  key: string;
+  single_type?: {
+    beat_type: {
+      buckets: Array<{ key: string }>;
+    };
+  };
+}
 
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 
-const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nodeUuid, size) => {
+const getRecentMonitoringDocuments = async (
+  req: LegacyRequest,
+  indexPatterns: Record<string, string>,
+  clusterUuid?: string,
+  nodeUuid?: string,
+  size?: string
+) => {
   const start = get(req.payload, 'timeRange.min') || `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`;
   const end = get(req.payload, 'timeRange.max') || 'now';
 
-  const filters = [
+  const filters: Filter[] = [
     {
       range: {
         timestamp: {
@@ -38,7 +56,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
     filters.push({ term: { cluster_uuid: clusterUuid } });
   }
 
-  const nodesClause = {};
+  const nodesClause: Filter = {};
   if (nodeUuid) {
     nodesClause.must = [
       {
@@ -201,7 +219,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
   return await callWithRequest(req, 'search', params);
 };
 
-async function doesIndexExist(req, index) {
+async function doesIndexExist(req: LegacyRequest, index: string) {
   const params = {
     index,
     size: 0,
@@ -214,8 +232,8 @@ async function doesIndexExist(req, index) {
   return get(response, 'hits.total.value', 0) > 0;
 }
 
-async function detectProducts(req, isLiveCluster) {
-  const result = {
+async function detectProducts(req: LegacyRequest, isLiveCluster: boolean) {
+  const result: Record<string, Record<string, boolean>> = {
     [KIBANA_SYSTEM_ID]: {
       doesExist: true,
     },
@@ -260,7 +278,7 @@ async function detectProducts(req, isLiveCluster) {
   return result;
 }
 
-function getUuidBucketName(productName) {
+function getUuidBucketName(productName: string) {
   switch (productName) {
     case ELASTICSEARCH_SYSTEM_ID:
       return 'es_uuids';
@@ -274,7 +292,7 @@ function getUuidBucketName(productName) {
   }
 }
 
-function matchesMetricbeatIndex(metricbeatIndex, index) {
+function matchesMetricbeatIndex(metricbeatIndex: string, index: string) {
   if (index.includes(metricbeatIndex)) {
     return true;
   }
@@ -284,7 +302,7 @@ function matchesMetricbeatIndex(metricbeatIndex, index) {
   return false;
 }
 
-function isBeatFromAPM(bucket) {
+function isBeatFromAPM(bucket: Bucket) {
   const beatType = get(bucket, 'single_type.beat_type');
   if (!beatType) {
     return false;
@@ -293,7 +311,7 @@ function isBeatFromAPM(bucket) {
   return get(beatType, 'buckets[0].key') === 'apm-server';
 }
 
-async function hasNecessaryPermissions(req) {
+async function hasNecessaryPermissions(req: LegacyRequest) {
   const licenseService = await req.server.plugins.monitoring.info.getLicenseService();
   const securityFeature = licenseService.getSecurityFeature();
   if (!securityFeature.isAvailable || !securityFeature.isEnabled) {
@@ -310,7 +328,7 @@ async function hasNecessaryPermissions(req) {
     });
     // If there is some problem, assume they do not have access
     return get(response, 'has_all_requested', false);
-  } catch (err) {
+  } catch (err: any) {
     if (
       err.message === 'no handler found for uri [/_security/user/_has_privileges] and method [POST]'
     ) {
@@ -336,7 +354,7 @@ async function hasNecessaryPermissions(req) {
  * @param {*} product The product object, which are stored in PRODUCTS
  * @param {*} bucket The agg bucket in the response
  */
-function shouldSkipBucket(product, bucket) {
+function shouldSkipBucket(product: { name: string }, bucket: Bucket) {
   if (product.name === BEATS_SYSTEM_ID && isBeatFromAPM(bucket)) {
     return true;
   }
@@ -346,18 +364,22 @@ function shouldSkipBucket(product, bucket) {
   return false;
 }
 
-async function getLiveKibanaInstance(usageCollection) {
+async function getLiveKibanaInstance(usageCollection?: UsageCollectionSetup) {
   if (!usageCollection) {
     return null;
   }
   const kibanaStatsCollector = usageCollection.getCollectorByType(KIBANA_STATS_TYPE_MONITORING);
-  if (!(await kibanaStatsCollector.isReady())) {
+  if (!(await kibanaStatsCollector?.isReady())) {
     return null;
   }
-  return usageCollection.toApiFieldNames(await kibanaStatsCollector.fetch());
+  return usageCollection.toApiFieldNames(
+    (await kibanaStatsCollector!.fetch(
+      (undefined as unknown) as CollectorFetchContext
+    )) as unknown[]
+  );
 }
 
-async function getLiveElasticsearchClusterUuid(req) {
+async function getLiveElasticsearchClusterUuid(req: LegacyRequest) {
   const params = {
     path: '/_cluster/state/cluster_uuid',
     method: 'GET',
@@ -368,7 +390,7 @@ async function getLiveElasticsearchClusterUuid(req) {
   return clusterUuid;
 }
 
-async function getLiveElasticsearchCollectionEnabled(req) {
+async function getLiveElasticsearchCollectionEnabled(req: LegacyRequest) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const response = await callWithRequest(req, 'transport.request', {
     method: 'GET',
@@ -416,15 +438,15 @@ async function getLiveElasticsearchCollectionEnabled(req) {
  * @param {*} skipLiveData Optional and will not make any live api calls if set to true
  */
 export const getCollectionStatus = async (
-  req,
-  indexPatterns,
-  clusterUuid,
-  nodeUuid,
-  skipLiveData
+  req: LegacyRequest,
+  indexPatterns: Record<string, string>,
+  clusterUuid?: string,
+  nodeUuid?: string,
+  skipLiveData?: boolean
 ) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
-  const metricbeatIndex = config.get('monitoring.ui.metricbeat.index');
+  const metricbeatIndex = config.get('monitoring.ui.metricbeat.index')!;
   const size = config.get('monitoring.ui.max_bucket_size');
   const hasPermissions = await hasNecessaryPermissions(req);
 
@@ -458,10 +480,10 @@ export const getCollectionStatus = async (
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
   const liveClusterInternalCollectionEnabled = await getLiveElasticsearchCollectionEnabled(req);
 
-  const status = PRODUCTS.reduce((products, product) => {
+  const status: Record<string, any> = PRODUCTS.reduce((products, product) => {
     const token = product.token || product.name;
     const uuidBucketName = getUuidBucketName(product.name);
-    const indexBuckets = indicesBuckets.filter((bucket) => {
+    const indexBuckets = indicesBuckets.filter((bucket: Bucket) => {
       if (bucket.key.includes(token)) {
         return true;
       }
@@ -473,18 +495,18 @@ export const getCollectionStatus = async (
       return false;
     });
 
-    const productStatus = {
+    const productStatus: Record<string, any> = {
       totalUniqueInstanceCount: 0,
       totalUniqueInternallyCollectedCount: 0,
       totalUniqueFullyMigratedCount: 0,
       totalUniquePartiallyMigratedCount: 0,
       detected: null,
-      byUuid: {},
+      byUuid: {} as Record<string, any>,
     };
 
-    const fullyMigratedUuidsMap = {};
-    const internalCollectorsUuidsMap = {};
-    const partiallyMigratedUuidsMap = {};
+    const fullyMigratedUuidsMap: Record<string, any> = {};
+    const internalCollectorsUuidsMap: Record<string, any> = {};
+    const partiallyMigratedUuidsMap: Record<string, any> = {};
 
     // If there is no data, then they are a net new user
     if (!indexBuckets || indexBuckets.length === 0) {
@@ -522,8 +544,9 @@ export const getCollectionStatus = async (
       productStatus.totalUniqueInternallyCollectedCount = Object.keys(
         internalCollectorsUuidsMap
       ).length;
-      productStatus.totalUniquePartiallyMigratedCount =
-        Object.keys(partiallyMigratedUuidsMap).length;
+      productStatus.totalUniquePartiallyMigratedCount = Object.keys(
+        partiallyMigratedUuidsMap
+      ).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
         ...productStatus.byUuid,
@@ -571,7 +594,7 @@ export const getCollectionStatus = async (
         product.name === ELASTICSEARCH_SYSTEM_ID &&
         clusterUuid === liveClusterUuid &&
         !liveClusterInternalCollectionEnabled;
-      const internalTimestamps = [];
+      const internalTimestamps: number[] = [];
       for (const indexBucket of indexBuckets) {
         const isFullyMigrated =
           considerAllInstancesMigrated ||
@@ -619,8 +642,9 @@ export const getCollectionStatus = async (
       productStatus.totalUniqueInternallyCollectedCount = Object.keys(
         internalCollectorsUuidsMap
       ).length;
-      productStatus.totalUniquePartiallyMigratedCount =
-        Object.keys(partiallyMigratedUuidsMap).length;
+      productStatus.totalUniquePartiallyMigratedCount = Object.keys(
+        partiallyMigratedUuidsMap
+      ).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
         ...productStatus.byUuid,
