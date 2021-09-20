@@ -120,12 +120,8 @@ export class CCRReadExceptionsRule extends BaseRule {
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const {
-      remoteCluster,
-      followerIndex,
-      shardId,
-      lastReadException,
-    } = item.meta as CCRReadExceptionsUIMeta;
+    const { remoteCluster, followerIndex, shardId, lastReadException } =
+      item.meta as CCRReadExceptionsUIMeta;
     return {
       text: i18n.translate('xpack.monitoring.alerts.ccrReadExceptions.ui.firingMessage', {
         defaultMessage: `Follower index #start_link{followerIndex}#end_link is reporting CCR read exceptions on remote cluster: {remoteCluster} at #absolute`,

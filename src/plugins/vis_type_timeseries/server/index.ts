@@ -15,7 +15,7 @@ export { VisTypeTimeseriesSetup } from './plugin';
 export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
   deprecations: ({ unused, renameFromRoot }) => [
     // In Kibana v7.8 plugin id was renamed from 'metrics' to 'vis_type_timeseries':
-    renameFromRoot('metrics.enabled', 'vis_type_timeseries.enabled', { silent: true }),
+    renameFromRoot('metrics.enabled', 'vis_type_timeseries.enabled'),
     renameFromRoot('metrics.chartResolution', 'vis_type_timeseries.chartResolution', {
       silent: true,
     }),

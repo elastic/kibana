@@ -48,10 +48,10 @@ export const getThresholdBucketFilters = async ({
   );
 
   return [
-    ({
+    {
       bool: {
         must_not: filters,
       },
-    } as unknown) as Filter,
+    } as unknown as Filter,
   ];
 };

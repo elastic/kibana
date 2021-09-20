@@ -22,7 +22,8 @@ interface SetupDeps {
 }
 
 export class SavedObjectTaggingPlugin
-  implements Plugin<{}, SavedObjectTaggingPluginStart, SetupDeps, {}> {
+  implements Plugin<{}, SavedObjectTaggingPluginStart, SetupDeps, {}>
+{
   private tagClient?: TagsClient;
   private tagCache?: TagsCache;
   private assignmentService?: TagAssignmentService;
