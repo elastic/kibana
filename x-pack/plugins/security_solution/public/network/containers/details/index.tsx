@@ -59,10 +59,8 @@ export const useNetworkDetails = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
 
-  const [
-    networkDetailsRequest,
-    setNetworkDetailsRequest,
-  ] = useState<NetworkDetailsRequestOptions | null>(null);
+  const [networkDetailsRequest, setNetworkDetailsRequest] =
+    useState<NetworkDetailsRequestOptions | null>(null);
 
   const [networkDetailsResponse, setNetworkDetailsResponse] = useState<NetworkDetailsArgs>({
     networkDetails: {},
