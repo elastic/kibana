@@ -17,9 +17,6 @@ const createSetupContract = (): Setup => ({
   fork: jest.fn(),
   getFunction: jest.fn(),
   getFunctions: jest.fn(),
-  getRenderer: jest.fn(),
-  getRenderers: jest.fn(),
-  getType: jest.fn(),
   getTypes: jest.fn(),
   registerFunction: jest.fn(),
   registerRenderer: jest.fn(),
@@ -27,13 +24,13 @@ const createSetupContract = (): Setup => ({
 });
 
 const createStartContract = (): Start =>
-  (({
+  ({
     execute: jest.fn(),
     getFunction: jest.fn(),
     getRenderer: jest.fn(),
     getType: jest.fn(),
     run: jest.fn(),
-  } as unknown) as Start);
+  } as unknown as Start);
 
 const createPlugin = async () => {
   const pluginInitializerContext = coreMock.createPluginInitializerContext();

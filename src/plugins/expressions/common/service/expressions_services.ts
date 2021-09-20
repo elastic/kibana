@@ -39,57 +39,32 @@ import {
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
- * in Kibana Platform in both *setup* and *start* life-cycles.
+ * in Kibana Platform in *setup* life-cycle.
  */
-export interface ExpressionsServiceCommon {
+export interface ExpressionsServiceSetup {
   /**
    * Get a registered `ExpressionFunction` by its name, which was registered
    * using the `registerFunction` method. The returned `ExpressionFunction`
    * instance is an internal representation of the function in Expressions
    * service - do not mutate that object.
+   * @deprecated Use start contract instead.
    */
   getFunction(name: string): ReturnType<Executor['getFunction']>;
 
   /**
    * Returns POJO map of all registered expression functions, where keys are
    * names of the functions and values are `ExpressionFunction` instances.
+   * @deprecated Use start contract instead.
    */
   getFunctions(): ReturnType<Executor['getFunctions']>;
 
   /**
-   * Get a registered `ExpressionRenderer` by its name, which was registered
-   * using the `registerRenderer` method. The returned `ExpressionRenderer`
-   * instance is an internal representation of the renderer in Expressions
-   * service - do not mutate that object.
-   */
-  getRenderer(name: string): ReturnType<ExpressionRendererRegistry['get']>;
-
-  /**
-   * Returns POJO map of all registered expression renderers, where keys are
-   * names of the renderers and values are `ExpressionRenderer` instances.
-   */
-  getRenderers(): ReturnType<ExpressionRendererRegistry['toJS']>;
-
-  /**
-   * Get a registered `ExpressionType` by its name, which was registered
-   * using the `registerType` method. The returned `ExpressionType`
-   * instance is an internal representation of the type in Expressions
-   * service - do not mutate that object.
-   */
-  getType(name: string): ReturnType<Executor['getType']>;
-
-  /**
    * Returns POJO map of all registered expression types, where keys are
    * names of the types and values are `ExpressionType` instances.
+   * @deprecated Use start contract instead.
    */
   getTypes(): ReturnType<Executor['getTypes']>;
-}
 
-/**
- * The public contract that `ExpressionsService` provides to other plugins
- * in Kibana Platform in *setup* life-cycle.
- */
-export interface ExpressionsServiceSetup extends ExpressionsServiceCommon {
   /**
    * Create a new instance of `ExpressionsService`. The new instance inherits
    * all state of the original `ExpressionsService`, including all expression
@@ -179,7 +154,49 @@ export interface ExpressionExecutionParams {
  * The public contract that `ExpressionsService` provides to other plugins
  * in Kibana Platform in *start* life-cycle.
  */
-export interface ExpressionsServiceStart extends ExpressionsServiceCommon {
+export interface ExpressionsServiceStart {
+  /**
+   * Get a registered `ExpressionFunction` by its name, which was registered
+   * using the `registerFunction` method. The returned `ExpressionFunction`
+   * instance is an internal representation of the function in Expressions
+   * service - do not mutate that object.
+   */
+  getFunction(name: string): ReturnType<Executor['getFunction']>;
+
+  /**
+   * Returns POJO map of all registered expression functions, where keys are
+   * names of the functions and values are `ExpressionFunction` instances.
+   */
+  getFunctions(): ReturnType<Executor['getFunctions']>;
+
+  /**
+   * Get a registered `ExpressionRenderer` by its name, which was registered
+   * using the `registerRenderer` method. The returned `ExpressionRenderer`
+   * instance is an internal representation of the renderer in Expressions
+   * service - do not mutate that object.
+   */
+  getRenderer(name: string): ReturnType<ExpressionRendererRegistry['get']>;
+
+  /**
+   * Returns POJO map of all registered expression renderers, where keys are
+   * names of the renderers and values are `ExpressionRenderer` instances.
+   */
+  getRenderers(): ReturnType<ExpressionRendererRegistry['toJS']>;
+
+  /**
+   * Get a registered `ExpressionType` by its name, which was registered
+   * using the `registerType` method. The returned `ExpressionType`
+   * instance is an internal representation of the type in Expressions
+   * service - do not mutate that object.
+   */
+  getType(name: string): ReturnType<Executor['getType']>;
+
+  /**
+   * Returns POJO map of all registered expression types, where keys are
+   * names of the types and values are `ExpressionType` instances.
+   */
+  getTypes(): ReturnType<Executor['getTypes']>;
+
   /**
    * Executes expression string or a parsed expression AST and immediately
    * returns the result.
@@ -251,7 +268,8 @@ export class ExpressionsService
   implements
     PersistableStateService<ExpressionAstExpression>,
     ExpressionsServiceSetup,
-    ExpressionsServiceStart {
+    ExpressionsServiceStart
+{
   /**
    * @note Workaround since the expressions service is frozen.
    */
@@ -286,22 +304,31 @@ export class ExpressionsService
     }
   }
 
-  public readonly getFunction: ExpressionsServiceCommon['getFunction'] = (name) =>
+  public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
     this.executor.getFunction(name);
 
-  public readonly getFunctions: ExpressionsServiceCommon['getFunctions'] = () =>
+  public readonly getFunctions: ExpressionsServiceStart['getFunctions'] = () =>
     this.executor.getFunctions();
 
-  public readonly getRenderer: ExpressionsServiceStart['getRenderer'] = (name) =>
-    this.renderers.get(name);
+  public readonly getRenderer: ExpressionsServiceStart['getRenderer'] = (name) => {
+    this.assertStart();
 
-  public readonly getRenderers: ExpressionsServiceCommon['getRenderers'] = () =>
-    this.renderers.toJS();
+    return this.renderers.get(name);
+  };
 
-  public readonly getType: ExpressionsServiceCommon['getType'] = (name) =>
-    this.executor.getType(name);
+  public readonly getRenderers: ExpressionsServiceStart['getRenderers'] = () => {
+    this.assertStart();
 
-  public readonly getTypes: ExpressionsServiceCommon['getTypes'] = () => this.executor.getTypes();
+    return this.renderers.toJS();
+  };
+
+  public readonly getType: ExpressionsServiceStart['getType'] = (name) => {
+    this.assertStart();
+
+    return this.executor.getType(name);
+  };
+
+  public readonly getTypes: ExpressionsServiceStart['getTypes'] = () => this.executor.getTypes();
 
   public readonly registerFunction: ExpressionsServiceSetup['registerFunction'] = (
     functionDefinition
