@@ -7,7 +7,7 @@
  */
 
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './';
-import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+import { IndexPatternsContract } from '../..';
 
 export class SearchSourceService {
   public setup() {}

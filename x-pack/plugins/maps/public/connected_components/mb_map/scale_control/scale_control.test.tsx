@@ -14,7 +14,7 @@ const CLIENT_HEIGHT_PIXELS = 1200;
 const DISTANCE_METERS = 87653;
 
 const mockMbMapHandlers: { [key: string]: () => void } = {};
-const mockMBMap = ({
+const mockMBMap = {
   on: (eventName: string, callback: () => void) => {
     mockMbMapHandlers[eventName] = callback;
   },
@@ -30,23 +30,23 @@ const mockMBMap = ({
     return 4;
   },
   getBounds: () => {
-    return ({
+    return {
       getNorth: () => {
         return 75;
       },
       getSouth: () => {
         return -60;
       },
-    } as unknown) as LngLatBounds;
+    } as unknown as LngLatBounds;
   },
   unproject: (point: PointLike) => {
-    return ({
+    return {
       distanceTo: (lngLat: LngLat) => {
         return DISTANCE_METERS;
       },
-    } as unknown) as LngLat;
+    } as unknown as LngLat;
   },
-} as unknown) as MapboxMap;
+} as unknown as MapboxMap;
 
 test('render', () => {
   const component = shallow(<ScaleControl mbMap={mockMBMap} isFullScreen={false} />);

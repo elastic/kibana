@@ -41,6 +41,7 @@ test('Should create layer descriptor', () => {
     geoField: 'myGeoField',
     id: '12345',
     indexPatternId: 'myIndexPattern',
+    applyForceRefresh: true,
     scalingType: 'CLUSTERS',
     sortField: '',
     sortOrder: 'desc',

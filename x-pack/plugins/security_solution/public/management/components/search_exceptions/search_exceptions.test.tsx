@@ -32,8 +32,10 @@ describe('Search exceptions', () => {
   it('should have a default value', () => {
     const expectedDefaultValue = 'this is a default value';
     const element = mount(getElement(expectedDefaultValue));
-    const defaultValue = element.find('[data-test-subj="searchField"]').first().props()
-      .defaultValue;
+    const defaultValue = element
+      .find('[data-test-subj="searchField"]')
+      .first()
+      .props().defaultValue;
     expect(defaultValue).toBe(expectedDefaultValue);
   });
 

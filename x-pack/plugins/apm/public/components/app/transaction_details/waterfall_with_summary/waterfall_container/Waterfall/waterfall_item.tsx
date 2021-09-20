@@ -230,9 +230,9 @@ function RelatedErrors({
 }) {
   const apmRouter = useApmRouter();
   const theme = useTheme();
-  const { query } = useApmParams('/services/:serviceName/transactions/view');
+  const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
-  const href = apmRouter.link(`/services/:serviceName/errors`, {
+  const href = apmRouter.link(`/services/{serviceName}/errors`, {
     path: { serviceName: item.doc.service.name },
     query: {
       ...query,

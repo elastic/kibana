@@ -45,7 +45,10 @@ const generateAnnotationData = (values, formatter) =>
     }),
   }));
 
-const decorateFormatter = (formatter) => ({ value }) => formatter(value);
+const decorateFormatter =
+  (formatter) =>
+  ({ value }) =>
+    formatter(value);
 
 /** When displaying the annotation, we must slightly shift the labels for
  * the x-axis so that they do not overlap the annotations. **/
@@ -141,6 +144,7 @@ export const TimeSeries = ({
         debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}
+        allowBrushingLastHistogramBucket={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}
         onElementClick={(args) => handleElementClick(args)}
