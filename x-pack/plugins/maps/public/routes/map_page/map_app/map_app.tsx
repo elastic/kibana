@@ -18,6 +18,7 @@ import {
   getCoreChrome,
   getMapsCapabilities,
   getNavigation,
+  getSpacesApi,
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
@@ -40,7 +41,8 @@ import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
 import { goToSpecifiedPath } from '../../../render_app';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { getFullPath, APP_ID } from '../../../../common/constants';
+import { getEditPath, getFullPath, APP_ID } from '../../../../common/constants';
+import { getMapEmbeddableDisplayName } from '../../../../common/i18n_getters';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
@@ -437,6 +439,19 @@ export class MapApp extends React.Component<Props, State> {
     this._onFiltersChange([...this.props.filters, ...newFilters]);
   };
 
+  _renderLegacyUrlConflict() {
+    const sharingSavedObjectProps = this.props.savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    return sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict'
+      ? spaces.ui.components.getLegacyUrlConflict({
+          objectNoun: getMapEmbeddableDisplayName(),
+          currentObjectId: this.props.savedMap.getSavedObjectId()!,
+          otherObjectId: sharingSavedObjectProps.aliasTargetId!,
+          otherObjectPath: getEditPath(sharingSavedObjectProps.aliasTargetId!),
+        })
+      : null;
+  }
+
   render() {
     if (!this.state.initialized) {
       return null;
@@ -447,6 +462,7 @@ export class MapApp extends React.Component<Props, State> {
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root">
+          {this._renderLegacyUrlConflict()}
           <MapContainer
             addFilters={this._addFilter}
             title={this.props.savedMap.getAttributes().title}

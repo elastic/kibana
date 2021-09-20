@@ -82,7 +82,8 @@ import {
   tileMapRenderer,
   tileMapVisType,
 } from './legacy_visualizations';
-import { SecurityPluginStart } from '../../security/public';
+import type { SecurityPluginStart } from '../../security/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
@@ -112,6 +113,7 @@ export interface MapsPluginStartDependencies {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   security: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
