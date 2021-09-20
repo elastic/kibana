@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { omit, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLte from 'semver/functions/lte';
 import { getFlattenedObject } from '@kbn/std';
@@ -38,6 +38,7 @@ import type {
   ListWithKuery,
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
+  RegistryDataStream,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -70,6 +71,15 @@ export type InputsOverride = Partial<NewPackagePolicyInput> & {
 };
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
+
+export const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
+  'auto_configure',
+  'create_doc',
+  'maintenance',
+  'monitor',
+  'read',
+  'read_cross_cluster',
+]);
 
 class PackagePolicyService {
   public async create(
@@ -794,13 +804,51 @@ async function _compilePackageStreams(
   return await Promise.all(streamsPromises);
 }
 
+// temporary export to enable testing pending refactor https://github.com/elastic/kibana/issues/112386
+export function _applyIndexPrivileges(
+  packageDataStream: RegistryDataStream,
+  stream: PackagePolicyInputStream
+): PackagePolicyInputStream {
+  const streamOut = { ...stream };
+
+  const indexPrivileges = packageDataStream?.elasticsearch?.privileges?.indices;
+
+  if (!indexPrivileges?.length) {
+    return streamOut;
+  }
+
+  const [valid, invalid] = partition(indexPrivileges, (permission) =>
+    DATA_STREAM_ALLOWED_INDEX_PRIVILEGES.has(permission)
+  );
+
+  if (invalid.length) {
+    appContextService
+      .getLogger()
+      .warn(
+        `Ignoring invalid or forbidden index privilege(s) in "${stream.id}" data stream: ${invalid}`
+      );
+  }
+
+  if (valid.length) {
+    stream.data_stream.elasticsearch = {
+      privileges: {
+        indices: valid,
+      },
+    };
+  }
+
+  return streamOut;
+}
+
 async function _compilePackageStream(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  stream: PackagePolicyInputStream
+  streamIn: PackagePolicyInputStream
 ) {
+  let stream = streamIn;
+
   if (!stream.enabled) {
     return { ...stream, compiled_stream: undefined };
   }
@@ -819,6 +867,8 @@ async function _compilePackageStream(
       `Stream template not found, unable to find dataset ${stream.data_stream.dataset}`
     );
   }
+
+  stream = _applyIndexPrivileges(packageDataStream, streamIn);
 
   const streamFromPkg = (packageDataStream.streams || []).find(
     (pkgStream) => pkgStream.input === input.type
