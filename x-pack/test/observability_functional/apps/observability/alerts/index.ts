@@ -14,11 +14,14 @@ async function asyncForEach<T>(array: T[], callback: (item: T, index: number) =>
   }
 }
 
+const ACTIVE_ALERTS_CELL_COUNT = 48;
+const RECOVERED_ALERTS_CELL_COUNT = 24;
+const TOTAL_ALERTS_CELL_COUNT = 72;
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  // Failing: See https://github.com/elastic/kibana/issues/111907
-  describe.skip('Observability alerts', function () {
+  describe('Observability alerts', function () {
     this.tags('includeFirefox');
 
     const pageObjects = getPageObjects(['common']);
@@ -41,9 +44,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Renders the correct number of cells', async () => {
-        // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
-        const cells = await observability.alerts.getTableCells();
-        expect(cells.length).to.be(72);
+        await retry.try(async () => {
+          const cells = await observability.alerts.getTableCells();
+          expect(cells.length).to.be(TOTAL_ALERTS_CELL_COUNT);
+        });
       });
 
       describe('Filtering', () => {
@@ -67,7 +71,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await observability.alerts.submitQuery('kibana.alert.status: recovered');
           await retry.try(async () => {
             const cells = await observability.alerts.getTableCells();
-            expect(cells.length).to.be(24);
+            expect(cells.length).to.be(RECOVERED_ALERTS_CELL_COUNT);
           });
         });
 
@@ -87,9 +91,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
             // We shouldn't expect any data for the last 15 minutes
             await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
+            await observability.alerts.getNoDataStateOrFail();
+            await pageObjects.common.waitUntilUrlIncludes('rangeFrom=now-15m&rangeTo=now');
           });
-          await observability.alerts.getNoDataStateOrFail();
-          await pageObjects.common.waitUntilUrlIncludes('rangeFrom=now-15m&rangeTo=now');
         });
       });
 
@@ -114,10 +118,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('Displays the correct title', async () => {
-            const titleText = await (
-              await observability.alerts.getAlertsFlyoutTitle()
-            ).getVisibleText();
-            expect(titleText).to.contain('Log threshold');
+            await retry.try(async () => {
+              const titleText = await (
+                await observability.alerts.getAlertsFlyoutTitle()
+              ).getVisibleText();
+              expect(titleText).to.contain('Log threshold');
+            });
           });
 
           it('Displays the correct content', async () => {
@@ -153,6 +159,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('Displays a View in App button', async () => {
             await observability.alerts.getAlertsFlyoutViewInAppButtonOrFail();
+          });
+        });
+      });
+
+      describe('Cell actions', () => {
+        beforeEach(async () => {
+          await retry.try(async () => {
+            const cells = await observability.alerts.getTableCells();
+            const alertStatusCell = cells[2];
+            await alertStatusCell.moveMouseTo();
+            await retry.waitFor(
+              'cell actions visible',
+              async () => await observability.alerts.copyToClipboardButtonExists()
+            );
+          });
+        });
+
+        afterEach(async () => {
+          await observability.alerts.clearQueryBar();
+        });
+
+        it('Copy button works', async () => {
+          // NOTE: We don't have access to the clipboard in a headless environment,
+          // so we'll just check the button is clickable in the functional tests.
+          await (await observability.alerts.getCopyToClipboardButton()).click();
+        });
+
+        it('Filter for value works', async () => {
+          await (await observability.alerts.getFilterForValueButton()).click();
+          const queryBarValue = await (
+            await observability.alerts.getQueryBar()
+          ).getAttribute('value');
+          expect(queryBarValue).to.be('kibana.alert.status: "active"');
+          // Wait for request
+          await retry.try(async () => {
+            const cells = await observability.alerts.getTableCells();
+            expect(cells.length).to.be(ACTIVE_ALERTS_CELL_COUNT);
           });
         });
       });
