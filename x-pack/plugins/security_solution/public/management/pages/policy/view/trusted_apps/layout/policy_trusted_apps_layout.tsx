@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -19,6 +19,10 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiSpacer,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import {
   policyDetails,
@@ -63,6 +67,8 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
     [handleListFlyoutOpen]
   );
 
+  const handleOnConfirmAction = useCallback(() => {}, []);
+
   const addArtifactsFlyout = useMemo(
     () => (
       <EuiFlyout onClose={handleListFlyoutClose}>
@@ -87,13 +93,47 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
             artifacts={availableArtifactsList}
             defaultSelectedArtifactIds={[]}
             isListLoading={isAvailableArtifactsListLoading}
-            isSubmitLoading={false}
             selectedArtifactsUpdated={(artifactIds) => setSelectedArtifactIds(artifactIds)}
           />
         </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="cancelPolicyTrustedAppsFlyout"
+                onClick={handleListFlyoutClose}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.cancel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="confirmPolicyTrustedAppsFlyout"
+                fill
+                onClick={handleOnConfirmAction}
+                isLoading={false}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.confirm"
+                  defaultMessage="Assing to {policyName}"
+                  values={{ policyName }}
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
       </EuiFlyout>
     ),
-    [availableArtifactsList, handleListFlyoutClose, isAvailableArtifactsListLoading, policyName]
+    [
+      availableArtifactsList,
+      handleListFlyoutClose,
+      isAvailableArtifactsListLoading,
+      policyName,
+      handleOnConfirmAction,
+    ]
   );
 
   return (

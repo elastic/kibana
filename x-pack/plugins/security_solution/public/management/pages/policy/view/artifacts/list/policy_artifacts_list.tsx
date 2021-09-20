@@ -17,7 +17,6 @@ interface PolicyArtifactsListProps {
   defaultSelectedArtifactIds: string[];
   selectedArtifactsUpdated: (ids: string[]) => void;
   isListLoading: boolean;
-  isSubmitLoading: boolean;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
