@@ -16,10 +16,10 @@ describe('createTextHandler()', () => {
   beforeEach(() => {
     handleChange = jest.fn();
     changeHandler = createTextHandler(handleChange);
-    event = ({
+    event = {
       preventDefault: jest.fn(),
       target: { value: 'foo' },
-    } as unknown) as React.ChangeEvent<HTMLInputElement>;
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
     const fn = changeHandler('axis_scale');
     fn(event);
   });

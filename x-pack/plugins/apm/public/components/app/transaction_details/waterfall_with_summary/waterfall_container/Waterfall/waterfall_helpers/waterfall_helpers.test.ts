@@ -85,7 +85,7 @@ describe('waterfall_helpers', () => {
         },
         timestamp: { us: 1549324795785760 },
       } as Span,
-      ({
+      {
         parent: { id: 'mySpanIdD' },
         processor: { event: 'transaction' },
         trace: { id: 'myTraceId' },
@@ -103,10 +103,10 @@ describe('waterfall_helpers', () => {
           },
         },
         timestamp: { us: 1549324795823304 },
-      } as unknown) as Transaction,
+      } as unknown as Transaction,
     ];
     const errorDocs = [
-      ({
+      {
         processor: { event: 'error' },
         parent: { id: 'myTransactionId1' },
         timestamp: { us: 1549324795810000 },
@@ -124,7 +124,7 @@ describe('waterfall_helpers', () => {
           name: 'ruby',
           version: '2',
         },
-      } as unknown) as APMError,
+      } as unknown as APMError,
     ];
 
     it('should return full waterfall', () => {
@@ -500,22 +500,22 @@ describe('waterfall_helpers', () => {
         {
           docType: 'transaction',
           id: 'a',
-          doc: ({
+          doc: {
             transaction: { id: 'a' },
             timestamp: { us: 10 },
-          } as unknown) as Transaction,
+          } as unknown as Transaction,
         } as IWaterfallSpanOrTransaction,
         {
           docType: 'span',
           id: 'b',
           parentId: 'a',
-          doc: ({
+          doc: {
             span: {
               id: 'b',
             },
             parent: { id: 'a' },
             timestamp: { us: 20 },
-          } as unknown) as Span,
+          } as unknown as Span,
         } as IWaterfallSpanOrTransaction,
       ];
       const childrenByParentId = groupBy(items, (hit) =>
