@@ -28,7 +28,6 @@ import {
   applicationServiceMock,
 } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { serviceRegistryMock } from '../../services/service_registry.mock';
 import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';
 import {
@@ -122,7 +121,6 @@ describe('SavedObjectsTable', () => {
 
     defaultProps = {
       allowedTypes,
-      serviceRegistry: serviceRegistryMock.create(),
       actionRegistry: actionServiceMock.createStart(),
       columnRegistry: columnServiceMock.createStart(),
       savedObjectsClient: savedObjects.client,

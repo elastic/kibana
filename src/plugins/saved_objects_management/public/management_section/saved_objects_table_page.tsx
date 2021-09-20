@@ -81,7 +81,6 @@ const SavedObjectsTablePage = ({
       <SavedObjectsTable
         initialQuery={initialQuery}
         allowedTypes={allowedTypes}
-        serviceRegistry={serviceRegistry}
         actionRegistry={actionRegistry}
         columnRegistry={columnRegistry}
         taggingApi={taggingApi}
