@@ -6,8 +6,13 @@
  */
 
 import React from 'react';
+import { getListItems } from '../store/selector';
+import { useHostIsolationExceptionsSelector } from './hooks';
 
 export const HostIsolationExceptions = () => {
+  const listItems = useHostIsolationExceptionsSelector(getListItems);
+
+  console.log(listItems);
   return (
     <>
       <h1>Exceptions list</h1>
