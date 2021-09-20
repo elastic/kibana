@@ -178,10 +178,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       const timelineId = TimelineId.detectionsPage;
       clearEventsLoading!({ id: timelineId });
       clearEventsDeleted!({ id: timelineId });
-      clearSelected!({ id: timelineId });
       setFilterGroup(newFilterGroup);
     },
-    [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
+    [clearEventsLoading, clearEventsDeleted, setFilterGroup]
   );
 
   const alertsHistogramDefaultFilters = useMemo(
