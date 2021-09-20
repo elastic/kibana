@@ -117,7 +117,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send(job);
   };
   const generatePdf = async (username: string, password: string, job: JobParamsPDF) => {
-    const jobParams = rison.encode((job as object) as RisonValue);
+    const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/printablePdf`)
       .auth(username, password)
@@ -125,7 +125,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send({ jobParams });
   };
   const generatePng = async (username: string, password: string, job: JobParamsPNG) => {
-    const jobParams = rison.encode((job as object) as RisonValue);
+    const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/png`)
       .auth(username, password)
@@ -133,7 +133,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send({ jobParams });
   };
   const generateCsv = async (username: string, password: string, job: JobParamsCSV) => {
-    const jobParams = rison.encode((job as object) as RisonValue);
+    const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/csv_searchsource`)
       .auth(username, password)

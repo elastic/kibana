@@ -29,9 +29,12 @@ export interface ESBounds {
   };
 }
 
-export function parseTileKey(
-  tileKey: string
-): { x: number; y: number; zoom: number; tileCount: number } {
+export function parseTileKey(tileKey: string): {
+  x: number;
+  y: number;
+  zoom: number;
+  tileCount: number;
+} {
   const tileKeyParts = tileKey.split('/');
 
   if (tileKeyParts.length !== 3) {
