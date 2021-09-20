@@ -56,6 +56,10 @@ export const plugin = (initContext: PluginInitializerContext) => new ActionsPlug
 
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
+  exposeToUsage: {
+    rejectUnauthorized: true,
+    proxyRejectUnauthorizedCertificates: true,
+  },
   deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.actions.whitelistedHosts', 'xpack.actions.allowedHosts'),
     (settings, fromPath, addDeprecation) => {
