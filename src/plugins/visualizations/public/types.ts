@@ -38,7 +38,7 @@ export interface ISavedVis {
   savedSearchId?: string;
 }
 
-export interface VisSavedObject extends SavedObject, ISavedVis {}
+export interface VisSavedObject extends ISavedVis {}
 
 export interface VisToExpressionAstParams {
   timefilter: TimefilterContract;

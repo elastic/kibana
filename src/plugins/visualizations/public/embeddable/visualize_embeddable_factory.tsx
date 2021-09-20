@@ -150,7 +150,6 @@ export class VisualizeEmbeddableFactory
     input: Partial<VisualizeInput> & { id: string },
     parent?: IContainer
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const savedVisualizations = getSavedVisualizationsLoader();
     const { savedObjectsClient, data } = await this.deps.start().plugins;
 
     try {
@@ -164,7 +163,6 @@ export class VisualizeEmbeddableFactory
       return createVisEmbeddableFromObject(this.deps)(
         vis,
         input,
-        savedVisualizations,
         await this.getAttributeService(),
         parent
       );
@@ -180,11 +178,9 @@ export class VisualizeEmbeddableFactory
     if (input.savedVis) {
       const visState = input.savedVis;
       const vis = await createVisAsync(visState.type, visState);
-      const savedVisualizations = getSavedVisualizationsLoader();
       return createVisEmbeddableFromObject(this.deps)(
         vis,
         input,
-        savedVisualizations,
         await this.getAttributeService(),
         parent
       );
@@ -224,9 +220,13 @@ export class VisualizeEmbeddableFactory
       if (visObj) {
         savedVis.uiStateJSON = visObj?.uiState.toString();
       }
-      const { savedObjectsClient } = await this.deps.start().plugins;
+      const {
+        plugins: { savedObjectsClient },
+        core,
+      } = await this.deps.start();
       const id = await saveVisualization(savedVis, saveOptions, {
         savedObjectsClient,
+        chrome: core.chrome,
       });
       if (!id || id === '') {
         throw new Error(

@@ -109,7 +109,6 @@ export class VisualizeEmbeddable
     VisualizeByValueInput,
     VisualizeByReferenceInput
   >;
-  private savedVisualizationsLoader?: SavedVisualizationsLoader;
 
   constructor(
     timefilter: TimefilterContract,
@@ -120,7 +119,6 @@ export class VisualizeEmbeddable
       VisualizeByValueInput,
       VisualizeByReferenceInput
     >,
-    savedVisualizationsLoader?: SavedVisualizationsLoader,
     parent?: IContainer
   ) {
     super(
@@ -145,7 +143,6 @@ export class VisualizeEmbeddable
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
-    this.savedVisualizationsLoader = savedVisualizationsLoader;
 
     if (this.attributeService) {
       const isByValue = !this.inputIsRefType(initialInput);

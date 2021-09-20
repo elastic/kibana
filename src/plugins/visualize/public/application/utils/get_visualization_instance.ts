@@ -71,14 +71,19 @@ export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
   input: VisualizeInput
 ) => {
-  const { visualizations, savedVisualizations } = visualizeServices;
+  const { visualizations, savedObjects, data } = visualizeServices;
   const visState = input.savedVis as SerializedVis;
 
   /**
    * A saved vis is needed even in by value mode to support 'save to library' which converts the 'by value'
    * state of the visualization, into a new saved object.
    */
-  const savedVis: VisSavedObject = await savedVisualizations.get();
+  const savedVis: VisSavedObject = await getSavedVisualization({
+    search: data.search,
+    savedObjectsClient: savedObjects.client,
+    dataViews: data.dataViews,
+  });
+
   if (visState.uiState && Object.keys(visState.uiState).length !== 0) {
     savedVis.uiStateJSON = JSON.stringify(visState.uiState);
   }

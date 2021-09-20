@@ -53,5 +53,6 @@ export {
   convertToSerializedVis,
   convertFromSerializedVis,
   getSavedVisualization,
-  saveVisualization
+  saveVisualization,
+  findListItems
 } from './utils/saved_visualize_utils';

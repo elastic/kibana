@@ -19,7 +19,7 @@ import { useLocation } from 'react-router-dom';
 
 import { SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { useKibana, TableListView } from '../../../../kibana_react/public';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
+import { VISUALIZE_ENABLE_LABS_SETTING, findListItems } from '../../../../visualizations/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getTableColumns, getNoItemsMessage } from '../utils';
@@ -113,14 +113,14 @@ export const VisualizeListing = () => {
       }
 
       const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
-      return savedVisualizations
-        .findListItems(searchTerm, { size: listingLimit, references })
-        .then(({ total, hits }: { total: number; hits: object[] }) => ({
+      return findListItems(savedObjects.client, searchTerm, listingLimit, references).then(
+        ({ total, hits }: { total: number; hits: object[] }) => ({
           total,
           hits: hits.filter(
             (result: any) => isLabsEnabled || result.type?.stage !== 'experimental'
           ),
-        }));
+        })
+      );
     },
     [listingLimit, savedVisualizations, uiSettings, savedObjectsTagging]
   );

@@ -31,7 +31,6 @@ import {
 } from '../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { IndexPattern } from '../../../data/public';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 
@@ -40,7 +39,6 @@ export const createVisEmbeddableFromObject =
   async (
     vis: Vis,
     input: Partial<VisualizeInput> & { id: string },
-    savedVisualizationsLoader?: SavedVisualizationsLoader,
     attributeService?: AttributeService<
       VisualizeSavedObjectAttributes,
       VisualizeByValueInput,
@@ -87,7 +85,6 @@ export const createVisEmbeddableFromObject =
         },
         input,
         attributeService,
-        savedVisualizationsLoader,
         parent
       );
     } catch (e) {

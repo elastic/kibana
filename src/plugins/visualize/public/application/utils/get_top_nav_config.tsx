@@ -136,6 +136,7 @@ export const getTopNavConfig = (
     try {
       const id = await saveVisualization(savedVis, saveOptions, {
         savedObjectsClient: savedObjects.client,
+        chrome
       });
 
       if (id) {

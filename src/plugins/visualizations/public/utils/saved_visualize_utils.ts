@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { assign, cloneDeep, defaults } from 'lodash';
-import type { SavedObjectReference, SavedObjectsClientContract } from 'kibana/public';
+import _, { assign, cloneDeep, defaults } from 'lodash';
+import type {
+  SavedObjectsFindOptionsReference,
+  SavedObjectsFindOptions,
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+} from 'kibana/public';
 import { SavedObjectNotFound } from '../../../../plugins/kibana_utils/public';
 import {
   extractSearchSourceReferences,
@@ -15,6 +20,8 @@ import {
   parseSearchSourceJSON,
 } from '../../../../plugins/data/public';
 import { checkForDuplicateTitle } from '../../../../plugins/saved_objects/public';
+import { getTypes } from '../services';
+import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type { ISavedVis, SerializedVis } from '../types';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
@@ -31,42 +38,52 @@ const getDefaults = (opts: Record<string, unknown>) => ({
   version: 1,
 });
 
+function getFullPath(id: string) {
+  return `/app/visualize#/edit/${id}`;
+}
+
 export function urlFor(id: string) {
   return `#/edit/${encodeURIComponent(id)}`;
 }
 
 export function mapHitSource(
   visTypes: any,
-  source: Record<string, any>,
-  id: string,
-  references: SavedObjectReference[] = []
+  {
+    attributes,
+    id,
+    references,
+  }: {
+    attributes: any;
+    id: string;
+    references: any;
+  }
 ) {
-  source.id = id;
-  source.references = references;
-  source.url = urlFor(id);
+  attributes.id = id;
+  attributes.references = references;
+  attributes.url = urlFor(id);
 
-  let typeName = source.typeName;
-  if (source.visState) {
+  let typeName = attributes.typeName;
+  if (attributes.visState) {
     try {
-      typeName = JSON.parse(String(source.visState)).type;
+      typeName = JSON.parse(String(attributes.visState)).type;
     } catch (e) {
       /* missing typename handled below */
     }
   }
 
   if (!typeName || !visTypes.get(typeName)) {
-    source.error = 'Unknown visualization type';
-    return source;
+    attributes.error = 'Unknown visualization type';
+    return attributes;
   }
 
-  source.type = visTypes.get(typeName);
-  source.savedObjectType = 'visualization';
-  source.icon = source.type.icon;
-  source.image = source.type.image;
-  source.typeTitle = source.type.title;
-  source.editUrl = `/edit/${id}`;
+  attributes.type = visTypes.get(typeName);
+  attributes.savedObjectType = 'visualization';
+  attributes.icon = attributes.type.icon;
+  attributes.image = attributes.type.image;
+  attributes.typeTitle = attributes.type.title;
+  attributes.editUrl = `/edit/${id}`;
 
-  return source;
+  return attributes;
 }
 
 export const convertToSerializedVis = (savedVis: ISavedVis): SerializedVis => {
@@ -106,8 +123,62 @@ export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
   };
 };
 
+export async function findListItems(
+  savedObjectsClient: SavedObjectsClientContract,
+  search: string,
+  size: number,
+  references?: SavedObjectsFindOptionsReference[]
+) {
+  const visTypes = getTypes();
+  const visAliases = visTypes.getAliases();
+  const extensions = visAliases
+    .map((v) => v.appExtensions?.visualizations)
+    .filter(Boolean) as VisualizationsAppExtension[];
+  const extensionByType = extensions.reduce((acc, m) => {
+    return m!.docTypes.reduce((_acc, type) => {
+      acc[type] = m;
+      return acc;
+    }, acc);
+  }, {} as { [visType: string]: VisualizationsAppExtension });
+  const searchOption = (field: string, ...defaults: string[]) =>
+    _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
+  const searchOptions: SavedObjectsFindOptions = {
+    type: searchOption('docTypes', 'visualization'),
+    searchFields: searchOption('searchFields', 'title^3', 'description'),
+    search: search ? `${search}*` : undefined,
+    perPage: size,
+    page: 1,
+    defaultSearchOperator: 'AND' as 'AND',
+    hasReference: references,
+  };
+
+  const { total, savedObjects } = await savedObjectsClient.find<SavedObjectAttributes>(
+    searchOptions
+  );
+
+  return {
+    total,
+    hits: savedObjects.map((savedObject) => {
+      const config = extensionByType[savedObject.type];
+
+      if (config) {
+        return {
+          ...config.toListItem(savedObject),
+          references: savedObject.references,
+        };
+      } else {
+        return mapHitSource(visTypes, savedObject);
+      }
+    }),
+  };
+}
+
 export async function getSavedVisualization(
-  services: any,
+  services: {
+    savedObjectsClient: SavedObjectsClientContract;
+    search: any;
+    dataViews: any;
+  },
   opts?: any
 ) {
   if (typeof opts !== 'object') {
@@ -122,7 +193,7 @@ export async function getSavedVisualization(
     getDisplayName: () => SAVED_VIS_TYPE,
     searchSource: opts.searchSource ? services.search.searchSource.createEmpty() : undefined,
   } as { [key: string]: any };
-  
+
   const defaultsProps = getDefaults(opts);
 
   if (!id) {
@@ -159,9 +230,7 @@ export async function getSavedVisualization(
           searchSourceValues as any,
           resp.references
         );
-        savedObject.searchSource = await services.search.searchSource.create(
-          searchSourceValues
-        );
+        savedObject.searchSource = await services.search.searchSource.create(searchSourceValues);
       } else {
         savedObject.searchSourceFields = searchSourceValues;
       }
@@ -184,7 +253,7 @@ export async function getSavedVisualization(
   }
 
   if (resp.references && resp.references.length > 0) {
-    injectReferences(savedObject, resp.references);
+    injectReferences(savedObject as ISavedVis, resp.references);
   }
 
   savedObject.visState = await updateOldState(savedObject.visState);
@@ -192,18 +261,15 @@ export async function getSavedVisualization(
     await services.dataViews.get(savedObject.searchSourceFields.index as any);
   }
 
-  return savedObject;
+  return savedObject as ISavedVis;
 }
 
 export async function saveVisualization(
   savedObject: any,
-  {
-    confirmOverwrite = false,
-    isTitleDuplicateConfirmed = false,
-    onTitleDuplicate,
-  }: any = {},
+  { confirmOverwrite = false, isTitleDuplicateConfirmed = false, onTitleDuplicate }: any = {},
   services: {
     savedObjectsClient: SavedObjectsClientContract;
+    chrome: any;
   }
 ) {
   // Save the original id in case the save fails.
@@ -229,8 +295,10 @@ export async function saveVisualization(
   let references: any = [];
 
   if (savedObject.searchSource) {
-    const { searchSourceJSON, references: searchSourceReferences } =
-      savedObject.searchSource.serialize();
+    const {
+      searchSourceJSON,
+      references: searchSourceReferences,
+    } = savedObject.searchSource.serialize();
     attributes.kibanaSavedObjectMeta = { searchSourceJSON };
     references.push(...searchSourceReferences);
   }
@@ -268,10 +336,16 @@ export async function saveVisualization(
       migrationVersion: savedObject.migrationVersion,
       references: extractedRefs.references,
     };
-    const resp = await services.savedObjectsClient.create(SAVED_VIS_TYPE, extractedRefs.attributes, {
-      ...createOpt,
-      overwrite: true,
-    });
+    const resp = await services.savedObjectsClient.create(
+      SAVED_VIS_TYPE,
+      extractedRefs.attributes,
+      {
+        ...createOpt,
+        overwrite: true,
+      }
+    );
+
+    services.chrome.recentlyAccessed.add(getFullPath(resp.id), savedObject.title, String(resp.id));
 
     savedObject.id = resp.id;
     savedObject.isSaving = false;
