@@ -16,6 +16,7 @@ import { tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
 import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
 import { Category, CATEGORY_DISPLAY } from '../../../../custom_integrations/common';
+import { HOME_APP_BASE_PATH } from '../../../common/constants';
 
 const emptyContext = {};
 
@@ -36,11 +37,17 @@ function registerTutorialWithCustomIntegrations(
     title: tutorial.name,
     categories: allowedCategories,
     type: 'ui_link',
-    uiInternalPath: `/app/home#/tutorial/${tutorial.id}`,
+    uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
     description: tutorial.shortDescription,
-    euiIconType: tutorial.euiIconType || '',
+    icons: [
+      {
+        type: 'eui',
+        src: tutorial.euiIconType,
+      },
+    ],
     eprPackageOverlap: tutorial.eprPackageOverlap,
     shipper: 'tutorial',
+    isBeta: false,
   });
 }
 

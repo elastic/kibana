@@ -51,8 +51,8 @@ export interface CustomIntegration {
   description: string;
   type: 'ui_link';
   uiInternalPath: string;
-  euiIconType: string;
-  iconPath?: string;
+  isBeta: boolean;
+  icons: Array<{ src: string; type: string }>;
   categories: Category[];
   shipper: string;
   eprPackageOverlap?: string;
