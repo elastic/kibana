@@ -9,3 +9,4 @@
 export { getConfiguration } from './config_loader';
 export { initApm } from './init_apm';
 export type { ApmConfiguration } from './config';
+export type { ApmAgentConfig } from './types';
