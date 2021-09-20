@@ -425,14 +425,6 @@ describe('When on the Trusted Apps Page', () => {
       expect(queryByTestId('addTrustedAppFlyout-createForm')).not.toBeNull();
     });
 
-    it('should have list of policies populated', async () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-      const resetEnv = forceHTMLElementOffsetWidth();
-      const { getByTestId } = await renderAndClickAddButton();
-      expect(getByTestId('policy-abc123'));
-      resetEnv();
-    });
-
     it('should initially have the flyout Add button disabled', async () => {
       const { getByTestId } = await renderAndClickAddButton();
       expect((getByTestId('addTrustedAppFlyout-createButton') as HTMLButtonElement).disabled).toBe(
