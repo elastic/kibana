@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import useMount from 'react-use/lib/useMount';
 import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
@@ -13,7 +14,6 @@ import {
   EuiFlexItem,
   EuiButtonGroup,
   EuiFormLabel,
-  EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
@@ -21,22 +21,37 @@ import {
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
+
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlStyle } from '../../types';
+import { ControlsPanels, ControlStyle, ControlWidth } from '../../types';
 import { PresentationOverlaysService } from '../../../../services/overlays';
 import { toMountPoint } from '../../../../../../kibana_react/public';
+import { CONTROL_LAYOUT_OPTIONS, CONTROL_WIDTH_OPTIONS } from '../control_group_constants';
 
 interface ManageControlGroupProps {
+  panels: ControlsPanels;
   controlStyle: ControlStyle;
-  openFlyout: PresentationOverlaysService['openFlyout'];
   setControlStyle: (style: ControlStyle) => void;
+  setAllPanelWidths: (newWidth: ControlWidth) => void;
+  openFlyout: PresentationOverlaysService['openFlyout'];
 }
 
 const ManageControlGroupFlyout = ({
+  panels,
   controlStyle,
   setControlStyle,
+  setAllPanelWidths,
 }: Omit<ManageControlGroupProps, 'openFlyout'>) => {
   const [currentControlStyle, setCurrentControlStyle] = useState<ControlStyle>(controlStyle);
+  const [selectedWidth, setSelectedWidth] = useState<ControlWidth>();
+
+  useMount(() => {
+    if (!panels || Object.keys(panels).length === 0) return;
+    const firstWidth = panels[Object.keys(panels)[0]].width;
+    if (Object.values(panels).every((panel) => panel.width === firstWidth)) {
+      setSelectedWidth(firstWidth);
+    }
+  });
 
   return (
     <>
@@ -52,16 +67,7 @@ const ManageControlGroupFlyout = ({
         <EuiSpacer size="s" />
         <EuiButtonGroup
           legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
-          options={[
-            {
-              id: `oneLine`,
-              label: ControlGroupStrings.management.controlStyle.getSingleLineTitle(),
-            },
-            {
-              id: `twoLine`,
-              label: ControlGroupStrings.management.controlStyle.getTwoLineTitle(),
-            },
-          ]}
+          options={CONTROL_LAYOUT_OPTIONS}
           idSelected={currentControlStyle}
           onChange={(newControlStyle) => {
             setControlStyle(newControlStyle as ControlStyle);
@@ -74,47 +80,41 @@ const ManageControlGroupFlyout = ({
         </EuiTitle>
         <EuiSpacer size="s" />
 
-        {/* <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-  <EuiFlexItem grow={false}>
-    <EuiFormLabel>
-      {ControlGroupStrings.management.controlWidth.getChangeAllControlWidthsTitle()}
-    </EuiFormLabel>
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    <EuiButtonGroup
-      buttonSize="compressed"
-      idSelected={
-        controlMeta.every((currentMeta) => currentMeta?.width === controlMeta[0]?.width)
-          ? controlMeta[0]?.width
-          : ''
-      }
-      legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-      options={widthOptions}
-      onChange={(newWidth: string) =>
-        setControlMeta((currentControls) => {
-          currentControls.forEach((currentMeta) => {
-            currentMeta.width = newWidth as ControlWidth;
-          });
-          return [...currentControls];
-        })
-      }
-    />
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    <EuiButtonEmpty iconType="trash" color="danger" aria-label={'delete-all'} size="s">
-      {ControlGroupStrings.management.getDeleteAllButtonTitle()}
-    </EuiButtonEmpty>
-  </EuiFlexItem>
-</EuiFlexGroup> */}
+        <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiFormLabel>
+              {ControlGroupStrings.management.controlWidth.getChangeAllControlWidthsTitle()}
+            </EuiFormLabel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              idSelected={selectedWidth ?? ''}
+              buttonSize="compressed"
+              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+              options={CONTROL_WIDTH_OPTIONS}
+              onChange={(newWidth: string) => {
+                setAllPanelWidths(newWidth as ControlWidth);
+                setSelectedWidth(newWidth as ControlWidth);
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="trash" color="danger" aria-label={'delete-all'} size="s">
+              {ControlGroupStrings.management.getDeleteAllButtonTitle()}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutBody>
     </>
   );
 };
 
 export const ManageControlGroupComponent = ({
+  setAllPanelWidths,
+  setControlStyle,
   controlStyle,
   openFlyout,
-  setControlStyle,
+  panels,
 }: ManageControlGroupProps) => {
   return (
     <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
@@ -127,8 +127,10 @@ export const ManageControlGroupComponent = ({
           openFlyout(
             toMountPoint(
               <ManageControlGroupFlyout
+                panels={panels}
                 controlStyle={controlStyle}
                 setControlStyle={setControlStyle}
+                setAllPanelWidths={setAllPanelWidths}
               />
             )
           );

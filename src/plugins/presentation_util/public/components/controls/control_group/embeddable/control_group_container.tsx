@@ -25,7 +25,7 @@ import {
   IEditableControlFactory,
   ControlWidth,
 } from '../../types';
-import { ControlsService } from '../../controlsService';
+import { ControlsService } from '../../controls_service';
 import { PresentationOverlaysService } from '../../../../services/overlays';
 import { toMountPoint } from '../../../../../../kibana_react/public';
 import { ManageControlComponent } from '../control_group_editor/manage_control';
@@ -141,7 +141,7 @@ export class ControlGroupContainer extends Container<InputControlInput, ControlG
             this.updateInput({
               panels: {
                 ...this.getInput().panels,
-                [embeddableId]: { ...this.getInput().panels[embeddableId], ...{ width: newWidth } },
+                [embeddableId]: { ...this.getInput().panels[embeddableId], width: newWidth },
               },
             })
           }

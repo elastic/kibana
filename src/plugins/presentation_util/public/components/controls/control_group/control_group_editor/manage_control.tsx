@@ -31,9 +31,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { CONTROL_WIDTH_OPTIONS } from '../control_group_constants';
 import { ControlGroupStrings } from '../control_group_strings';
-import { widthOptions } from '../control_group_constants';
-import { ControlEditorComponent, ControlPanelState, ControlWidth } from '../../types';
+import { ControlEditorComponent, ControlWidth } from '../../types';
 
 interface ManageControlProps {
   title?: string;
@@ -88,7 +88,7 @@ export const ManageControlComponent = ({
             <EuiButtonGroup
               buttonSize="compressed"
               legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-              options={widthOptions}
+              options={CONTROL_WIDTH_OPTIONS}
               idSelected={currentWidth}
               onChange={(newWidth: string) => {
                 setCurrentWidth(newWidth as ControlWidth);

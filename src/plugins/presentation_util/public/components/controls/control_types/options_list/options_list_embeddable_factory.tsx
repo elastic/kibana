@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { EmbeddableFactoryDefinition } from '../../../../../../embeddable/public';
-import { PresentationOverlaysService } from '../../../../services/overlays';
 import {
   ControlEditorProps,
   GetControlEditorComponentProps,
@@ -31,12 +30,10 @@ export class OptionsListEmbeddableFactory
   constructor(
     private fetchData: OptionsListDataFetcher,
     private fetchIndexPatterns: OptionsListIndexPatternFetcher,
-    private fetchFields: OptionsListFieldFetcher,
-    private openFlyout: PresentationOverlaysService['openFlyout']
+    private fetchFields: OptionsListFieldFetcher
   ) {
     this.fetchIndexPatterns = fetchIndexPatterns;
     this.fetchFields = fetchFields;
-    this.openFlyout = openFlyout;
     this.fetchData = fetchData;
   }
 

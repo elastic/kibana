@@ -67,6 +67,10 @@ export interface ControlPanelState<TEmbeddableInput extends InputControlInput = 
   width: ControlWidth;
 }
 
+export interface ControlsPanels {
+  [panelId: string]: ControlPanelState;
+}
+
 export type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
 export type ControlStyle = 'twoLine' | 'oneLine';
 
@@ -79,7 +83,5 @@ export interface ControlGroupInput
     useTimerange: boolean;
   };
   controlStyle: ControlStyle;
-  panels: {
-    [panelId: string]: ControlPanelState;
-  };
+  panels: ControlsPanels;
 }

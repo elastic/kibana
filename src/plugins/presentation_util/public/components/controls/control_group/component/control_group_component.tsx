@@ -27,14 +27,13 @@ import {
 
 import './control_group.scss';
 import classNames from 'classnames';
-import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
+import { cloneDeep } from 'lodash';
 import { OPTIONS_LIST_CONTROL } from '../../control_types/options_list/options_list_embeddable';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { ControlGroupContainer } from '../embeddable/control_group_container';
 import { PresentationOverlaysService } from '../../../../services/overlays';
-import { toMountPoint } from '../../../../../../kibana_react/public';
-import { ControlStyle, ControlWidth } from '../../types';
 import { ManageControlGroupComponent } from '../control_group_editor/manage_control_group_component';
 import { ControlGroupStrings } from '../control_group_strings';
 
@@ -93,7 +92,7 @@ export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroup
   };
 
   return (
-    <EuiFlexGroup wrap={false} direction="row" alignItems="center">
+    <EuiFlexGroup wrap={false} direction="row" alignItems="center" className="superWrapper">
       <EuiFlexItem>
         <DndContext
           onDragStart={({ active }) => setDraggingId(active.id)}
@@ -142,6 +141,12 @@ export const ControlGroup = ({ controlGroupContainer, openFlyout }: ControlGroup
               setControlStyle={(newStyle) =>
                 controlGroupContainer.updateInput({ controlStyle: newStyle })
               }
+              setAllPanelWidths={(newWidth) => {
+                const newPanels = cloneDeep(controlGroupContainer.getInput().panels);
+                Object.values(newPanels).forEach((panel) => (panel.width = newWidth));
+                controlGroupContainer.updateInput({ panels: { ...newPanels, ...newPanels } });
+              }}
+              panels={controlGroupContainer.getInput().panels}
             />
           </EuiFlexItem>
           <EuiFlexItem>

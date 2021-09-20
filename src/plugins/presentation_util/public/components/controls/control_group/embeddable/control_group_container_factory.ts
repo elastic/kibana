@@ -25,7 +25,7 @@ import {
 import { CONTROL_GROUP_TYPE } from '../control_group_constants';
 import { ControlGroupInput } from '../../types';
 import { ControlGroupContainer } from './control_group_container';
-import { ControlsService } from '../../controlsService';
+import { ControlsService } from '../../controls_service';
 import { PresentationOverlaysService } from '../../../../services/overlays';
 
 export type DashboardContainerFactory = EmbeddableFactory<

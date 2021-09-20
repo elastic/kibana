@@ -13,7 +13,7 @@ export const CONTROL_GROUP_TYPE = 'control_group';
 
 export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'auto';
 
-export const widthOptions = [
+export const CONTROL_WIDTH_OPTIONS = [
   {
     id: `auto`,
     label: ControlGroupStrings.management.controlWidth.getAutoWidthTitle(),
@@ -29,5 +29,16 @@ export const widthOptions = [
   {
     id: `large`,
     label: ControlGroupStrings.management.controlWidth.getLargeWidthTitle(),
+  },
+];
+
+export const CONTROL_LAYOUT_OPTIONS = [
+  {
+    id: `oneLine`,
+    label: ControlGroupStrings.management.controlStyle.getSingleLineTitle(),
+  },
+  {
+    id: `twoLine`,
+    label: ControlGroupStrings.management.controlStyle.getTwoLineTitle(),
   },
 ];

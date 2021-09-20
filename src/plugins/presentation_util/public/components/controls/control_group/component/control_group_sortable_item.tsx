@@ -8,11 +8,11 @@
 
 import { EuiFlexItem, EuiFormControlLayout, EuiFormLabel, EuiIcon } from '@elastic/eui';
 import React, { forwardRef, HTMLAttributes } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
 
-import { CSS } from '@dnd-kit/utilities';
-import { useSortable } from '@dnd-kit/sortable';
-import { ControlWidth } from '../control_group_constants';
+import { ControlWidth } from '../../types';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { ControlGroupContainer } from '../embeddable/control_group_container';
 import { ControlFrame, ControlFrameProps } from '../../control_frame/control_frame_component';
