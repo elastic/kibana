@@ -59,10 +59,8 @@ export const caseConnectorIdMigration = (
     connector
   );
 
-  const {
-    transformedPushConnector,
-    references: pushConnectorReferences,
-  } = transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, external_service);
+  const { transformedPushConnector, references: pushConnectorReferences } =
+    transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, external_service);
 
   const { references = [] } = doc;
 

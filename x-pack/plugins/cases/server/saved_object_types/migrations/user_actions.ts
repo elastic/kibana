@@ -69,25 +69,21 @@ function formatDocumentWithConnectorReferences(
   const { new_value, old_value, action, action_field, ...restAttributes } = doc.attributes;
   const { references = [] } = doc;
 
-  const {
-    transformedActionDetails: transformedNewValue,
-    references: newValueConnectorRefs,
-  } = extractConnectorIdFromJson({
-    action,
-    actionFields: action_field,
-    actionDetails: new_value,
-    fieldType: UserActionFieldType.New,
-  });
+  const { transformedActionDetails: transformedNewValue, references: newValueConnectorRefs } =
+    extractConnectorIdFromJson({
+      action,
+      actionFields: action_field,
+      actionDetails: new_value,
+      fieldType: UserActionFieldType.New,
+    });
 
-  const {
-    transformedActionDetails: transformedOldValue,
-    references: oldValueConnectorRefs,
-  } = extractConnectorIdFromJson({
-    action,
-    actionFields: action_field,
-    actionDetails: old_value,
-    fieldType: UserActionFieldType.Old,
-  });
+  const { transformedActionDetails: transformedOldValue, references: oldValueConnectorRefs } =
+    extractConnectorIdFromJson({
+      action,
+      actionFields: action_field,
+      actionDetails: old_value,
+      fieldType: UserActionFieldType.Old,
+    });
 
   return {
     ...doc,

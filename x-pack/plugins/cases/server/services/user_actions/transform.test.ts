@@ -811,7 +811,7 @@ describe('user action transform utils', () => {
         const { transformedActionDetails, references } = extractConnectorId({
           action: 'a',
           actionFields: ['a'],
-          actionDetails: (5 as unknown) as Record<string, unknown>,
+          actionDetails: 5 as unknown as Record<string, unknown>,
           fieldType: UserActionFieldType.New,
         });
 

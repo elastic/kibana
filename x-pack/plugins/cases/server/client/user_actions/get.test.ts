@@ -67,7 +67,7 @@ describe('get', () => {
               ],
               id: 'b',
               score: 0,
-              attributes: ({ field: '1' } as unknown) as CaseUserActionResponse,
+              attributes: { field: '1' } as unknown as CaseUserActionResponse,
             },
           ],
         })
@@ -87,14 +87,14 @@ describe('get', () => {
               ],
               id: 'b',
               score: 0,
-              attributes: ({ field: '2' } as unknown) as CaseUserActionResponse,
+              attributes: { field: '2' } as unknown as CaseUserActionResponse,
             },
             {
               type: 'a',
               references: [{ name: SUB_CASE_REF_NAME, type: SUB_CASE_SAVED_OBJECT, id: '1' }],
               id: 'b',
               score: 0,
-              attributes: ({ field: '1' } as unknown) as CaseUserActionResponse,
+              attributes: { field: '1' } as unknown as CaseUserActionResponse,
             },
           ],
         })

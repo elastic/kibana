@@ -123,10 +123,8 @@ export function extractConnectorIdHelper({
 
   try {
     if (isCreateCaseConnector(action, actionFields, actionDetails)) {
-      const {
-        transformedActionDetails: transformedConnectorPortion,
-        references,
-      } = transformConnectorFromCreateAndUpdateAction(actionDetails.connector, fieldType);
+      const { transformedActionDetails: transformedConnectorPortion, references } =
+        transformConnectorFromCreateAndUpdateAction(actionDetails.connector, fieldType);
 
       // the above call only transforms the connector portion of the action details so let's add back
       // the rest of the details and we'll overwrite the connector portion when the transformed one
@@ -144,10 +142,8 @@ export function extractConnectorIdHelper({
       transformedActionDetails = transformedConnector;
       referencesToReturn = references;
     } else if (isPushConnector(action, actionFields, actionDetails)) {
-      ({
-        transformedActionDetails,
-        references: referencesToReturn,
-      } = transformConnectorFromPushAction(actionDetails, fieldType));
+      ({ transformedActionDetails, references: referencesToReturn } =
+        transformConnectorFromPushAction(actionDetails, fieldType));
     }
   } catch (error) {
     // ignore any errors, we'll just return whatever was passed in for action details in that case
@@ -274,13 +270,11 @@ function isPushConnector(
   }
 }
 
-export const PushConnectorIdReferenceName: Record<
-  UserActionFieldType,
-  PushConnectorIdRefNameType
-> = {
-  [UserActionFieldType.New]: PUSH_CONNECTOR_ID_REFERENCE_NAME,
-  [UserActionFieldType.Old]: USER_ACTION_OLD_PUSH_ID_REF_NAME,
-};
+export const PushConnectorIdReferenceName: Record<UserActionFieldType, PushConnectorIdRefNameType> =
+  {
+    [UserActionFieldType.New]: PUSH_CONNECTOR_ID_REFERENCE_NAME,
+    [UserActionFieldType.Old]: USER_ACTION_OLD_PUSH_ID_REF_NAME,
+  };
 
 function transformConnectorFromPushAction(
   externalService: CaseExternalService,

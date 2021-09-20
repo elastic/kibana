@@ -50,25 +50,21 @@ export const buildCaseUserActionItem = ({
   subCaseId,
   owner,
 }: BuildCaseUserActionParams): UserActionItem => {
-  const {
-    transformedActionDetails: transformedNewValue,
-    references: newValueReferences,
-  } = extractConnectorId({
-    action,
-    actionFields: fields,
-    actionDetails: newValue,
-    fieldType: UserActionFieldType.New,
-  });
+  const { transformedActionDetails: transformedNewValue, references: newValueReferences } =
+    extractConnectorId({
+      action,
+      actionFields: fields,
+      actionDetails: newValue,
+      fieldType: UserActionFieldType.New,
+    });
 
-  const {
-    transformedActionDetails: transformedOldValue,
-    references: oldValueReferences,
-  } = extractConnectorId({
-    action,
-    actionFields: fields,
-    actionDetails: oldValue,
-    fieldType: UserActionFieldType.Old,
-  });
+  const { transformedActionDetails: transformedOldValue, references: oldValueReferences } =
+    extractConnectorId({
+      action,
+      actionFields: fields,
+      actionDetails: oldValue,
+      fieldType: UserActionFieldType.Old,
+    });
 
   return {
     attributes: transformNewUserAction({

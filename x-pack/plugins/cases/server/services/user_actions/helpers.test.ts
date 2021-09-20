@@ -91,8 +91,8 @@ describe('user action helpers', () => {
         const userAction = buildCaseUserActionItem({
           ...defaultFields(),
           action: 'push-to-service',
-          fields: (['invalid field'] as unknown) as UserActionField,
-          newValue: ('hello' as unknown) as Record<string, unknown>,
+          fields: ['invalid field'] as unknown as UserActionField,
+          newValue: 'hello' as unknown as Record<string, unknown>,
         });
 
         expect(userAction.attributes.old_value).toBeNull();
@@ -192,9 +192,9 @@ describe('user action helpers', () => {
         const userAction = buildCaseUserActionItem({
           ...defaultFields(),
           action: 'update',
-          fields: (['invalid field'] as unknown) as UserActionField,
-          newValue: ('hello' as unknown) as Record<string, unknown>,
-          oldValue: ('old value' as unknown) as Record<string, unknown>,
+          fields: ['invalid field'] as unknown as UserActionField,
+          newValue: 'hello' as unknown as Record<string, unknown>,
+          oldValue: 'old value' as unknown as Record<string, unknown>,
         });
 
         expect(userAction).toMatchInlineSnapshot(`
@@ -295,9 +295,9 @@ describe('user action helpers', () => {
         const userAction = buildCaseUserActionItem({
           ...defaultFields(),
           action: 'create',
-          fields: (['invalid action'] as unknown) as UserActionField,
-          newValue: ('new json value' as unknown) as Record<string, unknown>,
-          oldValue: ('old value' as unknown) as Record<string, unknown>,
+          fields: ['invalid action'] as unknown as UserActionField,
+          newValue: 'new json value' as unknown as Record<string, unknown>,
+          oldValue: 'old value' as unknown as Record<string, unknown>,
         });
 
         expect(userAction).toMatchInlineSnapshot(`
