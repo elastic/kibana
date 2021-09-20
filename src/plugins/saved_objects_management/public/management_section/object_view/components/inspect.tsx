@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { omit } from 'lodash';
@@ -19,7 +18,7 @@ export interface InspectProps {
 }
 const codeEditorAriaLabel = (title: string) =>
   i18n.translate('savedObjectsManagement.view.inspectCodeEditorAriaLabel', {
-    defaultMessage: 'inspect { title } object',
+    defaultMessage: 'inspect { title }',
     values: {
       title,
     },
@@ -27,7 +26,7 @@ const codeEditorAriaLabel = (title: string) =>
 const copyToClipboardLabel = i18n.translate('savedObjectsManagement.view.copyToClipboardLabel', {
   defaultMessage: 'Copy to clipboard',
 });
-export const Inspect: FC<InspectProps> = ({ object }) => {
+export const Inspect = ({ object }: InspectProps) => {
   const title = object.meta.title || 'saved object';
   const objectAsJsonString = JSON.stringify(omit(object, 'meta'), null, 2);
   return (
@@ -53,7 +52,6 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
           languageId={XJsonLang.ID}
           value={objectAsJsonString}
           aria-label={codeEditorAriaLabel(title)}
-          height={'100%'}
           options={{
             automaticLayout: false,
             fontSize: 12,
@@ -69,6 +67,7 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
             scrollBeyondLastLine: false,
             wordWrap: 'on',
             wrappingIndent: 'indent',
+            renderIndentGuides: false,
           }}
         />
       </EuiFlexItem>

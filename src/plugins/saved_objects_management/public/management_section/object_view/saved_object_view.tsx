@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import './saved_object_view.scss';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
@@ -102,7 +102,7 @@ export class SavedObjectEdition extends Component<
         <EuiFlexGroup
           direction="column"
           data-test-subject="savedObjectsEdit"
-          style={{ height: '100%' }}
+          className="savedObjectsManagementObjectView"
         >
           <EuiFlexItem grow={false}>
             <Header
