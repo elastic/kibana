@@ -24,6 +24,7 @@ import {
 import { storedPackagePoliciesToAgentInputs, dataTypes, outputType } from '../../../common';
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
+import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
 
 const MONITORING_DATASETS = [
   'elastic_agent',
@@ -155,7 +156,7 @@ export async function getFullAgentPolicy(
     monitoringPermissions._elastic_agent_checks.indices = [
       {
         names,
-        privileges: ['auto_configure', 'create_doc'],
+        privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
       },
     ];
   }
