@@ -12,7 +12,7 @@ import { MigrateFunctionsObject } from '../../../kibana_utils/common';
 
 export const telemetryBaseEmbeddableInput = (
   state: EmbeddableStateWithType,
-  telemetryData: Record<string, any>
+  telemetryData: Record<string, string | number | boolean>
 ) => {
   return telemetryData;
 };

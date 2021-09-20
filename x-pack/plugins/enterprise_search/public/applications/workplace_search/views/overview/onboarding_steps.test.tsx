@@ -21,19 +21,19 @@ import { OnboardingSteps, OrgNameOnboarding } from './onboarding_steps';
 const account = {
   id: '1',
   isAdmin: true,
-  canCreatePersonalSources: true,
+  canCreatePrivateSources: true,
   groups: [],
 };
 
 describe('OnboardingSteps', () => {
-  describe('Shared Sources', () => {
+  describe('Organizational Sources', () => {
     it('renders 0 sources state', () => {
       const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OnboardingCard)).toHaveLength(2);
       expect(wrapper.find(OnboardingCard).first().prop('actionPath')).toBe(ADD_SOURCE_PATH);
       expect(wrapper.find(OnboardingCard).first().prop('description')).toBe(
-        'Add shared sources for your organization to start searching.'
+        'Add organizational sources for your organization to start searching.'
       );
     });
 
@@ -42,7 +42,7 @@ describe('OnboardingSteps', () => {
       const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OnboardingCard).first().prop('description')).toEqual(
-        'You have added 2 shared sources. Happy searching.'
+        'You have added 2 organizational sources. Happy searching.'
       );
     });
   });
