@@ -28,7 +28,8 @@ import {
 } from '../../shared/time_comparison/get_time_range_comparison';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
-type ThroughputApiReturnType = APIReturnType<'GET /api/apm/services/{serviceName}/throughput'>;
+type ThroughputApiReturnType =
+  APIReturnType<'GET /api/apm/services/{serviceName}/throughput'>;
 
 const INITIAL_STATE: ThroughputApiReturnType = {
   currentPeriod: [],
