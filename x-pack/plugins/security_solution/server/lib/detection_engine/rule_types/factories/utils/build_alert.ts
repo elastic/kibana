@@ -120,10 +120,10 @@ export const buildAlert = (
     []
   );
 
-  const { id, ...mappedRule } = rule;
+  const { id, output_index: outputIndex, ...mappedRule } = rule;
   mappedRule.uuid = id;
 
-  return ({
+  return {
     [TIMESTAMP]: new Date().toISOString(),
     [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
     [SPACE_IDS]: spaceId != null ? [spaceId] : [],
@@ -133,7 +133,7 @@ export const buildAlert = (
     [ALERT_DEPTH]: depth,
     [ALERT_REASON]: reason,
     ...flattenWithPrefix(ALERT_RULE_NAMESPACE, mappedRule as RulesSchema),
-  } as unknown) as RACAlert;
+  } as unknown as RACAlert;
 };
 
 /**

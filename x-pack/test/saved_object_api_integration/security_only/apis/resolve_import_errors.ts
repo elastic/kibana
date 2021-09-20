@@ -64,11 +64,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  const {
-    addTests,
-    createTestDefinitions,
-    expectSavedObjectForbidden,
-  } = resolveImportErrorsTestSuiteFactory(es, esArchiver, supertest);
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
+    resolveImportErrorsTestSuiteFactory(es, esArchiver, supertest);
   const createTests = (overwrite: boolean, createNewCopies: boolean) => {
     // use singleRequest to reduce execution time and/or test combined cases
     const singleRequest = true;
