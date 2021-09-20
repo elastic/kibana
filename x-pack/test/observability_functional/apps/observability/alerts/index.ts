@@ -128,7 +128,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('Displays the correct content', async () => {
             const flyoutTitles = await observability.alerts.getAlertsFlyoutDescriptionListTitles();
-            const flyoutDescriptions = await observability.alerts.getAlertsFlyoutDescriptionListDescriptions();
+            const flyoutDescriptions =
+              await observability.alerts.getAlertsFlyoutDescriptionListDescriptions();
 
             const expectedTitles = [
               'Status',
