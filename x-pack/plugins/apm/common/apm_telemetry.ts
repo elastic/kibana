@@ -49,7 +49,8 @@ export function mergeApmTelemetryMapping(
   xpackPhoneHomeMapping: Record<string, any>
 ) {
   return produce(xpackPhoneHomeMapping, (draft: Record<string, any>) => {
-    draft.mappings.properties.stack_stats.properties.kibana.properties.plugins.properties.apm = getApmTelemetryMapping();
+    draft.mappings.properties.stack_stats.properties.kibana.properties.plugins.properties.apm =
+      getApmTelemetryMapping();
     return draft;
   });
 }

@@ -10,20 +10,20 @@ import { ValidationFunc } from '../../hook_form_lib';
 import { startsWith } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 
-export const startsWithField = ({ message, char }: { message: string; char: string }) => (
-  ...args: Parameters<ValidationFunc>
-): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-  const [{ value }] = args;
+export const startsWithField =
+  ({ message, char }: { message: string; char: string }) =>
+  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    const [{ value }] = args;
 
-  if (typeof value !== 'string') {
-    return;
-  }
+    if (typeof value !== 'string') {
+      return;
+    }
 
-  if (startsWith(char)(value)) {
-    return {
-      code: 'ERR_FIRST_CHAR',
-      char,
-      message,
-    };
-  }
-};
+    if (startsWith(char)(value)) {
+      return {
+        code: 'ERR_FIRST_CHAR',
+        char,
+        message,
+      };
+    }
+  };

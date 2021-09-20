@@ -50,7 +50,7 @@ describe('layer_actions', () => {
     });
 
     it('should register feature-use', async () => {
-      const action = addLayer(({} as unknown) as LayerDescriptor);
+      const action = addLayer({} as unknown as LayerDescriptor);
       await action(dispatchMock, getStoreMock);
       expect(notifyLicensedFeatureUsageMock).toHaveBeenCalledWith(
         LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE
