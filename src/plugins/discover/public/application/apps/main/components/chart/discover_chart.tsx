@@ -14,6 +14,7 @@ import {
   EuiPopover,
   EuiButtonEmpty,
   EuiContextMenu,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HitsCounter } from '../hits_counter';
@@ -22,11 +23,109 @@ import { TimechartHeader } from '../timechart_header';
 import { SavedSearch } from '../../../../../saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
-import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
+import { DataCharts$, DataChartsMessage, DataTotalHits$ } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
+import { useDataState } from '../../utils/use_data_state';
+import { TimechartBucketInterval } from '../timechart_header/timechart_header';
 
 const TimechartHeaderMemoized = memo(TimechartHeader);
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
+function getPanels(
+  interval: string | undefined,
+  hideChart: boolean | undefined,
+  toggleHideChart: () => void,
+  onChangeInterval: (val: string) => void,
+  closePopover: () => void,
+  bucketInterval: TimechartBucketInterval | undefined
+) {
+  const selectedOptionIdx = search.aggs.intervalOptions.findIndex((opt) => opt.val === interval);
+  const interValDisplay =
+    selectedOptionIdx > -1
+      ? search.aggs.intervalOptions[selectedOptionIdx].display
+      : search.aggs.intervalOptions[0].display;
+
+  const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [
+    {
+      name: !hideChart
+        ? i18n.translate('discover.hideChart', {
+            defaultMessage: 'Hide chart',
+          })
+        : i18n.translate('discover.showChart', {
+            defaultMessage: 'Show chart',
+          }),
+      icon: !hideChart ? 'eyeClosed' : 'eye',
+      onClick: () => {
+        toggleHideChart();
+        closePopover();
+      },
+      'data-test-subj': 'discoverChartToggle',
+    },
+  ];
+  if (!hideChart) {
+    mainPanelItems.push({
+      name: i18n.translate('discover.timeIntervalWithValue', {
+        defaultMessage: 'Time interval: {timeInterval}',
+        values: {
+          timeInterval: interValDisplay,
+        },
+      }),
+      icon: bucketInterval?.scaled ? 'alert' : '',
+      toolTipTitle: bucketInterval?.scaled ? 'Warning' : '',
+      toolTipContent: bucketInterval?.scaled
+        ? i18n.translate('discover.bucketIntervalTooltip', {
+            defaultMessage:
+              'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
+            values: {
+              bucketsDescription:
+                bucketInterval!.scale && bucketInterval!.scale > 1
+                  ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
+                      defaultMessage: 'buckets that are too large',
+                    })
+                  : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
+                      defaultMessage: 'too many buckets',
+                    }),
+              bucketIntervalDescription: bucketInterval?.description,
+            },
+          })
+        : '',
+      panel: 1,
+      'data-test-subj': 'discoverTimeIntervalPanel',
+    });
+  }
+
+  return [
+    {
+      id: 0,
+      title: i18n.translate('discover.chartOptions', {
+        defaultMessage: 'Chart options',
+      }),
+      items: mainPanelItems,
+    },
+    {
+      id: 1,
+      initialFocusedItemIndex: selectedOptionIdx > -1 ? selectedOptionIdx : 0,
+      title: i18n.translate('discover.timeIntervals', {
+        defaultMessage: 'Time intervals',
+      }),
+      items: search.aggs.intervalOptions
+        .filter(({ val }) => val !== 'custom')
+        .map(({ display, val }) => {
+          return {
+            name: display,
+            label: display,
+            icon: val === interval ? 'check' : 'empty',
+            onClick: () => {
+              onChangeInterval(val);
+              closePopover();
+            },
+            'data-test-subj': `discoverTimeInterval-${display}`,
+            className: val === interval ? 'discoverIntervalSelected' : '',
+          };
+        }),
+    },
+  ];
+}
+
 export function DiscoverChart({
   resetSavedSearch,
   savedSearch,
@@ -47,67 +146,12 @@ export function DiscoverChart({
   timefield?: string;
 }) {
   const [isPopoverOpen, setPopover] = useState(false);
+  const dataState: DataChartsMessage = useDataState(savedSearchDataChart$);
+  const { bucketInterval } = dataState;
+
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
   };
-  const getIconType = useCallback(
-    (val) => {
-      return val === state.interval ? 'check' : 'empty';
-    },
-    [state.interval]
-  );
-  const panels = [
-    {
-      id: 0,
-      title: 'Chart options',
-      items: [
-        {
-          name: !state.hideChart
-            ? i18n.translate('discover.hideChart', {
-                defaultMessage: 'Hide chart',
-              })
-            : i18n.translate('discover.showChart', {
-                defaultMessage: 'Show chart',
-              }),
-          icon: !state.hideChart ? 'eyeClosed' : 'eye',
-          onClick: () => {
-            toggleHideChart();
-            setPopover(false);
-          },
-        },
-        {
-          name: i18n.translate('discover.timeIntervalWithValue', {
-            defaultMessage: 'Time interval: {timeInterval}',
-            values: {
-              timeInterval: state.interval ?? 'Auto',
-            },
-          }),
-          icon: '',
-          panel: 1,
-        },
-      ],
-    },
-    {
-      id: 1,
-      initialFocusedItemIndex: 1,
-      title: i18n.translate('discover.timeIntervals', {
-        defaultMessage: 'Time intervals',
-      }),
-      items: search.aggs.intervalOptions
-        .filter(({ val }) => val !== 'custom')
-        .map(({ display, val }) => {
-          return {
-            name: display,
-            label: display,
-            icon: getIconType(val),
-            onClick: () => {
-              onChangeInterval(val);
-              setPopover(false);
-            },
-          };
-        }),
-    },
-  ];
 
   const closePopover = () => {
     setPopover(false);
@@ -149,6 +193,14 @@ export function DiscoverChart({
     },
     [data]
   );
+  const panels = getPanels(
+    state.interval,
+    state.hideChart,
+    toggleHideChart,
+    onChangeInterval,
+    () => setPopover(false),
+    bucketInterval
+  );
 
   return (
     <EuiFlexGroup direction="column" alignItems="stretch" gutterSize="none" responsive={false}>
@@ -169,8 +221,6 @@ export function DiscoverChart({
               <TimechartHeaderMemoized
                 data={data}
                 dateFormat={config.get('dateFormat')}
-                options={search.aggs.intervalOptions}
-                onChangeInterval={onChangeInterval}
                 stateInterval={state.interval || ''}
                 savedSearchData$={savedSearchDataChart$}
               />
@@ -185,9 +235,9 @@ export function DiscoverChart({
                     size="xs"
                     iconType={'gear'}
                     onClick={onButtonClick}
-                    data-test-subj="discoverChartToggle"
+                    data-test-subj="discoverChartOptionsToggle"
                   >
-                    {i18n.translate('discover.hideChart', {
+                    {i18n.translate('discover.chartOptionsButton', {
                       defaultMessage: 'Chart options',
                     })}
                   </EuiButtonEmpty>

@@ -175,19 +175,22 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getChartInterval() {
-    const selectedValue = await this.testSubjects.getAttribute('discoverIntervalSelect', 'value');
-    const selectedOption = await this.find.byCssSelector(`option[value="${selectedValue}"]`);
+    await this.testSubjects.click('discoverChartOptionsToggle');
+    await this.testSubjects.click('discoverTimeIntervalPanel');
+    const selectedOption = await this.find.byCssSelector(`.discoverIntervalSelected`);
     return selectedOption.getVisibleText();
   }
 
   public async getChartIntervalWarningIcon() {
+    await this.testSubjects.click('discoverChartOptionsToggle');
     await this.header.waitUntilLoadingHasFinished();
     return await this.find.existsByCssSelector('.euiToolTipAnchor');
   }
 
   public async setChartInterval(interval: string) {
-    const optionElement = await this.find.byCssSelector(`option[label="${interval}"]`, 5000);
-    await optionElement.click();
+    await this.testSubjects.click('discoverChartOptionsToggle');
+    await this.testSubjects.click('discoverTimeIntervalPanel');
+    await this.testSubjects.click(`discoverTimeInterval-${interval}`);
     return await this.header.waitUntilLoadingHasFinished();
   }
 

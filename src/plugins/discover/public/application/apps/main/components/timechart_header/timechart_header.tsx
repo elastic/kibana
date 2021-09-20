@@ -30,14 +30,6 @@ export interface TimechartHeaderProps {
 
   data: DataPublicPluginStart;
   /**
-   * Interval Options
-   */
-  options: Array<{ display: string; val: string }>;
-  /**
-   * changes the interval
-   */
-  onChangeInterval: (interval: string) => void;
-  /**
    * selected interval
    */
   stateInterval: string;
@@ -48,8 +40,6 @@ export interface TimechartHeaderProps {
 export function TimechartHeader({
   dateFormat,
   data: dataPluginStart,
-  onChangeInterval,
-  stateInterval,
   savedSearchData$,
 }: TimechartHeaderProps) {
   const { timefilter } = dataPluginStart.query.timefilter;

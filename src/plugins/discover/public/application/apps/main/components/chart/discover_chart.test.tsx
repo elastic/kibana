@@ -112,10 +112,10 @@ function getProps(timefield?: string) {
 describe('Discover chart', () => {
   test('render without timefield', () => {
     const component = mountWithIntl(<DiscoverChart {...getProps()} />);
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
   test('render with filefield', () => {
     const component = mountWithIntl(<DiscoverChart {...getProps('timefield')} />);
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });
 });

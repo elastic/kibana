@@ -87,22 +87,6 @@ describe('timechart header', function () {
       } as DataPublicPluginStart,
       dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
       stateInterval: 's',
-      options: [
-        {
-          display: 'Auto',
-          val: 'auto',
-        },
-        {
-          display: 'Millisecond',
-          val: 'ms',
-        },
-        {
-          display: 'Second',
-          val: 's',
-        },
-      ],
-      onChangeInterval: jest.fn(),
-
       savedSearchData$: new BehaviorSubject({
         fetchStatus: FetchStatus.COMPLETE,
         chartData,
@@ -120,45 +104,11 @@ describe('timechart header', function () {
     expect(component.find(EuiIconTip).length).toBe(0);
   });
 
-  it('TimechartHeader renders an info when bucketInterval.scale is set to true', () => {
-    props.savedSearchData$ = new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      chartData,
-      bucketInterval: {
-        scaled: true,
-        description: 'second',
-        scale: undefined,
-      },
-    }) as DataCharts$;
-    component = mountWithIntl(<TimechartHeader {...props} />);
-    expect(component.find(EuiIconTip).length).toBe(1);
-  });
-
   it('expect to render the date range', function () {
     component = mountWithIntl(<TimechartHeader {...props} />);
     const datetimeRangeText = findTestSubject(component, 'discoverIntervalDateRange');
     expect(datetimeRangeText.text()).toBe(
-      'May 14, 2020 @ 11:05:13.590 - May 14, 2020 @ 11:20:13.590 per'
+      'May 14, 2020 @ 11:05:13.590 - May 14, 2020 @ 11:20:13.590'
     );
-  });
-
-  it('expects to render a dropdown with the interval options', () => {
-    component = mountWithIntl(<TimechartHeader {...props} />);
-    const dropdown = findTestSubject(component, 'discoverIntervalSelect');
-    expect(dropdown.length).toBe(1);
-    // @ts-expect-error
-    const values = dropdown.find('option').map((option) => option.prop('value'));
-    expect(values).toEqual(['auto', 'ms', 's']);
-    // @ts-expect-error
-    const labels = dropdown.find('option').map((option) => option.text());
-    expect(labels).toEqual(['Auto', 'Millisecond', 'Second']);
-  });
-
-  it('should change the interval', function () {
-    component = mountWithIntl(<TimechartHeader {...props} />);
-    findTestSubject(component, 'discoverIntervalSelect').simulate('change', {
-      target: { value: 'ms' },
-    });
-    expect(props.onChangeInterval).toHaveBeenCalled();
   });
 });

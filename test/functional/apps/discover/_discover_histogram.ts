@@ -80,6 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await prepareTest(fromTime, toTime);
       let canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);
+      await testSubjects.click('discoverChartOptionsToggle');
       await testSubjects.click('discoverChartToggle');
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
@@ -87,6 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.refresh();
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
+      await testSubjects.click('discoverChartOptionsToggle');
       await testSubjects.click('discoverChartToggle');
       await PageObjects.header.waitUntilLoadingHasFinished();
       canvasExists = await elasticChart.canvasExists();
@@ -97,6 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const toTime = 'Mar 21, 2019 @ 00:00:00.000';
       const savedSearch = 'persisted hidden histogram';
       await prepareTest(fromTime, toTime);
+      await testSubjects.click('discoverChartOptionsToggle');
       await testSubjects.click('discoverChartToggle');
       let canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
@@ -110,6 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
+      await testSubjects.click('discoverChartOptionsToggle');
       await testSubjects.click('discoverChartToggle');
       await retry.waitFor(`Discover histogram to be displayed`, async () => {
         canvasExists = await elasticChart.canvasExists();

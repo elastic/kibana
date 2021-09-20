@@ -164,7 +164,6 @@ export function DiscoverHistogram({
         id="discover-histogram-left-axis"
         position={Position.Left}
         ticks={5}
-        title={chartData.yAxisLabel}
         integersOnly
         tickFormat={(value) => xAxisFormatter.convert(value)}
       />
