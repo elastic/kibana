@@ -23,23 +23,25 @@ import { InventoryFormatterType } from '../../../../../common/inventory_models/t
 import { SeriesOverrides, VisSectionProps } from '../types';
 import { getChartName } from './helpers';
 
-const getFormatter = (
-  defaultFormatter: InventoryFormatterType = 'number',
-  defaultFormatterTemplate: string = '{{value}}',
-  seriesOverrides: SeriesOverrides = {},
-  seriesId: string
-) => (val: ReactText) => {
-  if (val == null) {
-    return '';
-  }
-  const formatter = get(seriesOverrides, [seriesId, 'formatter'], defaultFormatter);
-  const formatterTemplate = get(
-    seriesOverrides,
-    [seriesId, 'formatterTemplate'],
-    defaultFormatterTemplate
-  );
-  return createFormatter(formatter, formatterTemplate)(val);
-};
+const getFormatter =
+  (
+    defaultFormatter: InventoryFormatterType = 'number',
+    defaultFormatterTemplate: string = '{{value}}',
+    seriesOverrides: SeriesOverrides = {},
+    seriesId: string
+  ) =>
+  (val: ReactText) => {
+    if (val == null) {
+      return '';
+    }
+    const formatter = get(seriesOverrides, [seriesId, 'formatter'], defaultFormatter);
+    const formatterTemplate = get(
+      seriesOverrides,
+      [seriesId, 'formatterTemplate'],
+      defaultFormatterTemplate
+    );
+    return createFormatter(formatter, formatterTemplate)(val);
+  };
 
 export const GaugesSectionVis = ({
   id,

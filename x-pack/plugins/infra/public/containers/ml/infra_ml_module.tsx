@@ -104,9 +104,10 @@ export const useInfraMLModule = <JobType extends string>({
     [spaceId, sourceId]
   );
 
-  const isCleaningUp = useMemo(() => cleanUpModuleRequest.state === 'pending', [
-    cleanUpModuleRequest.state,
-  ]);
+  const isCleaningUp = useMemo(
+    () => cleanUpModuleRequest.state === 'pending',
+    [cleanUpModuleRequest.state]
+  );
 
   const cleanUpAndSetUpModule = useCallback(
     (
@@ -132,11 +133,10 @@ export const useInfraMLModule = <JobType extends string>({
     dispatchModuleStatus({ type: 'viewedResults' });
   }, [dispatchModuleStatus]);
 
-  const jobIds = useMemo(() => moduleDescriptor.getJobIds(spaceId, sourceId), [
-    moduleDescriptor,
-    spaceId,
-    sourceId,
-  ]);
+  const jobIds = useMemo(
+    () => moduleDescriptor.getJobIds(spaceId, sourceId),
+    [moduleDescriptor, spaceId, sourceId]
+  );
 
   return {
     cleanUpAndSetUpModule,

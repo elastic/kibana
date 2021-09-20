@@ -163,12 +163,8 @@ export const DashboardListing = ({
       : [];
   }, [savedObjectsTagging]);
 
-  const {
-    getEntityName,
-    getTableCaption,
-    getTableListTitle,
-    getEntityNamePlural,
-  } = dashboardListingTable;
+  const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
+    dashboardListingTable;
   return (
     <TableListView
       createItem={!showWriteControls ? undefined : createItem}
