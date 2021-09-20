@@ -26,6 +26,7 @@ interface CommonProps {
   usePrependLabel?: boolean;
   allowExclusions?: boolean;
   allowAllValuesSelection?: boolean;
+  cardinalityField?: string;
   required?: boolean;
 }
 

@@ -21,14 +21,12 @@ export interface StorybookParams {
   workpadCount?: number;
 }
 
-export const pluginServiceProviders: PluginServiceProviders<
-  CanvasPluginServices,
-  StorybookParams
-> = {
-  ...stubProviders,
-  workpad: new PluginServiceProvider(workpadServiceFactory),
-  notify: new PluginServiceProvider(notifyServiceFactory),
-};
+export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices, StorybookParams> =
+  {
+    ...stubProviders,
+    workpad: new PluginServiceProvider(workpadServiceFactory),
+    notify: new PluginServiceProvider(notifyServiceFactory),
+  };
 
 export const argTypes = {
   hasTemplates: {

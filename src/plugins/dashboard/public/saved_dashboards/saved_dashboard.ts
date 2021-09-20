@@ -127,5 +127,5 @@ export function createSavedDashboardClass(
 
   // Unfortunately this throws a typescript error without the casting.  I think it's due to the
   // convoluted way SavedObjects are created.
-  return (SavedDashboard as unknown) as new (id: string) => DashboardSavedObject;
+  return SavedDashboard as unknown as new (id: string) => DashboardSavedObject;
 }

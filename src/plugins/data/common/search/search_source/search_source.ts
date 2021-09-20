@@ -75,7 +75,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
+import { IIndexPattern, IndexPattern, IndexPatternField } from '../..';
 import {
   AggConfigs,
   EsQuerySortValue,

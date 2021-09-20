@@ -71,7 +71,8 @@ export class Plugin
       ObservabilityPublicStart,
       ObservabilityPublicPluginsSetup,
       ObservabilityPublicPluginsStart
-    > {
+    >
+{
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly navigationRegistry = createNavigationRegistry();
 
