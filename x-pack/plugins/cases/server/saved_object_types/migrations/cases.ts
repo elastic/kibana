@@ -50,14 +50,11 @@ export const caseConnectorIdMigration = (
   // removing the id field since it will be stored in the references instead
   const { connector, external_service, ...restAttributes } = doc.attributes;
 
-  const { transformedConnector, references: connectorReferences } = transformConnectorIdToReference(
-    connector
-  );
+  const { transformedConnector, references: connectorReferences } =
+    transformConnectorIdToReference(connector);
 
-  const {
-    transformedPushConnector,
-    references: pushConnectorReferences,
-  } = transformPushConnectorIdToReference(external_service);
+  const { transformedPushConnector, references: pushConnectorReferences } =
+    transformPushConnectorIdToReference(external_service);
 
   const { references = [] } = doc;
 

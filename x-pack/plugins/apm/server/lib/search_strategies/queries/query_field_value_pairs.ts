@@ -56,10 +56,12 @@ const fetchTransactionDurationFieldTerms = async (
       );
       return [];
     }
-    const buckets = (resp.body.aggregations
-      .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
-      key: string;
-    }>)?.buckets;
+    const buckets = (
+      resp.body.aggregations
+        .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
+        key: string;
+      }>
+    )?.buckets;
     if (buckets?.length >= 1) {
       return buckets.map((d) => ({
         fieldName,
