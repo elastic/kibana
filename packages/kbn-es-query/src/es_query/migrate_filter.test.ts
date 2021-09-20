@@ -11,7 +11,7 @@ import { migrateFilter, DeprecatedMatchPhraseFilter } from './migrate_filter';
 import { PhraseFilter, MatchAllFilter } from '../filters';
 
 describe('migrateFilter', function () {
-  const oldMatchPhraseFilter = ({
+  const oldMatchPhraseFilter = {
     query: {
       match: {
         fieldFoo: {
@@ -21,9 +21,9 @@ describe('migrateFilter', function () {
       },
     },
     meta: {},
-  } as unknown) as DeprecatedMatchPhraseFilter;
+  } as unknown as DeprecatedMatchPhraseFilter;
 
-  const newMatchPhraseFilter = ({
+  const newMatchPhraseFilter = {
     query: {
       match_phrase: {
         fieldFoo: {
@@ -32,7 +32,7 @@ describe('migrateFilter', function () {
       },
     },
     meta: {},
-  } as unknown) as PhraseFilter;
+  } as unknown as PhraseFilter;
 
   it('should migrate match filters of type phrase', function () {
     const migratedFilter = migrateFilter(oldMatchPhraseFilter, undefined);

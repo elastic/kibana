@@ -21,9 +21,8 @@ import { MonitoringStartPluginDependencies } from '../types';
 export const AlertsDropdown: React.FC<{}> = () => {
   const $injector = Legacy.shims.getAngularInjector();
   const alertsEnableModalProvider: any = $injector.get('enableAlertsModal');
-  const { navigateToApp } = useKibana<
-    MonitoringStartPluginDependencies['core']
-  >().services.application;
+  const { navigateToApp } =
+    useKibana<MonitoringStartPluginDependencies['core']>().services.application;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
