@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       after('remove index alias', async () => {
         await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
-        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+        await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
 
         await cleanupIndexAlias();
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/bwc/6_2');
