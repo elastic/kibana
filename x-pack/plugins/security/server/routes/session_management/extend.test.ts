@@ -42,7 +42,7 @@ describe('Extend session routes', () => {
     it('always returns 302.', async () => {
       await expect(
         routeHandler(
-          ({} as unknown) as SecurityRequestHandlerContext,
+          {} as unknown as SecurityRequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           kibanaResponseFactory
         )

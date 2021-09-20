@@ -55,29 +55,27 @@ export interface TimelineRequestOptionsPaginated<Field = string>
   sort: Array<TimelineRequestSortField<Field>>;
 }
 
-export type TimelineStrategyResponseType<
-  T extends TimelineFactoryQueryTypes
-> = T extends TimelineEventsQueries.all
-  ? TimelineEventsAllStrategyResponse
-  : T extends TimelineEventsQueries.details
-  ? TimelineEventsDetailsStrategyResponse
-  : T extends TimelineEventsQueries.kpi
-  ? TimelineKpiStrategyResponse
-  : T extends TimelineEventsQueries.lastEventTime
-  ? TimelineEventsLastEventTimeStrategyResponse
-  : never;
+export type TimelineStrategyResponseType<T extends TimelineFactoryQueryTypes> =
+  T extends TimelineEventsQueries.all
+    ? TimelineEventsAllStrategyResponse
+    : T extends TimelineEventsQueries.details
+    ? TimelineEventsDetailsStrategyResponse
+    : T extends TimelineEventsQueries.kpi
+    ? TimelineKpiStrategyResponse
+    : T extends TimelineEventsQueries.lastEventTime
+    ? TimelineEventsLastEventTimeStrategyResponse
+    : never;
 
-export type TimelineStrategyRequestType<
-  T extends TimelineFactoryQueryTypes
-> = T extends TimelineEventsQueries.all
-  ? TimelineEventsAllRequestOptions
-  : T extends TimelineEventsQueries.details
-  ? TimelineEventsDetailsRequestOptions
-  : T extends TimelineEventsQueries.kpi
-  ? TimelineRequestBasicOptions
-  : T extends TimelineEventsQueries.lastEventTime
-  ? TimelineEventsLastEventTimeRequestOptions
-  : never;
+export type TimelineStrategyRequestType<T extends TimelineFactoryQueryTypes> =
+  T extends TimelineEventsQueries.all
+    ? TimelineEventsAllRequestOptions
+    : T extends TimelineEventsQueries.details
+    ? TimelineEventsDetailsRequestOptions
+    : T extends TimelineEventsQueries.kpi
+    ? TimelineRequestBasicOptions
+    : T extends TimelineEventsQueries.lastEventTime
+    ? TimelineEventsLastEventTimeRequestOptions
+    : never;
 
 export interface ColumnHeaderInput {
   aggregatable?: Maybe<boolean>;

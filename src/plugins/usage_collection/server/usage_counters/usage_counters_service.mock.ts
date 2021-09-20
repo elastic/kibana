@@ -16,9 +16,9 @@ const createSetupContractMock = () => {
     getUsageCounterByType: jest.fn(),
   };
 
-  setupContract.createUsageCounter.mockReturnValue(({
+  setupContract.createUsageCounter.mockReturnValue({
     incrementCounter: jest.fn(),
-  } as unknown) as jest.Mocked<UsageCounter>);
+  } as unknown as jest.Mocked<UsageCounter>);
 
   return setupContract;
 };

@@ -78,7 +78,8 @@ export function DatePicker() {
     }
 
     // read time from state and update the url
-    const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
+    const timePickerSharedState =
+      plugins.data.query.timefilter.timefilter.getTime();
 
     history.replace({
       ...location,

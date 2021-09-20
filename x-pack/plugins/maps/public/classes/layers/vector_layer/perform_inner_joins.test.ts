@@ -66,7 +66,7 @@ const joinDescriptor = {
     type: SOURCE_TYPES.ES_TERM_SOURCE,
   } as ESTermSourceDescriptor,
 };
-const mockVectorSource = ({
+const mockVectorSource = {
   getInspectorAdapters: () => {
     return undefined;
   },
@@ -77,7 +77,7 @@ const mockVectorSource = ({
       },
     } as IField;
   },
-} as unknown) as IVectorSource;
+} as unknown as IVectorSource;
 const innerJoin = new InnerJoin(joinDescriptor, mockVectorSource);
 const propertiesMap = new Map<string, Record<string | number, unknown>>();
 propertiesMap.set('alpha', { [COUNT_PROPERTY_NAME]: 1 });
