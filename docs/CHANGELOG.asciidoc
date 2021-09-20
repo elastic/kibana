@@ -90,7 +90,7 @@ Platform::
 [[fixes-v7.14.2]]
 === Bug Fixes
 Canvas::
-* Fixes bugs in interactive workpad {kibana-pull}110385[#110385]
+* Fixes several minor workpad layout and interaction bugs {kibana-pull}110385[#110385]
 * Fixes element stats {kibana-pull}109770[#109770]
 * Fixes image argument form issues {kibana-pull}109767[#109767]
 * Handle Timelion errors gracefully {kibana-pull}109761[#109761]
