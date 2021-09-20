@@ -9,7 +9,6 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { timelineActions } from '../../../../../store/timeline';
-import { Direction } from '../../../../../../graphql/types';
 import { TestProviders } from '../../../../../../common/mock';
 import { ColumnHeaderType } from '../../../../../store/timeline/model';
 import { Sort } from '../../sort';
@@ -18,6 +17,8 @@ import { defaultHeaders } from '../default_headers';
 
 import { HeaderComponent } from '.';
 import { getNewSortDirectionOnClick, getNextSortDirection, getSortDirection } from './helpers';
+import { Direction } from '../../../../../../../common/search_strategy';
+import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -30,6 +31,11 @@ jest.mock('react-redux', () => {
   };
 });
 
+jest.mock('../../../../../../common/hooks/use_selector', () => ({
+  useShallowEqualSelector: jest.fn(),
+  useDeepEqualSelector: jest.fn(),
+}));
+
 const filteredColumnHeader: ColumnHeaderType = 'text-filter';
 
 describe('Header', () => {
@@ -41,7 +47,11 @@ describe('Header', () => {
       sortDirection: Direction.desc,
     },
   ];
-  const timelineId = 'fakeId';
+  const timelineId = 'test';
+
+  beforeEach(() => {
+    (useDeepEqualSelector as jest.Mock).mockReturnValue({ isLoading: false });
+  });
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
@@ -65,9 +75,9 @@ describe('Header', () => {
       ).toEqual(columnHeader.id);
     });
 
-    test('it renders the header text alias when label is provided', () => {
-      const label = 'Timestamp';
-      const headerWithLabel = { ...columnHeader, label };
+    test('it renders the header text alias when displayAsText is provided', () => {
+      const displayAsText = 'Timestamp';
+      const headerWithLabel = { ...columnHeader, displayAsText };
       const wrapper = mount(
         <TestProviders>
           <HeaderComponent header={headerWithLabel} sort={sort} timelineId={timelineId} />
@@ -76,7 +86,52 @@ describe('Header', () => {
 
       expect(
         wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`).first().text()
-      ).toEqual(label);
+      ).toEqual(displayAsText);
+    });
+
+    test('it renders the header as a `ReactNode` when `display` is provided', () => {
+      const display: React.ReactNode = (
+        <div data-test-subj="rendered-via-display">
+          {'The display property renders the column heading as a ReactNode'}
+        </div>
+      );
+      const headerWithLabel = { ...columnHeader, display };
+      const wrapper = mount(
+        <TestProviders>
+          <HeaderComponent header={headerWithLabel} sort={sort} timelineId={timelineId} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(`[data-test-subj="rendered-via-display"]`).exists()).toBe(true);
+    });
+
+    test('it prefers to render `display` instead of `displayAsText` when both are provided', () => {
+      const displayAsText = 'this text should NOT be rendered';
+      const display: React.ReactNode = (
+        <div data-test-subj="rendered-via-display">{'this text is rendered via display'}</div>
+      );
+      const headerWithLabel = { ...columnHeader, display, displayAsText };
+      const wrapper = mount(
+        <TestProviders>
+          <HeaderComponent header={headerWithLabel} sort={sort} timelineId={timelineId} />
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toBe('this text is rendered via display');
+    });
+
+    test('it falls back to rendering header.id when `display` is not a valid React node', () => {
+      const display = {}; // a plain object is NOT a `ReactNode`
+      const headerWithLabel = { ...columnHeader, display };
+      const wrapper = mount(
+        <TestProviders>
+          <HeaderComponent header={headerWithLabel} sort={sort} timelineId={timelineId} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`).first().text()
+      ).toEqual(columnHeader.id);
     });
 
     test('it renders a sort indicator', () => {

@@ -6,8 +6,9 @@
  */
 
 import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
   canDelete: boolean;

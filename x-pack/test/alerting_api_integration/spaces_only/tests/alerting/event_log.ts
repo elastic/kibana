@@ -24,335 +24,512 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
     after(() => objectRemover.removeAll());
 
-    it('should generate expected events for normal operation', async () => {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'MY action',
-          actionTypeId: 'test.noop',
-          config: {},
-          secrets: {},
-        })
-        .expect(200);
+    for (const space of [Spaces.default, Spaces.space1]) {
+      describe(`in space ${space.id}`, () => {
+        it('should generate expected events for normal operation', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
 
-      // pattern of when the alert should fire
-      const pattern = {
-        instance: [false, true, true],
-      };
+          // pattern of when the alert should fire
+          const pattern = {
+            instance: [false, true, true],
+          };
 
-      const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestAlertData({
-            alertTypeId: 'test.patternFiring',
-            schedule: { interval: '1s' },
-            throttle: null,
-            params: {
-              pattern,
-            },
-            actions: [
-              {
-                id: createdAction.id,
-                group: 'default',
-                params: {},
-              },
-            ],
-          })
-        );
-
-      expect(response.status).to.eql(200);
-      const alertId = response.body.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
-
-      // get the events we're expecting
-      const events = await retry.try(async () => {
-        return await getEventLog({
-          getService,
-          spaceId: Spaces.space1.id,
-          type: 'alert',
-          id: alertId,
-          provider: 'alerting',
-          actions: new Map([
-            // make sure the counts of the # of events per type are as expected
-            ['execute', { gte: 4 }],
-            ['execute-action', { equal: 2 }],
-            ['new-instance', { equal: 1 }],
-            ['active-instance', { gte: 1 }],
-            ['recovered-instance', { equal: 1 }],
-          ]),
-        });
-      });
-
-      // get the filtered events only with action 'new-instance'
-      const filteredEvents = await retry.try(async () => {
-        return await getEventLog({
-          getService,
-          spaceId: Spaces.space1.id,
-          type: 'alert',
-          id: alertId,
-          provider: 'alerting',
-          actions: new Map([['new-instance', { equal: 1 }]]),
-          filter: 'event.action:(new-instance)',
-        });
-      });
-
-      expect(getEventsByAction(filteredEvents, 'execute').length).equal(0);
-      expect(getEventsByAction(filteredEvents, 'execute-action').length).equal(0);
-      expect(getEventsByAction(events, 'new-instance').length).equal(1);
-
-      const executeEvents = getEventsByAction(events, 'execute');
-      const executeActionEvents = getEventsByAction(events, 'execute-action');
-      const newInstanceEvents = getEventsByAction(events, 'new-instance');
-      const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
-
-      // make sure the events are in the right temporal order
-      const executeTimes = getTimestamps(executeEvents);
-      const executeActionTimes = getTimestamps(executeActionEvents);
-      const newInstanceTimes = getTimestamps(newInstanceEvents);
-      const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
-
-      expect(executeTimes[0] < newInstanceTimes[0]).to.be(true);
-      expect(executeTimes[1] <= newInstanceTimes[0]).to.be(true);
-      expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
-      expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
-      expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
-      expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
-
-      // validate each event
-      let executeCount = 0;
-      const executeStatuses = ['ok', 'active', 'active'];
-      for (const event of events) {
-        switch (event?.event?.action) {
-          case 'execute':
-            validateEvent(event, {
-              spaceId: Spaces.space1.id,
-              savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
-              outcome: 'success',
-              message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
-              status: executeStatuses[executeCount++],
-            });
-            break;
-          case 'execute-action':
-            validateEvent(event, {
-              spaceId: Spaces.space1.id,
-              savedObjects: [
-                { type: 'alert', id: alertId, rel: 'primary' },
-                { type: 'action', id: createdAction.id },
-              ],
-              message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup: 'default' action: test.noop:${createdAction.id}`,
-              instanceId: 'instance',
-              actionGroupId: 'default',
-            });
-            break;
-          case 'new-instance':
-            validateInstanceEvent(event, `created new instance: 'instance'`);
-            break;
-          case 'recovered-instance':
-            validateInstanceEvent(event, `instance 'instance' has recovered`);
-            break;
-          case 'active-instance':
-            validateInstanceEvent(event, `active instance: 'instance' in actionGroup: 'default'`);
-            break;
-          // this will get triggered as we add new event actions
-          default:
-            throw new Error(`unexpected event action "${event?.event?.action}"`);
-        }
-      }
-
-      function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
-        validateEvent(event, {
-          spaceId: Spaces.space1.id,
-          savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
-          message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
-          instanceId: 'instance',
-          actionGroupId: 'default',
-        });
-      }
-    });
-
-    it('should generate expected events for normal operation with subgroups', async () => {
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'MY action',
-          actionTypeId: 'test.noop',
-          config: {},
-          secrets: {},
-        })
-        .expect(200);
-
-      // pattern of when the alert should fire
-      const [firstSubgroup, secondSubgroup] = [uuid.v4(), uuid.v4()];
-      const pattern = {
-        instance: [false, firstSubgroup, secondSubgroup],
-      };
-
-      const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestAlertData({
-            alertTypeId: 'test.patternFiring',
-            schedule: { interval: '1s' },
-            throttle: null,
-            params: {
-              pattern,
-            },
-            actions: [
-              {
-                id: createdAction.id,
-                group: 'default',
-                params: {},
-              },
-            ],
-          })
-        );
-
-      expect(response.status).to.eql(200);
-      const alertId = response.body.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
-
-      // get the events we're expecting
-      const events = await retry.try(async () => {
-        return await getEventLog({
-          getService,
-          spaceId: Spaces.space1.id,
-          type: 'alert',
-          id: alertId,
-          provider: 'alerting',
-          actions: new Map([
-            // make sure the counts of the # of events per type are as expected
-            ['execute', { gte: 4 }],
-            ['execute-action', { equal: 2 }],
-            ['new-instance', { equal: 1 }],
-            ['active-instance', { gte: 2 }],
-            ['recovered-instance', { equal: 1 }],
-          ]),
-        });
-      });
-
-      const executeEvents = getEventsByAction(events, 'execute');
-      const executeActionEvents = getEventsByAction(events, 'execute-action');
-      const newInstanceEvents = getEventsByAction(events, 'new-instance');
-      const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
-
-      // make sure the events are in the right temporal order
-      const executeTimes = getTimestamps(executeEvents);
-      const executeActionTimes = getTimestamps(executeActionEvents);
-      const newInstanceTimes = getTimestamps(newInstanceEvents);
-      const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
-
-      expect(executeTimes[0] < newInstanceTimes[0]).to.be(true);
-      expect(executeTimes[1] <= newInstanceTimes[0]).to.be(true);
-      expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
-      expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
-      expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
-      expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
-
-      // validate each event
-      let executeCount = 0;
-      const executeStatuses = ['ok', 'active', 'active'];
-      for (const event of events) {
-        switch (event?.event?.action) {
-          case 'execute':
-            validateEvent(event, {
-              spaceId: Spaces.space1.id,
-              savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
-              outcome: 'success',
-              message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
-              status: executeStatuses[executeCount++],
-            });
-            break;
-          case 'execute-action':
-            expect(
-              [firstSubgroup, secondSubgroup].includes(event?.kibana?.alerting?.action_subgroup!)
-            ).to.be(true);
-            validateEvent(event, {
-              spaceId: Spaces.space1.id,
-              savedObjects: [
-                { type: 'alert', id: alertId, rel: 'primary' },
-                { type: 'action', id: createdAction.id },
-              ],
-              message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})' action: test.noop:${createdAction.id}`,
-              instanceId: 'instance',
-              actionGroupId: 'default',
-            });
-            break;
-          case 'new-instance':
-            validateInstanceEvent(event, `created new instance: 'instance'`);
-            break;
-          case 'recovered-instance':
-            validateInstanceEvent(event, `instance 'instance' has recovered`);
-            break;
-          case 'active-instance':
-            expect(
-              [firstSubgroup, secondSubgroup].includes(event?.kibana?.alerting?.action_subgroup!)
-            ).to.be(true);
-            validateInstanceEvent(
-              event,
-              `active instance: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern,
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
             );
-            break;
-          // this will get triggered as we add new event actions
-          default:
-            throw new Error(`unexpected event action "${event?.event?.action}"`);
-        }
-      }
 
-      function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
-        validateEvent(event, {
-          spaceId: Spaces.space1.id,
-          savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
-          message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
-          instanceId: 'instance',
-          actionGroupId: 'default',
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute-start', { gte: 4 }],
+                ['execute', { gte: 4 }],
+                ['execute-action', { equal: 2 }],
+                ['new-instance', { equal: 1 }],
+                ['active-instance', { gte: 1 }],
+                ['recovered-instance', { equal: 1 }],
+              ]),
+            });
+          });
+
+          // get the filtered events only with action 'new-instance'
+          const filteredEvents = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([['new-instance', { equal: 1 }]]),
+              filter: 'event.action:(new-instance)',
+            });
+          });
+
+          expect(getEventsByAction(filteredEvents, 'execute').length).equal(0);
+          expect(getEventsByAction(filteredEvents, 'execute-action').length).equal(0);
+          expect(getEventsByAction(events, 'new-instance').length).equal(1);
+
+          const executeEvents = getEventsByAction(events, 'execute');
+          const executeStartEvents = getEventsByAction(events, 'execute-start');
+          const executeActionEvents = getEventsByAction(events, 'execute-action');
+          const newInstanceEvents = getEventsByAction(events, 'new-instance');
+          const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
+
+          // make sure the events are in the right temporal order
+          const executeTimes = getTimestamps(executeEvents);
+          const executeStartTimes = getTimestamps(executeStartEvents);
+          const executeActionTimes = getTimestamps(executeActionEvents);
+          const newInstanceTimes = getTimestamps(newInstanceEvents);
+          const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
+
+          expect(executeTimes[0] < newInstanceTimes[0]).to.be(true);
+          expect(executeTimes[1] <= newInstanceTimes[0]).to.be(true);
+          expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
+          expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
+          expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
+          expect(executeStartTimes.length === executeTimes.length).to.be(true);
+          executeStartTimes.forEach((est, index) =>
+            expect(est === executeTimes[index]).to.be(true)
+          );
+          expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
+
+          // validate each event
+          let executeCount = 0;
+          const executeStatuses = ['ok', 'active', 'active'];
+          for (const event of events) {
+            switch (event?.event?.action) {
+              case 'execute-start':
+                validateEvent(event, {
+                  spaceId: space.id,
+                  savedObjects: [
+                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                  ],
+                  message: `alert execution start: "${alertId}"`,
+                  shouldHaveTask: true,
+                  rule: {
+                    id: alertId,
+                    category: response.body.rule_type_id,
+                    license: 'basic',
+                    ruleset: 'alertsFixture',
+                  },
+                });
+                break;
+              case 'execute':
+                validateEvent(event, {
+                  spaceId: space.id,
+                  savedObjects: [
+                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                  ],
+                  outcome: 'success',
+                  message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
+                  status: executeStatuses[executeCount++],
+                  shouldHaveTask: true,
+                  rule: {
+                    id: alertId,
+                    category: response.body.rule_type_id,
+                    license: 'basic',
+                    ruleset: 'alertsFixture',
+                    name: response.body.name,
+                  },
+                });
+                break;
+              case 'execute-action':
+                validateEvent(event, {
+                  spaceId: space.id,
+                  savedObjects: [
+                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                    { type: 'action', id: createdAction.id, type_id: 'test.noop' },
+                  ],
+                  message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup: 'default' action: test.noop:${createdAction.id}`,
+                  instanceId: 'instance',
+                  actionGroupId: 'default',
+                  rule: {
+                    id: alertId,
+                    category: response.body.rule_type_id,
+                    license: 'basic',
+                    ruleset: 'alertsFixture',
+                    name: response.body.name,
+                  },
+                });
+                break;
+              case 'new-instance':
+                validateInstanceEvent(event, `created new instance: 'instance'`, false);
+                break;
+              case 'recovered-instance':
+                validateInstanceEvent(event, `instance 'instance' has recovered`, true);
+                break;
+              case 'active-instance':
+                validateInstanceEvent(
+                  event,
+                  `active instance: 'instance' in actionGroup: 'default'`,
+                  false
+                );
+                break;
+              // this will get triggered as we add new event actions
+              default:
+                throw new Error(`unexpected event action "${event?.event?.action}"`);
+            }
+          }
+
+          const actionEvents = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'action',
+              id: createdAction.id,
+              provider: 'actions',
+              actions: new Map([['execute', { gte: 1 }]]),
+            });
+          });
+
+          for (const event of actionEvents) {
+            switch (event?.event?.action) {
+              case 'execute':
+                validateEvent(event, {
+                  spaceId: space.id,
+                  savedObjects: [
+                    { type: 'action', id: createdAction.id, rel: 'primary', type_id: 'test.noop' },
+                  ],
+                  message: `action executed: test.noop:${createdAction.id}: MY action`,
+                  outcome: 'success',
+                  shouldHaveTask: true,
+                  rule: undefined,
+                });
+                break;
+            }
+          }
+
+          function validateInstanceEvent(
+            event: IValidatedEvent,
+            subMessage: string,
+            shouldHaveEventEnd: boolean
+          ) {
+            validateEvent(event, {
+              spaceId: space.id,
+              savedObjects: [
+                { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+              ],
+              message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
+              instanceId: 'instance',
+              actionGroupId: 'default',
+              shouldHaveEventEnd,
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                name: response.body.name,
+              },
+            });
+          }
         });
-      }
-    });
 
-    it('should generate events for execution errors', async () => {
-      const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestAlertData({
-            alertTypeId: 'test.throw',
-            schedule: { interval: '1s' },
-            throttle: null,
-          })
-        );
+        it('should generate expected events for normal operation with subgroups', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
 
-      expect(response.status).to.eql(200);
-      const alertId = response.body.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+          // pattern of when the alert should fire
+          const [firstSubgroup, secondSubgroup] = [uuid.v4(), uuid.v4()];
+          const pattern = {
+            instance: [false, firstSubgroup, secondSubgroup],
+          };
 
-      const events = await retry.try(async () => {
-        return await getEventLog({
-          getService,
-          spaceId: Spaces.space1.id,
-          type: 'alert',
-          id: alertId,
-          provider: 'alerting',
-          actions: new Map([['execute', { gte: 1 }]]),
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern,
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute-start', { gte: 4 }],
+                ['execute', { gte: 4 }],
+                ['execute-action', { equal: 2 }],
+                ['new-instance', { equal: 1 }],
+                ['active-instance', { gte: 2 }],
+                ['recovered-instance', { equal: 1 }],
+              ]),
+            });
+          });
+
+          const executeEvents = getEventsByAction(events, 'execute');
+          const executeStartEvents = getEventsByAction(events, 'execute-start');
+          const executeActionEvents = getEventsByAction(events, 'execute-action');
+          const newInstanceEvents = getEventsByAction(events, 'new-instance');
+          const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
+
+          // make sure the events are in the right temporal order
+          const executeTimes = getTimestamps(executeEvents);
+          const executeStartTimes = getTimestamps(executeStartEvents);
+          const executeActionTimes = getTimestamps(executeActionEvents);
+          const newInstanceTimes = getTimestamps(newInstanceEvents);
+          const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
+
+          expect(executeTimes[0] < newInstanceTimes[0]).to.be(true);
+          expect(executeTimes[1] <= newInstanceTimes[0]).to.be(true);
+          expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
+          expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
+          expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
+          expect(executeStartTimes.length === executeTimes.length).to.be(true);
+          executeStartTimes.forEach((est, index) =>
+            expect(est === executeTimes[index]).to.be(true)
+          );
+          expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
+
+          // validate each event
+          let executeCount = 0;
+          const executeStatuses = ['ok', 'active', 'active'];
+          for (const event of events) {
+            switch (event?.event?.action) {
+              case 'execute-start':
+                validateEvent(event, {
+                  spaceId: space.id,
+                  savedObjects: [
+                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                  ],
+                  message: `alert execution start: "${alertId}"`,
+                  shouldHaveTask: true,
+                  rule: {
+                    id: alertId,
+                    category: response.body.rule_type_id,
+                    license: 'basic',
+                    ruleset: 'alertsFixture',
+                  },
+                });
+                break;
+              case 'execute':
+                validateEvent(event, {
+                  spaceId: space.id,
+                  savedObjects: [
+                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                  ],
+                  outcome: 'success',
+                  message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
+                  status: executeStatuses[executeCount++],
+                  shouldHaveTask: true,
+                  rule: {
+                    id: alertId,
+                    category: response.body.rule_type_id,
+                    license: 'basic',
+                    ruleset: 'alertsFixture',
+                    name: response.body.name,
+                  },
+                });
+                break;
+              case 'execute-action':
+                expect(
+                  [firstSubgroup, secondSubgroup].includes(
+                    event?.kibana?.alerting?.action_subgroup!
+                  )
+                ).to.be(true);
+                validateEvent(event, {
+                  spaceId: space.id,
+                  savedObjects: [
+                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                    { type: 'action', id: createdAction.id, type_id: 'test.noop' },
+                  ],
+                  message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})' action: test.noop:${createdAction.id}`,
+                  instanceId: 'instance',
+                  actionGroupId: 'default',
+                  rule: {
+                    id: alertId,
+                    category: response.body.rule_type_id,
+                    license: 'basic',
+                    ruleset: 'alertsFixture',
+                    name: response.body.name,
+                  },
+                });
+                break;
+              case 'new-instance':
+                validateInstanceEvent(event, `created new instance: 'instance'`, false);
+                break;
+              case 'recovered-instance':
+                validateInstanceEvent(event, `instance 'instance' has recovered`, true);
+                break;
+              case 'active-instance':
+                expect(
+                  [firstSubgroup, secondSubgroup].includes(
+                    event?.kibana?.alerting?.action_subgroup!
+                  )
+                ).to.be(true);
+                validateInstanceEvent(
+                  event,
+                  `active instance: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`,
+                  false
+                );
+                break;
+              // this will get triggered as we add new event actions
+              default:
+                throw new Error(`unexpected event action "${event?.event?.action}"`);
+            }
+          }
+
+          function validateInstanceEvent(
+            event: IValidatedEvent,
+            subMessage: string,
+            shouldHaveEventEnd: boolean
+          ) {
+            validateEvent(event, {
+              spaceId: space.id,
+              savedObjects: [
+                { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+              ],
+              message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
+              instanceId: 'instance',
+              actionGroupId: 'default',
+              shouldHaveEventEnd,
+              rule: {
+                id: alertId,
+                category: response.body.rule_type_id,
+                license: 'basic',
+                ruleset: 'alertsFixture',
+                name: response.body.name,
+              },
+            });
+          }
+        });
+
+        it('should generate events for execution errors', async () => {
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                rule_type_id: 'test.throw',
+                schedule: { interval: '1s' },
+                throttle: null,
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                ['execute-start', { gte: 1 }],
+                ['execute', { gte: 1 }],
+              ]),
+            });
+          });
+
+          const startEvent = events[0];
+          const executeEvent = events[1];
+
+          expect(startEvent).to.be.ok();
+          expect(executeEvent).to.be.ok();
+
+          validateEvent(startEvent, {
+            spaceId: space.id,
+            savedObjects: [
+              { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+            ],
+            message: `alert execution start: "${alertId}"`,
+            shouldHaveTask: true,
+            rule: {
+              id: alertId,
+              category: response.body.rule_type_id,
+              license: 'basic',
+              ruleset: 'alertsFixture',
+            },
+          });
+
+          validateEvent(executeEvent, {
+            spaceId: space.id,
+            savedObjects: [{ type: 'alert', id: alertId, rel: 'primary', type_id: 'test.throw' }],
+            outcome: 'failure',
+            message: `alert execution failure: test.throw:${alertId}: 'abc'`,
+            errorMessage: 'this alert is intended to fail',
+            status: 'error',
+            reason: 'execute',
+            shouldHaveTask: true,
+            rule: {
+              id: alertId,
+              category: response.body.rule_type_id,
+              license: 'basic',
+              ruleset: 'alertsFixture',
+            },
+          });
         });
       });
-
-      const event = events[0];
-      expect(event).to.be.ok();
-
-      validateEvent(event, {
-        spaceId: Spaces.space1.id,
-        savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
-        outcome: 'failure',
-        message: `alert execution failure: test.throw:${alertId}: 'abc'`,
-        errorMessage: 'this alert is intended to fail',
-        status: 'error',
-        reason: 'execute',
-      });
-    });
+    }
   });
 }
 
@@ -360,6 +537,7 @@ interface SavedObject {
   type: string;
   id: string;
   rel?: string;
+  type_id: string;
 }
 
 interface ValidateEventLogParams {
@@ -367,16 +545,29 @@ interface ValidateEventLogParams {
   savedObjects: SavedObject[];
   outcome?: string;
   message: string;
+  shouldHaveEventEnd?: boolean;
+  shouldHaveTask?: boolean;
   errorMessage?: string;
   status?: string;
   actionGroupId?: string;
   instanceId?: string;
   reason?: string;
+  rule?: {
+    id: string;
+    name?: string;
+    version?: string;
+    category?: string;
+    reference?: string;
+    author?: string[];
+    license?: string;
+    ruleset?: string;
+    namespace?: string;
+  };
 }
 
 export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
-  const { spaceId, savedObjects, outcome, message, errorMessage } = params;
-  const { status, actionGroupId, instanceId, reason } = params;
+  const { spaceId, savedObjects, outcome, message, errorMessage, rule, shouldHaveTask } = params;
+  const { status, actionGroupId, instanceId, reason, shouldHaveEventEnd } = params;
 
   if (status) {
     expect(event?.kibana?.alerting?.status).to.be(status);
@@ -402,16 +593,23 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   if (duration !== undefined) {
     expect(typeof duration).to.be('number');
     expect(eventStart).to.be.ok();
-    expect(eventEnd).to.be.ok();
 
-    const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
-    );
+    if (shouldHaveEventEnd !== false) {
+      expect(eventEnd).to.be.ok();
 
-    // account for rounding errors
-    expect(durationDiff < 1).to.equal(true);
-    expect(eventStart <= eventEnd).to.equal(true);
-    expect(eventEnd <= dateNow).to.equal(true);
+      const durationDiff = Math.abs(
+        Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+      );
+
+      // account for rounding errors
+      expect(durationDiff < 1).to.equal(true);
+      expect(eventStart <= eventEnd).to.equal(true);
+      expect(eventEnd <= dateNow).to.equal(true);
+    }
+
+    if (shouldHaveEventEnd === false) {
+      expect(eventEnd).not.to.be.ok();
+    }
   }
 
   expect(event?.event?.outcome).to.equal(outcome);
@@ -423,6 +621,18 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   }
 
   expect(event?.message).to.eql(message);
+
+  expect(event?.rule).to.eql(rule);
+
+  if (shouldHaveTask) {
+    const task = event?.kibana?.task;
+    expect(task).to.be.ok();
+    expect(typeof Date.parse(typeof task?.scheduled)).to.be('number');
+    expect(typeof task?.schedule_delay).to.be('number');
+    expect(task?.schedule_delay).to.be.greaterThan(-1);
+  } else {
+    expect(event?.kibana?.task).to.be(undefined);
+  }
 
   if (errorMessage) {
     expect(event?.error?.message).to.eql(errorMessage);
@@ -439,12 +649,13 @@ function getTimestamps(events: IValidatedEvent[]) {
 
 function isSavedObjectInEvent(
   event: IValidatedEvent,
-  namespace: string,
+  spaceId: string,
   type: string,
   id: string,
   rel?: string
 ): boolean {
   const savedObjects = event?.kibana?.saved_objects ?? [];
+  const namespace = spaceId === 'default' ? undefined : spaceId;
 
   for (const savedObject of savedObjects) {
     if (

@@ -10,7 +10,7 @@ import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';
-import { LibraryStacktrace } from './LibraryStacktrace';
+import { LibraryStacktrace } from './library_stacktrace';
 import { Stackframe as StackframeComponent } from './Stackframe';
 
 interface Props {

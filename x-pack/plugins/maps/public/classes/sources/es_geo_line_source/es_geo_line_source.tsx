@@ -10,6 +10,7 @@ import React from 'react';
 
 import { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
+import type { Filter } from 'src/plugins/data/public';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
@@ -190,6 +191,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     // Fetch entities
     //
     const entitySearchSource = await this.makeSearchSource(searchFilters, 0);
+    entitySearchSource.setField('trackTotalHits', false);
     const splitField = getField(indexPattern, this._descriptor.splitField);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = { size: MAX_TRACKS };
@@ -201,6 +203,15 @@ export class ESGeoLineSource extends AbstractESAggSource {
         terms: addFieldToDSL(termsAgg, splitField),
       },
     });
+    if (splitField.type === 'string') {
+      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(splitField, '', indexPattern);
+      entityIsNotEmptyFilter.meta.negate = true;
+      entitySearchSource.setField('filter', [
+        ...(entitySearchSource.getField('filter') as Filter[]),
+        entityIsNotEmptyFilter,
+      ]);
+    }
+
     const entityResp = await this._runEsQuery({
       requestId: `${this.getId()}_entities`,
       requestName: i18n.translate('xpack.maps.source.esGeoLine.entityRequestName', {
@@ -250,6 +261,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const tracksSearchFilters = { ...searchFilters };
     delete tracksSearchFilters.buffer;
     const tracksSearchSource = await this.makeSearchSource(tracksSearchFilters, 0);
+    tracksSearchSource.setField('trackTotalHits', false);
     tracksSearchSource.setField('aggs', {
       tracks: {
         filters: {
@@ -324,21 +336,21 @@ export class ESGeoLineSource extends AbstractESAggSource {
       ? i18n.translate('xpack.maps.esGeoLine.areEntitiesTrimmedMsg', {
           defaultMessage: `Results limited to first {entityCount} tracks of ~{totalEntities}.`,
           values: {
-            entityCount: meta.entityCount,
-            totalEntities: meta.totalEntities,
+            entityCount: meta.entityCount.toLocaleString(),
+            totalEntities: meta.totalEntities.toLocaleString(),
           },
         })
       : i18n.translate('xpack.maps.esGeoLine.tracksCountMsg', {
           defaultMessage: `Found {entityCount} tracks.`,
-          values: { entityCount: meta.entityCount },
+          values: { entityCount: meta.entityCount.toLocaleString() },
         });
     const tracksTrimmedMsg =
       meta.numTrimmedTracks > 0
         ? i18n.translate('xpack.maps.esGeoLine.tracksTrimmedMsg', {
             defaultMessage: `{numTrimmedTracks} of {entityCount} tracks are incomplete.`,
             values: {
-              entityCount: meta.entityCount,
-              numTrimmedTracks: meta.numTrimmedTracks,
+              entityCount: meta.entityCount.toLocaleString(),
+              numTrimmedTracks: meta.numTrimmedTracks.toLocaleString(),
             },
           })
         : undefined;
@@ -357,7 +369,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return true;
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return true;
   }
 

@@ -61,12 +61,12 @@ describe('schema_extractor', () => {
           {
             name: 'mode',
             documentation: '',
-            type: 'string',
+            type: '"auto" | "manual" | "off"',
           },
           {
             name: 'time_span',
             documentation: '',
-            type: 'string',
+            type: 'string | number',
           },
         ],
       },
@@ -133,7 +133,7 @@ describe('schema_extractor', () => {
           {
             name: 'expand_wildcards',
             documentation: '',
-            type: 'string[]',
+            type: '"all" | "open" | "closed" | "hidden" | "none"[]',
           },
           {
             name: 'ignore_unavailable',
@@ -158,7 +158,7 @@ describe('schema_extractor', () => {
       {
         name: 'force',
         documentation: '',
-        type: 'any', // string
+        type: 'boolean',
       },
     ]);
   });

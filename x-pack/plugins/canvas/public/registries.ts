@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-expect-error untyped module
 import { addRegistries, register } from '@kbn/interpreter/common';
 // @ts-expect-error untyped local
 import { elementsRegistry } from './lib/elements_registry';
@@ -21,7 +20,6 @@ import {
   modelRegistry,
   transformRegistry,
   viewRegistry,
-  // @ts-expect-error untyped local
 } from './expression_types';
 import { SetupRegistries } from './plugin_api';
 

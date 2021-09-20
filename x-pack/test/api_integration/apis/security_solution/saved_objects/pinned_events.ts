@@ -8,27 +8,23 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { persistTimelinePinnedEventMutation } from '../../../../../plugins/security_solution/public/timelines/containers/pinned_event/persist.gql_query';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const client = getService('securitySolutionGraphQLClient');
+  const supertest = getService('supertest');
 
   describe('Pinned Events - Saved Objects', () => {
-    beforeEach(() => esArchiver.load('empty_kibana'));
-    afterEach(() => esArchiver.unload('empty_kibana'));
+    beforeEach(() => esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
+    afterEach(() => esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
 
     describe('Pinned an event', () => {
       it('return a timelineId, timelineVersion, pinnedEventId and version', async () => {
-        const response = await client.mutate<any>({
-          mutation: persistTimelinePinnedEventMutation,
-          variables: {
-            pinnedEventId: null,
-            eventId: 'bv4QSGsB9v5HJNSH-7fi',
-          },
+        const response = await supertest.patch('/api/pinned_event').set('kbn-xsrf', 'true').send({
+          pinnedEventId: null,
+          eventId: 'bv4QSGsB9v5HJNSH-7fi',
         });
         const { eventId, pinnedEventId, timelineId, timelineVersion, version } =
-          response.data && response.data.persistPinnedEventOnTimeline;
+          response.body.data && response.body.data.persistPinnedEventOnTimeline;
 
         expect(eventId).to.be('bv4QSGsB9v5HJNSH-7fi');
         expect(pinnedEventId).to.not.be.empty();
@@ -40,25 +36,21 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Unpinned an event', () => {
       it('return null', async () => {
-        const response = await client.mutate<any>({
-          mutation: persistTimelinePinnedEventMutation,
-          variables: {
-            pinnedEventId: null,
-            eventId: 'bv4QSGsB9v5HJNSH-7fi',
-          },
+        const response = await supertest.patch('/api/pinned_event').set('kbn-xsrf', 'true').send({
+          pinnedEventId: null,
+          eventId: 'bv4QSGsB9v5HJNSH-7fi',
         });
         const { eventId, pinnedEventId } =
-          response.data && response.data.persistPinnedEventOnTimeline;
+          response.body.data && response.body.data.persistPinnedEventOnTimeline;
 
-        const responseToTest = await client.mutate<any>({
-          mutation: persistTimelinePinnedEventMutation,
-          variables: {
+        const responseToTest = await supertest
+          .patch('/api/pinned_event')
+          .set('kbn-xsrf', 'true')
+          .send({
             pinnedEventId,
             eventId,
-          },
-        });
-
-        expect(responseToTest.data!.persistPinnedEventOnTimeline).to.be(null);
+          });
+        expect(responseToTest.body.data!.persistPinnedEventOnTimeline).to.be(null);
       });
     });
   });

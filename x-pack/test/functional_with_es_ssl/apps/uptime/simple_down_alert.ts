@@ -16,6 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const uptimeService = getService('uptime');
     const retry = getService('retry');
     const supertest = getService('supertest');
+    const toasts = getService('toasts');
 
     const testSubjects = getService('testSubjects');
 
@@ -46,6 +47,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays to define default connector', async () => {
+      await testSubjects.click('uptimeDismissSyntheticsCallout');
       await hideErrorToast();
       await testSubjects.click('uptimeDisplayDefineConnector');
       await testSubjects.existOrFail('uptimeSettingsDefineConnector');
@@ -71,6 +73,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays relevant alert in list drawer', async () => {
+      await toasts.dismissAllToasts();
+
       await testSubjects.click(`xpack.uptime.monitorList.${monitorId}.expandMonitorDetail`);
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('uptimeMonitorListDrawerAlert0');
@@ -87,31 +91,38 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         alert = alertsFromThisTest[0];
       });
 
-      const { actions, alertTypeId, consumer, id, tags } = alert ?? {};
-      try {
-        expect(actions).to.eql([
-          {
-            actionTypeId: '.slack',
-            group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
-            id: 'my-slack1',
-            params: {
-              message:
-                'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}',
-            },
+      const { actions, alertTypeId, consumer, tags } = alert ?? {};
+      expect(actions).to.eql([
+        {
+          actionTypeId: '.slack',
+          group: 'recovered',
+          params: {
+            message:
+              'Monitor 0000-intermittent with url http://localhost:5678/pattern?r=200x5,500x1 has recovered with status Up',
           },
-        ]);
-        expect(alertTypeId).to.eql('xpack.uptime.alerts.monitorStatus');
-        expect(consumer).to.eql('uptime');
-        expect(tags).to.eql(['UPTIME_AUTO']);
-      } catch (e) {
-        await supertest.delete(`/api/alerts/alert/${id}`).set('kbn-xsrf', 'true').expect(204);
-      }
+          id: 'my-slack1',
+        },
+        {
+          actionTypeId: '.slack',
+          group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
+          params: {
+            message:
+              'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}',
+          },
+          id: 'my-slack1',
+        },
+      ]);
+      expect(alertTypeId).to.eql('xpack.uptime.alerts.monitorStatus');
+      expect(consumer).to.eql('uptime');
+      expect(tags).to.eql(['UPTIME_AUTO']);
     });
 
     it('disable simple status alert', async () => {
       await testSubjects.click('uptimeDisableSimpleDownAlert' + monitorId);
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('uptimeEnableSimpleDownAlert' + monitorId);
+      await retry.try(async () => {
+        await testSubjects.existOrFail('uptimeEnableSimpleDownAlert' + monitorId);
+      });
     });
   });
 };

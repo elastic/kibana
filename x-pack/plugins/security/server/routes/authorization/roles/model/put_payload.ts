@@ -6,11 +6,14 @@
  */
 
 import _ from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { PrivilegeSerializer } from '../../../../authorization/privilege_serializer';
 import { ResourceSerializer } from '../../../../authorization/resource_serializer';
-import { ElasticsearchRole } from './elasticsearch_role';
+import type { ElasticsearchRole } from './elasticsearch_role';
 
 /**
  * Elasticsearch specific portion of the role definition.

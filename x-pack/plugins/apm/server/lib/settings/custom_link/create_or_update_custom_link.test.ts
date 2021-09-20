@@ -39,17 +39,20 @@ describe('Create or Update Custom link', () => {
 
   it('creates a new custom link', () => {
     createOrUpdateCustomLink({ customLink, setup: mockedSetup });
-    expect(internalClientIndexMock).toHaveBeenCalledWith({
-      refresh: true,
-      index: 'apmCustomLinkIndex',
-      body: {
-        '@timestamp': 1570737000000,
-        label: 'foo',
-        url: 'http://elastic.com/{{trace.id}}',
-        'service.name': ['opbeans-java'],
-        'transaction.type': ['Request'],
-      },
-    });
+    expect(internalClientIndexMock).toHaveBeenCalledWith(
+      'create_or_update_custom_link',
+      {
+        refresh: true,
+        index: 'apmCustomLinkIndex',
+        body: {
+          '@timestamp': 1570737000000,
+          label: 'foo',
+          url: 'http://elastic.com/{{trace.id}}',
+          'service.name': ['opbeans-java'],
+          'transaction.type': ['Request'],
+        },
+      }
+    );
   });
   it('update a new custom link', () => {
     createOrUpdateCustomLink({
@@ -57,17 +60,20 @@ describe('Create or Update Custom link', () => {
       customLink,
       setup: mockedSetup,
     });
-    expect(internalClientIndexMock).toHaveBeenCalledWith({
-      refresh: true,
-      index: 'apmCustomLinkIndex',
-      id: 'bar',
-      body: {
-        '@timestamp': 1570737000000,
-        label: 'foo',
-        url: 'http://elastic.com/{{trace.id}}',
-        'service.name': ['opbeans-java'],
-        'transaction.type': ['Request'],
-      },
-    });
+    expect(internalClientIndexMock).toHaveBeenCalledWith(
+      'create_or_update_custom_link',
+      {
+        refresh: true,
+        index: 'apmCustomLinkIndex',
+        id: 'bar',
+        body: {
+          '@timestamp': 1570737000000,
+          label: 'foo',
+          url: 'http://elastic.com/{{trace.id}}',
+          'service.name': ['opbeans-java'],
+          'transaction.type': ['Request'],
+        },
+      }
+    );
   });
 });

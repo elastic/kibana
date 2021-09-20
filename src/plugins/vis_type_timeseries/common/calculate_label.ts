@@ -8,8 +8,11 @@
 
 import { includes, startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { lookup } from './agg_lookup';
-import { MetricsItemsSchema, SanitizedFieldType } from './types';
+import { getMetricLabel } from './agg_utils';
+import { extractFieldLabel } from './fields_utils';
+import { METRIC_TYPES } from '../../data/common';
+import { TSVB_METRIC_TYPES } from './enums';
+import type { Metric, SanitizedFieldType } from './types';
 
 const paths = [
   'cumulative_sum',
@@ -26,14 +29,11 @@ const paths = [
   'positive_only',
 ];
 
-export const extractFieldLabel = (fields: SanitizedFieldType[], name: string) => {
-  return fields.find((f) => f.name === name)?.label ?? name;
-};
-
 export const calculateLabel = (
-  metric: MetricsItemsSchema,
-  metrics: MetricsItemsSchema[] = [],
-  fields: SanitizedFieldType[] = []
+  metric: Metric,
+  metrics: Metric[] = [],
+  fields: SanitizedFieldType[] = [],
+  isThrowErrorOnFieldNotFound: boolean = true
 ): string => {
   if (!metric) {
     return i18n.translate('visTypeTimeseries.calculateLabel.unknownLabel', {
@@ -44,46 +44,45 @@ export const calculateLabel = (
     return metric.alias;
   }
 
-  if (metric.type === 'count') {
-    return i18n.translate('visTypeTimeseries.calculateLabel.countLabel', {
-      defaultMessage: 'Count',
-    });
+  switch (metric.type) {
+    case METRIC_TYPES.COUNT:
+      return i18n.translate('visTypeTimeseries.calculateLabel.countLabel', {
+        defaultMessage: 'Count',
+      });
+    case TSVB_METRIC_TYPES.CALCULATION:
+      return i18n.translate('visTypeTimeseries.calculateLabel.bucketScriptsLabel', {
+        defaultMessage: 'Bucket Script',
+      });
+    case TSVB_METRIC_TYPES.MATH:
+      return i18n.translate('visTypeTimeseries.calculateLabel.mathLabel', {
+        defaultMessage: 'Math',
+      });
+    case TSVB_METRIC_TYPES.SERIES_AGG:
+      return i18n.translate('visTypeTimeseries.calculateLabel.seriesAggLabel', {
+        defaultMessage: 'Series Agg ({metricFunction})',
+        values: { metricFunction: metric.function },
+      });
+    case TSVB_METRIC_TYPES.FILTER_RATIO:
+      return i18n.translate('visTypeTimeseries.calculateLabel.filterRatioLabel', {
+        defaultMessage: 'Filter Ratio',
+      });
+    case TSVB_METRIC_TYPES.POSITIVE_RATE:
+      return i18n.translate('visTypeTimeseries.calculateLabel.positiveRateLabel', {
+        defaultMessage: 'Counter Rate of {field}',
+        values: { field: extractFieldLabel(fields, metric.field!, isThrowErrorOnFieldNotFound) },
+      });
+    case TSVB_METRIC_TYPES.STATIC:
+      return i18n.translate('visTypeTimeseries.calculateLabel.staticValueLabel', {
+        defaultMessage: 'Static Value of {metricValue}',
+        values: { metricValue: metric.value },
+      });
   }
-  if (metric.type === 'calculation') {
-    return i18n.translate('visTypeTimeseries.calculateLabel.bucketScriptsLabel', {
-      defaultMessage: 'Bucket Script',
-    });
-  }
-  if (metric.type === 'math') {
-    return i18n.translate('visTypeTimeseries.calculateLabel.mathLabel', { defaultMessage: 'Math' });
-  }
-  if (metric.type === 'series_agg') {
-    return i18n.translate('visTypeTimeseries.calculateLabel.seriesAggLabel', {
-      defaultMessage: 'Series Agg ({metricFunction})',
-      values: { metricFunction: metric.function },
-    });
-  }
-  if (metric.type === 'filter_ratio') {
-    return i18n.translate('visTypeTimeseries.calculateLabel.filterRatioLabel', {
-      defaultMessage: 'Filter Ratio',
-    });
-  }
-  if (metric.type === 'positive_rate') {
-    return i18n.translate('visTypeTimeseries.calculateLabel.positiveRateLabel', {
-      defaultMessage: 'Counter Rate of {field}',
-      values: { field: extractFieldLabel(fields, metric.field!) },
-    });
-  }
-  if (metric.type === 'static') {
-    return i18n.translate('visTypeTimeseries.calculateLabel.staticValueLabel', {
-      defaultMessage: 'Static Value of {metricValue}',
-      values: { metricValue: metric.value },
-    });
-  }
+
+  const metricTypeLabel = getMetricLabel(metric.type);
 
   if (includes(paths, metric.type)) {
     const targetMetric = metrics.find((m) => startsWith(metric.field!, m.id));
-    const targetLabel = calculateLabel(targetMetric!, metrics, fields);
+    const targetLabel = calculateLabel(targetMetric!, metrics, fields, isThrowErrorOnFieldNotFound);
 
     // For percentiles we need to parse the field id to extract the percentile
     // the user configured in the percentile aggregation and specified in the
@@ -93,11 +92,11 @@ export const calculateLabel = (
       const matches = metric.field!.match(percentileValueMatch);
       if (matches) {
         return i18n.translate(
-          'visTypeTimeseries.calculateLabel.lookupMetricTypeOfTargetWithAdditionalLabel',
+          'visTypeTimeseries.calculateLabel.metricTypeOfTargetWithAdditionalLabel',
           {
-            defaultMessage: '{lookupMetricType} of {targetLabel} ({additionalLabel})',
+            defaultMessage: '{metricTypeLabel} of {targetLabel} ({additionalLabel})',
             values: {
-              lookupMetricType: lookup[metric.type],
+              metricTypeLabel,
               targetLabel,
               additionalLabel: matches[1],
             },
@@ -105,17 +104,17 @@ export const calculateLabel = (
         );
       }
     }
-    return i18n.translate('visTypeTimeseries.calculateLabel.lookupMetricTypeOfTargetLabel', {
-      defaultMessage: '{lookupMetricType} of {targetLabel}',
-      values: { lookupMetricType: lookup[metric.type], targetLabel },
+    return i18n.translate('visTypeTimeseries.calculateLabel.metricTypeOfTargetLabel', {
+      defaultMessage: '{metricTypeLabel} of {targetLabel}',
+      values: { metricTypeLabel, targetLabel },
     });
   }
 
-  return i18n.translate('visTypeTimeseries.calculateLabel.lookupMetricTypeOfMetricFieldRankLabel', {
-    defaultMessage: '{lookupMetricType} of {metricField}',
+  return i18n.translate('visTypeTimeseries.calculateLabel.metricTypeOfMetricFieldRankLabel', {
+    defaultMessage: '{metricTypeLabel} of {metricField}',
     values: {
-      lookupMetricType: lookup[metric.type],
-      metricField: extractFieldLabel(fields, metric.field!),
+      metricTypeLabel,
+      metricField: extractFieldLabel(fields, metric.field!, isThrowErrorOnFieldNotFound),
     },
   });
 };

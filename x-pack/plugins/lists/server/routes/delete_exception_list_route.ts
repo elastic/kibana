@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import type { ListsPluginRouter } from '../types';
-import { EXCEPTION_LIST_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   DeleteExceptionListSchemaDecoded,
   deleteExceptionListSchema,
   exceptionListSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import { getErrorMessageExceptionList, getExceptionListClient } from './utils';
+import type { ListsPluginRouter } from '../types';
+
+import {
+  buildRouteValidation,
+  buildSiemResponse,
+  getErrorMessageExceptionList,
+  getExceptionListClient,
+} from './utils';
 
 export const deleteExceptionListRoute = (router: ListsPluginRouter): void => {
   router.delete(

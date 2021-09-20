@@ -160,14 +160,12 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
       },
       "get$": [MockFunction],
       "getAll": [MockFunction],
-      "getSaved$": [MockFunction],
       "getUpdate$": [MockFunction],
       "getUpdateErrors$": [MockFunction],
       "isCustom": [MockFunction],
       "isDeclared": [MockFunction],
       "isDefault": [MockFunction],
       "isOverridden": [MockFunction],
-      "overrideLocalDefault": [MockFunction],
       "remove": [MockFunction],
       "set": [MockFunction],
     }
@@ -287,7 +285,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
             <h3
               className="euiTitle euiTitle--xsmall"
             >
-              Add your first panel
+              Add your first visualization
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -310,6 +308,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
               >
                 <div
                   className="euiTextColor euiTextColor--subdued"
+                  style={Object {}}
                 >
                   <span>
                     Create content that tells a story about your data.
@@ -493,14 +492,12 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
       },
       "get$": [MockFunction],
       "getAll": [MockFunction],
-      "getSaved$": [MockFunction],
       "getUpdate$": [MockFunction],
       "getUpdateErrors$": [MockFunction],
       "isCustom": [MockFunction],
       "isDeclared": [MockFunction],
       "isDefault": [MockFunction],
       "isOverridden": [MockFunction],
-      "overrideLocalDefault": [MockFunction],
       "remove": [MockFunction],
       "set": [MockFunction],
     }
@@ -594,10 +591,12 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
       <PseudoLocaleWrapper>
         <EuiPage
           className="dshStartScreen"
+          data-test-subj="dashboardEmptyReadOnly"
           restrictWidth="500px"
         >
           <div
-            className="euiPage euiPage--restrictWidth-custom euiPage--paddingMedium dshStartScreen"
+            className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-custom dshStartScreen"
+            data-test-subj="dashboardEmptyReadOnly"
             style={
               Object {
                 "maxWidth": "500px",
@@ -605,8 +604,8 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
             }
           >
             <EuiPageBody>
-              <main
-                className="euiPageBody"
+              <div
+                className="euiPageBody euiPageBody--borderRadiusNone"
               >
                 <EuiPageContent
                   className="dshStartScreen__pageContent"
@@ -617,9 +616,11 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                   <EuiPanel
                     className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     paddingSize="none"
+                    role="main"
                   >
                     <div
-                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      role="main"
                     >
                       <EuiImage
                         alt=""
@@ -666,6 +667,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                           >
                             <div
                               className="euiTextColor euiTextColor--subdued"
+                              style={Object {}}
                             >
                               You need additional privileges to edit this dashboard.
                             </div>
@@ -675,7 +677,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                     </div>
                   </EuiPanel>
                 </EuiPageContent>
-              </main>
+              </div>
             </EuiPageBody>
           </div>
         </EuiPage>
@@ -838,14 +840,12 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
       },
       "get$": [MockFunction],
       "getAll": [MockFunction],
-      "getSaved$": [MockFunction],
       "getUpdate$": [MockFunction],
       "getUpdateErrors$": [MockFunction],
       "isCustom": [MockFunction],
       "isDeclared": [MockFunction],
       "isDefault": [MockFunction],
       "isOverridden": [MockFunction],
-      "overrideLocalDefault": [MockFunction],
       "remove": [MockFunction],
       "set": [MockFunction],
     }
@@ -939,10 +939,12 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
       <PseudoLocaleWrapper>
         <EuiPage
           className="dshStartScreen"
+          data-test-subj="dashboardEmptyReadWrite"
           restrictWidth="500px"
         >
           <div
-            className="euiPage euiPage--restrictWidth-custom euiPage--paddingMedium dshStartScreen"
+            className="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-custom dshStartScreen"
+            data-test-subj="dashboardEmptyReadWrite"
             style={
               Object {
                 "maxWidth": "500px",
@@ -950,8 +952,8 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
             }
           >
             <EuiPageBody>
-              <main
-                className="euiPageBody"
+              <div
+                className="euiPageBody euiPageBody--borderRadiusNone"
               >
                 <EuiPageContent
                   className="dshStartScreen__pageContent"
@@ -962,9 +964,11 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                   <EuiPanel
                     className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     paddingSize="none"
+                    role="main"
                   >
                     <div
-                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      role="main"
                     >
                       <EuiImage
                         alt=""
@@ -1021,32 +1025,10 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                             >
                               <div
                                 className="euiTextColor euiTextColor--subdued"
+                                style={Object {}}
                               >
                                 <p>
-                                  Click
-                                  <span>
-                                     
-                                  </span>
-                                  <EuiLink
-                                    aria-label="Edit dashboard"
-                                    data-test-subj=""
-                                    onClick={[MockFunction]}
-                                  >
-                                    <button
-                                      aria-label="Edit dashboard"
-                                      className="euiLink euiLink--primary"
-                                      data-test-subj=""
-                                      disabled={false}
-                                      onClick={[MockFunction]}
-                                      type="button"
-                                    >
-                                      Edit
-                                    </button>
-                                  </EuiLink>
-                                  <span>
-                                     
-                                  </span>
-                                  in the menu bar above to start adding panels.
+                                  Click edit in the menu bar above to start adding panels.
                                 </p>
                               </div>
                             </EuiTextColor>
@@ -1056,7 +1038,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                     </div>
                   </EuiPanel>
                 </EuiPageContent>
-              </main>
+              </div>
             </EuiPageBody>
           </div>
         </EuiPage>

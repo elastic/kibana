@@ -8,6 +8,8 @@
 
 import * as PropTypes from 'prop-types';
 import * as React from 'react';
+
+// eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
 
 import * as i18n from '../core';

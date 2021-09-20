@@ -14,15 +14,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('hybrid index pattern', () => {
     before(async () => {
-      await esArchiver.load('hybrid/kibana');
-      await esArchiver.load('hybrid/logstash');
-      await esArchiver.load('hybrid/rollup');
+      await esArchiver.load('x-pack/test/functional/es_archives/hybrid/kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/hybrid/logstash');
+      await esArchiver.load('x-pack/test/functional/es_archives/hybrid/rollup');
     });
 
     after(async () => {
-      await esArchiver.unload('hybrid/kibana');
-      await esArchiver.unload('hybrid/logstash');
-      await esArchiver.unload('hybrid/rollup');
+      await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/logstash');
+      await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/rollup');
     });
 
     it('should render histogram line chart', async () => {

@@ -6,5 +6,5 @@
  */
 
 export * from '../../../common/types/app_search';
-export { Role, RoleTypes, AbilityTypes, ASRoleMapping } from './utils/role';
+export { Role, RoleTypes, AbilityTypes, ASRoleMapping, AdvanceRoleType } from './utils/role';
 export { Engine } from './components/engine/types';

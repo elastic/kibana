@@ -13,7 +13,7 @@ import { KbnError } from '../../../../kibana_utils/common/';
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
  */
-export class IndexPatternMissingIndices extends KbnError {
+export class DataViewMissingIndices extends KbnError {
   constructor(message: string) {
     const defaultMessage = "IndexPattern's configured pattern does not match any indices";
 

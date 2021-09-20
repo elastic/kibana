@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
 import {
-  EuiSpacer,
-  EuiConfirmModal,
   EuiCallOut,
+  EuiConfirmModal,
   EuiErrorBoundary,
-  EuiIcon,
-  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiFormRow,
+  EuiIcon,
+  EuiLink,
   EuiPanel,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import type { DocLinksStart } from 'src/core/public';
-import { RoleMapping } from '../../../../../common/model';
-import { VisualRuleEditor } from './visual_rule_editor';
-import { JSONRuleEditor } from './json_rule_editor';
+
+import type { RoleMapping } from '../../../../../common/model';
+import type { Rule } from '../../model';
+import { generateRulesFromRaw } from '../../model';
 import { VISUAL_MAX_RULE_DEPTH } from '../services/role_mapping_constants';
-import { Rule, generateRulesFromRaw } from '../../model';
 import { validateRoleMappingRules } from '../services/role_mapping_validation';
+import { JSONRuleEditor } from './json_rule_editor';
+import { VisualRuleEditor } from './visual_rule_editor';
 
 interface Props {
   rawRules: RoleMapping['rules'];
@@ -73,7 +76,7 @@ export class RuleEditorPanel extends Component<Props, State> {
     }
 
     return (
-      <EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiTitle>
           <h2>
             <FormattedMessage

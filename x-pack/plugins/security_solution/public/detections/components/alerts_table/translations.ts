@@ -18,6 +18,12 @@ export const ALERTS_DOCUMENT_TYPE = i18n.translate(
   }
 );
 
+export const ALERTS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.alertsUnit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
+  });
+
 export const OPEN_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.openAlertsTitle',
   {
@@ -32,10 +38,10 @@ export const CLOSED_ALERTS = i18n.translate(
   }
 );
 
-export const IN_PROGRESS_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.inProgressAlertsTitle',
+export const ACKNOWLEDGED_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertsTitle',
   {
-    defaultMessage: 'In progress',
+    defaultMessage: 'Acknowledged',
   }
 );
 
@@ -60,6 +66,20 @@ export const ALERTS_HEADERS_RULE = i18n.translate(
   }
 );
 
+export const ALERTS_HEADERS_RULE_NAME = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.ruleNameTitle',
+  {
+    defaultMessage: 'Rule name',
+  }
+);
+
+export const ALERTS_HEADERS_RULE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.ruleDescriptionTitle',
+  {
+    defaultMessage: 'Rule description',
+  }
+);
+
 export const ALERTS_HEADERS_VERSION = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.versionTitle',
   {
@@ -81,10 +101,45 @@ export const ALERTS_HEADERS_SEVERITY = i18n.translate(
   }
 );
 
+export const ALERTS_HEADERS_REASON = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.reasonTitle',
+  {
+    defaultMessage: 'Reason',
+  }
+);
+
 export const ALERTS_HEADERS_RISK_SCORE = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.riskScoreTitle',
   {
     defaultMessage: 'Risk Score',
+  }
+);
+
+export const ALERTS_HEADERS_THRESHOLD_COUNT = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdCount',
+  {
+    defaultMessage: 'Threshold Count',
+  }
+);
+
+export const ALERTS_HEADERS_THRESHOLD_TERMS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdTerms',
+  {
+    defaultMessage: 'Threshold Terms',
+  }
+);
+
+export const ALERTS_HEADERS_THRESHOLD_CARDINALITY = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdCardinality',
+  {
+    defaultMessage: 'Threshold Cardinality',
+  }
+);
+
+export const ALERTS_HEADERS_TARGET_IMPORT_HASH = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overviewTable.targetImportHash',
+  {
+    defaultMessage: 'Import Hash',
   }
 );
 
@@ -102,10 +157,10 @@ export const ACTION_CLOSE_ALERT = i18n.translate(
   }
 );
 
-export const ACTION_IN_PROGRESS_ALERT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.inProgressAlertTitle',
+export const ACTION_ACKNOWLEDGED_ALERT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.acknowledgedAlertTitle',
   {
-    defaultMessage: 'Mark in progress',
+    defaultMessage: 'Mark as acknowledged',
   }
 );
 
@@ -130,6 +185,13 @@ export const ACTION_ADD_EXCEPTION = i18n.translate(
   }
 );
 
+export const ACTION_ADD_EVENT_FILTER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter',
+  {
+    defaultMessage: 'Add Endpoint event filter',
+  }
+);
+
 export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addEndpointException',
   {
@@ -144,6 +206,13 @@ export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
       'Successfully closed {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
+export const ALERT_DURATION = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.alertDurationTitle',
+  {
+    defaultMessage: 'Alert duration',
+  }
+);
+
 export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.openedAlertSuccessToastMessage', {
     values: { totalAlerts },
@@ -151,13 +220,13 @@ export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
       'Successfully opened {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
-export const IN_PROGRESS_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
+export const ACKNOWLEDGED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.alerts.inProgressAlertSuccessToastMessage',
+    'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertSuccessToastMessage',
     {
       values: { totalAlerts },
       defaultMessage:
-        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as in progress.',
+        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as acknowledged.',
     }
   );
 
@@ -175,10 +244,10 @@ export const OPENED_ALERT_FAILED_TOAST = i18n.translate(
   }
 );
 
-export const IN_PROGRESS_ALERT_FAILED_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.inProgressAlertFailedToastMessage',
+export const ACKNOWLEDGED_ALERT_FAILED_TOAST = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertFailedToastMessage',
   {
-    defaultMessage: 'Failed to mark alert(s) as in progress',
+    defaultMessage: 'Failed to mark alert(s) as acknowledged',
   }
 );
 
@@ -186,5 +255,33 @@ export const MORE_ACTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.moreActionsAriaLabel',
   {
     defaultMessage: 'More actions',
+  }
+);
+
+export const STATUS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.statusTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const SIGNAL_STATUS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overviewTable.signalStatusTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const TRIGGERED = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.triggeredTitle',
+  {
+    defaultMessage: 'Triggered',
+  }
+);
+
+export const TIMESTAMP = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overviewTable.timestampTitle',
+  {
+    defaultMessage: 'Timestamp',
   }
 );

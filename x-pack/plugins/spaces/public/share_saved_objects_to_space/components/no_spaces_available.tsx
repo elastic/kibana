@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import React from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ApplicationStart } from 'src/core/public';
+import type { ApplicationStart } from 'src/core/public';
 
 interface Props {
   application: ApplicationStart;

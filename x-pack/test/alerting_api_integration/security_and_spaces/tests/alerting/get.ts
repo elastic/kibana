@@ -31,14 +31,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle get alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -61,26 +61,26 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 id: createdAlert.id,
                 name: 'abc',
                 tags: ['foo'],
-                alertTypeId: 'test.noop',
+                rule_type_id: 'test.noop',
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: true,
                 actions: [],
                 params: {},
-                createdBy: 'elastic',
-                scheduledTaskId: response.body.scheduledTaskId,
-                updatedAt: response.body.updatedAt,
-                createdAt: response.body.createdAt,
+                created_by: 'elastic',
+                scheduled_task_id: response.body.scheduled_task_id,
+                updated_at: response.body.updated_at,
+                created_at: response.body.created_at,
                 throttle: '1m',
-                notifyWhen: 'onThrottleInterval',
-                updatedBy: 'elastic',
-                apiKeyOwner: 'elastic',
-                muteAll: false,
-                mutedInstanceIds: [],
-                executionStatus: response.body.executionStatus,
+                notify_when: 'onThrottleInterval',
+                updated_by: 'elastic',
+                api_key_owner: 'elastic',
+                mute_all: false,
+                muted_alert_ids: [],
+                execution_status: response.body.execution_status,
               });
-              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
-              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -89,19 +89,19 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
         it('should handle get alert request appropriately when consumer is the same as producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -132,19 +132,19 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
         it('should handle get alert request appropriately when consumer is not the producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.unrestricted-noop',
+                rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -186,19 +186,19 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
         it('should handle get alert request appropriately when consumer is "alerts"', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alerts',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -240,14 +240,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't get alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('other')}/api/alerts/alert/${createdAlert.id}`)
+            .get(`${getUrlPrefix('other')}/api/alerting/rule/${createdAlert.id}`)
             .auth(user.username, user.password);
 
           expect(response.statusCode).to.eql(404);
@@ -272,7 +272,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
         it(`should handle get alert request appropriately when alert doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/1`)
+            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/1`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {

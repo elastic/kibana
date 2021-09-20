@@ -14,11 +14,21 @@ export interface CustomPaletteArguments {
   color?: string[];
   gradient: boolean;
   reverse?: boolean;
+  stop?: number[];
+  range?: 'number' | 'percent';
+  rangeMin?: number;
+  rangeMax?: number;
+  continuity?: 'above' | 'below' | 'all' | 'none';
 }
 
 export interface CustomPaletteState {
   colors: string[];
   gradient: boolean;
+  stops: number[];
+  range: 'number' | 'percent';
+  rangeMin: number;
+  rangeMax: number;
+  continuity?: 'above' | 'below' | 'all' | 'none';
 }
 
 export interface SystemPaletteArguments {
@@ -83,6 +93,35 @@ export function palette(): ExpressionFunctionDefinition<
         }),
         required: false,
       },
+      stop: {
+        multi: true,
+        types: ['number'],
+        help: i18n.translate('charts.functions.palette.args.stopHelpText', {
+          defaultMessage:
+            'The palette color stops. When used, it must be associated with each color.',
+        }),
+        required: false,
+      },
+      continuity: {
+        types: ['string'],
+        options: ['above', 'below', 'all', 'none'],
+        default: 'above',
+        help: '',
+      },
+      rangeMin: {
+        types: ['number'],
+        help: '',
+      },
+      rangeMax: {
+        types: ['number'],
+        help: '',
+      },
+      range: {
+        types: ['string'],
+        options: ['number', 'percent'],
+        default: 'percent',
+        help: '',
+      },
       gradient: {
         types: ['boolean'],
         default: false,
@@ -101,15 +140,32 @@ export function palette(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const { color, reverse, gradient } = args;
+      const {
+        color,
+        continuity,
+        reverse,
+        gradient,
+        stop,
+        range,
+        rangeMin = 0,
+        rangeMax = 100,
+      } = args;
       const colors = ([] as string[]).concat(color || defaultCustomColors);
-
+      const stops = ([] as number[]).concat(stop || []);
+      if (stops.length > 0 && colors.length !== stops.length) {
+        throw Error('When stop is used, each color must have an associated stop value.');
+      }
       return {
         type: 'palette',
         name: 'custom',
         params: {
           colors: reverse ? colors.reverse() : colors,
+          stops,
+          range: range ?? 'percent',
           gradient,
+          continuity,
+          rangeMin,
+          rangeMax,
         },
       };
     },

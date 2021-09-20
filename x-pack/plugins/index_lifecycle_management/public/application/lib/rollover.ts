@@ -14,6 +14,6 @@ export const isUsingDefaultRollover = (policy: SerializedPolicy): boolean => {
     rollover &&
       rollover.max_age === defaultRolloverAction.max_age &&
       rollover.max_docs === defaultRolloverAction.max_docs &&
-      rollover.max_size === defaultRolloverAction.max_size
+      rollover.max_primary_shard_size === defaultRolloverAction.max_primary_shard_size
   );
 };

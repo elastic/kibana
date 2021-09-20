@@ -27,7 +27,11 @@ describe('request logging', () => {
   describe('http server response logging', () => {
     describe('configuration', () => {
       it('does not log with a default config', async () => {
-        const root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+        const root = kbnTestServer.createRoot({
+          plugins: { initialize: false },
+          elasticsearch: { skipStartupConnectionCheck: true },
+        });
+        await root.preboot();
         const { http } = await root.setup();
 
         http
@@ -68,7 +72,9 @@ describe('request logging', () => {
           plugins: {
             initialize: false,
           },
+          elasticsearch: { skipStartupConnectionCheck: true },
         });
+        await root.preboot();
         const { http } = await root.setup();
 
         http
@@ -114,6 +120,7 @@ describe('request logging', () => {
         plugins: {
           initialize: false,
         },
+        elasticsearch: { skipStartupConnectionCheck: true },
       };
 
       beforeEach(() => {
@@ -125,6 +132,7 @@ describe('request logging', () => {
       });
 
       it('handles a GET request', async () => {
+        await root.preboot();
         const { http } = await root.setup();
 
         http
@@ -147,6 +155,7 @@ describe('request logging', () => {
       });
 
       it('handles a POST request', async () => {
+        await root.preboot();
         const { http } = await root.setup();
 
         http.createRouter('/').post(
@@ -178,6 +187,7 @@ describe('request logging', () => {
       });
 
       it('handles an error response', async () => {
+        await root.preboot();
         const { http } = await root.setup();
 
         http
@@ -198,6 +208,7 @@ describe('request logging', () => {
       });
 
       it('handles query strings', async () => {
+        await root.preboot();
         const { http } = await root.setup();
 
         http
@@ -216,6 +227,7 @@ describe('request logging', () => {
       });
 
       it('correctly calculates response payload', async () => {
+        await root.preboot();
         const { http } = await root.setup();
 
         http
@@ -234,6 +246,7 @@ describe('request logging', () => {
 
       describe('handles request/response headers', () => {
         it('includes request/response headers in log entry', async () => {
+          await root.preboot();
           const { http } = await root.setup();
 
           http
@@ -251,7 +264,8 @@ describe('request logging', () => {
           expect(JSON.parse(meta).http.response.headers.bar).toBe('world');
         });
 
-        it('filters sensitive request headers', async () => {
+        it('filters sensitive request headers by default', async () => {
+          await root.preboot();
           const { http } = await root.setup();
 
           http.createRouter('/').post(
@@ -283,7 +297,144 @@ describe('request logging', () => {
           expect(JSON.parse(meta).http.request.headers.authorization).toBe('[REDACTED]');
         });
 
-        it('filters sensitive response headers', async () => {
+        it('filters sensitive request headers when RewriteAppender is configured', async () => {
+          root = kbnTestServer.createRoot({
+            logging: {
+              silent: true,
+              appenders: {
+                'test-console': {
+                  type: 'console',
+                  layout: {
+                    type: 'pattern',
+                    pattern: '%level|%logger|%message|%meta',
+                  },
+                },
+                rewrite: {
+                  type: 'rewrite',
+                  appenders: ['test-console'],
+                  policy: {
+                    type: 'meta',
+                    mode: 'update',
+                    properties: [
+                      { path: 'http.request.headers.authorization', value: '[REDACTED]' },
+                    ],
+                  },
+                },
+              },
+              loggers: [
+                {
+                  name: 'http.server.response',
+                  appenders: ['rewrite'],
+                  level: 'debug',
+                },
+              ],
+            },
+            plugins: {
+              initialize: false,
+            },
+            elasticsearch: { skipStartupConnectionCheck: true },
+          });
+          await root.preboot();
+          const { http } = await root.setup();
+
+          http.createRouter('/').post(
+            {
+              path: '/ping',
+              validate: {
+                body: schema.object({ message: schema.string() }),
+              },
+              options: {
+                authRequired: 'optional',
+                body: {
+                  accepts: ['application/json'],
+                },
+                timeout: { payload: 100 },
+              },
+            },
+            (context, req, res) => res.ok({ body: { message: req.body.message } })
+          );
+          await root.start();
+
+          await kbnTestServer.request
+            .post(root, '/ping')
+            .set('content-type', 'application/json')
+            .set('authorization', 'abc')
+            .send({ message: 'hi' })
+            .expect(200);
+          expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+          const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
+          expect(JSON.parse(meta).http.request.headers.authorization).toBe('[REDACTED]');
+        });
+
+        it('filters sensitive response headers by defaut', async () => {
+          await root.preboot();
+          const { http } = await root.setup();
+
+          http.createRouter('/').post(
+            {
+              path: '/ping',
+              validate: {
+                body: schema.object({ message: schema.string() }),
+              },
+              options: {
+                authRequired: 'optional',
+                body: {
+                  accepts: ['application/json'],
+                },
+                timeout: { payload: 100 },
+              },
+            },
+            (context, req, res) =>
+              res.ok({ headers: { 'set-cookie': ['123'] }, body: { message: req.body.message } })
+          );
+          await root.start();
+
+          await kbnTestServer.request
+            .post(root, '/ping')
+            .set('Content-Type', 'application/json')
+            .send({ message: 'hi' })
+            .expect(200);
+          expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+          const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
+          expect(JSON.parse(meta).http.response.headers['set-cookie']).toBe('[REDACTED]');
+        });
+
+        it('filters sensitive response headers when RewriteAppender is configured', async () => {
+          root = kbnTestServer.createRoot({
+            logging: {
+              silent: true,
+              appenders: {
+                'test-console': {
+                  type: 'console',
+                  layout: {
+                    type: 'pattern',
+                    pattern: '%level|%logger|%message|%meta',
+                  },
+                },
+                rewrite: {
+                  type: 'rewrite',
+                  appenders: ['test-console'],
+                  policy: {
+                    type: 'meta',
+                    mode: 'update',
+                    properties: [{ path: 'http.response.headers.set-cookie', value: '[REDACTED]' }],
+                  },
+                },
+              },
+              loggers: [
+                {
+                  name: 'http.server.response',
+                  appenders: ['rewrite'],
+                  level: 'debug',
+                },
+              ],
+            },
+            plugins: {
+              initialize: false,
+            },
+            elasticsearch: { skipStartupConnectionCheck: true },
+          });
+          await root.preboot();
           const { http } = await root.setup();
 
           http.createRouter('/').post(
@@ -317,6 +468,7 @@ describe('request logging', () => {
       });
 
       it('handles user agent', async () => {
+        await root.preboot();
         const { http } = await root.setup();
 
         http

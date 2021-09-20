@@ -62,7 +62,7 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
 
     async navigateToFileUpload() {
       await testSubjects.click('mlDataVisualizerUploadFileButton');
-      await testSubjects.existOrFail('mlPageFileDataVisualizerUpload');
+      await testSubjects.existOrFail('dataVisualizerPageFileUpload');
     },
   };
 }

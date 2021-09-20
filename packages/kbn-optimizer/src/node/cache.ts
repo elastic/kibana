@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
 import { Writable } from 'stream';
 
 import chalk from 'chalk';
@@ -25,11 +26,17 @@ export class Cache {
   private readonly atimes: LmdbStore.Database<string, string>;
   private readonly mtimes: LmdbStore.Database<string, string>;
   private readonly sourceMaps: LmdbStore.Database<string, string>;
+  private readonly pathRoot: string;
   private readonly prefix: string;
   private readonly log?: Writable;
   private readonly timer: NodeJS.Timer;
 
-  constructor(config: { dir: string; prefix: string; log?: Writable }) {
+  constructor(config: { pathRoot: string; dir: string; prefix: string; log?: Writable }) {
+    if (!Path.isAbsolute(config.pathRoot)) {
+      throw new Error('cache requires an absolute path to resolve paths relative to');
+    }
+
+    this.pathRoot = config.pathRoot;
     this.prefix = config.prefix;
     this.log = config.log;
 
@@ -110,7 +117,12 @@ export class Cache {
   }
 
   private getKey(path: string) {
-    return `${this.prefix}${path}`;
+    const normalizedPath =
+      Path.sep !== '/'
+        ? Path.relative(this.pathRoot, path).split(Path.sep).join('/')
+        : Path.relative(this.pathRoot, path);
+
+    return `${this.prefix}${normalizedPath}`;
   }
 
   private safeGet<V>(db: LmdbStore.Database<V, string>, key: string) {

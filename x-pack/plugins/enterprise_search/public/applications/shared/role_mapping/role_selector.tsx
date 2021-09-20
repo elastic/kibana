@@ -7,61 +7,43 @@
 
 import React from 'react';
 
-import { startCase } from 'lodash';
+import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 
-import {
-  EuiCallOut,
-  EuiFormRow,
-  EuiRadio,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
-} from '@elastic/eui';
+import { RoleOptionLabel } from './role_option_label';
+
+interface RoleOption {
+  id: string;
+  description: string;
+  disabled?: boolean;
+}
 
 interface Props {
   disabled?: boolean;
-  disabledText?: string;
   roleType?: string;
-  roleTypeOption: string;
-  description: string;
-  onChange(roleTypeOption: string): void;
+  roleOptions: RoleOption[];
+  label: string;
+  onChange(id: string): void;
 }
 
-export const RoleSelector: React.FC<Props> = ({
-  disabled,
-  disabledText,
-  roleType,
-  roleTypeOption,
-  description,
-  onChange,
-}) => (
-  <EuiFormRow>
-    <EuiRadio
-      disabled={disabled}
-      id={roleTypeOption}
-      checked={roleTypeOption === roleType}
-      onChange={() => {
-        onChange(roleTypeOption);
-      }}
-      label={
-        <>
-          <EuiTitle size="xs">
-            <h4 className="usersLayout__users--roletype">{startCase(roleTypeOption)}</h4>
-          </EuiTitle>
-          {disabled && disabledText && (
-            <EuiCallOut
-              size="s"
-              title={<EuiTextColor color="subdued">{disabledText}</EuiTextColor>}
-              iconType="alert"
-            />
-          )}
-          <EuiSpacer size="xs" />
-          <EuiText size="s">
-            <p>{description}</p>
-          </EuiText>
-        </>
-      }
-    />
-  </EuiFormRow>
-);
+export const RoleSelector: React.FC<Props> = ({ label, roleType, roleOptions, onChange }) => {
+  const options = roleOptions.map(({ id, description, disabled }) => ({
+    id,
+    label: <RoleOptionLabel label={id} description={description} />,
+    disabled,
+  }));
+
+  return (
+    <EuiFormRow>
+      <EuiRadioGroup
+        options={options}
+        idSelected={roleOptions.filter((r) => r.id === roleType)[0].id}
+        onChange={(id) => {
+          onChange(id);
+        }}
+        legend={{
+          children: <span>{label}</span>,
+        }}
+      />
+    </EuiFormRow>
+  );
+};

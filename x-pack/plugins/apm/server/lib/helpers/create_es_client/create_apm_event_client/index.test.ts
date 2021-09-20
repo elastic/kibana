@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { contextServiceMock } from 'src/core/server/mocks';
+import {
+  contextServiceMock,
+  executionContextServiceMock,
+} from '../../../../../../../../src/core/server/mocks';
 import { createHttpServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { createApmEventClient } from '.';
@@ -21,8 +24,12 @@ describe('createApmEventClient', () => {
     await server.stop();
   });
   it('cancels a search when a request is aborted', async () => {
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+    });
     const { server: innerServer, createRouter } = await server.setup({
       context: contextServiceMock.createSetupContract(),
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
     const router = createRouter('/');
 
@@ -47,7 +54,7 @@ describe('createApmEventClient', () => {
           },
         });
 
-        await eventClient.search({
+        await eventClient.search('foo', {
           apm: {
             events: [],
           },

@@ -46,13 +46,7 @@ test('includes namespace in failure', () => {
 describe('#defaultValue', () => {
   test('returns default when undefined', () => {
     const value = new Stream();
-    expect(schema.stream({ defaultValue: value }).validate(undefined)).toMatchInlineSnapshot(`
-      Stream {
-        "_events": Object {},
-        "_eventsCount": 0,
-        "_maxListeners": undefined,
-      }
-    `);
+    expect(schema.stream({ defaultValue: value }).validate(undefined)).toBeInstanceOf(Stream);
   });
 
   test('returns value when specified', () => {

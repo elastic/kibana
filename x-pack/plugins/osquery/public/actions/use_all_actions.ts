@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQuery } from 'react-query';
 
+import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
   ActionEdges,
   PageInfoPaginated,
-  DocValueFields,
   OsqueryQueries,
   ActionsRequestOptions,
   ActionsStrategyResponse,
@@ -21,12 +20,8 @@ import {
 } from '../../common/search_strategy';
 import { ESTermQuery } from '../../common/typed_json';
 
-import * as i18n from './translations';
-import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
-
-const ID = 'actionsAllQuery';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionsArgs {
   actions: ActionEdges;
@@ -42,7 +37,6 @@ interface UseAllActions {
   direction: Direction;
   limit: number;
   sortField: string;
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
 }
@@ -52,111 +46,48 @@ export const useAllActions = ({
   direction,
   limit,
   sortField,
-  docValueFields,
   filterQuery,
   skip = false,
-}: UseAllActions): [boolean, ActionsArgs] => {
-  const { data, notifications } = useKibana().services;
+}: UseAllActions) => {
+  const { data } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
-  const abortCtrl = useRef(new AbortController());
-  const [loading, setLoading] = useState(false);
-  const [actionsRequest, setHostRequest] = useState<ActionsRequestOptions | null>(null);
-
-  const [actionsResponse, setActionsResponse] = useState<ActionsArgs>({
-    actions: [],
-    id: ID,
-    inspect: {
-      dsl: [],
-      response: [],
-    },
-    isInspected: false,
-    pageInfo: {
-      activePage: 0,
-      fakeTotalCount: 0,
-      showMorePagesIndicator: false,
-    },
-    totalCount: -1,
-  });
-
-  const actionsSearch = useCallback(
-    (request: ActionsRequestOptions | null) => {
-      if (request == null || skip) {
-        return;
-      }
-
-      let didCancel = false;
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-
-        const searchSubscription$ = data.search
-          .search<ActionsRequestOptions, ActionsStrategyResponse>(request, {
+  return useQuery(
+    ['actions', { activePage, direction, limit, sortField }],
+    async () => {
+      const responseData = await data.search
+        .search<ActionsRequestOptions, ActionsStrategyResponse>(
+          {
+            factoryQueryType: OsqueryQueries.actions,
+            filterQuery: createFilter(filterQuery),
+            pagination: generateTablePaginationOptions(activePage, limit),
+            sort: {
+              direction,
+              field: sortField,
+            },
+          },
+          {
             strategy: 'osquerySearchStrategy',
-            abortSignal: abortCtrl.current.signal,
-          })
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setActionsResponse((prevResponse) => ({
-                    ...prevResponse,
-                    actions: response.edges,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    pageInfo: response.pageInfo,
-                    totalCount: response.totalCount,
-                  }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_ALL_ACTIONS);
-                searchSubscription$.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({ title: i18n.FAIL_ALL_ACTIONS, text: msg.message });
-              }
-            },
-          });
-      };
-      abortCtrl.current.abort();
-      asyncSearch();
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
+          }
+        )
+        .toPromise();
+
+      return {
+        ...responseData,
+        actions: responseData.edges,
+        inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
     },
-    [data.search, notifications.toasts, skip]
+    {
+      keepPreviousData: true,
+      enabled: !skip,
+      onSuccess: () => setErrorToast(),
+      onError: (error: Error) =>
+        setErrorToast(error, {
+          title: i18n.translate('xpack.osquery.all_actions.fetchError', {
+            defaultMessage: 'Error while fetching actions',
+          }),
+        }),
+    }
   );
-
-  useEffect(() => {
-    setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        docValueFields: docValueFields ?? [],
-        factoryQueryType: OsqueryQueries.actions,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort: {
-          direction,
-          field: sortField,
-        },
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [activePage, direction, docValueFields, filterQuery, limit, sortField]);
-
-  useEffect(() => {
-    actionsSearch(actionsRequest);
-  }, [actionsRequest, actionsSearch]);
-
-  return [loading, actionsResponse];
 };

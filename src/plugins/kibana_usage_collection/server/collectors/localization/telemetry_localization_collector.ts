@@ -53,9 +53,27 @@ export function registerLocalizationUsageCollector(
     isReady: () => true,
     fetch: createCollectorFetch(i18n),
     schema: {
-      locale: { type: 'keyword' },
-      integrities: { DYNAMIC_KEY: { type: 'text' } },
-      labelsCount: { type: 'long' },
+      locale: {
+        type: 'keyword',
+        _meta: {
+          description: 'The default locale set on the Kibana system',
+        },
+      },
+      integrities: {
+        DYNAMIC_KEY: {
+          type: 'text',
+          _meta: {
+            description:
+              'Translation file hash. If the hash is different it indicates that a custom translation file is used',
+          },
+        },
+      },
+      labelsCount: {
+        type: 'long',
+        _meta: {
+          description: 'The number of translated labels',
+        },
+      },
     },
   });
 

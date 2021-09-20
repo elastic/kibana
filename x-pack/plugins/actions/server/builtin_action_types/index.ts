@@ -12,6 +12,7 @@ import { Logger } from '../../../../../src/core/server';
 import { getActionType as getEmailActionType } from './email';
 import { getActionType as getIndexActionType } from './es_index';
 import { getActionType as getPagerDutyActionType } from './pagerduty';
+import { getActionType as getSwimlaneActionType } from './swimlane';
 import { getActionType as getServerLogActionType } from './server_log';
 import { getActionType as getSlackActionType } from './slack';
 import { getActionType as getWebhookActionType } from './webhook';
@@ -65,6 +66,7 @@ export function registerBuiltInActionTypes({
   );
   actionTypeRegistry.register(getIndexActionType({ logger }));
   actionTypeRegistry.register(getPagerDutyActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(getSwimlaneActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getServerLogActionType({ logger }));
   actionTypeRegistry.register(getSlackActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getWebhookActionType({ logger, configurationUtilities }));

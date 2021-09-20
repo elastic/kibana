@@ -375,7 +375,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
                   data-test-subj="sourcerer-reset"
                   flush="left"
                   onClick={resetDataSources}
-                  size="l"
                   title={i18n.DATA_SOURCES_RESET}
                 >
                   {i18n.DATA_SOURCES_RESET}

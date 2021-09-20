@@ -9,6 +9,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import uuid from 'uuid';
+import { i18n } from '@kbn/i18n';
+import { last } from 'lodash';
+
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
 import { createTextHandler } from '../../lib/create_text_handler';
@@ -24,15 +27,16 @@ import {
   EuiFormRow,
   EuiCode,
   EuiHorizontalRule,
-  EuiFormLabel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
-
+import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { QueryBarWrapper } from '../../query_bar_wrapper';
-class TableSeriesConfigUI extends Component {
+import { DATA_FORMATTERS } from '../../../../../common/enums';
+
+export class TableSeriesConfig extends Component {
   UNSAFE_componentWillMount() {
     const { model } = this.props;
     if (!model.color_rules || (model.color_rules && model.color_rules.length === 0)) {
@@ -42,74 +46,66 @@ class TableSeriesConfigUI extends Component {
     }
   }
 
+  changeModelFormatter = (formatter) => this.props.onChange({ formatter });
+
   render() {
-    const defaults = { offset_time: '', value_template: '' };
+    const defaults = { offset_time: '', value_template: '{{value}}' };
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
-    const { intl } = this.props;
 
     const functionOptions = [
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.sumLabel',
+        label: i18n.translate('visTypeTimeseries.table.sumLabel', {
           defaultMessage: 'Sum',
         }),
         value: 'sum',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.maxLabel',
+        label: i18n.translate('visTypeTimeseries.table.maxLabel', {
           defaultMessage: 'Max',
         }),
         value: 'max',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.minLabel',
+        label: i18n.translate('visTypeTimeseries.table.minLabel', {
           defaultMessage: 'Min',
         }),
         value: 'min',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.avgLabel',
+        label: i18n.translate('visTypeTimeseries.table.avgLabel', {
           defaultMessage: 'Avg',
         }),
         value: 'mean',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.overallSumLabel',
+        label: i18n.translate('visTypeTimeseries.table.overallSumLabel', {
           defaultMessage: 'Overall Sum',
         }),
         value: 'overall_sum',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.overallMaxLabel',
+        label: i18n.translate('visTypeTimeseries.table.overallMaxLabel', {
           defaultMessage: 'Overall Max',
         }),
         value: 'overall_max',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.overallMinLabel',
+        label: i18n.translate('visTypeTimeseries.table.overallMinLabel', {
           defaultMessage: 'Overall Min',
         }),
         value: 'overall_min',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.overallAvgLabel',
+        label: i18n.translate('visTypeTimeseries.table.overallAvgLabel', {
           defaultMessage: 'Overall Avg',
         }),
         value: 'overall_avg',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.table.cumulativeSumLabel',
+        label: i18n.translate('visTypeTimeseries.table.cumulativeSumLabel', {
           defaultMessage: 'Cumulative Sum',
         }),
         value: 'cumulative_sum',
@@ -119,13 +115,24 @@ class TableSeriesConfigUI extends Component {
       return model.aggregate_function === option.value;
     });
 
+    const isNumericMetric = checkIfNumericMetric(
+      last(model.metrics),
+      this.props.fields,
+      this.props.indexPatternForQuery
+    );
+    const isKibanaIndexPattern =
+      this.props.panel.use_kibana_indexes || this.props.indexPatternForQuery === '';
+
     return (
       <div className="tvbAggRow">
         <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
-          </EuiFlexItem>
-          <EuiFlexItem>
+          <DataFormatPicker
+            formatterValue={model.formatter}
+            changeModelFormatter={this.changeModelFormatter}
+            shouldIncludeDefaultOption={isKibanaIndexPattern}
+            shouldIncludeNumberOptions={isNumericMetric}
+          />
+          <EuiFlexItem grow={3}>
             <EuiFormRow
               id={htmlId('template')}
               label={
@@ -148,6 +155,7 @@ class TableSeriesConfigUI extends Component {
               <EuiFieldText
                 onChange={handleTextChange('value_template')}
                 value={model.value_template}
+                disabled={model.formatter === DATA_FORMATTERS.DEFAULT}
                 fullWidth
               />
             </EuiFormRow>
@@ -170,11 +178,8 @@ class TableSeriesConfigUI extends Component {
             >
               <QueryBarWrapper
                 query={{
-                  language:
-                    model.filter && model.filter.language
-                      ? model.filter.language
-                      : getDefaultQueryLanguage(),
-                  query: model.filter && model.filter.query ? model.filter.query : '',
+                  language: model?.filter?.language || getDefaultQueryLanguage(),
+                  query: model?.filter?.query || '',
                 }}
                 onChange={(filter) => this.props.onChange({ filter })}
                 indexPatterns={[this.props.indexPatternForQuery]}
@@ -182,14 +187,17 @@ class TableSeriesConfigUI extends Component {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormLabel>
-              <FormattedMessage
-                id="visTypeTimeseries.table.showTrendArrowsLabel"
-                defaultMessage="Show trend arrows?"
+            <EuiFormRow
+              label={i18n.translate('visTypeTimeseries.table.showTrendArrowsLabel', {
+                defaultMessage: 'Show trend arrows?',
+              })}
+            >
+              <YesNo
+                value={model.trend_arrows}
+                name="trend_arrows"
+                onChange={this.props.onChange}
               />
-            </EuiFormLabel>
-            <EuiSpacer size="s" />
-            <YesNo value={model.trend_arrows} name="trend_arrows" onChange={this.props.onChange} />
+            </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -197,20 +205,16 @@ class TableSeriesConfigUI extends Component {
 
         <EuiFlexGroup responsive={false} wrap={true}>
           <EuiFlexItem grow={true}>
-            <EuiFormRow
-              id={htmlId('field')}
+            <FieldSelect
               label={
                 <FormattedMessage id="visTypeTimeseries.table.fieldLabel" defaultMessage="Field" />
               }
-            >
-              <FieldSelect
-                fields={this.props.fields}
-                indexPattern={this.props.panel.index_pattern}
-                value={model.aggregate_by}
-                onChange={handleSelectChange('aggregate_by')}
-                fullWidth
-              />
-            </EuiFormRow>
+              fields={this.props.fields}
+              indexPattern={this.props.panel.index_pattern}
+              value={model.aggregate_by}
+              onChange={handleSelectChange('aggregate_by')}
+              fullWidth
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiFormRow
@@ -259,11 +263,9 @@ class TableSeriesConfigUI extends Component {
   }
 }
 
-TableSeriesConfigUI.propTypes = {
+TableSeriesConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  indexPatternForQuery: PropTypes.string,
+  indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 };
-
-export const TableSeriesConfig = injectI18n(TableSeriesConfigUI);

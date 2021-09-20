@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { HttpStart, NotificationsStart } from 'src/core/public';
 
-export function getSupportedScriptingLanguages(): string[] {
+export function getSupportedScriptingLanguages(): estypes.ScriptLanguage[] {
   return ['painless'];
 }
 
-export function getDeprecatedScriptingLanguages(): string[] {
+export function getDeprecatedScriptingLanguages(): estypes.ScriptLanguage[] {
   return [];
 }
 

@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function spaceSelectorFunctonalTests({
+export default function spaceSelectorFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
@@ -22,15 +22,17 @@ export default function spaceSelectorFunctonalTests({
     'spaceSelector',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/51942
+  // FLAKY: https://github.com/elastic/kibana/issues/99581
   describe.skip('Spaces', function () {
     this.tags('includeFirefox');
     describe('Space Selector', () => {
       before(async () => {
-        await esArchiver.load('spaces/selector');
+        await esArchiver.load('x-pack/test/functional/es_archives/spaces/selector');
         await PageObjects.security.forceLogout();
       });
-      after(async () => await esArchiver.unload('spaces/selector'));
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/spaces/selector')
+      );
 
       afterEach(async () => {
         await PageObjects.security.forceLogout();
@@ -69,7 +71,7 @@ export default function spaceSelectorFunctonalTests({
       };
 
       before(async () => {
-        await esArchiver.load('spaces/selector');
+        await esArchiver.load('x-pack/test/functional/es_archives/spaces/selector');
         await PageObjects.security.login(undefined, undefined, {
           expectSpaceSelector: true,
         });
@@ -89,13 +91,13 @@ export default function spaceSelectorFunctonalTests({
         // No need to remove the same sample data in both spaces, the index
         // data will be removed in the first call. By feature limitation,
         // the created saved objects in the second space will be broken but removed
-        // when we call esArchiver.unload('spaces').
+        // when we call esArchiver.unload('x-pack/test/functional/es_archives/spaces').
         await PageObjects.common.navigateToApp('home', {
           hash: sampleDataHash,
         });
         await PageObjects.home.removeSampleDataSet('logs');
         await PageObjects.security.forceLogout();
-        await esArchiver.unload('spaces/selector');
+        await esArchiver.unload('x-pack/test/functional/es_archives/spaces/selector');
       });
 
       describe('displays separate data for each space', () => {

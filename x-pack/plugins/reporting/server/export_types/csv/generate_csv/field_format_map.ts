@@ -6,8 +6,11 @@
  */
 
 import _ from 'lodash';
-import { FieldFormat } from 'src/plugins/data/common';
-import { FieldFormatConfig, IFieldFormatsRegistry } from 'src/plugins/data/server';
+import {
+  FieldFormat,
+  IFieldFormatsRegistry,
+  FieldFormatConfig,
+} from 'src/plugins/field_formats/common';
 import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
 
 /**

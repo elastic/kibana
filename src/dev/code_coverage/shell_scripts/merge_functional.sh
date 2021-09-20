@@ -12,11 +12,8 @@ mkdir -p "$coverageBasePath/kibana"
 rsync -ahSD --ignore-errors --force --delete --stats ./ "$coverageBasePath/kibana/"
 cd "$coverageBasePath/kibana"
 
-echo "### bootstrap from x-pack folder"
-cd x-pack
+echo "### bootstrap"
 yarn kbn bootstrap
-# Return to project root
-cd ..
 echo "### Merge coverage reports"
 yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.functional.config.js
 

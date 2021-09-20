@@ -8,6 +8,7 @@
 
 import Boom from '@hapi/boom';
 
+import type { estypes } from '@elastic/elasticsearch';
 import { IndexMapping } from '../../../mappings';
 import { SavedObjectsPitParams } from '../../../types';
 import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
@@ -23,9 +24,9 @@ interface GetSearchDslOptions {
   defaultSearchOperator?: SearchOperator;
   searchFields?: string[];
   rootSearchFields?: string[];
-  searchAfter?: unknown[];
+  searchAfter?: estypes.Id[];
   sortField?: string;
-  sortOrder?: string;
+  sortOrder?: estypes.SearchSortOrder;
   namespaces?: string[];
   pit?: SavedObjectsPitParams;
   typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -78,8 +79,8 @@ export function getSearchDsl(
       hasReferenceOperator,
       kueryNode,
     }),
-    ...getSortingParams(mappings, type, sortField, sortOrder, pit),
+    ...getSortingParams(mappings, type, sortField, sortOrder),
     ...(pit ? getPitParams(pit) : {}),
-    ...(searchAfter ? { search_after: searchAfter } : {}),
+    search_after: searchAfter,
   };
 }

@@ -16,7 +16,7 @@ describe('buildProcessorFunction(chain, ...args)', () => {
   test('should call each processor', () => {
     const first = jest.fn(() => (next: any) => (doc: any) => next(doc));
     const second = jest.fn(() => (next: any) => (doc: any) => next(doc));
-    buildProcessorFunction([first, second], req, panel, series);
+    buildProcessorFunction([first, second], { req, panel, series });
     expect(first.mock.calls.length).toEqual(1);
     expect(second.mock.calls.length).toEqual(1);
   });
@@ -25,7 +25,7 @@ describe('buildProcessorFunction(chain, ...args)', () => {
     const first = jest.fn(() => (next: any) => (doc: any) => next(doc));
     const second = jest.fn(() => (next: any) => (doc: any) => next(doc));
 
-    buildProcessorFunction([() => first, () => second], req, panel, series);
+    buildProcessorFunction([() => first, () => second], { req, panel, series });
 
     expect(first.mock.calls.length).toEqual(1);
     expect(second.mock.calls.length).toEqual(1);
@@ -45,9 +45,11 @@ describe('buildProcessorFunction(chain, ...args)', () => {
           next(doc);
         },
       ],
-      req,
-      panel,
-      series
+      {
+        req,
+        panel,
+        series,
+      }
     );
     fn({});
     expect(first.mock.calls.length).toEqual(1);

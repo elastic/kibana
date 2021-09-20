@@ -6,26 +6,39 @@
  */
 
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
-import { IRouter, KibanaRequest, RequestHandler, RouteConfig } from 'kibana/server';
-import { registerRoutes } from './index';
+import type { KibanaRequest } from 'kibana/server';
+import type { IRouter, RequestHandler, RouteConfig } from 'kibana/server';
+
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
-import { appContextService } from '../../services';
+import { appContextService, packagePolicyService } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
-import { PackagePolicyServiceInterface, ExternalCallback } from '../..';
-import { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
-import { packagePolicyService } from '../../services';
+import type {
+  PackagePolicyServiceInterface,
+  PostPackagePolicyCreateCallback,
+  PutPackagePolicyUpdateCallback,
+} from '../..';
+import type { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
+
+import { registerRoutes } from './index';
+
+type PackagePolicyServicePublicInterface = Omit<
+  PackagePolicyServiceInterface,
+  'getUpgradePackagePolicyInfo'
+>;
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
 
 jest.mock('../../services/package_policy', (): {
-  packagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+  packagePolicyService: jest.Mocked<PackagePolicyServicePublicInterface>;
 } => {
   return {
     packagePolicyService: {
-      compilePackagePolicyInputs: jest.fn((packageInfo, dataInputs) => Promise.resolve(dataInputs)),
+      compilePackagePolicyInputs: jest.fn((packageInfo, vars, dataInputs) =>
+        Promise.resolve(dataInputs)
+      ),
       buildPackagePolicyFromPackage: jest.fn(),
       bulkCreate: jest.fn(),
-      create: jest.fn((soClient, esClient, callCluster, newData) =>
+      create: jest.fn((soClient, esClient, newData) =>
         Promise.resolve({
           ...newData,
           inputs: newData.inputs.map((input) => ({
@@ -49,9 +62,14 @@ jest.mock('../../services/package_policy', (): {
       list: jest.fn(),
       listIds: jest.fn(),
       update: jest.fn(),
-      runExternalCallbacks: jest.fn((callbackType, newPackagePolicy, context, request) =>
-        Promise.resolve(newPackagePolicy)
+      // @ts-ignore
+      runExternalCallbacks: jest.fn((callbackType, packagePolicy, context, request) =>
+        callbackType === 'postPackagePolicyDelete'
+          ? Promise.resolve(undefined)
+          : Promise.resolve(packagePolicy)
       ),
+      upgrade: jest.fn(),
+      getUpgradeDryRunDiff: jest.fn(),
     },
   };
 });
@@ -121,45 +139,49 @@ describe('When calling package policy', () => {
       const callbackCallingOrder: string[] = [];
 
       // Callback one adds an input that includes a `config` property
-      const callbackOne: ExternalCallback[1] = jest.fn(async (ds) => {
-        callbackCallingOrder.push('one');
-        const newDs = {
-          ...ds,
-          inputs: [
-            {
-              type: 'endpoint',
-              enabled: true,
-              streams: [],
-              config: {
-                one: {
-                  value: 'inserted by callbackOne',
+      const callbackOne: PostPackagePolicyCreateCallback | PutPackagePolicyUpdateCallback = jest.fn(
+        async (ds) => {
+          callbackCallingOrder.push('one');
+          const newDs = {
+            ...ds,
+            inputs: [
+              {
+                type: 'endpoint',
+                enabled: true,
+                streams: [],
+                config: {
+                  one: {
+                    value: 'inserted by callbackOne',
+                  },
                 },
               },
-            },
-          ],
-        };
-        return newDs;
-      });
+            ],
+          };
+          return newDs;
+        }
+      );
 
       // Callback two adds an additional `input[0].config` property
-      const callbackTwo: ExternalCallback[1] = jest.fn(async (ds) => {
-        callbackCallingOrder.push('two');
-        const newDs = {
-          ...ds,
-          inputs: [
-            {
-              ...ds.inputs[0],
-              config: {
-                ...ds.inputs[0].config,
-                two: {
-                  value: 'inserted by callbackTwo',
+      const callbackTwo: PostPackagePolicyCreateCallback | PutPackagePolicyUpdateCallback = jest.fn(
+        async (ds) => {
+          callbackCallingOrder.push('two');
+          const newDs = {
+            ...ds,
+            inputs: [
+              {
+                ...ds.inputs[0],
+                config: {
+                  ...ds.inputs[0].config,
+                  two: {
+                    value: 'inserted by callbackTwo',
+                  },
                 },
               },
-            },
-          ],
-        };
-        return newDs;
-      });
+            ],
+          };
+          return newDs;
+        }
+      );
 
       beforeEach(() => {
         appContextService.addExternalCallback('packagePolicyCreate', callbackOne);
@@ -202,7 +224,8 @@ describe('When calling package policy', () => {
         );
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
-        expect(packagePolicyServiceMock.create.mock.calls[0][3]).toEqual({
+
+        expect(packagePolicyServiceMock.create.mock.calls[0][2]).toEqual({
           policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           description: '',
           enabled: true,

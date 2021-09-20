@@ -7,10 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
-import type { Datatable, DatatableColumnMeta } from 'src/plugins/expressions';
-import type { FormatFactory } from '../../types';
-import { ColumnConfig } from './table_basic';
+import {
+  EuiDataGridColumn,
+  EuiDataGridColumnCellActionProps,
+  EuiListGroupItemProps,
+} from '@elastic/eui';
+import type { Datatable, DatatableColumn, DatatableColumnMeta } from 'src/plugins/expressions';
+import type { FormatFactory } from '../../../common';
+import type { ColumnConfig } from '../../../common/expressions';
 
 export const createGridColumns = (
   bucketColumns: string[],
@@ -22,12 +26,17 @@ export const createGridColumns = (
     rowIndex: number,
     negate?: boolean
   ) => void,
+  handleTransposedColumnClick: (
+    bucketValues: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>,
+    negate?: boolean
+  ) => void,
   isReadOnly: boolean,
   columnConfig: ColumnConfig,
   visibleColumns: string[],
   formatFactory: FormatFactory,
   onColumnResize: (eventData: { columnId: string; width: number | undefined }) => void,
-  onColumnHide: (eventData: { columnId: string }) => void
+  onColumnHide: (eventData: { columnId: string }) => void,
+  alignments: Record<string, 'left' | 'right' | 'center'>
 ) => {
   const columnsReverseLookup = table.columns.reduce<
     Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
@@ -43,7 +52,7 @@ export const createGridColumns = (
     columnId,
   }: Pick<EuiDataGridColumnCellActionProps, 'rowIndex' | 'columnId'>) => {
     const rowValue = table.rows[rowIndex][columnId];
-    const column = columnsReverseLookup[columnId];
+    const column = columnsReverseLookup?.[columnId];
     const contentsIsDefined = rowValue != null;
 
     const cellContent = formatFactory(column?.meta?.params).convert(rowValue);
@@ -135,14 +144,72 @@ export const createGridColumns = (
         ]
       : undefined;
 
-    const column = columnConfig.columns.find(({ columnId }) => columnId === field);
-    const initialWidth = column?.width;
-    const isHidden = column?.hidden;
+    const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
+    const isTransposed = Boolean(columnArgs?.originalColumnId);
+    const initialWidth = columnArgs?.width;
+    const isHidden = columnArgs?.hidden;
+    const originalColumnId = columnArgs?.originalColumnId;
+
+    const additionalActions: EuiListGroupItemProps[] = [];
+
+    additionalActions.push({
+      color: 'text',
+      size: 'xs',
+      onClick: () => onColumnResize({ columnId: originalColumnId || field, width: undefined }),
+      iconType: 'empty',
+      label: i18n.translate('xpack.lens.table.resize.reset', {
+        defaultMessage: 'Reset width',
+      }),
+      'data-test-subj': 'lensDatatableResetWidth',
+      isDisabled: initialWidth == null,
+    });
+    if (!isTransposed) {
+      additionalActions.push({
+        color: 'text',
+        size: 'xs',
+        onClick: () => onColumnHide({ columnId: originalColumnId || field }),
+        iconType: 'eyeClosed',
+        label: i18n.translate('xpack.lens.table.hide.hideLabel', {
+          defaultMessage: 'Hide',
+        }),
+        'data-test-subj': 'lensDatatableHide',
+        isDisabled: !isHidden && visibleColumns.length <= 1,
+      });
+    }
+
+    if (!isReadOnly) {
+      if (isTransposed && columnArgs?.bucketValues) {
+        const bucketValues = columnArgs?.bucketValues;
+        additionalActions.push({
+          color: 'text',
+          size: 'xs',
+          onClick: () => handleTransposedColumnClick(bucketValues, false),
+          iconType: 'plusInCircle',
+          label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
+            defaultMessage: 'Filter for column',
+          }),
+          'data-test-subj': 'lensDatatableHide',
+        });
+
+        additionalActions.push({
+          color: 'text',
+          size: 'xs',
+          onClick: () => handleTransposedColumnClick(bucketValues, true),
+          iconType: 'minusInCircle',
+          label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
+            defaultMessage: 'Filter out column',
+          }),
+          'data-test-subj': 'lensDatatableHide',
+        });
+      }
+    }
+    const currentAlignment = alignments && alignments[field];
+    const alignmentClassName = `lnsTableCell--${currentAlignment}`;
 
     const columnDefinition: EuiDataGridColumn = {
       id: field,
       cellActions,
-      display: name,
+      display: <div className={alignmentClassName}>{name}</div>,
       displayAsText: name,
       actions: {
         showHide: false,
@@ -162,32 +229,7 @@ export const createGridColumns = (
                 defaultMessage: 'Sort descending',
               }),
             },
-        additional: isReadOnly
-          ? undefined
-          : [
-              {
-                color: 'text',
-                size: 'xs',
-                onClick: () => onColumnResize({ columnId: field, width: undefined }),
-                iconType: 'empty',
-                label: i18n.translate('xpack.lens.table.resize.reset', {
-                  defaultMessage: 'Reset width',
-                }),
-                'data-test-subj': 'lensDatatableResetWidth',
-                isDisabled: initialWidth == null,
-              },
-              {
-                color: 'text',
-                size: 'xs',
-                onClick: () => onColumnHide({ columnId: field }),
-                iconType: 'eyeClosed',
-                label: i18n.translate('xpack.lens.table.hide.hideLabel', {
-                  defaultMessage: 'Hide',
-                }),
-                'data-test-subj': 'lensDatatableHide',
-                isDisabled: !isHidden && visibleColumns.length <= 1,
-              },
-            ],
+        additional: additionalActions,
       },
     };
 

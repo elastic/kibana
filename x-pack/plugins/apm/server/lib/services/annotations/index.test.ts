@@ -8,7 +8,7 @@
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../typings/elasticsearch';
+} from '../../../../../../../src/core/types/elasticsearch';
 import {
   inspectSearchParams,
   SearchParamsMock,

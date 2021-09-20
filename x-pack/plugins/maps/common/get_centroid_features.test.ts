@@ -44,7 +44,7 @@ test('should not create centroid feature for point and multipoint', () => {
   expect(centroidFeatures.length).toBe(0);
 });
 
-test('should not create centroid for too many features polygon', () => {
+test('should not create centroid for the metadata polygon', () => {
   const polygonFeature: Feature = {
     type: 'Feature',
     geometry: {
@@ -60,7 +60,7 @@ test('should not create centroid for too many features polygon', () => {
       ],
     },
     properties: {
-      __kbn_too_many_features__: true,
+      __kbn_metadata_feature__: true,
       prop0: 'value0',
       prop1: 0.0,
     },
@@ -273,6 +273,133 @@ test('should create centroid feature for multi polygon', () => {
     geometry: {
       type: 'Point',
       coordinates: [28.333333333333332, 33.333333333333336],
+    },
+    properties: {
+      __kbn_is_centroid_feature__: true,
+      prop0: 'value0',
+      prop1: 0.0,
+    },
+  });
+});
+
+test('should create centroid feature for GeometryCollection with Point', () => {
+  const featureCollection: FeatureCollection = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'GeometryCollection',
+          geometries: [
+            {
+              type: 'Point',
+              coordinates: [100.0, 0.0],
+            },
+          ],
+        },
+        properties: {
+          prop0: 'value0',
+          prop1: 0.0,
+        },
+      },
+    ],
+  };
+  const centroidFeatures = getCentroidFeatures(featureCollection);
+  expect(centroidFeatures.length).toBe(1);
+  expect(centroidFeatures[0]).toEqual({
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [100.0, 0.0],
+    },
+    properties: {
+      __kbn_is_centroid_feature__: true,
+      prop0: 'value0',
+      prop1: 0.0,
+    },
+  });
+});
+
+test('should create centroid feature for GeometryCollection with MultiPoint', () => {
+  const featureCollection: FeatureCollection = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'GeometryCollection',
+          geometries: [
+            {
+              type: 'MultiPoint',
+              coordinates: [
+                [10, 40],
+                [40, 30],
+                [20, 20],
+                [30, 10],
+              ],
+            },
+          ],
+        },
+        properties: {
+          prop0: 'value0',
+          prop1: 0.0,
+        },
+      },
+    ],
+  };
+  const centroidFeatures = getCentroidFeatures(featureCollection);
+  expect(centroidFeatures.length).toBe(1);
+  expect(centroidFeatures[0]).toEqual({
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [10, 40],
+    },
+    properties: {
+      __kbn_is_centroid_feature__: true,
+      prop0: 'value0',
+      prop1: 0.0,
+    },
+  });
+});
+
+test('should create centroid feature for GeometryCollection with Polygon', () => {
+  const featureCollection: FeatureCollection = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'GeometryCollection',
+          geometries: [
+            {
+              type: 'Polygon',
+              coordinates: [
+                [
+                  [35, 10],
+                  [45, 45],
+                  [15, 40],
+                  [10, 20],
+                  [35, 10],
+                ],
+              ],
+            },
+          ],
+        },
+        properties: {
+          prop0: 'value0',
+          prop1: 0.0,
+        },
+      },
+    ],
+  };
+  const centroidFeatures = getCentroidFeatures(featureCollection);
+  expect(centroidFeatures.length).toBe(1);
+  expect(centroidFeatures[0]).toEqual({
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [27.526881720430108, 28.70967741935484],
     },
     properties: {
       __kbn_is_centroid_feature__: true,

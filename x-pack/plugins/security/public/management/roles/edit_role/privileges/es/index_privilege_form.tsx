@@ -5,24 +5,29 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
   EuiSwitch,
-  EuiTextArea,
 } from '@elastic/eui';
+import _ from 'lodash';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import _ from 'lodash';
-import React, { ChangeEvent, Component, Fragment } from 'react';
-import { RoleIndexPrivilege } from '../../../../../../common/model';
-import { RoleValidator } from '../../validate_role';
+import type { monaco } from '@kbn/monaco';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import { CodeEditorField } from '../../../../../../../../../src/plugins/kibana_react/public';
+import type { RoleIndexPrivilege } from '../../../../../../common/model';
+import type { IndicesAPIClient } from '../../../indices_api_client';
+import type { RoleValidator } from '../../validate_role';
 
 const fromOption = (option: any) => option.label;
 const toOption = (value: string) => ({ label: value });
@@ -32,7 +37,7 @@ interface Props {
   indexPrivilege: RoleIndexPrivilege;
   indexPatterns: string[];
   availableIndexPrivileges: string[];
-  availableFields: string[];
+  indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
   onChange: (indexPrivilege: RoleIndexPrivilege) => void;
   onDelete: () => void;
   isRoleReadOnly: boolean;
@@ -47,9 +52,17 @@ interface State {
   grantedFields: string[];
   exceptedFields: string[];
   documentQuery?: string;
+  documentQueryEditorHeight: string;
+  isFieldListLoading: boolean;
+  flsOptions: string[];
 }
 
 export class IndexPrivilegeForm extends Component<Props, State> {
+  // This is distinct from the field within `this.state`.
+  // We want to make sure that only one request for fields is in-flight at a time,
+  // and relying on state for this is error prone.
+  private isFieldListLoading: boolean = false;
+
   constructor(props: Props) {
     super(props);
 
@@ -61,7 +74,16 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       grantedFields: grant,
       exceptedFields: except,
       documentQuery: props.indexPrivilege.query,
+      documentQueryEditorHeight: '100px',
+      isFieldListLoading: false,
+      flsOptions: [],
     };
+  }
+
+  public componentDidMount() {
+    if (this.state.fieldSecurityExpanded && this.props.allowFieldLevelSecurity) {
+      this.loadFLSOptions(this.props.indexPrivilege.names);
+    }
   }
 
   public render() {
@@ -146,11 +168,30 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     );
   };
 
+  private loadFLSOptions = (indexNames: string[], force = false) => {
+    if (!force && (this.isFieldListLoading || indexNames.length === 0)) return;
+
+    this.isFieldListLoading = true;
+    this.setState({
+      isFieldListLoading: true,
+    });
+
+    this.props.indicesAPIClient
+      .getFields(indexNames.join(','))
+      .then((fields) => {
+        this.isFieldListLoading = false;
+        this.setState({ flsOptions: fields, isFieldListLoading: false });
+      })
+      .catch(() => {
+        this.isFieldListLoading = false;
+        this.setState({ flsOptions: [], isFieldListLoading: false });
+      });
+  };
+
   private getFieldLevelControls = () => {
     const {
       allowFieldLevelSecurity,
       allowDocumentLevelSecurity,
-      availableFields,
       indexPrivilege,
       isRoleReadOnly,
     } = this.props;
@@ -207,11 +248,13 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                     <Fragment>
                       <EuiComboBox
                         data-test-subj={`fieldInput${this.props.formIndex}`}
-                        options={availableFields ? availableFields.map(toOption) : []}
+                        options={this.state.flsOptions.map(toOption)}
                         selectedOptions={grant.map(toOption)}
                         onCreateOption={this.onCreateGrantedField}
                         onChange={this.onGrantedFieldsChange}
                         isDisabled={this.props.isRoleReadOnly}
+                        async={true}
+                        isLoading={this.state.isFieldListLoading}
                       />
                     </Fragment>
                   </EuiFormRow>
@@ -230,11 +273,13 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                     <Fragment>
                       <EuiComboBox
                         data-test-subj={`deniedFieldInput${this.props.formIndex}`}
-                        options={availableFields ? availableFields.map(toOption) : []}
+                        options={this.state.flsOptions.map(toOption)}
                         selectedOptions={except.map(toOption)}
                         onCreateOption={this.onCreateDeniedField}
                         onChange={this.onDeniedFieldsChange}
                         isDisabled={isRoleReadOnly}
+                        async={true}
+                        isLoading={this.state.isFieldListLoading}
                       />
                     </Fragment>
                   </EuiFormRow>
@@ -259,21 +304,19 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       <EuiFlexGroup direction="column">
         {!this.props.isRoleReadOnly && (
           <EuiFlexItem>
-            {
-              <EuiSwitch
-                data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
-                label={
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
-                    defaultMessage="Grant read privileges to specific documents"
-                  />
-                }
-                compressed={true}
-                checked={this.state.queryExpanded}
-                onChange={this.toggleDocumentQuery}
-                disabled={isRoleReadOnly}
-              />
-            }
+            <EuiSwitch
+              data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
+                  defaultMessage="Grant read privileges to specific documents"
+                />
+              }
+              compressed={true}
+              checked={this.state.queryExpanded}
+              onChange={this.toggleDocumentQuery}
+              disabled={isRoleReadOnly}
+            />
           </EuiFlexItem>
         )}
         {this.state.queryExpanded && (
@@ -286,20 +329,54 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 />
               }
               fullWidth={true}
+              data-test-subj={`queryInput${this.props.formIndex}`}
             >
-              <EuiTextArea
-                data-test-subj={`queryInput${this.props.formIndex}`}
-                style={{ resize: 'none' }}
+              <CodeEditorField
+                languageId="xjson"
+                width="100%"
                 fullWidth={true}
-                value={indexPrivilege.query}
+                height={this.state.documentQueryEditorHeight}
+                aria-label={i18n.translate(
+                  'xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryEditorAriaLabel',
+                  {
+                    defaultMessage: 'Granted documents query editor',
+                  }
+                )}
+                value={indexPrivilege.query ?? ''}
                 onChange={this.onQueryChange}
-                readOnly={this.props.isRoleReadOnly}
+                options={{
+                  readOnly: this.props.isRoleReadOnly,
+                  minimap: {
+                    enabled: false,
+                  },
+                  // Prevent an empty form from showing an error
+                  renderValidationDecorations: indexPrivilege.query ? 'editable' : 'off',
+                }}
+                editorDidMount={this.editorDidMount}
               />
             </EuiFormRow>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
     );
+  };
+
+  private editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    /**
+     * Resize the editor based on the contents of the editor itself.
+     * Adapted from https://github.com/microsoft/monaco-editor/issues/794#issuecomment-688959283
+     */
+
+    const minHeight = 100;
+    const maxHeight = 1000;
+
+    const updateHeight = () => {
+      const contentHeight = Math.min(maxHeight, Math.max(minHeight, editor.getContentHeight()));
+      this.setState({ documentQueryEditorHeight: `${contentHeight}px` });
+    };
+
+    editor.onDidContentSizeChange(updateHeight);
+    updateHeight();
   };
 
   private toggleDocumentQuery = () => {
@@ -359,6 +436,11 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     const hasSavedFieldSecurity =
       this.state.exceptedFields.length > 0 || this.state.grantedFields.length > 0;
 
+    // If turning on, then request available fields
+    if (willToggleOn) {
+      this.loadFLSOptions(this.props.indexPrivilege.names);
+    }
+
     if (willToggleOn && !hasConfiguredFieldSecurity && hasSavedFieldSecurity) {
       this.props.onChange({
         ...this.props.indexPrivilege,
@@ -377,13 +459,22 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       ...this.props.indexPrivilege,
       names: newIndexPatterns,
     });
+    // If FLS controls are visible, then forcefully request a new set of options
+    if (this.state.fieldSecurityExpanded) {
+      this.loadFLSOptions(newIndexPatterns, true);
+    }
   };
 
   private onIndexPatternsChange = (newPatterns: EuiComboBoxOptionOption[]) => {
+    const names = newPatterns.map(fromOption);
     this.props.onChange({
       ...this.props.indexPrivilege,
-      names: newPatterns.map(fromOption),
+      names,
     });
+    // If FLS controls are visible, then forcefully request a new set of options
+    if (this.state.fieldSecurityExpanded) {
+      this.loadFLSOptions(names, true);
+    }
   };
 
   private onPrivilegeChange = (newPrivileges: EuiComboBoxOptionOption[]) => {
@@ -400,10 +491,10 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  private onQueryChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+  private onQueryChange = (query: string) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
-      query: e.target.value,
+      query,
     });
   };
 

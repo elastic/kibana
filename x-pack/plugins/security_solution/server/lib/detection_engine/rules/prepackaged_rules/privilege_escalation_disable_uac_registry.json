@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Disabling User Account Control via Registry Modification",
   "query": "registry where event.type == \"change\" and\n  registry.path :\n    (\n      \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\EnableLUA\",\n      \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\ConsentPromptBehaviorAdmin\",\n      \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\PromptOnSecureDesktop\"\n    ) and\n  registry.data.strings : \"0\"\n",
   "references": [
@@ -44,7 +44,7 @@
           "subtechnique": [
             {
               "id": "T1548.002",
-              "name": "Bypass User Access Control",
+              "name": "Bypass User Account Control",
               "reference": "https://attack.mitre.org/techniques/T1548/002/"
             }
           ]
@@ -66,7 +66,7 @@
           "subtechnique": [
             {
               "id": "T1548.002",
-              "name": "Bypass User Access Control",
+              "name": "Bypass User Account Control",
               "reference": "https://attack.mitre.org/techniques/T1548/002/"
             }
           ]
@@ -76,5 +76,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

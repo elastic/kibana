@@ -8,8 +8,7 @@
 import { mount, shallow } from 'enzyme';
 import { clone } from 'lodash/fp';
 import React from 'react';
-
-import { FlowDirection, FlowTarget } from '../../../graphql/types';
+import { FlowDirection, FlowTarget } from '../../../../common/search_strategy';
 
 import { FlowTargetSelect } from './flow_target_select';
 

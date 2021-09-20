@@ -7,20 +7,17 @@
  */
 
 import React, { Fragment } from 'react';
-import { DurationFormat } from 'src/plugins/data/common';
+import { DurationFormat } from 'src/plugins/field_formats/common';
 
 import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  DefaultFormatEditor,
-  defaultState,
-  FormatEditorProps,
-  FormatEditorState,
-} from '../default';
+import { DefaultFormatEditor, defaultState, FormatEditorState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
+import { formatId } from './constants';
+import { FormatEditorProps } from '../types';
 
 interface DurationFormatEditorState {
   hasDecimalError: boolean;
@@ -41,13 +38,15 @@ interface DurationFormatEditorFormatParams {
   inputFormat: string;
   outputFormat: string;
   showSuffix?: boolean;
+  useShortSuffix?: boolean;
+  includeSpaceWithSuffix?: boolean;
 }
 
 export class DurationFormatEditor extends DefaultFormatEditor<
   DurationFormatEditorFormatParams,
   DurationFormatEditorState
 > {
-  static formatId = 'duration';
+  static formatId = formatId;
   state = {
     ...defaultState,
     sampleInputs: [-123, 1, 12, 123, 658, 1988, 3857, 123292, 923528271],
@@ -83,8 +82,13 @@ export class DurationFormatEditor extends DefaultFormatEditor<
   }
 
   render() {
-    const { format, formatParams } = this.props;
+    const { format } = this.props;
     const { error, samples, hasDecimalError } = this.state;
+
+    const formatParams: DurationFormatEditorFormatParams = {
+      includeSpaceWithSuffix: format.getParamDefaults().includeSpaceWithSuffix,
+      ...this.props.formatParams,
+    };
 
     return (
       <Fragment>
@@ -99,8 +103,9 @@ export class DurationFormatEditor extends DefaultFormatEditor<
           error={hasDecimalError ? null : error}
         >
           <EuiSelect
+            data-test-subj={'durationEditorInputFormat'}
             value={formatParams.inputFormat}
-            options={format.type.inputFormats.map((fmt: InputFormat) => {
+            options={(format.type as typeof DurationFormat).inputFormats.map((fmt: InputFormat) => {
               return {
                 value: fmt.kind,
                 text: fmt.text,
@@ -122,13 +127,16 @@ export class DurationFormatEditor extends DefaultFormatEditor<
           isInvalid={!!error}
         >
           <EuiSelect
+            data-test-subj={'durationEditorOutputFormat'}
             value={formatParams.outputFormat}
-            options={format.type.outputFormats.map((fmt: OutputFormat) => {
-              return {
-                value: fmt.method,
-                text: fmt.text,
-              };
-            })}
+            options={(format.type as typeof DurationFormat).outputFormats.map(
+              (fmt: OutputFormat) => {
+                return {
+                  value: fmt.method,
+                  text: fmt.text,
+                };
+              }
+            )}
             onChange={(e) => {
               this.onChange({ outputFormat: e.target.value });
             }}
@@ -159,17 +167,55 @@ export class DurationFormatEditor extends DefaultFormatEditor<
                 isInvalid={!!error}
               />
             </EuiFormRow>
+            {!(format as DurationFormat).isHumanPrecise() && (
+              <EuiFormRow>
+                <EuiSwitch
+                  label={
+                    <FormattedMessage
+                      id="indexPatternFieldEditor.duration.showSuffixLabel"
+                      defaultMessage="Show suffix"
+                    />
+                  }
+                  checked={Boolean(formatParams.showSuffix)}
+                  onChange={(e) => {
+                    this.onChange({
+                      showSuffix: !formatParams.showSuffix,
+                    });
+                  }}
+                />
+              </EuiFormRow>
+            )}
             <EuiFormRow>
               <EuiSwitch
+                disabled={
+                  !Boolean(formatParams.showSuffix) && !(format as DurationFormat).isHumanPrecise()
+                }
                 label={
                   <FormattedMessage
-                    id="indexPatternFieldEditor.duration.showSuffixLabel"
-                    defaultMessage="Show suffix"
+                    id="indexPatternFieldEditor.duration.showSuffixLabel.short"
+                    defaultMessage="Use short suffix"
                   />
                 }
-                checked={Boolean(formatParams.showSuffix)}
+                checked={Boolean(formatParams.useShortSuffix)}
                 onChange={(e) => {
-                  this.onChange({ showSuffix: !formatParams.showSuffix });
+                  this.onChange({ useShortSuffix: !formatParams.useShortSuffix });
+                }}
+              />
+            </EuiFormRow>
+            <EuiFormRow>
+              <EuiSwitch
+                disabled={
+                  !Boolean(formatParams.showSuffix) && !(format as DurationFormat).isHumanPrecise()
+                }
+                label={
+                  <FormattedMessage
+                    id="indexPatternFieldEditor.duration.includeSpace"
+                    defaultMessage="Include space between suffix and value"
+                  />
+                }
+                checked={Boolean(formatParams.includeSpaceWithSuffix)}
+                onChange={(e) => {
+                  this.onChange({ includeSpaceWithSuffix: !formatParams.includeSpaceWithSuffix });
                 }}
               />
             </EuiFormRow>

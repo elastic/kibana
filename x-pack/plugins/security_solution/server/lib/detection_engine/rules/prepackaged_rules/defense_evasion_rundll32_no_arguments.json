@@ -3,14 +3,15 @@
     "Elastic"
   ],
   "description": "Identifies child processes of unusual instances of RunDLL32 where the command line parameters were suspicious. Misuse of RunDLL32 could indicate malicious activity.",
-  "from": "now-9m",
+  "from": "now-60m",
   "index": [
     "logs-endpoint.events.*",
     "winlogbeat-*",
     "logs-windows.*"
   ],
+  "interval": "30m",
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Unusual Child Processes of RunDLL32",
   "query": "sequence with maxspan=1h\n  [process where event.type in (\"start\", \"process_started\") and\n     (process.name : \"rundll32.exe\" or process.pe.original_file_name == \"RUNDLL32.EXE\") and\n      process.args_count == 1\n  ] by process.entity_id\n  [process where event.type in (\"start\", \"process_started\") and process.parent.name : \"rundll32.exe\"\n  ] by process.parent.entity_id\n",
   "risk_score": 21,
@@ -48,5 +49,5 @@
     }
   ],
   "type": "eql",
-  "version": 3
+  "version": 4
 }

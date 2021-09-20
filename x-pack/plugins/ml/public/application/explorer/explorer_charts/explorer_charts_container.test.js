@@ -18,18 +18,10 @@ import { ExplorerChartsContainer } from './explorer_charts_container';
 import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 import seriesConfigRare from './__mocks__/mock_series_config_rare.json';
+import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
+import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
+import { timefilterMock } from '../../contexts/kibana/__mocks__/use_timefilter';
 
-// Mock TimeBuckets and mlFieldFormatService, they don't play well
-// with the jest based test setup yet.
-jest.mock('../../util/time_buckets', () => ({
-  getTimeBucketsFromCache: jest.fn(() => {
-    return {
-      setBounds: jest.fn(),
-      setInterval: jest.fn(),
-      getScaledDateFormat: jest.fn(),
-    };
-  }),
-}));
 jest.mock('../../services/field_format_service', () => ({
   mlFieldFormatService: {
     getFieldFormat: jest.fn(),
@@ -47,6 +39,18 @@ jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
   },
 }));
 
+const getUtilityProps = () => {
+  const mlUrlGenerator = {
+    createUrl: jest.fn(),
+  };
+  return {
+    mlUrlGenerator,
+    timefilter: timefilterMock,
+    timeBuckets: timeBucketsMock,
+    kibana: kibanaContextMock,
+  };
+};
+
 describe('ExplorerChartsContainer', () => {
   const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
   const originalGetBBox = SVGElement.prototype.getBBox;
@@ -54,32 +58,15 @@ describe('ExplorerChartsContainer', () => {
   beforeEach(() => (SVGElement.prototype.getBBox = () => mockedGetBBox));
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
-  const kibanaContextMock = {
-    services: {
-      application: { navigateToApp: jest.fn() },
-      http: {
-        basePath: {
-          get: jest.fn(),
-        },
-      },
-      share: {
-        urlGenerators: { getUrlGenerator: jest.fn() },
-      },
-    },
-  };
   test('Minimal Initialization', () => {
     const wrapper = shallow(
       <I18nProvider>
-        <ExplorerChartsContainer
-          {...getDefaultChartsData()}
-          kibana={kibanaContextMock}
-          severity={10}
-        />
+        <ExplorerChartsContainer {...getDefaultChartsData()} {...getUtilityProps()} severity={10} />
       </I18nProvider>
     );
 
     expect(wrapper.html()).toBe(
-      '<div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--wrap euiFlexGrid--responsive"></div>'
+      '<div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--wrap euiFlexGrid--responsive" data-test-subj="mlExplorerChartsContainer"></div>'
     );
   });
 
@@ -99,7 +86,7 @@ describe('ExplorerChartsContainer', () => {
     };
     const wrapper = mount(
       <I18nProvider>
-        <ExplorerChartsContainer {...props} kibana={kibanaContextMock} />
+        <ExplorerChartsContainer {...props} {...getUtilityProps()} />
       </I18nProvider>
     );
 
@@ -127,7 +114,7 @@ describe('ExplorerChartsContainer', () => {
     };
     const wrapper = mount(
       <I18nProvider>
-        <ExplorerChartsContainer {...props} kibana={kibanaContextMock} />
+        <ExplorerChartsContainer {...props} {...getUtilityProps()} />
       </I18nProvider>
     );
 

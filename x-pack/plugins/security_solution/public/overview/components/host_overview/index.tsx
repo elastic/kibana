@@ -42,6 +42,7 @@ interface HostSummaryProps {
   data: HostItem;
   docValueFields: DocValueFields[];
   id: string;
+  isDraggable?: boolean;
   isInDetailsSidePanel: boolean;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
@@ -60,6 +61,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     docValueFields,
     endDate,
     id,
+    isDraggable = false,
     isInDetailsSidePanel = false, // Rather than duplicate the component, alter the structure based on it's location
     isLoadingAnomaliesData,
     indexNames,
@@ -77,23 +79,25 @@ export const HostOverview = React.memo<HostSummaryProps>(
           rowItems={getOr([], fieldName, fieldData)}
           attrName={fieldName}
           idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
+          isDraggable={isDraggable}
         />
       ),
-      [contextID]
+      [contextID, isDraggable]
     );
 
     const column: DescriptionList[] = useMemo(
       () => [
         {
           title: i18n.HOST_ID,
-          description: data.host
-            ? hostIdRenderer({ host: data.host, noLink: true })
-            : getEmptyTagValue(),
+          description:
+            data && data.host
+              ? hostIdRenderer({ host: data.host, isDraggable, noLink: true })
+              : getEmptyTagValue(),
         },
         {
           title: i18n.FIRST_SEEN,
           description:
-            data.host != null && data.host.name && data.host.name.length ? (
+            data && data.host != null && data.host.name && data.host.name.length ? (
               <FirstLastSeenHost
                 docValueFields={docValueFields}
                 hostName={data.host.name[0]}
@@ -107,7 +111,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
         {
           title: i18n.LAST_SEEN,
           description:
-            data.host != null && data.host.name && data.host.name.length ? (
+            data && data.host != null && data.host.name && data.host.name.length ? (
               <FirstLastSeenHost
                 docValueFields={docValueFields}
                 hostName={data.host.name[0]}
@@ -119,7 +123,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             ),
         },
       ],
-      [data, docValueFields, indexNames]
+      [data, docValueFields, indexNames, isDraggable]
     );
     const firstColumn = useMemo(
       () =>
@@ -162,6 +166,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 rowItems={getOr([], 'host.ip', data)}
                 attrName={'host.ip'}
                 idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
+                isDraggable={isDraggable}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
               />
             ),
@@ -197,21 +202,20 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [contextID, data, firstColumn, getDefaultRenderer]
+      [contextID, data, firstColumn, getDefaultRenderer, isDraggable]
     );
     return (
       <>
         <InspectButtonContainer>
-          <OverviewWrapper direction={isInDetailsSidePanel ? 'column' : 'row'}>
+          <OverviewWrapper
+            direction={isInDetailsSidePanel ? 'column' : 'row'}
+            data-test-subj="host-overview"
+          >
             {!isInDetailsSidePanel && (
               <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
             )}
             {descriptionLists.map((descriptionList, index) => (
-              <OverviewDescriptionList
-                descriptionList={descriptionList}
-                isInDetailsSidePanel={isInDetailsSidePanel}
-                key={index}
-              />
+              <OverviewDescriptionList descriptionList={descriptionList} key={index} />
             ))}
 
             {loading && (
@@ -225,15 +229,11 @@ export const HostOverview = React.memo<HostSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {data.endpoint != null ? (
+        {data && data.endpoint != null ? (
           <>
             <EuiHorizontalRule />
             <OverviewWrapper direction={isInDetailsSidePanel ? 'column' : 'row'}>
-              <EndpointOverview
-                contextID={contextID}
-                data={data.endpoint}
-                isInDetailsSidePanel={isInDetailsSidePanel}
-              />
+              <EndpointOverview contextID={contextID} data={data.endpoint} />
 
               {loading && (
                 <Loader

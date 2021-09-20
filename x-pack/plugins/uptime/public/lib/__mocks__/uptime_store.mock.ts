@@ -33,15 +33,6 @@ export const mockState: AppState = {
     loading: false,
     errors: [],
   },
-  snapshot: {
-    count: {
-      up: 2,
-      down: 0,
-      total: 2,
-    },
-    errors: [],
-    loading: false,
-  },
   ui: {
     alertFlyoutVisible: false,
     basePath: 'yyz',
@@ -120,4 +111,9 @@ export const mockState: AppState = {
   },
   journeys: {},
   networkEvents: {},
+  synthetics: {
+    blocks: {},
+    cacheSize: 0,
+    hitCount: [],
+  },
 };

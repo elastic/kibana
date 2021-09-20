@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ComponentType, ReactWrapper } from 'enzyme';
+import { Component as ReactComponent } from 'react';
+import { ComponentType, HTMLAttributes, ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
@@ -250,8 +251,17 @@ export const registerTestBed = <T extends string = string>(
         component.update();
       };
 
-      const getErrorsMessages: TestBed<T>['form']['getErrorsMessages'] = () => {
-        const errorMessagesWrappers = component.find('.euiFormErrorText');
+      const getErrorsMessages: TestBed<T>['form']['getErrorsMessages'] = (
+        wrapper?: T | ReactWrapper
+      ) => {
+        let errorMessagesWrappers: ReactWrapper<HTMLAttributes, any, ReactComponent>;
+        if (typeof wrapper === 'string') {
+          errorMessagesWrappers = find(wrapper).find('.euiFormErrorText');
+        } else {
+          errorMessagesWrappers = wrapper
+            ? wrapper.find('.euiFormErrorText')
+            : component.find('.euiFormErrorText');
+        }
         return errorMessagesWrappers.map((err) => err.text());
       };
 

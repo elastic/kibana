@@ -13,7 +13,7 @@ import {
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
-import { PluginName } from 'src/core/server';
+import { PluginName, PluginType } from 'src/core/server';
 import { coreMock } from '../mocks';
 import {
   PluginsService,
@@ -34,6 +34,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
+import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -58,10 +59,15 @@ function createManifest(
   return {
     id,
     version: 'some-version',
+    type: PluginType.standard,
     configPath: ['path'],
     requiredPlugins: required,
     optionalPlugins: optional,
     requiredBundles: [],
+    owner: {
+      name: 'Core',
+      githubTeam: 'kibana-core',
+    },
   };
 }
 
@@ -101,6 +107,7 @@ describe('PluginsService', () => {
       uiSettings: uiSettingsServiceMock.createStartContract(),
       savedObjects: savedObjectsServiceMock.createStartContract(),
       fatalErrors: fatalErrorsServiceMock.createStartContract(),
+      deprecations: deprecationsServiceMock.createStartContract(),
     };
     mockStartContext = {
       ...mockStartDeps,

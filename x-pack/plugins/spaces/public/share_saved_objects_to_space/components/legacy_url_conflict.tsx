@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import type { LegacyUrlConflictProps } from 'src/plugins/spaces_oss/public';
-import { LegacyUrlConflictInternal, InternalProps } from './legacy_url_conflict_internal';
 
-export const getLegacyUrlConflict = (
+import type { LegacyUrlConflictProps } from '../types';
+import type { InternalProps } from './legacy_url_conflict_internal';
+
+export const getLegacyUrlConflict = async (
   internalProps: InternalProps
-): React.FC<LegacyUrlConflictProps> => {
+): Promise<React.FC<LegacyUrlConflictProps>> => {
+  const { LegacyUrlConflictInternal } = await import('./legacy_url_conflict_internal');
   return (props: LegacyUrlConflictProps) => {
     return <LegacyUrlConflictInternal {...{ ...internalProps, ...props }} />;
   };

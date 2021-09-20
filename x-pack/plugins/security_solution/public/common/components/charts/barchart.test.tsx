@@ -6,10 +6,8 @@
  */
 
 import { Chart, BarSeries, Axis, ScaleType } from '@elastic/charts';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { TestProviders } from '../../mock';
@@ -36,8 +34,6 @@ jest.mock('uuid', () => {
     v4: jest.fn(() => 'uuid.v4()'),
   };
 });
-
-const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 const customHeight = '100px';
 const customWidth = '120px';
@@ -323,11 +319,9 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
 
   beforeAll(() => {
     wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <TestProviders>
-          <BarChartComponent configs={mockConfig} barChart={data} stackByField={stackByField} />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <BarChartComponent configs={mockConfig} barChart={data} stackByField={stackByField} />
+      </TestProviders>
     );
   });
 
@@ -346,13 +340,9 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
       const dataProviderId = `draggableId.content.draggable-legend-item-uuid_v4()-${escapeDataProviderId(
         stackByField
       )}-${escapeDataProviderId(datum.key)}`;
-
-      expect(
-        wrapper
-          .find(`[draggableId="${dataProviderId}"] [data-test-subj="providerContainer"]`)
-          .first()
-          .text()
-      ).toEqual(datum.key);
+      expect(wrapper.find(`div[data-provider-id="${dataProviderId}"]`).first().text()).toEqual(
+        datum.key
+      );
     });
   });
 });
@@ -407,11 +397,9 @@ describe.each(chartDataSets)('BarChart with custom color', () => {
 
   beforeAll(() => {
     wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <TestProviders>
-          <BarChartComponent configs={mockConfig} barChart={data} stackByField={stackByField} />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <BarChartComponent configs={mockConfig} barChart={data} stackByField={stackByField} />
+      </TestProviders>
     );
   });
 

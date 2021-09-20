@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock } from '../../../../../core/server/mocks';
-import { setupServer } from '../../../../../core/server/test_utils';
-import { AnonymousAccessService } from '../../plugin';
-import { setupAppStateRoute } from '../app_state';
-import { ConfigType } from '../../config';
 import { BehaviorSubject, of } from 'rxjs';
-import { UnwrapPromise } from '@kbn/utility-types';
-import { createClusterDataCheck } from '../../check_cluster_data';
 import supertest from 'supertest';
+
+import type { UnwrapPromise } from '@kbn/utility-types';
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { setupServer } from 'src/core/server/test_utils';
+
+import type { createClusterDataCheck } from '../../check_cluster_data';
+import type { ConfigType } from '../../config';
+import type { AnonymousAccessService } from '../../plugin';
+import { setupAppStateRoute } from '../app_state';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const pluginId = Symbol('securityOss');

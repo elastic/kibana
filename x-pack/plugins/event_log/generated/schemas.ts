@@ -13,13 +13,14 @@
 // the event log
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import semver from 'semver';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U> ? Array<DeepPartial<U>> : DeepPartial<T[P]>;
 };
 
-export const ECS_VERSION = '1.6.0';
+export const ECS_VERSION = '1.8.0';
 
 // types and config-schema describing the es structures
 export type IValidatedEvent = TypeOf<typeof EventSchema>;
@@ -28,27 +29,69 @@ export type IEvent = DeepPartial<DeepWriteable<IValidatedEvent>>;
 export const EventSchema = schema.maybe(
   schema.object({
     '@timestamp': ecsDate(),
-    tags: ecsStringMulti(),
     message: ecsString(),
+    tags: ecsStringMulti(),
     ecs: schema.maybe(
       schema.object({
         version: ecsString(),
       })
     ),
+    error: schema.maybe(
+      schema.object({
+        code: ecsString(),
+        id: ecsString(),
+        message: ecsString(),
+        stack_trace: ecsString(),
+        type: ecsString(),
+      })
+    ),
     event: schema.maybe(
       schema.object({
         action: ecsString(),
-        provider: ecsString(),
-        start: ecsDate(),
+        category: ecsStringMulti(),
+        code: ecsString(),
+        created: ecsDate(),
+        dataset: ecsString(),
         duration: ecsNumber(),
         end: ecsDate(),
+        hash: ecsString(),
+        id: ecsString(),
+        ingested: ecsDate(),
+        kind: ecsString(),
+        module: ecsString(),
+        original: ecsString(),
         outcome: ecsString(),
+        provider: ecsString(),
         reason: ecsString(),
+        reference: ecsString(),
+        risk_score: ecsNumber(),
+        risk_score_norm: ecsNumber(),
+        sequence: ecsNumber(),
+        severity: ecsNumber(),
+        start: ecsDate(),
+        timezone: ecsString(),
+        type: ecsStringMulti(),
+        url: ecsString(),
       })
     ),
-    error: schema.maybe(
+    log: schema.maybe(
       schema.object({
-        message: ecsString(),
+        level: ecsString(),
+        logger: ecsString(),
+      })
+    ),
+    rule: schema.maybe(
+      schema.object({
+        author: ecsStringMulti(),
+        category: ecsString(),
+        description: ecsString(),
+        id: ecsString(),
+        license: ecsString(),
+        name: ecsString(),
+        reference: ecsString(),
+        ruleset: ecsString(),
+        uuid: ecsString(),
+        version: ecsString(),
       })
     ),
     user: schema.maybe(
@@ -59,6 +102,12 @@ export const EventSchema = schema.maybe(
     kibana: schema.maybe(
       schema.object({
         server_uuid: ecsString(),
+        task: schema.maybe(
+          schema.object({
+            scheduled: ecsDate(),
+            schedule_delay: ecsNumber(),
+          })
+        ),
         alerting: schema.maybe(
           schema.object({
             instance_id: ecsString(),
@@ -74,9 +123,11 @@ export const EventSchema = schema.maybe(
               namespace: ecsString(),
               id: ecsString(),
               type: ecsString(),
+              type_id: ecsString(),
             })
           )
         ),
+        version: ecsVersion(),
       })
     ),
   })
@@ -103,4 +154,13 @@ const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 function validateDate(isoDate: string) {
   if (ISO_DATE_PATTERN.test(isoDate)) return;
   return 'string is not a valid ISO date: ' + isoDate;
+}
+
+function ecsVersion() {
+  return schema.maybe(schema.string({ validate: validateVersion }));
+}
+
+function validateVersion(version: string) {
+  if (semver.valid(version)) return;
+  return 'string is not a valid version: ' + version;
 }

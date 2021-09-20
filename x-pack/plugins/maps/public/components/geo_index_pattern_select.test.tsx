@@ -38,6 +38,6 @@ test('should render', async () => {
 
 test('should render no index pattern warning when there are no matching index patterns', async () => {
   const component = shallow(<GeoIndexPatternSelect onChange={() => {}} value={'indexPatternId'} />);
-  component.setState({ noGeoIndexPatternsExist: true });
+  component.setState({ noIndexPatternsExist: true });
   expect(component).toMatchSnapshot();
 });

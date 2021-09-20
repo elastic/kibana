@@ -38,18 +38,18 @@ import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import {
   ELASTICSEARCH_SYSTEM_ID,
-  ALERT_LICENSE_EXPIRATION,
-  ALERT_CLUSTER_HEALTH,
-  ALERT_CPU_USAGE,
-  ALERT_DISK_USAGE,
-  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
-  ALERT_THREAD_POOL_WRITE_REJECTIONS,
-  ALERT_MEMORY_USAGE,
-  ALERT_NODES_CHANGED,
-  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
-  ALERT_MISSING_MONITORING_DATA,
-  ALERT_CCR_READ_EXCEPTIONS,
-  ALERT_LARGE_SHARD_SIZE,
+  RULE_LICENSE_EXPIRATION,
+  RULE_CLUSTER_HEALTH,
+  RULE_CPU_USAGE,
+  RULE_DISK_USAGE,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_MEMORY_USAGE,
+  RULE_NODES_CHANGED,
+  RULE_ELASTICSEARCH_VERSION_MISMATCH,
+  RULE_MISSING_MONITORING_DATA,
+  RULE_CCR_READ_EXCEPTIONS,
+  RULE_LARGE_SHARD_SIZE,
 } from '../../../../common/constants';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
@@ -162,24 +162,24 @@ function renderLog(log) {
   );
 }
 
-const OVERVIEW_PANEL_ALERTS = [
-  ALERT_CLUSTER_HEALTH,
-  ALERT_LICENSE_EXPIRATION,
-  ALERT_CCR_READ_EXCEPTIONS,
+const OVERVIEW_PANEL_RULES = [
+  RULE_CLUSTER_HEALTH,
+  RULE_LICENSE_EXPIRATION,
+  RULE_CCR_READ_EXCEPTIONS,
 ];
 
-const NODES_PANEL_ALERTS = [
-  ALERT_CPU_USAGE,
-  ALERT_DISK_USAGE,
-  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
-  ALERT_THREAD_POOL_WRITE_REJECTIONS,
-  ALERT_MEMORY_USAGE,
-  ALERT_NODES_CHANGED,
-  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
-  ALERT_MISSING_MONITORING_DATA,
+const NODES_PANEL_RULES = [
+  RULE_CPU_USAGE,
+  RULE_DISK_USAGE,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_MEMORY_USAGE,
+  RULE_NODES_CHANGED,
+  RULE_ELASTICSEARCH_VERSION_MISMATCH,
+  RULE_MISSING_MONITORING_DATA,
 ];
 
-const INDICES_PANEL_ALERTS = [ALERT_LARGE_SHARD_SIZE];
+const INDICES_PANEL_RULES = [RULE_LARGE_SHARD_SIZE];
 
 export function ElasticsearchPanel(props) {
   const clusterStats = props.cluster_stats || {};
@@ -286,8 +286,8 @@ export function ElasticsearchPanel(props) {
   };
 
   let nodesAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS, setupModeContext)) {
-    const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_RULES, setupModeContext)) {
+    const alertsList = NODES_PANEL_RULES.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
         <AlertsBadge alerts={alertsList} />
@@ -296,8 +296,8 @@ export function ElasticsearchPanel(props) {
   }
 
   let overviewAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, OVERVIEW_PANEL_ALERTS, setupModeContext)) {
-    const alertsList = OVERVIEW_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+  if (shouldShowAlertBadge(alerts, OVERVIEW_PANEL_RULES, setupModeContext)) {
+    const alertsList = OVERVIEW_PANEL_RULES.map((alertType) => alerts[alertType]);
     overviewAlertStatus = (
       <EuiFlexItem grow={false}>
         <AlertsBadge alerts={alertsList} />
@@ -306,8 +306,8 @@ export function ElasticsearchPanel(props) {
   }
 
   let indicesAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, INDICES_PANEL_ALERTS, setupModeContext)) {
-    const alertsList = INDICES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+  if (shouldShowAlertBadge(alerts, INDICES_PANEL_RULES, setupModeContext)) {
+    const alertsList = INDICES_PANEL_RULES.map((alertType) => alerts[alertType]);
     indicesAlertStatus = (
       <EuiFlexItem grow={false}>
         <AlertsBadge alerts={alertsList} />
@@ -356,7 +356,7 @@ export function ElasticsearchPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 <EuiHealth color={statusColorMap[clusterStats.status]} data-test-subj="statusIcon">
-                  <HealthLabel status={clusterStats.status} />
+                  <HealthLabel status={clusterStats.status} product={'es'} />
                 </EuiHealth>
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle className="eui-textBreakWord">
@@ -424,8 +424,8 @@ export function ElasticsearchPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDiskAvailable">
                 <BytesPercentageUsage
-                  usedBytes={get(nodes, 'fs.available_in_bytes')}
-                  maxBytes={get(nodes, 'fs.total_in_bytes')}
+                  usedBytes={get(nodes, 'fs.available.bytes', get(nodes, 'fs.available_in_bytes'))}
+                  maxBytes={get(nodes, 'fs.total.bytes', get(nodes, 'fs.total_in_bytes'))}
                 />
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle className="eui-textBreakWord">
@@ -437,8 +437,16 @@ export function ElasticsearchPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esJvmHeap">
                 <BytesPercentageUsage
-                  usedBytes={get(nodes, 'jvm.mem.heap_used_in_bytes')}
-                  maxBytes={get(nodes, 'jvm.mem.heap_max_in_bytes')}
+                  usedBytes={get(
+                    nodes,
+                    'jvm.mem.heap.used.bytes',
+                    get(nodes, 'jvm.mem.heap_used_in_bytes')
+                  )}
+                  maxBytes={get(
+                    nodes,
+                    'jvm.mem.heap.max.bytes',
+                    get(nodes, 'jvm.mem.heap_max_in_bytes')
+                  )}
                 />
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
@@ -489,7 +497,7 @@ export function ElasticsearchPanel(props) {
                 data-test-subj="esDocumentsCount"
                 className="eui-textBreakWord"
               >
-                {formatNumber(get(indices, 'docs.count'), 'int_commas')}
+                {formatNumber(get(indices, 'docs.total', get(indices, 'docs.count')), 'int_commas')}
               </EuiDescriptionListDescription>
 
               <EuiDescriptionListTitle className="eui-textBreakWord">
@@ -499,7 +507,10 @@ export function ElasticsearchPanel(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDiskUsage">
-                {formatNumber(get(indices, 'store.size_in_bytes'), 'byte')}
+                {formatNumber(
+                  get(indices, 'store.size.bytes', get(indices, 'store.size_in_bytes')),
+                  'byte'
+                )}
               </EuiDescriptionListDescription>
 
               <EuiDescriptionListTitle className="eui-textBreakWord">

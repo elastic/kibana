@@ -8,29 +8,31 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APMLinkExtendProps, getAPMHref } from './APMLink';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
   latencyAggregationType?: string;
+  transactionType?: string;
 }
 
 export function useTransactionsOverviewHref({
   serviceName,
   latencyAggregationType,
-}: {
-  serviceName: string;
-  latencyAggregationType?: string;
-}) {
+  transactionType,
+}: Props) {
   const { core } = useApmPluginContext();
   const location = useLocation();
   const { search } = location;
 
+  const query = { latencyAggregationType, transactionType };
+
   return getAPMHref({
     basePath: core.http.basePath,
     path: `/services/${serviceName}/transactions`,
-    query: { ...(latencyAggregationType ? { latencyAggregationType } : {}) },
+    query: removeUndefinedProps(query),
     search,
   });
 }
@@ -38,11 +40,13 @@ export function useTransactionsOverviewHref({
 export function TransactionOverviewLink({
   serviceName,
   latencyAggregationType,
+  transactionType,
   ...rest
 }: Props) {
   const href = useTransactionsOverviewHref({
     serviceName,
     latencyAggregationType,
+    transactionType,
   });
   return <EuiLink href={href} {...rest} />;
 }

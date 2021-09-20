@@ -9,7 +9,7 @@
 import { Capabilities } from '../../types/capabilities';
 import { KibanaRequest } from '../http';
 
-export { Capabilities };
+export type { Capabilities };
 
 /**
  * See {@link CapabilitiesSetup}

@@ -6,8 +6,13 @@
  */
 
 import React from 'react';
+/* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
+import '../../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
 import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
-import { uiSettingsServiceMock } from '../../../../../../../../../../src/core/public/mocks';
+import {
+  docLinksServiceMock,
+  uiSettingsServiceMock,
+} from '../../../../../../../../../../src/core/public/mocks';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
 
@@ -24,16 +29,6 @@ jest.mock('@elastic/eui', () => {
         data-currentvalue={props.selectedOptions}
         onChange={async (syntheticEvent: any) => {
           props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
         }}
       />
     ),
@@ -80,10 +75,7 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
 });
 
 const defaultProps = {
-  docLinks: {
-    DOC_LINK_VERSION: 'master',
-    ELASTIC_WEBSITE_URL: 'https://jest.elastic.co',
-  },
+  docLinks: docLinksServiceMock.createStartContract(),
 };
 
 export const WithAppDependencies = (Comp: any) => (props: any) => (

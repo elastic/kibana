@@ -15,8 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Overview Network', () => {
     describe('With filebeat', () => {
-      before(() => esArchiver.load('filebeat/default'));
-      after(() => esArchiver.unload('filebeat/default'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/filebeat/default'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default'));
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -57,8 +57,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('With packetbeat', () => {
-      before(() => esArchiver.load('packetbeat/overview'));
-      after(() => esArchiver.unload('packetbeat/overview'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/overview'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/overview'));
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -99,8 +99,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('With auditbeat', () => {
-      before(() => esArchiver.load('auditbeat/overview'));
-      after(() => esArchiver.unload('auditbeat/overview'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/overview'));
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';

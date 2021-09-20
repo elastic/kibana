@@ -1,48 +1,53 @@
-[[actions-and-connectors-api-update]]
-=== Update action API
+[[update-connector-api]]
+=== Update connector API
 ++++
-<titleabbrev>Update action API</titleabbrev>
+<titleabbrev>Update connector</titleabbrev>
 ++++
 
-Updates the attributes for an existing action.
+Updates the attributes for an existing connector.
 
-[[actions-and-connectors-api-update-request]]
+[[update-connector-api-request]]
 ==== Request
 
-`PUT <kibana host>:<port>/api/actions/action/<id>`
+`PUT <kibana host>:<port>/api/actions/connector/<id>`
 
-[[actions-and-connectors-api-update-params]]
+`PUT <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
+
+[[update-connector-api-params]]
 ==== Path parameters
 
 `id`::
-  (Required, string) The ID of the action.
+  (Required, string) The ID of the connector.
 
-[[actions-and-connectors-api-update-request-body]]
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[update-connector-api-request-body]]
 ==== Request body
 
 `name`::
-  (Required, string) The new name of the action.
+  (Required, string) The new name of the connector.
 
 `config`::
-  (Required, object) The new action configuration. Configuration properties vary depending on the action type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+  (Required, object) The new connector configuration. Configuration properties vary depending on the connector type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
 
 `secrets`::
-  (Required, object) The updated secrets configuration for the action. Secrets properties vary depending on the action type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+  (Required, object) The updated secrets configuration for the connector. Secrets properties vary depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
 
-[[actions-and-connectors-api-update-codes]]
+[[update-connector-api-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[actions-and-connectors-api-update-example]]
+[[update-connector-api-example]]
 ==== Example
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT api/actions/action/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+$ curl -X PUT api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
 {
-  "name": "updated-action",
+  "name": "updated-connector",
   "config": {
     "index": "updated-index"
   }
@@ -56,13 +61,14 @@ The API returns the following:
 --------------------------------------------------
 {
   "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
-  "actionTypeId": ".index",
-  "name": "updated-action",
+  "connector_type_id": ".index",
+  "name": "updated-connector",
   "config": {
     "index": "updated-index",
     "refresh": false,
     "executionTimeField": null
   },
-  "isPreconfigured": false
+  "is_preconfigured": false,
+  "is_missing_secrets": false
 }
 --------------------------------------------------

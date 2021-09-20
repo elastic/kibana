@@ -17,12 +17,9 @@ import {
 export interface InitialAppData {
   readOnlyMode?: boolean;
   ilmEnabled?: boolean;
-  isFederatedAuth?: boolean;
+  searchOAuth?: SearchOAuth;
   configuredLimits?: ConfiguredLimits;
-  access?: {
-    hasAppSearchAccess: boolean;
-    hasWorkplaceSearchAccess: boolean;
-  };
+  access?: ProductAccess;
   appSearch?: AppSearchAccount;
   workplaceSearch?: WorkplaceSearchInitialData;
 }
@@ -30,6 +27,16 @@ export interface InitialAppData {
 export interface ConfiguredLimits {
   appSearch: AppSearchConfiguredLimits;
   workplaceSearch: WorkplaceSearchConfiguredLimits;
+}
+
+export interface ProductAccess {
+  hasAppSearchAccess: boolean;
+  hasWorkplaceSearchAccess: boolean;
+}
+
+export interface SearchOAuth {
+  clientId: string;
+  redirectUrl: string;
 }
 
 export interface MetaPage {

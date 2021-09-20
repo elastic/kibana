@@ -19,8 +19,9 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
       filters: schema.maybe(schema.string()),
       pagination: schema.maybe(schema.string()),
       statusFilter: schema.maybe(schema.string()),
+      query: schema.maybe(schema.string()),
       pageSize: schema.number(),
-      _debug: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   options: {
@@ -34,6 +35,7 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
       pagination,
       statusFilter,
       pageSize,
+      query,
     } = request.query;
 
     const decodedPagination = pagination
@@ -47,6 +49,7 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
       pagination: decodedPagination,
       pageSize,
       filters,
+      query,
       // this is added to make typescript happy,
       // this sort of reassignment used to be further downstream but I've moved it here
       // because this code is going to be decomissioned soon

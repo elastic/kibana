@@ -14,6 +14,13 @@ Object {
       "dateRangeStart": Array [
         "now-15",
       ],
+      "fleet_monitor_frequency": Array [],
+      "fleet_monitor_name_stats": Object {
+        "avg_length": 0,
+        "max_length": 0,
+        "min_length": 0,
+      },
+      "fleet_no_of_unique_monitors": 0,
       "monitor_frequency": Array [],
       "monitor_name_stats": Object {
         "avg_length": 0,
@@ -49,6 +56,13 @@ Object {
       "dateRangeStart": Array [
         "now-15",
       ],
+      "fleet_monitor_frequency": Array [],
+      "fleet_monitor_name_stats": Object {
+        "avg_length": 0,
+        "max_length": 0,
+        "min_length": 0,
+      },
+      "fleet_no_of_unique_monitors": 0,
       "monitor_frequency": Array [],
       "monitor_name_stats": Object {
         "avg_length": 0,

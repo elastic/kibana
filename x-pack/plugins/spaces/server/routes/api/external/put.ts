@@ -6,12 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
-import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
+import type { Space } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
-import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
+import type { ExternalRouteDeps } from './';
 
 export function initPutSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, getSpacesService } = deps;

@@ -16,7 +16,7 @@ import { Query } from 'src/plugins/data/public';
  * @return Object
  */
 
-export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
+export function migrateLegacyQuery(query: Query | { [key: string]: unknown } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
   if (!has(query, 'language')) {
     return { query, language: 'lucene' };

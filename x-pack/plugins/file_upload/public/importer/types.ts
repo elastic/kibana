@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { IngestPipeline, ImportDoc, ImportResponse, Mappings, Settings } from '../../common';
+import {
+  ImportFailure,
+  IngestPipeline,
+  ImportDoc,
+  ImportResponse,
+  Mappings,
+  Settings,
+} from '../../common';
 
 export interface ImportConfig {
   settings: Settings;
@@ -15,7 +22,7 @@ export interface ImportConfig {
 
 export interface ImportResults {
   success: boolean;
-  failures?: any[];
+  failures?: ImportFailure[];
   docCount?: number;
   error?: any;
 }
@@ -44,7 +51,7 @@ export interface IImporter {
   import(
     id: string,
     index: string,
-    pipelineId: string,
+    pipelineId: string | undefined,
     setImportProgress: (progress: number) => void
   ): Promise<ImportResults>;
 }

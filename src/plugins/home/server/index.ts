@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { HomeServerPluginSetup, HomeServerPluginStart } from './plugin';
-export { TutorialProvider } from './services';
-export { SampleDatasetProvider, SampleDataRegistrySetup } from './services';
+export type { HomeServerPluginSetup, HomeServerPluginStart } from './plugin';
+export type { TutorialProvider } from './services';
+export type { SampleDatasetProvider, SampleDataRegistrySetup } from './services';
 import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
 import { HomeServerPlugin } from './plugin';
 import { configSchema, ConfigSchema } from '../config';
@@ -26,4 +26,10 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 export const plugin = (initContext: PluginInitializerContext) => new HomeServerPlugin(initContext);
 
 export { INSTRUCTION_VARIANT } from '../common/instruction_variant';
-export { ArtifactsSchema, TutorialsCategory } from './services/tutorials';
+export { TutorialsCategory } from './services/tutorials';
+export type {
+  ArtifactsSchema,
+  TutorialSchema,
+  InstructionSetSchema,
+  InstructionsSchema,
+} from './services/tutorials';

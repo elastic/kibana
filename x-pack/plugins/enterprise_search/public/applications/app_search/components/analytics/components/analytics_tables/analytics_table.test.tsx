@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '../../../../../__mocks__';
+import '../../../../../__mocks__/kea_logic';
+import '../../../../../__mocks__/react_router';
 import '../../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { EuiBasicTable, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
 
-import { runActionColumnTests } from './shared_columns_tests';
+import { mountWithIntl } from '../../../../../test_helpers';
+
+import { runActionColumnTests } from './test_helpers/shared_columns_tests';
 
 import { AnalyticsTable } from './';
 
@@ -67,6 +70,16 @@ describe('AnalyticsTable', () => {
     expect(tableContent).toContain('10');
     expect(tableContent).toContain('9');
     expect(tableContent).toContain('0');
+  });
+
+  it('renders tag counts instead of tag names if isSmall is passed', () => {
+    const wrapper = mountWithIntl(<AnalyticsTable items={items} isSmall />);
+    const tableContent = wrapper.find(EuiBasicTable).text();
+
+    expect(tableContent).toContain('Analytics tags');
+    expect(tableContent).toContain('1 tag');
+    expect(tableContent).toContain('2 tags');
+    expect(wrapper.find(EuiBadge)).toHaveLength(3);
   });
 
   describe('renders an action column', () => {

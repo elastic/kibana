@@ -6,6 +6,26 @@
  * Side Public License, v 1.
  */
 
-export * from './feature_catalogue';
-export * from './environment';
-export * from './tutorials';
+export { FeatureCatalogueCategory, FeatureCatalogueRegistry } from './feature_catalogue';
+
+export type {
+  FeatureCatalogueEntry,
+  FeatureCatalogueSolution,
+  FeatureCatalogueRegistrySetup,
+} from './feature_catalogue';
+
+export { EnvironmentService } from './environment';
+export type { Environment, EnvironmentServiceSetup } from './environment';
+
+export { TutorialService } from './tutorials';
+
+export type {
+  TutorialVariables,
+  TutorialServiceSetup,
+  TutorialDirectoryNoticeComponent,
+  TutorialDirectoryHeaderLinkComponent,
+  TutorialModuleNoticeComponent,
+} from './tutorials';
+
+export { AddDataService } from './add_data';
+export type { AddDataServiceSetup, AddDataTab } from './add_data';

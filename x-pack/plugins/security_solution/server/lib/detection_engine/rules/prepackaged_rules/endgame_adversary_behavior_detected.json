@@ -1,0 +1,24 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Elastic Endgame detected an Adversary Behavior. Click the Elastic Endgame icon in the event.module column or the link in the rule.reference column for additional information.",
+  "from": "now-15m",
+  "index": [
+    "endgame-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Adversary Behavior - Detected - Elastic Endgame",
+  "query": "event.kind:alert and event.module:endgame and (event.action:rules_engine_event or endgame.event_subtype_full:rules_engine_event)\n",
+  "risk_score": 47,
+  "rule_id": "77a3c3df-8ec4-4da4-b758-878f551dee69",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Elastic Endgame"
+  ],
+  "type": "query",
+  "version": 6
+}

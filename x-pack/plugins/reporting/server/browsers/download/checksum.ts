@@ -7,8 +7,13 @@
 
 import { createHash } from 'crypto';
 import { createReadStream } from 'fs';
+import { Readable } from 'stream';
 
-import { readableEnd } from './util';
+function readableEnd(stream: Readable) {
+  return new Promise((resolve, reject) => {
+    stream.on('error', reject).on('end', resolve);
+  });
+}
 
 export async function md5(path: string) {
   const hash = createHash('md5');

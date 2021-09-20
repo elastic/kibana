@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { agentPolicyStatuses } from '../../constants';
-import { DataType, ValueOf } from '../../types';
-import { PackagePolicy, PackagePolicyPackage } from './package_policy';
-import { Output } from './output';
+import type { agentPolicyStatuses } from '../../constants';
+import type { MonitoringType, ValueOf } from '../../types';
+
+import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
+import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -19,7 +20,9 @@ export interface NewAgentPolicy {
   is_default?: boolean;
   is_default_fleet_server?: boolean; // Optional when creating a policy
   is_managed?: boolean; // Optional when creating a policy
-  monitoring_enabled?: Array<ValueOf<DataType>>;
+  monitoring_enabled?: MonitoringType;
+  unenroll_timeout?: number;
+  is_preconfigured?: boolean;
 }
 
 export interface AgentPolicy extends NewAgentPolicy {
@@ -58,6 +61,16 @@ export interface FullAgentPolicyInput {
   [key: string]: any;
 }
 
+export interface FullAgentPolicyOutputPermissions {
+  [packagePolicyName: string]: {
+    cluster?: string[];
+    indices?: Array<{
+      names: string[];
+      privileges: string[];
+    }>;
+  };
+}
+
 export interface FullAgentPolicy {
   id: string;
   outputs: {
@@ -65,13 +78,21 @@ export interface FullAgentPolicy {
       [key: string]: any;
     };
   };
-  fleet?: {
-    kibana: FullAgentPolicyKibanaConfig;
+  output_permissions?: {
+    [output: string]: FullAgentPolicyOutputPermissions;
   };
+  fleet?:
+    | {
+        hosts: string[];
+      }
+    | {
+        kibana: FullAgentPolicyKibanaConfig;
+      };
   inputs: FullAgentPolicyInput[];
   revision?: number;
   agent?: {
     monitoring: {
+      namespace?: string;
       use_output?: string;
       enabled: boolean;
       metrics: boolean;
@@ -118,4 +139,8 @@ export interface FleetServerPolicy {
    * True when this policy is the default policy to start Fleet Server
    */
   default_fleet_server: boolean;
+  /**
+   * Auto unenroll any Elastic Agents which have not checked in for this many seconds
+   */
+  unenroll_timeout?: number;
 }

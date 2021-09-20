@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaFeature, FeatureKibanaPrivileges } from '../../../../../features/server';
-import { Actions } from '../../actions';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
+import type { Actions } from '../../actions';
 
 export interface FeaturePrivilegeBuilder {
   getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: KibanaFeature): string[];

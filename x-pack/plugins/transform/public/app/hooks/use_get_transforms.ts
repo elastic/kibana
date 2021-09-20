@@ -8,6 +8,7 @@
 import { HttpFetchError } from 'src/core/public';
 
 import {
+  isGetTransformNodesResponseSchema,
   isGetTransformsResponseSchema,
   isGetTransformsStatsResponseSchema,
 } from '../../../common/api_schemas/type_guards';
@@ -22,6 +23,7 @@ export type GetTransforms = (forceRefresh?: boolean) => void;
 
 export const useGetTransforms = (
   setTransforms: React.Dispatch<React.SetStateAction<TransformListRow[]>>,
+  setTransformNodes: React.Dispatch<React.SetStateAction<number>>,
   setErrorMessage: React.Dispatch<React.SetStateAction<HttpFetchError | undefined>>,
   setIsInitialized: React.Dispatch<React.SetStateAction<boolean>>,
   blockRefresh: boolean
@@ -40,17 +42,20 @@ export const useGetTransforms = (
       }
 
       const fetchOptions = { asSystemRequest: true };
+      const transformNodes = await api.getTransformNodes();
       const transformConfigs = await api.getTransforms(fetchOptions);
       const transformStats = await api.getTransformsStats(fetchOptions);
 
       if (
         !isGetTransformsResponseSchema(transformConfigs) ||
-        !isGetTransformsStatsResponseSchema(transformStats)
+        !isGetTransformsStatsResponseSchema(transformStats) ||
+        !isGetTransformNodesResponseSchema(transformNodes)
       ) {
         // An error is followed immediately by setting the state to idle.
         // This way we're able to treat ERROR as a one-time-event like REFRESH.
         refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.ERROR);
         refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.IDLE);
+        setTransformNodes(0);
         setTransforms([]);
 
         setIsInitialized(true);
@@ -86,6 +91,7 @@ export const useGetTransforms = (
         return reducedtableRows;
       }, [] as TransformListRow[]);
 
+      setTransformNodes(transformNodes.count);
       setTransforms(tableRows);
       setErrorMessage(undefined);
       setIsInitialized(true);

@@ -7,15 +7,14 @@
 
 import React from 'react';
 
-import { mount } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { ResultHeaderItem } from './result_header_item';
 
 describe('ResultHeaderItem', () => {
   it('renders', () => {
     const wrapper = mount(<ResultHeaderItem field="id" value="001" type="id" />);
-    expect(wrapper.find('.appSearchResultHeaderItem__key').text()).toEqual('id');
-    expect(wrapper.find('.appSearchResultHeaderItem__value').text()).toEqual('001');
+    expect(wrapper.find('.appSearchResultHeaderItem').text()).toContain('001');
   });
 
   it('will truncate long field names', () => {
@@ -26,7 +25,7 @@ describe('ResultHeaderItem', () => {
         type="string"
       />
     );
-    expect(wrapper.find('.appSearchResultHeaderItem__key').text()).toEqual(
+    expect(wrapper.find('.appSearchResultHeaderItem').text()).toContain(
       'a-really-really-really-really-…'
     );
   });
@@ -35,7 +34,7 @@ describe('ResultHeaderItem', () => {
     const wrapper = mount(
       <ResultHeaderItem field="foo" value="a-really-really-really-really-value" type="string" />
     );
-    expect(wrapper.find('.appSearchResultHeaderItem__value').text()).toEqual(
+    expect(wrapper.find('.appSearchResultHeaderItem').text()).toContain(
       'a-really-really-really-really-…'
     );
   });
@@ -44,18 +43,33 @@ describe('ResultHeaderItem', () => {
     const wrapper = mount(
       <ResultHeaderItem field="foo" value="a-really-really-really-really-value" type="id" />
     );
-    expect(wrapper.find('.appSearchResultHeaderItem__value').text()).toEqual(
+    expect(wrapper.find('.appSearchResultHeaderItem').text()).toContain(
       '…lly-really-really-really-value'
     );
   });
 
   it('will round any numeric values that are passed in to 2 decimals, regardless of the explicit "type" passed', () => {
     const wrapper = mount(<ResultHeaderItem field="foo" value={5.19383718193} type="string" />);
-    expect(wrapper.find('.appSearchResultHeaderItem__value').text()).toEqual('5.19');
+    expect(wrapper.find('.appSearchResultHeaderItem').text()).toContain('5.19');
   });
 
   it('if the value passed in is undefined, it will render "-"', () => {
     const wrapper = mount(<ResultHeaderItem field="foo" type="string" />);
-    expect(wrapper.find('.appSearchResultHeaderItem__value').text()).toEqual('-');
+    expect(wrapper.find('.appSearchResultHeaderItem').text()).toContain('-');
+  });
+
+  it('it will add a "score" class if the "type" passed is "score"', () => {
+    const wrapper = shallow(<ResultHeaderItem field="foo" type="score" />);
+    expect(
+      wrapper.find('.appSearchResultHeaderItem').hasClass('appSearchResultHeaderItem__score')
+    ).toBe(true);
+  });
+
+  it('it will render as a link if an href is passed', () => {
+    const wrapper = shallow(
+      <ResultHeaderItem field="foo" type="score" href="http://www.example.com" />
+    );
+    expect(wrapper.find('EuiLinkTo').exists()).toBe(true);
+    expect(wrapper.find('EuiLinkTo').prop('to')).toBe('http://www.example.com');
   });
 });

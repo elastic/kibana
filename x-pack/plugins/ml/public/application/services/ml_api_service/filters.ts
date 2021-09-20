@@ -11,18 +11,19 @@
 import { http } from '../http_service';
 
 import { basePath } from './index';
+import type { Filter, FilterStats } from '../../../../common/types/filters';
 
 export const filters = {
   filters(obj?: { filterId?: string }) {
     const filterId = obj && obj.filterId ? `/${obj.filterId}` : '';
-    return http<any>({
+    return http<Filter[]>({
       path: `${basePath()}/filters${filterId}`,
       method: 'GET',
     });
   },
 
   filtersStats() {
-    return http<any>({
+    return http<FilterStats[]>({
       path: `${basePath()}/filters/_stats`,
       method: 'GET',
     });
@@ -34,7 +35,7 @@ export const filters = {
       description,
       items,
     });
-    return http<any>({
+    return http<Filter>({
       path: `${basePath()}/filters`,
       method: 'PUT',
       body,
@@ -48,7 +49,7 @@ export const filters = {
       ...(removeItems !== undefined ? { removeItems } : {}),
     });
 
-    return http<any>({
+    return http<Filter>({
       path: `${basePath()}/filters/${filterId}`,
       method: 'PUT',
       body,
@@ -56,7 +57,7 @@ export const filters = {
   },
 
   deleteFilter(filterId: string) {
-    return http<any>({
+    return http<{ acknowledged: boolean }>({
       path: `${basePath()}/filters/${filterId}`,
       method: 'DELETE',
     });

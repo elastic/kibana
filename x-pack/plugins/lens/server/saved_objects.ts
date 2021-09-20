@@ -7,13 +7,14 @@
 
 import { CoreSetup } from 'kibana/server';
 import { getEditPath } from '../common';
-import { migrations } from './migrations';
+import { migrations } from './migrations/saved_object_migrations';
 
 export function setupSavedObjects(core: CoreSetup) {
   core.savedObjects.registerType({
     name: 'lens',
     hidden: false,
-    namespaceType: 'single',
+    namespaceType: 'multiple-isolated',
+    convertToMultiNamespaceTypeVersion: '8.0.0',
     management: {
       icon: 'lensApp',
       defaultSearchField: 'title',

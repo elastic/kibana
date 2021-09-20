@@ -14,4 +14,7 @@ export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema
 
 export { DataEnhancedSetup, DataEnhancedStart };
 
-export { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
+export {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+} from '../../../../src/plugins/data/common';

@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import type { EuiBasicTableProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,13 +17,14 @@ import {
   EuiPanel,
   EuiButtonIcon,
   EuiBasicTable,
-  EuiBasicTableProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { Agent, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../../../../types';
+
+import type { Agent, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../../../../types';
 import { useLink } from '../../../../../hooks';
 import { PackageIcon } from '../../../../../components';
+
 import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
 
 const StyledEuiAccordion = styled(EuiAccordion)`
@@ -99,12 +101,15 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
             })}
           >
             <EuiButtonIcon
-              href={getHref('fleet_agent_details', {
+              href={getHref('agent_details', {
                 agentId: agent.id,
                 tabId: 'logs',
                 logQuery: getLogsQueryByInputType(inputType),
               })}
               iconType="editorAlignLeft"
+              aria-label={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
+                defaultMessage: 'View logs',
+              })}
             />
           </EuiToolTip>
         );

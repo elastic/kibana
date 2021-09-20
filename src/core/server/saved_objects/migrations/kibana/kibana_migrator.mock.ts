@@ -11,6 +11,7 @@ import { buildActiveMappings } from '../core';
 const { mergeTypes } = jest.requireActual('./kibana_migrator');
 import { SavedObjectsType } from '../../types';
 import { BehaviorSubject } from 'rxjs';
+import { ByteSizeValue } from '@kbn/config-schema';
 
 const defaultSavedObjectTypes: SavedObjectsType[] = [
   {
@@ -35,13 +36,15 @@ const createMigrator = (
 ) => {
   const mockMigrator: jest.Mocked<IKibanaMigrator> = {
     kibanaVersion: '8.0.0-testing',
-    savedObjectsConfig: {
+    soMigrationsConfig: {
       batchSize: 100,
+      maxBatchSizeBytes: ByteSizeValue.parse('30kb'),
       scrollDuration: '15m',
       pollInterval: 1500,
       skip: false,
-      // TODO migrationsV2: remove/deprecate once we release migrations v2
+      // TODO migrationsV2: remove/deprecate once we remove migrations v1
       enableV2: false,
+      retryAttempts: 10,
     },
     runMigrations: jest.fn(),
     getActiveMappings: jest.fn(),

@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import '../../../common/mock/match_media';
 import '../../../common/mock/react_beautiful_dnd';
-import { useMatrixHistogram } from '../../../common/containers/matrix_histogram';
+import { useMatrixHistogramCombined } from '../../../common/containers/matrix_histogram';
 import { waitFor } from '@testing-library/react';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
@@ -21,10 +19,9 @@ import { AlertsByCategory } from '.';
 jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/containers/matrix_histogram', () => ({
-  useMatrixHistogram: jest.fn(),
+  useMatrixHistogramCombined: jest.fn(),
 }));
 
-const theme = () => ({ eui: { ...euiDarkVars, euiSizeL: '24px' }, darkMode: true });
 const from = '2020-03-31T06:00:00.000Z';
 const to = '2019-03-31T06:00:00.000Z';
 
@@ -45,7 +42,7 @@ describe('Alerts by category', () => {
   };
   describe('before loading data', () => {
     beforeAll(async () => {
-      (useMatrixHistogram as jest.Mock).mockReturnValue([
+      (useMatrixHistogramCombined as jest.Mock).mockReturnValue([
         false,
         {
           data: null,
@@ -55,11 +52,9 @@ describe('Alerts by category', () => {
       ]);
 
       wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <TestProviders>
-            <AlertsByCategory {...testProps} />
-          </TestProviders>
-        </ThemeProvider>
+        <TestProviders>
+          <AlertsByCategory {...testProps} />
+        </TestProviders>
       );
 
       await waitFor(() => {
@@ -106,7 +101,7 @@ describe('Alerts by category', () => {
 
   describe('after loading data', () => {
     beforeAll(async () => {
-      (useMatrixHistogram as jest.Mock).mockReturnValue([
+      (useMatrixHistogramCombined as jest.Mock).mockReturnValue([
         false,
         {
           data: [
@@ -123,11 +118,9 @@ describe('Alerts by category', () => {
       ]);
 
       wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <TestProviders>
-            <AlertsByCategory {...testProps} />
-          </TestProviders>
-        </ThemeProvider>
+        <TestProviders>
+          <AlertsByCategory {...testProps} />
+        </TestProviders>
       );
 
       wrapper.update();

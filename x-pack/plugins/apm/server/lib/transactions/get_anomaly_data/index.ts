@@ -14,7 +14,7 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { anomalySeriesFetcher } from './fetcher';
 import { getMLJobIds } from '../../service_map/get_service_anomalies';
-import { ANOMALY_THRESHOLD } from '../../../../../ml/common';
+import { ANOMALY_THRESHOLD } from '../../../../common/ml_constants';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getAnomalySeries({
@@ -22,13 +22,15 @@ export async function getAnomalySeries({
   serviceName,
   transactionType,
   transactionName,
+  kuery,
   setup,
   logger,
 }: {
-  environment?: string;
+  environment: string;
   serviceName: string;
   transactionType: string;
   transactionName?: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   logger: Logger;
 }) {
@@ -50,13 +52,8 @@ export async function getAnomalySeries({
     return undefined;
   }
 
-  // Don't fetch anomalies if uiFilters are applied. This filters out anything
-  // with empty values so `kuery: ''` returns false but `kuery: 'x:y'` returns true.
-  const hasUiFiltersApplied =
-    Object.entries(setup.uiFilters).filter(([_key, value]) => !!value).length >
-    0;
-
-  if (hasUiFiltersApplied) {
+  // Don't fetch anomalies if kuery is present
+  if (kuery) {
     return undefined;
   }
 

@@ -6,25 +6,32 @@
  */
 
 import expect from '@kbn/expect';
+import { countBy } from 'lodash';
 import { registry } from '../../../common/registry';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
-  const apmWriteUser = getService('supertestAsApmWriteUser');
+  const apmApiClient = getService('apmApiClient');
+  const legacyWriteUserClient = getService('legacySupertestAsApmWriteUser');
 
   function getJobs() {
-    return apmWriteUser.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
+    return apmApiClient.writeUser({ endpoint: `GET /api/apm/settings/anomaly-detection/jobs` });
   }
 
   function createJobs(environments: string[]) {
-    return apmWriteUser
-      .post(`/api/apm/settings/anomaly-detection/jobs`)
-      .send({ environments })
-      .set('kbn-xsrf', 'foo');
+    return apmApiClient.writeUser({
+      endpoint: `POST /api/apm/settings/anomaly-detection/jobs`,
+      params: {
+        body: { environments },
+      },
+    });
   }
 
   function deleteJobs(jobIds: string[]) {
-    return apmWriteUser.post(`/api/ml/jobs/delete_jobs`).send({ jobIds }).set('kbn-xsrf', 'foo');
+    return legacyWriteUserClient
+      .post(`/api/ml/jobs/delete_jobs`)
+      .send({ jobIds })
+      .set('kbn-xsrf', 'foo');
   }
 
   registry.when('ML jobs', { config: 'trial', archives: [] }, () => {
@@ -49,7 +56,26 @@ export default function apiTest({ getService }: FtrProviderContext) {
 
           const { body } = await getJobs();
           expect(body.hasLegacyJobs).to.be(false);
-          expect(body.jobs.map((job: any) => job.environment)).to.eql(['production', 'staging']);
+          expect(countBy(body.jobs, 'environment')).to.eql({
+            production: 1,
+            staging: 1,
+          });
+        });
+
+        describe('with existing ML jobs', () => {
+          before(async () => {
+            await createJobs(['production', 'staging']);
+          });
+          it('skips duplicate job creation', async () => {
+            await createJobs(['production', 'test']);
+
+            const { body } = await getJobs();
+            expect(countBy(body.jobs, 'environment')).to.eql({
+              production: 1,
+              staging: 1,
+              test: 1,
+            });
+          });
         });
       });
     });

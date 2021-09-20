@@ -6,23 +6,23 @@
  */
 
 import { Subject } from 'rxjs';
-import { ConfigSchema, createConfig } from '../config';
-import { OnlineStatusRetryScheduler } from '../elasticsearch';
-import {
-  SessionManagementService,
-  SESSION_INDEX_CLEANUP_TASK_NAME,
-} from './session_management_service';
-import { Session } from './session';
-import { SessionIndex } from './session_index';
 
 import { nextTick } from '@kbn/test/jest';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '../../../../../src/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+
+import type {
+  TaskManagerStartContract,
+  TaskRunCreatorFunction,
+} from '../../../task_manager/server';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
-import { TaskManagerStartContract, TaskRunCreatorFunction } from '../../../task_manager/server';
+import { ConfigSchema, createConfig } from '../config';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { Session } from './session';
+import { SessionIndex } from './session_index';
+import {
+  SESSION_INDEX_CLEANUP_TASK_NAME,
+  SessionManagementService,
+} from './session_management_service';
 
 describe('SessionManagementService', () => {
   let service: SessionManagementService;

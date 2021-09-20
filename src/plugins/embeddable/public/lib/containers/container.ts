@@ -32,7 +32,7 @@ export abstract class Container<
   extends Embeddable<TContainerInput, TContainerOutput>
   implements IContainer<TChildInput, TContainerInput, TContainerOutput> {
   public readonly isContainer: boolean = true;
-  protected readonly children: {
+  public readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
   } = {};
 
@@ -51,6 +51,22 @@ export abstract class Container<
       .subscribe(([{ panels: prevPanels }, { panels: currentPanels }]) => {
         this.maybeUpdateChildren(currentPanels, prevPanels);
       });
+  }
+
+  public setChildLoaded(embeddable: IEmbeddable) {
+    // make sure the panel wasn't removed in the mean time, since the embeddable creation is async
+    if (!this.input.panels[embeddable.id]) {
+      embeddable.destroy();
+      return;
+    }
+
+    this.children[embeddable.id] = embeddable;
+    this.updateOutput({
+      embeddableLoaded: {
+        ...this.output.embeddableLoaded,
+        [embeddable.id]: true,
+      },
+    } as Partial<TContainerOutput>);
   }
 
   public updateInputForChild<EEI extends EmbeddableInput = EmbeddableInput>(
@@ -307,19 +323,9 @@ export abstract class Container<
     // switch over to inline creation we can probably clean this up, and force EmbeddableFactory.create to always
     // return an embeddable, or throw an error.
     if (embeddable) {
-      // make sure the panel wasn't removed in the mean time, since the embeddable creation is async
-      if (!this.input.panels[panel.explicitInput.id]) {
-        embeddable.destroy();
-        return;
+      if (!embeddable.deferEmbeddableLoad) {
+        this.setChildLoaded(embeddable);
       }
-
-      this.children[embeddable.id] = embeddable;
-      this.updateOutput({
-        embeddableLoaded: {
-          ...this.output.embeddableLoaded,
-          [panel.explicitInput.id]: true,
-        },
-      } as Partial<TContainerOutput>);
     } else if (embeddable === undefined) {
       this.removeEmbeddable(panel.explicitInput.id);
     }

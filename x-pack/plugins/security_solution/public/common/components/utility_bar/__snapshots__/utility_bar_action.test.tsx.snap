@@ -2,6 +2,7 @@
 
 exports[`UtilityBarAction it renders 1`] = `
 <UtilityBarAction
+  dataTestSubj="alert"
   iconType="alert"
 >
   Test action

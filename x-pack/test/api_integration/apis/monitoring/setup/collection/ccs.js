@@ -10,7 +10,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('ccs', () => {
-    const archive = 'monitoring/setup/collection/detect_apm';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/setup/collection/detect_apm';
     const timeRange = {
       min: '2019-04-16T00:00:00.741Z',
       max: '2019-04-16T23:59:59.741Z',

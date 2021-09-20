@@ -8,7 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
-import { getInvalidFieldMessage, getSafeName } from './helpers';
+import {
+  getFormatFromPreviousColumn,
+  getInvalidFieldMessage,
+  getSafeName,
+  getFilter,
+} from './helpers';
 import {
   FormattedIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -27,7 +32,7 @@ type MetricColumn<T> = FormattedIndexPatternColumn &
 const typeToFn: Record<string, string> = {
   min: 'aggMin',
   max: 'aggMax',
-  avg: 'aggAvg',
+  average: 'aggAvg',
   sum: 'aggSum',
   median: 'aggMedian',
 };
@@ -37,6 +42,7 @@ const supportedTypes = ['number', 'histogram'];
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
   displayName,
+  description,
   ofName,
   priority,
   optionalTimeScaling,
@@ -46,19 +52,24 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   ofName: (name: string) => string;
   priority?: number;
   optionalTimeScaling?: boolean;
+  description?: string;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
-    if (!optionalTimeScaling) {
-      return label;
-    }
-    return adjustTimeScaleLabelSuffix(label, undefined, column?.timeScale);
+    return adjustTimeScaleLabelSuffix(
+      label,
+      undefined,
+      optionalTimeScaling ? column?.timeScale : undefined,
+      undefined,
+      column?.timeShift
+    );
   };
 
   return {
     type,
     priority,
     displayName,
+    description,
     input: 'field',
     timeScalingMode: optionalTimeScaling ? 'optional' : undefined,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
@@ -76,7 +87,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     },
     isTransferable: (column, newIndexPattern) => {
       const newField = newIndexPattern.getFieldByName(column.sourceField);
-
       return Boolean(
         newField &&
           supportedTypes.includes(newField.type) &&
@@ -90,8 +100,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         : (layer.columns[thisColumnId] as T),
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
-    buildColumn: ({ field, previousColumn }) =>
-      ({
+    buildColumn: ({ field, previousColumn }, columnParams) => {
+      return {
         label: labelLookup(field.displayName, previousColumn),
         dataType: 'number',
         operationType: type,
@@ -99,11 +109,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         isBucketed: false,
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
-        params:
-          previousColumn && previousColumn.dataType === 'number'
-            ? previousColumn.params
-            : undefined,
-      } as T),
+        filter: getFilter(previousColumn, columnParams),
+        timeShift: columnParams?.shift || previousColumn?.timeShift,
+        params: getFormatFromPreviousColumn(previousColumn),
+      } as T;
+    },
     onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,
@@ -117,15 +127,39 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         enabled: true,
         schema: 'metric',
         field: column.sourceField,
+        // time shift is added to wrapping aggFilteredMetric if filter is set
+        timeShift: column.filter ? undefined : column.timeShift,
       }).toAst();
     },
     getErrorMessage: (layer, columnId, indexPattern) =>
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    filterable: true,
+    documentation: {
+      section: 'elasticsearch',
+      signature: i18n.translate('xpack.lens.indexPattern.metric.signature', {
+        defaultMessage: 'field: string',
+      }),
+      description: i18n.translate('xpack.lens.indexPattern.metric.documentation.markdown', {
+        defaultMessage: `
+Returns the {metric} of a field. This function only works for number fields.
+
+Example: Get the {metric} of price:
+\`{metric}(price)\`
+
+Example: Get the {metric} of price for orders from the UK:
+\`{metric}(price, kql='location:UK')\`
+      `,
+        values: {
+          metric: type,
+        },
+      }),
+    },
+    shiftable: true,
   } as OperationDefinition<T, 'field'>;
 }
 
 export type SumIndexPatternColumn = MetricColumn<'sum'>;
-export type AvgIndexPatternColumn = MetricColumn<'avg'>;
+export type AvgIndexPatternColumn = MetricColumn<'average'>;
 export type MinIndexPatternColumn = MetricColumn<'min'>;
 export type MaxIndexPatternColumn = MetricColumn<'max'>;
 export type MedianIndexPatternColumn = MetricColumn<'median'>;
@@ -140,6 +174,10 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
       defaultMessage: 'Minimum of {name}',
       values: { name },
     }),
+  description: i18n.translate('xpack.lens.indexPattern.min.description', {
+    defaultMessage:
+      'A single-value metrics aggregation that returns the minimum value among the numeric values extracted from the aggregated documents.',
+  }),
 });
 
 export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
@@ -152,10 +190,14 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
       defaultMessage: 'Maximum of {name}',
       values: { name },
     }),
+  description: i18n.translate('xpack.lens.indexPattern.max.description', {
+    defaultMessage:
+      'A single-value metrics aggregation that returns the maximum value among the numeric values extracted from the aggregated documents.',
+  }),
 });
 
 export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
-  type: 'avg',
+  type: 'average',
   priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.avg', {
     defaultMessage: 'Average',
@@ -165,6 +207,10 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
       defaultMessage: 'Average of {name}',
       values: { name },
     }),
+  description: i18n.translate('xpack.lens.indexPattern.avg.description', {
+    defaultMessage:
+      'A single-value metric aggregation that computes the average of numeric values that are extracted from the aggregated documents',
+  }),
 });
 
 export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
@@ -179,6 +225,10 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
       values: { name },
     }),
   optionalTimeScaling: true,
+  description: i18n.translate('xpack.lens.indexPattern.sum.description', {
+    defaultMessage:
+      'A single-value metrics aggregation that sums up numeric values that are extracted from the aggregated documents.',
+  }),
 });
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
@@ -192,4 +242,8 @@ export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
       defaultMessage: 'Median of {name}',
       values: { name },
     }),
+  description: i18n.translate('xpack.lens.indexPattern.median.description', {
+    defaultMessage:
+      'A single-value metrics aggregation that computes the median value that are extracted from the aggregated documents.',
+  }),
 });

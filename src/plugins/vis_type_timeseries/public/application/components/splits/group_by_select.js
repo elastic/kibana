@@ -61,6 +61,7 @@ function GroupBySelectUi(props) {
       selectedOptions={[selectedOption]}
       onChange={props.onChange}
       singleSelection={{ asPlainText: true }}
+      data-test-subj="groupBySelect"
     />
   );
 }

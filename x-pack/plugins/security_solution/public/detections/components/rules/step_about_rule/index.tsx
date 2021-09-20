@@ -41,7 +41,7 @@ import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
-import { DEFAULT_INDICATOR_PATH } from '../../../../../common/constants';
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -310,7 +310,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                     euiFieldProps: {
                       fullWidth: true,
                       disabled: isLoading,
-                      placeholder: DEFAULT_INDICATOR_PATH,
+                      placeholder: DEFAULT_INDICATOR_SOURCE_PATH,
                     },
                   }}
                 />

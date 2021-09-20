@@ -48,7 +48,7 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
   if (!esQuery) {
     errors.esQuery.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredQueryText', {
-        defaultMessage: 'ES query is required.',
+        defaultMessage: 'Elasticsearch query is required.',
       })
     );
   } else {

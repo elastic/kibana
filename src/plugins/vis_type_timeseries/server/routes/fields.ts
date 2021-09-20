@@ -11,9 +11,10 @@ import { schema } from '@kbn/config-schema';
 import { getFields } from '../lib/get_fields';
 import { Framework } from '../plugin';
 import { ROUTES } from '../../common/constants';
+import { VisTypeTimeseriesRouter } from '../types';
 
-export const fieldsRoutes = (framework: Framework) => {
-  framework.router.get(
+export const fieldsRoutes = (router: VisTypeTimeseriesRouter, framework: Framework) => {
+  router.get<{}, { index: string }, {}>(
     {
       path: ROUTES.FIELDS,
       validate: {

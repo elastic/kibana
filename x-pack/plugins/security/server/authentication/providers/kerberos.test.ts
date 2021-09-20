@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import type { KibanaRequest, ScopeableRequest } from 'src/core/server';
+import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
-import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
-
-import { KibanaRequest, ScopeableRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import type { MockAuthenticationProviderOptions } from './base.mock';
+import { mockAuthenticationProviderOptions } from './base.mock';
 import { KerberosAuthenticationProvider } from './kerberos';
 
 function expectAuthenticateCall(
@@ -45,7 +46,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-        securityMock.createApiResponse({ body: {} })
+        securityMock.createApiResponse({ body: mockAuthenticatedUser() })
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -121,6 +122,7 @@ describe('KerberosAuthenticationProvider', () => {
       });
 
       mockOptions.client.asInternalUser.security.getToken.mockResolvedValue(
+        // @ts-expect-error not full interface
         securityMock.createApiResponse({
           body: {
             access_token: 'some-token',
@@ -155,6 +157,7 @@ describe('KerberosAuthenticationProvider', () => {
       });
 
       mockOptions.client.asInternalUser.security.getToken.mockResolvedValue(
+        // @ts-expect-error not full interface
         securityMock.createApiResponse({
           body: {
             access_token: 'some-token',

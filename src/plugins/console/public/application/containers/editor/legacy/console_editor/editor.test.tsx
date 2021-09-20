@@ -27,7 +27,7 @@ import {
 // Mocked functions
 import { sendRequestToES } from '../../../../hooks/use_send_current_request_to_es/send_request_to_es';
 import { getEndpointFromPosition } from '../../../../../lib/autocomplete/get_endpoint_from_position';
-
+import type { DevToolsSettings } from '../../../../../services';
 import * as consoleMenuActions from '../console_menu_actions';
 import { Editor } from './editor';
 
@@ -40,7 +40,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
       <I18nProvider>
         <ServicesContextProvider value={mockedAppContextValue}>
           <RequestContextProvider>
-            <EditorContextProvider settings={{} as any}>
+            <EditorContextProvider settings={({} as unknown) as DevToolsSettings}>
               <Editor initialTextValue="" />
             </EditorContextProvider>
           </RequestContextProvider>

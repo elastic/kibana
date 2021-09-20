@@ -27,9 +27,12 @@ function main() {
   const ecsMappings = readEcsJSONFile(ecsDir, ECS_MAPPINGS_FILE);
 
   // add our custom fields
-  ecsMappings.mappings.properties.kibana = mappings.EcsKibanaExtensionsMappings;
+  ecsMappings.mappings.properties = {
+    ...ecsMappings.mappings.properties,
+    ...mappings.EcsCustomPropertyMappings,
+  };
 
-  const exportedProperties = mappings.EcsEventLogProperties;
+  const exportedProperties = mappings.EcsPropertiesToGenerate;
   const multiValuedProperties = new Set(mappings.EcsEventLogMultiValuedProperties);
 
   augmentMappings(ecsMappings.mappings, multiValuedProperties);
@@ -144,6 +147,11 @@ function generateSchemaLines(lineWriter, prop, mappings) {
 
   if (mappings.type === 'date') {
     lineWriter.addLine(`${propKey}: ecsDate(),`);
+    return;
+  }
+
+  if (mappings.type === 'version') {
+    lineWriter.addLine(`${propKey}: ecsVersion(),`);
     return;
   }
 
@@ -275,6 +283,7 @@ const SchemaFileTemplate = `
 // the event log
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import semver from 'semver';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 type DeepPartial<T> = {
@@ -310,6 +319,15 @@ const ISO_DATE_PATTERN = /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/
 function validateDate(isoDate: string) {
   if (ISO_DATE_PATTERN.test(isoDate)) return;
   return 'string is not a valid ISO date: ' + isoDate;
+}
+
+function ecsVersion() {
+  return schema.maybe(schema.string({ validate: validateVersion }));
+}
+
+function validateVersion(version: string) {
+  if (semver.valid(version)) return;
+  return 'string is not a valid version: ' + version;
 }
 `.trim();
 

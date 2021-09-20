@@ -1,17 +1,18 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true
   },
   "include": [
+    "__jest__/**/*",
     "common/**/*",
     "fixtures/**/*",
     "public/**/*",
     "server/**/*",
+    "../../../typings/**/*",
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },

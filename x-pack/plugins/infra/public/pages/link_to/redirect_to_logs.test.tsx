@@ -20,7 +20,7 @@ describe('RedirectToLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/stream?sourceId=default&logPosition=(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)&logFilter=(expression:'',kind:kuery)"
+        to="/stream?sourceId=default&logPosition=(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)&logFilter=(language:kuery,query:'')"
       />
     `);
   });
@@ -34,7 +34,7 @@ describe('RedirectToLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/stream?sourceId=default&logPosition=(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)&logFilter=(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)"
+        to="/stream?sourceId=default&logPosition=(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)&logFilter=(language:kuery,query:'FILTER_FIELD:FILTER_VALUE')"
       />
     `);
   });
@@ -46,7 +46,7 @@ describe('RedirectToLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/stream?sourceId=SOME-OTHER-SOURCE&logFilter=(expression:'',kind:kuery)"
+        to="/stream?sourceId=SOME-OTHER-SOURCE&logFilter=(language:kuery,query:'')"
       />
     `);
   });

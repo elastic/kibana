@@ -39,11 +39,15 @@ import { LocalizedDateTooltip } from '../../../../../common/components/localized
 import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { TagsDisplay } from './tag_display';
+import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
+import { APP_ID, SecurityPageName } from '../../../../../../common/constants';
+import { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
 
 export const getActions = (
   dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>,
   reFetchRules: () => Promise<void>,
   refetchPrePackagedRulesStatus: () => Promise<void>,
   actionsPrivileges:
@@ -63,10 +67,11 @@ export const getActions = (
       i18n.EDIT_RULE_SETTINGS
     ),
     icon: 'controlsHorizontal',
-    onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
+    onClick: (rowItem: Rule) => editRuleAction(rowItem.id, navigateToApp),
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
   },
   {
+    'data-test-subj': 'duplicateRuleAction',
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
     name: !actionsPrivileges ? (
@@ -78,9 +83,15 @@ export const getActions = (
     ),
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: Rule) => {
-      await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
-      await reFetchRules();
-      await refetchPrePackagedRulesStatus();
+      const createdRules = await duplicateRulesAction(
+        [rowItem],
+        [rowItem.id],
+        dispatch,
+        dispatchToaster
+      );
+      if (createdRules?.length) {
+        editRuleAction(createdRules[0].id, navigateToApp);
+      }
     },
   },
   {
@@ -88,7 +99,7 @@ export const getActions = (
     description: i18n.EXPORT_RULE,
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
-    onClick: (rowItem: Rule) => exportRulesAction([rowItem.rule_id], dispatch),
+    onClick: (rowItem: Rule) => exportRulesAction([rowItem.rule_id], dispatch, dispatchToaster),
     enabled: (rowItem: Rule) => !rowItem.immutable,
   },
   {
@@ -117,8 +128,9 @@ interface GetColumns {
   formatUrl: FormatUrl;
   history: H.History;
   hasMlPermissions: boolean;
-  hasNoPermissions: boolean;
+  hasPermissions: boolean;
   loadingRuleIds: string[];
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   reFetchRules: () => Promise<void>;
   refetchPrePackagedRulesStatus: () => Promise<void>;
   hasReadActionsPrivileges:
@@ -134,8 +146,9 @@ export const getColumns = ({
   formatUrl,
   history,
   hasMlPermissions,
-  hasNoPermissions,
+  hasPermissions,
   loadingRuleIds,
+  navigateToApp,
   reFetchRules,
   refetchPrePackagedRulesStatus,
   hasReadActionsPrivileges,
@@ -149,7 +162,10 @@ export const getColumns = ({
           data-test-subj="ruleName"
           onClick={(ev: { preventDefault: () => void }) => {
             ev.preventDefault();
-            history.push(getRuleDetailsUrl(item.id));
+            navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.rules,
+              path: getRuleDetailsUrl(item.id),
+            });
           }}
           href={formatUrl(getRuleDetailsUrl(item.id))}
         >
@@ -200,7 +216,7 @@ export const getColumns = ({
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {getRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );
@@ -267,7 +283,7 @@ export const getColumns = ({
             enabled={item.enabled}
             isDisabled={
               !canEditRuleWithActions(item, hasReadActionsPrivileges) ||
-              hasNoPermissions ||
+              !hasPermissions ||
               (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
             }
             isLoading={loadingRuleIds.includes(item.id)}
@@ -284,6 +300,7 @@ export const getColumns = ({
         dispatch,
         dispatchToaster,
         history,
+        navigateToApp,
         reFetchRules,
         refetchPrePackagedRulesStatus,
         hasReadActionsPrivileges
@@ -292,11 +309,11 @@ export const getColumns = ({
     } as EuiTableActionsColumnType<Rule>,
   ];
 
-  return hasNoPermissions ? cols : [...cols, ...actions];
+  return hasPermissions ? [...cols, ...actions] : cols;
 };
 
 export const getMonitoringColumns = (
-  history: H.History,
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>,
   formatUrl: FormatUrl
 ): RulesStatusesColumns[] => {
   const cols: RulesStatusesColumns[] = [
@@ -309,7 +326,10 @@ export const getMonitoringColumns = (
             data-test-subj="ruleName"
             onClick={(ev: { preventDefault: () => void }) => {
               ev.preventDefault();
-              history.push(getRuleDetailsUrl(item.id));
+              navigateToApp(APP_ID, {
+                deepLinkId: SecurityPageName.rules,
+                path: getRuleDetailsUrl(item.id),
+              });
             }}
             href={formatUrl(getRuleDetailsUrl(item.id))}
           >
@@ -361,20 +381,6 @@ export const getMonitoringColumns = (
       truncateText: true,
       width: '14%',
     },
-    // hiding this field until after 7.11 release
-    // {
-    //   field: 'current_status.last_look_back_date',
-    //   name: i18n.COLUMN_LAST_LOOKBACK_DATE,
-    //   render: (value: RuleStatus['current_status']['last_look_back_date']) => {
-    //     return value == null ? (
-    //       getEmptyTagValue()
-    //     ) : (
-    //       <FormattedDate value={value} fieldName={'last look back date'} />
-    //     );
-    //   },
-    //   truncateText: true,
-    //   width: '16%',
-    // },
     {
       field: 'current_status.status_date',
       name: i18n.COLUMN_LAST_COMPLETE_RUN,
@@ -397,7 +403,7 @@ export const getMonitoringColumns = (
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {getRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );

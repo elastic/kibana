@@ -40,7 +40,7 @@ const TeamsParamsFields: React.FunctionComponent<ActionParamsProps<TeamsActionPa
           defaultMessage: 'Message',
         }
       )}
-      errors={errors.message as string[]}
+      errors={(errors.message ?? []) as string[]}
     />
   );
 };

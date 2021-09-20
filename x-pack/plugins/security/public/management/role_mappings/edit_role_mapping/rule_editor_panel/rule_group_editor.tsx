@@ -7,20 +7,22 @@
 
 import './rule_group_editor.scss';
 
-import React, { Component, Fragment } from 'react';
 import {
-  EuiPanel,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiButtonEmpty,
+  EuiPanel,
 } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AddRuleButton } from './add_rule_button';
-import { RuleGroupTitle } from './rule_group_title';
-import { FieldRuleEditor } from './field_rule_editor';
-import { RuleGroup, Rule, FieldRule } from '../../model';
+
+import type { FieldRule, Rule, RuleGroup } from '../../model';
 import { isRuleGroup } from '../services/is_rule_group';
+import { AddRuleButton } from './add_rule_button';
+import { FieldRuleEditor } from './field_rule_editor';
+import { RuleGroupTitle } from './rule_group_title';
 
 interface Props {
   rule: RuleGroup;
@@ -35,6 +37,8 @@ export class RuleGroupEditor extends Component<Props, {}> {
     return (
       <EuiPanel
         className={`secRoleMapping__ruleEditorGroup--${this.props.ruleDepth % 2 ? 'odd' : 'even'}`}
+        hasBorder={true}
+        hasShadow={false}
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem>

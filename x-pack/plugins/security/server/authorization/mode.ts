@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../src/core/server';
-import { SecurityLicense } from '../../common/licensing';
+import type { KibanaRequest } from 'src/core/server';
+
+import type { SecurityLicense } from '../../common/licensing';
 
 export interface AuthorizationMode {
   useRbacForRequest(request: KibanaRequest): boolean;

@@ -17,9 +17,8 @@ describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(
       <TransformList
-        errorMessage={undefined}
-        isInitialized={true}
         onCreateTransform={jest.fn()}
+        transformNodes={1}
         transforms={[]}
         transformsLoading={false}
       />

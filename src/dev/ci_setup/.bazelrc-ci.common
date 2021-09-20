@@ -6,3 +6,6 @@ build --noshow_progress
 
 # More details on failures
 build --verbose_failures=true
+
+## Avoid to keep connections to build event backend connections alive across builds
+build --keep_backend_build_event_connections_alive=false

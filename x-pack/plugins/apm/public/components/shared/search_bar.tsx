@@ -5,59 +5,94 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import {
+  EuiFlexGroup,
+  EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
-import { px, unit } from '../../style/variables';
+import { useBreakpoints } from '../../hooks/use_breakpoints';
 import { DatePicker } from './DatePicker';
-import { KueryBar } from './KueryBar';
+import { KueryBar } from './kuery_bar';
 import { TimeComparison } from './time_comparison';
-import { useBreakPoints } from '../../hooks/use_break_points';
-
-const SearchBarFlexGroup = euiStyled(EuiFlexGroup)`
-  margin: ${({ theme }) =>
-    `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeS}`};
-`;
+import { TransactionTypeSelect } from './transaction_type_select';
 
 interface Props {
-  prepend?: React.ReactNode | string;
+  hidden?: boolean;
+  showKueryBar?: boolean;
   showTimeComparison?: boolean;
-  showCorrelations?: boolean;
-}
-
-function getRowDirection(showColumn: boolean) {
-  return showColumn ? 'column' : 'row';
+  showTransactionTypeSelector?: boolean;
+  kueryBarPlaceholder?: string;
+  kueryBarBoolFilter?: QueryDslQueryContainer[];
 }
 
 export function SearchBar({
-  prepend,
+  hidden = false,
+  showKueryBar = true,
   showTimeComparison = false,
-  showCorrelations = false,
+  showTransactionTypeSelector = false,
+  kueryBarBoolFilter,
+  kueryBarPlaceholder,
 }: Props) {
-  const { isMedium, isLarge } = useBreakPoints();
-  const itemsStyle = { marginBottom: isLarge ? px(unit) : 0 };
+  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakpoints();
+
+  if (hidden) {
+    return null;
+  }
+
+  const searchBarDirection: EuiFlexGroupProps['direction'] =
+    isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
 
   return (
-    <SearchBarFlexGroup gutterSize="m" direction={getRowDirection(isLarge)}>
-      <EuiFlexItem>
-        <KueryBar prepend={prepend} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          gutterSize="s"
-          direction={getRowDirection(isMedium)}
-        >
-          {showTimeComparison && (
-            <EuiFlexItem style={{ ...itemsStyle, minWidth: px(300) }}>
-              <TimeComparison />
+    <>
+      <EuiFlexGroup
+        gutterSize="s"
+        responsive={false}
+        direction={searchBarDirection}
+      >
+        <EuiFlexItem>
+          <EuiFlexGroup
+            direction={isLarge ? 'columnReverse' : 'row'}
+            gutterSize="s"
+            responsive={false}
+          >
+            {showTransactionTypeSelector && (
+              <EuiFlexItem grow={false}>
+                <TransactionTypeSelect />
+              </EuiFlexItem>
+            )}
+
+            {showKueryBar && (
+              <EuiFlexItem>
+                <KueryBar
+                  placeholder={kueryBarPlaceholder}
+                  boolFilter={kueryBarBoolFilter}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={showTimeComparison && !isXXXL}>
+          <EuiFlexGroup
+            direction={isSmall || isMedium || isLarge ? 'columnReverse' : 'row'}
+            justifyContent={isXXL ? 'flexEnd' : undefined}
+            gutterSize="s"
+            responsive={false}
+          >
+            {showTimeComparison && (
+              <EuiFlexItem grow={isXXXL} style={{ minWidth: 300 }}>
+                <TimeComparison />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <DatePicker />
             </EuiFlexItem>
-          )}
-          <EuiFlexItem style={itemsStyle}>
-            <DatePicker />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </SearchBarFlexGroup>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+    </>
   );
 }

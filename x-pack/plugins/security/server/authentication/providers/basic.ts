@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../../src/core/server';
+import type { KibanaRequest } from 'src/core/server';
+
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
-import { canRedirectRequest } from '../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
+import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
 import {
-  HTTPAuthorizationHeader,
   BasicHTTPAuthorizationHeaderCredentials,
+  HTTPAuthorizationHeader,
 } from '../http_authentication';
 import { BaseAuthenticationProvider } from './base';
 

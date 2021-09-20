@@ -9,7 +9,8 @@
     "licensing",
     "management",
     "features",
-    "savedObjects"
+    "savedObjects",
+    "share"
   ],
   "optionalPlugins": [
     "security",
@@ -22,5 +23,10 @@
     "kibanaUtils",
     "kibanaReact",
     "ml"
-  ]
+  ],
+  "owner": {
+    "name": "Machine Learning UI",
+    "githubTeam": "ml-ui"
+  },
+  "description": "This plugin provides access to the transforms features provided by Elastic. Transforms enable you to convert existing Elasticsearch indices into summarized indices, which provide opportunities for new insights and analytics."
 }

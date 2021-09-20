@@ -1,6 +1,7 @@
 .lnsVisualizationContainer {
   @include euiScrollBar;
   overflow: auto;
+  user-select: text;
 }
 
 .lnsExpressionRenderer {
@@ -22,4 +23,8 @@
   align-items: center;
   justify-content: center;
   overflow: auto;
+}
+
+.lnsSelectableErrorMessage {
+  user-select: text;
 }

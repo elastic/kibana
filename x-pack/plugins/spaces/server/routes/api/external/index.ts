@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup } from 'src/core/server';
+import type { CoreSetup, Logger } from 'src/core/server';
+
+import type { SpacesServiceStart } from '../../../spaces_service';
+import type { SpacesRouter } from '../../../types';
+import type { UsageStatsServiceSetup } from '../../../usage_stats';
+import { initCopyToSpacesApi } from './copy_to_space';
 import { initDeleteSpacesApi } from './delete';
+import { initDisableLegacyUrlAliasesApi } from './disable_legacy_url_aliases';
 import { initGetSpaceApi } from './get';
 import { initGetAllSpacesApi } from './get_all';
+import { initGetShareableReferencesApi } from './get_shareable_references';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
-import { SpacesServiceStart } from '../../../spaces_service';
-import { UsageStatsServiceSetup } from '../../../usage_stats';
-import { initCopyToSpacesApi } from './copy_to_space';
-import { initShareToSpacesApi } from './share_to_space';
-import type { SpacesRouter } from '../../../types';
+import { initUpdateObjectsSpacesApi } from './update_objects_spaces';
 
 export interface ExternalRouteDeps {
   externalRouter: SpacesRouter;
@@ -32,5 +35,7 @@ export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   initPostSpacesApi(deps);
   initPutSpacesApi(deps);
   initCopyToSpacesApi(deps);
-  initShareToSpacesApi(deps);
+  initUpdateObjectsSpacesApi(deps);
+  initGetShareableReferencesApi(deps);
+  initDisableLegacyUrlAliasesApi(deps);
 }

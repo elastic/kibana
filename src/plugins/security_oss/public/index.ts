@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import type { PluginInitializerContext } from 'src/core/public';
 
 import { SecurityOssPlugin } from './plugin';
 
 export { SecurityOssPluginSetup, SecurityOssPluginStart } from './plugin';
+
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SecurityOssPlugin(initializerContext);

@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiFormFieldset,
-  EuiTitle,
   EuiCheckableCard,
-  EuiRadioGroup,
-  EuiText,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormFieldset,
   EuiIconTip,
+  EuiRadioGroup,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 
 export interface CopyModeControlProps {

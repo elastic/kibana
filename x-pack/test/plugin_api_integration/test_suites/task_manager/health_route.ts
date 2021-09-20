@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import { keyBy, mapValues } from 'lodash';
-import supertestAsPromised from 'supertest-as-promised';
+import supertest from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
@@ -27,7 +27,14 @@ interface MonitoringStats {
         task_types: Record<string, object>;
         schedule: Array<[string, number]>;
         overdue: number;
+        non_recurring: number;
+        owner_ids: number;
         estimated_schedule_density: number[];
+        capacity_requirements: {
+          per_minute: number;
+          per_hour: number;
+          per_day: number;
+        };
       };
     };
     runtime: {
@@ -38,6 +45,7 @@ interface MonitoringStats {
         load: Record<string, object>;
         execution: {
           duration: Record<string, Record<string, object>>;
+          persistence: Record<string, number>;
           result_frequency_percent_as_number: Record<string, Record<string, object>>;
         };
         polling: {
@@ -49,16 +57,37 @@ interface MonitoringStats {
         };
       };
     };
+    capacity_estimation: {
+      timestamp: string;
+      value: {
+        observed: {
+          observed_kibana_instances: number;
+          max_throughput_per_minute: number;
+          max_throughput_per_minute_per_kibana: number;
+          minutes_to_drain_overdue: number;
+          avg_required_throughput_per_minute: number;
+          avg_required_throughput_per_minute_per_kibana: number;
+          avg_recurring_required_throughput_per_minute: number;
+          avg_recurring_required_throughput_per_minute_per_kibana: number;
+        };
+        proposed: {
+          min_required_kibana: number;
+          avg_recurring_required_throughput_per_minute_per_kibana: number;
+          avg_required_throughput_per_minute: number;
+          avg_required_throughput_per_minute_per_kibana: number;
+        };
+      };
+    };
   };
 }
 
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
   const retry = getService('retry');
-  const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
+  const request = supertest(url.format(config.get('servers.kibana')));
 
   function getHealthRequest() {
-    return supertest.get('/api/task_manager/_health').set('kbn-xsrf', 'foo');
+    return request.get('/api/task_manager/_health').set('kbn-xsrf', 'foo');
   }
 
   function getHealth(): Promise<MonitoringStats> {
@@ -68,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   function scheduleTask(task: Partial<ConcreteTaskInstance>): Promise<ConcreteTaskInstance> {
-    return supertest
+    return request
       .post('/api/sample_tasks/schedule')
       .set('kbn-xsrf', 'xxx')
       .send({ task })
@@ -156,10 +185,42 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return a breakdown of idleTasks in the task manager workload', async () => {
       const {
+        capacity_estimation: {
+          value: { observed, proposed },
+        },
+      } = (await getHealth()).stats;
+
+      expect(typeof observed.observed_kibana_instances).to.eql('number');
+      expect(typeof observed.max_throughput_per_minute).to.eql('number');
+      expect(typeof observed.max_throughput_per_minute_per_kibana).to.eql('number');
+      expect(typeof observed.minutes_to_drain_overdue).to.eql('number');
+      expect(typeof observed.avg_required_throughput_per_minute).to.eql('number');
+      expect(typeof observed.avg_required_throughput_per_minute_per_kibana).to.eql('number');
+      expect(typeof observed.avg_recurring_required_throughput_per_minute).to.eql('number');
+      expect(typeof observed.avg_recurring_required_throughput_per_minute_per_kibana).to.eql(
+        'number'
+      );
+
+      expect(typeof proposed.min_required_kibana).to.eql('number');
+      expect(typeof proposed.avg_recurring_required_throughput_per_minute_per_kibana).to.eql(
+        'number'
+      );
+      expect(typeof proposed.avg_required_throughput_per_minute_per_kibana).to.eql('number');
+    });
+
+    it('should return an estimation of task manager capacity', async () => {
+      const {
         workload: { value: workload },
       } = (await getHealth()).stats;
 
       expect(typeof workload.overdue).to.eql('number');
+
+      expect(typeof workload.non_recurring).to.eql('number');
+      expect(typeof workload.owner_ids).to.eql('number');
+
+      expect(typeof workload.capacity_requirements.per_minute).to.eql('number');
+      expect(typeof workload.capacity_requirements.per_hour).to.eql('number');
+      expect(typeof workload.capacity_requirements.per_day).to.eql('number');
 
       expect(Array.isArray(workload.estimated_schedule_density)).to.eql(true);
 
@@ -219,6 +280,10 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof execution.duration.sampleTask.p90).to.eql('number');
       expect(typeof execution.duration.sampleTask.p95).to.eql('number');
       expect(typeof execution.duration.sampleTask.p99).to.eql('number');
+
+      expect(typeof execution.persistence.ephemeral).to.eql('number');
+      expect(typeof execution.persistence.non_recurring).to.eql('number');
+      expect(typeof execution.persistence.recurring).to.eql('number');
 
       expect(typeof execution.result_frequency_percent_as_number.sampleTask.Success).to.eql(
         'number'

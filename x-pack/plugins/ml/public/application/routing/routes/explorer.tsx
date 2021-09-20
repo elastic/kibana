@@ -26,7 +26,6 @@ import { useExplorerData } from '../../explorer/actions';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
-import { useShowCharts } from '../../components/controls/checkbox_showcharts';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 import { useUrlState } from '../../util/url_state';
@@ -37,6 +36,7 @@ import { JOB_ID } from '../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { useExplorerUrlState } from '../../explorer/hooks/use_explorer_url_state';
+import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -84,6 +84,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [lastRefresh, setLastRefresh] = useState(0);
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
+
+  const timeBuckets = useTimeBuckets();
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);
@@ -105,6 +107,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         setGlobalState('time', {
           from: start,
           to: end,
+          ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
         });
       }
     }
@@ -124,7 +127,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         to: globalState.time.to,
       });
     }
-  }, [globalState?.time?.from, globalState?.time?.to]);
+  }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {
@@ -156,6 +159,14 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [JSON.stringify(jobIds)]);
 
+  useEffect(() => {
+    return () => {
+      // upon component unmounting
+      // clear any data to prevent next page from rendering old charts
+      explorerService.clearExplorerData();
+    };
+  }, []);
+
   /**
    * TODO get rid of the intermediate state in explorerService.
    * URL state should be the only source of truth for related props.
@@ -166,7 +177,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       explorerService.setFilterData(filterData);
     }
 
-    const { viewByFieldName, viewByFromPage, viewByPerPage } =
+    const { viewByFieldName, viewByFromPage, viewByPerPage, severity } =
       explorerUrlState?.mlExplorerSwimlane ?? {};
 
     if (viewByFieldName !== undefined) {
@@ -179,6 +190,14 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
 
     if (viewByFromPage !== undefined) {
       explorerService.setViewByFromPage(viewByFromPage);
+    }
+
+    if (severity !== undefined) {
+      explorerService.setSwimLaneSeverity(severity);
+    }
+
+    if (explorerUrlState.mlShowCharts !== undefined) {
+      explorerService.setShowCharts(explorerUrlState.mlShowCharts);
     }
   }, []);
 
@@ -198,7 +217,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [explorerData]);
 
-  const [showCharts] = useShowCharts();
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
 
@@ -227,6 +245,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           swimlaneContainerWidth: explorerState.swimlaneContainerWidth,
           viewByPerPage: explorerState.viewByPerPage,
           viewByFromPage: explorerState.viewByFromPage,
+          swimLaneSeverity: explorerState.swimLaneSeverity,
         }
       : undefined;
 
@@ -250,7 +269,11 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [JSON.stringify(loadExplorerDataConfig), selectedCells?.showTopFieldValues]);
 
-  if (explorerState === undefined || refresh === undefined || showCharts === undefined) {
+  if (
+    explorerState === undefined ||
+    refresh === undefined ||
+    explorerAppState?.mlShowCharts === undefined
+  ) {
     return null;
   }
 
@@ -260,11 +283,13 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         {...{
           explorerState,
           setSelectedCells,
-          showCharts,
+          showCharts: explorerState.showCharts,
           severity: tableSeverity.val,
           stoppedPartitions,
           invalidTimeRangeError,
           selectedJobsRunning,
+          timeBuckets,
+          timefilter,
         }}
       />
     </div>

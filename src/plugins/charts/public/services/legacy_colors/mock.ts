@@ -17,5 +17,6 @@ export const colorsServiceMock: LegacyColorsService = {
   mappedColors: {
     mapKeys: jest.fn(),
     get: jest.fn(),
+    getColorFromConfig: jest.fn(),
   },
 } as any;

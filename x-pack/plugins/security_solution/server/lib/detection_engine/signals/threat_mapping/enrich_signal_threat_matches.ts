@@ -6,12 +6,12 @@
  */
 
 import { get, isObject } from 'lodash';
-import { DEFAULT_INDICATOR_PATH } from '../../../../../common/constants';
+import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 
 import type { SignalSearchResponse, SignalSourceHit } from '../types';
 import type {
   GetMatchedThreats,
-  ThreatIndicator,
+  ThreatEnrichment,
   ThreatListItem,
   ThreatMatchNamedQuery,
 } from './types';
@@ -40,7 +40,7 @@ export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): Signa
   return dedupedHits;
 };
 
-export const buildMatchedIndicator = ({
+export const buildEnrichments = ({
   queries,
   threats,
   indicatorPath,
@@ -48,20 +48,25 @@ export const buildMatchedIndicator = ({
   queries: ThreatMatchNamedQuery[];
   threats: ThreatListItem[];
   indicatorPath: string;
-}): ThreatIndicator[] =>
+}): ThreatEnrichment[] =>
   queries.map((query) => {
     const matchedThreat = threats.find((threat) => threat._id === query.id);
     const indicatorValue = get(matchedThreat?._source, indicatorPath) as unknown;
-    const indicator = [indicatorValue].flat()[0] ?? {};
+    const indicator = ([indicatorValue].flat()[0] ?? {}) as Record<string, unknown>;
     if (!isObject(indicator)) {
       throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
     }
     const atomic = get(matchedThreat?._source, query.value) as unknown;
-    const type = get(indicator, 'type') as unknown;
 
     return {
-      ...indicator,
-      matched: { atomic, field: query.field, type },
+      indicator,
+      matched: {
+        atomic,
+        field: query.field,
+        id: query.id,
+        index: query.index,
+        type: ENRICHMENT_TYPES.IndicatorMatchRule,
+      },
     };
   });
 
@@ -79,8 +84,8 @@ export const enrichSignalThreatMatches = async (
   const signalMatches = uniqueHits.map((signalHit) => extractNamedQueries(signalHit));
   const matchedThreatIds = [...new Set(signalMatches.flat().map(({ id }) => id))];
   const matchedThreats = await getMatchedThreats(matchedThreatIds);
-  const matchedIndicators = signalMatches.map((queries) =>
-    buildMatchedIndicator({
+  const enrichments = signalMatches.map((queries) =>
+    buildEnrichments({
       indicatorPath,
       queries,
       threats: matchedThreats,
@@ -92,16 +97,20 @@ export const enrichSignalThreatMatches = async (
     if (!isObject(threat)) {
       throw new Error(`Expected threat field to be an object, but found: ${threat}`);
     }
-    const existingIndicatorValue = get(signalHit._source, DEFAULT_INDICATOR_PATH) ?? [];
-    const existingIndicators = [existingIndicatorValue].flat(); // ensure indicators is an array
+    // We are not using ENRICHMENT_DESTINATION_PATH here because the code above
+    // and below make assumptions about its current value, 'threat.enrichments',
+    // and making this code dynamic on an arbitrary path would introduce several
+    // new issues.
+    const existingEnrichmentValue = get(signalHit._source, 'threat.enrichments') ?? [];
+    const existingEnrichments = [existingEnrichmentValue].flat(); // ensure enrichments is an array
 
     return {
       ...signalHit,
       _source: {
-        ...signalHit._source,
+        ...signalHit._source!,
         threat: {
           ...threat,
-          indicator: [...existingIndicators, ...matchedIndicators[i]],
+          enrichments: [...existingEnrichments, ...enrichments[i]],
         },
       },
     };

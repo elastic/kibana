@@ -286,7 +286,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Categorization example endpoint - ', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/categorization');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 

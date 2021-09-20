@@ -14,7 +14,6 @@ import { LogRetentionOptions, LogRetention, LogRetentionServer } from './types';
 import { convertLogRetentionFromServerToClient } from './utils/convert_log_retention';
 
 interface LogRetentionActions {
-  setLogRetentionUpdating(): void;
   clearLogRetentionUpdating(): void;
   closeModals(): void;
   fetchLogRetention(): void;
@@ -36,7 +35,6 @@ interface LogRetentionValues {
 export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetentionActions>>({
   path: ['enterprise_search', 'app_search', 'log_retention_logic'],
   actions: () => ({
-    setLogRetentionUpdating: true,
     clearLogRetentionUpdating: true,
     closeModals: true,
     fetchLogRetention: true,
@@ -57,7 +55,7 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
       {
         clearLogRetentionUpdating: () => false,
         closeModals: () => false,
-        setLogRetentionUpdating: () => true,
+        fetchLogRetention: () => true,
         toggleLogRetention: () => true,
       },
     ],
@@ -71,14 +69,12 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
     ],
   }),
   listeners: ({ actions, values }) => ({
-    fetchLogRetention: async () => {
-      if (values.isLogRetentionUpdating) return; // Prevent duplicate calls to the API
+    fetchLogRetention: async (_, breakpoint) => {
+      await breakpoint(100); // Prevents duplicate calls to the API (e.g., when a tooltip & callout are on the same page)
 
       try {
-        actions.setLogRetentionUpdating();
-
         const { http } = HttpLogic.values;
-        const response = await http.get('/api/app_search/log_settings');
+        const response = await http.get('/internal/app_search/log_settings');
 
         actions.updateLogRetention(
           convertLogRetentionFromServerToClient(response as LogRetentionServer)
@@ -94,7 +90,7 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
 
       try {
         const { http } = HttpLogic.values;
-        const response = await http.put('/api/app_search/log_settings', {
+        const response = await http.put('/internal/app_search/log_settings', {
           body: JSON.stringify(updateData),
         });
         actions.updateLogRetention(

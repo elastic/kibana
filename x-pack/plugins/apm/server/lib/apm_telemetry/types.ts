@@ -35,7 +35,7 @@ export interface APMUsage {
     };
   };
   environments: {
-    services_without_environments: number;
+    services_without_environment: number;
     services_with_multiple_environments: number;
     top_environments: string[];
   };
@@ -52,6 +52,7 @@ export interface APMUsage {
     provider: string[];
     region: string[];
   };
+  host: { os: { platform: string[] } };
   counts: {
     transaction: TimeframeMap;
     span: TimeframeMap;
@@ -132,6 +133,7 @@ export interface APMUsage {
   tasks: Record<
     | 'aggregated_transactions'
     | 'cloud'
+    | 'host'
     | 'processor_events'
     | 'agent_configuration'
     | 'services'
@@ -140,7 +142,8 @@ export interface APMUsage {
     | 'integrations'
     | 'agents'
     | 'indices_stats'
-    | 'cardinality',
+    | 'cardinality'
+    | 'environments',
     { took: { ms: number } }
   >;
 }

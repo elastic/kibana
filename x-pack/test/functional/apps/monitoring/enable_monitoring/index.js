@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       const browser = getService('browser');
       await browser.setWindowSize(1600, 1000);
-      await PageObjects.monitoring.navigateTo(true);
+      await PageObjects.common.navigateToApp('monitoring');
       await noData.isOnNoDataPage();
     });
 
@@ -55,6 +55,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.tryForTime(20000, async () => {
         // Click the refresh button
         await testSubjects.click('querySubmitButton');
+        await clusterOverview.closeAlertsModal();
         expect(await clusterOverview.isOnClusterOverview()).to.be(true);
       });
     });

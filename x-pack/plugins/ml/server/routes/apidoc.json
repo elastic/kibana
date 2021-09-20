@@ -1,6 +1,6 @@
 {
   "name": "ml_kibana_api",
-  "version": "7.11.0",
+  "version": "7.15.0",
   "description": "This is the documentation of the REST API provided by the Machine Learning Kibana plugin. Each API is experimental and can include breaking changes in any version.",
   "title": "ML Kibana API",
   "order": [
@@ -18,10 +18,10 @@
     "DeleteDataFrameAnalytics",
     "JobsExist",
     "GetDataFrameAnalyticsIdMap",
+    "AnalyticsNewJobCaps",
+    "ValidateDataFrameAnalytics",
 
     "DataVisualizer",
-    "GetOverallStats",
-    "GetStatsForFields",
     "GetHistogramsForFields",
 
     "AnomalyDetectors",
@@ -32,6 +32,7 @@
     "GetAnomalyDetectorsStats",
     "GetAnomalyDetectorsStatsById",
     "CloseAnomalyDetectorsJob",
+    "ResetAnomalyDetectorsJob",
     "ValidateAnomalyDetector",
     "ForecastAnomalyDetector",
     "GetRecords",
@@ -46,6 +47,7 @@
 
     "ResultsService",
     "GetAnomaliesTableData",
+    "GetDatafeedResultsChartData",
     "GetCategoryDefinition",
     "GetMaxAnomalyScore",
     "GetCategoryExamples",
@@ -70,6 +72,7 @@
     "ForceStartDatafeeds",
     "StopDatafeeds",
     "CloseJobs",
+    "ResetJobs",
     "JobsSummary",
     "JobsWithTimeRange",
     "GetJobForCloning",
@@ -83,10 +86,12 @@
     "GetLookBackProgress",
     "ValidateCategoryExamples",
     "TopCategories",
+    "DatafeedPreview",
     "UpdateGroups",
-    "DeletingJobTasks",
+    "BlockingJobTasks",
     "DeleteJobs",
     "RevertModelSnapshot",
+    "BulkCreateJobs",
 
     "Calendars",
     "PutCalendars",
@@ -117,15 +122,12 @@
     "JobAuditMessages",
     "GetJobAuditMessages",
     "GetAllJobAuditMessages",
-
+    "ClearJobAuditMessages",
     "JobValidation",
     "EstimateBucketSpan",
     "CalculateModelMemoryLimit",
     "ValidateCardinality",
     "ValidateJob",
-
-    "NotificationSettings",
-    "GetNotificationSettings",
 
     "DatafeedService",
     "CreateDatafeed",
@@ -147,8 +149,7 @@
     "SavedObjectsStatus",
     "SyncJobSavedObjects",
     "InitializeJobSavedObjects",
-    "AssignJobsToSpaces",
-    "RemoveJobsFromSpaces",
+    "UpdateJobsSpaces",
     "RemoveJobsFromCurrentSpace",
     "JobsSpaces",
     "CanDeleteJob",
@@ -157,6 +158,9 @@
     "GetTrainedModel",
     "GetTrainedModelStats",
     "GetTrainedModelPipelines",
-    "DeleteTrainedModel"
+    "DeleteTrainedModel",
+
+    "Alerting",
+    "PreviewAlert"
   ]
 }

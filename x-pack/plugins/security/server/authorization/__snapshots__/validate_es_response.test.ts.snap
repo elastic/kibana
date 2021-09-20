@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`validateEsPrivilegeResponse fails validation when an action is malformed in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.foo-application]: expected value of type [boolean] but got [string]"`;
+exports[`validateEsPrivilegeResponse fails validation when an action is malformed in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.foo-application]: [2]: expected value of type [boolean] but got [string]"`;
 
 exports[`validateEsPrivilegeResponse fails validation when an action is missing in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.foo-application]: Payload did not match expected actions"`;
 

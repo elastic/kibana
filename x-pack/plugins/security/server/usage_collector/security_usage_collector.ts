@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ConfigType } from '../config';
-import { SecurityLicense } from '../../common/licensing';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
+import type { SecurityLicense } from '../../common/licensing';
+import type { ConfigType } from '../config';
 
 interface Usage {
   auditLoggingEnabled: boolean;
+  auditLoggingType?: 'ecs' | 'legacy';
   loginSelectorEnabled: boolean;
   accessAgreementEnabled: boolean;
   authProviderCount: number;
   enabledAuthProviders: string[];
   httpAuthSchemes: string[];
+  sessionIdleTimeoutInMinutes: number;
+  sessionLifespanInMinutes: number;
+  sessionCleanupInMinutes: number;
 }
 
 interface Deps {
@@ -52,26 +57,77 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
     schema: {
       auditLoggingEnabled: {
         type: 'boolean',
+        _meta: {
+          description:
+            'Indicates if audit logging is both enabled and supported by the current license.',
+        },
+      },
+      auditLoggingType: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'If auditLoggingEnabled is true, indicates what type is enabled (ECS or legacy).',
+        },
       },
       loginSelectorEnabled: {
         type: 'boolean',
+        _meta: {
+          description: 'Indicates if the login selector UI is enabled.',
+        },
       },
       accessAgreementEnabled: {
         type: 'boolean',
+        _meta: {
+          description:
+            'Indicates if the access agreement UI is both enabled and supported by the current license.',
+        },
       },
       authProviderCount: {
         type: 'long',
+        _meta: {
+          description:
+            'The number of configured auth providers (including disabled auth providers).',
+        },
       },
       enabledAuthProviders: {
         type: 'array',
         items: {
           type: 'keyword',
+          _meta: {
+            description:
+              'The types of enabled auth providers (such as `saml`, `basic`, `pki`, etc).',
+          },
         },
       },
       httpAuthSchemes: {
         type: 'array',
         items: {
           type: 'keyword',
+          _meta: {
+            description:
+              'The set of enabled http auth schemes. Used for api-based usage, and when credentials are provided via reverse-proxy.',
+          },
+        },
+      },
+      sessionIdleTimeoutInMinutes: {
+        type: 'long',
+        _meta: {
+          description:
+            'The global session idle timeout expiration that is configured, in minutes (0 if disabled).',
+        },
+      },
+      sessionLifespanInMinutes: {
+        type: 'long',
+        _meta: {
+          description:
+            'The global session lifespan expiration that is configured, in minutes (0 if disabled).',
+        },
+      },
+      sessionCleanupInMinutes: {
+        type: 'long',
+        _meta: {
+          description:
+            'The session cleanup interval that is configured, in minutes (0 if disabled).',
         },
       },
     },
@@ -90,12 +146,22 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           authProviderCount: 0,
           enabledAuthProviders: [],
           httpAuthSchemes: [],
+          sessionIdleTimeoutInMinutes: 0,
+          sessionLifespanInMinutes: 0,
+          sessionCleanupInMinutes: 0,
         };
       }
 
       const legacyAuditLoggingEnabled = allowLegacyAuditLogging && config.audit.enabled;
-      const auditLoggingEnabled =
+      const ecsAuditLoggingEnabled =
         allowAuditLogging && config.audit.enabled && config.audit.appender != null;
+
+      let auditLoggingType: Usage['auditLoggingType'];
+      if (ecsAuditLoggingEnabled) {
+        auditLoggingType = 'ecs';
+      } else if (legacyAuditLoggingEnabled) {
+        auditLoggingType = 'legacy';
+      }
 
       const loginSelectorEnabled = config.authc.selector.enabled;
       const authProviderCount = config.authc.sortedProviders.length;
@@ -115,13 +181,22 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         WELL_KNOWN_AUTH_SCHEMES.includes(scheme.toLowerCase())
       );
 
+      const sessionExpirations = config.session.getExpirationTimeouts(undefined); // use `undefined` to get global expiration values
+      const sessionIdleTimeoutInMinutes = sessionExpirations.idleTimeout?.asMinutes() ?? 0;
+      const sessionLifespanInMinutes = sessionExpirations.lifespan?.asMinutes() ?? 0;
+      const sessionCleanupInMinutes = config.session.cleanupInterval?.asMinutes() ?? 0;
+
       return {
-        auditLoggingEnabled: legacyAuditLoggingEnabled || auditLoggingEnabled,
+        auditLoggingEnabled: legacyAuditLoggingEnabled || ecsAuditLoggingEnabled,
+        auditLoggingType,
         loginSelectorEnabled,
         accessAgreementEnabled,
         authProviderCount,
         enabledAuthProviders,
         httpAuthSchemes,
+        sessionIdleTimeoutInMinutes,
+        sessionLifespanInMinutes,
+        sessionCleanupInMinutes,
       };
     },
   });

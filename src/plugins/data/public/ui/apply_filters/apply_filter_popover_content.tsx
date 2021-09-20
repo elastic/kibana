@@ -15,14 +15,14 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSwitch,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { IIndexPattern } from '../..';
-import { getDisplayValueFromFilter, Filter } from '../../../common';
+import { Filter } from '../../../common';
 import { FilterLabel } from '../filter_bar';
-import { mapAndFlattenFilters } from '../../query';
+import { mapAndFlattenFilters, getDisplayValueFromFilter } from '../../query';
 
 interface Props {
   filters: Filter[];
@@ -64,7 +64,8 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
       <EuiForm>
         {mappedFilters.map((filter, i) => (
           <EuiFormRow key={i}>
-            <EuiSwitch
+            <EuiCheckbox
+              id={`filterCheckbox-${i}`}
               label={this.getLabel(filter)}
               checked={this.isFilterSelected(i)}
               onChange={() => this.toggleFilterSelected(i)}

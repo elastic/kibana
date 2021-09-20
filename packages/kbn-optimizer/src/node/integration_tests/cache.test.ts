@@ -53,8 +53,9 @@ it('returns undefined until values are set', async () => {
   const log = makeTestLog();
   const cache = makeCache({
     dir: DIR,
-    prefix: 'foo',
+    prefix: 'prefix:',
     log,
+    pathRoot: '/foo/',
   });
 
   expect(cache.getMtime(path)).toBe(undefined);
@@ -71,16 +72,16 @@ it('returns undefined until values are set', async () => {
   expect(cache.getCode(path)).toBe('var x = 1');
   expect(cache.getSourceMap(path)).toEqual({ foo: 'bar' });
   expect(log.output).toMatchInlineSnapshot(`
-    "MISS   [mtimes]   foo/foo/bar.js
-    MISS   [codes]   foo/foo/bar.js
-    MISS   [sourceMaps]   foo/foo/bar.js
-    PUT   [atimes]   foo/foo/bar.js
-    PUT   [mtimes]   foo/foo/bar.js
-    PUT   [codes]   foo/foo/bar.js
-    PUT   [sourceMaps]   foo/foo/bar.js
-    HIT   [mtimes]   foo/foo/bar.js
-    HIT   [codes]   foo/foo/bar.js
-    HIT   [sourceMaps]   foo/foo/bar.js
+    "MISS   [mtimes]   prefix:bar.js
+    MISS   [codes]   prefix:bar.js
+    MISS   [sourceMaps]   prefix:bar.js
+    PUT   [atimes]   prefix:bar.js
+    PUT   [mtimes]   prefix:bar.js
+    PUT   [codes]   prefix:bar.js
+    PUT   [sourceMaps]   prefix:bar.js
+    HIT   [mtimes]   prefix:bar.js
+    HIT   [codes]   prefix:bar.js
+    HIT   [sourceMaps]   prefix:bar.js
     "
   `);
 });

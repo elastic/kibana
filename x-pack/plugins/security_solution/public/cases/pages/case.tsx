@@ -7,33 +7,26 @@
 
 import React from 'react';
 
-import { WrapperPage } from '../../common/components/wrapper_page';
-import { useGetUserSavedObjectPermissions } from '../../common/lib/kibana';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { AllCases } from '../components/all_cases';
 
-import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../components/callout';
-import { CaseSavedObjectNoPermissions } from './saved_object_no_permissions';
+import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { SecurityPageName } from '../../app/types';
 
 export const CasesPage = React.memo(() => {
-  const userPermissions = useGetUserSavedObjectPermissions();
+  const userPermissions = useGetUserCasesPermissions();
 
   return userPermissions == null || userPermissions?.read ? (
     <>
-      <WrapperPage>
-        {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
-          <CaseCallOut
-            title={savedObjectReadOnlyErrorMessage.title}
-            messages={[{ ...savedObjectReadOnlyErrorMessage }]}
-          />
-        )}
+      <SecuritySolutionPageWrapper>
         <AllCases userCanCrud={userPermissions?.crud ?? false} />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.case} />
     </>
   ) : (
-    <CaseSavedObjectNoPermissions />
+    <CaseFeatureNoPermissions />
   );
 });
 

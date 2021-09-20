@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiStat,
   EuiHorizontalRule,
+  EuiStat,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { ProcessedImportResponse, FailedImport } from 'src/plugins/saved_objects_management/public';
-import { ImportRetry } from '../types';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { FailedImport, ProcessedImportResponse } from '../lib';
+import type { ImportRetry } from '../types';
 
 interface Props {
   copyInProgress: boolean;
@@ -57,8 +59,8 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
       let pendingCount = 0;
       let skippedCount = 0;
       let errorCount = 0;
-      if (spaceResult.status === 'success') {
-        successCount = spaceResult.importCount;
+      if (spaceResult.success === true) {
+        successCount = spaceResult.successfulImports.length;
       } else {
         const uniqueResolvableErrors = spaceResult.failedImports
           .filter(isResolvableError)

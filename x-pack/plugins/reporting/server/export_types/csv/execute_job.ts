@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CONTENT_TYPE_CSV, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
+import { CONTENT_TYPE_CSV } from '../../../common/constants';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
 import { createGenerateCsv } from './generate_csv';
@@ -16,34 +16,30 @@ export const runTaskFnFactory: RunTaskFnFactory<
 > = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
 
-  return async function runTask(jobId, job, cancellationToken) {
-    const elasticsearch = reporting.getElasticsearchService();
-    const logger = parentLogger.clone([CSV_JOB_TYPE_DEPRECATED, 'execute-job', jobId]);
+  return async function runTask(jobId, job, cancellationToken, stream) {
+    const elasticsearch = await reporting.getEsClient();
+    const logger = parentLogger.clone([jobId]);
     const generateCsv = createGenerateCsv(logger);
 
     const encryptionKey = config.get('encryptionKey');
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId, logger);
     const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
+    const { asCurrentUser: elasticsearchClient } = elasticsearch.asScoped(fakeRequest);
 
-    const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(fakeRequest);
-    const callEndpoint = (endpoint: string, clientParams = {}, options = {}) =>
-      callAsCurrentUser(endpoint, clientParams, options);
-
-    const { content, maxSizeReached, size, csvContainsFormulas, warnings } = await generateCsv(
+    const { maxSizeReached, csvContainsFormulas, warnings } = await generateCsv(
       job,
       config,
       uiSettingsClient,
-      callEndpoint,
-      cancellationToken
+      elasticsearchClient,
+      cancellationToken,
+      stream
     );
 
     // @TODO: Consolidate these one-off warnings into the warnings array (max-size reached and csv contains formulas)
     return {
       content_type: CONTENT_TYPE_CSV,
-      content,
       max_size_reached: maxSizeReached,
-      size,
       csv_contains_formulas: csvContainsFormulas,
       warnings,
     };

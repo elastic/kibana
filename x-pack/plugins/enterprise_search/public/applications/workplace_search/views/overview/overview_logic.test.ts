@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../__mocks__';
-
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 import { mockOverviewValues } from './__mocks__';
+
 import { OverviewLogic } from './overview_logic';
 
 describe('OverviewLogic', () => {
@@ -29,7 +29,6 @@ describe('OverviewLogic', () => {
     const data = {
       accountsCount: 1,
       activityFeed: feed,
-      canCreateContentSources: true,
       hasOrgSources: true,
       hasUsers: true,
       isOldAccount: true,
@@ -49,7 +48,6 @@ describe('OverviewLogic', () => {
     it('will set server values', () => {
       expect(OverviewLogic.values.hasUsers).toEqual(true);
       expect(OverviewLogic.values.hasOrgSources).toEqual(true);
-      expect(OverviewLogic.values.canCreateContentSources).toEqual(true);
       expect(OverviewLogic.values.isOldAccount).toEqual(true);
       expect(OverviewLogic.values.sourcesCount).toEqual(1);
       expect(OverviewLogic.values.pendingInvitationsCount).toEqual(1);
@@ -65,7 +63,7 @@ describe('OverviewLogic', () => {
 
       await OverviewLogic.actions.initializeOverview();
 
-      expect(http.get).toHaveBeenCalledWith('/api/workplace_search/overview');
+      expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/overview');
       expect(setServerDataSpy).toHaveBeenCalled();
     });
   });

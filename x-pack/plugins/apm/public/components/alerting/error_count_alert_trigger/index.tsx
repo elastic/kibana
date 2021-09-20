@@ -6,17 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { defaults, omit } from 'lodash';
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asInteger } from '../../../../common/utils/formatters';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import { getAbsoluteTimeRange } from '../helper';
+import {
+  AlertMetadata,
+  getIntervalAndTimeRange,
+  isNewApmRuleFromStackManagement,
+  TimeUnit,
+} from '../helper';
+import { NewAlertEmptyPrompt } from '../new_alert_empty_prompt';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 export interface AlertParams {
@@ -29,55 +34,65 @@ export interface AlertParams {
 
 interface Props {
   alertParams: AlertParams;
+  metadata?: AlertMetadata;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
 export function ErrorCountAlertTrigger(props: Props) {
-  const { setAlertParams, setAlertProperty, alertParams } = props;
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams } = useUrlParams();
-  const { start, end } = urlParams;
+  const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
+
   const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName,
-    start,
-    end,
+    serviceName: metadata?.serviceName,
+    start: metadata?.start,
+    end: metadata?.end,
   });
 
-  const { threshold, windowSize, windowUnit, environment } = alertParams;
+  const params = defaults(
+    { ...omit(metadata, ['start', 'end']), ...alertParams },
+    {
+      threshold: 25,
+      windowSize: 1,
+      windowUnit: 'm',
+      environment: ENVIRONMENT_ALL.value,
+    }
+  );
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (windowSize && windowUnit) {
+      const { interval, start, end } = getIntervalAndTimeRange({
+        windowSize: params.windowSize,
+        windowUnit: params.windowUnit as TimeUnit,
+      });
+      if (interval && start && end) {
         return callApmApi({
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
           params: {
             query: {
-              ...getAbsoluteTimeRange(windowSize, windowUnit),
-              environment,
-              serviceName,
+              environment: params.environment,
+              serviceName: params.serviceName,
+              interval,
+              start,
+              end,
             },
           },
         });
       }
     },
-    [windowSize, windowUnit, environment, serviceName]
+    [
+      params.windowSize,
+      params.windowUnit,
+      params.environment,
+      params.serviceName,
+    ]
   );
 
-  const defaults = {
-    threshold: 25,
-    windowSize: 1,
-    windowUnit: 'm',
-    environment: urlParams.environment || ENVIRONMENT_ALL.value,
-  };
-
-  const params = {
-    ...defaults,
-    ...alertParams,
-  };
+  if (isNewApmRuleFromStackManagement(alertParams, metadata)) {
+    return <NewAlertEmptyPrompt />;
+  }
 
   const fields = [
-    <ServiceField value={serviceName} />,
+    <ServiceField value={params.serviceName} />,
     <EnvironmentField
       currentValue={params.environment}
       options={environmentOptions}
@@ -107,12 +122,16 @@ export function ErrorCountAlertTrigger(props: Props) {
   ];
 
   const chartPreview = (
-    <ChartPreview data={data} threshold={threshold} yTickFormat={asInteger} />
+    <ChartPreview
+      data={data?.errorCountChartPreview}
+      threshold={params.threshold}
+      yTickFormat={asInteger}
+    />
   );
 
   return (
     <ServiceAlertTrigger
-      defaults={defaults}
+      defaults={params}
       fields={fields}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}

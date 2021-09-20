@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import useAsync from 'react-use/lib/useAsync';
 import constate from 'constate';
-import { AuthenticationServiceSetup } from '../authentication';
+import useAsync from 'react-use/lib/useAsync';
+
+import type { AuthenticationServiceSetup } from '../authentication';
 
 export interface AuthenticationProviderProps {
   authc: AuthenticationServiceSetup;

@@ -12,7 +12,6 @@ import React from 'react';
 // @ts-expect-error untyped local
 import { DatasourceComponent } from '../datasource_component';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
-// @ts-expect-error untyped local
 import { Datasource } from '../../../../public/expression_types/datasource';
 
 const TestDatasource = ({ args }: any) => (
@@ -70,6 +69,7 @@ storiesOf('components/datasource/DatasourceComponent', module)
       setPreviewing={action('setPreviewing')}
       isInvalid={false}
       setInvalid={action('setInvalid')}
+      renderError={action('renderError')}
     />
   ))
   .add('datasource with expression arguments', () => (
@@ -90,5 +90,6 @@ storiesOf('components/datasource/DatasourceComponent', module)
       setPreviewing={action('setPreviewing')}
       isInvalid={false}
       setInvalid={action('setInvalid')}
+      renderError={action('renderError')}
     />
   ));

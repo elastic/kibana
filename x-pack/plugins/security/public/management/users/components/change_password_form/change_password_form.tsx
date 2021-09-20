@@ -15,13 +15,16 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import _ from 'lodash';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import React, { ChangeEvent, Component } from 'react';
-import { NotificationsStart } from 'src/core/public';
-import { User } from '../../../../../common/model';
-import { UserAPIClient } from '../..';
+import type { NotificationsStart } from 'src/core/public';
+
+import type { User } from '../../../../../common/model';
+import type { UserAPIClient } from '../../user_api_client';
 
 interface Props {
   user: User;

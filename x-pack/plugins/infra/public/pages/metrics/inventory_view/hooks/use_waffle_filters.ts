@@ -13,7 +13,7 @@ import { constant, identity } from 'fp-ts/lib/function';
 import createContainter from 'constate';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useUrlState } from '../../../../utils/use_url_state';
-import { useSourceContext } from '../../../../containers/source';
+import { useSourceContext } from '../../../../containers/metrics_source';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
 

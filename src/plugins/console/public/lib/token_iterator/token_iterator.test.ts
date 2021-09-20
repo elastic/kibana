@@ -15,7 +15,7 @@ const mockTokensProviderFactory = (tokenMtx: Token[][]): TokensProvider => {
       return tokenMtx[lineNumber - 1] || null;
     },
     getTokenAt(pos: Position): Token | null {
-      return null as any;
+      return null;
     },
   };
 };

@@ -25,8 +25,8 @@ import {
 } from '../../../../common/elasticsearch_util';
 import {
   ESTermSourceDescriptor,
+  ESTermSourceSyncMeta,
   VectorJoinSourceRequestMeta,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
@@ -127,6 +127,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
 
     const indexPattern = await this.getIndexPattern();
     const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
+    searchSource.setField('trackTotalHits', false);
     const termsField = getField(indexPattern, this._termField.getName());
     const termsAgg = {
       size: this._descriptor.size !== undefined ? this._descriptor.size : DEFAULT_MAX_BUCKETS_LIMIT,
@@ -170,12 +171,12 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
-    return this._descriptor.size !== undefined
-      ? {
-          size: this._descriptor.size,
-        }
-      : null;
+  getSyncMeta(): ESTermSourceSyncMeta | null {
+    return {
+      indexPatternId: this._descriptor.indexPatternId,
+      size: this._descriptor.size,
+      term: this._descriptor.term,
+    };
   }
 
   getRightFields(): IField[] {

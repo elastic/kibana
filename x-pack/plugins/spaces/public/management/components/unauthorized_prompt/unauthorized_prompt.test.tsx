@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallowWithIntl } from '@kbn/test/jest';
+
 import { UnauthorizedPrompt } from './unauthorized_prompt';
 
 describe('UnauthorizedPrompt', () => {

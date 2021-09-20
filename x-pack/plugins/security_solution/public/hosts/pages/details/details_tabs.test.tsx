@@ -18,6 +18,9 @@ import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
+import { HostsTableType } from '../../store/model';
+
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 
@@ -49,12 +52,12 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 
 describe('body', () => {
   const scenariosMap = {
-    authentications: 'AuthenticationsQueryTabBody',
-    allHosts: 'HostsQueryTabBody',
-    uncommonProcesses: 'UncommonProcessQueryTabBody',
-    anomalies: 'AnomaliesQueryTabBody',
-    events: 'EventsQueryTabBody',
-    alerts: 'HostAlertsQueryTabBody',
+    [HostsTableType.authentications]: 'AuthenticationsQueryTabBody',
+    [HostsTableType.hosts]: 'HostsQueryTabBody',
+    [HostsTableType.uncommonProcesses]: 'UncommonProcessQueryTabBody',
+    [HostsTableType.anomalies]: 'AnomaliesQueryTabBody',
+    [HostsTableType.events]: 'EventsQueryTabBody',
+    [HostsTableType.alerts]: 'HostAlertsQueryTabBody',
   };
 
   const mockHostDetailsPageFilters = getHostDetailsPageFilters('host-1');
@@ -78,7 +81,7 @@ describe('body', () => {
     test(`it should pass expected object properties to ${componentName}`, () => {
       const wrapper = mount(
         <TestProviders>
-          <MemoryRouter initialEntries={[`/host-1/${path}`]}>
+          <MemoryRouter initialEntries={[`/hosts/host-1/${path}`]}>
             <HostDetailsTabs
               isInitializing={false}
               detailName={'host-1'}
@@ -120,6 +123,18 @@ describe('body', () => {
             { name: 'agent.test7', searchable: true, type: 'string', aggregatable: true },
             { name: 'agent.test8', searchable: true, type: 'string', aggregatable: true },
             { name: 'host.name', searchable: true, type: 'string', aggregatable: true },
+            {
+              aggregatable: false,
+              name: 'nestedField.firstAttributes',
+              searchable: true,
+              type: 'string',
+            },
+            {
+              aggregatable: false,
+              name: 'nestedField.secondAttributes',
+              searchable: true,
+              type: 'string',
+            },
           ],
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },

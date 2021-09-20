@@ -19,18 +19,18 @@ export default function ({ getService, getPageObjects }) {
   describe('mgmt saved objects', function describeIndexTests() {
     beforeEach(async function () {
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.load('discover');
+      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
       await PageObjects.settings.navigateTo();
     });
 
     afterEach(async function () {
-      await esArchiver.unload('discover');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/discover');
     });
 
     it('should import saved objects mgmt', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.savedObjects.importFile(
-        path.join(__dirname, 'exports', 'mgmt_import_objects.json')
+        path.join(__dirname, 'exports', 'mgmt_import_objects.ndjson')
       );
       await PageObjects.settings.associateIndexPattern(
         '4c3f3c30-ac94-11e8-a651-614b2788174a',

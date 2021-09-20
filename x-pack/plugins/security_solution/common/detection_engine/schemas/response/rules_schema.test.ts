@@ -21,8 +21,7 @@ import {
   addThreatMatchFields,
   addEqlFields,
 } from './rules_schema';
-import { exactCheck } from '../../../exact_check';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { TypeAndTimelineOnly } from './type_timeline_only_schema';
 import {
   getRulesSchemaMock,
@@ -30,7 +29,7 @@ import {
   getThreatMatchingSchemaMock,
   getRulesEqlSchemaMock,
 } from './rules_schema.mocks';
-import { ListArray } from '../types/lists';
+import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
@@ -403,6 +402,19 @@ describe('rules_schema', () => {
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
+    });
+
+    test('it should validate a namespace as string', () => {
+      const payload = {
+        ...getRulesSchemaMock(),
+        namespace: 'a namespace',
+      };
+      const dependents = getDependents(payload);
+      const decoded = dependents.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
     });
 
     test('it should NOT validate invalid_data for the type', () => {

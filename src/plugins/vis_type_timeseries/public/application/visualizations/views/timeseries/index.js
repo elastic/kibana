@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
@@ -16,21 +16,25 @@ import {
   Chart,
   Position,
   Settings,
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   LineAnnotation,
   TooltipType,
   StackMode,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
-import { activeCursor$ } from '../../lib/active_cursor';
-import { getUISettings, getChartsSetup } from '../../../../services';
+import { getUISettings, getCharts } from '../../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
-import { emptyLabel } from '../../../../../common/empty_label';
+import { TOOLTIP_MODES } from '../../../../../common/enums';
+import { getValueOrEmpty } from '../../../../../common/empty_label';
+import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
+import { renderEndzoneTooltip, useActiveCursor } from '../../../../../../charts/public';
+import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
+import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -43,73 +47,120 @@ const generateAnnotationData = (values, formatter) =>
 
 const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
-const handleCursorUpdate = (cursor) => {
-  activeCursor$.next(cursor);
-};
+/** When displaying the annotation, we must slightly shift the labels for
+ * the x-axis so that they do not overlap the annotations. **/
+const TICK_LABEL_WITH_ANNOTATIONS_PADDING = 19;
 
 export const TimeSeries = ({
   backgroundColor,
   showGrid,
   legend,
   legendPosition,
+  truncateLegend,
+  maxLegendLines,
   tooltipMode,
-  xAxisLabel,
   series,
   yAxis,
   onBrush,
+  onFilterClick,
   xAxisFormatter,
   annotations,
+  syncColors,
+  palettesService,
+  interval,
+  isLastBucketDropped,
 }) => {
+  // If the color isn't configured by the user, use the color mapping service
+  // to assign a color from the Kibana palette. Colors will be shared across the
+  // session, including dashboards.
+  const { theme: themeService, activeCursor: activeCursorService } = getCharts();
+
   const chartRef = useRef();
+  const chartTheme = themeService.useChartsTheme();
 
-  useEffect(() => {
-    const updateCursor = (cursor) => {
-      if (chartRef.current) {
-        chartRef.current.dispatchExternalPointerEvent(cursor);
-      }
-    };
+  const handleCursorUpdate = useActiveCursor(activeCursorService, chartRef, {
+    isDateHistogram: true,
+  });
 
-    const subscription = activeCursor$.subscribe(updateCursor);
+  const hasVisibleAnnotations = useMemo(
+    () => (annotations ?? []).some((annotation) => Boolean(annotation.data?.length)),
+    [annotations]
+  );
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  let tooltipFormatter = decorateFormatter(xAxisFormatter);
+  if (!isLastBucketDropped) {
+    const domainBounds = calculateDomainForSeries(series);
+    tooltipFormatter = renderEndzoneTooltip(
+      interval,
+      domainBounds?.domainStart,
+      domainBounds?.domainEnd,
+      xAxisFormatter
+    );
+  }
 
-  const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = getUISettings();
   const timeZone = getTimezone(uiSettings);
   const hasBarChart = series.some(({ bars }) => bars?.show);
 
   // apply legend style change if bgColor is configured
-  const classes = classNames('tvbVisTimeSeries', getChartClasses(backgroundColor));
+  const classes = classNames(getChartClasses(backgroundColor));
 
-  // If the color isn't configured by the user, use the color mapping service
-  // to assign a color from the Kibana palette. Colors will be shared across the
-  // session, including dashboards.
-  const { legacyColors: colors, theme: themeService } = getChartsSetup();
   const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
-
-  colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
 
   const onBrushEndListener = ({ x }) => {
     if (!x) {
       return;
     }
     const [min, max] = x;
-    onBrush(min, max);
+    onBrush(min, max, series);
   };
 
+  const handleElementClick = (points) => {
+    onFilterClick(series, points);
+  };
+
+  const getSeriesColor = useCallback(
+    (seriesName, seriesGroupId, seriesId) => {
+      const seriesById = series.filter((s) => s.seriesId === seriesGroupId);
+      const props = {
+        seriesById,
+        seriesName,
+        seriesId,
+        baseColor: seriesById[0].baseColor,
+        seriesPalette: seriesById[0].palette,
+        palettesRegistry: palettesService,
+        syncColors,
+      };
+      return getSplitByTermsColor(props) || null;
+    },
+    [palettesService, series, syncColors]
+  );
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
+        debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}
+        onElementClick={(args) => handleElementClick(args)}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
         theme={[
+          {
+            crosshair: {
+              ...chartTheme.crosshair,
+            },
+            axes: {
+              tickLabel: {
+                padding: {
+                  inner: hasVisibleAnnotations
+                    ? TICK_LABEL_WITH_ANNOTATIONS_PADDING
+                    : chartTheme.axes.tickLabel.padding.inner,
+                },
+              },
+            },
+          },
           hasBarChart
             ? {}
             : {
@@ -123,12 +174,20 @@ export const TimeSeries = ({
             background: {
               color: backgroundColor,
             },
+            legend: {
+              labelOptions: { maxLines: truncateLegend ? maxLegendLines ?? 1 : 0 },
+            },
           },
+          chartTheme,
         ]}
         baseTheme={baseTheme}
         tooltip={{
           snap: true,
-          type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
+          type:
+            tooltipMode === TOOLTIP_MODES.SHOW_FOCUSED
+              ? TooltipType.Follow
+              : TooltipType.VerticalCursor,
+          boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: tooltipFormatter,
         }}
         externalPointerEvents={{ tooltip: { visible: false } }}
@@ -142,7 +201,7 @@ export const TimeSeries = ({
           <LineAnnotation
             key={id}
             id={id}
-            domainType={AnnotationDomainTypes.XDomain}
+            domainType={AnnotationDomainType.XDomain}
             dataValues={dataValues}
             marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
             hideLinesTooltips={true}
@@ -155,16 +214,19 @@ export const TimeSeries = ({
         (
           {
             id,
+            seriesId,
             label,
             labelFormatted,
             bars,
             lines,
             data,
             hideInLegend,
+            truncateLegend,
             xScaleType,
             yScaleType,
             groupId,
             color,
+            isSplitByTerms,
             stack,
             points,
             y1AccessorFormat,
@@ -177,21 +239,23 @@ export const TimeSeries = ({
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
           const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
-          // Only use color mapping if there is no color from the server
-          const finalColor = color ?? colors.mappedColors.mapping[label];
           let seriesName = label.toString();
           if (labelFormatted) {
             seriesName = labelDateFormatter(labelFormatted);
           }
+          // The colors from the paletteService should be applied only when the timeseries is split by terms
+          const splitColor = getSeriesColor(seriesName, seriesId, id);
+          const finalColor = isSplitByTerms && splitColor ? splitColor : color;
           if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName || emptyLabel}
+                name={getValueOrEmpty(seriesName)}
                 data={data}
                 hideInLegend={hideInLegend}
+                truncateLegend={truncateLegend}
                 bars={bars}
                 color={finalColor}
                 stackAccessors={stackAccessors}
@@ -214,9 +278,10 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName || emptyLabel}
+                name={getValueOrEmpty(seriesName)}
                 data={data}
                 hideInLegend={hideInLegend}
+                truncateLegend={truncateLegend}
                 lines={lines}
                 color={finalColor}
                 stackAccessors={stackAccessors}
@@ -257,7 +322,7 @@ export const TimeSeries = ({
       <Axis
         id="bottom"
         position={Position.Bottom}
-        title={xAxisLabel}
+        title={getAxisLabelString(interval)}
         tickFormat={xAxisFormatter}
         gridLine={{
           ...GRID_LINE_CONFIG,
@@ -279,10 +344,13 @@ TimeSeries.propTypes = {
   showGrid: PropTypes.bool,
   legend: PropTypes.bool,
   legendPosition: PropTypes.string,
-  xAxisLabel: PropTypes.string,
+  truncateLegend: PropTypes.bool,
+  maxLegendLines: PropTypes.number,
   series: PropTypes.array,
   yAxis: PropTypes.array,
   onBrush: PropTypes.func,
   xAxisFormatter: PropTypes.func,
   annotations: PropTypes.array,
+  interval: PropTypes.number,
+  isLastBucketDropped: PropTypes.bool,
 };

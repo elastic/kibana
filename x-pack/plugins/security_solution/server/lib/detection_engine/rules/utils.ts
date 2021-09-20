@@ -6,53 +6,61 @@
  */
 
 import { pickBy, isEmpty } from 'lodash/fp';
-import {
-  DescriptionOrUndefined,
-  AnomalyThresholdOrUndefined,
-  QueryOrUndefined,
-  LanguageOrUndefined,
-  SavedIdOrUndefined,
-  TimelineIdOrUndefined,
-  TimelineTitleOrUndefined,
-  MachineLearningJobIdOrUndefined,
-  IndexOrUndefined,
-  NoteOrUndefined,
-  MetaOrUndefined,
-  VersionOrUndefined,
-  FalsePositivesOrUndefined,
+import type {
   FromOrUndefined,
-  OutputIndexOrUndefined,
-  IntervalOrUndefined,
-  MaxSignalsOrUndefined,
-  RiskScoreOrUndefined,
-  NameOrUndefined,
-  SeverityOrUndefined,
-  TagsOrUndefined,
-  ToOrUndefined,
-  ThreatsOrUndefined,
-  ThresholdOrUndefined,
-  TypeOrUndefined,
-  ReferencesOrUndefined,
-  AuthorOrUndefined,
-  BuildingBlockTypeOrUndefined,
-  LicenseOrUndefined,
+  MachineLearningJobIdOrUndefined,
   RiskScoreMappingOrUndefined,
-  RuleNameOverrideOrUndefined,
-  SeverityMappingOrUndefined,
-  TimestampOverrideOrUndefined,
-  EventCategoryOverrideOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
-import { PartialFilter } from '../types';
-import {
+  RiskScoreOrUndefined,
   ConcurrentSearchesOrUndefined,
   ItemsPerSearchOrUndefined,
-  ListArrayOrUndefined,
   ThreatFiltersOrUndefined,
   ThreatIndexOrUndefined,
   ThreatLanguageOrUndefined,
   ThreatMappingOrUndefined,
   ThreatQueryOrUndefined,
-} from '../../../../common/detection_engine/schemas/types';
+  ThreatsOrUndefined,
+  TypeOrUndefined,
+  LanguageOrUndefined,
+  SeverityOrUndefined,
+  SeverityMappingOrUndefined,
+  MaxSignalsOrUndefined,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import { AlertNotifyWhenType, SanitizedAlert } from '../../../../../alerting/common';
+import {
+  DescriptionOrUndefined,
+  AnomalyThresholdOrUndefined,
+  QueryOrUndefined,
+  SavedIdOrUndefined,
+  TimelineIdOrUndefined,
+  TimelineTitleOrUndefined,
+  IndexOrUndefined,
+  NoteOrUndefined,
+  MetaOrUndefined,
+  FalsePositivesOrUndefined,
+  OutputIndexOrUndefined,
+  IntervalOrUndefined,
+  NameOrUndefined,
+  TagsOrUndefined,
+  ToOrUndefined,
+  ThresholdOrUndefined,
+  ReferencesOrUndefined,
+  AuthorOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  LicenseOrUndefined,
+  RuleNameOverrideOrUndefined,
+  TimestampOverrideOrUndefined,
+  EventCategoryOverrideOrUndefined,
+  NamespaceOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
+import { PartialFilter } from '../types';
+import { RuleParams } from '../schemas/rule_schemas';
+import {
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+  NOTIFICATION_THROTTLE_RULE,
+} from '../../../../common/constants';
+import { RulesClient } from '../../../../../alerting/server';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -111,6 +119,7 @@ export interface UpdateProperties {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  namespace: NamespaceOrUndefined;
 }
 
 export const calculateVersion = (
@@ -165,5 +174,89 @@ export const calculateName = ({
     // the name of "untitled" just in case a rule name became null or undefined at
     // some point since TypeScript allows it.
     return 'untitled';
+  }
+};
+
+/**
+ * Given a throttle from a "security_solution" rule this will transform it into an "alerting" notifyWhen
+ * on their saved object.
+ * @params throttle The throttle from a "security_solution" rule
+ * @returns The correct "NotifyWhen" for a Kibana alerting.
+ */
+export const transformToNotifyWhen = (
+  throttle: string | null | undefined
+): AlertNotifyWhenType | null => {
+  if (throttle == null || throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    return null; // Although I return null, this does not change the value of the "notifyWhen" and it keeps the current value of "notifyWhen"
+  } else if (throttle === NOTIFICATION_THROTTLE_RULE) {
+    return 'onActiveAlert';
+  } else {
+    return 'onThrottleInterval';
+  }
+};
+
+/**
+ * Given a throttle from a "security_solution" rule this will transform it into an "alerting" "throttle"
+ * on their saved object.
+ * @params throttle The throttle from a "security_solution" rule
+ * @returns The "alerting" throttle
+ */
+export const transformToAlertThrottle = (throttle: string | null | undefined): string | null => {
+  if (
+    throttle == null ||
+    throttle === NOTIFICATION_THROTTLE_RULE ||
+    throttle === NOTIFICATION_THROTTLE_NO_ACTIONS
+  ) {
+    return null;
+  } else {
+    return throttle;
+  }
+};
+
+/**
+ * Given a throttle from an "alerting" Saved Object (SO) this will transform it into a "security_solution"
+ * throttle type.
+ * @params throttle The throttle from a  "alerting" Saved Object (SO)
+ * @returns The "security_solution" throttle
+ */
+export const transformFromAlertThrottle = (rule: SanitizedAlert<RuleParams>): string => {
+  if (rule.muteAll || rule.actions.length === 0) {
+    return NOTIFICATION_THROTTLE_NO_ACTIONS;
+  } else if (
+    rule.notifyWhen === 'onActiveAlert' ||
+    (rule.throttle == null && rule.notifyWhen == null)
+  ) {
+    return NOTIFICATION_THROTTLE_RULE;
+  } else if (rule.throttle == null) {
+    return NOTIFICATION_THROTTLE_NO_ACTIONS;
+  } else {
+    return rule.throttle;
+  }
+};
+
+/**
+ * Mutes, unmutes, or does nothing to the alert if no changed is detected
+ * @param id The id of the alert to (un)mute
+ * @param rulesClient the rules client
+ * @param muteAll If the existing alert has all actions muted
+ * @param throttle If the existing alert has a throttle set
+ */
+export const maybeMute = async ({
+  id,
+  rulesClient,
+  muteAll,
+  throttle,
+}: {
+  id: SanitizedAlert['id'];
+  rulesClient: RulesClient;
+  muteAll: SanitizedAlert<RuleParams>['muteAll'];
+  throttle: string | null | undefined;
+}): Promise<void> => {
+  if (muteAll && throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    await rulesClient.unmuteAll({ id });
+  } else if (!muteAll && throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    await rulesClient.muteAll({ id });
+  } else {
+    // Do nothing, no-operation
   }
 };

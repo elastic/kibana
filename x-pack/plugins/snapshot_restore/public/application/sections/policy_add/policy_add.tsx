@@ -9,13 +9,13 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPageContentBody, EuiSpacer, EuiPageHeader } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common';
 
-import { SectionError, Error } from '../../../shared_imports';
+import { SectionError, PageError } from '../../../shared_imports';
 
-import { PolicyForm, SectionLoading } from '../../components';
+import { PolicyForm, PageLoading } from '../../components';
 import { BASE_PATH, DEFAULT_POLICY_SCHEDULE } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addPolicy, useLoadIndices } from '../../services/http';
@@ -87,49 +87,57 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
     setSaveError(null);
   };
 
+  if (isLoadingIndices) {
+    return (
+      <PageLoading>
+        <FormattedMessage
+          id="xpack.snapshotRestore.addPolicy.loadingIndicesDescription"
+          defaultMessage="Loading available indices…"
+        />
+      </PageLoading>
+    );
+  }
+
+  if (errorLoadingIndices) {
+    return (
+      <PageError
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.addPolicy.LoadingIndicesErrorMessage"
+            defaultMessage="Error loading available indices"
+          />
+        }
+        error={errorLoadingIndices}
+      />
+    );
+  }
+
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.snapshotRestore.addPolicyTitle"
               defaultMessage="Create policy"
             />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {isLoadingIndices ? (
-          <SectionLoading>
-            <FormattedMessage
-              id="xpack.snapshotRestore.addPolicy.loadingIndicesDescription"
-              defaultMessage="Loading available indices…"
-            />
-          </SectionLoading>
-        ) : errorLoadingIndices ? (
-          <SectionError
-            title={
-              <FormattedMessage
-                id="xpack.snapshotRestore.addPolicy.LoadingIndicesErrorMessage"
-                defaultMessage="Error loading available indices"
-              />
-            }
-            error={errorLoadingIndices as Error}
-          />
-        ) : (
-          <PolicyForm
-            policy={emptyPolicy}
-            indices={indices}
-            dataStreams={dataStreams}
-            currentUrl={pathname}
-            isSaving={isSaving}
-            saveError={renderSaveError()}
-            clearSaveError={clearSaveError}
-            onSave={onSave}
-            onCancel={onCancel}
-          />
-        )}
-      </EuiPageContent>
-    </EuiPageBody>
+          </span>
+        }
+      />
+
+      <EuiSpacer size="l" />
+
+      <PolicyForm
+        policy={emptyPolicy}
+        indices={indices}
+        dataStreams={dataStreams}
+        currentUrl={pathname}
+        isSaving={isSaving}
+        saveError={renderSaveError()}
+        clearSaveError={clearSaveError}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    </EuiPageContentBody>
   );
 };

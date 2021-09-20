@@ -9,10 +9,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
+import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import _, { get, isUndefined, assign, includes } from 'lodash';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { get, isUndefined, assign, includes } from 'lodash';
 import { Gauge } from '../../../visualizations/views/gauge';
-import { getLastValue } from '../../../../../common/get_last_value';
+import { getLastValue } from '../../../../../common/last_value_utils';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
+import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -21,9 +25,9 @@ function getColors(props) {
   let gauge;
   if (model.gauge_color_rules) {
     model.gauge_color_rules.forEach((rule) => {
-      if (rule.operator && rule.value != null) {
-        const value = (series[0] && getLastValue(series[0].data)) || 0;
-        if (_[rule.operator](value, rule.value)) {
+      if (rule.operator) {
+        const value = getLastValue(series[0]?.data);
+        if (shouldOperate(rule, value) && getOperator(rule.operator)(value, rule.value)) {
           gauge = rule.gauge;
           text = rule.text;
         }
@@ -34,7 +38,7 @@ function getColors(props) {
 }
 
 function GaugeVisualization(props) {
-  const { backgroundColor, model, visData } = props;
+  const { backgroundColor, model, visData, fieldFormatMap, getConfig } = props;
   const colors = getColors(props);
 
   const series = get(visData, `${model.id}.series`, [])
@@ -43,11 +47,16 @@ function GaugeVisualization(props) {
       const seriesDef = model.series.find((s) => includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        newProps.formatter = createTickFormatter(
-          seriesDef.formatter,
-          seriesDef.value_template,
-          props.getConfig
-        );
+        const hasTextColorRules = model.gauge_color_rules.some(({ text }) => text);
+        newProps.formatter =
+          seriesDef.formatter === DATA_FORMATTERS.DEFAULT
+            ? createFieldFormatter(
+                getMetricsField(seriesDef.metrics),
+                fieldFormatMap,
+                'html',
+                hasTextColorRules
+              )
+            : createTickFormatter(seriesDef.formatter, seriesDef.value_template, getConfig);
       }
       if (i === 0 && colors.gauge) newProps.color = colors.gauge;
       return assign({}, row, newProps);
@@ -85,6 +94,7 @@ GaugeVisualization.propTypes = {
   additionalLabel: PropTypes.string,
   model: PropTypes.object,
   onBrush: PropTypes.func,
+  onFilterClick: PropTypes.func,
   onChange: PropTypes.func,
   visData: PropTypes.object,
   getConfig: PropTypes.func,

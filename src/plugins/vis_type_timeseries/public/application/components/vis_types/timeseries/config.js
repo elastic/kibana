@@ -5,9 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { i18n } from '@kbn/i18n';
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import { last } from 'lodash';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
 import { YesNo } from '../../yes_no';
@@ -23,12 +26,12 @@ import {
   EuiCode,
   EuiHorizontalRule,
   EuiFieldNumber,
-  EuiFormLabel,
-  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
-
+import { PalettePicker } from '../../palette_picker';
+import { getCharts } from '../../../../services';
+import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 
@@ -36,12 +39,8 @@ export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const defaults = {
-    fill: '',
-    line_width: '',
-    point_size: '',
     value_template: '{{value}}',
     offset_time: '',
-    split_color_mode: 'kibana',
     axis_min: '',
     axis_max: '',
     stacked: STACKED_OPTIONS.NONE,
@@ -124,33 +123,23 @@ export const TimeseriesConfig = injectI18n(function (props) {
   const selectedChartTypeOption = chartTypeOptions.find((option) => {
     return model.chart_type === option.value;
   });
+  const { palettes } = getCharts();
+  const [palettesRegistry, setPalettesRegistry] = useState(null);
 
-  const splitColorOptions = [
-    {
-      label: intl.formatMessage({
-        id: 'visTypeTimeseries.timeSeries.defaultPaletteLabel',
-        defaultMessage: 'Default palette',
-      }),
-      value: 'kibana',
-    },
-    {
-      label: intl.formatMessage({
-        id: 'visTypeTimeseries.timeSeries.rainbowLabel',
-        defaultMessage: 'Rainbow',
-      }),
-      value: 'rainbow',
-    },
-    {
-      label: intl.formatMessage({
-        id: 'visTypeTimeseries.timeSeries.gradientLabel',
-        defaultMessage: 'Gradient',
-      }),
-      value: 'gradient',
-    },
-  ];
-  const selectedSplitColorOption = splitColorOptions.find((option) => {
-    return model.split_color_mode === option.value;
-  });
+  useEffect(() => {
+    const fetchPalettes = async () => {
+      const palettesService = await palettes.getPalettes();
+      setPalettesRegistry(palettesService);
+    };
+    fetchPalettes();
+  }, [palettes]);
+
+  const handlePaletteChange = (val) => {
+    props.onChange({
+      split_color_mode: null,
+      palette: val,
+    });
+  };
 
   let type;
 
@@ -173,6 +162,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
               onChange={handleSelectChange('chart_type')}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="seriesChartTypeComboBox"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -245,14 +235,13 @@ export const TimeseriesConfig = injectI18n(function (props) {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="visTypeTimeseries.timeSeries.chartLine.stepsLabel"
-              defaultMessage="Steps"
-            />
-          </EuiFormLabel>
-          <EuiSpacer size="s" />
-          <YesNo value={model.steps} name="steps" onChange={props.onChange} />
+          <EuiFormRow
+            label={i18n.translate('visTypeTimeseries.timeSeries.chartLine.stepsLabel', {
+              defaultMessage: 'Steps',
+            })}
+          >
+            <YesNo value={model.steps} name="steps" onChange={props.onChange} />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -276,6 +265,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
               onChange={handleSelectChange('chart_type')}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="seriesChartTypeComboBox"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -337,18 +327,40 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
   const disableSeparateYaxis = model.separate_axis ? false : true;
 
-  const seriesIndexPattern =
-    props.model.override_index_pattern && props.model.series_index_pattern
-      ? props.model.series_index_pattern
-      : props.indexPatternForQuery;
+  const seriesIndexPattern = props.model.override_index_pattern
+    ? props.model.series_index_pattern
+    : props.indexPatternForQuery;
+
+  const changeModelFormatter = useCallback((formatter) => props.onChange({ formatter }), [props]);
+  const isNumericMetric = useMemo(
+    () => checkIfNumericMetric(last(model.metrics), props.fields, seriesIndexPattern),
+    [model.metrics, props.fields, seriesIndexPattern]
+  );
+  const isKibanaIndexPattern = props.panel.use_kibana_indexes || seriesIndexPattern === '';
+
+  const initialPalette = model.palette ?? {
+    type: 'palette',
+    name: 'default',
+  };
+
+  const palette = {
+    ...initialPalette,
+    name:
+      model.split_color_mode === 'kibana'
+        ? 'kibana_palette'
+        : model.split_color_mode || initialPalette.name,
+  };
 
   return (
     <div className="tvbAggRow">
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
-        </EuiFlexItem>
-        <EuiFlexItem>
+        <DataFormatPicker
+          formatterValue={model.formatter}
+          changeModelFormatter={changeModelFormatter}
+          shouldIncludeDefaultOption={isKibanaIndexPattern}
+          shouldIncludeNumberOptions={isNumericMetric}
+        />
+        <EuiFlexItem grow={3}>
           <EuiFormRow
             id={htmlId('template')}
             label={
@@ -371,6 +383,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             <EuiFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
+              disabled={model.formatter === DATA_FORMATTERS.DEFAULT}
               fullWidth
               data-test-subj="tsvb_series_value"
             />
@@ -411,48 +424,47 @@ export const TimeseriesConfig = injectI18n(function (props) {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="visTypeTimeseries.timeSeries.hideInLegendLabel"
-              defaultMessage="Hide in legend"
-            />
-          </EuiFormLabel>
-          <EuiSpacer size="s" />
-          <YesNo value={model.hide_in_legend} name="hide_in_legend" onChange={props.onChange} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
           <EuiFormRow
-            id={htmlId('splitColor')}
-            label={
-              <FormattedMessage
-                id="visTypeTimeseries.timeSeries.splitColorThemeLabel"
-                defaultMessage="Split color theme"
-              />
-            }
+            label={i18n.translate('visTypeTimeseries.timeSeries.hideInLegendLabel', {
+              defaultMessage: 'Hide in legend',
+            })}
           >
-            <EuiComboBox
-              isClearable={false}
-              options={splitColorOptions}
-              selectedOptions={selectedSplitColorOption ? [selectedSplitColorOption] : []}
-              onChange={handleSelectChange('split_color_mode')}
-              singleSelection={{ asPlainText: true }}
-            />
+            <YesNo value={model.hide_in_legend} name="hide_in_legend" onChange={props.onChange} />
           </EuiFormRow>
         </EuiFlexItem>
+        {palettesRegistry && (
+          <EuiFlexItem grow={true}>
+            <EuiFormRow
+              id={htmlId('splitColor')}
+              label={
+                <FormattedMessage
+                  id="visTypeTimeseries.timeSeries.splitColorThemeLabel"
+                  defaultMessage="Split color theme"
+                />
+              }
+            >
+              <PalettePicker
+                palettes={palettesRegistry}
+                activePalette={palette}
+                setPalette={handlePaletteChange}
+                color={model.color}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="s" />
 
       <EuiFlexGroup responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="visTypeTimeseries.timeSeries.separateAxisLabel"
-              defaultMessage="Separate axis?"
-            />
-          </EuiFormLabel>
-          <EuiSpacer size="s" />
-          <YesNo value={model.separate_axis} name="separate_axis" onChange={props.onChange} />
+          <EuiFormRow
+            label={i18n.translate('visTypeTimeseries.timeSeries.separateAxisLabel', {
+              defaultMessage: 'Separate axis?',
+            })}
+          >
+            <YesNo value={model.separate_axis} name="separate_axis" onChange={props.onChange} />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
@@ -525,25 +537,25 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>
-            <FormattedMessage
-              id="visTypeTimeseries.timeSeries.overrideIndexPatternLabel"
-              defaultMessage="Override Index Pattern?"
+          <EuiFormRow
+            label={i18n.translate('visTypeTimeseries.timeSeries.overrideIndexPatternLabel', {
+              defaultMessage: 'Override Index Pattern?',
+            })}
+          >
+            <YesNo
+              value={model.override_index_pattern}
+              name="override_index_pattern"
+              onChange={props.onChange}
+              data-test-subj="seriesOverrideIndexPattern"
             />
-          </EuiFormLabel>
-          <EuiSpacer size="s" />
-          <YesNo
-            value={model.override_index_pattern}
-            name="override_index_pattern"
-            onChange={props.onChange}
-          />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <IndexPattern
             {...props}
             prefix="series_"
             disabled={!model.override_index_pattern}
-            allowLevelofDetail={true}
+            allowLevelOfDetail={true}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -556,6 +568,6 @@ TimeseriesConfig.propTypes = {
   model: PropTypes.object,
   panel: PropTypes.object,
   onChange: PropTypes.func,
-  indexPatternForQuery: PropTypes.string,
+  indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   seriesQuantity: PropTypes.object,
 };

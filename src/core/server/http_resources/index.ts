@@ -8,11 +8,12 @@
 
 export { HttpResourcesService } from './http_resources_service';
 
-export {
+export type {
   HttpResourcesRenderOptions,
   HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,
   HttpResourcesRequestHandler,
   HttpResources,
+  InternalHttpResourcesPreboot,
   InternalHttpResourcesSetup,
 } from './types';

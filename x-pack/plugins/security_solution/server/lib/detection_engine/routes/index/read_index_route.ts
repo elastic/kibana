@@ -5,15 +5,19 @@
  * 2.0.
  */
 
+import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
+import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
+import { ConfigType } from '../../../../config';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { transformError, buildSiemResponse } from '../utils';
-import { getIndexExists } from '../../index/get_index_exists';
+import { DEFAULT_ALERTS_INDEX, DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
+
+import { buildSiemResponse } from '../utils';
 import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
+import { fieldAliasesOutdated } from './check_template_version';
 
-export const readIndexRoute = (router: SecuritySolutionPluginRouter) => {
+export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
   router.get(
     {
       path: DETECTION_ENGINE_INDEX_URL,
@@ -26,24 +30,29 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
         const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
+        // TODO: Once we are past experimental phase this code should be removed
+        const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
+
         const index = siemClient.getSignalsIndex();
-        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, index);
+        const indexExists = await getIndexExists(esClient, index);
 
         if (indexExists) {
           let mappingOutdated: boolean | null = null;
+          let aliasesOutdated: boolean | null = null;
           try {
-            const indexVersion = await getIndexVersion(clusterClient.callAsCurrentUser, index);
+            const indexVersion = await getIndexVersion(esClient, index);
             mappingOutdated = isOutdated({
               current: indexVersion,
               target: SIGNALS_TEMPLATE_VERSION,
             });
+            aliasesOutdated = await fieldAliasesOutdated(esClient, index);
           } catch (err) {
             const error = transformError(err);
             // Some users may not have the view_index_metadata permission necessary to check the index mapping version
@@ -55,12 +64,26 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter) => {
               });
             }
           }
-          return response.ok({ body: { name: index, index_mapping_outdated: mappingOutdated } });
-        } else {
-          return siemResponse.error({
-            statusCode: 404,
-            body: 'index for this space does not exist',
+          return response.ok({
+            body: {
+              name: ruleRegistryEnabled ? DEFAULT_ALERTS_INDEX : index,
+              index_mapping_outdated: mappingOutdated || aliasesOutdated,
+            },
           });
+        } else {
+          if (ruleRegistryEnabled) {
+            return response.ok({
+              body: {
+                name: DEFAULT_ALERTS_INDEX,
+                index_mapping_outdated: false,
+              },
+            });
+          } else {
+            return siemResponse.error({
+              statusCode: 404,
+              body: 'index for this space does not exist',
+            });
+          }
         }
       } catch (err) {
         const error = transformError(err);

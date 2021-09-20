@@ -17,13 +17,13 @@ if your data is stored in {es} and contains a time field, you can use the
 [role="screenshot"]
 image::user/ml/images/ml-data-visualizer-sample.jpg[{data-viz} for sample flight data]
 
-experimental[] You can also upload a CSV, NDJSON, or log file. The *{data-viz}*
+You can also upload a CSV, NDJSON, or log file. The *{data-viz}*
 identifies the file format and field mappings. You can then optionally import
 that data into an {es} index. To change the default file size limit, see
-<<kibana-ml-settings,Machine learning advanced settings>>.
+<<kibana-general-settings, fileUpload:maxFileSize advanced settings>>.
 
 If {stack-security-features} are enabled, users must have the necessary
-privileges to use {ml-features}. Refer to 
+privileges to use {ml-features}. Refer to
 {ml-docs}/setup.html#setup-privileges[Set up {ml-features}].
 
 NOTE: There are limitations in {ml-features} that affect {kib}. For more information, refer to {ml-docs}/ml-limitations.html[Machine learning].
@@ -40,16 +40,17 @@ false positives. {anomaly-detect-cap} runs in and scales with {es}, and
 includes an intuitive UI on the {kib} *Machine Learning* page for creating
 {anomaly-jobs} and understanding results.
 
-If you have a license that includes the {ml-features}, you can 
+If you have a license that includes the {ml-features}, you can
 create {anomaly-jobs} and manage jobs and {dfeeds} from the *Job Management*
-pane: 
+pane:
 
 [role="screenshot"]
 image::user/ml/images/ml-job-management.png[Job Management]
 
-You can use the *Settings* pane to create and edit 
-{ml-docs}/ml-calendars.html[calendars] and the filters that are used in 
-{ml-docs}/ml-rules.html[custom rules]:
+You can use the *Settings* pane to create and edit
+{ml-docs}/ml-ad-finding-anomalies.html#ml-ad-calendars[calendars] and the
+filters that are used in
+{ml-docs}/ml-ad-finding-anomalies.html#ml-ad-rules[custom rules]:
 
 [role="screenshot"]
 image::user/ml/images/ml-settings.png[Calendar Management]
@@ -69,18 +70,18 @@ occurring in your operational environment at that time:
 image::user/ml/images/ml-annotations-list.png[Single Metric Viewer with annotations]
 
 In some circumstances, annotations are also added automatically. For example, if
-the {anomaly-job} detects that there is missing data, it annotates the affected 
-time period. For more information, see 
-{ml-docs}/ml-delayed-data-detection.html[Handling delayed data]. The 
+the {anomaly-job} detects that there is missing data, it annotates the affected
+time period. For more information, see
+{ml-docs}/ml-delayed-data-detection.html[Handling delayed data]. The
 *Job Management* pane shows the full list of annotations for each job.
 
-NOTE: The {kib} {ml-features} use pop-ups. You must configure your web 
-browser so that it does not block pop-up windows or create an exception for your 
+NOTE: The {kib} {ml-features} use pop-ups. You must configure your web
+browser so that it does not block pop-up windows or create an exception for your
 {kib} URL.
 
 For more information about the {anomaly-detect} feature, see
 https://www.elastic.co/what-is/elastic-stack-machine-learning[{ml-cap} in the {stack}]
-and {ml-docs}/xpack-ml.html[{ml-cap} {anomaly-detect}].
+and {ml-docs}/ml-ad-overview.html[{ml-cap} {anomaly-detect}].
 
 [[xpack-ml-dfanalytics]]
 == {dfanalytics-cap}
@@ -89,7 +90,7 @@ experimental[]
 
 The Elastic {ml} {dfanalytics} feature enables you to analyze your data using
 {classification}, {oldetection}, and {regression} algorithms and generate new
-indices that contain the results alongside your source data. 
+indices that contain the results alongside your source data.
 
 If you have a license that includes the {ml-features}, you can create
 {dfanalytics-jobs} and view their results on the *Data Frame Analytics* page in
@@ -98,5 +99,5 @@ If you have a license that includes the {ml-features}, you can create
 [role="screenshot"]
 image::user/ml/images/outliers.png[{oldetection-cap} results in {kib}]
 
-For more information about the {dfanalytics} feature, see 
+For more information about the {dfanalytics} feature, see
 {ml-docs}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].

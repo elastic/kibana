@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Add one more saved object to cancel it', async () => {
-      await testSubjects.click('savedObjectTitle[Flights]-Average-Ticket-Price');
+      await testSubjects.click('savedObjectTitle[Flights]-Destination-Weather');
       await a11y.testAppSnapshot();
     });
 
@@ -110,13 +110,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Exit out of edit mode', async () => {
-      await PageObjects.dashboard.clickDiscardChanges(false);
+      await PageObjects.dashboard.clickCancelOutOfEditMode(false);
       await a11y.testAppSnapshot();
     });
 
     it('Discard changes', async () => {
-      await testSubjects.exists('dashboardDiscardConfirmDiscard');
-      await testSubjects.click('dashboardDiscardConfirmDiscard');
+      await PageObjects.common.clickConfirmOnModal();
       await PageObjects.dashboard.getIsInViewMode();
       await a11y.testAppSnapshot();
     });

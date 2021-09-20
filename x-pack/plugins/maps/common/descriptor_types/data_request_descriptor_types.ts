@@ -7,25 +7,33 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Query } from 'src/plugins/data/public';
+import type { Query } from 'src/plugins/data/common';
 import { SortDirection } from 'src/plugins/data/common/search';
 import { RENDER_AS, SCALING_TYPES } from '../constants';
-import { MapExtent, MapQuery } from './map_descriptor';
+import { MapExtent } from './map_descriptor';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
+import { ESTermSourceDescriptor } from './source_descriptor_types';
+
+export type Timeslice = {
+  from: number;
+  to: number;
+};
 
 // Global map state passed to every layer.
-export type MapFilters = {
+export type DataFilters = {
   buffer?: MapExtent; // extent with additional buffer
   extent?: MapExtent; // map viewport
   filters: Filter[];
-  query?: MapQuery;
-  refreshTimerLastTriggeredAt?: string;
+  query?: Query;
   searchSessionId?: string;
   timeFilters: TimeRange;
+  timeslice?: Timeslice;
   zoom: number;
+  isReadOnly: boolean;
 };
 
-type ESSearchSourceSyncMeta = {
+export type ESSearchSourceSyncMeta = {
+  filterByMapBounds: boolean;
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
@@ -42,9 +50,7 @@ type ESGeoLineSourceSyncMeta = {
   sortField: string;
 };
 
-type ESTermSourceSyncMeta = {
-  size: number;
-};
+export type ESTermSourceSyncMeta = Pick<ESTermSourceDescriptor, 'indexPatternId' | 'size' | 'term'>;
 
 export type VectorSourceSyncMeta =
   | ESSearchSourceSyncMeta
@@ -53,28 +59,33 @@ export type VectorSourceSyncMeta =
   | ESTermSourceSyncMeta
   | null;
 
-export type VectorSourceRequestMeta = MapFilters & {
+export type VectorSourceRequestMeta = DataFilters & {
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
+  applyForceRefresh: boolean;
   fieldNames: string[];
   geogridPrecision?: number;
-  sourceQuery?: MapQuery;
-  sourceMeta: VectorSourceSyncMeta;
-};
-
-export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'> & {
+  timesliceMaskField?: string;
   sourceQuery?: Query;
+  sourceMeta: VectorSourceSyncMeta;
+  isForceRefresh: boolean;
 };
 
-export type VectorStyleRequestMeta = MapFilters & {
+export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'>;
+
+export type VectorStyleRequestMeta = DataFilters & {
   dynamicStyleFields: string[];
   isTimeAware: boolean;
-  sourceQuery: MapQuery;
+  sourceQuery: Query;
   timeFilters: TimeRange;
 };
 
 export type ESSearchSourceResponseMeta = {
   areResultsTrimmed?: boolean;
+  resultsCount?: number;
+  // results time extent, either Kibana time range or timeslider time slice
+  timeExtent?: Timeslice;
+  isTimeExtentForTimeslice?: boolean;
 
   // top hits meta
   areEntitiesTrimmed?: boolean;
@@ -95,7 +106,7 @@ export type VectorTileLayerMeta = {
 };
 
 // Partial because objects are justified downstream in constructors
-export type DataMeta = Partial<
+export type DataRequestMeta = Partial<
   VectorSourceRequestMeta &
     VectorJoinSourceRequestMeta &
     VectorStyleRequestMeta &
@@ -122,8 +133,8 @@ export type StyleMetaData = {
 
 export type DataRequestDescriptor = {
   dataId: string;
-  dataMetaAtStart?: DataMeta | null;
+  dataRequestMetaAtStart?: DataRequestMeta | null;
   dataRequestToken?: symbol;
   data?: object;
-  dataMeta?: DataMeta;
+  dataRequestMeta?: DataRequestMeta;
 };

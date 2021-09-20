@@ -6,3 +6,4 @@
  */
 
 export const CONTROLLED_BY_SWIM_LANE_FILTER = 'anomaly-swim-lane';
+export const CONTROLLED_BY_ANOMALY_CHARTS_FILTER = 'anomaly-charts';

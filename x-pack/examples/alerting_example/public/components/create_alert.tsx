@@ -36,8 +36,8 @@ export const CreateAlert = ({
       <EuiFlexItem grow={false}>
         <EuiCard
           icon={<EuiIcon size="xxl" type={`bell`} />}
-          title={`Create Alert`}
-          description="Create an new Alert based on one of our example Alert Types ."
+          title={`Create Rule`}
+          description="Create a new Rule based on one of our example Rule Types ."
           onClick={() => setAlertFlyoutVisibility(true)}
         />
       </EuiFlexItem>

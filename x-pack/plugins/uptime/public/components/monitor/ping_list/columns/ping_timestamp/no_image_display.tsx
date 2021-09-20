@@ -27,7 +27,7 @@ export const NoImageDisplay: React.FC<NoImageDisplayProps> = ({
         {isLoading || isPending ? (
           <EuiLoadingSpinner
             aria-label={imageLoadingSpinnerAriaLabel}
-            size="xl"
+            size="l"
             data-test-subj="pingTimestampSpinner"
           />
         ) : (

@@ -7,7 +7,9 @@
 
 import { EuiText } from '@elastic/eui';
 import React from 'react';
+
 import { mountWithIntl } from '@kbn/test/jest';
+
 import { PrivilegeDisplay } from './privilege_display';
 
 describe('PrivilegeDisplay', () => {

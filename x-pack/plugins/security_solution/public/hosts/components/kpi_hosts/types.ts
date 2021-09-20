@@ -9,7 +9,7 @@ import { UpdateDateRange } from '../../../common/components/charts/common';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 export interface HostsKpiProps {
-  filterQuery: string;
+  filterQuery?: string;
   from: string;
   to: string;
   indexNames: string[];

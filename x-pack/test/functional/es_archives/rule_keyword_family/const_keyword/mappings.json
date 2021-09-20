@@ -1,0 +1,48 @@
+{
+  "type": "index",
+  "value": {
+    "index": "const_keyword",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "data_stream": {
+          "properties": {
+            "dataset": {
+              "type": "constant_keyword",
+              "value": "dataset_name_1"
+            },
+            "module": {
+              "type": "constant_keyword",
+              "value": "module_name_1"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "category": {
+              "type": "keyword"
+            },
+            "dataset": {
+              "type": "alias",
+              "path": "data_stream.dataset"
+            },
+            "module": {
+              "type": "alias",
+              "path": "data_stream.module"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "refresh_interval": "1s",
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

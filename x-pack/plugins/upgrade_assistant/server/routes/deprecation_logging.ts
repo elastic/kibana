@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { API_BASE_PATH } from '../../common/constants';
 
 import {
   getDeprecationLoggingStatus,
@@ -17,7 +18,7 @@ import { RouteDependencies } from '../types';
 export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) {
   router.get(
     {
-      path: '/api/upgrade_assistant/deprecation_logging',
+      path: `${API_BASE_PATH}/deprecation_logging`,
       validate: false,
     },
     versionCheckHandlerWrapper(
@@ -38,7 +39,7 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
 
   router.put(
     {
-      path: '/api/upgrade_assistant/deprecation_logging',
+      path: `${API_BASE_PATH}/deprecation_logging`,
       validate: {
         body: schema.object({
           isEnabled: schema.boolean(),

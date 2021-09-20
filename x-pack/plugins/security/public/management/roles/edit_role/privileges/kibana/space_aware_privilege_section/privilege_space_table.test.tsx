@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiBadge, EuiInMemoryTable } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
-import { ReactWrapper } from 'enzyme';
-import { PrivilegeSpaceTable } from './privilege_space_table';
-import { PrivilegeDisplay } from './privilege_display';
-import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { ReactWrapper } from 'enzyme';
+import React from 'react';
+
+import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+
+import { KibanaFeature } from '../../../../../../../../features/public';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { KibanaFeature } from '../../../../../../../../features/public';
-import { findTestSubject } from '@kbn/test/jest';
+import { PrivilegeDisplay } from './privilege_display';
+import { PrivilegeSpaceTable } from './privilege_space_table';
 
 interface TableRow {
   spaces: string[];
@@ -738,6 +739,21 @@ describe('global base read', () => {
         { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
       ]);
     });
+  });
+});
+
+describe('global and reserved', () => {
+  it('base all, reserved_foo', () => {
+    const props = buildProps([
+      { spaces: ['*'], base: ['all'], feature: {} },
+      { spaces: ['*'], base: [], feature: {}, _reserved: ['foo'] },
+    ]);
+    const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+    const actualTable = getTableFromComponent(component);
+    expect(actualTable).toEqual([
+      { spaces: ['*'], privileges: { summary: 'Foo', overridden: false } },
+      { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
+    ]);
   });
 });
 

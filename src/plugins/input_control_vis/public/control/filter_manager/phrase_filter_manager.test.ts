@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { Filter } from '@kbn/es-query';
 import expect from '@kbn/expect';
 
 import {
-  Filter,
   IndexPattern,
   FilterManager as QueryFilterManager,
   IndexPatternsContract,
@@ -69,7 +69,7 @@ describe('PhraseFilterManager', function () {
       expect(newFilter.meta.controlledBy).to.be(controlId);
       expect(newFilter.meta.key).to.be('field1');
       expect(newFilter).to.have.property('query');
-      const query = newFilter.query;
+      const query = newFilter.query!;
       expect(query).to.have.property('bool');
       expect(query.bool.should.length).to.be(2);
       expect(JSON.stringify(query.bool.should[0], null, '')).to.be(
@@ -121,6 +121,7 @@ describe('PhraseFilterManager', function () {
     test('should extract value from match phrase filter', function () {
       filterManager.setMockFilters([
         {
+          meta: {},
           query: {
             match: {
               field1: {
@@ -137,6 +138,7 @@ describe('PhraseFilterManager', function () {
     test('should extract value from multiple filters', function () {
       filterManager.setMockFilters([
         {
+          meta: {},
           query: {
             match: {
               field1: {
@@ -163,6 +165,7 @@ describe('PhraseFilterManager', function () {
     test('should extract value from bool filter', function () {
       filterManager.setMockFilters([
         {
+          meta: {},
           query: {
             bool: {
               should: [
@@ -187,6 +190,7 @@ describe('PhraseFilterManager', function () {
     test('should return undefined when filter value can not be extracted from Kibana filter', function () {
       filterManager.setMockFilters([
         {
+          meta: {},
           query: {
             match: {
               myFieldWhichIsNotField1: {

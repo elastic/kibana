@@ -27,6 +27,7 @@ import { VisualizeConstants } from '../..';
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
+  const [embeddableIdValue, setEmbeddableId] = useState<string>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
@@ -55,8 +56,17 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
 
   useEffect(() => {
-    const { originatingApp: value } =
-      services.stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
+    const { stateTransferService, data } = services;
+    const { originatingApp: value, searchSessionId, embeddableId } =
+      stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
+
+    if (searchSessionId) {
+      data.search.session.continue(searchSessionId);
+    } else {
+      data.search.session.start();
+    }
+
+    setEmbeddableId(embeddableId);
     setOriginatingApp(value);
   }, [services]);
 
@@ -65,7 +75,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     return () => {
       eventEmitter.removeAllListeners();
     };
-  }, [eventEmitter]);
+  }, [eventEmitter, services]);
 
   return (
     <VisualizeEditorCommon
@@ -82,6 +92,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}
       onAppLeave={onAppLeave}
+      embeddableId={embeddableIdValue}
     />
   );
 };

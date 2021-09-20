@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreStart } from 'kibana/public';
+import { PluginInitializerContext, CoreStart, AppMountParameters } from 'kibana/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
@@ -26,4 +26,5 @@ export interface MonitoringStartPluginDependencies {
   externalConfig: Array<Array<string | number> | Array<string | boolean>>;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
+  appMountParameters: AppMountParameters;
 }

@@ -23,7 +23,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./get_alert_state'));
     loadTestFile(require.resolve('./get_alert_instance_summary'));
-    loadTestFile(require.resolve('./list_alert_types'));
+    loadTestFile(require.resolve('./rule_types'));
     loadTestFile(require.resolve('./event_log'));
     loadTestFile(require.resolve('./execution_status'));
     loadTestFile(require.resolve('./mute_all'));
@@ -37,6 +37,8 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./builtin_alert_types'));
     loadTestFile(require.resolve('./mustache_templates.ts'));
     loadTestFile(require.resolve('./notify_when'));
+    loadTestFile(require.resolve('./ephemeral'));
+    loadTestFile(require.resolve('./event_log_alerts'));
 
     // note that this test will destroy existing spaces
     loadTestFile(require.resolve('./migrations'));

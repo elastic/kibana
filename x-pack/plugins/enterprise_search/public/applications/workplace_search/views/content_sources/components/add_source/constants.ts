@@ -176,7 +176,7 @@ export const CONFIG_CUSTOM_BUTTON = i18n.translate(
 export const CONFIG_OAUTH_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configOauth.label',
   {
-    defaultMessage: 'Complete connection',
+    defaultMessage: 'Select GitHub organizations to sync',
   }
 );
 
@@ -304,6 +304,13 @@ export const SAVE_CUSTOM_DOC_PERMISSIONS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.docPermissions.title',
   {
     defaultMessage: 'Set document-level permissions',
+  }
+);
+
+export const INCLUDED_FEATURES_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.includedFeaturesTitle',
+  {
+    defaultMessage: 'Included features',
   }
 );
 

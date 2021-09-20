@@ -17,6 +17,7 @@ interface Processor {
 export interface SpanRaw extends APMBaseDoc {
   processor: Processor;
   trace: { id: string }; // trace is required
+  event?: { outcome?: 'success' | 'failure' };
   service: {
     name: string;
     environment?: string;
@@ -53,6 +54,11 @@ export interface SpanRaw extends APMBaseDoc {
       age?: { ms: number };
       body?: string;
       headers?: Record<string, unknown>;
+    };
+    composite?: {
+      count: number;
+      sum: { us: number };
+      compression_strategy: string;
     };
   };
   timestamp: TimestampUs;

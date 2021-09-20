@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mount, shallow, ShallowWrapper } from 'enzyme';
+import { mount, shallow, ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
-import { removeExternalLinkText } from '../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 
 import { encodeIpv6 } from '../../lib/helpers';
@@ -121,11 +121,11 @@ describe('Custom Links', () => {
   describe('External Link', () => {
     const mockLink = 'https://www.virustotal.com/gui/search/';
     const mockLinkName = 'Link';
-    let wrapper: ShallowWrapper;
+    let wrapper: ReactWrapper | ShallowWrapper;
 
     describe('render', () => {
       beforeAll(() => {
-        wrapper = shallow(
+        wrapper = mount(
           <ExternalLink url={mockLink} idx={0} allItemsLimit={5} overflowIndexStart={5}>
             {mockLinkName}
           </ExternalLink>
@@ -137,11 +137,13 @@ describe('Custom Links', () => {
       });
 
       test('it renders ExternalLinkIcon', () => {
-        expect(wrapper.find('[data-test-subj="externalLinkIcon"]').exists()).toBeTruthy();
+        expect(wrapper.find('span [data-euiicon-type="popout"]').length).toBe(1);
       });
 
       test('it renders correct url', () => {
-        expect(wrapper.find('[data-test-subj="externalLink"]').prop('href')).toEqual(mockLink);
+        expect(wrapper.find('[data-test-subj="externalLink"]').first().prop('href')).toEqual(
+          mockLink
+        );
       });
 
       test('it renders comma if id is given', () => {
@@ -435,14 +437,14 @@ describe('Custom Links', () => {
 
       test('it renders correct number of external icons by default', () => {
         const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
-        expect(wrapper.find('[data-test-subj="externalLinkIcon"]')).toHaveLength(5);
+        expect(wrapper.find('span [data-euiicon-type="popout"]')).toHaveLength(5);
       });
 
       test('it renders correct number of external icons', () => {
         const wrapper = mountWithIntl(
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
         );
-        expect(wrapper.find('[data-test-subj="externalLinkIcon"]')).toHaveLength(1);
+        expect(wrapper.find('span [data-euiicon-type="popout"]')).toHaveLength(1);
       });
     });
   });

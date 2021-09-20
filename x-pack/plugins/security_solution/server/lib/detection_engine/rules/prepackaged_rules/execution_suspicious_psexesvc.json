@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Process Execution via Renamed PsExec Executable",
   "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n  process.pe.original_file_name : \"psexesvc.exe\" and not process.name : \"PSEXESVC.exe\"\n",
   "risk_score": 47,

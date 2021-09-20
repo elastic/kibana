@@ -6,14 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
+import type { RouteDefinitionParams } from '../';
 import { canUserChangePassword } from '../../../common/model';
+import {
+  BasicHTTPAuthorizationHeaderCredentials,
+  HTTPAuthorizationHeader,
+} from '../../authentication';
 import { getErrorStatusCode, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-import {
-  HTTPAuthorizationHeader,
-  BasicHTTPAuthorizationHeaderCredentials,
-} from '../../authentication';
-import { RouteDefinitionParams } from '..';
 
 export function defineChangeUserPasswordRoutes({
   getAuthenticationService,

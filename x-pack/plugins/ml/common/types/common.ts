@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlPages } from '../constants/ml_url_generator';
+import { MlPages } from '../constants/locator';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;
@@ -46,3 +46,7 @@ export interface ListingPageUrlState {
 export type AppPageState<T> = {
   [key in MlPages]?: Partial<T>;
 };
+
+type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+
+export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;

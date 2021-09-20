@@ -26,7 +26,7 @@ import {
   IAggConfigs,
   IndexPattern,
   ISearchSource,
-  AggConfigOptions,
+  AggConfigSerialized,
   SearchSourceFields,
 } from '../../../plugins/data/public';
 import { BaseVisType } from './vis_types';
@@ -34,17 +34,17 @@ import { VisParams } from '../common/types';
 
 export interface SerializedVisData {
   expression?: string;
-  aggs: AggConfigOptions[];
+  aggs: AggConfigSerialized[];
   searchSource: SearchSourceFields;
   savedSearchId?: string;
 }
 
-export interface SerializedVis {
+export interface SerializedVis<T = VisParams> {
   id?: string;
   title: string;
   description?: string;
   type: string;
-  params: VisParams;
+  params: T;
   uiState?: any;
   data: SerializedVisData;
 }
@@ -80,7 +80,7 @@ export class Vis<TVisParams = VisParams> {
 
   public readonly uiState: PersistedState;
 
-  constructor(visType: string, visState: SerializedVis = {} as any) {
+  constructor(visType: string, visState: SerializedVis<TVisParams> = {} as any) {
     this.type = this.getType(visType);
     this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
@@ -154,9 +154,9 @@ export class Vis<TVisParams = VisParams> {
     }
   }
 
-  clone() {
+  clone(): Vis<TVisParams> {
     const { data, ...restOfSerialized } = this.serialize();
-    const vis = new Vis(this.type.name, restOfSerialized as any);
+    const vis = new Vis<TVisParams>(this.type.name, restOfSerialized as any);
     vis.setState({ ...restOfSerialized, data: {} });
     const aggs = this.data.indexPattern
       ? getAggs().createAggConfigs(this.data.indexPattern, data.aggs)
@@ -175,7 +175,7 @@ export class Vis<TVisParams = VisParams> {
       title: this.title,
       description: this.description,
       type: this.type.name,
-      params: cloneDeep(this.params) as any,
+      params: cloneDeep(this.params),
       uiState: this.uiState.toJSON(),
       data: {
         aggs: aggs as any,
@@ -194,7 +194,7 @@ export class Vis<TVisParams = VisParams> {
     }
   }
 
-  private initializeDefaultsFromSchemas(configStates: AggConfigOptions[], schemas: any) {
+  private initializeDefaultsFromSchemas(configStates: AggConfigSerialized[], schemas: any) {
     // Set the defaults for any schema which has them. If the defaults
     // for some reason has more then the max only set the max number
     // of defaults (not sure why a someone define more...
@@ -213,3 +213,6 @@ export class Vis<TVisParams = VisParams> {
     return newConfigs;
   }
 }
+
+// eslint-disable-next-line import/no-default-export
+export default Vis;

@@ -51,7 +51,7 @@ export interface LinkIconProps extends LinkProps {
   children: string | ReactNode;
   iconSize?: IconSize;
   iconType: IconType;
-  dataTestSubj?: string;
+  dataTestSubj: string;
 }
 
 export const LinkIcon = React.memo<LinkIconProps>(

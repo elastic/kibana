@@ -7,19 +7,22 @@
  */
 
 export { ElasticsearchService } from './elasticsearch_service';
-export { config, configSchema, ElasticsearchConfig } from './elasticsearch_config';
-export { NodesVersionCompatibility } from './version_check/ensure_es_version';
-export {
+export { config, configSchema } from './elasticsearch_config';
+export { ElasticsearchConfig } from './elasticsearch_config';
+export type { NodesVersionCompatibility } from './version_check/ensure_es_version';
+export type {
+  ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
+  InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
   FakeRequest,
   ScopeableRequest,
+  ElasticsearchConfigPreboot,
 } from './types';
-export * from './legacy';
-export {
+export type {
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
@@ -30,7 +33,12 @@ export {
   CountResponse,
   ShardsInfo,
   ShardsResponse,
-  Explanation,
   GetResponse,
   DeleteDocumentResponse,
 } from './client';
+export { getRequestDebugMeta, getErrorMessage } from './client';
+export {
+  isSupportedEsServer,
+  isNotFoundFromUnsupportedServer,
+  PRODUCT_RESPONSE_HEADER,
+} from './supported_server_response_check';

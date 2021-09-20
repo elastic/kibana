@@ -7,9 +7,8 @@
 
 import { patchRulesSchema, PatchRulesSchema, PatchRulesSchemaDecoded } from './patch_rules_schema';
 import { getPatchRulesSchemaMock, getPatchRulesSchemaDecodedMock } from './patch_rules_schema.mock';
-import { exactCheck } from '../../../exact_check';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from '../../../test_utils';
 import { left } from 'fp-ts/lib/Either';
 import { getListArrayMock } from '../types/lists.mock';
 
@@ -973,7 +972,7 @@ describe('patch_rules_schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('threat is invalid when updated with missing technique', () => {
+  test('threat is valid when updated with missing technique', () => {
     const threat: Omit<PatchRulesSchema['threat'], 'technique'> = [
       {
         framework: 'fake',
@@ -993,10 +992,8 @@ describe('patch_rules_schema', () => {
     const decoded = patchRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "threat,technique"',
-    ]);
-    expect(message.schema).toEqual({});
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
   });
 
   test('validates with timeline_id and timeline_title', () => {

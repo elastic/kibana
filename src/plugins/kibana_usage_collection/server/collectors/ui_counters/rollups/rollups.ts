@@ -8,6 +8,7 @@
 
 import { ISavedObjectsRepository, Logger } from 'kibana/server';
 import moment from 'moment';
+import type { Subject } from 'rxjs';
 
 import { UI_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 import {
@@ -38,6 +39,7 @@ export function isSavedObjectOlderThan({
 
 export async function rollUiCounterIndices(
   logger: Logger,
+  stopUsingUiCounterIndicies$: Subject<void>,
   savedObjectsClient?: ISavedObjectsRepository
 ) {
   if (!savedObjectsClient) {
@@ -53,6 +55,20 @@ export async function rollUiCounterIndices(
         perPage: 1000, // Process 1000 at a time as a compromise of speed and overload
       }
     );
+
+    if (rawUiCounterDocs.length === 0) {
+      /**
+       * @deprecated 7.13 to be removed in 8.0.0
+       * Stop triggering rollups when we've rolled up all documents.
+       *
+       * This Saved Object registry is no longer used.
+       * Migration from one SO registry to another is not yet supported.
+       * In a future release we can remove this piece of code and
+       * migrate any docs to the Usage Counters Saved object.
+       */
+
+      stopUsingUiCounterIndicies$.complete();
+    }
 
     const docsToDelete = rawUiCounterDocs.filter((doc) =>
       isSavedObjectOlderThan({

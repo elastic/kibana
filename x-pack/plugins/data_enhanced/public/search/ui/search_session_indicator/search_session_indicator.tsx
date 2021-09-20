@@ -19,11 +19,13 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { PartialClock, CheckInEmptyCircle } from './custom_icons';
+import { CheckInEmptyCircle, PartialClock } from './custom_icons';
 import './search_session_indicator.scss';
 import { SearchSessionState } from '../../../../../../../src/plugins/data/public';
+import { SearchSessionName } from './components';
 
 export interface SearchSessionIndicatorProps {
   state: SearchSessionState;
@@ -38,6 +40,13 @@ export interface SearchSessionIndicatorProps {
   saveDisabledReasonText?: string;
 
   onOpened?: (openedState: SearchSessionState) => void;
+
+  searchSessionName?: string;
+  saveSearchSessionNameFn?: (newName: string) => Promise<unknown>;
+
+  startedTime?: Date;
+  completedTime?: Date;
+  canceledTime?: Date;
 }
 
 type ActionButtonProps = SearchSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
@@ -130,6 +139,7 @@ const searchSessionIndicatorViewStateToProps: {
     popover: {
       title: string;
       description: string;
+      whenText: (props: SearchSessionIndicatorProps) => string;
       primaryAction?: React.ComponentType<ActionButtonProps>;
       secondaryAction?: React.ComponentType<ActionButtonProps>;
     };
@@ -154,8 +164,15 @@ const searchSessionIndicatorViewStateToProps: {
         defaultMessage: 'Your search is taking a while...',
       }),
       description: i18n.translate('xpack.data.searchSessionIndicator.loadingResultsDescription', {
-        defaultMessage: 'Save your session, continue your work, and return to completed results.',
+        defaultMessage: 'Save your session, continue your work, and return to completed results',
       }),
+      whenText: (props: SearchSessionIndicatorProps) =>
+        i18n.translate('xpack.data.searchSessionIndicator.loadingResultsWhenText', {
+          defaultMessage: 'Started {when}',
+          values: {
+            when: props.startedTime ? moment(props.startedTime).format(`L @ LTS`) : '',
+          },
+        }),
       primaryAction: CancelButton,
       secondaryAction: ContinueInBackgroundButton,
     },
@@ -181,9 +198,16 @@ const searchSessionIndicatorViewStateToProps: {
       description: i18n.translate(
         'xpack.data.searchSessionIndicator.resultsLoadedDescriptionText',
         {
-          defaultMessage: 'Save your session and return to it later.',
+          defaultMessage: 'Save your session and return to it later',
         }
       ),
+      whenText: (props: SearchSessionIndicatorProps) =>
+        i18n.translate('xpack.data.searchSessionIndicator.resultsLoadedWhenText', {
+          defaultMessage: 'Completed {when}',
+          values: {
+            when: props.completedTime ? moment(props.completedTime).format(`L @ LTS`) : '',
+          },
+        }),
       primaryAction: SaveButton,
       secondaryAction: ViewAllSearchSessionsButton,
     },
@@ -211,9 +235,16 @@ const searchSessionIndicatorViewStateToProps: {
       description: i18n.translate(
         'xpack.data.searchSessionIndicator.loadingInTheBackgroundDescriptionText',
         {
-          defaultMessage: 'You can return to completed results from Management.',
+          defaultMessage: 'You can return to completed results from Management',
         }
       ),
+      whenText: (props: SearchSessionIndicatorProps) =>
+        i18n.translate('xpack.data.searchSessionIndicator.loadingInTheBackgroundWhenText', {
+          defaultMessage: 'Started {when}',
+          values: {
+            when: props.startedTime ? moment(props.startedTime).format(`L @ LTS`) : '',
+          },
+        }),
       primaryAction: CancelButton,
       secondaryAction: ViewAllSearchSessionsButton,
     },
@@ -245,9 +276,16 @@ const searchSessionIndicatorViewStateToProps: {
       description: i18n.translate(
         'xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundDescriptionText',
         {
-          defaultMessage: 'You can return to these results from Management.',
+          defaultMessage: 'You can return to these results from Management',
         }
       ),
+      whenText: (props: SearchSessionIndicatorProps) =>
+        i18n.translate('xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundWhenText', {
+          defaultMessage: 'Completed {when}',
+          values: {
+            when: props.completedTime ? moment(props.completedTime).format(`L @ LTS`) : '',
+          },
+        }),
       secondaryAction: ViewAllSearchSessionsButton,
     },
   },
@@ -271,8 +309,15 @@ const searchSessionIndicatorViewStateToProps: {
       }),
       description: i18n.translate('xpack.data.searchSessionIndicator.restoredDescriptionText', {
         defaultMessage:
-          'You are viewing cached data from a specific time range. Changing the time range or filters will re-run the session.',
+          'You are viewing cached data from a specific time range. Changing the time range or filters will re-run the session',
       }),
+      whenText: (props: SearchSessionIndicatorProps) =>
+        i18n.translate('xpack.data.searchSessionIndicator.restoredWhenText', {
+          defaultMessage: 'Completed {when}',
+          values: {
+            when: props.completedTime ? moment(props.completedTime).format(`L @ LTS`) : '',
+          },
+        }),
       secondaryAction: ViewAllSearchSessionsButton,
     },
   },
@@ -292,8 +337,15 @@ const searchSessionIndicatorViewStateToProps: {
         defaultMessage: 'Search session stopped',
       }),
       description: i18n.translate('xpack.data.searchSessionIndicator.canceledDescriptionText', {
-        defaultMessage: 'You are viewing incomplete data.',
+        defaultMessage: 'You are viewing incomplete data',
       }),
+      whenText: (props: SearchSessionIndicatorProps) =>
+        i18n.translate('xpack.data.searchSessionIndicator.canceledWhenText', {
+          defaultMessage: 'Stopped {when}',
+          values: {
+            when: props.canceledTime ? moment(props.canceledTime).format(`L @ LTS`) : '',
+          },
+        }),
       secondaryAction: ViewAllSearchSessionsButton,
     },
   },
@@ -365,14 +417,31 @@ export const SearchSessionIndicator = React.forwardRef<
       }
     >
       <div data-test-subj="searchSessionIndicatorPopoverContainer">
-        <EuiText size="s">
-          <p>{popover.title}</p>
-        </EuiText>
+        {props.searchSessionName && props.saveSearchSessionNameFn ? (
+          <SearchSessionName
+            name={props.searchSessionName}
+            editName={props.saveSearchSessionNameFn}
+          />
+        ) : (
+          <EuiText size={'s'}>
+            <p>{popover.title}</p>
+          </EuiText>
+        )}
+
         <EuiSpacer size={'xs'} />
+        {popover.whenText?.(props) ? (
+          <>
+            <EuiText size="xs" color={'subdued'}>
+              <p>{popover.whenText(props)}</p>
+            </EuiText>
+            <EuiSpacer size={'xs'} />
+          </>
+        ) : null}
+
         <EuiText size="xs" color={'subdued'}>
           <p>{popover.description}</p>
         </EuiText>
-        <EuiSpacer size={'s'} />
+        <EuiSpacer size={'m'} />
         <EuiFlexGroup
           wrap={true}
           responsive={false}

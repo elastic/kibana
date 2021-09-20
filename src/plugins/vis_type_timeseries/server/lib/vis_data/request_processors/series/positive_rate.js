@@ -7,7 +7,6 @@
  */
 
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
 import { UI_SETTINGS } from '../../../../../../data/common';
@@ -56,14 +55,15 @@ export function positiveRate(
   panel,
   series,
   esQueryConfig,
-  indexPatternObject,
+  seriesIndex,
   capabilities,
-  uiSettings
+  uiSettings,
+  buildSeriesMetaParams
 ) {
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
 
-    const { interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
+    const { interval } = await buildSeriesMetaParams();
     const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
 
     if (series.metrics.some(filter)) {

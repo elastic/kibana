@@ -10,6 +10,7 @@ import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
 import { JOB_MAP_NODE_TYPES } from '../../common/constants/data_frame_analytics';
+import { Field, Aggregation } from '../../common/types/fields';
 import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsJobUpdateSchema,
@@ -21,13 +22,16 @@ import {
   deleteDataFrameAnalyticsJobSchema,
   jobsExistSchema,
   analyticsQuerySchema,
+  analyticsNewJobCapsParamsSchema,
+  analyticsNewJobCapsQuerySchema,
 } from './schemas/data_analytics_schema';
 import { GetAnalyticsMapArgs, ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
+import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
+import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
 import type { MlClient } from '../lib/ml_client';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
@@ -56,6 +60,24 @@ function getExtendedMap(
 ) {
   const analytics = new AnalyticsManager(mlClient, client);
   return analytics.extendAnalyticsMapForAnalyticsJob(idOptions);
+}
+
+// replace the recursive field and agg references with a
+// map of ids to allow it to be stringified for transportation
+// over the network.
+function convertForStringify(aggs: Aggregation[], fields: Field[]): void {
+  fields.forEach((f) => {
+    f.aggIds = f.aggs ? f.aggs.map((a) => a.id) : [];
+    delete f.aggs;
+  });
+  aggs.forEach((a) => {
+    if (a.fields !== undefined) {
+      // if the aggregation supports fields, i.e. it's fields list isn't undefined,
+      // create a list of field ids
+      a.fieldIds = a.fields.map((f) => f.id);
+    }
+    delete a.fields;
+  });
 }
 
 /**
@@ -243,6 +265,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         const { body } = await mlClient.putDataFrameAnalytics(
           {
             id: analyticsId,
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
           },
           getAuthorizationHeader(request)
@@ -279,6 +302,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       try {
         const { body } = await mlClient.evaluateDataFrame(
           {
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
           },
           getAuthorizationHeader(request)
@@ -316,6 +340,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       try {
         const { body } = await mlClient.explainDataFrameAnalytics(
           {
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
           },
           getAuthorizationHeader(request)
@@ -598,31 +623,27 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { analyticsIds, allSpaces } = request.body;
-        const results: { [id: string]: boolean } = {};
+        const results: { [id: string]: { exists: boolean } } = {};
         for (const id of analyticsIds) {
           try {
             const { body } = allSpaces
-              ? await client.asInternalUser.ml.getDataFrameAnalytics<{
-                  data_frame_analytics: DataFrameAnalyticsConfig[];
-                }>({
+              ? await client.asInternalUser.ml.getDataFrameAnalytics({
                   id,
                 })
-              : await mlClient.getDataFrameAnalytics<{
-                  data_frame_analytics: DataFrameAnalyticsConfig[];
-                }>({
+              : await mlClient.getDataFrameAnalytics({
                   id,
                 });
-            results[id] = body.data_frame_analytics.length > 0;
+            results[id] = { exists: body.data_frame_analytics.length > 0 };
           } catch (error) {
             if (error.statusCode !== 404) {
               throw error;
             }
-            results[id] = false;
+            results[id] = { exists: false };
           }
         }
 
         return response.ok({
-          body: { results },
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -655,17 +676,98 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
 
         let results;
         if (treatAsRoot === 'true' || treatAsRoot === true) {
+          // @ts-expect-error never used as analyticsId
           results = await getExtendedMap(mlClient, client, {
             analyticsId: type !== JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
             index: type === JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
           });
         } else {
+          // @ts-expect-error never used as analyticsId
           results = await getAnalyticsMap(mlClient, client, {
             analyticsId: type !== JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
             modelId: type === JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
           });
         }
 
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} api/data_frame/analytics/fields/:indexPattern Get index pattern fields for analytics
+   * @apiName AnalyticsNewJobCaps
+   * @apiDescription Retrieve the index fields for analytics
+   */
+  router.get(
+    {
+      path: '/api/ml/data_frame/analytics/new_job_caps/{indexPattern}',
+      validate: {
+        params: analyticsNewJobCapsParamsSchema,
+        query: analyticsNewJobCapsQuerySchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, context }) => {
+      try {
+        const { indexPattern } = request.params;
+        const isRollup = request.query?.rollup === 'true';
+        const savedObjectsClient = context.core.savedObjects.client;
+        const fieldService = fieldServiceProvider(
+          indexPattern,
+          isRollup,
+          client,
+          savedObjectsClient
+        );
+        const { fields, aggs } = await fieldService.getData(true);
+        convertForStringify(aggs, fields);
+
+        return response.ok({
+          body: {
+            [indexPattern]: {
+              aggs,
+              fields,
+            },
+          },
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {post} /api/ml/data_frame/validate Validate the data frame analytics job config
+   * @apiName ValidateDataFrameAnalytics
+   * @apiDescription Validates the data frame analytics job config.
+   *
+   * @apiSchema (body) dataAnalyticsJobConfigSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/validate',
+      validate: {
+        body: dataAnalyticsJobConfigSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      const jobConfig = request.body;
+      try {
+        // @ts-expect-error DFA schemas are incorrect
+        const results = await validateAnalyticsJob(client, jobConfig);
         return response.ok({
           body: results,
         });

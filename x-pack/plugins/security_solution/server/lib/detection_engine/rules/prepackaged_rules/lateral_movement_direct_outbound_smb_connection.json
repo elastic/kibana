@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Direct Outbound SMB Connection",
   "query": "sequence by process.entity_id\n  [process where event.type == \"start\" and process.pid != 4]\n  [network where destination.port == 445 and process.pid != 4 and\n     not cidrmatch(destination.ip, \"127.0.0.1\", \"::1\")]\n",
   "risk_score": 47,

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../common/types';
 import { LevelLogger, startTrace } from '../';
 import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriver } from '../../browsers';
@@ -15,19 +16,24 @@ import { CaptureConfig } from '../../types';
 export const openUrl = async (
   captureConfig: CaptureConfig,
   browser: HeadlessChromiumDriver,
-  url: string,
-  pageLoadSelector: string,
+  urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple,
+  waitForSelector: string,
   conditionalHeaders: ConditionalHeaders,
   logger: LevelLogger
 ): Promise<void> => {
   const endTrace = startTrace('open_url', 'wait');
+  let url: string;
+  let locator: undefined | LocatorParams;
+
+  if (typeof urlOrUrlLocatorTuple === 'string') {
+    url = urlOrUrlLocatorTuple;
+  } else {
+    [url, locator] = urlOrUrlLocatorTuple;
+  }
+
   try {
     const timeout = durationToNumber(captureConfig.timeouts.openUrl);
-    await browser.open(
-      url,
-      { conditionalHeaders, waitForSelector: pageLoadSelector, timeout },
-      logger
-    );
+    await browser.open(url, { conditionalHeaders, waitForSelector, timeout, locator }, logger);
   } catch (err) {
     logger.error(err);
     throw new Error(

@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
@@ -64,6 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const navLinks = await appsMenu.readLinks();
         expect(navLinks.map((link) => link.text)).to.eql([
           'Overview',
+          'Alerts',
           'APM',
           'User Experience',
           'Stack Management',
@@ -116,7 +117,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows apm navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'APM', 'User Experience', 'Stack Management']);
+        expect(navLinks).to.eql([
+          'Overview',
+          'Alerts',
+          'APM',
+          'User Experience',
+          'Stack Management',
+        ]);
       });
 
       it('can navigate to APM app', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityNavControlServiceStart } from '.';
+import type { SecurityNavControlServiceStart } from './nav_control_service';
 
 export const navControlServiceMock = {
   createStart: (): jest.Mocked<SecurityNavControlServiceStart> => ({

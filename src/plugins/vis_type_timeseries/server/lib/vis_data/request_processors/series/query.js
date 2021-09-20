@@ -7,19 +7,29 @@
  */
 
 import { offsetTime } from '../../offset_time';
-import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { esQuery } from '../../../../../../data/server';
 
-export function query(req, panel, series, esQueryConfig, indexPatternObject) {
-  return (next) => (doc) => {
-    const { timeField } = getIntervalAndTimefield(panel, series, indexPatternObject);
+export function query(
+  req,
+  panel,
+  series,
+  esQueryConfig,
+  seriesIndex,
+  capabilities,
+  uiSettings,
+  buildSeriesMetaParams
+) {
+  return (next) => async (doc) => {
+    const { timeField } = await buildSeriesMetaParams();
     const { from, to } = offsetTime(req, series.offset_time);
 
     doc.size = 0;
+
     const ignoreGlobalFilter = panel.ignore_global_filter || series.ignore_global_filter;
-    const queries = !ignoreGlobalFilter ? req.payload.query : [];
-    const filters = !ignoreGlobalFilter ? req.payload.filters : [];
-    doc.query = esQuery.buildEsQuery(indexPatternObject, queries, filters, esQueryConfig);
+    const queries = !ignoreGlobalFilter ? req.body.query : [];
+    const filters = !ignoreGlobalFilter ? req.body.filters : [];
+
+    doc.query = esQuery.buildEsQuery(seriesIndex.indexPattern, queries, filters, esQueryConfig);
 
     const timerange = {
       range: {
@@ -34,13 +44,13 @@ export function query(req, panel, series, esQueryConfig, indexPatternObject) {
 
     if (panel.filter) {
       doc.query.bool.must.push(
-        esQuery.buildEsQuery(indexPatternObject, [panel.filter], [], esQueryConfig)
+        esQuery.buildEsQuery(seriesIndex.indexPattern, [panel.filter], [], esQueryConfig)
       );
     }
 
     if (series.filter) {
       doc.query.bool.must.push(
-        esQuery.buildEsQuery(indexPatternObject, [series.filter], [], esQueryConfig)
+        esQuery.buildEsQuery(seriesIndex.indexPattern, [series.filter], [], esQueryConfig)
       );
     }
 

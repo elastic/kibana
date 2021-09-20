@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PaginationInputPaginated } from '../../../graphql/types';
+import { PaginationInputPaginated } from '../../../../common/search_strategy';
 
 export const generateTablePaginationOptions = (
   activePage: number,

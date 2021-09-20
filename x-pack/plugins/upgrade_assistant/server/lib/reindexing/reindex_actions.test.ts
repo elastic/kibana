@@ -19,9 +19,10 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
+import { mockKibanaVersion } from '../../../common/constants';
 import { versionService } from '../version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
-import { MOCK_VERSION_STRING, getMockVersionInfo } from '../__fixtures__/version';
+import { getMockVersionInfo } from '../__fixtures__/version';
 
 const { currentMajor, prevMajor } = getMockVersionInfo();
 
@@ -53,7 +54,7 @@ describe('ReindexActions', () => {
 
   describe('createReindexOp', () => {
     beforeEach(() => {
-      versionService.setup(MOCK_VERSION_STRING);
+      versionService.setup(mockKibanaVersion);
       client.create.mockResolvedValue();
     });
 
@@ -282,6 +283,7 @@ describe('ReindexActions', () => {
 
     it('returns flat settings', async () => {
       clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
+        // @ts-expect-error not full interface
         asApiResponse({
           myIndex: {
             settings: { 'index.mySetting': '1' },

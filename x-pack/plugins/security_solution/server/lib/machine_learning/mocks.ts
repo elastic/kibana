@@ -5,25 +5,9 @@
  * 2.0.
  */
 
-import { MlPluginSetup } from '../../../../ml/server';
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { mlPluginServerMock } from '../../../../ml/server/mocks';
 
-const createMockClient = () => elasticsearchServiceMock.createLegacyClusterClient();
-const createMockMlSystemProvider = () =>
-  jest.fn(() => ({
-    mlCapabilities: jest.fn(),
-  }));
-
-export const mlServicesMock = {
-  create: () =>
-    (({
-      modulesProvider: jest.fn(),
-      jobServiceProvider: jest.fn(),
-      anomalyDetectorsProvider: jest.fn(),
-      mlSystemProvider: createMockMlSystemProvider(),
-      mlClient: createMockClient(),
-    } as unknown) as jest.Mocked<MlPluginSetup>),
-};
+export const mlServicesMock = mlPluginServerMock;
 
 const mockValidateRuleType = jest.fn().mockResolvedValue({ valid: true, message: undefined });
 const createBuildMlAuthzMock = () =>

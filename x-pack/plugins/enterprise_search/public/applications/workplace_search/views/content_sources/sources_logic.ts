@@ -10,7 +10,7 @@ import { cloneDeep, findIndex } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { AppLogic } from '../../app_logic';
 import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } from '../../types';
@@ -158,8 +158,8 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     initializeSources: async () => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? '/api/workplace_search/org/sources'
-        : '/api/workplace_search/account/sources';
+        ? '/internal/workplace_search/org/sources'
+        : '/internal/workplace_search/account/sources';
 
       try {
         const response = await HttpLogic.values.http.get(route);
@@ -194,8 +194,8 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     setSourceSearchability: async ({ sourceId, searchable }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/searchable`
-        : `/api/workplace_search/account/sources/${sourceId}/searchable`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/searchable`
+        : `/internal/workplace_search/account/sources/${sourceId}/searchable`;
 
       try {
         await HttpLogic.values.http.put(route, {
@@ -222,7 +222,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
         }
       );
 
-      setQueuedSuccessMessage(
+      flashSuccessToast(
         [
           successfullyConnectedMessage,
           additionalConfiguration ? additionalConfigurationMessage : '',
@@ -242,8 +242,8 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
 
 export const fetchSourceStatuses = async (isOrganization: boolean) => {
   const route = isOrganization
-    ? '/api/workplace_search/org/sources/status'
-    : '/api/workplace_search/account/sources/status';
+    ? '/internal/workplace_search/org/sources/status'
+    : '/internal/workplace_search/account/sources/status';
   let response;
 
   try {

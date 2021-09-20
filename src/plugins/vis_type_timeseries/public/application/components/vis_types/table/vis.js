@@ -8,16 +8,20 @@
 
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
+import { parse as parseUrl } from 'url';
 import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '../../../../../../kibana_react/public';
+import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
-import { fieldFormats } from '../../../../../../../plugins/data/public';
+import { FIELD_FORMAT_IDS } from '../../../../../../../plugins/field_formats/common';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
-import { emptyLabel } from '../../../../../common/empty_label';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
+import { getValueOrEmpty } from '../../../../../common/empty_label';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -33,12 +37,20 @@ function getColor(rules, colorKey, value) {
   return color;
 }
 
+function sanitizeUrl(url) {
+  // eslint-disable-next-line no-script-url
+  if (parseUrl(url).protocol === 'javascript:') {
+    return '';
+  }
+  return url;
+}
+
 class TableVis extends Component {
   constructor(props) {
     super(props);
 
     const fieldFormatsService = getFieldFormats();
-    const DateFormat = fieldFormatsService.getType(fieldFormats.FIELD_FORMAT_IDS.DATE);
+    const DateFormat = fieldFormatsService.getType(FIELD_FORMAT_IDS.DATE);
 
     this.dateFormatter = new DateFormat({}, this.props.getConfig);
   }
@@ -48,22 +60,40 @@ class TableVis extends Component {
   }
 
   renderRow = (row) => {
-    const { model } = this.props;
-    let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
+    const { model, fieldFormatMap, getConfig } = this.props;
+
+    let rowDisplay = getValueOrEmpty(
+      model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key
+    );
+
+    // we should skip url field formatting for key if tsvb have drilldown_url
+    if (fieldFormatMap?.[model.pivot_id]?.id !== FIELD_FORMAT_IDS.URL || !model.drilldown_url) {
+      const formatter = createFieldFormatter(model?.pivot_id, fieldFormatMap, 'html');
+      rowDisplay = <span dangerouslySetInnerHTML={{ __html: formatter(rowDisplay) }} />; // eslint-disable-line react/no-danger
+    }
+
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
-      rowDisplay = <a href={url}>{rowDisplay}</a>;
+      rowDisplay = <a href={sanitizeUrl(url)}>{rowDisplay}</a>;
     }
+
     const columns = row.series
       .filter((item) => item)
       .map((item) => {
         const column = this.visibleSeries.find((c) => c.id === item.id);
         if (!column) return null;
-        const formatter = createTickFormatter(
-          column.formatter,
-          column.value_template,
-          this.props.getConfig
+        const hasColorRules = column.color_rules?.some(
+          ({ value, operator, text }) => value || operator || text
         );
+        const formatter =
+          column.formatter === DATA_FORMATTERS.DEFAULT
+            ? createFieldFormatter(
+                getMetricsField(column.metrics),
+                fieldFormatMap,
+                'html',
+                hasColorRules
+              )
+            : createTickFormatter(column.formatter, column.value_template, getConfig);
         const value = formatter(item.last);
         let trend;
         if (column.trend_arrows) {
@@ -82,14 +112,15 @@ class TableVis extends Component {
             className="eui-textRight"
             style={style}
           >
-            <span>{value}</span>
+            {/* eslint-disable-next-line react/no-danger */}
+            <span dangerouslySetInnerHTML={{ __html: value }} />
             {trend}
           </td>
         );
       });
     return (
       <tr key={row.key}>
-        <td>{rowDisplay || emptyLabel}</td>
+        <td>{rowDisplay}</td>
         {columns}
       </tr>
     );

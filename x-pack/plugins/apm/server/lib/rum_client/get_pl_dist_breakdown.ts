@@ -8,7 +8,8 @@
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   USER_AGENT_DEVICE,
@@ -44,7 +45,7 @@ export const getPageLoadDistBreakdown = async ({
   breakdown,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   minPercentile: number;
   maxPercentile: number;
   breakdown: string;
@@ -92,16 +93,21 @@ export const getPageLoadDistBreakdown = async ({
 
   const { apmEventClient } = setup;
 
-  const { aggregations } = await apmEventClient.search(params);
+  const { aggregations } = await apmEventClient.search(
+    'get_page_load_dist_breakdown',
+    params
+  );
 
   const pageDistBreakdowns = aggregations?.breakdowns.buckets;
 
   return pageDistBreakdowns?.map(({ key, page_dist: pageDist }) => {
     let seriesData = pageDist.values?.map(
-      ({ key: pKey, value }, index: number, arr) => {
+      ({ key: pKey, value: maybeNullValue }, index: number, arr) => {
+        // FIXME: values from percentile* aggs can be null
+        const value = maybeNullValue!;
         return {
           x: microToSec(pKey),
-          y: index === 0 ? value : value - arr[index - 1].value,
+          y: index === 0 ? value : value - arr[index - 1].value!,
         };
       }
     );

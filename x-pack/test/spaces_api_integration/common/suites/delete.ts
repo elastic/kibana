@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -28,7 +29,11 @@ interface DeleteTestDefinition {
   tests: DeleteTests;
 }
 
-export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
+export function deleteTestSuiteFactory(
+  es: KibanaClient,
+  esArchiver: any,
+  supertest: SuperTest<any>
+) {
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
   };
@@ -38,13 +43,16 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
     // Query ES to ensure that we deleted everything we expected, and nothing we didn't
     // Grouping first by namespace, then by saved object type
-    const response = await es.search({
+    const { body: response } = await es.search({
       index: '.kibana',
       body: {
         size: 0,
         query: {
           terms: {
-            type: ['visualization', 'dashboard', 'space', 'config', 'index-pattern'],
+            type: ['visualization', 'dashboard', 'space', 'index-pattern'],
+            // TODO: add assertions for config objects -- these assertions were removed because of flaky behavior in #92358, but we should
+            // consider adding them again at some point, especially if we convert config objects to `namespaceType: 'multiple-isolated'` in
+            // the future.
           },
         },
         aggs: {
@@ -68,13 +76,14 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       },
     });
 
-    const buckets = response.aggregations.count.buckets;
+    // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
+    const buckets = response.aggregations?.count.buckets;
 
     // Space 2 deleted, all others should exist
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 9,
+        doc_count: 8,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
@@ -92,10 +101,6 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
               doc_count: 2,
             },
             {
-              key: 'config',
-              doc_count: 1,
-            },
-            {
               key: 'index-pattern',
               doc_count: 1,
             },
@@ -103,7 +108,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         },
       },
       {
-        doc_count: 7,
+        doc_count: 6,
         key: 'space_1',
         countByType: {
           doc_count_error_upper_bound: 0,
@@ -118,10 +123,6 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
               doc_count: 2,
             },
             {
-              key: 'config',
-              doc_count: 1,
-            },
-            {
               key: 'index-pattern',
               doc_count: 1,
             },
@@ -132,20 +133,22 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
     expect(buckets).to.eql(expectedBuckets);
 
-    // There were eleven multi-namespace objects.
+    // There were 15 multi-namespace objects.
     // Since Space 2 was deleted, any multi-namespace objects that existed in that space
     // are updated to remove it, and of those, any that don't exist in any space are deleted.
-    const multiNamespaceResponse = await es.search({
+    const { body: multiNamespaceResponse } = await es.search<Record<string, any>>({
       index: '.kibana',
+      size: 20,
       body: { query: { terms: { type: ['sharedtype'] } } },
     });
-    const docs: [Record<string, any>] = multiNamespaceResponse.hits.hits;
-    expect(docs).length(10); // just ten results, since spaces_2_only got deleted
+    const docs = multiNamespaceResponse.hits.hits;
+    // Just 12 results, since spaces_2_only, conflict_1_space_2 and conflict_2_space_2 got deleted.
+    expect(docs).length(12);
     docs.forEach((doc) => () => {
       const containsSpace2 = doc?._source?.namespaces.includes('space_2');
       expect(containsSpace2).to.eql(false);
     });
-    const space2OnlyObjExists = docs.some((x) => x._id === CASES.SPACE_2_ONLY);
+    const space2OnlyObjExists = docs.some((x) => x._id === CASES.SPACE_2_ONLY.id);
     expect(space2OnlyObjExists).to.eql(false);
   };
 
@@ -179,19 +182,15 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   ) => {
     describeFn(description, () => {
       beforeEach(async () => {
-        await esArchiver.load('saved_objects/spaces');
-
-        // since we want to verify that we only delete the right things
-        // and can't include a config document with the correct id in the
-        // archive we read the settings to trigger an automatic upgrade
-        // in each space
-        await supertest.get('/api/kibana/settings').auth(user.username, user.password).expect(200);
-        await supertest
-          .get('/s/space_1/api/kibana/settings')
-          .auth(user.username, user.password)
-          .expect(200);
+        await esArchiver.load(
+          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        );
       });
-      afterEach(() => esArchiver.unload('saved_objects/spaces'));
+      afterEach(() =>
+        esArchiver.unload(
+          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
 
       getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
         it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {

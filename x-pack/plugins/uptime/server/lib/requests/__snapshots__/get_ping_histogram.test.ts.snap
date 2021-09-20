@@ -76,7 +76,7 @@ Object {
       "y": 1,
     },
     Object {
-      "downCount": undefined,
+      "downCount": 0,
       "upCount": 2,
       "x": 2,
       "y": 1,

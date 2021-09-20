@@ -2,6 +2,10 @@
   "id": "monitoring",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Stack Monitoring",
+    "githubTeam": "stack-monitoring-ui"
+  },
   "configPath": ["monitoring"],
   "requiredPlugins": [
     "licensing",
@@ -17,11 +21,11 @@
     "home",
     "cloud",
     "triggersActionsUi",
-    "alerts",
+    "alerting",
     "actions",
     "encryptedSavedObjects"
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaUtils", "home", "alerts", "kibanaReact", "licenseManagement"]
+  "requiredBundles": ["kibanaUtils", "home", "alerting", "kibanaReact", "licenseManagement"]
 }

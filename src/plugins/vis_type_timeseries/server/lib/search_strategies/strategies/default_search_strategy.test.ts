@@ -6,16 +6,32 @@
  * Side Public License, v 1.
  */
 
+import {
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../../types';
 import { DefaultSearchStrategy } from './default_search_strategy';
-import type { ReqFacade } from './abstract_search_strategy';
-import type { VisPayload } from '../../../../common/types';
 
 describe('DefaultSearchStrategy', () => {
+  const requestContext = ({
+    core: {
+      uiSettings: {
+        client: {
+          get: jest.fn(),
+        },
+      },
+    },
+  } as unknown) as VisTypeTimeseriesRequestHandlerContext;
+
   let defaultSearchStrategy: DefaultSearchStrategy;
-  let req: ReqFacade<VisPayload>;
+  let req: VisTypeTimeseriesVisDataRequest;
 
   beforeEach(() => {
-    req = {} as ReqFacade<VisPayload>;
+    req = ({
+      body: {
+        panels: [],
+      },
+    } as unknown) as VisTypeTimeseriesVisDataRequest;
     defaultSearchStrategy = new DefaultSearchStrategy();
   });
 
@@ -26,12 +42,15 @@ describe('DefaultSearchStrategy', () => {
   });
 
   test('should check a strategy for viability', async () => {
-    const value = await defaultSearchStrategy.checkForViability(req);
+    const value = await defaultSearchStrategy.checkForViability(requestContext, req);
 
     expect(value.isViable).toBe(true);
-    expect(value.capabilities).toEqual({
-      request: req,
-      fieldsCapabilities: {},
-    });
+    expect(value.capabilities).toMatchInlineSnapshot(`
+      DefaultSearchCapabilities {
+        "maxBucketsLimit": undefined,
+        "panel": undefined,
+        "timezone": undefined,
+      }
+    `);
   });
 });

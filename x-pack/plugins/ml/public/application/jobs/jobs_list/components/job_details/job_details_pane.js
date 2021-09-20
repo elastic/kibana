@@ -9,6 +9,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiTitle,
   EuiTable,
   EuiTableBody,
@@ -42,9 +44,14 @@ function Section({ section }) {
 
   return (
     <React.Fragment>
-      <EuiTitle size="xs">
-        <h4>{section.title}</h4>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h4>{section.title}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{section.titleAction}</EuiFlexItem>
+      </EuiFlexGroup>
       <div className="job-section" data-test-subj={`mlJobRowDetailsSection-${section.id}`}>
         <EuiTable compressed={true}>
           <EuiTableBody>

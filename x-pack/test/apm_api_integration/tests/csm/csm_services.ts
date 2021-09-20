@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function rumServicesApiTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   registry.when('CSM Services without data', { config: 'trial', archives: [] }, () => {
     it('returns empty list', async () => {
@@ -19,7 +19,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
       );
 
       expect(response.status).to.be(200);
-      expect(response.body).to.eql([]);
+      expect(response.body.rumServices).to.eql([]);
     });
   });
 
@@ -34,7 +34,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
         expect(response.status).to.be(200);
 
-        expectSnapshot(response.body).toMatchInline(`Array []`);
+        expectSnapshot(response.body.rumServices).toMatchInline(`Array []`);
       });
     }
   );

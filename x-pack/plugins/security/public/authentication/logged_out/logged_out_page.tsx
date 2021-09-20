@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiButton } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, IBasePath } from 'src/core/public';
+import type { CoreStart, IBasePath } from 'src/core/public';
+
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 

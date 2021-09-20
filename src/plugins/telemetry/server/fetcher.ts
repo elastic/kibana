@@ -8,12 +8,8 @@
 
 import { Observable, Subscription, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
-// @ts-ignore
 import fetch from 'node-fetch';
-import {
-  TelemetryCollectionManagerPluginStart,
-  UsageStatsPayload,
-} from 'src/plugins/telemetry_collection_manager/server';
+import type { TelemetryCollectionManagerPluginStart } from 'src/plugins/telemetry_collection_manager/server';
 import {
   PluginInitializerContext,
   Logger,
@@ -23,6 +19,7 @@ import {
   ICustomClusterClient,
 } from '../../../core/server';
 import {
+  getTelemetryChannelEndpoint,
   getTelemetryOptIn,
   getTelemetrySendUsageFrom,
   getTelemetryFailureDetails,
@@ -41,6 +38,7 @@ interface TelemetryConfig {
   telemetryUrl: string;
   failureCount: number;
   failureVersion: string | undefined;
+  currentVersion: string;
 }
 
 export class FetcherTask {
@@ -105,7 +103,7 @@ export class FetcherTask {
       return;
     }
 
-    let clusters: Array<UsageStatsPayload | string> = [];
+    let clusters: string[] = [];
     this.isSending = true;
 
     try {
@@ -142,7 +140,10 @@ export class FetcherTask {
     const configTelemetrySendUsageFrom = config.sendUsageFrom;
     const allowChangingOptInStatus = config.allowChangingOptInStatus;
     const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
-    const telemetryUrl = config.url;
+    const telemetryUrl = getTelemetryChannelEndpoint({
+      channelName: 'main',
+      env: config.sendUsageTo,
+    });
     const { failureCount, failureVersion } = getTelemetryFailureDetails({
       telemetrySavedObject,
     });
@@ -161,6 +162,7 @@ export class FetcherTask {
       telemetryUrl,
       failureCount,
       failureVersion,
+      currentVersion: currentKibanaVersion,
     };
   }
 
@@ -188,11 +190,11 @@ export class FetcherTask {
   private shouldSendReport({
     telemetryOptIn,
     telemetrySendUsageFrom,
-    reportFailureCount,
+    failureCount,
+    failureVersion,
     currentVersion,
-    reportFailureVersion,
-  }: any) {
-    if (reportFailureCount > 2 && reportFailureVersion === currentVersion) {
+  }: TelemetryConfig) {
+    if (failureCount > 2 && failureVersion === currentVersion) {
       return false;
     }
 
@@ -210,17 +212,17 @@ export class FetcherTask {
     });
   }
 
-  private async sendTelemetry(url: string, cluster: any): Promise<void> {
+  private async sendTelemetry(telemetryUrl: string, cluster: string): Promise<void> {
     this.logger.debug(`Sending usage stats.`);
     /**
      * send OPTIONS before sending usage data.
      * OPTIONS is less intrusive as it does not contain any payload and is used here to check if the endpoint is reachable.
      */
-    await fetch(url, {
+    await fetch(telemetryUrl, {
       method: 'options',
     });
 
-    await fetch(url, {
+    await fetch(telemetryUrl, {
       method: 'post',
       body: cluster,
       headers: { 'X-Elastic-Stack-Version': this.currentKibanaVersion },

@@ -1,0 +1,188 @@
+---
+id: formLibCoreFieldHook
+slug: /form-lib/core/field-hook
+title: Field hook
+summary: You don't manually create them but you'll get all the love from them
+tags: ['forms', 'kibana', 'dev']
+date: 2021-04-14
+---
+
+When you use the  `<UseField />` component you receive back a `field` hook object that you can connect to your React components.  
+
+This hook has the following properties and handlers:
+
+## Properties
+
+### path
+
+**Type:** `string`
+
+The field `path`.
+
+### label
+
+**Type:** `string`
+
+The field `label` provided in the config.
+
+### labelAppend
+
+**Type:** `string | ReactNode`
+
+The field `labelAppend` provided in the config.
+
+### helpText
+
+**Type:** `string | ReactNode`
+
+The field `helpText` provided in the config.
+
+### type
+
+**Type:** `string`
+
+The field `type` provided in the config.
+
+### value
+
+**Type:** `T`
+
+The field state value.
+
+### errors
+
+**Type:** `ValidationError[]`
+
+An array of possible validation errors. Each error has a required `message` property and any other meta data returned by your validation(s).
+
+### isValid
+
+**Type:** `boolean`
+
+Flag that indicates if the field is valid.
+
+### isPristine
+
+**Type:** `boolean`
+
+Flag that indicates if the field is pristine (if it hasn't been modified by the user).
+
+### isValidating
+
+**Type:** `boolean`
+
+Flag that indicates if the field is being validated. It is set to `true` when the value changes, and back to `false` right after all the validations have executed.  If all your validations are synchronous, this state is always `false`.
+
+### isValidated
+
+**Type:** `boolean`
+
+Flag that indicates if this field has run at least once its validation(s). The validations are run when the field values changes or, if the field value has not changed, when we call `form.submit()` or `form.validate()`.
+
+### isChangingValue
+
+**Type:** `boolean`
+
+Flag that indicates if the field value is changing. If you have set the [`valueChangeDebounceTime`](use_field.md#valuechangedebouncetime) to `0`, then this state is the same as the `isValidating` state. But if you have increased the `valueChangeDebounceTime` time, then you will have a minimum value changing time. This is useful if you want to display your validation errors after a certain amount of time has passed.
+
+## Handlers
+
+### setValue()
+
+**Arguments:** `value: T | (prevValue: T) => T`  
+**Returns:** `void`
+
+Handler to set the value of the field.  
+You can either pass the value directly or provide a callback that will receive the previous field value and you will have to return the next value.
+
+### onChange()
+
+**Arguments:** `event: React.ChangeEvent<HTMLInputElement>`  
+**Returns:** `void`
+
+Use the `onChange` helper to directly hook into the forms fields inputs `onChange` prop without having to extract the event value and call `setValue()` on the field.
+
+```js
+// Instead of this
+<UseField path="name">
+  {({ setValue }) => {
+    return <input type="text" value={field.value} onChange={(e) => setValue(e.target.value)} />
+  }}
+</UseField>
+
+// You can use the "onChange" handler
+<UseField path="name">
+  {({ onChange }) => {
+    return <input type="text" value={field.value} onChange={onChange} />
+  }}
+</UseField>
+```
+
+### setErrors()
+
+**Arguments:** `ValidationError[]`  
+**Returns:** `void`
+
+Handler to set the errors of the field.
+
+### clearErrors()
+
+**Arguments:** `type?: string | string[]`  
+**Returns:** `void`
+
+Handler to clear the errors of the field. You can optionally provide the type of error to clear.  
+See an example of typed validation when <DocLink id="formLibExampleValidation" section="validating-arrays-of-items" text="validating an array of items" />.
+
+### getErrorsMessages()
+
+**Arguments:** `options?: { validationType?: string; errorCode?: string }`  
+**Returns:** `string | null`
+
+Returns a concatenated string with all the error messages if the field has errors, or `null` otherwise.
+
+You can optionally provide an error code or a validation type to narrow down the errors you want to receive back.  
+
+**Note:** You can add error code to your errors by adding a `code` property to your validation errors.
+
+```js
+const nameValidator = ({ value }) => {
+  if (value.startsWith('.')) => {
+    return {
+      message: "The name can't start with a dot (.)",
+      code: 'ERR_NAME_FORMAT',
+    };
+  }
+};
+```
+
+### validate()
+
+**Arguments:** `options?: { formData?: any; value?: T; validationType?: string; }`  
+**Returns:** `FieldValidateResponse | Promise<FieldValidateResponse>`
+
+Validate the field by calling all the validations declared in its config.  Optionally you can provide an options object with the following properties:
+
+* `formData` - The form data
+* `value` - The value to validate
+* `validationType` - The validation type to run against the value 
+
+You rarely need to manually call this method as it is automatically done for you whenever the field value changes.
+
+**Important:** Calling `validate()` **does not update** the form `isValid` state and is only meant to get the field validity at a point in time.
+
+#### Example where you might need this method:
+
+The user changes the value inside one of your components and you receive this value in an `onChange` handler. Before updating the field value with `setValue()`, you want to validate this value and maybe prevent the field `value` to be updated at all.
+
+### reset()
+
+**Arguments:** `options?: { resetValue?: boolean; defaultValue?: T }`  
+**Returns:** `T | undefined`
+
+Resets the field to its initial state. It accepts an optional configuration object:
+
+- `resetValue` (default: `true`). Flag to indicate if we want to not only reset the field state (`errors`, `isPristine`...) but also the field value. If set to `true`, it will put back the default value passed to the field, or to the form, or declared on the field config (in that order).
+
+- `defaultValue`. In some cases you might not want to reset the field to the default value initiallly provided. In this case you can provide a new `defaultValue` value when resetting.
+
+If you provided a new `defaultValue`, you will receive back this value after it has gone through any possible `deserializer(s)` defined for that field. If you didn't provide a default value `undefined` is returned.

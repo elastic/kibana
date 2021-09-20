@@ -16,7 +16,7 @@ export const verifyErrorResponse = (
 ) => {
   expect(r.statusCode).to.be(expectedCode);
   if (message) {
-    expect(r.message).to.be(message);
+    expect(r.message).to.include.string(message);
   }
   if (shouldHaveAttrs) {
     expect(r).to.have.property('attributes');

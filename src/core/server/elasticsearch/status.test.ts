@@ -54,7 +54,7 @@ describe('calculateStatus', () => {
     });
   });
 
-  it('changes to available with a differemnt message when isCompatible and warningNodes present', async () => {
+  it('changes to available with a different message when isCompatible and warningNodes present', async () => {
     expect(
       await calculateStatus$(
         of({
@@ -192,6 +192,119 @@ describe('calculateStatus', () => {
             ],
           },
           "summary": "Some nodes are incompatible",
+        },
+        Object {
+          "level": available,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "warningNodes": Array [],
+          },
+          "summary": "Elasticsearch is available",
+        },
+      ]
+    `);
+  });
+
+  it('emits status updates when node info request error changes', () => {
+    const nodeCompat$ = new Subject<NodesVersionCompatibility>();
+
+    const statusUpdates: ServiceStatus[] = [];
+    const subscription = calculateStatus$(nodeCompat$).subscribe((status) =>
+      statusUpdates.push(status)
+    );
+
+    nodeCompat$.next({
+      isCompatible: false,
+      kibanaVersion: '1.1.1',
+      incompatibleNodes: [],
+      warningNodes: [],
+      message: 'Unable to retrieve version info. connect ECONNREFUSED',
+      nodesInfoRequestError: new Error('connect ECONNREFUSED'),
+    });
+    nodeCompat$.next({
+      isCompatible: false,
+      kibanaVersion: '1.1.1',
+      incompatibleNodes: [],
+      warningNodes: [],
+      message: 'Unable to retrieve version info. security_exception',
+      nodesInfoRequestError: new Error('security_exception'),
+    });
+
+    subscription.unsubscribe();
+    expect(statusUpdates).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "level": unavailable,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "warningNodes": Array [],
+          },
+          "summary": "Waiting for Elasticsearch",
+        },
+        Object {
+          "level": critical,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "nodesInfoRequestError": [Error: connect ECONNREFUSED],
+            "warningNodes": Array [],
+          },
+          "summary": "Unable to retrieve version info. connect ECONNREFUSED",
+        },
+        Object {
+          "level": critical,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "nodesInfoRequestError": [Error: security_exception],
+            "warningNodes": Array [],
+          },
+          "summary": "Unable to retrieve version info. security_exception",
+        },
+      ]
+    `);
+  });
+
+  it('changes to available when a request error is resolved', () => {
+    const nodeCompat$ = new Subject<NodesVersionCompatibility>();
+
+    const statusUpdates: ServiceStatus[] = [];
+    const subscription = calculateStatus$(nodeCompat$).subscribe((status) =>
+      statusUpdates.push(status)
+    );
+
+    nodeCompat$.next({
+      isCompatible: false,
+      kibanaVersion: '1.1.1',
+      incompatibleNodes: [],
+      warningNodes: [],
+      message: 'Unable to retrieve version info. security_exception',
+      nodesInfoRequestError: new Error('security_exception'),
+    });
+    nodeCompat$.next({
+      isCompatible: true,
+      kibanaVersion: '1.1.1',
+      warningNodes: [],
+      incompatibleNodes: [],
+    });
+
+    subscription.unsubscribe();
+    expect(statusUpdates).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "level": unavailable,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "warningNodes": Array [],
+          },
+          "summary": "Waiting for Elasticsearch",
+        },
+        Object {
+          "level": critical,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "nodesInfoRequestError": [Error: security_exception],
+            "warningNodes": Array [],
+          },
+          "summary": "Unable to retrieve version info. security_exception",
         },
         Object {
           "level": available,

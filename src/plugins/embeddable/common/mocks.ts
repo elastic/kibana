@@ -12,7 +12,7 @@ export const createEmbeddablePersistableStateServiceMock = (): jest.Mocked<Embed
   return {
     inject: jest.fn((state, references) => state),
     extract: jest.fn((state) => ({ state, references: [] })),
-    migrate: jest.fn((state, version) => state),
+    getAllMigrations: jest.fn(() => ({})),
     telemetry: jest.fn((state, collector) => ({})),
   };
 };

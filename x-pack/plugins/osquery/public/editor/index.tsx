@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
-import 'brace/mode/sql';
+import useDebounce from 'react-use/lib/useDebounce';
 import 'brace/theme/tomorrow';
-import 'brace/ext/language_tools';
+
+import './osquery_mode.ts';
 
 const EDITOR_SET_OPTIONS = {
   enableBasicAutocompletion: true,
@@ -26,23 +27,25 @@ interface OsqueryEditorProps {
 }
 
 const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, onChange }) => {
-  const handleChange = useCallback(
-    (newValue) => {
-      onChange(newValue);
-    },
-    [onChange]
-  );
+  const [editorValue, setEditorValue] = useState(defaultValue ?? '');
+
+  useDebounce(() => onChange(editorValue.replaceAll('\n', ' ').replaceAll('  ', ' ')), 500, [
+    editorValue,
+  ]);
+
+  useEffect(() => setEditorValue(defaultValue), [defaultValue]);
 
   return (
     <EuiCodeEditor
-      value={defaultValue}
-      mode="sql"
+      value={editorValue}
+      mode="osquery"
+      onChange={setEditorValue}
       theme="tomorrow"
-      onChange={handleChange}
       name="osquery_editor"
       setOptions={EDITOR_SET_OPTIONS}
       editorProps={EDITOR_PROPS}
-      height="200px"
+      height="150px"
+      width="100%"
     />
   );
 };

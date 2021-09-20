@@ -23,7 +23,7 @@ describe('view in app', () => {
   describe('link to the app that created the alert', () => {
     it('is disabled when there is no navigation', async () => {
       const alert = mockAlert();
-      const { alerts } = useKibana().services;
+      const { alerting } = useKibana().services;
       let component: ReactWrapper;
       await act(async () => {
         // use mount as we need useEffect to run
@@ -34,7 +34,7 @@ describe('view in app', () => {
         expect(component!.find('button').prop('disabled')).toBe(true);
         expect(component!.text()).toBe('View in app');
 
-        expect(alerts!.getNavigation).toBeCalledWith(alert.id);
+        expect(alerting!.getNavigation).toBeCalledWith(alert.id);
       });
     });
 

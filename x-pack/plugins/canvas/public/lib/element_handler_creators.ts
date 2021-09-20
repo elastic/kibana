@@ -8,8 +8,7 @@
 import { camelCase } from 'lodash';
 import { getClipboardData, setClipboardData } from './clipboard';
 import { cloneSubgraphs } from './clone_subgraphs';
-import { notifyService } from '../services';
-import * as customElementService from './custom_element_service';
+import { pluginServices } from '../services';
 import { getId } from './get_id';
 import { PositionedElement } from '../../types';
 import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
@@ -70,6 +69,9 @@ export const basicHandlerCreators = {
     description = '',
     image = ''
   ): void => {
+    const notifyService = pluginServices.getServices().notify;
+    const customElementService = pluginServices.getServices().customElement;
+
     if (selectedNodes.length) {
       const content = JSON.stringify({ selectedNodes });
       const customElement = {
@@ -83,17 +85,15 @@ export const basicHandlerCreators = {
       customElementService
         .create(customElement)
         .then(() =>
-          notifyService
-            .getService()
-            .success(
-              `Custom element '${customElement.displayName || customElement.id}' was saved`,
-              {
-                'data-test-subj': 'canvasCustomElementCreate-success',
-              }
-            )
+          notifyService.success(
+            `Custom element '${customElement.displayName || customElement.id}' was saved`,
+            {
+              'data-test-subj': 'canvasCustomElementCreate-success',
+            }
+          )
         )
         .catch((error: Error) =>
-          notifyService.getService().warning(error, {
+          notifyService.warning(error, {
             title: `Custom element '${
               customElement.displayName || customElement.id
             }' was not saved`,
@@ -135,16 +135,20 @@ export const groupHandlerCreators = {
 // handlers for cut/copy/paste
 export const clipboardHandlerCreators = {
   cutNodes: ({ pageId, removeNodes, selectedNodes }: Props) => (): void => {
+    const notifyService = pluginServices.getServices().notify;
+
     if (selectedNodes.length) {
       setClipboardData({ selectedNodes });
       removeNodes(selectedNodes.map(extractId), pageId);
-      notifyService.getService().success('Cut element to clipboard');
+      notifyService.success('Cut element to clipboard');
     }
   },
   copyNodes: ({ selectedNodes }: Props) => (): void => {
+    const notifyService = pluginServices.getServices().notify;
+
     if (selectedNodes.length) {
       setClipboardData({ selectedNodes });
-      notifyService.getService().success('Copied element to clipboard');
+      notifyService.success('Copied element to clipboard');
     }
   },
   pasteNodes: ({ insertNodes, pageId, selectToplevelNodes }: Props) => (): void => {

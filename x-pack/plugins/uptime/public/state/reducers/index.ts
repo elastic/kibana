@@ -8,7 +8,6 @@
 import { combineReducers } from 'redux';
 import { monitorReducer } from './monitor';
 import { overviewFiltersReducer } from './overview_filters';
-import { snapshotReducer } from './snapshot';
 import { uiReducer } from './ui';
 import { monitorStatusReducer } from './monitor_status';
 import { monitorListReducer } from './monitor_list';
@@ -24,11 +23,11 @@ import { selectedFiltersReducer } from './selected_filters';
 import { alertsReducer } from '../alerts/alerts';
 import { journeyReducer } from './journey';
 import { networkEventsReducer } from './network_events';
+import { syntheticsReducer } from './synthetics';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
   overviewFilters: overviewFiltersReducer,
-  snapshot: snapshotReducer,
   ui: uiReducer,
   monitorList: monitorListReducer,
   monitorStatus: monitorStatusReducer,
@@ -44,4 +43,5 @@ export const rootReducer = combineReducers({
   alerts: alertsReducer,
   journeys: journeyReducer,
   networkEvents: networkEventsReducer,
+  synthetics: syntheticsReducer,
 });

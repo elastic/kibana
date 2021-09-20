@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import {
-  mountWithIntl,
-  mockKibanaValues,
-  setMockActions,
-  setMockValues,
-} from '../../../../__mocks__';
+import { mockKibanaValues, setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import '../../../../__mocks__/react_router';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { shallow, ReactWrapper } from 'enzyme';
 
-import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 
-import { Loading } from '../../../../shared/loading';
+import { mountWithIntl, getPageTitle } from '../../../../test_helpers';
 
 import { Curations, CurationsTable } from './curations';
 
@@ -51,7 +47,7 @@ describe('Curations', () => {
 
   const actions = {
     loadCurations: jest.fn(),
-    deleteCurationSet: jest.fn(),
+    deleteCuration: jest.fn(),
     onPaginate: jest.fn(),
   };
 
@@ -64,31 +60,34 @@ describe('Curations', () => {
   it('renders', () => {
     const wrapper = shallow(<Curations />);
 
-    expect(wrapper.find('h1').text()).toEqual('Curated results');
+    expect(getPageTitle(wrapper)).toEqual('Curated results');
     expect(wrapper.find(CurationsTable)).toHaveLength(1);
   });
 
-  it('renders a loading component on page load', () => {
-    setMockValues({ ...values, dataLoading: true, curations: [] });
-    const wrapper = shallow(<Curations />);
+  describe('loading state', () => {
+    it('renders a full-page loading state on initial page load', () => {
+      setMockValues({ ...values, dataLoading: true, curations: [] });
+      const wrapper = shallow(<Curations />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+      expect(wrapper.prop('isLoading')).toEqual(true);
+    });
+
+    it('does not re-render a full-page loading state after initial page load (uses component-level loading state instead)', () => {
+      setMockValues({ ...values, dataLoading: true, curations: [{}] });
+      const wrapper = shallow(<Curations />);
+
+      expect(wrapper.prop('isLoading')).toEqual(false);
+    });
   });
 
   it('calls loadCurations on page load', () => {
+    setMockValues({ ...values, myRole: {} }); // Required for AppSearchPageTemplate to load
     mountWithIntl(<Curations />);
 
     expect(actions.loadCurations).toHaveBeenCalledTimes(1);
   });
 
   describe('CurationsTable', () => {
-    it('renders an EuiEmptyPrompt if curations is empty', () => {
-      setMockValues({ ...values, curations: [] });
-      const wrapper = shallow(<CurationsTable />);
-
-      expect(wrapper.find(EuiBasicTable).prop('noItemsMessage').type).toEqual(EuiEmptyPrompt);
-    });
-
     it('passes loading prop based on dataLoading', () => {
       setMockValues({ ...values, dataLoading: true });
       const wrapper = shallow(<CurationsTable />);
@@ -134,12 +133,12 @@ describe('Curations', () => {
           expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations/cur-id-2');
         });
 
-        it('delete action calls deleteCurationSet', () => {
+        it('delete action calls deleteCuration', () => {
           wrapper.find('[data-test-subj="CurationsTableDeleteButton"]').first().simulate('click');
-          expect(actions.deleteCurationSet).toHaveBeenCalledWith('cur-id-1');
+          expect(actions.deleteCuration).toHaveBeenCalledWith('cur-id-1');
 
           wrapper.find('[data-test-subj="CurationsTableDeleteButton"]').last().simulate('click');
-          expect(actions.deleteCurationSet).toHaveBeenCalledWith('cur-id-2');
+          expect(actions.deleteCuration).toHaveBeenCalledWith('cur-id-2');
         });
       });
     });

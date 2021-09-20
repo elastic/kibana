@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
+require('../src/setup_node_env/ensure_node_preserve_symlinks');
 require('@kbn/optimizer').registerNodeAutoTranspilation();
 require('../src/dev/run_precommit_hook');

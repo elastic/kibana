@@ -7,7 +7,6 @@
 
 import {
   EMS_APP_NAME,
-  EMS_CATALOGUE_PATH,
   EMS_FILES_API_PATH,
   EMS_FILES_CATALOGUE_PATH,
   EMS_FILES_DEFAULT_JSON_PATH,
@@ -19,7 +18,6 @@ import {
   EMS_TILES_VECTOR_STYLE_PATH,
   EMS_TILES_VECTOR_SOURCE_PATH,
   EMS_TILES_VECTOR_TILE_PATH,
-  GIS_API_PATH,
   EMS_SPRITES_PATH,
   INDEX_SETTINGS_API_PATH,
   FONTS_API_PATH,
@@ -33,6 +31,7 @@ import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
+import { initIndexingRoutes } from './data_indexing/indexing_routes';
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {
@@ -40,9 +39,6 @@ const EMPTY_EMS_CLIENT = {
   },
   async getTMSServices() {
     return [];
-  },
-  async getMainManifest() {
-    return null;
   },
   async getDefaultFileManifest() {
     return null;
@@ -53,9 +49,11 @@ const EMPTY_EMS_CLIENT = {
   addQueryParams() {},
 };
 
-export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger) {
+export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, logger) {
   let emsClient;
   let lastLicenseId;
+  const router = core.http.createRouter();
+  const [, { data: dataPlugin }] = await core.getStartServices();
 
   function getEMSClient() {
     const currentLicenseId = getLicenseId();
@@ -74,7 +72,10 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
         landingPageUrl: emsSettings.getEMSLandingPageUrl(),
         fetchFunction: fetch,
       });
-      emsClient.addQueryParams({ license: currentLicenseId });
+      emsClient.addQueryParams({
+        license: currentLicenseId,
+        is_kibana_proxy: '1', // identifies this is proxied request from kibana
+      });
       return emsClient;
     } else {
       return EMPTY_EMS_CLIENT;
@@ -154,42 +155,6 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
         .replace('{z}', request.query.z);
 
       return await proxyResource({ url, contentType: 'image/png' }, response);
-    }
-  );
-
-  router.get(
-    {
-      path: `${API_ROOT_PATH}/${EMS_CATALOGUE_PATH}`,
-      validate: false,
-    },
-    async (context, request, { ok, badRequest }) => {
-      if (!checkEMSProxyEnabled()) {
-        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
-      }
-
-      const main = await getEMSClient().getMainManifest();
-      const proxiedManifest = {
-        services: [],
-      };
-
-      //rewrite the urls to the submanifest
-      const tileService = main.services.find((service) => service.type === 'tms');
-      const fileService = main.services.find((service) => service.type === 'file');
-      if (tileService) {
-        proxiedManifest.services.push({
-          ...tileService,
-          manifest: `${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}`,
-        });
-      }
-      if (fileService) {
-        proxiedManifest.services.push({
-          ...fileService,
-          manifest: `${GIS_API_PATH}/${EMS_FILES_CATALOGUE_PATH}`,
-        });
-      }
-      return ok({
-        body: proxiedManifest,
-      });
     }
   );
 
@@ -522,25 +487,23 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
       },
     },
     (context, request, response) => {
-      return new Promise((resolve, reject) => {
-        const santizedRange = path.normalize(request.params.range);
-        const fontPath = path.join(__dirname, 'fonts', 'open_sans', `${santizedRange}.pbf`);
-        fs.readFile(fontPath, (error, data) => {
-          if (error) {
-            reject(
-              response.custom({
-                statusCode: 404,
-              })
-            );
-          } else {
-            resolve(
-              response.ok({
-                body: data,
-              })
-            );
-          }
-        });
-      });
+      const range = path.normalize(request.params.range);
+      return range.startsWith('..')
+        ? response.notFound()
+        : new Promise((resolve) => {
+            const fontPath = path.join(__dirname, 'fonts', 'open_sans', `${range}.pbf`);
+            fs.readFile(fontPath, (error, data) => {
+              if (error) {
+                resolve(response.notFound());
+              } else {
+                resolve(
+                  response.ok({
+                    body: data,
+                  })
+                );
+              }
+            });
+          });
     }
   );
 
@@ -555,7 +518,6 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
     },
     async (context, request, response) => {
       const { query } = request;
-
       if (!query.indexPatternTitle) {
         logger.warn(`Required query parameter 'indexPatternTitle' not provided.`);
         return response.custom({
@@ -565,13 +527,10 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
       }
 
       try {
-        const resp = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-          'indices.getSettings',
-          {
-            index: query.indexPatternTitle,
-          }
-        );
-        const indexPatternSettings = getIndexPatternSettings(resp);
+        const resp = await context.core.elasticsearch.client.asCurrentUser.indices.getSettings({
+          index: query.indexPatternTitle,
+        });
+        const indexPatternSettings = getIndexPatternSettings(resp.body);
         return response.ok({
           body: indexPatternSettings,
         });
@@ -618,4 +577,5 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
   }
 
   initMVTRoutes({ router, logger });
+  initIndexingRoutes({ router, logger, dataPlugin });
 }

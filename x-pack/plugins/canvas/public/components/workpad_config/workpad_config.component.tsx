@@ -22,14 +22,70 @@ import {
   EuiAccordion,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { VarConfig } from '../var_config';
-
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { CanvasVariable } from '../../../types';
-import { ComponentStrings } from '../../../i18n';
 
-const { WorkpadConfig: strings } = ComponentStrings;
+const strings = {
+  getApplyStylesheetButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadConfig.applyStylesheetButtonLabel', {
+      defaultMessage: `Apply stylesheet`,
+      description: '"stylesheet" refers to the collection of CSS style rules entered by the user.',
+    }),
+  getFlipDimensionAriaLabel: () =>
+    i18n.translate('xpack.canvas.workpadConfig.swapDimensionsAriaLabel', {
+      defaultMessage: `Swap the page's width and height`,
+    }),
+  getFlipDimensionTooltip: () =>
+    i18n.translate('xpack.canvas.workpadConfig.swapDimensionsTooltip', {
+      defaultMessage: 'Swap the width and height',
+    }),
+  getGlobalCSSLabel: () =>
+    i18n.translate('xpack.canvas.workpadConfig.globalCSSLabel', {
+      defaultMessage: `Global CSS overrides`,
+    }),
+  getGlobalCSSTooltip: () =>
+    i18n.translate('xpack.canvas.workpadConfig.globalCSSTooltip', {
+      defaultMessage: `Apply styles to all pages in this workpad`,
+    }),
+  getNameLabel: () =>
+    i18n.translate('xpack.canvas.workpadConfig.nameLabel', {
+      defaultMessage: 'Name',
+    }),
+  getPageHeightLabel: () =>
+    i18n.translate('xpack.canvas.workpadConfig.heightLabel', {
+      defaultMessage: 'Height',
+    }),
+  getPageSizeBadgeAriaLabel: (sizeName: string) =>
+    i18n.translate('xpack.canvas.workpadConfig.pageSizeBadgeAriaLabel', {
+      defaultMessage: `Preset page size: {sizeName}`,
+      values: {
+        sizeName,
+      },
+    }),
+  getPageSizeBadgeOnClickAriaLabel: (sizeName: string) =>
+    i18n.translate('xpack.canvas.workpadConfig.pageSizeBadgeOnClickAriaLabel', {
+      defaultMessage: `Set page size to {sizeName}`,
+      values: {
+        sizeName,
+      },
+    }),
+  getPageWidthLabel: () =>
+    i18n.translate('xpack.canvas.workpadConfig.widthLabel', {
+      defaultMessage: 'Width',
+    }),
+  getTitle: () =>
+    i18n.translate('xpack.canvas.workpadConfig.title', {
+      defaultMessage: 'Workpad settings',
+    }),
+  getUSLetterButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadConfig.USLetterButtonLabel', {
+      defaultMessage: 'US Letter',
+      description: 'This is referring to the dimensions of U.S. standard letter paper.',
+    }),
+};
 
 export interface Props {
   size: {

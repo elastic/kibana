@@ -7,6 +7,7 @@
 
 import { notFound } from '@hapi/boom';
 import { debounce } from 'lodash';
+import { nodeBuilder, fromKueryExpression } from '@kbn/es-query';
 import {
   CoreSetup,
   CoreStart,
@@ -20,9 +21,13 @@ import {
 import {
   IKibanaSearchRequest,
   ISearchOptions,
-  nodeBuilder,
+  ENHANCED_ES_SEARCH_STRATEGY,
+  SEARCH_SESSION_TYPE,
 } from '../../../../../../src/plugins/data/common';
-import { esKuery, ISearchSessionService } from '../../../../../../src/plugins/data/server';
+import {
+  ISearchSessionService,
+  NoSearchIdInSessionError,
+} from '../../../../../../src/plugins/data/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../../security/server';
 import {
   TaskManagerSetupContract,
@@ -32,12 +37,31 @@ import {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
-  SEARCH_SESSION_TYPE,
-} from '../../../common';
+} from '../../../../../../src/plugins/data/common';
 import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
-import { registerSearchSessionsTask, scheduleSearchSessionsTasks } from './monitoring_task';
+import {
+  registerSearchSessionsTask,
+  scheduleSearchSessionsTask,
+  unscheduleSearchSessionsTask,
+} from './setup_task';
 import { SearchSessionsConfig, SearchStatus } from './types';
+import { DataEnhancedStartDependencies } from '../../type';
+import {
+  checkPersistedSessionsProgress,
+  SEARCH_SESSIONS_TASK_ID,
+  SEARCH_SESSIONS_TASK_TYPE,
+} from './check_persisted_sessions';
+import {
+  SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
+  checkNonPersistedSessions,
+  SEARCH_SESSIONS_CLEANUP_TASK_ID,
+} from './check_non_persisted_sessions';
+import {
+  SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
+  SEARCH_SESSIONS_EXPIRE_TASK_ID,
+  checkPersistedCompletedSessionExpiration,
+} from './expire_persisted_sessions';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -73,17 +97,42 @@ export class SearchSessionService
   constructor(
     private readonly logger: Logger,
     private readonly config: ConfigSchema,
+    private readonly version: string,
     private readonly security?: SecurityPluginSetup
   ) {
     this.sessionConfig = this.config.search.sessions;
   }
 
-  public setup(core: CoreSetup, deps: SetupDependencies) {
-    registerSearchSessionsTask(core, {
+  public setup(core: CoreSetup<DataEnhancedStartDependencies>, deps: SetupDependencies) {
+    const taskDeps = {
       config: this.config,
       taskManager: deps.taskManager,
       logger: this.logger,
-    });
+    };
+
+    registerSearchSessionsTask(
+      core,
+      taskDeps,
+      SEARCH_SESSIONS_TASK_TYPE,
+      'persisted session progress',
+      checkPersistedSessionsProgress
+    );
+
+    registerSearchSessionsTask(
+      core,
+      taskDeps,
+      SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
+      'non persisted session cleanup',
+      checkNonPersistedSessions
+    );
+
+    registerSearchSessionsTask(
+      core,
+      taskDeps,
+      SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
+      'complete session expiration',
+      checkPersistedCompletedSessionExpiration
+    );
   }
 
   public async start(core: CoreStart, deps: StartDependencies) {
@@ -93,12 +142,37 @@ export class SearchSessionService
   public stop() {}
 
   private setupMonitoring = async (core: CoreStart, deps: StartDependencies) => {
+    const taskDeps = {
+      config: this.config,
+      taskManager: deps.taskManager,
+      logger: this.logger,
+    };
+
     if (this.sessionConfig.enabled) {
-      scheduleSearchSessionsTasks(
-        deps.taskManager,
-        this.logger,
+      scheduleSearchSessionsTask(
+        taskDeps,
+        SEARCH_SESSIONS_TASK_ID,
+        SEARCH_SESSIONS_TASK_TYPE,
         this.sessionConfig.trackingInterval
       );
+
+      scheduleSearchSessionsTask(
+        taskDeps,
+        SEARCH_SESSIONS_CLEANUP_TASK_ID,
+        SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
+        this.sessionConfig.cleanupInterval
+      );
+
+      scheduleSearchSessionsTask(
+        taskDeps,
+        SEARCH_SESSIONS_EXPIRE_TASK_ID,
+        SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
+        this.sessionConfig.expireInterval
+      );
+    } else {
+      unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_TASK_ID);
+      unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_CLEANUP_TASK_ID);
+      unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_EXPIRE_TASK_ID);
     }
   };
 
@@ -217,6 +291,7 @@ export class SearchSessionService
       restoreState = {},
     }: Partial<SearchSessionSavedObjectAttributes>
   ) => {
+    if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
     if (!name) throw new Error('Name is required');
     if (!appId) throw new Error('AppId is required');
     if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
@@ -255,6 +330,7 @@ export class SearchSessionService
         touched: new Date().toISOString(),
         idMapping: {},
         persisted: false,
+        version: this.version,
         realmType,
         realmName,
         username,
@@ -298,9 +374,7 @@ export class SearchSessionService
             nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.username`, `${user.username}`),
           ];
     const filterKueryNode =
-      typeof options.filter === 'string'
-        ? esKuery.fromKueryExpression(options.filter)
-        : options.filter;
+      typeof options.filter === 'string' ? fromKueryExpression(options.filter) : options.filter;
     const filter = nodeBuilder.and(userFilters.concat(filterKueryNode ?? []));
     return savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
       ...options,
@@ -316,6 +390,7 @@ export class SearchSessionService
     attributes: Partial<SearchSessionSavedObjectAttributes>
   ) => {
     this.logger.debug(`update | ${sessionId}`);
+    if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
     await this.get(deps, user, sessionId); // Verify correct user
     return deps.savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
@@ -353,6 +428,7 @@ export class SearchSessionService
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
+    if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
     this.logger.debug(`delete | ${sessionId}`);
     await this.get(deps, user, sessionId); // Verify correct user
     return deps.savedObjectsClient.delete(SEARCH_SESSION_TYPE, sessionId);
@@ -367,9 +443,9 @@ export class SearchSessionService
     user: AuthenticatedUser | null,
     searchRequest: IKibanaSearchRequest,
     searchId: string,
-    { sessionId, strategy }: ISearchOptions
+    { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY }: ISearchOptions
   ) => {
-    if (!sessionId || !searchId) return;
+    if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
     this.logger.debug(`trackId | ${sessionId} | ${searchId}`);
 
     let idMapping: Record<string, SearchSessionRequestInfo> = {};
@@ -378,7 +454,7 @@ export class SearchSessionService
       const requestHash = createRequestHash(searchRequest.params);
       const searchInfo = {
         id: searchId,
-        strategy: strategy!,
+        strategy,
         status: SearchStatus.IN_PROGRESS,
       };
       idMapping = { [requestHash]: searchInfo };
@@ -411,7 +487,9 @@ export class SearchSessionService
     searchRequest: IKibanaSearchRequest,
     { sessionId, isStored, isRestore }: ISearchOptions
   ) => {
-    if (!sessionId) {
+    if (!this.sessionConfig.enabled) {
+      throw new Error('Search sessions are disabled');
+    } else if (!sessionId) {
       throw new Error('Session ID is required');
     } else if (!isStored) {
       throw new Error('Cannot get search ID from a session that is not stored');
@@ -423,7 +501,7 @@ export class SearchSessionService
     const requestHash = createRequestHash(searchRequest.params);
     if (!session.attributes.idMapping.hasOwnProperty(requestHash)) {
       this.logger.error(`getId | ${sessionId} | ${requestHash} not found`);
-      throw new Error('No search ID in this session matching the given search request');
+      throw new NoSearchIdInSessionError();
     }
     this.logger.debug(`getId | ${sessionId} | ${requestHash}`);
 
@@ -448,6 +526,7 @@ export class SearchSessionService
         extend: this.extend.bind(this, deps, user),
         cancel: this.cancel.bind(this, deps, user),
         delete: this.delete.bind(this, deps, user),
+        getConfig: () => this.config.search.sessions,
       };
     };
   };

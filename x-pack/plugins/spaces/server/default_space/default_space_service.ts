@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import { CoreSetup, SavedObjectsServiceStart, Logger, ServiceStatus } from 'src/core/server';
-import {
-  concat,
-  of,
-  timer,
-  Observable,
-  ObservableInput,
-  combineLatest,
-  defer,
-  Subscription,
-  BehaviorSubject,
-} from 'rxjs';
-import { mergeMap, switchMap, catchError, tap } from 'rxjs/operators';
+import type { Observable, ObservableInput, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, concat, defer, of, timer } from 'rxjs';
+import { catchError, mergeMap, switchMap, tap } from 'rxjs/operators';
+
+import type { CoreSetup, Logger, SavedObjectsServiceStart, ServiceStatus } from 'src/core/server';
+
 import { ServiceStatusLevels } from '../../../../../src/core/server';
-import { ILicense } from '../../../licensing/server';
-import { SpacesLicense } from '../../common/licensing';
+import type { ILicense } from '../../../licensing/server';
+import type { SpacesLicense } from '../../common/licensing';
 import { createDefaultSpace } from './create_default_space';
 
 interface Deps {

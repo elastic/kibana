@@ -32,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
         name: 'hp_read_user',
         body: {
           cluster: [],
+          // @ts-expect-error unknown property
           index: [],
           applications: [
             {

@@ -9,12 +9,12 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
+import { EuiPageContentBody, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
-import { SectionError, Error } from '../../../shared_imports';
+import { SectionError, Error, PageError } from '../../../shared_imports';
 import { useDecodedParams } from '../../lib';
 import { TIME_UNITS } from '../../../../common/constants';
-import { SectionLoading, PolicyForm } from '../../components';
+import { PageLoading, PolicyForm } from '../../components';
 import { BASE_PATH } from '../../constants';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
@@ -106,67 +106,6 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
     history.push(encodeURI(`${BASE_PATH}/policies/${encodeURIComponent(name)}`));
   };
 
-  const renderLoading = () => {
-    return errorLoadingPolicy ? (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.snapshotRestore.editPolicy.loadingPolicyDescription"
-          defaultMessage="Loading policy details…"
-        />
-      </SectionLoading>
-    ) : (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.snapshotRestore.editPolicy.loadingIndicesDescription"
-          defaultMessage="Loading available indices…"
-        />
-      </SectionLoading>
-    );
-  };
-
-  const renderError = () => {
-    if (errorLoadingPolicy) {
-      const notFound = (errorLoadingPolicy as any).status === 404;
-      const errorObject = notFound
-        ? {
-            data: {
-              error: i18n.translate('xpack.snapshotRestore.editPolicy.policyNotFoundErrorMessage', {
-                defaultMessage: `The policy '{name}' does not exist.`,
-                values: {
-                  name,
-                },
-              }),
-            },
-          }
-        : errorLoadingPolicy;
-      return (
-        <SectionError
-          title={
-            <FormattedMessage
-              id="xpack.snapshotRestore.editPolicy.loadingPolicyErrorTitle"
-              defaultMessage="Error loading policy details"
-            />
-          }
-          error={errorObject as Error}
-        />
-      );
-    }
-
-    if (errorLoadingIndices) {
-      return (
-        <SectionError
-          title={
-            <FormattedMessage
-              id="xpack.snapshotRestore.editPolicy.LoadingIndicesErrorMessage"
-              defaultMessage="Error loading available indices"
-            />
-          }
-          error={errorLoadingIndices as Error}
-        />
-      );
-    }
-  };
-
   const renderSaveError = () => {
     return saveError ? (
       <SectionError
@@ -185,62 +124,117 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
     setSaveError(null);
   };
 
-  const renderContent = () => {
-    if (isLoadingPolicy || isLoadingIndices) {
-      return renderLoading();
-    }
-    if (errorLoadingPolicy || errorLoadingIndices) {
-      return renderError();
-    }
-
-    return (
-      <>
-        {policy.isManagedPolicy ? (
-          <>
-            <EuiCallOut
-              size="m"
-              color="warning"
-              iconType="iInCircle"
-              title={
-                <FormattedMessage
-                  id="xpack.snapshotRestore.editPolicy.managedPolicyWarningTitle"
-                  defaultMessage="This is a managed policy. Changing this policy might affect other systems that use it. Proceed with caution."
-                />
-              }
-            />
-            <EuiSpacer size="l" />
-          </>
-        ) : null}
-        <PolicyForm
-          policy={policy}
-          dataStreams={indicesData!.dataStreams}
-          indices={indicesData!.indices}
-          currentUrl={pathname}
-          isEditing={true}
-          isSaving={isSaving}
-          saveError={renderSaveError()}
-          clearSaveError={clearSaveError}
-          onSave={onSave}
-          onCancel={onCancel}
+  const renderLoading = () => {
+    return isLoadingPolicy ? (
+      <PageLoading>
+        <FormattedMessage
+          id="xpack.snapshotRestore.editPolicy.loadingPolicyDescription"
+          defaultMessage="Loading policy details…"
         />
-      </>
+      </PageLoading>
+    ) : (
+      <PageLoading>
+        <FormattedMessage
+          id="xpack.snapshotRestore.editPolicy.loadingIndicesDescription"
+          defaultMessage="Loading available indices…"
+        />
+      </PageLoading>
     );
   };
 
+  const renderError = () => {
+    if (errorLoadingPolicy) {
+      const notFound = (errorLoadingPolicy as any).status === 404;
+      const errorObject = notFound
+        ? {
+            data: {
+              error: i18n.translate('xpack.snapshotRestore.editPolicy.policyNotFoundErrorMessage', {
+                defaultMessage: `The policy '{name}' does not exist.`,
+                values: {
+                  name,
+                },
+              }),
+            },
+          }
+        : errorLoadingPolicy;
+
+      return (
+        <PageError
+          title={
+            <FormattedMessage
+              id="xpack.snapshotRestore.editPolicy.loadingPolicyErrorTitle"
+              defaultMessage="Error loading policy details"
+            />
+          }
+          error={errorObject as Error}
+        />
+      );
+    }
+
+    return (
+      <PageError
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.editPolicy.LoadingIndicesErrorMessage"
+            defaultMessage="Error loading available indices"
+          />
+        }
+        error={errorLoadingIndices as Error}
+      />
+    );
+  };
+
+  if (isLoadingPolicy || isLoadingIndices) {
+    return renderLoading();
+  }
+
+  if (errorLoadingPolicy || errorLoadingIndices) {
+    return renderError();
+  }
+
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.snapshotRestore.editPolicyTitle"
               defaultMessage="Edit policy"
             />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {renderContent()}
-      </EuiPageContent>
-    </EuiPageBody>
+          </span>
+        }
+      />
+      <EuiSpacer size="l" />
+
+      {policy.isManagedPolicy ? (
+        <>
+          <EuiCallOut
+            size="m"
+            color="warning"
+            iconType="iInCircle"
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.editPolicy.managedPolicyWarningTitle"
+                defaultMessage="This is a managed policy. Changing this policy might affect other systems that use it. Proceed with caution."
+              />
+            }
+          />
+          <EuiSpacer size="l" />
+        </>
+      ) : null}
+
+      <PolicyForm
+        policy={policy}
+        dataStreams={indicesData!.dataStreams}
+        indices={indicesData!.indices}
+        currentUrl={pathname}
+        isEditing={true}
+        isSaving={isSaving}
+        saveError={renderSaveError()}
+        clearSaveError={clearSaveError}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    </EuiPageContentBody>
   );
 };

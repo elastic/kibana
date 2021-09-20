@@ -7,6 +7,7 @@
 
 import './collapsible_panel.scss';
 
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,10 +16,11 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  IconType,
 } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component, Fragment, ReactNode } from 'react';
 
 interface Props {
   iconType?: IconType;
@@ -44,7 +46,7 @@ export class CollapsiblePanel extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={true}>
         {this.getTitle()}
         {this.getForm()}
       </EuiPanel>

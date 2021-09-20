@@ -9,7 +9,7 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
 import { TabContent, TabProps } from '../shared';
-import { Source } from '../../../../../../../containers/source';
+import { Source } from '../../../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../../../../common/inventory_models/types';
 import { useMetadata } from '../../../../../metric_detail/hooks/use_metadata';

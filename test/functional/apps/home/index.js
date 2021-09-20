@@ -21,5 +21,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_newsfeed'));
     loadTestFile(require.resolve('./_add_data'));
     loadTestFile(require.resolve('./_sample_data'));
+    loadTestFile(require.resolve('./_welcome'));
   });
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { METRIC_TYPE } from '@kbn/analytics';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
 import { UIM_APP_NAME } from '../constants';
@@ -22,7 +23,7 @@ export class UiMetricService {
       return;
     }
 
-    const { reportUiCounter, METRIC_TYPE } = this.usageCollection;
+    const { reportUiCounter } = this.usageCollection;
     reportUiCounter(UIM_APP_NAME, METRIC_TYPE.COUNT, name);
   }
 

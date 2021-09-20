@@ -15,5 +15,10 @@
     "share",
     "visDefaultEditor"
   ],
-  "optionalPlugins": ["usageCollection"]
+  "optionalPlugins": ["usageCollection"],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  },
+  "description": "Registers the datatable aggregation-based visualization."
 }

@@ -8,18 +8,21 @@
 
 import { query } from './query';
 
-describe('query(req, panel, series)', () => {
+describe('query', () => {
   let panel;
   let series;
   let req;
+  let seriesIndex;
+  let buildSeriesMetaParams;
 
   const config = {
     allowLeadingWildcards: true,
     queryStringOptions: { analyze_wildcard: true },
   };
+
   beforeEach(() => {
     req = {
-      payload: {
+      body: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
@@ -32,17 +35,33 @@ describe('query(req, panel, series)', () => {
       interval: '10s',
     };
     series = { id: 'test' };
+    seriesIndex = {};
+    buildSeriesMetaParams = jest.fn().mockResolvedValue({
+      timeField: panel.time_field,
+      interval: panel.interval,
+    });
   });
 
-  test('calls next when finished', () => {
+  test('calls next when finished', async () => {
     const next = jest.fn();
-    query(req, panel, series, config)(next)({});
+    await query(req, panel, series, config, seriesIndex, null, null, buildSeriesMetaParams)(next)(
+      {}
+    );
     expect(next.mock.calls.length).toEqual(1);
   });
 
-  test('returns doc with query for timerange', () => {
+  test('returns doc with query for timerange', async () => {
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = await query(
+      req,
+      panel,
+      series,
+      config,
+      seriesIndex,
+      null,
+      null,
+      buildSeriesMetaParams
+    )(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {
@@ -66,10 +85,19 @@ describe('query(req, panel, series)', () => {
     });
   });
 
-  test('returns doc with query for timerange (offset by 1h)', () => {
+  test('returns doc with query for timerange (offset by 1h)', async () => {
     series.offset_time = '1h';
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = await query(
+      req,
+      panel,
+      series,
+      config,
+      seriesIndex,
+      null,
+      null,
+      buildSeriesMetaParams
+    )(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {
@@ -93,8 +121,8 @@ describe('query(req, panel, series)', () => {
     });
   });
 
-  test('returns doc with global query', () => {
-    req.payload.filters = [
+  test('returns doc with global query', async () => {
+    req.body.filters = [
       {
         bool: {
           must: [
@@ -108,7 +136,16 @@ describe('query(req, panel, series)', () => {
       },
     ];
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = await query(
+      req,
+      panel,
+      series,
+      config,
+      seriesIndex,
+      null,
+      null,
+      buildSeriesMetaParams
+    )(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {
@@ -144,10 +181,19 @@ describe('query(req, panel, series)', () => {
     });
   });
 
-  test('returns doc with series filter', () => {
+  test('returns doc with series filter', async () => {
     series.filter = { query: 'host:web-server', language: 'lucene' };
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = await query(
+      req,
+      panel,
+      series,
+      config,
+      seriesIndex,
+      null,
+      null,
+      buildSeriesMetaParams
+    )(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {
@@ -185,8 +231,8 @@ describe('query(req, panel, series)', () => {
       },
     });
   });
-  test('returns doc with panel filter and global', () => {
-    req.payload.filters = [
+  test('returns doc with panel filter and global', async () => {
+    req.body.filters = [
       {
         bool: {
           must: [
@@ -201,7 +247,16 @@ describe('query(req, panel, series)', () => {
     ];
     panel.filter = { query: 'host:web-server', language: 'lucene' };
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = await query(
+      req,
+      panel,
+      series,
+      config,
+      seriesIndex,
+      null,
+      null,
+      buildSeriesMetaParams
+    )(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {
@@ -252,8 +307,8 @@ describe('query(req, panel, series)', () => {
     });
   });
 
-  test('returns doc with panel filter (ignoring globals)', () => {
-    req.payload.filters = [
+  test('returns doc with panel filter (ignoring globals)', async () => {
+    req.body.filters = [
       {
         bool: {
           must: [
@@ -269,7 +324,16 @@ describe('query(req, panel, series)', () => {
     panel.filter = { query: 'host:web-server', language: 'lucene' };
     panel.ignore_global_filter = true;
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = await query(
+      req,
+      panel,
+      series,
+      config,
+      seriesIndex,
+      null,
+      null,
+      buildSeriesMetaParams
+    )(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {
@@ -308,8 +372,8 @@ describe('query(req, panel, series)', () => {
     });
   });
 
-  test('returns doc with panel filter (ignoring globals from series)', () => {
-    req.payload.filters = [
+  test('returns doc with panel filter (ignoring globals from series)', async () => {
+    req.body.filters = [
       {
         bool: {
           must: [
@@ -325,7 +389,16 @@ describe('query(req, panel, series)', () => {
     panel.filter = { query: 'host:web-server', language: 'lucene' };
     series.ignore_global_filter = true;
     const next = (doc) => doc;
-    const doc = query(req, panel, series, config)(next)({});
+    const doc = await query(
+      req,
+      panel,
+      series,
+      config,
+      seriesIndex,
+      null,
+      null,
+      buildSeriesMetaParams
+    )(next)({});
     expect(doc).toEqual({
       size: 0,
       query: {

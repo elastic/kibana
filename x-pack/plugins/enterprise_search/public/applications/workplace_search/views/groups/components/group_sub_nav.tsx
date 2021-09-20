@@ -5,28 +5,34 @@
  * 2.0.
  */
 
-import React from 'react';
-
 import { useValues } from 'kea';
 
-import { SideNavLink } from '../../../../shared/layout';
+import { EuiSideNavItemType } from '@elastic/eui';
+
+import { generateNavLink } from '../../../../shared/layout';
 import { NAV } from '../../../constants';
 import { getGroupPath, getGroupSourcePrioritizationPath } from '../../../routes';
 import { GroupLogic } from '../group_logic';
 
-export const GroupSubNav: React.FC = () => {
+export const useGroupSubNav = () => {
   const {
     group: { id },
   } = useValues(GroupLogic);
 
-  if (!id) return null;
+  if (!id) return undefined;
 
-  return (
-    <>
-      <SideNavLink to={getGroupPath(id)}>{NAV.GROUP_OVERVIEW}</SideNavLink>
-      <SideNavLink to={getGroupSourcePrioritizationPath(id)}>
-        {NAV.SOURCE_PRIORITIZATION}
-      </SideNavLink>
-    </>
-  );
+  const navItems: Array<EuiSideNavItemType<unknown>> = [
+    {
+      id: 'groupOverview',
+      name: NAV.GROUP_OVERVIEW,
+      ...generateNavLink({ to: getGroupPath(id) }),
+    },
+    {
+      id: 'groupSourcePrioritization',
+      name: NAV.SOURCE_PRIORITIZATION,
+      ...generateNavLink({ to: getGroupSourcePrioritizationPath(id) }),
+    },
+  ];
+
+  return navItems;
 };

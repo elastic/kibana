@@ -3,21 +3,23 @@
 
 Manage Actions and Connectors.
 
-The following action APIs are available:
+The following connector APIs are available:
 
-* <<actions-and-connectors-api-get, Get action API>> to retrieve a single action by ID
+* <<get-connector-api, Get connector API>> to retrieve a single connector by ID
 
-* <<actions-and-connectors-api-get-all, Get all actions API>> to retrieve all actions
+* <<get-all-connectors-api, Get all connectors API>> to retrieve all connectors
 
-* <<actions-and-connectors-api-list, List all action types API>> to retrieve a list of all action types
+* <<list-connector-types-api, List all connector types API>> to retrieve a list of all connector types
 
-* <<actions-and-connectors-api-create, Create action API>> to create actions
+* <<create-connector-api, Create connector API>> to create connectors
 
-* <<actions-and-connectors-api-update, Update action API>> to update the attributes for an existing action
+* <<update-connector-api, Update connector API>> to update the attributes for an existing connector
 
-* <<actions-and-connectors-api-execute, Execute action API>> to execute an action by ID
+* <<execute-connector-api, Execute connector API>> to execute a connector by ID
 
-* <<actions-and-connectors-api-delete, Delete action API>> to delete an action by ID
+* <<delete-connector-api, Delete connector API>> to delete a connector by ID
+
+For deprecated APIs, refer to <<actions-and-connectors-legacy-apis>>.
 
 For information about the actions and connectors that {kib} supports, refer to <<action-types,Action and connector types>>.
 
@@ -28,3 +30,11 @@ include::actions-and-connectors/create.asciidoc[]
 include::actions-and-connectors/update.asciidoc[]
 include::actions-and-connectors/execute.asciidoc[]
 include::actions-and-connectors/delete.asciidoc[]
+include::actions-and-connectors/legacy/index.asciidoc[]
+include::actions-and-connectors/legacy/get.asciidoc[]
+include::actions-and-connectors/legacy/get_all.asciidoc[]
+include::actions-and-connectors/legacy/list.asciidoc[]
+include::actions-and-connectors/legacy/create.asciidoc[]
+include::actions-and-connectors/legacy/update.asciidoc[]
+include::actions-and-connectors/legacy/execute.asciidoc[]
+include::actions-and-connectors/legacy/delete.asciidoc[]

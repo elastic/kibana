@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from 'mapbox-gl';
+import type { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { AbstractLayer } from '../layer';
 import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { EMPTY_FEATURE_COLLECTION, LAYER_TYPE } from '../../../../common/constants';
-import { HeatmapLayerDescriptor, MapQuery } from '../../../../common/descriptor_types';
+import { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
-import { addGeoJsonMbSource, syncVectorSource } from '../vector_layer';
+import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from '../vector_layer';
 import { DataRequestContext } from '../../../actions';
 import { DataRequestAbortError } from '../../util/data_request';
+import { buildVectorRequestMeta } from '../build_vector_request_meta';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__'; // unique name to store scaled value for weighting
 
@@ -43,6 +44,12 @@ export class HeatmapLayer extends AbstractLayer {
       this._style = new HeatmapStyle(defaultStyle);
     } else {
       this._style = new HeatmapStyle(layerDescriptor.style);
+    }
+  }
+
+  destroy() {
+    if (this.getSource()) {
+      this.getSource().destroy();
     }
   }
 
@@ -88,23 +95,23 @@ export class HeatmapLayer extends AbstractLayer {
       return;
     }
 
-    const sourceQuery = this.getQuery() as MapQuery;
     try {
       await syncVectorSource({
         layerId: this.getId(),
         layerName: await this.getDisplayName(this.getSource()),
         prevDataRequest: this.getSourceDataRequest(),
-        requestMeta: {
-          ...syncContext.dataFilters,
-          fieldNames: this.getSource().getFieldNames(),
-          geogridPrecision: this.getSource().getGeoGridPrecision(syncContext.dataFilters.zoom),
-          sourceQuery: sourceQuery ? sourceQuery : undefined,
-          applyGlobalQuery: this.getSource().getApplyGlobalQuery(),
-          applyGlobalTime: this.getSource().getApplyGlobalTime(),
-          sourceMeta: this.getSource().getSyncMeta(),
-        },
+        requestMeta: buildVectorRequestMeta(
+          this.getSource(),
+          this.getSource().getFieldNames(),
+          syncContext.dataFilters,
+          this.getQuery(),
+          syncContext.isForceRefresh
+        ),
         syncContext,
         source: this.getSource(),
+        getUpdateDueToTimeslice: () => {
+          return true;
+        },
       });
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
@@ -178,5 +185,30 @@ export class HeatmapLayer extends AbstractLayer {
   renderLegendDetails() {
     const metricFields = this.getSource().getMetricFields();
     return this.getCurrentStyle().renderLegendDetails(metricFields[0]);
+  }
+
+  async getBounds(syncContext: DataRequestContext) {
+    return await getVectorSourceBounds({
+      layerId: this.getId(),
+      syncContext,
+      source: this.getSource(),
+      sourceQuery: this.getQuery(),
+    });
+  }
+
+  async isFilteredByGlobalTime(): Promise<boolean> {
+    return this.getSource().getApplyGlobalTime() && (await this.getSource().isTimeAware());
+  }
+
+  getIndexPatternIds() {
+    return this.getSource().getIndexPatternIds();
+  }
+
+  getQueryableIndexPatternIds() {
+    return this.getSource().getQueryableIndexPatternIds();
+  }
+
+  async getLicensedFeatures() {
+    return await this.getSource().getLicensedFeatures();
   }
 }

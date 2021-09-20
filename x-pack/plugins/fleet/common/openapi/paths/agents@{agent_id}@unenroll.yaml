@@ -5,10 +5,31 @@ parameters:
     in: path
     required: true
 post:
-  summary: Fleet - Agent - Unenroll
+  summary: Agent - Unenroll
   tags: []
-  responses: {}
-  operationId: post-fleet-agents-unenroll
+  responses:
+    '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+    '400':
+        description: BAD REQUEST
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                message:
+                  type: string
+                statusCode:
+                  type: number
+                  enum:
+                    - 400
+  operationId: unenroll-agent
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
   requestBody:
@@ -17,5 +38,7 @@ post:
         schema:
           type: object
           properties:
+            revoke:
+              type: boolean
             force:
               type: boolean

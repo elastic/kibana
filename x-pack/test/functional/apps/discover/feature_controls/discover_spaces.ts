@@ -22,6 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const kibanaServer = getService('kibanaServer');
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -29,14 +30,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('spaces', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('space with no features disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('discover/feature_controls/spaces');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/custom_space',
+          { space: 'custom_space' }
+        );
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -46,7 +53,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('discover/feature_controls/spaces');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/custom_space',
+          { space: 'custom_space' }
+        );
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
+        );
       });
 
       it('shows discover navlink', async () => {
@@ -80,7 +93,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('discover/feature_controls/spaces');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
+        );
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -90,7 +105,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('discover/feature_controls/spaces');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
+        );
       });
 
       it(`doesn't show discover navlink`, async () => {
@@ -116,7 +133,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('spaces/disabled_features');
+        await esArchiver.load('x-pack/test/functional/es_archives/spaces/disabled_features');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -126,7 +143,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('spaces/disabled_features');
+        await esArchiver.unload('x-pack/test/functional/es_archives/spaces/disabled_features');
       });
 
       it('Does not show the "visualize" field button', async () => {
@@ -159,6 +176,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToUrl('discover', '', {
           basePath: '/s/custom_space_no_index_patterns',
           ensureCurrentUrl: false,
+          shouldUseHashForSubUrl: false,
         });
         await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });

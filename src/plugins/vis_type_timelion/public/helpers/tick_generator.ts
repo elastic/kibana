@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Axis } from './panel_utils';
+import { IAxis } from './panel_utils';
 
 export function generateTicksProvider() {
   function floorInBase(n: number, base: number) {
     return base * Math.floor(n / base);
   }
 
-  function generateTicks(axis: Axis) {
+  function generateTicks(axis: IAxis) {
     const returnTicks = [];
     let tickSize = 2;
     let delta = axis.delta || 0;
@@ -46,5 +46,5 @@ export function generateTicksProvider() {
     return returnTicks;
   }
 
-  return (axis: Axis) => generateTicks(axis);
+  return (axis: IAxis) => generateTicks(axis);
 }

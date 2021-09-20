@@ -6,7 +6,7 @@
  */
 
 import { pick, keys, values, some } from 'lodash';
-import { cellHasFormulas } from './cell_has_formula';
+import { cellHasFormulas } from '../../../../../../../src/plugins/data/common';
 
 interface IFlattened {
   [header: string]: string;

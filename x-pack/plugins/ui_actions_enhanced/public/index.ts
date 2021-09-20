@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/109891
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext } from '../../../../src/core/public';
 import { AdvancedUiActionsPublicPlugin } from './plugin';
 
@@ -35,5 +38,8 @@ export {
 
 export { DynamicActionsState } from './services/ui_actions_service_enhancements';
 
-export { DrilldownDefinition as UiActionsEnhancedDrilldownDefinition } from './drilldowns';
+export {
+  DrilldownDefinition as UiActionsEnhancedDrilldownDefinition,
+  DrilldownTemplate as UiActionsEnhancedDrilldownTemplate,
+} from './drilldowns';
 export * from './drilldowns/url_drilldown';

@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import reactcss from 'reactcss';
 
-import { getLastValue } from '../../../../common/get_last_value';
+import { getLastValue } from '../../../../common/last_value_utils';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 
 export class Metric extends Component {
@@ -58,7 +58,8 @@ export class Metric extends Component {
     const { metric, secondary } = this.props;
     const { scale, translateX, translateY } = this.state;
     const primaryFormatter = (metric && (metric.tickFormatter || metric.formatter)) || ((n) => n);
-    const primaryValue = primaryFormatter(getLastValue(metric && metric.data));
+    const primaryValue = primaryFormatter(getLastValue(metric?.data));
+
     const styles = reactcss(
       {
         default: {
@@ -100,7 +101,8 @@ export class Metric extends Component {
         <div className="tvbVisMetric__secondary">
           {secondaryLabel}
           <div style={styles.secondary_value} className="tvbVisMetric__value--secondary">
-            {secondaryValue}
+            {/* eslint-disable-next-line react/no-danger */}
+            <span dangerouslySetInnerHTML={{ __html: secondaryValue }} />
           </div>
         </div>
       );
@@ -120,7 +122,6 @@ export class Metric extends Component {
     if (this.props.reversed) {
       className += ' tvbVisMetric--reversed';
     }
-
     return (
       <div className={className} style={styles.container}>
         <div ref={(el) => (this.resize = el)} className="tvbVisMetric__resize">
@@ -132,7 +133,8 @@ export class Metric extends Component {
                 data-test-subj="tsvbMetricValue"
                 className="tvbVisMetric__value--primary"
               >
-                {primaryValue}
+                {/* eslint-disable-next-line react/no-danger */}
+                <span dangerouslySetInnerHTML={{ __html: primaryValue }} />
               </div>
             </div>
             {secondarySnippet}

@@ -8,6 +8,7 @@
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
+import { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
 import {
   Field,
   SplitField,
@@ -56,7 +57,8 @@ export class ChartLoader {
     splitField: SplitField,
     splitFieldValue: SplitFieldValue,
     intervalMs: number,
-    runtimeMappings: RuntimeMappings | null
+    runtimeMappings: RuntimeMappings | null,
+    indicesOptions?: IndicesOptions
   ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
       if (aggFieldPairsCanBeCharted(aggFieldPairs) === false) {
@@ -77,7 +79,8 @@ export class ChartLoader {
         aggFieldPairNames,
         splitFieldName,
         splitFieldValue,
-        runtimeMappings ?? undefined
+        runtimeMappings ?? undefined,
+        indicesOptions
       );
 
       return resp.results;
@@ -91,7 +94,8 @@ export class ChartLoader {
     aggFieldPairs: AggFieldPair[],
     splitField: SplitField,
     intervalMs: number,
-    runtimeMappings: RuntimeMappings | null
+    runtimeMappings: RuntimeMappings | null,
+    indicesOptions?: IndicesOptions
   ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
       if (aggFieldPairsCanBeCharted(aggFieldPairs) === false) {
@@ -111,7 +115,8 @@ export class ChartLoader {
         this._query,
         aggFieldPairNames,
         splitFieldName,
-        runtimeMappings ?? undefined
+        runtimeMappings ?? undefined,
+        indicesOptions
       );
 
       return resp.results;
@@ -122,7 +127,9 @@ export class ChartLoader {
   async loadEventRateChart(
     start: number,
     end: number,
-    intervalMs: number
+    intervalMs: number,
+    runtimeMappings?: RuntimeMappings,
+    indicesOptions?: IndicesOptions
   ): Promise<LineChartPoint[]> {
     if (this._timeFieldName !== '') {
       const resp = await getEventRateData(
@@ -131,7 +138,9 @@ export class ChartLoader {
         this._timeFieldName,
         start,
         end,
-        intervalMs * 3
+        intervalMs * 3,
+        runtimeMappings,
+        indicesOptions
       );
       if (resp.error !== undefined) {
         throw resp.error;
@@ -147,14 +156,16 @@ export class ChartLoader {
 
   async loadFieldExampleValues(
     field: Field,
-    runtimeMappings: RuntimeMappings | null
+    runtimeMappings: RuntimeMappings | null,
+    indicesOptions?: IndicesOptions
   ): Promise<string[]> {
     const { results } = await getCategoryFields(
       this._indexPatternTitle,
       field.name,
       10,
       this._query,
-      runtimeMappings ?? undefined
+      runtimeMappings ?? undefined,
+      indicesOptions
     );
     return results;
   }

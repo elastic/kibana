@@ -303,7 +303,7 @@ export interface ParseSearchQueryOptions {
    *
    * Defaults to true.
    *
-   * @remarks this must be set to to true if the filter is configured to use tag names instead of id in the query.
+   * @remarks this must be set to true if the filter is configured to use tag names instead of id in the query.
    *           see {@link GetSearchBarFilterOptions.useName} for more details.
    */
   useName?: boolean;

@@ -5,36 +5,18 @@
  * 2.0.
  */
 
-import { PNG_JOB_TYPE } from '../../../../common/constants';
-import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPNG, TaskPayloadPNG } from '../types';
 
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsPNG, TaskPayloadPNG>
-> = function createJobFactoryFn(reporting, parentLogger) {
-  const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute-job']);
-  const config = reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
-
-  return async function createJob(
-    { objectType, title, relativeUrl, browserTimezone, layout },
-    context,
-    req
-  ) {
-    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
-
-    validateUrls([relativeUrl]);
+> = function createJobFactoryFn() {
+  return async function createJob(jobParams) {
+    validateUrls([jobParams.relativeUrl]);
 
     return {
-      headers: serializedEncryptedHeaders,
-      spaceId: reporting.getSpaceId(req, logger),
-      objectType,
-      title,
-      relativeUrl,
-      browserTimezone,
-      layout,
+      ...jobParams,
       forceNow: new Date().toISOString(),
     };
   };

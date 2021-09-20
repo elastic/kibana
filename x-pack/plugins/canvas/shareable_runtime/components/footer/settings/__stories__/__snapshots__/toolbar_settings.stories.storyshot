@@ -34,7 +34,7 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: off 1`
         >
           <button
             aria-checked={false}
-            aria-describedby="generated-id-help"
+            aria-describedby="generated-id-help-0"
             aria-labelledby="generated-id"
             className="euiSwitch__button"
             data-test-subj="hideToolbarSwitch"
@@ -78,7 +78,7 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: off 1`
         </div>
         <div
           className="euiFormHelpText euiFormRow__text"
-          id="generated-id-help"
+          id="generated-id-help-0"
         >
           Hide the toolbar when the mouse is not within the Canvas?
         </div>
@@ -122,7 +122,7 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: on 1`]
         >
           <button
             aria-checked={true}
-            aria-describedby="generated-id-help"
+            aria-describedby="generated-id-help-0"
             aria-labelledby="generated-id"
             className="euiSwitch__button"
             data-test-subj="hideToolbarSwitch"
@@ -166,7 +166,7 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: on 1`]
         </div>
         <div
           className="euiFormHelpText euiFormRow__text"
-          id="generated-id-help"
+          id="generated-id-help-0"
         >
           Hide the toolbar when the mouse is not within the Canvas?
         </div>
@@ -210,7 +210,7 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings contextual 1`] = 
         >
           <button
             aria-checked={false}
-            aria-describedby="generated-id-help"
+            aria-describedby="generated-id-help-0"
             aria-labelledby="generated-id"
             className="euiSwitch__button"
             data-test-subj="hideToolbarSwitch"
@@ -254,7 +254,7 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings contextual 1`] = 
         </div>
         <div
           className="euiFormHelpText euiFormRow__text"
-          id="generated-id-help"
+          id="generated-id-help-0"
         >
           Hide the toolbar when the mouse is not within the Canvas?
         </div>

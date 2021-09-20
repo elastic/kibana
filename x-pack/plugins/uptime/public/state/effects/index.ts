@@ -8,7 +8,6 @@
 import { fork } from 'redux-saga/effects';
 import { fetchMonitorDetailsEffect } from './monitor';
 import { fetchOverviewFiltersEffect } from './overview_filters';
-import { fetchSnapshotCountEffect } from './snapshot';
 import { fetchMonitorListEffect } from './monitor_list';
 import { fetchMonitorStatusEffect } from './monitor_status';
 import { fetchDynamicSettingsEffect, setDynamicSettingsEffect } from './dynamic_settings';
@@ -21,10 +20,14 @@ import { fetchCertificatesEffect } from '../certificates/certificates';
 import { fetchAlertsEffect } from '../alerts/alerts';
 import { fetchJourneyStepsEffect } from './journey';
 import { fetchNetworkEventsEffect } from './network_events';
+import {
+  fetchScreenshotBlocks,
+  generateBlockStatsOnPut,
+  pruneBlockCache,
+} from './synthetic_journey_blocks';
 
 export function* rootEffect() {
   yield fork(fetchMonitorDetailsEffect);
-  yield fork(fetchSnapshotCountEffect);
   yield fork(fetchOverviewFiltersEffect);
   yield fork(fetchMonitorListEffect);
   yield fork(fetchMonitorStatusEffect);
@@ -40,4 +43,7 @@ export function* rootEffect() {
   yield fork(fetchAlertsEffect);
   yield fork(fetchJourneyStepsEffect);
   yield fork(fetchNetworkEventsEffect);
+  yield fork(fetchScreenshotBlocks);
+  yield fork(generateBlockStatsOnPut);
+  yield fork(pruneBlockCache);
 }

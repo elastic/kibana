@@ -16,7 +16,7 @@ import { MonitoringViewBaseController } from '../../../base_controller';
 import { CcrShard } from '../../../../components/elasticsearch/ccr_shard';
 import {
   CODE_PATH_ELASTICSEARCH,
-  ALERT_CCR_READ_EXCEPTIONS,
+  RULE_CCR_READ_EXCEPTIONS,
   ELASTICSEARCH_SYSTEM_ID,
 } from '../../../../../common/constants';
 import { SetupModeRenderer } from '../../../../components/renderers';
@@ -46,7 +46,7 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_CCR_READ_EXCEPTIONS],
+            alertTypeIds: [RULE_CCR_READ_EXCEPTIONS],
             filters: [
               {
                 shardId: $route.current.pathParams.shardId,
@@ -75,8 +75,16 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
             i18n.translate('xpack.monitoring.elasticsearch.ccr.shard.pageTitle', {
               defaultMessage: 'Elasticsearch Ccr Shard - Index: {followerIndex} Shard: {shardId}',
               values: {
-                followerIndex: get(pageData, 'stat.follower_index'),
-                shardId: get(pageData, 'stat.shard_id'),
+                followerIndex: get(
+                  pageData,
+                  'stat.follower.index',
+                  get(pageData, 'stat.follower_index')
+                ),
+                shardId: get(
+                  pageData,
+                  'stat.follower.shard.number',
+                  get(pageData, 'stat.shard_id')
+                ),
               },
             })
           );

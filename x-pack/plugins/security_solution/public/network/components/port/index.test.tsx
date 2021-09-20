@@ -8,12 +8,14 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { removeExternalLinkText } from '../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import { Port } from '.';
+
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -29,7 +31,13 @@ describe('Port', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
+      <Port
+        contextId="test"
+        eventId="abcd"
+        fieldName="destination.port"
+        isDraggable={true}
+        value="443"
+      />
     );
     expect(wrapper).toMatchSnapshot();
   });
@@ -37,7 +45,13 @@ describe('Port', () => {
   test('it renders the port', () => {
     const wrapper = mount(
       <TestProviders>
-        <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
+        <Port
+          contextId="test"
+          eventId="abcd"
+          fieldName="destination.port"
+          isDraggable={true}
+          value="443"
+        />
       </TestProviders>
     );
 
@@ -49,7 +63,13 @@ describe('Port', () => {
   test('it hyperlinks links destination.port to an external service that describes the purpose of the port', () => {
     const wrapper = mount(
       <TestProviders>
-        <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
+        <Port
+          contextId="test"
+          eventId="abcd"
+          fieldName="destination.port"
+          isDraggable={true}
+          value="443"
+        />
       </TestProviders>
     );
 
@@ -60,13 +80,19 @@ describe('Port', () => {
     );
   });
 
-  test('it renders an external link', () => {
+  test('it renders only one external link icon', () => {
     const wrapper = mount(
       <TestProviders>
-        <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
+        <Port
+          contextId="test"
+          eventId="abcd"
+          fieldName="destination.port"
+          isDraggable={true}
+          value="443"
+        />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="external-link-icon"]').first().exists()).toBe(true);
+    expect(wrapper.find('span [data-euiicon-type="popout"]').length).toBe(1);
   });
 });

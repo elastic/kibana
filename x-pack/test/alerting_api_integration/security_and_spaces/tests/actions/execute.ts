@@ -23,7 +23,7 @@ const NANOS_IN_MILLIS = 1000 * 1000;
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -48,11 +48,11 @@ export default function ({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle execute request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const reference = `actions-execute-1:${user.username}`;
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -97,8 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.hits.total.value).to.eql(1);
-              const indexedRecord = searchResult.hits.hits[0];
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              const indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source).to.eql({
                 params: {
                   reference,
@@ -117,8 +117,9 @@ export default function ({ getService }: FtrProviderContext) {
 
               await validateEventLog({
                 spaceId: space.id,
-                actionId: createdAction.id,
+                connectorId: createdAction.id,
                 outcome: 'success',
+                actionTypeId: 'test.index-record',
                 message: `action executed: test.index-record:${createdAction.id}: My action`,
               });
               break;
@@ -129,11 +130,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         it(`shouldn't execute an action from another space`, async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -146,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const reference = `actions-execute-4:${user.username}`;
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix('other')}/api/actions/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix('other')}/api/actions/connector/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -186,11 +187,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should handle execute request appropriately after action is updated', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -202,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           await supertest
-            .put(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action updated',
@@ -217,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const reference = `actions-execute-2:${user.username}`;
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -249,8 +250,8 @@ export default function ({ getService }: FtrProviderContext) {
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.hits.total.value).to.eql(1);
-              const indexedRecord = searchResult.hits.hits[0];
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              const indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source).to.eql({
                 params: {
                   reference,
@@ -274,7 +275,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it(`should handle execute request appropriately when action doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/action/1/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/1/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -310,7 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should handle execute request appropriately when payload is empty and invalid', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/action/1/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/1/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({});
@@ -338,11 +339,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should handle execute request appropriately after changing config properties', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'test email action',
-              actionTypeId: '.email',
+              connector_type_id: '.email',
               config: {
                 from: 'email-from-1@example.com',
                 // this host is specifically added to allowedHosts in:
@@ -359,7 +360,7 @@ export default function ({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           await supertest
-            .put(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'a test email action 2',
@@ -375,7 +376,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -413,17 +414,17 @@ export default function ({ getService }: FtrProviderContext) {
           let searchResult: any;
           const reference = `actions-execute-3:${user.username}`;
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.authorization',
+              connector_type_id: 'test.authorization',
             })
             .expect(200);
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -452,19 +453,17 @@ export default function ({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-              expect(searchResult.hits.total.value).to.eql(1);
-              indexedRecord = searchResult.hits.hits[0];
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: false,
                 callScopedClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...indexedRecord._source.state.callClusterError,
-                  statusCode: 403,
                 },
                 callScopedClusterError: {
                   ...indexedRecord._source.state.callScopedClusterError,
-                  statusCode: 403,
                 },
                 savedObjectsClientError: {
                   ...indexedRecord._source.state.savedObjectsClientError,
@@ -478,8 +477,8 @@ export default function ({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-              expect(searchResult.hits.total.value).to.eql(1);
-              indexedRecord = searchResult.hits.hits[0];
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: true,
                 callScopedClusterSuccess: true,
@@ -503,62 +502,110 @@ export default function ({ getService }: FtrProviderContext) {
 
   interface ValidateEventLogParams {
     spaceId: string;
-    actionId: string;
+    connectorId: string;
+    actionTypeId: string;
     outcome: string;
     message: string;
     errorMessage?: string;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, actionId, outcome, message, errorMessage } = params;
+    const { spaceId, connectorId, actionTypeId, outcome, message, errorMessage } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
         getService,
         spaceId,
         type: 'action',
-        id: actionId,
+        id: connectorId,
         provider: 'actions',
-        actions: new Map([['execute', { equal: 1 }]]),
-        filter: 'event.action:(execute)',
+        actions: new Map([
+          ['execute-start', { equal: 1 }],
+          ['execute', { equal: 1 }],
+        ]),
+        // filter: 'event.action:(execute)',
       });
     });
 
-    const event = events[0];
+    const startExecuteEvent = events[0];
+    const executeEvent = events[1];
 
-    const duration = event?.event?.duration;
-    const eventStart = Date.parse(event?.event?.start || 'undefined');
-    const eventEnd = Date.parse(event?.event?.end || 'undefined');
+    const duration = executeEvent?.event?.duration;
+    const executeEventStart = Date.parse(executeEvent?.event?.start || 'undefined');
+    const startExecuteEventStart = Date.parse(startExecuteEvent?.event?.start || 'undefined');
+    const executeEventEnd = Date.parse(executeEvent?.event?.end || 'undefined');
     const dateNow = Date.now();
 
     expect(typeof duration).to.be('number');
-    expect(eventStart).to.be.ok();
-    expect(eventEnd).to.be.ok();
+    expect(executeEventStart).to.be.ok();
+    expect(startExecuteEventStart).to.equal(executeEventStart);
+    expect(executeEventEnd).to.be.ok();
 
     const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+      Math.round(duration! / NANOS_IN_MILLIS) - (executeEventEnd - executeEventStart)
     );
 
     // account for rounding errors
     expect(durationDiff < 1).to.equal(true);
-    expect(eventStart <= eventEnd).to.equal(true);
-    expect(eventEnd <= dateNow).to.equal(true);
+    expect(executeEventStart <= executeEventEnd).to.equal(true);
+    expect(executeEventEnd <= dateNow).to.equal(true);
 
-    expect(event?.event?.outcome).to.equal(outcome);
+    expect(executeEvent?.event?.outcome).to.equal(outcome);
 
-    expect(event?.kibana?.saved_objects).to.eql([
+    expect(executeEvent?.kibana?.saved_objects).to.eql([
       {
         rel: 'primary',
         type: 'action',
-        id: actionId,
-        namespace: spaceId,
+        id: connectorId,
+        namespace: 'space1',
+        type_id: actionTypeId,
       },
     ]);
+    expect(startExecuteEvent?.kibana?.saved_objects).to.eql(executeEvent?.kibana?.saved_objects);
 
-    expect(event?.message).to.eql(message);
+    expect(executeEvent?.message).to.eql(message);
+    expect(startExecuteEvent?.message).to.eql(message.replace('executed', 'started'));
 
     if (errorMessage) {
-      expect(event?.error?.message).to.eql(errorMessage);
+      expect(executeEvent?.error?.message).to.eql(errorMessage);
     }
+
+    // const event = events[0];
+
+    // const duration = event?.event?.duration;
+    // const eventStart = Date.parse(event?.event?.start || 'undefined');
+    // const eventEnd = Date.parse(event?.event?.end || 'undefined');
+    // const dateNow = Date.now();
+
+    // expect(typeof duration).to.be('number');
+    // expect(eventStart).to.be.ok();
+    // expect(eventEnd).to.be.ok();
+
+    // const durationDiff = Math.abs(
+    //   Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+    // );
+
+    // // account for rounding errors
+    // expect(durationDiff < 1).to.equal(true);
+    // expect(eventStart <= eventEnd).to.equal(true);
+    // expect(eventEnd <= dateNow).to.equal(true);
+
+    // expect(event?.event?.outcome).to.equal(outcome);
+
+    // expect(event?.kibana?.saved_objects).to.eql([
+    //   {
+    //     rel: 'primary',
+    //     type: 'action',
+    //     id: connectorId,
+    //     type_id: actionTypeId,
+    //     namespace: spaceId,
+    //   },
+    // ]);
+
+    // expect(event?.message).to.eql(message);
+
+    // if (errorMessage) {
+    //   expect(event?.error?.message).to.eql(errorMessage);
+    // }
   }
 }

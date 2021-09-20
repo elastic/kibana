@@ -9,5 +9,5 @@ The migration version that this migration function is defined for
 <b>Signature:</b>
 
 ```typescript
-migrationVersion: string;
+readonly migrationVersion: string;
 ```

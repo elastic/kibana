@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
+import type { Rule } from './rule';
 import { RuleGroup } from './rule_group';
-import { Rule } from './rule';
 
 /**
  * Represents a group of rules in which at least one must evaluate to false.

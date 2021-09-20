@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import * as ts from 'typescript';
 
 export interface DocEntry {

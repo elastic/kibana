@@ -41,10 +41,6 @@ export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedStat
     setAdvancedEditorRuntimeMappingsLastApplied,
   ] = useState(stringifiedRuntimeMappings);
 
-  const [advancedEditorRuntimeMappings, setAdvancedEditorRuntimeMappings] = useState(
-    stringifiedRuntimeMappings
-  );
-
   const {
     convertToJson,
     setXJson: setAdvancedRuntimeMappingsConfig,
@@ -52,11 +48,12 @@ export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedStat
   } = useXJsonMode(stringifiedRuntimeMappings ?? '');
 
   const applyRuntimeMappingsEditorChanges = () => {
-    const parsedRuntimeMappings = JSON.parse(advancedRuntimeMappingsConfig);
+    const parsedRuntimeMappings =
+      advancedRuntimeMappingsConfig === '' ? {} : JSON.parse(advancedRuntimeMappingsConfig);
     const prettySourceConfig = JSON.stringify(parsedRuntimeMappings, null, 2);
     setRuntimeMappingsUpdated(true);
     setRuntimeMappings(parsedRuntimeMappings);
-    setAdvancedEditorRuntimeMappings(prettySourceConfig);
+    setAdvancedRuntimeMappingsConfig(prettySourceConfig);
     setAdvancedEditorRuntimeMappingsLastApplied(prettySourceConfig);
     setRuntimeMappingsEditorApplyButtonEnabled(false);
   };
@@ -65,11 +62,8 @@ export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedStat
   const toggleRuntimeMappingsEditor = (reset = false) => {
     if (reset === true) {
       setRuntimeMappingsUpdated(false);
+      setAdvancedRuntimeMappingsConfig(advancedEditorRuntimeMappingsLastApplied);
     }
-    if (isRuntimeMappingsEditorEnabled === false) {
-      setAdvancedEditorRuntimeMappingsLastApplied(advancedEditorRuntimeMappings);
-    }
-
     setRuntimeMappingsEditorEnabled(!isRuntimeMappingsEditorEnabled);
     setRuntimeMappingsEditorApplyButtonEnabled(false);
   };
@@ -79,7 +73,6 @@ export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedStat
       applyRuntimeMappingsEditorChanges,
       setRuntimeMappingsEditorApplyButtonEnabled,
       setRuntimeMappingsEditorEnabled,
-      setAdvancedEditorRuntimeMappings,
       setAdvancedEditorRuntimeMappingsLastApplied,
       setRuntimeMappingsEditorSwitchModalVisible,
       setRuntimeMappingsUpdated,
@@ -88,7 +81,6 @@ export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedStat
       setAdvancedRuntimeMappingsConfig,
     },
     state: {
-      advancedEditorRuntimeMappings,
       advancedEditorRuntimeMappingsLastApplied,
       isRuntimeMappingsEditorApplyButtonEnabled,
       isRuntimeMappingsEditorEnabled,

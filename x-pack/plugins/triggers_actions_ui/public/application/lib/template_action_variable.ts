@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionVariable } from '../../types';
+import { ActionVariable } from '../../../../alerting/common';
 
 export function templateActionVariable(variable: ActionVariable) {
   return variable.useWithTripleBracesInTemplates

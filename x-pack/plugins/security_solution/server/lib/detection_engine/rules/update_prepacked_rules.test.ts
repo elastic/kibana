@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../alerts/server/mocks';
+import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
 import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
+import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 jest.mock('./patch_rules');
 
-describe('updatePrepackagedRules', () => {
-  let alertsClient: ReturnType<typeof alertsClientMock.create>;
-  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
+  let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
 
   beforeEach(() => {
-    alertsClient = alertsClientMock.create();
-    savedObjectsClient = savedObjectsClientMock.create();
+    rulesClient = rulesClientMock.create();
+    ruleStatusClient = ruleExecutionLogClientMock.create();
   });
 
   it('should omit actions and enabled when calling patchRules', async () => {
@@ -33,13 +36,15 @@ describe('updatePrepackagedRules', () => {
     ];
     const outputIndex = 'outputIndex';
     const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
-    alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
     await updatePrepackagedRules(
-      alertsClient,
-      savedObjectsClient,
+      rulesClient,
+      'default',
+      ruleStatusClient,
       [{ ...prepackagedRule, actions }],
-      outputIndex
+      outputIndex,
+      isRuleRegistryEnabled
     );
 
     expect(patchRules).toHaveBeenCalledWith(

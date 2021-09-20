@@ -26,8 +26,8 @@ export const SetupGuide: React.FC = () => {
     <SetupGuideLayout
       productName={WORKPLACE_SEARCH_PLUGIN.NAME}
       productEuiIcon="logoWorkplaceSearch"
-      standardAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#standard"
-      elasticsearchNativeAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#elasticsearch-native-realm"
+      standardAuthLink={`${DOCS_PREFIX}/workplace-search-security.html#standard`}
+      elasticsearchNativeAuthLink={`${DOCS_PREFIX}/workplace-search-security.html#elasticsearch-native-realm`}
     >
       <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />
       <SendTelemetry action="viewed" metric="setup_guide" />
@@ -49,7 +49,7 @@ export const SetupGuide: React.FC = () => {
         <p>
           <FormattedMessage
             id="xpack.enterpriseSearch.workplaceSearch.setupGuide.description"
-            defaultMessage="Elastic Workplace Search unifies your content platforms (Google Drive, Salesforce) into a personalized search experience."
+            defaultMessage="Unify your content platforms, such as Google Drive and Salesforce, into a personalized search experience."
           />
         </p>
       </EuiTitle>

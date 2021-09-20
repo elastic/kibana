@@ -51,7 +51,7 @@ export const ManageLicenseModal: React.FC<Props> = ({
       <p>
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.manageLicense.manageLicenseMessage"
-          defaultMessage="Alert {alertTypeId} is disabled because it requires a {licenseRequired} license. Continue to License Management to view upgrade options."
+          defaultMessage="Rule type {alertTypeId} is disabled because it requires a {licenseRequired} license. Continue to License Management to view upgrade options."
           values={{ alertTypeId, licenseRequired }}
         />
       </p>

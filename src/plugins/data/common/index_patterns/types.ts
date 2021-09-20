@@ -5,14 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
+import type { DataViewFieldBase, IFieldSubType, DataViewBase } from '@kbn/es-query';
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
 import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { SerializedFieldFormat } from '../../../expressions/common';
-import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
+import { KBN_FIELD_TYPES, DataViewField } from '..';
+import { FieldFormat } from '../../../field_formats/common';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
@@ -25,13 +27,13 @@ export interface RuntimeField {
 }
 
 /**
+ * @deprecated
  * IIndexPattern allows for an IndexPattern OR an index pattern saved object
- * too ambiguous, should be avoided
+ * Use IndexPattern or IndexPatternSpec instead
  */
-export interface IIndexPattern {
-  fields: IFieldType[];
+export interface IIndexPattern extends DataViewBase {
   title: string;
-  id?: string;
+  fields: IFieldType[];
   /**
    * Type is used for identifying rollup indices, otherwise left undefined
    */
@@ -42,19 +44,17 @@ export interface IIndexPattern {
   /**
    * Look up a formatter for a given field
    */
-  getFormatterForField?: (
-    field: IndexPatternField | IndexPatternField['spec'] | IFieldType
-  ) => FieldFormat;
+  getFormatterForField?: (field: DataViewField | DataViewField['spec'] | IFieldType) => FieldFormat;
 }
 
 /**
  * Interface for an index pattern saved object
  */
-export interface IndexPatternAttributes {
-  type: string;
+export interface DataViewAttributes {
   fields: string;
   title: string;
-  typeMeta: string;
+  type?: string;
+  typeMeta?: string;
   timeFieldName?: string;
   intervalName?: string;
   sourceFilters?: string;
@@ -66,6 +66,11 @@ export interface IndexPatternAttributes {
    */
   allowNoIndex?: boolean;
 }
+
+/**
+ * @deprecated Use DataViewAttributes. All index pattern interfaces were renamed.
+ */
+export type IndexPatternAttributes = DataViewAttributes;
 
 /**
  * @intenal
@@ -131,10 +136,16 @@ export interface GetFieldsOptionsTimePattern {
   interval: string;
 }
 
-export interface IIndexPatternsApiClient {
+export interface IDataViewsApiClient {
   getFieldsForTimePattern: (options: GetFieldsOptionsTimePattern) => Promise<any>;
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
+  hasUserIndexPattern: () => Promise<boolean>;
 }
+
+/**
+ * @deprecated Use IDataViewsApiClient. All index pattern interfaces were renamed.
+ */
+export type IIndexPatternsApiClient = IDataViewsApiClient;
 
 export type { SavedObject };
 
@@ -150,14 +161,24 @@ export type AggregationRestrictions = Record<
   }
 >;
 
-export interface IFieldSubType {
-  multi?: { parent: string };
-  nested?: { path: string };
-}
-
 export interface TypeMeta {
   aggs?: Record<string, AggregationRestrictions>;
-  [key: string]: any;
+  params?: {
+    rollup_index: string;
+  };
+}
+
+export enum DataViewType {
+  DEFAULT = 'default',
+  ROLLUP = 'rollup',
+}
+
+/**
+ * @deprecated Use DataViewType. All index pattern interfaces were renamed.
+ */
+export enum IndexPatternType {
+  DEFAULT = DataViewType.DEFAULT,
+  ROLLUP = DataViewType.ROLLUP,
 }
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
@@ -166,7 +187,7 @@ export type FieldSpecConflictDescriptions = Record<string, string[]>;
 export interface FieldSpecExportFmt {
   count?: number;
   script?: string;
-  lang?: string;
+  lang?: estypes.ScriptLanguage;
   conflictDescriptions?: FieldSpecConflictDescriptions;
   name: string;
   type: KBN_FIELD_TYPES;
@@ -181,32 +202,20 @@ export interface FieldSpecExportFmt {
 }
 
 /**
+ * @public
  * Serialized version of IndexPatternField
  */
-export interface FieldSpec {
+export interface FieldSpec extends DataViewFieldBase {
   /**
    * Popularity count is used by discover
    */
   count?: number;
-  /**
-   * Scripted field painless script
-   */
-  script?: string;
-  /**
-   * Scripted field langauge
-   * Painless is the only valid scripted field language
-   */
-  lang?: string;
   conflictDescriptions?: Record<string, string[]>;
   format?: SerializedFieldFormat;
-  name: string;
-  type: string;
   esTypes?: string[];
-  scripted?: boolean;
   searchable: boolean;
   aggregatable: boolean;
   readFromDocValues?: boolean;
-  subType?: IFieldSubType;
   indexed?: boolean;
   customLabel?: string;
   runtimeField?: RuntimeField;
@@ -215,13 +224,18 @@ export interface FieldSpec {
   isMapped?: boolean;
 }
 
-export type IndexPatternFieldMap = Record<string, FieldSpec>;
+export type DataViewFieldMap = Record<string, FieldSpec>;
+
+/**
+ * @deprecated Use DataViewFieldMap. All index pattern interfaces were renamed.
+ */
+export type IndexPatternFieldMap = DataViewFieldMap;
 
 /**
  * Static index pattern format
  * Serialized data object, representing index pattern attributes and state
  */
-export interface IndexPatternSpec {
+export interface DataViewSpec {
   /**
    * saved object id
    */
@@ -238,7 +252,7 @@ export interface IndexPatternSpec {
   intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
-  fields?: IndexPatternFieldMap;
+  fields?: DataViewFieldMap;
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
@@ -246,6 +260,11 @@ export interface IndexPatternSpec {
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
 }
+
+/**
+ * @deprecated Use DataViewSpec. All index pattern interfaces were renamed.
+ */
+export type IndexPatternSpec = DataViewSpec;
 
 export interface SourceFilter {
   value: string;

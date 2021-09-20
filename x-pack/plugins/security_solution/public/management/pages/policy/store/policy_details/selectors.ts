@@ -8,7 +8,7 @@
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { ILicense } from '../../../../../../../licensing/common/types';
-import { unsetPolicyFeaturesAboveLicenseLevel } from '../../../../../../common/license/policy_config';
+import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../common/license/policy_config';
 import { PolicyDetailsState } from '../../types';
 import {
   Immutable,
@@ -18,8 +18,12 @@ import {
   UIPolicyConfig,
 } from '../../../../../../common/endpoint/types';
 import { policyFactory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
-import { MANAGEMENT_ROUTING_POLICY_DETAILS_PATH } from '../../../../common/constants';
+import {
+  MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+} from '../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../types';
+import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
@@ -33,7 +37,7 @@ export const licensedPolicy: (
   licenseState,
   (policyData, license) => {
     if (policyData) {
-      const policyValue = unsetPolicyFeaturesAboveLicenseLevel(
+      const policyValue = unsetPolicyFeaturesAccordingToLicenseLevel(
         policyData.inputs[0].config.policy.value,
         license as ILicense
       );
@@ -59,74 +63,46 @@ export const licensedPolicy: (
 );
 
 /**
- * Given a Policy Data (package policy) object, return back a new object with only the field
- * needed for an Update/Create API action
- * @param policy
- */
-export const getPolicyDataForUpdate = (
-  policy: PolicyData | Immutable<PolicyData>
-): NewPolicyData | Immutable<NewPolicyData> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
-
-  // trim custom malware notification string
-  return {
-    ...newPolicy,
-    inputs: (newPolicy as Immutable<NewPolicyData>).inputs.map((input) => ({
-      ...input,
-      config: input.config && {
-        ...input.config,
-        policy: {
-          ...input.config.policy,
-          value: {
-            ...input.config.policy.value,
-            windows: {
-              ...input.config.policy.value.windows,
-              popup: {
-                ...input.config.policy.value.windows.popup,
-                malware: {
-                  ...input.config.policy.value.windows.popup.malware,
-                  message: input.config.policy.value.windows.popup.malware.message.trim(),
-                },
-              },
-            },
-            mac: {
-              ...input.config.policy.value.mac,
-              popup: {
-                ...input.config.policy.value.mac.popup,
-                malware: {
-                  ...input.config.policy.value.mac.popup.malware,
-                  message: input.config.policy.value.mac.popup.malware.message.trim(),
-                },
-              },
-            },
-          },
-        },
-      },
-    })),
-  };
-};
-
-/**
  * Return only the policy structure accepted for update/create
  */
 export const policyDetailsForUpdate: (
   state: Immutable<PolicyDetailsState>
 ) => Immutable<NewPolicyData> | undefined = createSelector(licensedPolicy, (policy) => {
   if (policy) {
-    return getPolicyDataForUpdate(policy);
+    return getPolicyDataForUpdate(policy) as Immutable<NewPolicyData>;
   }
 });
 
-/** Returns a boolean of whether the user is on the policy details page or not */
-export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) => {
+/**
+ * Checks if data needs to be refreshed
+ */
+export const needsToRefresh = (state: Immutable<PolicyDetailsState>): boolean => {
+  return !state.policyItem && !state.apiError;
+};
+
+/** Returns a boolean of whether the user is on the policy form page or not */
+export const isOnPolicyFormPage = (state: Immutable<PolicyDetailsState>) => {
   return (
     matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+      path: MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
       exact: true,
     }) !== null
   );
 };
+
+/** Returns a boolean of whether the user is on the policy details page or not */
+export const isOnPolicyTrustedAppsPage = (state: Immutable<PolicyDetailsState>) => {
+  return (
+    matchPath(state.location?.pathname ?? '', {
+      path: MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+      exact: true,
+    }) !== null
+  );
+};
+
+/** Returns a boolean of whether the user is on some of the policy details page or not */
+export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) =>
+  isOnPolicyFormPage(state) || isOnPolicyTrustedAppsPage(state);
 
 /** Returns the license info fetched from the license service */
 export const license = (state: Immutable<PolicyDetailsState>) => {
@@ -139,7 +115,10 @@ export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => strin
   (location: PolicyDetailsState['location']) => {
     return (
       matchPath<ManagementRoutePolicyDetailsParams>(location?.pathname ?? '', {
-        path: MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+        path: [
+          MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+        ],
         exact: true,
       })?.params?.policyId ?? ''
     );
@@ -185,6 +164,8 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         events: windows.events,
         malware: windows.malware,
         ransomware: windows.ransomware,
+        memory_protection: windows.memory_protection,
+        behavior_protection: windows.behavior_protection,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
       },
@@ -192,12 +173,15 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
-        ransomware: mac.ransomware,
+        behavior_protection: mac.behavior_protection,
         popup: mac.popup,
       },
       linux: {
         advanced: linux.advanced,
         events: linux.events,
+        malware: linux.malware,
+        behavior_protection: linux.behavior_protection,
+        popup: linux.popup,
       },
     };
   }

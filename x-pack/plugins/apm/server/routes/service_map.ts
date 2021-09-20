@@ -7,17 +7,19 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
+import { isActivePlatinumLicense } from '../../common/license_check';
 import { invalidLicenseMessage } from '../../common/service_map';
-import { setupRequest } from '../lib/helpers/setup_request';
-import { getServiceMap } from '../lib/service_map/get_service_map';
-import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
-import { createRoute } from './create_route';
-import { environmentRt, rangeRt } from './default_api_types';
 import { notifyFeatureUsage } from '../feature';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
-import { isActivePlatinumLicense } from '../../common/license_check';
+import { setupRequest } from '../lib/helpers/setup_request';
+import { getServiceMap } from '../lib/service_map/get_service_map';
+import { getServiceMapBackendNodeInfo } from '../lib/service_map/get_service_map_backend_node_info';
+import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
+import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { environmentRt, rangeRt } from './default_api_types';
 
-export const serviceMapRoute = createRoute({
+const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/service-map',
   params: t.type({
     query: t.intersection([
@@ -29,8 +31,9 @@ export const serviceMapRoute = createRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    if (!context.config['xpack.apm.serviceMapEnabled']) {
+  handler: async (resources) => {
+    const { config, context, params, logger } = resources;
+    if (!config['xpack.apm.serviceMapEnabled']) {
       throw Boom.notFound();
     }
     if (!isActivePlatinumLicense(context.licensing.license)) {
@@ -42,15 +45,18 @@ export const serviceMapRoute = createRoute({
       featureName: 'serviceMaps',
     });
 
-    const logger = context.logger;
-    const setup = await setupRequest(context, request);
+    const setup = await setupRequest(resources);
     const {
       query: { serviceName, environment },
-    } = context.params;
+    } = params;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      start: setup.start,
+      end: setup.end,
+      kuery: '',
+    });
     return getServiceMap({
       setup,
       serviceName,
@@ -61,7 +67,7 @@ export const serviceMapRoute = createRoute({
   },
 });
 
-export const serviceMapServiceNodeRoute = createRoute({
+const serviceMapServiceNodeRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/service-map/service/{serviceName}',
   params: t.type({
     path: t.type({
@@ -70,23 +76,29 @@ export const serviceMapServiceNodeRoute = createRoute({
     query: t.intersection([environmentRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    if (!context.config['xpack.apm.serviceMapEnabled']) {
+  handler: async (resources) => {
+    const { config, context, params } = resources;
+
+    if (!config['xpack.apm.serviceMapEnabled']) {
       throw Boom.notFound();
     }
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
-    const setup = await setupRequest(context, request);
+    const setup = await setupRequest(resources);
 
     const {
       path: { serviceName },
       query: { environment },
-    } = context.params;
+    } = params;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      start: setup.start,
+      end: setup.end,
+      kuery: '',
+    });
 
     return getServiceMapServiceNodeInfo({
       environment,
@@ -96,3 +108,41 @@ export const serviceMapServiceNodeRoute = createRoute({
     });
   },
 });
+
+const serviceMapBackendNodeRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/service-map/backend/{backendName}',
+  params: t.type({
+    path: t.type({
+      backendName: t.string,
+    }),
+    query: t.intersection([environmentRt, rangeRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const { config, context, params } = resources;
+
+    if (!config['xpack.apm.serviceMapEnabled']) {
+      throw Boom.notFound();
+    }
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+    const setup = await setupRequest(resources);
+
+    const {
+      path: { backendName },
+      query: { environment },
+    } = params;
+
+    return getServiceMapBackendNodeInfo({
+      environment,
+      setup,
+      backendName,
+    });
+  },
+});
+
+export const serviceMapRouteRepository = createApmServerRouteRepository()
+  .add(serviceMapRoute)
+  .add(serviceMapServiceNodeRoute)
+  .add(serviceMapBackendNodeRoute);

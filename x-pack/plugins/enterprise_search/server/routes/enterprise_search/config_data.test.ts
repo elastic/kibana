@@ -21,7 +21,7 @@ describe('Enterprise Search Config Data API', () => {
   beforeEach(() => {
     mockRouter = new MockRouter({
       method: 'get',
-      path: '/api/enterprise_search/config_data',
+      path: '/internal/enterprise_search/config_data',
     });
 
     registerConfigDataRoute({
@@ -30,15 +30,11 @@ describe('Enterprise Search Config Data API', () => {
     });
   });
 
-  describe('GET /api/enterprise_search/config_data', () => {
+  describe('GET /internal/enterprise_search/config_data', () => {
     it('returns an initial set of config data from Enterprise Search', async () => {
       const mockData = {
-        access: {
-          hasAppSearchAccess: true,
-          hasWorkplaceSearchAccess: true,
-        },
-        publicUrl: 'http://localhost:3002',
         ...DEFAULT_INITIAL_APP_DATA,
+        publicUrl: 'http://localhost:3002',
       };
 
       (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => {

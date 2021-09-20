@@ -9,19 +9,22 @@ import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
 
-import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
-import { assertUnreachable } from '../../../../../../common/utility_types';
-import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import { List } from '../../../../../../common/detection_engine/schemas/types';
-import { ENDPOINT_LIST_ID, ExceptionListType, NamespaceType } from '../../../../../shared_imports';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import type {
+  ExceptionListType,
+  NamespaceType,
+  List,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   Threats,
   ThreatSubtechnique,
   ThreatTechnique,
   Type,
-} from '../../../../../../common/detection_engine/schemas/common/schemas';
-
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
+import { assertUnreachable } from '../../../../../../common/utility_types';
+import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
+import { Rule } from '../../../../containers/detection_engine/rules';
 import {
   AboutStepRule,
   DefineStepRule,
@@ -182,7 +185,7 @@ export const filterEmptyThreats = (threats: Threats): Threats => {
     .map((threat) => {
       return {
         ...threat,
-        technique: trimThreatsWithNoName(threat.technique).map((technique) => {
+        technique: trimThreatsWithNoName(threat.technique ?? []).map((technique) => {
           return {
             ...technique,
             subtechnique:
@@ -221,8 +224,16 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
           threshold: {
             field: ruleFields.threshold?.field ?? [],
             value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
-            cardinality_field: ruleFields.threshold.cardinality_field[0] ?? '',
-            cardinality_value: parseInt(ruleFields.threshold?.cardinality_value, 10) ?? 0,
+            cardinality:
+              !isEmpty(ruleFields.threshold.cardinality?.field) &&
+              ruleFields.threshold.cardinality?.value != null
+                ? [
+                    {
+                      field: ruleFields.threshold.cardinality.field[0],
+                      value: parseInt(ruleFields.threshold.cardinality.value, 10),
+                    },
+                  ]
+                : [],
           },
         }),
       }

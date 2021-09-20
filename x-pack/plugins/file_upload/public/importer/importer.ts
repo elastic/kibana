@@ -21,8 +21,8 @@ import {
 import { CreateDocsResponse, IImporter, ImportResults } from './types';
 
 const CHUNK_SIZE = 5000;
-const MAX_CHUNK_CHAR_COUNT = 1000000;
-const IMPORT_RETRIES = 5;
+export const MAX_CHUNK_CHAR_COUNT = 1000000;
+export const IMPORT_RETRIES = 5;
 const STRING_CHUNKS_MB = 100;
 
 export abstract class Importer implements IImporter {
@@ -40,7 +40,10 @@ export abstract class Importer implements IImporter {
     let remainder = 0;
     for (let i = 0; i < parts; i++) {
       const byteArray = decoder.decode(data.slice(i * size - remainder, (i + 1) * size));
-      const { success, docs, remainder: tempRemainder } = this._createDocs(byteArray);
+      const { success, docs, remainder: tempRemainder } = this._createDocs(
+        byteArray,
+        i === parts - 1
+      );
       if (success) {
         this._docArray = this._docArray.concat(docs);
         remainder = tempRemainder;
@@ -52,7 +55,7 @@ export abstract class Importer implements IImporter {
     return { success: true };
   }
 
-  protected abstract _createDocs(t: string): CreateDocsResponse;
+  protected abstract _createDocs(t: string, isLastPart: boolean): CreateDocsResponse;
 
   public async initializeImport(
     index: string,
@@ -85,7 +88,7 @@ export abstract class Importer implements IImporter {
   public async import(
     id: string,
     index: string,
-    pipelineId: string,
+    pipelineId: string | undefined,
     setImportProgress: (progress: number) => void
   ): Promise<ImportResults> {
     if (!id || !index) {
@@ -232,7 +235,7 @@ function createDocumentChunks(docArray: ImportDoc[]) {
   return chunks;
 }
 
-function callImportRoute({
+export function callImportRoute({
   id,
   index,
   data,
@@ -260,7 +263,7 @@ function callImportRoute({
   });
 
   return getHttp().fetch<ImportResponse>({
-    path: `/api/file_upload/import`,
+    path: `/internal/file_upload/import`,
     method: 'POST',
     query,
     body,

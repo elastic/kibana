@@ -10,7 +10,6 @@ import {
   EuiButtonIcon,
   EuiText,
   EuiToolTip,
-  EuiOverlayMask,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -33,12 +32,12 @@ import { RowRenderersBrowser } from './row_renderers_browser';
 import * as i18n from './translations';
 
 const StyledEuiModal = styled(EuiModal)`
-  margin: 0 auto;
+  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
   max-width: 95vw;
-  min-height: 95vh;
+  min-height: 90vh;
 
   > .euiModal__flex {
-    max-height: 95vh;
+    max-height: 90vh;
   }
 `;
 
@@ -62,15 +61,6 @@ const StyledEuiModalBody = styled(EuiModalBody)`
         overflow: auto;
       }
     }
-  }
-`;
-
-const StyledEuiOverlayMask = styled(EuiOverlayMask)`
-  z-index: 8001;
-  padding-bottom: 0;
-
-  > div {
-    width: 100%;
   }
 `;
 
@@ -125,54 +115,47 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
       </EuiToolTip>
 
       {show && (
-        <StyledEuiOverlayMask>
-          <StyledEuiModal onClose={hideFieldBrowser}>
-            <EuiModalHeader>
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="spaceBetween"
-                direction="row"
-                gutterSize="none"
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiModalHeaderTitle>{i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}</EuiModalHeaderTitle>
-                  <EuiText size="s">{i18n.CUSTOMIZE_EVENT_RENDERERS_DESCRIPTION}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="s"
-                        data-test-subj="disable-all"
-                        onClick={handleDisableAll}
-                      >
-                        {i18n.DISABLE_ALL}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
+        <StyledEuiModal onClose={hideFieldBrowser} data-test-subj="row-renderers-modal">
+          <EuiModalHeader>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              direction="row"
+              gutterSize="none"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiModalHeaderTitle>{i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}</EuiModalHeaderTitle>
+                <EuiText size="s">{i18n.CUSTOMIZE_EVENT_RENDERERS_DESCRIPTION}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="s"
+                      data-test-subj="disable-all"
+                      onClick={handleDisableAll}
+                    >
+                      {i18n.DISABLE_ALL}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
 
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        fill
-                        size="s"
-                        data-test-subj="enable-all"
-                        onClick={handleEnableAll}
-                      >
-                        {i18n.ENABLE_ALL}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiModalHeader>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton fill size="s" data-test-subj="enable-all" onClick={handleEnableAll}>
+                      {i18n.ENABLE_ALL}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalHeader>
 
-            <StyledEuiModalBody>
-              <RowRenderersBrowser
-                excludedRowRendererIds={excludedRowRendererIds}
-                setExcludedRowRendererIds={setExcludedRowRendererIds}
-              />
-            </StyledEuiModalBody>
-          </StyledEuiModal>
-        </StyledEuiOverlayMask>
+          <StyledEuiModalBody>
+            <RowRenderersBrowser
+              excludedRowRendererIds={excludedRowRendererIds}
+              setExcludedRowRendererIds={setExcludedRowRendererIds}
+            />
+          </StyledEuiModalBody>
+        </StyledEuiModal>
       )}
     </>
   );

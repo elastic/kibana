@@ -3,6 +3,7 @@
 exports[`Render <DocViewer/> with 3 different tabs 1`] = `
 <div
   className="kbnDocViewer"
+  data-test-subj="kbnDocViewer"
 >
   <EuiTabbedContent
     autoFocus="initial"

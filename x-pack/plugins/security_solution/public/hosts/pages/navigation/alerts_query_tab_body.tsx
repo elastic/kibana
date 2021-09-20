@@ -52,6 +52,7 @@ export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQu
 
   return (
     <AlertsView
+      entityType="events"
       timelineId={TimelineId.hostsPageExternalAlerts}
       {...rest}
       pageFilters={hostPageFilters}

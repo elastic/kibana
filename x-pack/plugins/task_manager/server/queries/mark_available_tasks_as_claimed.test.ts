@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { asUpdateByQuery, shouldBeOneOf, mustBeAllOf } from './query_clauses';
+import { shouldBeOneOf, mustBeAllOf } from './query_clauses';
 
 import {
   updateFieldsAndMarkAsFailed,
@@ -41,25 +41,23 @@ describe('mark_available_tasks_as_claimed', () => {
       retryAt: claimOwnershipUntil,
     };
 
-    expect(
-      asUpdateByQuery({
-        query: mustBeAllOf(
-          // Either a task with idle status and runAt <= now or
-          // status running or claiming with a retryAt <= now.
-          shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
-        ),
-        update: updateFieldsAndMarkAsFailed(
-          fieldUpdates,
-          claimTasksById || [],
-          definitions.getAllTypes(),
-          [],
-          Array.from(definitions).reduce((accumulator, [type, { maxAttempts }]) => {
-            return { ...accumulator, [type]: maxAttempts || defaultMaxAttempts };
-          }, {})
-        ),
-        sort: SortByRunAtAndRetryAt,
-      })
-    ).toEqual({
+    expect({
+      query: mustBeAllOf(
+        // Either a task with idle status and runAt <= now or
+        // status running or claiming with a retryAt <= now.
+        shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
+      ),
+      script: updateFieldsAndMarkAsFailed(
+        fieldUpdates,
+        claimTasksById || [],
+        definitions.getAllTypes(),
+        [],
+        Array.from(definitions).reduce((accumulator, [type, { maxAttempts }]) => {
+          return { ...accumulator, [type]: maxAttempts || defaultMaxAttempts };
+        }, {})
+      ),
+      sort: SortByRunAtAndRetryAt,
+    }).toEqual({
       query: {
         bool: {
           must: [
@@ -114,7 +112,6 @@ if (doc['task.runAt'].size()!=0) {
           },
         },
       },
-      seq_no_primary_term: true,
       script: {
         source: `
     if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {

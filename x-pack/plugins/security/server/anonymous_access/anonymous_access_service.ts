@@ -6,18 +6,21 @@
  */
 
 import type { Request } from '@hapi/hapi';
-import {
+
+import type {
+  Capabilities,
   CapabilitiesStart,
   IBasePath,
-  KibanaRequest,
-  Logger,
-  Capabilities,
   IClusterClient,
-} from '../../../../../src/core/server';
+  Logger,
+} from 'src/core/server';
+
+import { KibanaRequest } from '../../../../../src/core/server';
 import { addSpaceIdToPath } from '../../../spaces/common';
 import type { SpacesServiceStart } from '../../../spaces/server';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
-import { AnonymousAuthenticationProvider, HTTPAuthorizationHeader } from '../authentication';
+import type { HTTPAuthorizationHeader } from '../authentication';
+import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 

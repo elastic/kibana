@@ -8,9 +8,26 @@
 import React, { FunctionComponent, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { ComponentStrings } from '../../../i18n/components';
+import { i18n } from '@kbn/i18n';
 
-const { ElementControls: strings } = ComponentStrings;
+const strings = {
+  getDeleteAriaLabel: () =>
+    i18n.translate('xpack.canvas.elementControls.deleteAriaLabel', {
+      defaultMessage: 'Delete element',
+    }),
+  getDeleteTooltip: () =>
+    i18n.translate('xpack.canvas.elementControls.deleteToolTip', {
+      defaultMessage: 'Delete',
+    }),
+  getEditAriaLabel: () =>
+    i18n.translate('xpack.canvas.elementControls.editAriaLabel', {
+      defaultMessage: 'Edit element',
+    }),
+  getEditTooltip: () =>
+    i18n.translate('xpack.canvas.elementControls.editToolTip', {
+      defaultMessage: 'Edit',
+    }),
+};
 
 interface Props {
   /**

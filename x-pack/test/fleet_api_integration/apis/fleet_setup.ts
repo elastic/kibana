@@ -13,9 +13,19 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('fleet_setup', () => {
     skipIfNoDockerRegistry(providerContext);
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    });
     beforeEach(async () => {
       try {
         await es.security.deleteUser({
@@ -54,58 +64,6 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    it('should update the fleet_enroll role with new index permissions if one does already exist', async () => {
-      try {
-        await es.security.putRole({
-          name: 'fleet_enroll',
-          body: {
-            cluster: ['monitor', 'manage_api_key'],
-            indices: [
-              {
-                names: ['logs-*', 'metrics-*', 'traces-*'],
-                privileges: ['create_doc', 'indices:admin/auto_create'],
-                allow_restricted_indices: false,
-              },
-            ],
-            applications: [],
-            run_as: [],
-            metadata: {},
-            transient_metadata: { enabled: true },
-          },
-        });
-      } catch (e) {
-        if (e.meta?.statusCode !== 404) {
-          throw e;
-        }
-      }
-
-      const { body: apiResponse } = await supertest
-        .post(`/api/fleet/setup`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
-
-      expect(apiResponse.isInitialized).to.be(true);
-
-      const { body: roleResponse } = await es.security.getRole({
-        name: 'fleet_enroll',
-      });
-      expect(roleResponse).to.have.key('fleet_enroll');
-      expect(roleResponse.fleet_enroll).to.eql({
-        cluster: ['monitor', 'manage_api_key'],
-        indices: [
-          {
-            names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
-            privileges: ['auto_configure', 'create_doc'],
-            allow_restricted_indices: false,
-          },
-        ],
-        applications: [],
-        run_as: [],
-        metadata: {},
-        transient_metadata: { enabled: true },
-      });
-    });
-
     it('should install default packages', async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
@@ -117,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
         .map((p: any) => p.name)
         .sort();
 
-      expect(installedPackages).to.eql(['elastic_agent', 'endpoint', 'system']);
+      expect(installedPackages).to.eql(['elastic_agent', 'endpoint', 'fleet_server', 'system']);
     });
   });
 }

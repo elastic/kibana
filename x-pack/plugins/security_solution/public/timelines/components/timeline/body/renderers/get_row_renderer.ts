@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { RowRenderer } from '../../../../../../common';
 import { Ecs } from '../../../../../../common/ecs';
-import { RowRenderer } from './row_renderer';
 
 export const getRowRenderer = (ecs: Ecs, rowRenderers: RowRenderer[]): RowRenderer | null =>
   rowRenderers.find((rowRenderer) => rowRenderer.isInstance(ecs)) ?? null;

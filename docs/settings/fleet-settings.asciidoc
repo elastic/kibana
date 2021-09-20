@@ -5,7 +5,10 @@
 <titleabbrev>{fleet} settings</titleabbrev>
 ++++
 
-experimental[]
+[NOTE]
+====
+In {ecloud}, {fleet} flags are already configured.
+====
 
 You can configure `xpack.fleet` settings in your `kibana.yml`. 
 By default, {fleet} is enabled. To use {fleet}, you also need to configure {kib} and {es} hosts.
@@ -30,22 +33,100 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 [cols="2*<"]
 |===
 | `xpack.fleet.registryUrl`
-  | The address to use to reach {package-manager} registry.
+  | The address to use to reach the {package-manager} registry.
+| `xpack.fleet.registryProxyUrl`
+  | The proxy address to use to reach the {package-manager} registry.
+
 |===
 
 ==== {fleet} settings
 
 [cols="2*<"]
 |===
-| `xpack.fleet.agents.kibana.host`
-  | The hostname used by {agent} for accessing {kib}.
-| `xpack.fleet.agents.elasticsearch.host`
-  | The hostname used by {agent} for accessing {es}.
-| `xpack.fleet.agents.tlsCheckDisabled`
-  | Set to `true` to allow {fleet} to run on a {kib} instance without TLS enabled.
+| `xpack.fleet.agents.fleet_server.hosts`
+  | Hostnames used by {agent} for accessing {fleet-server}.
+| `xpack.fleet.agents.elasticsearch.hosts`
+  | Hostnames used by {agent} for accessing {es}.
+| `xpack.fleet.agents.elasticsearch.ca_sha256`
+  | Hash pin used for certificate verification. The pin is a base64-encoded
+    string of the SHA-256 fingerprint.
 |===
 
-[NOTE]
-====
-In {ecloud}, {fleet} flags are already configured.
-====
+
+==== Preconfiguration settings (for advanced use cases)
+
+Use these settings to pre-define integrations and agent policies that you
+want {fleet} to load up by default.
+
+[cols="2*<a"]
+|===
+
+| `xpack.fleet.packages`
+  | List of integrations that are installed when the {fleet} app starts
+  up for the first time. Required properties are:
+  
+  `name`:: Name of the integration from the package registry.
+  `version`:: Either an exact semantic version, or the keyword `latest` to fetch
+  the latest integration version.
+
+| `xpack.fleet.agentPolicies`
+  | List of agent policies that are configured when the {fleet} app starts.
+Required properties are:
+
+  `id`:: Unique ID for this policy. The ID may be a number or string.
+  `name`:: Policy name.
+
+Optional properties are:
+  
+  `description`:: Text description of this policy.
+  `namespace`:: String identifying this policy's namespace.
+  `monitoring_enabled`:: List of keywords that specify the monitoring data to collect.
+  Valid values include `['logs']`, `['metrics']`, and `['logs', 'metrics']`.
+  `is_managed`:: If `true`, this policy is editable by the user and can only
+  be changed by updating the {kib} config.
+  `is_default`:: If `true`, this policy is the default agent policy.
+  `is_default_fleet_server`:: If `true`, this policy is the default {fleet-server} agent policy.
+  `package_policies`:: List of integration policies to add to this policy.
+    `name`::: (required) Name of the integration policy.
+    `package`::: (required) Integration that this policy configures
+      `name`:::: Name of the integration associated with this policy.
+    `description`::: Text string describing this integration policy.
+    `namespace`::: String identifying this policy's namespace.
+    `inputs`::: Array that overrides any default input settings for this
+    integration. Follows the same schema as integration inputs, with the
+    exception that any object in `vars` can be passed `frozen: true` in order to
+    prevent that specific `var` from being edited by the user.
+|===
+
+Example configuration:
+
+[source,yaml]
+----
+xpack.fleet.packages:
+  - name: apache
+    version: 0.5.0
+
+xpack.fleet.agentPolicies:
+  - name: Preconfigured Policy
+    id: 1
+    namespace: test
+    package_policies:
+      - package:
+          name: system
+        name: System Integration
+        inputs:
+          - type: system/metrics
+            enabled: true
+            vars:
+              - name: system.hostfs
+                value: home/test
+            streams:
+              - data_stream:
+                  dataset: system.core
+                enabled: true
+                vars:
+                  - name: period
+                    value: 20s
+          - type: winlog
+            enabled: false
+----

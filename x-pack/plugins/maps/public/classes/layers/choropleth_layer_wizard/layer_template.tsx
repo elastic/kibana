@@ -18,13 +18,13 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { IFieldType, IndexPattern } from 'src/plugins/data/public';
+import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../components/ems_file_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getGeoFields, getSourceFields, getTermsFields } from '../../../index_pattern_util';
-import { getEmsFileLayers } from '../../../meta';
+import { getEmsFileLayers } from '../../../util';
 import { getIndexPatternSelectComponent, getIndexPatternService } from '../../../kibana_services';
 import {
   createEmsChoroplethLayerDescriptor,
@@ -56,14 +56,14 @@ interface State {
   leftEmsFileId: string | null;
   leftEmsFields: Array<EuiComboBoxOptionOption<string>>;
   leftIndexPattern: IndexPattern | null;
-  leftGeoFields: IFieldType[];
-  leftJoinFields: IFieldType[];
+  leftGeoFields: IndexPatternField[];
+  leftJoinFields: IndexPatternField[];
   leftGeoField: string | null;
   leftEmsJoinField: string | null;
   leftElasticsearchJoinField: string | null;
   rightIndexPatternId: string;
   rightIndexPatternTitle: string | null;
-  rightTermsFields: IFieldType[];
+  rightTermsFields: IndexPatternField[];
   rightJoinField: string | null;
 }
 

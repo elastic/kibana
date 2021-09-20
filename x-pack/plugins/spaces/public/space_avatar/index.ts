@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { SpaceAvatar } from './space_avatar';
+export { getSpaceAvatarComponent } from './space_avatar';
 export * from './space_attributes';
+export type { SpaceAvatarProps } from './types';

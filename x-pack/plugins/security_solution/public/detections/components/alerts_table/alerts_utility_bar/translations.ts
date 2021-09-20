@@ -42,6 +42,13 @@ export const ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK = i18n.translate(
   }
 );
 
+export const ADDITIONAL_FILTERS_ACTIONS_SHOW_ONLY_THREAT_INDICATOR_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersActions.showOnlyThreatIndicatorAlerts',
+  {
+    defaultMessage: 'Show only threat indicator alerts',
+  }
+);
+
 export const CLEAR_SELECTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.utilityBar.clearSelectionTitle',
   {
@@ -98,9 +105,9 @@ export const BATCH_ACTION_CLOSE_SELECTED = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_IN_PROGRESS_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.utilityBar.batchActions.inProgressSelectedTitle',
+export const BATCH_ACTION_ACKNOWLEDGED_SELECTED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.utilityBar.batchActions.acknowledgedSelectedTitle',
   {
-    defaultMessage: 'Mark in progress',
+    defaultMessage: 'Mark as acknowledged',
   }
 );

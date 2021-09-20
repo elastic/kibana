@@ -1,3 +1,5 @@
+const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
+
 module.exports = {
   extends: [
     './javascript.js',
@@ -70,7 +72,25 @@ module.exports = {
           to: '@kbn/tinymath',
           disallowedMessage: `Don't use 'tinymath', use '@kbn/tinymath'`
         },
+        {
+          from: '@kbn/test/types/ftr',
+          to: '@kbn/test',
+          disallowedMessage: `import from the root of @kbn/test instead`
+        },
+        {
+          from: 'react-intl',
+          to: '@kbn/i18n/react',
+          disallowedMessage: `import from @kbn/i18n/react instead`
+        },
+        {
+          from: 'styled-components',
+          to: false,
+          exclude: USES_STYLED_COMPONENTS,
+          disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in @kbn/dev-utils/src/babel.ts.`
+        },
       ],
     ],
+
+    '@kbn/eslint/no_async_promise_body': 'error',
   },
 };

@@ -9,6 +9,7 @@ import { InternalArtifactSchema } from '../../schemas/artifacts';
 import { CompressionAlgorithm } from '../../../../common/endpoint/schema/common';
 import { ManifestEntrySchema } from '../../../../common/endpoint/schema/manifest';
 import { getArtifactId } from './common';
+import { relativeDownloadUrlFromArtifact } from '../../../../../fleet/server';
 
 export class ManifestEntry {
   private artifact: InternalArtifactSchema;
@@ -46,7 +47,10 @@ export class ManifestEntry {
   }
 
   public getUrl(): string {
-    return `/api/endpoint/artifacts/download/${this.getIdentifier()}/${this.getDecodedSha256()}`;
+    return relativeDownloadUrlFromArtifact({
+      identifier: this.getIdentifier(),
+      decodedSha256: this.getDecodedSha256(),
+    });
   }
 
   public getArtifact(): InternalArtifactSchema {

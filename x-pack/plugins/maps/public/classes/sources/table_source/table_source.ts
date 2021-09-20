@@ -6,11 +6,11 @@
  */
 
 import uuid from 'uuid';
+import type { Query } from 'src/plugins/data/common';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import {
   MapExtent,
-  MapFilters,
-  MapQuery,
+  DataFilters,
   TableSourceDescriptor,
   VectorJoinSourceRequestMeta,
   VectorSourceSyncMeta,
@@ -19,10 +19,9 @@ import { Adapters } from '../../../../../../../src/plugins/inspector/common/adap
 import { ITermJoinSource } from '../term_join_source';
 import { BucketProperties, PropertiesMap } from '../../../../common/elasticsearch_util';
 import { IField } from '../../fields/field';
-import { Query } from '../../../../../../../src/plugins/data/common/query';
 import {
   AbstractVectorSource,
-  BoundsFilters,
+  BoundsRequestMeta,
   GeoJsonWithMeta,
   IVectorSource,
   SourceTooltipConfig,
@@ -143,7 +142,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     });
   }
 
-  canFormatFeatureProperties(): boolean {
+  hasTooltipProperties(): boolean {
     return false;
   }
 
@@ -156,7 +155,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     return null;
@@ -187,12 +186,12 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   // Could be useful to implement, e.g. to preview raw csv data
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: MapFilters & {
+    searchFilters: DataFilters & {
       applyGlobalQuery: boolean;
       applyGlobalTime: boolean;
       fieldNames: string[];
       geogridPrecision?: number;
-      sourceQuery?: MapQuery;
+      sourceQuery?: Query;
       sourceMeta: VectorSourceSyncMeta;
     },
     registerCancelCallback: (callback: () => void) => void,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../__mocks__';
-import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
+import '../../../__mocks__/shallow_useeffect.mock';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -14,8 +14,8 @@ import { shallow } from 'enzyme';
 
 import { EuiSwitch, EuiConfirmModal } from '@elastic/eui';
 
-import { Loading } from '../../../shared/loading';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
+import { getPageHeaderActions } from '../../../test_helpers';
 
 import { Security } from './security';
 
@@ -52,44 +52,18 @@ describe('Security', () => {
     });
   });
 
-  it('renders on Basic license', () => {
+  it('renders', () => {
     setMockValues({ ...mockValues, hasPlatinumLicense: false });
     const wrapper = shallow(<Security />);
 
-    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
+    expect(wrapper.find(UnsavedChangesPrompt)).toHaveLength(1);
     expect(wrapper.find(EuiSwitch).prop('disabled')).toEqual(true);
   });
 
-  it('renders on Platinum license', () => {
+  it('does not disable switch on Platinum license', () => {
     const wrapper = shallow(<Security />);
 
-    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
     expect(wrapper.find(EuiSwitch).prop('disabled')).toEqual(false);
-  });
-
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<Security />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
-  it('handles window.onbeforeunload change', () => {
-    setMockValues({ ...mockValues, unsavedChanges: true });
-    shallow(<Security />);
-
-    expect(window.onbeforeunload!({} as any)).toEqual(
-      'Your private sources settings have not been saved. Are you sure you want to leave?'
-    );
-  });
-
-  it('handles window.onbeforeunload unmount', () => {
-    setMockValues({ ...mockValues, unsavedChanges: true });
-    shallow(<Security />);
-
-    unmountHandler();
-
-    expect(window.onbeforeunload).toEqual(null);
   });
 
   it('handles switch click', () => {
@@ -106,8 +80,8 @@ describe('Security', () => {
     setMockValues({ ...mockValues, unsavedChanges: true });
     const wrapper = shallow(<Security />);
 
-    const header = wrapper.find(ViewContentHeader).dive();
-    header.find('[data-test-subj="SaveSettingsButton"]').prop('onClick')!({} as any);
+    const headerActions = getPageHeaderActions(wrapper);
+    headerActions.find('[data-test-subj="SaveSettingsButton"]').prop('onClick')!({} as any);
     const modal = wrapper.find(EuiConfirmModal);
     modal.prop('onConfirm')!({} as any);
 

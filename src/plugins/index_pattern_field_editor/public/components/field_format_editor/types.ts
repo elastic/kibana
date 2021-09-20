@@ -8,7 +8,9 @@
 
 import { ReactText } from 'react';
 
+export type SampleInput = ReactText | ReactText[] | Record<string, ReactText[]>;
+
 export interface Sample {
-  input: ReactText | ReactText[];
+  input: SampleInput;
   output: string;
 }

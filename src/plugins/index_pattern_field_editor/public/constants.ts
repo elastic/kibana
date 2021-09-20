@@ -7,3 +7,5 @@
  */
 
 export const pluginName = 'index_pattern_field_editor';
+
+export const euiFlyoutClassname = 'indexPatternFieldEditorFlyout';

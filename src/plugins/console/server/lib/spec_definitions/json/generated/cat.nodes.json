@@ -16,7 +16,6 @@
       ],
       "format": "",
       "full_id": "__flag__",
-      "local": "__flag__",
       "master_timeout": "",
       "h": [],
       "help": "__flag__",
@@ -30,7 +29,8 @@
         "micros",
         "nanos"
       ],
-      "v": "__flag__"
+      "v": "__flag__",
+      "include_unloaded_segments": "__flag__"
     },
     "methods": [
       "GET"

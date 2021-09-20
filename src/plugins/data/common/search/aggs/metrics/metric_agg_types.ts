@@ -8,6 +8,7 @@
 
 export enum METRIC_TYPES {
   AVG = 'avg',
+  FILTERED_METRIC = 'filtered_metric',
   CARDINALITY = 'cardinality',
   AVG_BUCKET = 'avg_bucket',
   MAX_BUCKET = 'max_bucket',
@@ -19,6 +20,7 @@ export enum METRIC_TYPES {
   GEO_BOUNDS = 'geo_bounds',
   GEO_CENTROID = 'geo_centroid',
   MEDIAN = 'median',
+  SINGLE_PERCENTILE = 'single_percentile',
   MIN = 'min',
   MAX = 'max',
   MOVING_FN = 'moving_avg',

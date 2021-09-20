@@ -7,19 +7,26 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+
+import { coreMock } from '../../../../../src/core/server/mocks';
 import { ResetSessionPage } from './reset_session_page';
 
-jest.mock('../../../../../src/core/server/rendering/views/fonts', () => ({
+jest.mock('src/core/server/rendering/views/fonts', () => ({
   Fonts: () => <>MockedFonts</>,
 }));
 
 describe('ResetSessionPage', () => {
   it('renders as expected', async () => {
+    const mockCoreSetup = coreMock.createSetup();
+    (mockCoreSetup.http.basePath.prepend as jest.Mock).mockImplementation(
+      (path) => `/mock-basepath${path}`
+    );
+
     const body = renderToStaticMarkup(
       <ResetSessionPage
         logoutUrl="/path/to/logout"
-        styleSheetPaths={['/some-css-file.css', '/some-other-css-file.css']}
-        basePath="/path/to/base"
+        buildNumber={100500}
+        basePath={mockCoreSetup.http.basePath}
       />
     );
 

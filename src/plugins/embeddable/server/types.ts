@@ -6,22 +6,19 @@
  * Side Public License, v 1.
  */
 
-import {
-  PersistableState,
-  PersistableStateDefinition,
-  SerializableState,
-} from '../../kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { PersistableState, PersistableStateDefinition } from '../../kibana_utils/common';
 import { EmbeddableStateWithType } from '../common/types';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;
 
-export interface EnhancementRegistryDefinition<P extends SerializableState = SerializableState>
+export interface EnhancementRegistryDefinition<P extends SerializableRecord = SerializableRecord>
   extends PersistableStateDefinition<P> {
   id: string;
 }
 
-export interface EnhancementRegistryItem<P extends SerializableState = SerializableState>
+export interface EnhancementRegistryItem<P extends SerializableRecord = SerializableRecord>
   extends PersistableState<P> {
   id: string;
 }

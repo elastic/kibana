@@ -48,18 +48,14 @@ export interface FeatureCatalogueSolution {
   readonly id: string;
   /** Title of solution displayed to the user. */
   readonly title: string;
-  /** The tagline of the solution displayed to the user. */
-  readonly subtitle: string;
   /** One-line description of the solution displayed to the user. */
-  readonly description?: string;
-  /** A list of use cases for this solution displayed to the user. */
-  readonly appDescriptions: string[];
+  readonly description: string;
   /** EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement. */
   readonly icon: IconType;
   /** URL path to link to this future. Should not include the basePath. */
   readonly path: string;
   /** An ordinal used to sort solutions relative to one another for display on the home page */
-  readonly order?: number;
+  readonly order: number;
 }
 
 export class FeatureCatalogueRegistry {

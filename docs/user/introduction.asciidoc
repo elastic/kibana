@@ -20,6 +20,20 @@ Manage your indices and ingest pipelines, monitor the health of your
 Elastic Stack cluster, and control which users have access to
 which features.
 
+++++
+<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
+</script>
+<img
+style="width: 100%; margin: auto; display: block;"
+class="vidyard-player-embed"
+src="https://play.vidyard.com/iyqMwJcvi8r4YfjeoPMjyH.jpg"
+data-uuid="iyqMwJcvi8r4YfjeoPMjyH"
+data-v="4"
+data-type="inline"
+/>
+</br>
+++++
+
 *{kib} is for administrators, analysts, and business users.*
 As an admin, your role is to manage the Elastic Stack, from creating your
 deployment to getting {es} data into {kib}, and then
@@ -43,12 +57,9 @@ If you’re not ready to use your own data, you can add a sample data set.
 The home page provides access to the *Enterprise Search*, *Observability*, and *Security* solutions,
 and everything you need to visualize and analyze your data.
 
-[role="screenshot"]
-image::images/home-page.png[Kibana home page]
-
 To access all of {kib} features, use the main menu.
 Open this menu by clicking the
-menu icon. To keep the main menu visible at all times, click *Dock navigation*.
+menu icon.
 For a quick reference of all {kib} features, refer to <<whats-the-right-app,What’s the right app for you?>>
 
 [role="screenshot"]
@@ -70,10 +81,6 @@ that it ran in, trace the transaction, and check the overall service availabilit
 * Designed for security analysts, {security-guide}/es-overview.html[*Elastic Security*] provides an overview of
 the events and alerts from your environment.  Elastic Security helps you defend
 your organization from threats before damage and loss occur.
-+
-[role="screenshot"]
-image::siem/images/detections-ui.png[Detections view in Elastic Security]
-
 
 [float]
 [[visualize-and-analyze]]
@@ -154,7 +161,7 @@ guided processes for administering all things Elastic Stack,
 including data, indices, clusters, alerts, and security.
 
 [role="screenshot"]
-image::images/intro-management.png[Index Management view in Stack Management]
+image::images/stack-management.png[Index Management view in Stack Management]
 
 [float]
 ==== Manage your data, indices, and clusters
@@ -170,24 +177,24 @@ image::images/intro-management.png[Index Management view in Stack Management]
 [float]
 ==== Alert and take action
 Detecting and acting on significant shifts and signals in your data is a need
-that exists in almost every use case. For example, you might set an alert to notify you when:
+that exists in almost every use case. For example, you might set a rule to notify you when:
 
 * A shift occurs in your business critical KPIs.
 * System resources, such as memory, CPU and disk space, take a dip.
 * An unusually high number of service requests, suspicious processes, and login attempts occurs.
 
-An alert triggers when a specified condition is met. For example,
-you can trigger an alert when the average or max of one of
+A rule triggers when a specified condition is met. For example,
+you can create a rule when the average or max of one of
 your metrics exceeds a threshold within a specified time frame.
 
-When the alert triggers, you can send a notification to a system that is part of
+When the rule triggers, you can send a notification to a system that is part of
 your daily workflow. {kib} integrates with email, Slack, PagerDuty, and ServiceNow,
 to name a few.
 
-A dedicated view for creating, searching, and editing alerts is in <<alert-management,*Alerts and Actions*>>.
+A dedicated view for creating, searching, and editing rules is in <<create-and-manage-rules,*Rules and Connectors*>>.
 
 [role="screenshot"]
-image::images/alerts-and-actions.png[Alerts and Actions view]
+image::images/rules-and-connectors.png[Rules and Connectors view]
 
 
 [float]
@@ -195,7 +202,7 @@ image::images/alerts-and-actions.png[Alerts and Actions view]
 === Organize your work in spaces
 
 Want to share {kib}’s goodness with other people or teams without overwhelming them? You can do so
-with <<xpack-spaces, Spaces>>, built for organizing your visualizations, dashboards, and indices.
+with <<xpack-spaces, Spaces>>, built for organizing your visualizations, dashboards, and index patterns.
 Think of a space as its own mini {kib} installation&mdash;it’s isolated from all other spaces,
 so you can tailor it to your specific needs without impacting others.
 
@@ -203,7 +210,7 @@ so you can tailor it to your specific needs without impacting others.
 image::images/select-your-space.png[Space selector view]
 
 Most of {kib}’s entities are space-aware, including dashboards, visualizations, index patterns,
-Canvas workpads, Timelion visualizations, graphs, tags, and machine learning jobs.
+*Canvas* workpads, graphs, tags, and machine learning jobs.
 
 In addition:
 
@@ -223,15 +230,15 @@ For example, roles with no access to an app will not have access to its alerts.
 ==== Control feature visibility
 
 You can take spaces one step further and control which features are visible
-within each space. For example, you might hide **Dev Tools** in your "Executive"
-space or show **Stack Monitoring** only in your "Admin" space.
+within each space. For example, you might hide **Dev Tools** in your "Marketing"
+space or show **Stack Monitoring** only in your "Engineering" space.
 
 Controlling feature visibility is not a security feature. To secure access
 to specific features on a per-user basis, you must configure
 <<xpack-security-authorization,{kib} Security>>.
 
 [role="screenshot"]
-image::images/features-control.png[Features Controls view]
+image::spaces/images/edit-space-feature-visibility.png[Features Controls view]
 
 [float]
 [[intro-kibana-Security]]
@@ -245,11 +252,11 @@ see <<security-settings-kb,Security settings in {kib}>>.
 
 [float]
 ==== Log in
-Kibana supports several <<kibana-authentication,authentication providers>>,
+{kib} supports several <<kibana-authentication,authentication providers>>,
 allowing you to login using {es}’s built-in realms, or by your own single sign-on provider.
 
 [role="screenshot"]
-image::images/login-screen.png[Login page]
+image::security/images/kibana-login.png[Login page]
 
 [float]
 ==== Secure access
@@ -270,7 +277,7 @@ while analysts or executives might have *Dashboard* and *Canvas* with read-only 
 levels, or you can automate role creation via our <<role-management-api,API>>.
 
 [role="screenshot"]
-image::images/roles-and-privileges.png[{kib privileges}]
+image::spaces/images/spaces-roles.png[{kib privileges}]
 
 [float]
 ==== Audit access
@@ -418,15 +425,15 @@ the <<get-started,{kib} Quick start>>.
 |<<xpack-graph, Graph>>
 
 |Share your data
-|<<dashboard, Dashboard>>, <<canvas, Canvas>>
+|<<dashboard, Dashboard>>, <<canvas, Canvas>>, <<discover,Discover>>
 
 2+|*Administer your Kibana instance*
 
 |Manage your Elasticsearch data
 |<<manage-data,Stack Management > Data>>
 
-|Set up alerts
-|<<alert-management,Stack Management > Alerts and Actions>>
+|Set up rules
+|<<create-and-manage-rules,Stack Management > Rules and Connectors>>
 
 |Organize your workspace and users
 |<<xpack-spaces,Stack Management > Spaces>>

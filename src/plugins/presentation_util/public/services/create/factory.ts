@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { CoreStart, AppUpdater } from 'src/core/public';
+import { CoreStart, AppUpdater, PluginInitializerContext } from 'src/core/public';
 
 /**
  * A factory function for creating a service.
@@ -28,6 +28,7 @@ export interface KibanaPluginServiceParams<Start extends {}> {
   coreStart: CoreStart;
   startPlugins: Start;
   appUpdater?: BehaviorSubject<AppUpdater>;
+  initContext?: PluginInitializerContext;
 }
 
 /**

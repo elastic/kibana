@@ -6,12 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import { kibanaResponseFactory } from '../../../../../../../src/core/server';
-import { LicenseCheck } from '../../../../../licensing/server';
-import { defineGetRolesRoutes } from './get';
 
-import { coreMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
+import type { LicenseCheck } from '../../../../../licensing/server';
 import { routeDefinitionParamsMock } from '../../index.mock';
+import { defineGetRolesRoutes } from './get';
 
 const application = 'kibana-.kibana';
 const reservedPrivilegesApplicationWildcard = 'kibana-*';
@@ -284,7 +285,7 @@ describe('GET role', () => {
               indices: [],
               applications: [
                 {
-                  application,
+                  application: reservedPrivilegesApplicationWildcard,
                   privileges: ['reserved_customApplication1', 'reserved_customApplication2'],
                   resources: ['*'],
                 },

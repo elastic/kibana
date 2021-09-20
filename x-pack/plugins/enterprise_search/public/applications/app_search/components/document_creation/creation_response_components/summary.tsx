@@ -21,8 +21,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DocumentCreationLogic } from '../';
-import { FLYOUT_ARIA_LABEL_ID, FLYOUT_CLOSE_BUTTON, DOCUMENT_CREATION_ERRORS } from '../constants';
+import { CLOSE_BUTTON_LABEL } from '../../../../shared/constants';
+import { FLYOUT_ARIA_LABEL_ID, DOCUMENT_CREATION_ERRORS } from '../constants';
+import { DocumentCreationLogic } from '../index';
 import { DocumentCreationStep } from '../types';
 
 import {
@@ -80,7 +81,7 @@ export const FlyoutFooter: React.FC = () => {
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={closeDocumentCreation}>{FLYOUT_CLOSE_BUTTON}</EuiButton>
+          <EuiButton onClick={closeDocumentCreation}>{CLOSE_BUTTON_LABEL}</EuiButton>
         </EuiFlexItem>
         {hasInvalidDocuments && (
           <EuiFlexItem grow={false}>

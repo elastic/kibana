@@ -4,15 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import type { RuntimeMappings } from '../../../../../../../common/types/fields';
 import type { Datafeed, Job } from '../../../../../../../common/types/anomaly_detection_jobs';
+import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
 
 interface Response {
   runtime_mappings: RuntimeMappings;
@@ -20,7 +15,12 @@ interface Response {
 }
 
 export function filterRuntimeMappings(job: Job, datafeed: Datafeed): Response {
-  if (datafeed.runtime_mappings === undefined) {
+  if (
+    !(
+      isPopulatedObject(datafeed, ['runtime_mappings']) &&
+      isPopulatedObject(datafeed.runtime_mappings)
+    )
+  ) {
     return {
       runtime_mappings: {},
       discarded_mappings: {},
@@ -71,16 +71,39 @@ function findFieldsInJob(job: Job, datafeed: Datafeed) {
     findFieldsInAgg(aggs).forEach((f) => usedFields.add(f));
   }
 
+  const query = datafeed.query;
+  if (query !== undefined) {
+    findFieldsInQuery(query).forEach((f) => usedFields.add(f));
+  }
+
   return [...usedFields];
 }
 
-function findFieldsInAgg(obj: Record<string, any>) {
+function findFieldsInAgg(obj: Record<string, unknown>) {
   const fields: string[] = [];
   Object.entries(obj).forEach(([key, val]) => {
-    if (typeof val === 'object' && val !== null) {
+    if (isPopulatedObject(val)) {
       fields.push(...findFieldsInAgg(val));
     } else if (typeof val === 'string' && key === 'field') {
       fields.push(val);
+    }
+  });
+  return fields;
+}
+
+function findFieldsInQuery(obj: object) {
+  const fields: string[] = [];
+  Object.entries(obj).forEach(([key, val]) => {
+    // return all nested keys in the object
+    // most will not be fields, but better to catch everything
+    // and not accidentally remove a used runtime field.
+    if (isPopulatedObject(val)) {
+      fields.push(key);
+      fields.push(...findFieldsInQuery(val));
+    } else if (typeof val === 'string') {
+      fields.push(val);
+    } else {
+      fields.push(key);
     }
   });
   return fields;

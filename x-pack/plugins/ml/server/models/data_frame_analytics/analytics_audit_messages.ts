@@ -79,9 +79,9 @@ export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedCluste
       },
     });
 
-    let messages = [];
-    if (body.hits.total.value > 0) {
-      messages = body.hits.hits.map((hit: Message) => hit._source);
+    let messages: JobMessage[] = [];
+    if (typeof body.hits.total !== 'number' && body.hits.total.value > 0) {
+      messages = (body.hits.hits as Message[]).map((hit) => hit._source);
       messages.reverse();
     }
     return messages;

@@ -8,19 +8,21 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { ThemeProvider } from 'styled-components';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { waitFor } from '@testing-library/react';
 
 import { AllRulesUtilityBar } from './utility_bar';
+import { getMockTheme } from '../../../../../common/lib/kibana/kibana_react.mock';
 
-const theme = () => ({ eui: euiDarkVars, darkMode: true });
+const mockTheme = getMockTheme({
+  eui: { euiBreakpoints: { l: '1200px' }, paddingSizes: { m: '10px' } },
+});
 
 describe('AllRules', () => {
   it('renders AllRulesUtilityBar total rules and selected rules', () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
-          userHasNoPermissions={false}
+          canBulkEdit
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
@@ -40,9 +42,9 @@ describe('AllRules', () => {
 
   it('does not render total selected and bulk actions when "showBulkActions" is false', () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
-          userHasNoPermissions={false}
+          canBulkEdit
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
@@ -63,9 +65,9 @@ describe('AllRules', () => {
 
   it('renders utility actions if user has permissions', () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
-          userHasNoPermissions={false}
+          canBulkEdit
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
@@ -82,9 +84,9 @@ describe('AllRules', () => {
 
   it('renders no utility actions if user has no permissions', () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
-          userHasNoPermissions
+          canBulkEdit={false}
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
@@ -102,9 +104,9 @@ describe('AllRules', () => {
   it('invokes refresh on refresh action click', () => {
     const mockRefresh = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
-          userHasNoPermissions={false}
+          canBulkEdit
           onRefresh={mockRefresh}
           paginationTotal={4}
           numberSelectedItems={1}
@@ -124,9 +126,9 @@ describe('AllRules', () => {
   it('invokes onRefreshSwitch when auto refresh switch is clicked', async () => {
     const mockSwitch = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
-          userHasNoPermissions={false}
+          canBulkEdit
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}

@@ -14,7 +14,11 @@ import uuid from 'uuid/v4';
 import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
-import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../common/constants';
+import {
+  KBN_IS_CENTROID_FEATURE,
+  LAYER_TYPE,
+  SOURCE_DATA_REQUEST_ID,
+} from '../../common/constants';
 import {
   getDataFilters,
   getDataRequestDescriptor,
@@ -41,21 +45,28 @@ import {
 } from './map_action_constants';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
-import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
+import { DataRequestMeta, MapExtent, DataFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
 import { scaleBounds, turfBboxToBounds } from '../../common/elasticsearch_util';
-import { IVectorStyle } from '../classes/styles/vector/vector_style';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
 export type DataRequestContext = {
-  startLoading(dataId: string, requestToken: symbol, requestMeta: DataMeta): void;
-  stopLoading(dataId: string, requestToken: symbol, data: object, resultsMeta?: DataMeta): void;
+  startLoading(dataId: string, requestToken: symbol, requestMeta?: DataRequestMeta): void;
+  stopLoading(
+    dataId: string,
+    requestToken: symbol,
+    data: object,
+    resultsMeta?: DataRequestMeta
+  ): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
+  onJoinError(errorMessage: string): void;
   updateSourceData(newData: unknown): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
-  dataFilters: MapFilters;
+  dataFilters: DataFilters;
+  forceRefreshDueToDrawing: boolean; // Boolean signaling data request triggered by a user updating layer features via drawing tools. When true, layer will re-load regardless of "source.applyForceRefresh" flag.
+  isForceRefresh: boolean; // Boolean signaling data request triggered by auto-refresh timer or user clicking refresh button. When true, layer will re-load only when "source.applyForceRefresh" flag is set to true.
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -89,14 +100,12 @@ export function updateStyleMeta(layerId: string | null) {
     if (!layer) {
       return;
     }
-    const sourceDataRequest = layer.getSourceDataRequest();
-    const style = layer.getCurrentStyle();
-    if (!style || !sourceDataRequest || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
+
+    const styleMeta = await layer.getStyleMetaDescriptorFromLocalFeatures();
+    if (!styleMeta) {
       return;
     }
-    const styleMeta = await (style as IVectorStyle).pluckStyleMetaFromSourceDataRequest(
-      sourceDataRequest
-    );
+
     dispatch({
       type: SET_LAYER_STYLE_META,
       layerId,
@@ -108,17 +117,21 @@ export function updateStyleMeta(layerId: string | null) {
 function getDataRequestContext(
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
   getState: () => MapStoreState,
-  layerId: string
+  layerId: string,
+  forceRefreshDueToDrawing: boolean,
+  isForceRefresh: boolean
 ): DataRequestContext {
   return {
     dataFilters: getDataFilters(getState()),
-    startLoading: (dataId: string, requestToken: symbol, meta: DataMeta) =>
+    startLoading: (dataId: string, requestToken: symbol, meta: DataRequestMeta) =>
       dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
-    stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataMeta) =>
+    stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataRequestMeta) =>
       dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) =>
       dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
-    updateSourceData: (newData: unknown) => {
+    onJoinError: (errorMessage: string) =>
+      dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage)),
+    updateSourceData: (newData: object) => {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
     isRequestStillActive: (dataId: string, requestToken: symbol) => {
@@ -130,16 +143,18 @@ function getDataRequestContext(
     },
     registerCancelCallback: (requestToken: symbol, callback: () => void) =>
       dispatch(registerCancelCallback(requestToken, callback)),
+    forceRefreshDueToDrawing,
+    isForceRefresh,
   };
 }
 
-export function syncDataForAllLayers() {
+export function syncDataForAllLayers(isForceRefresh: boolean) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     const syncPromises = getLayerList(getState()).map((layer) => {
-      return dispatch(syncDataForLayer(layer));
+      return dispatch(syncDataForLayer(layer, isForceRefresh));
     });
     await Promise.all(syncPromises);
   };
@@ -155,15 +170,21 @@ function syncDataForAllJoinLayers() {
         return 'hasJoins' in layer ? (layer as IVectorLayer).hasJoins() : false;
       })
       .map((layer) => {
-        return dispatch(syncDataForLayer(layer));
+        return dispatch(syncDataForLayer(layer, false));
       });
     await Promise.all(syncPromises);
   };
 }
 
-export function syncDataForLayer(layer: ILayer) {
+export function syncDataForLayerDueToDrawing(layer: ILayer) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const dataRequestContext = getDataRequestContext(dispatch, getState, layer.getId());
+    const dataRequestContext = getDataRequestContext(
+      dispatch,
+      getState,
+      layer.getId(),
+      true,
+      false
+    );
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
     }
@@ -171,30 +192,49 @@ export function syncDataForLayer(layer: ILayer) {
   };
 }
 
-export function syncDataForLayerId(layerId: string | null) {
+export function syncDataForLayer(layer: ILayer, isForceRefresh: boolean) {
+  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+    const dataRequestContext = getDataRequestContext(
+      dispatch,
+      getState,
+      layer.getId(),
+      false,
+      isForceRefresh
+    );
+    if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
+      return;
+    }
+    await layer.syncData(dataRequestContext);
+  };
+}
+
+export function syncDataForLayerId(layerId: string | null, isForceRefresh: boolean) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
-      dispatch(syncDataForLayer(layer));
+      dispatch(syncDataForLayer(layer, isForceRefresh));
     }
   };
 }
 
 function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
-  return (dispatch: Dispatch) => {
-    dispatch({
-      type: SET_LAYER_ERROR_STATUS,
-      isInErrorState: errorMessage !== null,
-      layerId,
-      errorMessage,
-    });
+  return {
+    type: SET_LAYER_ERROR_STATUS,
+    isInErrorState: errorMessage !== null,
+    layerId,
+    errorMessage,
   };
 }
 
-function startDataLoad(layerId: string, dataId: string, requestToken: symbol, meta: DataMeta) {
+function startDataLoad(
+  layerId: string,
+  dataId: string,
+  requestToken: symbol,
+  meta: DataRequestMeta
+) {
   return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -227,7 +267,7 @@ function endDataLoad(
   dataId: string,
   requestToken: symbol,
   data: object,
-  meta: DataMeta
+  meta: DataRequestMeta
 ) {
   return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -236,6 +276,7 @@ function endDataLoad(
     dispatch(unregisterCancelCallback(requestToken));
     const dataRequest = getDataRequestDescriptor(getState(), layerId, dataId);
     if (dataRequest && dataRequest.dataRequestToken !== requestToken) {
+      // todo - investigate - this may arise with failing style meta request and should not throw in that case
       throw new DataRequestAbortError();
     }
 
@@ -246,7 +287,10 @@ function endDataLoad(
       const layer = getLayerById(layerId, getState());
       const resultMeta: ResultMeta = {};
       if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
-        resultMeta.featuresCount = features.length;
+        const featuresWithoutCentroids = features.filter((feature) => {
+          return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
+        });
+        resultMeta.featuresCount = featuresWithoutCentroids.length;
       }
 
       eventHandlers.onDataLoadEnd({
@@ -308,7 +352,7 @@ function onDataLoadError(
   };
 }
 
-export function updateSourceDataRequest(layerId: string, newData: unknown) {
+export function updateSourceDataRequest(layerId: string, newData: object) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,
@@ -328,7 +372,7 @@ export function fitToLayerExtent(layerId: string) {
     if (targetLayer) {
       try {
         const bounds = await targetLayer.getBounds(
-          getDataRequestContext(dispatch, getState, layerId)
+          getDataRequestContext(dispatch, getState, layerId, false, false)
         );
         if (bounds) {
           await dispatch(setGotoWithBounds(scaleBounds(bounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
@@ -360,7 +404,9 @@ export function fitToDataBounds(onNoBounds?: () => void) {
       if (!(await layer.isFittable())) {
         return null;
       }
-      return layer.getBounds(getDataRequestContext(dispatch, getState, layer.getId()));
+      return layer.getBounds(
+        getDataRequestContext(dispatch, getState, layer.getId(), false, false)
+      );
     });
 
     let bounds;
@@ -428,7 +474,7 @@ export function autoFitToBounds() {
       // Ensure layer syncing occurs when setGotoWithBounds is not triggered.
       function onNoBounds() {
         if (localSetQueryCallId === lastSetQueryCallId) {
-          dispatch(syncDataForAllLayers());
+          dispatch(syncDataForAllLayers(false));
         }
       }
       dispatch(fitToDataBounds(onNoBounds));

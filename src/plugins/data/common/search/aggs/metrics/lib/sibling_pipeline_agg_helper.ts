@@ -27,6 +27,8 @@ const metricAggFilter: string[] = [
   '!cumulative_sum',
   '!geo_bounds',
   '!geo_centroid',
+  '!filtered_metric',
+  '!single_percentile',
 ];
 const bucketAggFilter: string[] = [];
 
@@ -39,12 +41,12 @@ export const siblingPipelineType = i18n.translate(
 
 export const siblingPipelineAggHelper = {
   subtype: siblingPipelineType,
-  params() {
+  params(bucketFilter = bucketAggFilter) {
     return [
       {
         name: 'customBucket',
         type: 'agg',
-        allowedAggs: bucketAggFilter,
+        allowedAggs: bucketFilter,
         default: null,
         makeAgg(agg: IMetricAggConfig, state = { type: 'date_histogram' }) {
           const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
@@ -69,7 +71,8 @@ export const siblingPipelineAggHelper = {
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
           'customMetric'
         ),
-        write: siblingPipelineAggWriter,
+        write: (agg: IMetricAggConfig, output: Record<string, any>) =>
+          siblingPipelineAggWriter(agg, output),
       },
     ] as Array<MetricAggParam<IMetricAggConfig>>;
   },

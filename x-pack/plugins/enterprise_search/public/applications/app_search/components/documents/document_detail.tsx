@@ -10,22 +10,13 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiButton,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-  EuiPageContentBody,
-  EuiPageContent,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-} from '@elastic/eui';
+import { EuiPanel, EuiButton, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
+import { DELETE_BUTTON_LABEL } from '../../../shared/constants';
 import { useDecodedParams } from '../../utils/encode_path_params';
+import { getEngineBreadcrumbs } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
 import { ResultFieldValue } from '../result';
 
 import { DOCUMENTS_TITLE } from './constants';
@@ -37,11 +28,8 @@ const DOCUMENT_DETAIL_TITLE = (documentId: string) =>
     defaultMessage: 'Document: {documentId}',
     values: { documentId },
   });
-interface Props {
-  engineBreadcrumb: string[];
-}
 
-export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
+export const DocumentDetail: React.FC = () => {
   const { dataLoading, fields } = useValues(DocumentDetailLogic);
   const { deleteDocument, getDocumentDetails, setFields } = useActions(DocumentDetailLogic);
 
@@ -54,10 +42,6 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
       setFields([]);
     };
   }, []);
-
-  if (dataLoading) {
-    return <Loading />;
-  }
 
   const columns: Array<EuiBasicTableColumn<FieldDetails>> = [
     {
@@ -77,33 +61,26 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
   ];
 
   return (
-    <>
-      <SetPageChrome trail={[...engineBreadcrumb, DOCUMENTS_TITLE, documentTitle]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{DOCUMENT_DETAIL_TITLE(documentTitle)}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs([DOCUMENTS_TITLE, documentTitle])}
+      pageHeader={{
+        pageTitle: DOCUMENT_DETAIL_TITLE(documentTitle),
+        rightSideItems: [
           <EuiButton
             color="danger"
             iconType="trash"
             onClick={() => deleteDocument(documentId)}
             data-test-subj="DeleteDocumentButton"
           >
-            {i18n.translate('xpack.enterpriseSearch.appSearch.documentDetail.deleteButton', {
-              defaultMessage: 'Delete',
-            })}
-          </EuiButton>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
-          <FlashMessages />
-          <EuiBasicTable columns={columns} items={fields} />
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </>
+            {DELETE_BUTTON_LABEL}
+          </EuiButton>,
+        ],
+      }}
+      isLoading={dataLoading}
+    >
+      <EuiPanel hasBorder>
+        <EuiBasicTable columns={columns} items={fields} />
+      </EuiPanel>
+    </AppSearchPageTemplate>
   );
 };

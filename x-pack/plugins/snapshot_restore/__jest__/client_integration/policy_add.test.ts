@@ -78,29 +78,51 @@ describe('<PolicyAdd />', () => {
         test('should require a policy name', async () => {
           const { form, find } = testBed;
 
+          // Verify required validation
           form.setInputValue('nameInput', '');
           find('nameInput').simulate('blur');
-
           expect(form.getErrorsMessages()).toEqual(['Policy name is required.']);
+
+          // Enter valid policy name and verify no error messages
+          form.setInputValue('nameInput', 'my_policy');
+          find('nameInput').simulate('blur');
+
+          expect(form.getErrorsMessages()).toEqual([]);
         });
 
-        test('should require a snapshot name', () => {
+        test('should require a snapshot name that is lowercase', () => {
           const { form, find } = testBed;
 
+          // Verify required validation
           form.setInputValue('snapshotNameInput', '');
           find('snapshotNameInput').simulate('blur');
-
           expect(form.getErrorsMessages()).toEqual(['Snapshot name is required.']);
+
+          // Verify lowercase validation
+          form.setInputValue('snapshotNameInput', 'MY_SNAPSHOT');
+          find('snapshotNameInput').simulate('blur');
+          expect(form.getErrorsMessages()).toEqual(['Snapshot name needs to be lowercase.']);
+
+          // Enter valid snapshot name and verify no error messages
+          form.setInputValue('snapshotNameInput', 'my_snapshot');
+          find('snapshotNameInput').simulate('blur');
+
+          expect(form.getErrorsMessages()).toEqual([]);
         });
 
         it('should require a schedule', () => {
           const { form, find } = testBed;
 
+          // Verify required validation
           find('showAdvancedCronLink').simulate('click');
           form.setInputValue('advancedCronInput', '');
           find('advancedCronInput').simulate('blur');
-
           expect(form.getErrorsMessages()).toEqual(['Schedule is required.']);
+
+          // Enter valid schedule and verify no error messages
+          form.setInputValue('advancedCronInput', '0 30 1 * * ?');
+          find('advancedCronInput').simulate('blur');
+          expect(form.getErrorsMessages()).toEqual([]);
         });
       });
 
@@ -118,7 +140,7 @@ describe('<PolicyAdd />', () => {
 
           await act(async () => {
             // Toggle "All indices" switch
-            form.toggleEuiSwitch('allIndicesToggle', false);
+            form.toggleEuiSwitch('allIndicesToggle');
             await nextTick();
             component.update();
           });
@@ -136,7 +158,7 @@ describe('<PolicyAdd />', () => {
 
           await act(async () => {
             // Toggle "All indices" switch
-            form.toggleEuiSwitch('allIndicesToggle', false);
+            form.toggleEuiSwitch('allIndicesToggle');
             await nextTick();
           });
           component.update();

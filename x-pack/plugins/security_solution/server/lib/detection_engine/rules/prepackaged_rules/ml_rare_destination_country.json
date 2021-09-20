@@ -1,0 +1,29 @@
+{
+  "anomaly_threshold": 75,
+  "author": [
+    "Elastic"
+  ],
+  "description": "A machine learning job detected a rare destination country name in the network logs. This can be due to initial access, persistence, command-and-control, or exfiltration activity. For example, when a user clicks on a link in a phishing email or opens a malicious document, a request may be sent to download and run a payload from a server in a country which does not normally appear in network traffic or business work-flows. Malware instances and persistence mechanisms may communicate with command-and-control (C2) infrastructure in their country of origin, which may be an unusual destination country for the source network.",
+  "false_positives": [
+    "Business workflows that occur very occasionally, and involve a business relationship with an organization in a country that does not routinely appear in network events, can trigger this alert. A new business workflow with an organization in a country with which no workflows previously existed may trigger this alert - although the model will learn that the new destination country is no longer anomalous as the activity becomes ongoing. Business travelers who roam to many countries for brief periods may trigger this alert."
+  ],
+  "from": "now-30m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "rare_destination_country",
+  "name": "Network Traffic to Rare Destination Country",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "35f86980-1fb1-4dff-b311-3be941549c8d",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Network",
+    "Threat Detection",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 2
+}

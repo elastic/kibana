@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+} from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -18,6 +22,8 @@ jest.mock('../../app_logic', () => ({
 }));
 import { AppLogic } from '../../app_logic';
 
+import { EngineTypes } from '../engine/types';
+
 import { ApiTokenTypes } from './constants';
 
 import { CredentialsLogic } from './credentials_logic';
@@ -25,7 +31,7 @@ import { CredentialsLogic } from './credentials_logic';
 describe('CredentialsLogic', () => {
   const { mount } = new LogicMounter(CredentialsLogic);
   const { http } = mockHttpValues;
-  const { clearFlashMessages, setSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     activeApiToken: {
@@ -61,8 +67,8 @@ describe('CredentialsLogic', () => {
 
   const credentialsDetails = {
     engines: [
-      { name: 'engine1', type: 'indexed', language: 'english', result_fields: {} },
-      { name: 'engine1', type: 'indexed', language: 'english', result_fields: {} },
+      { name: 'engine1', type: EngineTypes.indexed, language: 'english', result_fields: {} },
+      { name: 'engine1', type: EngineTypes.indexed, language: 'english', result_fields: {} },
     ],
   };
 
@@ -1023,7 +1029,9 @@ describe('CredentialsLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('fetchCredentials', () => {
       const meta = {
         page: {
@@ -1041,7 +1049,7 @@ describe('CredentialsLogic', () => {
         http.get.mockReturnValue(Promise.resolve({ meta, results }));
 
         CredentialsLogic.actions.fetchCredentials();
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/credentials', {
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/credentials', {
           query: {
             'page[current]': 1,
             'page[size]': 10,
@@ -1071,7 +1079,7 @@ describe('CredentialsLogic', () => {
         http.get.mockReturnValue(Promise.resolve(credentialsDetails));
 
         CredentialsLogic.actions.fetchDetails();
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/credentials/details');
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/credentials/details');
         await nextTick();
         expect(CredentialsLogic.actions.setCredentialsDetails).toHaveBeenCalledWith(
           credentialsDetails
@@ -1098,11 +1106,11 @@ describe('CredentialsLogic', () => {
         http.delete.mockReturnValue(Promise.resolve());
 
         CredentialsLogic.actions.deleteApiKey(tokenName);
-        expect(http.delete).toHaveBeenCalledWith(`/api/app_search/credentials/${tokenName}`);
+        expect(http.delete).toHaveBeenCalledWith(`/internal/app_search/credentials/${tokenName}`);
         await nextTick();
 
         expect(CredentialsLogic.actions.fetchCredentials).toHaveBeenCalled();
-        expect(setSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('handles errors', async () => {
@@ -1129,12 +1137,12 @@ describe('CredentialsLogic', () => {
         http.post.mockReturnValue(Promise.resolve(createdToken));
 
         CredentialsLogic.actions.onApiTokenChange();
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/credentials', {
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/credentials', {
           body: JSON.stringify(createdToken),
         });
         await nextTick();
         expect(CredentialsLogic.actions.onApiTokenCreateSuccess).toHaveBeenCalledWith(createdToken);
-        expect(setSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('calls a PUT endpoint that updates the active token if it already exists', async () => {
@@ -1156,12 +1164,12 @@ describe('CredentialsLogic', () => {
         http.put.mockReturnValue(Promise.resolve(updatedToken));
 
         CredentialsLogic.actions.onApiTokenChange();
-        expect(http.put).toHaveBeenCalledWith('/api/app_search/credentials/test-key', {
+        expect(http.put).toHaveBeenCalledWith('/internal/app_search/credentials/test-key', {
           body: JSON.stringify(updatedToken),
         });
         await nextTick();
         expect(CredentialsLogic.actions.onApiTokenUpdateSuccess).toHaveBeenCalledWith(updatedToken);
-        expect(setSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('handles errors', async () => {
@@ -1188,7 +1196,7 @@ describe('CredentialsLogic', () => {
           mount({ activeApiToken: { ...correctAdminToken, ...extraData } });
 
           CredentialsLogic.actions.onApiTokenChange();
-          expect(http.post).toHaveBeenCalledWith('/api/app_search/credentials', {
+          expect(http.post).toHaveBeenCalledWith('/internal/app_search/credentials', {
             body: JSON.stringify(correctAdminToken),
           });
         });
@@ -1207,7 +1215,7 @@ describe('CredentialsLogic', () => {
           mount({ activeApiToken: { ...correctSearchToken, ...extraData } });
 
           CredentialsLogic.actions.onApiTokenChange();
-          expect(http.post).toHaveBeenCalledWith('/api/app_search/credentials', {
+          expect(http.post).toHaveBeenCalledWith('/internal/app_search/credentials', {
             body: JSON.stringify(correctSearchToken),
           });
         });

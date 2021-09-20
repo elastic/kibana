@@ -6,11 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-
-import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
-import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
-import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
-import {
+import type {
   CreateCommentsArray,
   Description,
   DescriptionOrUndefined,
@@ -31,6 +27,7 @@ import {
   Name,
   NameOrUndefined,
   NamespaceType,
+  NamespaceTypeArray,
   OsTypeArray,
   PageOrUndefined,
   PerPageOrUndefined,
@@ -39,10 +36,14 @@ import {
   Tags,
   TagsOrUndefined,
   UpdateCommentsArray,
+  _VersionOrUndefined,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  EmptyStringArrayDecoded,
+  NonEmptyStringArrayDecoded,
   Version,
   VersionOrUndefined,
-  _VersionOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-types';
 
 export interface ConstructorOptions {
   user: string;
@@ -50,6 +51,12 @@ export interface ConstructorOptions {
 }
 
 export interface GetExceptionListOptions {
+  listId: ListIdOrUndefined;
+  id: IdOrUndefined;
+  namespaceType: NamespaceType;
+}
+
+export interface GetExceptionListSummaryOptions {
   listId: ListIdOrUndefined;
   id: IdOrUndefined;
   namespaceType: NamespaceType;

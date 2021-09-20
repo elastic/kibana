@@ -9,9 +9,8 @@ import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../../../../common';
 import { defaultHeaders } from '../../../../../../common/mock';
-
 import { HeaderToolTipContent } from '.';
 
 describe('HeaderToolTipContent', () => {

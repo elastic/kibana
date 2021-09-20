@@ -209,7 +209,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
         </h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiForm className="ml-edit-url-form">
+      <EuiForm className="ml-edit-url-form" data-test-subj="mlJobCustomUrlForm">
         <EuiFormRow
           label={
             <FormattedMessage id="xpack.ml.customUrlsEditor.labelLabel" defaultMessage="Label" />
@@ -239,6 +239,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
             idSelected={type}
             onChange={onTypeChange}
             className="url-link-to-radio"
+            data-test-subj="mlJobCustomUrlLinkToTypeInput"
           />
         </EuiFormRow>
 
@@ -256,6 +257,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
               options={dashboardOptions}
               value={kibanaSettings.dashboardId}
               onChange={onDashboardChange}
+              data-test-subj="mlJobCustomUrlDashboardNameInput"
               compressed
             />
           </EuiFormRow>
@@ -275,6 +277,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
               options={indexPatternOptions}
               value={kibanaSettings.discoverIndexPatternId}
               onChange={onDiscoverIndexPatternChange}
+              data-test-subj="mlJobCustomUrlDiscoverIndexPatternInput"
               compressed
             />
           </EuiFormRow>
@@ -298,6 +301,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                 selectedOptions={selectedEntityOptions}
                 onChange={onQueryEntitiesChange}
                 isClearable={true}
+                data-test-subj="mlJobCustomUrlQueryEntitiesInput"
               />
             </EuiFormRow>
           )}
@@ -321,6 +325,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                     options={timeRangeOptions}
                     value={timeRange.type}
                     onChange={onTimeRangeTypeChange}
+                    data-test-subj="mlJobCustomUrlTimeRangeInput"
                     compressed
                   />
                 </EuiFormRow>
@@ -343,6 +348,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                       value={timeRange.interval}
                       onChange={onTimeRangeIntervalChange}
                       isInvalid={isInvalidTimeRange}
+                      data-test-subj="mlJobCustomUrlTimeRangeIntervalInput"
                       compressed
                     />
                   </EuiFormRow>
@@ -365,6 +371,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
               rows={2}
               value={otherUrlSettings.urlValue}
               onChange={onOtherUrlValueChange}
+              data-test-subj="mlJobCustomUrlOtherTypeUrlInput"
               compressed
             />
           </EuiFormRow>

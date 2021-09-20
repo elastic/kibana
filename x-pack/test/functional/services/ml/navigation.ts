@@ -13,6 +13,8 @@ export function MachineLearningNavigationProvider({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
+  const appsMenu = getService('appsMenu');
+  const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
@@ -21,6 +23,13 @@ export function MachineLearningNavigationProvider({
     async navigateToMl() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('ml');
+        await testSubjects.existOrFail('mlApp', { timeout: 2000 });
+      });
+    },
+
+    async navigateToMlViaAppsMenu() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await appsMenu.clickLink('Machine Learning');
         await testSubjects.existOrFail('mlApp', { timeout: 2000 });
       });
     },
@@ -36,9 +45,16 @@ export function MachineLearningNavigationProvider({
       });
     },
 
+    async navigateToStackManagementViaAppsMenu() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await appsMenu.clickLink('Stack Management');
+        await testSubjects.existOrFail('jobsListLink', { timeout: 2000 });
+      });
+    },
+
     async navigateToAlertsAndAction() {
       await PageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('alertsTab');
+      await testSubjects.click('rulesTab');
       await testSubjects.existOrFail('alertsList');
     },
 
@@ -114,6 +130,13 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~dataFrameAnalytics', 'mlPageDataFrameAnalytics');
     },
 
+    async navigateToTrainedModels() {
+      await this.navigateToMl();
+      await this.navigateToDataFrameAnalytics();
+      await testSubjects.click('mlTrainedModelsTab');
+      await testSubjects.existOrFail('mlModelsTableContainer');
+    },
+
     async navigateToDataVisualizer() {
       await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
     },
@@ -137,6 +160,24 @@ export function MachineLearningNavigationProvider({
       });
     },
 
+    async navigateToStackManagementInsuficientLicensePage() {
+      // clicks the jobsListLink and loads the jobs list page
+      await testSubjects.click('jobsListLink');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the overall page is present
+        await testSubjects.existOrFail('mlPageInsufficientLicense');
+      });
+    },
+
+    async navigateToStackManagementJobsListPageAnomalyDetectionTab() {
+      // clicks the `Analytics` tab and loads the analytics list page
+      await testSubjects.click('mlStackManagementJobsListAnomalyDetectionTab');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the empty prompt for analytics jobs list got loaded
+        await testSubjects.existOrFail('ml-jobs-list');
+      });
+    },
+
     async navigateToStackManagementJobsListPageAnalyticsTab() {
       // clicks the `Analytics` tab and loads the analytics list page
       await testSubjects.click('mlStackManagementJobsListAnalyticsTab');
@@ -156,7 +197,7 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToSingleMetricViewerViaAnomalyExplorer() {
-      // clicks the `Single Metric Viewere` icon on the button group to switch result views
+      // clicks the `Single Metric Viewer` icon on the button group to switch result views
       await testSubjects.click('mlAnomalyResultsViewSelectorSingleMetricViewer');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the single metric viewer page is visible
@@ -192,6 +233,26 @@ export function MachineLearningNavigationProvider({
         await PageObjects.common.navigateToApp('home');
         await testSubjects.existOrFail('homeApp', { timeout: 2000 });
       });
+    },
+
+    /**
+     * Assert the active URL.
+     * @param expectedUrlPart - URL component excluding host
+     */
+    async assertCurrentURLContains(expectedUrlPart: string) {
+      const currentUrl = await browser.getCurrentUrl();
+      expect(currentUrl).to.include.string(
+        expectedUrlPart,
+        `Expected the current URL "${currentUrl}" to include ${expectedUrlPart}`
+      );
+    },
+
+    async assertCurrentURLNotContain(expectedUrlPart: string) {
+      const currentUrl = await browser.getCurrentUrl();
+      expect(currentUrl).to.not.include.string(
+        expectedUrlPart,
+        `Expected the current URL "${currentUrl}" to not include ${expectedUrlPart}`
+      );
     },
   };
 }

@@ -9,8 +9,10 @@
 import React, { createRef, Component } from 'react';
 
 import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from 'kibana/public';
+import classNames from 'classnames';
 import { ManagementApp } from '../../utils';
 import { Unmount } from '../../types';
+import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
 
 interface ManagementSectionWrapperProps {
   app: ManagementApp;
@@ -53,6 +55,12 @@ export class ManagementAppWrapper extends Component<ManagementSectionWrapperProp
   }
 
   render() {
-    return <div ref={this.mountElementRef} />;
+    return (
+      <div
+        // The following classes are a stop-gap for this element that wraps children of KibanaPageTemplate
+        className={classNames('euiPageContentBody', APP_WRAPPER_CLASS)}
+        ref={this.mountElementRef}
+      />
+    );
   }
 }

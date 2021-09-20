@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ListSchema } from '../../../common/schemas';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   DATE_NOW,
   DESCRIPTION,

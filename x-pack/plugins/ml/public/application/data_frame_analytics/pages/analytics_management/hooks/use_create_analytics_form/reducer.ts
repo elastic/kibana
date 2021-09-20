@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { memoize } from 'lodash';
+import { memoize, isEqual } from 'lodash';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
@@ -108,6 +108,28 @@ const getSourceIndexString = (state: State) => {
   return '';
 };
 
+const isSourceIndexNameValid = (
+  sourceIndexName: string,
+  sourceIndex: string | Array<string | undefined> | undefined
+) => {
+  // general check against Kibana index pattern names, but since this is about the advanced editor
+  // with support for arrays in the job config, we also need to check that each individual name
+  // doesn't include a comma if index names are supplied as an array.
+  // `indexPatterns.validate()` returns a map of messages, we're only interested here if it's valid or not.
+  // If there are no messages, it means the index pattern is valid.
+  let sourceIndexNameValid = Object.keys(indexPatterns.validate(sourceIndexName)).length === 0;
+  if (sourceIndexNameValid) {
+    if (typeof sourceIndex === 'string') {
+      sourceIndexNameValid = !sourceIndex.includes(',');
+    }
+    if (Array.isArray(sourceIndex)) {
+      sourceIndexNameValid = !sourceIndex.some((d) => d?.includes(','));
+    }
+  }
+
+  return sourceIndexNameValid;
+};
+
 /**
  * Validates num_top_feature_importance_values. Must be an integer >= 0.
  */
@@ -129,21 +151,8 @@ export const validateAdvancedEditor = (state: State): State => {
 
   const sourceIndexName = getSourceIndexString(state);
   const sourceIndexNameEmpty = sourceIndexName === '';
-  // general check against Kibana index pattern names, but since this is about the advanced editor
-  // with support for arrays in the job config, we also need to check that each individual name
-  // doesn't include a comma if index names are supplied as an array.
-  // `indexPatterns.validate()` returns a map of messages, we're only interested here if it's valid or not.
-  // If there are no messages, it means the index pattern is valid.
-  let sourceIndexNameValid = Object.keys(indexPatterns.validate(sourceIndexName)).length === 0;
   const sourceIndex = jobConfig?.source?.index;
-  if (sourceIndexNameValid) {
-    if (typeof sourceIndex === 'string') {
-      sourceIndexNameValid = !sourceIndex.includes(',');
-    }
-    if (Array.isArray(sourceIndex)) {
-      sourceIndexNameValid = !sourceIndex.some((d) => d?.includes(','));
-    }
-  }
+  const sourceIndexNameValid = isSourceIndexNameValid(sourceIndexName, sourceIndex);
 
   const destinationIndexName = jobConfig?.dest?.index ?? '';
   const destinationIndexNameEmpty = destinationIndexName === '';
@@ -470,7 +479,11 @@ export function reducer(state: State, action: Action): State {
       let disableSwitchToForm = false;
       try {
         resultJobConfig = JSON.parse(collapseLiteralStrings(action.advancedEditorRawString));
-        disableSwitchToForm = isAdvancedConfig(resultJobConfig);
+        const runtimeMappingsChanged =
+          state.form.runtimeMappings &&
+          resultJobConfig.source.runtime_mappings &&
+          !isEqual(state.form.runtimeMappings, resultJobConfig.source.runtime_mappings);
+        disableSwitchToForm = isAdvancedConfig(resultJobConfig) || runtimeMappingsChanged;
       } catch (e) {
         return {
           ...state,
@@ -579,6 +592,11 @@ export function reducer(state: State, action: Action): State {
           formState.numTopFeatureImportanceValues
         );
       }
+
+      const sourceIndexName = getSourceIndexString(state);
+      const sourceIndex = config?.source?.index;
+      const sourceIndexNameValid = isSourceIndexNameValid(sourceIndexName, sourceIndex);
+      formState.sourceIndexNameValid = sourceIndexNameValid;
 
       return validateForm({
         ...state,

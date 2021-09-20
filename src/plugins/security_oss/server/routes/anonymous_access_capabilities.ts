@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from 'kibana/server';
+import type { IRouter } from 'src/core/server';
+
 import type { AnonymousAccessService } from '../plugin';
 
 interface Deps {

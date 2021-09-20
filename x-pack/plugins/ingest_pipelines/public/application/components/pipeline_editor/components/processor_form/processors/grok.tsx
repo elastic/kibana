@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { flow } from 'lodash';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -22,7 +23,7 @@ import { XJsonEditor, DragAndDropTextList } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, to, from, EDITOR_PX_HEIGHT } from './shared';
+import { FieldsConfig, to, from, EDITOR_PX_HEIGHT, isJSONStringValidator } from './shared';
 
 const { isJsonField, emptyField } = fieldValidators;
 
@@ -46,7 +47,10 @@ const patternsValidation: ValidationFunc<any, string, ArrayItem[]> = ({ value, f
   }
 };
 
-const patternValidation = emptyField(valueRequiredMessage);
+const patternValidations: Array<ValidationFunc<any, string, string>> = [
+  emptyField(valueRequiredMessage),
+  isJSONStringValidator,
+];
 
 const fieldsConfig: FieldsConfig = {
   /* Required field configs */
@@ -54,6 +58,8 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.patternsFieldLabel', {
       defaultMessage: 'Patterns',
     }),
+    deserializer: flow(String, to.escapeBackslashes),
+    serializer: from.unescapeBackslashes,
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.patternsHelpText', {
       defaultMessage:
         'Grok expressions used to match and extract named capture groups. Uses the first matching expression.',
@@ -133,7 +139,9 @@ export const Grok: FunctionComponent = () => {
               onAdd={addItem}
               onRemove={removeItem}
               addLabel={i18nTexts.addPatternLabel}
-              textValidation={patternValidation}
+              textValidations={patternValidations}
+              textDeserializer={fieldsConfig.patterns?.deserializer}
+              textSerializer={fieldsConfig.patterns?.serializer}
             />
           );
         }}

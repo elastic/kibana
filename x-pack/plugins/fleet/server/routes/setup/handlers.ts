@@ -5,40 +5,28 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { TypeOf } from '@kbn/config-schema';
-import { outputService, appContextService } from '../../services';
-import { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
-import { setupIngestManager, setupFleet } from '../../services/setup';
-import { PostFleetSetupRequestSchema } from '../../types';
+import type { RequestHandler } from 'src/core/server';
+
+import { appContextService } from '../../services';
+import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common';
+import { setupIngestManager } from '../../services/setup';
+import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
   try {
-    const isAdminUserSetup = (await outputService.getAdminUser(soClient)) !== null;
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
-    const isTLSEnabled = appContextService.getHttpSetup().getServerInfo().protocol === 'https';
-    const isProductionMode = appContextService.getIsProductionMode();
-    const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
-    const isTLSCheckDisabled = appContextService.getConfig()?.agents?.tlsCheckDisabled ?? false;
-    const canEncrypt = appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt === true;
+    const isFleetServerSetup = await hasFleetServers(appContextService.getInternalUserESClient());
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
-    if (!isAdminUserSetup) {
-      missingRequirements.push('fleet_admin_user');
-    }
     if (!isApiKeysEnabled) {
       missingRequirements.push('api_keys');
     }
-    if (!isTLSCheckDisabled && !isCloud && isProductionMode && !isTLSEnabled) {
-      missingRequirements.push('tls_required');
-    }
 
-    if (!canEncrypt) {
-      missingRequirements.push('encrypted_saved_object_encryption_key_required');
+    if (!isFleetServerSetup) {
+      missingRequirements.push('fleet_server');
     }
 
     const body: GetFleetStatusResponse = {
@@ -54,39 +42,24 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
   }
 };
 
-export const createFleetSetupHandler: RequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof PostFleetSetupRequestSchema.body>
-> = async (context, request, response) => {
+export const fleetSetupHandler: RequestHandler = async (context, request, response) => {
   try {
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-    await setupIngestManager(soClient, esClient, callCluster);
-    await setupFleet(soClient, esClient, callCluster, {
-      forceRecreate: request.body?.forceRecreate ?? false,
-    });
+    const setupStatus = await setupIngestManager(soClient, esClient);
+    const body: PostFleetSetupResponse = {
+      ...setupStatus,
+      nonFatalErrors: setupStatus.nonFatalErrors.map((e) => {
+        // JSONify the error object so it can be displayed properly in the UI
+        const error = e.error ?? e;
+        return {
+          name: error.name,
+          message: error.message,
+        };
+      }),
+    };
 
-    return response.ok({
-      body: { isInitialized: true },
-    });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
-
-export const FleetSetupHandler: RequestHandler = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-
-  try {
-    const body: PostIngestSetupResponse = { isInitialized: true };
-    await setupIngestManager(soClient, esClient, callCluster);
-    return response.ok({
-      body,
-    });
+    return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }

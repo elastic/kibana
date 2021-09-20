@@ -7,7 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
@@ -16,8 +16,8 @@ import {
   getConditionalHeaders,
   getFullUrls,
   omitBlockedHeaders,
+  generatePngObservableFactory,
 } from '../../common';
-import { generatePngObservableFactory } from '../lib/generate_png';
 import { TaskPayloadPNG } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<
@@ -25,17 +25,16 @@ export const runTaskFnFactory: RunTaskFnFactory<
 > = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
-  const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
-  return async function runTask(jobId, job, cancellationToken) {
+  return async function runTask(jobId, job, cancellationToken, stream) {
     const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
     let apmGeneratePng: { end: () => void } | null | undefined;
 
     const generatePngObservable = await generatePngObservableFactory(reporting);
-    const jobLogger = logger.clone([jobId]);
+    const jobLogger = parentLogger.clone([PNG_JOB_TYPE, 'execute', jobId]);
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, logger)),
+      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
       map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
       mergeMap((conditionalHeaders) => {
@@ -52,20 +51,16 @@ export const runTaskFnFactory: RunTaskFnFactory<
           job.layout
         );
       }),
-      map(({ base64, warnings }) => {
-        if (apmGeneratePng) apmGeneratePng.end();
-
-        return {
-          content_type: 'image/png',
-          content: base64,
-          size: (base64 && base64.length) || 0,
-          warnings,
-        };
-      }),
+      tap(({ buffer }) => stream.write(buffer)),
+      map(({ warnings }) => ({
+        content_type: 'image/png',
+        warnings,
+      })),
       catchError((err) => {
         jobLogger.error(err);
         return Rx.throwError(err);
-      })
+      }),
+      finalize(() => apmGeneratePng?.end())
     );
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);

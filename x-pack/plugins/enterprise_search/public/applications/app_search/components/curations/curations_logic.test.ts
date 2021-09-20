@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockKibanaValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -17,7 +22,8 @@ import { CurationsLogic } from './';
 describe('CurationsLogic', () => {
   const { mount } = new LogicMounter(CurationsLogic);
   const { http } = mockHttpValues;
-  const { clearFlashMessages, setSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { navigateToUrl } = mockKibanaValues;
+  const { clearFlashMessages, flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const MOCK_CURATIONS_RESPONSE = {
     meta: {
@@ -106,12 +112,15 @@ describe('CurationsLogic', () => {
         CurationsLogic.actions.loadCurations();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/curations', {
-          query: {
-            'page[current]': 1,
-            'page[size]': 10,
-          },
-        });
+        expect(http.get).toHaveBeenCalledWith(
+          '/internal/app_search/engines/some-engine/curations',
+          {
+            query: {
+              'page[current]': 1,
+              'page[size]': 10,
+            },
+          }
+        );
         expect(CurationsLogic.actions.onCurationsLoad).toHaveBeenCalledWith(
           MOCK_CURATIONS_RESPONSE
         );
@@ -128,7 +137,7 @@ describe('CurationsLogic', () => {
       });
     });
 
-    describe('deleteCurationSet', () => {
+    describe('deleteCuration', () => {
       const confirmSpy = jest.spyOn(window, 'confirm');
 
       beforeEach(() => {
@@ -140,22 +149,22 @@ describe('CurationsLogic', () => {
         mount();
         jest.spyOn(CurationsLogic.actions, 'loadCurations');
 
-        CurationsLogic.actions.deleteCurationSet('some-curation-id');
+        CurationsLogic.actions.deleteCuration('some-curation-id');
         expect(clearFlashMessages).toHaveBeenCalled();
         await nextTick();
 
         expect(http.delete).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/curations/some-curation-id'
+          '/internal/app_search/engines/some-engine/curations/some-curation-id'
         );
         expect(CurationsLogic.actions.loadCurations).toHaveBeenCalled();
-        expect(setSuccessMessage).toHaveBeenCalledWith('Successfully removed curation.');
+        expect(flashSuccessToast).toHaveBeenCalledWith('Your curation was deleted');
       });
 
       it('handles errors', async () => {
         http.delete.mockReturnValueOnce(Promise.reject('error'));
         mount();
 
-        CurationsLogic.actions.deleteCurationSet('some-curation-id');
+        CurationsLogic.actions.deleteCuration('some-curation-id');
         expect(clearFlashMessages).toHaveBeenCalled();
         await nextTick();
 
@@ -166,11 +175,41 @@ describe('CurationsLogic', () => {
         confirmSpy.mockImplementationOnce(() => false);
         mount();
 
-        CurationsLogic.actions.deleteCurationSet('some-curation-id');
+        CurationsLogic.actions.deleteCuration('some-curation-id');
         expect(clearFlashMessages).toHaveBeenCalled();
         await nextTick();
 
         expect(http.delete).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('createCuration', () => {
+      it('should make an API call and navigate to the new curation', async () => {
+        http.post.mockReturnValueOnce(Promise.resolve({ id: 'some-cur-id' }));
+        mount();
+
+        CurationsLogic.actions.createCuration(['some query']);
+        expect(clearFlashMessages).toHaveBeenCalled();
+        await nextTick();
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/app_search/engines/some-engine/curations',
+          {
+            body: '{"queries":["some query"]}',
+          }
+        );
+        expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations/some-cur-id');
+      });
+
+      it('handles errors', async () => {
+        http.post.mockReturnValueOnce(Promise.reject('error'));
+        mount();
+
+        CurationsLogic.actions.createCuration(['some query']);
+        expect(clearFlashMessages).toHaveBeenCalled();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });

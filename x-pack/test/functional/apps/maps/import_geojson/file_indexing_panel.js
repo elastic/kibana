@@ -13,6 +13,8 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const log = getService('log');
   const security = getService('security');
+  const browser = getService('browser');
+  const retry = getService('retry');
 
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';
   const FILE_LOAD_DIR = 'test_upload_files';
@@ -31,6 +33,10 @@ export default function ({ getService, getPageObjects }) {
 
     const indexName = uuid();
     await PageObjects.maps.setIndexName(indexName);
+    await retry.try(async () => {
+      const importButtonActive = await PageObjects.maps.importFileButtonEnabled();
+      expect(importButtonActive).to.be(true);
+    });
     await PageObjects.maps.clickImportFileButton();
     return indexName;
   }
@@ -102,6 +108,9 @@ export default function ({ getService, getPageObjects }) {
     const pointGeojsonFiles = ['point.json', 'multi_point.json'];
     pointGeojsonFiles.forEach(async (pointFile) => {
       it(`should index with type geo_point for file: ${pointFile}`, async () => {
+        if (!(await browser.checkBrowserPermission('clipboard-read'))) {
+          return;
+        }
         await loadFileAndIndex(pointFile);
         const indexPatternResults = await PageObjects.maps.getIndexPatternResults();
         const coordinatesField = indexPatternResults.fields.find(
@@ -120,6 +129,9 @@ export default function ({ getService, getPageObjects }) {
     ];
     nonPointGeojsonFiles.forEach(async (shapeFile) => {
       it(`should index with type geo_shape for file: ${shapeFile}`, async () => {
+        if (!(await browser.checkBrowserPermission('clipboard-read'))) {
+          return;
+        }
         await loadFileAndIndex(shapeFile);
         const indexPatternResults = await PageObjects.maps.getIndexPatternResults();
         const coordinatesField = indexPatternResults.fields.find(

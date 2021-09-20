@@ -22,7 +22,7 @@ describe('existingFields', () => {
   }
 
   function searchResults(fields: Record<string, unknown[]> = {}) {
-    return { fields };
+    return { fields, _index: '_index', _id: '_id' };
   }
 
   it('should handle root level fields', () => {
@@ -77,7 +77,13 @@ describe('existingFields', () => {
 
   it('supports meta fields', () => {
     const result = existingFields(
-      [{ _mymeta: 'abc', ...searchResults({ bar: ['scriptvalue'] }) }],
+      [
+        {
+          // @ts-expect-error _mymeta is not defined on estypes.SearchHit
+          _mymeta: 'abc',
+          ...searchResults({ bar: ['scriptvalue'] }),
+        },
+      ],
       [field({ name: '_mymeta', isMeta: true })]
     );
 

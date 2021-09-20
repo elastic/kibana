@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AGENT_POLLING_THRESHOLD_MS, AGENT_SAVED_OBJECT_TYPE } from '../constants';
-import { Agent, AgentStatus } from '../types';
+import { AGENT_POLLING_THRESHOLD_MS } from '../constants';
+import type { Agent, AgentStatus } from '../types';
 
 export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
   const { last_checkin: lastCheckIn } = agent;
@@ -42,11 +42,11 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
 }
 
 export function buildKueryForEnrollingAgents() {
-  return `not (${AGENT_SAVED_OBJECT_TYPE}.last_checkin:*)`;
+  return 'not (last_checkin:*)';
 }
 
 export function buildKueryForUnenrollingAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.unenrollment_started_at:*`;
+  return 'unenrollment_started_at:*';
 }
 
 export function buildKueryForOnlineAgents() {
@@ -54,17 +54,17 @@ export function buildKueryForOnlineAgents() {
 }
 
 export function buildKueryForErrorAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:error or ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:degraded`;
+  return `(last_checkin_status:error or last_checkin_status:degraded) AND not (${buildKueryForUpdatingAgents()})`;
 }
 
 export function buildKueryForOfflineAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${
+  return `last_checkin < now-${
     (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
   }s AND not (${buildKueryForErrorAgents()}) AND not ( ${buildKueryForUpdatingAgents()} )`;
 }
 
 export function buildKueryForUpgradingAgents() {
-  return `(${AGENT_SAVED_OBJECT_TYPE}.upgrade_started_at:*) and not (${AGENT_SAVED_OBJECT_TYPE}.upgraded_at:*)`;
+  return '(upgrade_started_at:*) and not (upgraded_at:*)';
 }
 
 export function buildKueryForUpdatingAgents() {
@@ -72,5 +72,5 @@ export function buildKueryForUpdatingAgents() {
 }
 
 export function buildKueryForInactiveAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.active:false`;
+  return `active:false`;
 }

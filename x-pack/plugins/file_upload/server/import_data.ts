@@ -10,12 +10,11 @@ import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
 import {
   ImportResponse,
   ImportFailure,
+  InputData,
   Settings,
   Mappings,
   IngestPipelineWrapper,
 } from '../common';
-
-export type InputData = any[];
 
 export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function importData(
@@ -165,6 +164,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
         failures.push({
           item: i,
           reason: item.index.error.reason,
+          caused_by: item.index.error.caused_by,
           doc: data[i],
         });
       }

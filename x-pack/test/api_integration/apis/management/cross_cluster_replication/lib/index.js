@@ -6,5 +6,3 @@
  */
 
 export { registerHelpers } from './elasticsearch';
-
-export { getRandomString } from './random';

@@ -6,9 +6,7 @@
  */
 
 import React, { useEffect, useState, FormEvent } from 'react';
-import { useLocation } from 'react-router-dom';
 
-import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 
 import {
@@ -22,14 +20,9 @@ import {
 import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
 
 import { Loading } from '../../../../../shared/loading';
-import { parseQueryParams } from '../../../../../shared/query_params';
 
 import { AddSourceLogic } from './add_source_logic';
 import { CONFIG_OAUTH_LABEL, CONFIG_OAUTH_BUTTON } from './constants';
-
-interface OauthQueryParams {
-  preContentSourceId: string;
-}
 
 interface ConfigureOauthProps {
   header: React.ReactNode;
@@ -38,9 +31,6 @@ interface ConfigureOauthProps {
 }
 
 export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCreated, header }) => {
-  const { search } = useLocation() as Location;
-
-  const { preContentSourceId } = (parseQueryParams(search) as unknown) as OauthQueryParams;
   const [formLoading, setFormLoading] = useState(false);
 
   const {
@@ -58,7 +48,7 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
   const checkboxOptions = githubOrganizations.map((item) => ({ id: item, label: item }));
 
   useEffect(() => {
-    getPreContentSourceConfigData(preContentSourceId);
+    getPreContentSourceConfigData();
   }, []);
 
   const handleChange = (option: string) => setSelectedGithubOrganizations(option);
@@ -99,9 +89,10 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
   );
 
   return (
-    <div className="step-4">
+    <>
       {header}
+      <EuiSpacer />
       {sectionLoading ? <Loading /> : configfieldsForm}
-    </div>
+    </>
   );
 };

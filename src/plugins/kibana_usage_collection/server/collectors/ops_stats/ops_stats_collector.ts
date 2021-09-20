@@ -12,7 +12,6 @@ import moment from 'moment';
 import { OpsMetrics } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
-
 interface OpsStatsMetrics extends Omit<OpsMetrics, 'response_times' | 'collected_at'> {
   timestamp: string;
   response_times: {
@@ -34,6 +33,11 @@ export function getOpsStatsCollector(
     // Ensure we only include the same data that Metricbeat collection would get
     // @ts-expect-error
     delete metrics.process.pid;
+    for (const process of metrics.processes) {
+      // @ts-expect-error
+      delete process.pid;
+    }
+
     const responseTimes = {
       average: metrics.response_times.avg_in_millis,
       max: metrics.response_times.max_in_millis,

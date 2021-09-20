@@ -8,4 +8,4 @@
 
 export const ES_CLIENT_HEADERS = {
   'x-elastic-product-origin': 'kibana',
-};
+} as const;

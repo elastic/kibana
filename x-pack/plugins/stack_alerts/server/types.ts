@@ -6,18 +6,19 @@
  */
 
 import { PluginStartContract as TriggersActionsUiStartContract } from '../../triggers_actions_ui/server';
-import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
+import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 
 export {
   PluginSetupContract as AlertingSetup,
   AlertType,
+  RuleParamsAndRefs,
   AlertExecutorOptions,
-} from '../../alerts/server';
+} from '../../alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
 // this plugin's dependendencies
 export interface StackAlertsDeps {
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
   features: FeaturesPluginSetup;
 }
 

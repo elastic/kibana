@@ -11,7 +11,6 @@ import Boom from '@hapi/boom';
 
 import { isConfigSchema } from '@kbn/config-schema';
 import { Logger } from '../../logging';
-import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy/errors';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,
@@ -29,7 +28,8 @@ import { RequestHandlerContext } from '../../../server';
 import { wrapErrors } from './error_wrapper';
 import { RouteValidator } from './validator';
 
-interface RouterRoute {
+/** @internal */
+export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;
@@ -278,10 +278,6 @@ export class Router<Context extends RequestHandlerContext = RequestHandlerContex
         return hapiResponseAdapter.handle(
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
         );
-      }
-      // forward 401 (boom) errors from legacy ES client
-      if (LegacyElasticsearchErrorHelpers.isNotAuthorizedError(e)) {
-        return e;
       }
       return hapiResponseAdapter.toInternalError();
     }

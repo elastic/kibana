@@ -12,10 +12,11 @@ import { Agent } from '../../../../../../fleet/common/types/models';
 import { HostStatus } from '../../../../../common/endpoint/types';
 
 const STATUS_QUERY_MAP = new Map([
-  [HostStatus.ONLINE.toString(), AgentStatusKueryHelper.buildKueryForOnlineAgents()],
+  [HostStatus.HEALTHY.toString(), AgentStatusKueryHelper.buildKueryForOnlineAgents()],
   [HostStatus.OFFLINE.toString(), AgentStatusKueryHelper.buildKueryForOfflineAgents()],
-  [HostStatus.ERROR.toString(), AgentStatusKueryHelper.buildKueryForErrorAgents()],
-  [HostStatus.UNENROLLING.toString(), AgentStatusKueryHelper.buildKueryForUnenrollingAgents()],
+  [HostStatus.UNHEALTHY.toString(), AgentStatusKueryHelper.buildKueryForErrorAgents()],
+  [HostStatus.UPDATING.toString(), AgentStatusKueryHelper.buildKueryForUpdatingAgents()],
+  [HostStatus.INACTIVE.toString(), AgentStatusKueryHelper.buildKueryForInactiveAgents()],
 ]);
 
 export async function findAgentIDsByStatus(
@@ -31,7 +32,7 @@ export async function findAgentIDsByStatus(
       page: pageNum,
       perPage: pageSize,
       showInactive: true,
-      kuery: `(fleet-agents.packages : "endpoint" AND (${helpers.join(' OR ')}))`,
+      kuery: `(packages : "endpoint" AND (${helpers.join(' OR ')}))`,
     };
   };
 
@@ -41,7 +42,7 @@ export async function findAgentIDsByStatus(
   let hasMore = true;
 
   while (hasMore) {
-    const agents = await agentService.listAgents(soClient, esClient, searchOptions(page++));
+    const agents = await agentService.listAgents(esClient, searchOptions(page++));
     result.push(...agents.agents.map((agent: Agent) => agent.id));
     hasMore = agents.agents.length > 0;
   }

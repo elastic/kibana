@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_LABEL_SIZE } from '../vector_style_defaults';
 import { LABEL_BORDER_SIZES } from '../../../../../common/constants';

@@ -13,24 +13,59 @@ import {
   getSuitableUnit,
 } from '../../vis_data/helpers/unit_to_seconds';
 import { RESTRICTIONS_KEYS } from '../../../../common/ui_restrictions';
-import type { ReqFacade } from '../strategies/abstract_search_strategy';
-import type { VisPayload } from '../../../../common/types';
+import {
+  TIME_RANGE_DATA_MODES,
+  PANEL_TYPES,
+  BUCKET_TYPES,
+  TSVB_METRIC_TYPES,
+} from '../../../../common/enums';
+import { getAggsByType, AGG_TYPE } from '../../../../common/agg_utils';
+import type { Panel } from '../../../../common/types';
 
-const getTimezoneFromRequest = (request: ReqFacade<VisPayload>) => {
-  return request.payload.timerange.timezone;
-};
+export interface SearchCapabilitiesOptions {
+  timezone?: string;
+  maxBucketsLimit: number;
+  panel?: Panel;
+}
 
 export class DefaultSearchCapabilities {
-  constructor(
-    public request: ReqFacade<VisPayload>,
-    public fieldsCapabilities: Record<string, any> = {}
-  ) {}
+  public timezone: SearchCapabilitiesOptions['timezone'];
+  public maxBucketsLimit: SearchCapabilitiesOptions['maxBucketsLimit'];
+  public panel?: Panel;
+
+  constructor(options: SearchCapabilitiesOptions) {
+    this.timezone = options.timezone;
+    this.maxBucketsLimit = options.maxBucketsLimit;
+    this.panel = options.panel;
+  }
 
   public get defaultTimeInterval() {
     return null;
   }
 
   public get whiteListedMetrics() {
+    if (
+      this.panel &&
+      this.panel.type !== PANEL_TYPES.TIMESERIES &&
+      this.panel.time_range_mode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
+    ) {
+      const aggs = getAggsByType<string>((agg) => agg.id);
+      const allAvailableAggs = [
+        ...aggs[AGG_TYPE.METRIC],
+        ...aggs[AGG_TYPE.SIBLING_PIPELINE],
+        TSVB_METRIC_TYPES.MATH,
+        BUCKET_TYPES.TERMS,
+      ].reduce(
+        (availableAggs, aggType) => ({
+          ...availableAggs,
+          [aggType]: {
+            '*': true,
+          },
+        }),
+        {}
+      );
+      return this.createUiRestriction(allAvailableAggs);
+    }
     return this.createUiRestriction();
   }
 
@@ -48,10 +83,6 @@ export class DefaultSearchCapabilities {
       [RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS]: this.whiteListedGroupByFields,
       [RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES]: this.whiteListedTimerangeModes,
     };
-  }
-
-  public get searchTimezone() {
-    return getTimezoneFromRequest(this.request);
   }
 
   createUiRestriction(restrictionsObject?: Record<string, any>) {

@@ -19,7 +19,7 @@ import {
 } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -47,7 +47,7 @@ interface Props {
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
   series: MetricsExplorerSeries;
-  source: InfraSourceConfiguration | undefined;
+  source: MetricsSourceConfigurationProperties | undefined;
   timeRange: MetricsExplorerTimeOptions;
   onTimeChange: (start: string, end: string) => void;
 }
@@ -97,7 +97,7 @@ export const MetricsExplorerChart = ({
       : dataDomain;
 
   return (
-    <div style={{ padding: 24 }}>
+    <div style={{ padding: 24 }} data-test-subj="metricsExplorer-chart">
       {options.groupBy ? (
         <EuiTitle size="xs">
           <EuiFlexGroup alignItems="center">
@@ -133,7 +133,7 @@ export const MetricsExplorerChart = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <div className="infrastructureChart" style={{ height, width }}>
+      <div className="metricsExplorerChart" style={{ height, width }}>
         {metrics.length && series.rows.length > 0 ? (
           <Chart>
             {metrics.map((metric, id) => (

@@ -5,28 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { get, has } from 'lodash';
 import { leastCommonInterval, isCalendarInterval } from '../lib/interval_helper';
 
-import { DefaultSearchCapabilities } from './default_search_capabilities';
-
-import type { VisPayload } from '../../../../common/types';
-import type { ReqFacade } from '../strategies/abstract_search_strategy';
+import {
+  DefaultSearchCapabilities,
+  SearchCapabilitiesOptions,
+} from './default_search_capabilities';
 
 export class RollupSearchCapabilities extends DefaultSearchCapabilities {
   rollupIndex: string;
   availableMetrics: Record<string, any>;
 
   constructor(
-    req: ReqFacade<VisPayload>,
+    options: SearchCapabilitiesOptions,
     fieldsCapabilities: Record<string, any>,
     rollupIndex: string
   ) {
-    super(req, fieldsCapabilities);
+    super(options);
 
     this.rollupIndex = rollupIndex;
     this.availableMetrics = get(fieldsCapabilities, `${rollupIndex}.aggs`, {});
+    this.timezone = get(this.dateHistogram, 'time_zone', null);
   }
 
   public get dateHistogram() {
@@ -46,10 +46,6 @@ export class RollupSearchCapabilities extends DefaultSearchCapabilities {
       this.dateHistogram.interval ||
       null
     );
-  }
-
-  public get searchTimezone() {
-    return get(this.dateHistogram, 'time_zone', null);
   }
 
   public get whiteListedMetrics() {

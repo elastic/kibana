@@ -9,7 +9,7 @@ The Elasticsearch `sort` value of this result.
 <b>Signature:</b>
 
 ```typescript
-sort?: unknown[];
+sort?: string[];
 ```
 
 ## Remarks

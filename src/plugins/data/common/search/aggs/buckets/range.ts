@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { NumericalRange, numericalRangeToAst } from '../../expressions';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { AggTypesDependencies } from '../agg_types';
 import { BaseAggParams } from '../types';
@@ -28,11 +29,7 @@ export interface RangeBucketAggDependencies {
 
 export interface AggParamsRange extends BaseAggParams {
   field: string;
-  ranges?: Array<{
-    from: number;
-    to: number;
-    label?: string;
-  }>;
+  ranges?: NumericalRange[];
 }
 
 export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDependencies) => {
@@ -85,6 +82,7 @@ export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDepend
       {
         name: 'field',
         type: 'field',
+        // number_range is not supported by Elasticsearch
         filterFieldTypes: [KBN_FIELD_TYPES.NUMBER],
       },
       {
@@ -101,6 +99,7 @@ export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDepend
 
           output.params.keyed = true;
         },
+        toExpressionAst: (ranges) => ranges?.map(numericalRangeToAst),
       },
     ],
   });

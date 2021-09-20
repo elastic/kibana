@@ -16,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supportedTestSuites = [
     {
       suiteTitle: 'supported job with aggregation field',
+      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_supported_aggs_${ts}`,
         job_type: 'anomaly_detector',
@@ -102,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'supported job with scripted field',
+      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_supported_script_${ts}`,
         job_type: 'anomaly_detector',
@@ -176,6 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
   const unsupportedTestSuites = [
     {
       suiteTitle: 'unsupported job with bucket_script aggregation field',
+      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_unsupported_aggs_${ts}`,
         job_type: 'anomaly_detector',
@@ -280,6 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'unsupported job with partition by of a scripted field',
+      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_unsupported_script_${ts}`,
         job_type: 'anomaly_detector',
@@ -362,8 +366,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('aggregated or scripted job', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();

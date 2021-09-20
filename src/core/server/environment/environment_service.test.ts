@@ -62,18 +62,24 @@ describe('UuidService', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
   let configService: ReturnType<typeof configServiceMock.create>;
   let coreContext: CoreContext;
+  let service: EnvironmentService;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
     logger = loggingSystemMock.create();
     configService = getConfigService();
     coreContext = mockCoreContext.create({ logger, configService });
+
+    service = new EnvironmentService(coreContext);
   });
 
-  describe('#setup()', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('#preboot()', () => {
     it('calls resolveInstanceUuid with correct parameters', async () => {
-      const service = new EnvironmentService(coreContext);
-      await service.setup();
+      await service.preboot();
+
       expect(resolveInstanceUuid).toHaveBeenCalledTimes(1);
       expect(resolveInstanceUuid).toHaveBeenCalledWith({
         pathConfig,
@@ -83,8 +89,8 @@ describe('UuidService', () => {
     });
 
     it('calls createDataFolder with correct parameters', async () => {
-      const service = new EnvironmentService(coreContext);
-      await service.setup();
+      await service.preboot();
+
       expect(createDataFolder).toHaveBeenCalledTimes(1);
       expect(createDataFolder).toHaveBeenCalledWith({
         pathConfig,
@@ -93,8 +99,8 @@ describe('UuidService', () => {
     });
 
     it('calls writePidFile with correct parameters', async () => {
-      const service = new EnvironmentService(coreContext);
-      await service.setup();
+      await service.preboot();
+
       expect(writePidFile).toHaveBeenCalledTimes(1);
       expect(writePidFile).toHaveBeenCalledWith({
         pidConfig,
@@ -103,9 +109,38 @@ describe('UuidService', () => {
     });
 
     it('returns the uuid resolved from resolveInstanceUuid', async () => {
-      const service = new EnvironmentService(coreContext);
-      const setup = await service.setup();
-      expect(setup.instanceUuid).toEqual('SOME_UUID');
+      const preboot = await service.preboot();
+
+      expect(preboot.instanceUuid).toEqual('SOME_UUID');
+    });
+
+    describe('process warnings', () => {
+      it('logs warnings coming from the process', async () => {
+        await service.preboot();
+
+        const warning = new Error('something went wrong');
+        process.emit('warning', warning);
+
+        expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
+        expect(logger.get('process').warn).toHaveBeenCalledWith(warning);
+      });
+
+      it('does not log deprecation warnings', async () => {
+        await service.preboot();
+
+        const warning = new Error('something went wrong');
+        warning.name = 'DeprecationWarning';
+        process.emit('warning', warning);
+
+        expect(logger.get('process').warn).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('#setup()', () => {
+    it('returns the uuid resolved from resolveInstanceUuid', async () => {
+      await expect(service.preboot()).resolves.toEqual({ instanceUuid: 'SOME_UUID' });
+      expect(service.setup()).toEqual({ instanceUuid: 'SOME_UUID' });
     });
   });
 });

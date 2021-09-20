@@ -5,29 +5,28 @@
  * 2.0.
  */
 
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import moment from 'moment';
-import {
-  ElasticsearchServiceSetup,
-  ILegacyCustomClusterClient,
+import type {
+  ElasticsearchClient,
   Logger,
   OpsMetrics,
   ServiceStatus,
   ServiceStatusLevel,
-  ServiceStatusLevels,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
+import { ServiceStatusLevels } from '../../../../../src/core/server';
 import { KIBANA_STATS_TYPE_MONITORING, KIBANA_SETTINGS_TYPE } from '../../common/constants';
 
-import { sendBulkPayload, monitoringBulk } from './lib';
+import { sendBulkPayload } from './lib';
 import { getKibanaSettings } from './collectors';
-import { MonitoringConfig } from '../config';
+import type { MonitoringConfig } from '../config';
+import type { IBulkUploader } from '../types';
 
 export interface BulkUploaderOptions {
   log: Logger;
   config: MonitoringConfig;
   interval: number;
-  elasticsearch: ElasticsearchServiceSetup;
   statusGetter$: Observable<ServiceStatus>;
   opsMetrics$: Observable<OpsMetrics>;
   kibanaStats: KibanaStats;
@@ -61,11 +60,11 @@ export interface KibanaStats {
  * @param {Object} server HapiJS server instance
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
-export class BulkUploader {
+export class BulkUploader implements IBulkUploader {
   private readonly _log: Logger;
-  private readonly _cluster: ILegacyCustomClusterClient;
   private readonly kibanaStats: KibanaStats;
-  private readonly kibanaStatusGetter$: Subscription;
+  private readonly kibanaStatusGetter$: Observable<ServiceStatus>;
+  private kibanaStatusSubscription?: Subscription;
   private readonly opsMetrics$: Observable<OpsMetrics>;
   private kibanaStatus: ServiceStatusLevel | null;
   private _timer: NodeJS.Timer | null;
@@ -75,7 +74,6 @@ export class BulkUploader {
     log,
     config,
     interval,
-    elasticsearch,
     statusGetter$,
     opsMetrics$,
     kibanaStats,
@@ -91,16 +89,10 @@ export class BulkUploader {
     this._interval = interval;
     this._log = log;
 
-    this._cluster = elasticsearch.legacy.createClient('admin', {
-      plugins: [monitoringBulk],
-    });
-
     this.kibanaStats = kibanaStats;
 
     this.kibanaStatus = null;
-    this.kibanaStatusGetter$ = statusGetter$.subscribe((nextStatus) => {
-      this.kibanaStatus = nextStatus.level;
-    });
+    this.kibanaStatusGetter$ = statusGetter$;
   }
 
   /*
@@ -108,17 +100,21 @@ export class BulkUploader {
    * @param {usageCollection} usageCollection object to use for initial the fetch/upload and fetch/uploading on interval
    * @return undefined
    */
-  public start() {
+  public start(esClient: ElasticsearchClient) {
     this._log.info('Starting monitoring stats collection');
+
+    this.kibanaStatusSubscription = this.kibanaStatusGetter$.subscribe((nextStatus) => {
+      this.kibanaStatus = nextStatus.level;
+    });
 
     if (this._timer) {
       clearInterval(this._timer);
     } else {
-      this._fetchAndUpload(); // initial fetch
+      this._fetchAndUpload(esClient); // initial fetch
     }
 
     this._timer = setInterval(() => {
-      this._fetchAndUpload();
+      this._fetchAndUpload(esClient);
     }, this._interval);
   }
 
@@ -131,8 +127,7 @@ export class BulkUploader {
     if (this._timer) clearInterval(this._timer);
     this._timer = null;
 
-    this.kibanaStatusGetter$.unsubscribe();
-    this._cluster.close();
+    this.kibanaStatusSubscription?.unsubscribe();
 
     const prefix = logPrefix ? logPrefix + ':' : '';
     this._log.info(prefix + 'Monitoring stats collection is stopped');
@@ -168,7 +163,7 @@ export class BulkUploader {
     };
   }
 
-  private async _fetchAndUpload() {
+  private async _fetchAndUpload(esClient: ElasticsearchClient) {
     const data = await Promise.all([
       { type: KIBANA_STATS_TYPE_MONITORING, result: await this.getOpsMetrics() },
       { type: KIBANA_SETTINGS_TYPE, result: await getKibanaSettings(this._log, this.config) },
@@ -178,7 +173,7 @@ export class BulkUploader {
     if (payload && payload.length > 0) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
-        await this._onPayload(payload);
+        await this._onPayload(esClient, payload);
         this._log.debug(`Uploaded bulk stats payload to the local cluster`);
       } catch (err) {
         this._log.warn(err.stack);
@@ -189,8 +184,8 @@ export class BulkUploader {
     }
   }
 
-  private async _onPayload(payload: object[]) {
-    return await sendBulkPayload(this._cluster, this._interval, payload);
+  private async _onPayload(esClient: ElasticsearchClient, payload: object[]) {
+    return await sendBulkPayload(esClient, this._interval, payload);
   }
 
   private getConvertedKibanaStatus() {

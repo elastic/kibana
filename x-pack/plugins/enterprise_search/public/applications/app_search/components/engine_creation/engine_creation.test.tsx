@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -15,6 +15,7 @@ import { EngineCreation } from './';
 
 describe('EngineCreation', () => {
   const DEFAULT_VALUES = {
+    isLoading: false,
     name: '',
     rawName: '',
     language: 'Universal',
@@ -85,6 +86,15 @@ describe('EngineCreation', () => {
 
       expect(wrapper.find('[data-test-subj="NewEngineSubmitButton"]').prop('disabled')).toEqual(
         false
+      );
+    });
+
+    it('passes isLoading state', () => {
+      setMockValues({ ...DEFAULT_VALUES, isLoading: true });
+      const wrapper = shallow(<EngineCreation />);
+
+      expect(wrapper.find('[data-test-subj="NewEngineSubmitButton"]').prop('isLoading')).toEqual(
+        true
       );
     });
   });

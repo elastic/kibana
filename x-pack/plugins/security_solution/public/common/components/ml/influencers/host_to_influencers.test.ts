@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostItem } from '../../../../graphql/types';
+import { HostItem } from '../../../../../common/search_strategy/security_solution/hosts';
 import { InfluencerInput } from '../types';
 import { hostToInfluencers } from './host_to_influencers';
 
@@ -28,6 +28,7 @@ describe('host_to_influencer', () => {
   test('returns a null if the host.name is null', () => {
     const hostItem: HostItem = {
       host: {
+        // @ts-expect-error
         name: null,
       },
     };

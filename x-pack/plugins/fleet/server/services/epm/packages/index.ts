@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/server';
-import {
-  RequiredPackage,
-  requiredPackages,
-  ValueOf,
-  installationStatuses,
-} from '../../../../common';
-import { AssetType, Installable, Installation, KibanaAssetType } from '../../../types';
+import type { SavedObject } from 'src/core/server';
+
+import { unremovablePackages, installationStatuses } from '../../../../common';
+import { KibanaAssetType } from '../../../types';
+import type { AssetType, Installable, Installation } from '../../../types';
 
 export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 export {
@@ -20,6 +17,7 @@ export {
   getFile,
   getInstallationObject,
   getInstallation,
+  getInstallations,
   getPackageInfo,
   getPackages,
   getLimitedPackages,
@@ -35,8 +33,8 @@ export {
 } from './install';
 export { removeInstallation } from './remove';
 
-export function isRequiredPackage(value: string): value is ValueOf<RequiredPackage> {
-  return Object.values(requiredPackages).some((required) => value === required);
+export function isUnremovablePackage(value: string): boolean {
+  return unremovablePackages.includes(value);
 }
 
 export class PackageNotInstalledError extends Error {

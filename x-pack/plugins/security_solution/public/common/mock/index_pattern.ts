@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 
 export const mockIndexPattern: IIndexPattern = {
   fields: [
@@ -92,6 +92,18 @@ export const mockIndexPattern: IIndexPattern = {
       searchable: true,
       type: 'string',
       aggregatable: true,
+    },
+    {
+      name: 'nestedField.firstAttributes',
+      searchable: true,
+      type: 'string',
+      aggregatable: false,
+    },
+    {
+      name: 'nestedField.secondAttributes',
+      searchable: true,
+      type: 'string',
+      aggregatable: false,
     },
   ],
   title: 'filebeat-*,auditbeat-*,packetbeat-*',

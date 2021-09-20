@@ -22,6 +22,7 @@ Object {
     "events": Array [
       "transaction",
     ],
+    "includeLegacyData": true,
   },
   "body": Object {
     "query": Object {
@@ -62,14 +63,10 @@ Object {
     ],
   },
   "body": Object {
-    "aggs": Object {
-      "agents": Object {
-        "terms": Object {
-          "field": "agent.name",
-          "size": 1,
-        },
-      },
-    },
+    "_source": Array [
+      "agent.name",
+      "service.runtime.name",
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -87,10 +84,20 @@ Object {
               },
             },
           },
+          Object {
+            "exists": Object {
+              "field": "agent.name",
+            },
+          },
         ],
+        "should": Object {
+          "exists": Object {
+            "field": "service.runtime.name",
+          },
+        },
       },
     },
-    "size": 0,
+    "size": 1,
   },
   "terminateAfter": 1,
 }
@@ -118,7 +125,6 @@ Array [
                 "environments": Object {
                   "terms": Object {
                     "field": "service.environment",
-                    "missing": "",
                   },
                 },
                 "outcomes": Object {
@@ -132,44 +138,71 @@ Array [
                 },
                 "sample": Object {
                   "top_metrics": Object {
-                    "metrics": Object {
-                      "field": "agent.name",
-                    },
+                    "metrics": Array [
+                      Object {
+                        "field": "agent.name",
+                      },
+                    ],
                     "sort": Object {
                       "@timestamp": "desc",
                     },
                   },
                 },
-                "timeseries": Object {
-                  "aggs": Object {
-                    "avg_duration": Object {
-                      "avg": Object {
-                        "field": "transaction.duration.us",
-                      },
-                    },
-                    "outcomes": Object {
-                      "terms": Object {
-                        "field": "event.outcome",
-                        "include": Array [
-                          "failure",
-                          "success",
-                        ],
-                      },
-                    },
-                  },
-                  "date_histogram": Object {
-                    "extended_bounds": Object {
-                      "max": 1528977600000,
-                      "min": 1528113600000,
-                    },
-                    "field": "@timestamp",
-                    "fixed_interval": "43200s",
-                    "min_doc_count": 0,
-                  },
-                },
               },
               "terms": Object {
                 "field": "transaction.type",
+              },
+            },
+          },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
+        "metric",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "environments": Object {
+              "terms": Object {
+                "field": "service.environment",
+              },
+            },
+            "latest": Object {
+              "top_metrics": Object {
+                "metrics": Array [
+                  Object {
+                    "field": "agent.name",
+                  },
+                ],
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
               },
             },
           },

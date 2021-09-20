@@ -20,11 +20,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
-import { useMlKibana } from '../../../../contexts/kibana';
 import {
   jobCreatorFactory,
   isAdvancedJobCreator,
   isCategorizationJobCreator,
+  isRareJobCreator,
 } from '../../common/job_creator';
 import {
   JOB_TYPE,
@@ -38,9 +38,10 @@ import { useMlContext } from '../../../../contexts/ml';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
-import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
+import { useToastNotificationService } from '../../../../services/toast_notification_service';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -52,15 +53,13 @@ export interface PageProps {
 }
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
-  const {
-    services: { notifications },
-  } = useMlKibana();
   const mlContext = useMlContext();
   const jobCreator = jobCreatorFactory(jobType)(
     mlContext.currentIndexPattern,
     mlContext.currentSavedSearch,
     mlContext.combinedQuery
   );
+  const { displayErrorToast } = useToastNotificationService();
 
   const { from, to } = getTimeFilterRange();
   jobCreator.setTimeRange(from, to);
@@ -154,17 +153,12 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   if (autoSetTimeRange && isAdvancedJobCreator(jobCreator)) {
     // for advanced jobs, load the full time range start and end times
     // so they can be used for job validation and bucket span estimation
-    try {
-      jobCreator.autoSetTimeRange();
-    } catch (error) {
-      const { toasts } = notifications;
-      toasts.addDanger({
-        title: i18n.translate('xpack.ml.newJob.wizard.autoSetJobCreatorTimeRange.error', {
-          defaultMessage: `Error retrieving beginning and end times of index`,
-        }),
-        text: error,
+    jobCreator.autoSetTimeRange().catch((error) => {
+      const title = i18n.translate('xpack.ml.newJob.wizard.autoSetJobCreatorTimeRange.error', {
+        defaultMessage: `Error retrieving beginning and end times of index`,
       });
-    }
+      displayErrorToast(error, title);
+    });
   }
 
   function initCategorizationSettings() {
@@ -178,6 +172,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
       const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
       jobCreator.categorizationAnalyzer = anomalyDetectors.categorization_analyzer!;
+    } else if (isRareJobCreator(jobCreator)) {
+      const rare = newJobCapsService.getAggById('rare');
+      const freqRare = newJobCapsService.getAggById('freq_rare');
+      jobCreator.setDefaultDetectorProperties(rare, freqRare);
     }
   }
 

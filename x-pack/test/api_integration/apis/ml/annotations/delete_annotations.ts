@@ -18,13 +18,14 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('delete_annotations', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       // generate one annotation for each job
       for (let i = 0; i < testSetupJobConfigs.length; i++) {
         const job = testSetupJobConfigs[i];
         const annotationToIndex = testSetupAnnotations[i];
+        // @ts-expect-error not full interface
         await ml.api.createAnomalyDetectionJob(job);
         await ml.api.indexAnnotation(annotationToIndex);
       }

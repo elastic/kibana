@@ -19,13 +19,13 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
     after(() => objectRemover.removeAll());
 
-    it('should handle create action request appropriately', async () => {
+    it('should handle create connector request appropriately', async () => {
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
-          actionTypeId: 'test.index-record',
+          connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -38,9 +38,10 @@ export default function createActionTests({ getService }: FtrProviderContext) {
       objectRemover.add(Spaces.space1.id, response.body.id, 'action', 'actions');
       expect(response.body).to.eql({
         id: response.body.id,
-        isPreconfigured: false,
+        is_preconfigured: false,
         name: 'My action',
-        actionTypeId: 'test.index-record',
+        connector_type_id: 'test.index-record',
+        is_missing_secrets: false,
         config: {
           unencrypted: `This value shouldn't get encrypted`,
         },
@@ -53,6 +54,46 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         spaceId: Spaces.space1.id,
         type: 'action',
         id: response.body.id,
+      });
+    });
+
+    describe('legacy', () => {
+      it('should handle create action request appropriately', async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'My action',
+            actionTypeId: 'test.index-record',
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
+            secrets: {
+              encrypted: 'This value should be encrypted',
+            },
+          });
+
+        expect(response.status).to.eql(200);
+        objectRemover.add(Spaces.space1.id, response.body.id, 'action', 'actions');
+        expect(response.body).to.eql({
+          id: response.body.id,
+          isPreconfigured: false,
+          name: 'My action',
+          actionTypeId: 'test.index-record',
+          isMissingSecrets: false,
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+        });
+        expect(typeof response.body.id).to.be('string');
+
+        // Ensure AAD isn't broken
+        await checkAAD({
+          supertest,
+          spaceId: Spaces.space1.id,
+          type: 'action',
+          id: response.body.id,
+        });
       });
     });
 

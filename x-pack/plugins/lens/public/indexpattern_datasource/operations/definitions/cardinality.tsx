@@ -11,27 +11,48 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
-import { getInvalidFieldMessage, getSafeName } from './helpers';
+import {
+  getFormatFromPreviousColumn,
+  getInvalidFieldMessage,
+  getSafeName,
+  getFilter,
+} from './helpers';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 
-const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
+const supportedTypes = new Set([
+  'string',
+  'boolean',
+  'number',
+  'number_range',
+  'ip',
+  'ip_range',
+  'date',
+  'date_range',
+]);
 
 const SCALE = 'ratio';
-const OPERATION_TYPE = 'cardinality';
+const OPERATION_TYPE = 'unique_count';
 const IS_BUCKETED = false;
 
-function ofName(name: string) {
-  return i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
-    defaultMessage: 'Unique count of {name}',
-    values: {
-      name,
-    },
-  });
+function ofName(name: string, timeShift: string | undefined) {
+  return adjustTimeScaleLabelSuffix(
+    i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
+      defaultMessage: 'Unique count of {name}',
+      values: {
+        name,
+      },
+    }),
+    undefined,
+    undefined,
+    undefined,
+    timeShift
+  );
 }
 
 export interface CardinalityIndexPatternColumn
   extends FormattedIndexPatternColumn,
     FieldBasedIndexPatternColumn {
-  operationType: 'cardinality';
+  operationType: typeof OPERATION_TYPE;
 }
 
 export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn, 'field'> = {
@@ -61,22 +82,21 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
-  getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
-  buildColumn({ field, previousColumn }) {
+  filterable: true,
+  shiftable: true,
+  getDefaultLabel: (column, indexPattern) =>
+    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
+  buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(field.displayName),
+      label: ofName(field.displayName, previousColumn?.timeShift),
       dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
-      params:
-        previousColumn?.dataType === 'number' &&
-        previousColumn.params &&
-        'format' in previousColumn.params &&
-        previousColumn.params.format
-          ? { format: previousColumn.params.format }
-          : undefined,
+      filter: getFilter(previousColumn, columnParams),
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
+      params: getFormatFromPreviousColumn(previousColumn),
     };
   },
   toEsAggsFn: (column, columnId) => {
@@ -85,13 +105,32 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       enabled: true,
       schema: 'metric',
       field: column.sourceField,
+      // time shift is added to wrapping aggFilteredMetric if filter is set
+      timeShift: column.filter ? undefined : column.timeShift,
     }).toAst();
   },
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName),
+      label: ofName(field.displayName, oldColumn.timeShift),
       sourceField: field.name,
     };
+  },
+  documentation: {
+    section: 'elasticsearch',
+    signature: i18n.translate('xpack.lens.indexPattern.cardinality.signature', {
+      defaultMessage: 'field: string',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.cardinality.documentation.markdown', {
+      defaultMessage: `
+Calculates the number of unique values of a specified field. Works for number, string, date and boolean values.
+
+Example: Calculate the number of different products:
+\`unique_count(product.name)\`
+
+Example: Calculate the number of different products from the "clothes" group:
+\`unique_count(product.name, kql='product.group=clothes')\`
+      `,
+    }),
   },
 };

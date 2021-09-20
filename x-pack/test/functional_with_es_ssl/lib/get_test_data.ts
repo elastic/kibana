@@ -16,11 +16,11 @@ export function getTestAlertData(overwrites = {}) {
     enabled: true,
     name: generateUniqueKey(),
     tags: ['foo', 'bar'],
-    alertTypeId: 'test.noop',
+    rule_type_id: 'test.noop',
     consumer: 'alerts',
     schedule: { interval: '1m' },
     throttle: '1m',
-    notifyWhen: 'onThrottleInterval',
+    notify_when: 'onThrottleInterval',
     actions: [],
     params: {},
     ...overwrites,
@@ -30,7 +30,7 @@ export function getTestAlertData(overwrites = {}) {
 export function getTestActionData(overwrites = {}) {
   return {
     name: `slack-${Date.now()}`,
-    actionTypeId: '.slack',
+    connector_type_id: '.slack',
     config: {},
     secrets: {
       webhookUrl: 'https://test',

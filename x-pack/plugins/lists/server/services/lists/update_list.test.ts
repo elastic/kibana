@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ListSchema } from '../../../common/schemas';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 
 import { updateList } from './update_list';
@@ -29,7 +32,12 @@ describe('update_list', () => {
     const list = getListResponseMock();
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
     const options = getUpdateListOptionsMock();
-    const updatedList = await updateList(options);
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.update.mockReturnValue(
+      // @ts-expect-error not full response interface
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
+    );
+    const updatedList = await updateList({ ...options, esClient });
     const expected: ListSchema = { ...getListResponseMock(), id: 'elastic-id-123' };
     expect(updatedList).toEqual(expected);
   });
@@ -42,7 +50,12 @@ describe('update_list', () => {
     };
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
     const options = getUpdateListOptionsMock();
-    const updatedList = await updateList(options);
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.update.mockReturnValue(
+      // @ts-expect-error not full response interface
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
+    );
+    const updatedList = await updateList({ ...options, esClient });
     const expected: ListSchema = {
       ...getListResponseMock(),
       deserializer: '{{value}}',

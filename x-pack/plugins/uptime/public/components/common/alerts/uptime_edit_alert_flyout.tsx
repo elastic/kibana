@@ -10,7 +10,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import {
   Alert,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../../../../../plugins/triggers_actions_ui/public';
+} from '../../../../../triggers_actions_ui/public';
 
 interface Props {
   alertFlyoutVisible: boolean;
@@ -27,19 +27,17 @@ export const UptimeEditAlertFlyoutComponent = ({
   initialAlert,
   setAlertFlyoutVisibility,
 }: Props) => {
-  const onClose = () => {
-    setAlertFlyoutVisibility(false);
-  };
   const { triggersActionsUi } = useKibana<KibanaDeps>().services;
 
   const EditAlertFlyout = useMemo(
     () =>
       triggersActionsUi.getEditAlertFlyout({
         initialAlert,
-        onClose,
+        onClose: () => {
+          setAlertFlyoutVisibility(false);
+        },
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [initialAlert, setAlertFlyoutVisibility, triggersActionsUi]
   );
   return <>{alertFlyoutVisible && EditAlertFlyout}</>;
 };

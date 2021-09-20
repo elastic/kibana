@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ShareToSpaceFlyoutProps } from 'src/plugins/spaces_oss/public';
 import {
   JobType,
   ML_SAVED_OBJECT_TYPE,
   SavedObjectResult,
 } from '../../../../common/types/saved_objects';
-import type { SpacesPluginStart } from '../../../../../spaces/public';
+import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '../../../../../spaces/public';
 import { ml } from '../../services/ml_api_service';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
@@ -37,13 +36,21 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
 
   const [showFlyout, setShowFlyout] = useState(false);
 
-  async function changeSpacesHandler(spacesToAdd: string[], spacesToRemove: string[]) {
-    if (spacesToAdd.length) {
-      const resp = await ml.savedObjects.assignJobToSpace(jobType, [jobId], spacesToAdd);
-      handleApplySpaces(resp);
-    }
-    if (spacesToRemove.length && !spacesToAdd.includes(ALL_SPACES_ID)) {
-      const resp = await ml.savedObjects.removeJobFromSpace(jobType, [jobId], spacesToRemove);
+  async function changeSpacesHandler(
+    _objects: Array<{ type: string; id: string }>, // this is ignored because ML jobs do not have references
+    spacesToAdd: string[],
+    spacesToMaybeRemove: string[]
+  ) {
+    // If the user is adding the job to all current and future spaces, don't remove it from any specified spaces
+    const spacesToRemove = spacesToAdd.includes(ALL_SPACES_ID) ? [] : spacesToMaybeRemove;
+
+    if (spacesToAdd.length || spacesToRemove.length) {
+      const resp = await ml.savedObjects.updateJobsSpaces(
+        jobType,
+        [jobId],
+        spacesToAdd,
+        spacesToRemove
+      );
       handleApplySpaces(resp);
     }
     onClose();
@@ -66,7 +73,11 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
     });
   }
 
-  const { SpaceList, ShareToSpaceFlyout } = spacesApi.ui.components;
+  const LazySpaceList = useCallback(spacesApi.ui.components.getSpaceList, [spacesApi]);
+  const LazyShareToSpaceFlyout = useCallback(spacesApi.ui.components.getShareToSpaceFlyout, [
+    spacesApi,
+  ]);
+
   const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
     savedObjectTarget: {
       type: ML_SAVED_OBJECT_TYPE,
@@ -82,10 +93,14 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
 
   return (
     <>
-      <EuiButtonEmpty onClick={() => setShowFlyout(true)} style={{ height: 'auto' }}>
-        <SpaceList namespaces={spaceIds} displayLimit={0} behaviorContext="outside-space" />
+      <EuiButtonEmpty
+        onClick={() => setShowFlyout(true)}
+        style={{ height: 'auto' }}
+        data-test-subj="mlJobListRowManageSpacesButton"
+      >
+        <LazySpaceList namespaces={spaceIds} displayLimit={0} behaviorContext="outside-space" />
       </EuiButtonEmpty>
-      {showFlyout && <ShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}
+      {showFlyout && <LazyShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}
     </>
   );
 };

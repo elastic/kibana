@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   deleteAllDocsFromMetadataCurrentIndex,
   deleteAllDocsFromMetadataIndex,
   deleteMetadataStream,
 } from './data_stream_helper';
-import { METADATA_REQUEST_ROUTE } from '../../../plugins/security_solution/server/endpoint/routes/metadata';
-import { MetadataQueryStrategyVersions } from '../../../plugins/security_solution/common/endpoint/types';
+import { HOST_METADATA_LIST_ROUTE } from '../../../plugins/security_solution/common/endpoint/constants';
 
 /**
  * The number of host documents in the es archive.
@@ -25,13 +24,13 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('test metadata api', () => {
-    describe(`POST ${METADATA_REQUEST_ROUTE} when index is empty`, () => {
+    describe(`POST ${HOST_METADATA_LIST_ROUTE} when index is empty`, () => {
       it('metadata api should return empty result when index is empty', async () => {
         await deleteMetadataStream(getService);
         await deleteAllDocsFromMetadataIndex(getService);
         await deleteAllDocsFromMetadataCurrentIndex(getService);
         const { body } = await supertest
-          .post(`${METADATA_REQUEST_ROUTE}`)
+          .post(`${HOST_METADATA_LIST_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200);
@@ -42,9 +41,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe(`POST ${METADATA_REQUEST_ROUTE} when index is not empty`, () => {
+    describe(`POST ${HOST_METADATA_LIST_ROUTE} when index is not empty`, () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
+          useCreate: true,
+        });
         // wait for transform
         await new Promise((r) => setTimeout(r, 120000));
       });
@@ -57,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       it('metadata api should return one entry for each host with default paging', async () => {
         const { body } = await supertest
-          .post(`${METADATA_REQUEST_ROUTE}`)
+          .post(`${HOST_METADATA_LIST_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200);
@@ -69,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('metadata api should return page based on paging properties passed.', async () => {
         const { body } = await supertest
-          .post(`${METADATA_REQUEST_ROUTE}`)
+          .post(`${HOST_METADATA_LIST_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
@@ -86,7 +87,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(1);
         expect(body.request_page_index).to.eql(1);
-        expect(body.query_strategy_version).to.eql(MetadataQueryStrategyVersions.VERSION_2);
       });
 
       /* test that when paging properties produces no result, the total should reflect the actual number of metadata
@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
        */
       it('metadata api should return accurate total metadata if page index produces no result', async () => {
         const { body } = await supertest
-          .post(`${METADATA_REQUEST_ROUTE}`)
+          .post(`${HOST_METADATA_LIST_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
@@ -111,12 +111,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.hosts.length).to.eql(0);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(30);
-        expect(body.query_strategy_version).to.eql(MetadataQueryStrategyVersions.VERSION_2);
       });
 
       it('metadata api should return 400 when pagingProperties is below boundaries.', async () => {
         const { body } = await supertest
-          .post(`${METADATA_REQUEST_ROUTE}`)
+          .post(`${HOST_METADATA_LIST_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
@@ -134,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('metadata api should return page based on filters passed.', async () => {
         const { body } = await supertest
-          .post(`${METADATA_REQUEST_ROUTE}`)
+          .post(`${HOST_METADATA_LIST_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
@@ -146,13 +145,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.hosts.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
-        expect(body.query_strategy_version).to.eql(MetadataQueryStrategyVersions.VERSION_2);
       });
 
       it('metadata api should return page based on filters and paging passed.', async () => {
         const notIncludedIp = '10.46.229.234';
         const { body } = await supertest
-          .post(`${METADATA_REQUEST_ROUTE}`)
+          .post(`${HOST_METADATA_LIST_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             paging_properties: [
@@ -184,13 +182,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.hosts.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
-        expect(body.query_strategy_version).to.eql(MetadataQueryStrategyVersions.VERSION_2);
       });
 
       it('metadata api should return page based on host.os.Ext.variant filter.', async () => {
         const variantValue = 'Windows Pro';
         const { body } = await supertest
-          .post(`${METADATA_REQUEST_ROUTE}`)
+          .post(`${HOST_METADATA_LIST_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
@@ -206,13 +203,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.hosts.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
-        expect(body.query_strategy_version).to.eql(MetadataQueryStrategyVersions.VERSION_2);
       });
 
       it('metadata api should return the latest event for all the events for an endpoint', async () => {
         const targetEndpointIp = '10.46.229.234';
         const { body } = await supertest
-          .post(`${METADATA_REQUEST_ROUTE}`)
+          .post(`${HOST_METADATA_LIST_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
@@ -225,16 +221,15 @@ export default function ({ getService }: FtrProviderContext) {
           (ip: string) => ip === targetEndpointIp
         );
         expect(resultIp).to.eql([targetEndpointIp]);
-        expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
+        expect(body.hosts[0].metadata.event.created).to.eql(1626897841950);
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
-        expect(body.query_strategy_version).to.eql(MetadataQueryStrategyVersions.VERSION_2);
       });
 
       it('metadata api should return the latest event for all the events where policy status is not success', async () => {
         const { body } = await supertest
-          .post(`${METADATA_REQUEST_ROUTE}`)
+          .post(`${HOST_METADATA_LIST_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
@@ -251,11 +246,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(Array.from(statuses)).to.eql(['failure']);
       });
 
-      it('metadata api should return the endpoint based on the elastic agent id, and status should be error', async () => {
+      it('metadata api should return the endpoint based on the elastic agent id, and status should be unhealthy', async () => {
         const targetEndpointId = 'fc0ff548-feba-41b6-8367-65e8790d0eaf';
         const targetElasticAgentId = '023fa40c-411d-4188-a941-4147bfadd095';
         const { body } = await supertest
-          .post(`${METADATA_REQUEST_ROUTE}`)
+          .post(`${HOST_METADATA_LIST_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
@@ -268,17 +263,16 @@ export default function ({ getService }: FtrProviderContext) {
         const resultElasticAgentId: string = body.hosts[0].metadata.elastic.agent.id;
         expect(resultHostId).to.eql(targetEndpointId);
         expect(resultElasticAgentId).to.eql(targetElasticAgentId);
-        expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
-        expect(body.hosts[0].host_status).to.eql('error');
+        expect(body.hosts[0].metadata.event.created).to.eql(1626897841950);
+        expect(body.hosts[0].host_status).to.eql('unhealthy');
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
-        expect(body.query_strategy_version).to.eql(MetadataQueryStrategyVersions.VERSION_2);
       });
 
       it('metadata api should return all hosts when filter is empty string', async () => {
         const { body } = await supertest
-          .post(`${METADATA_REQUEST_ROUTE}`)
+          .post(`${HOST_METADATA_LIST_ROUTE}`)
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
@@ -290,7 +284,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.hosts.length).to.eql(numberOfHostsInFixture);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
-        expect(body.query_strategy_version).to.eql(MetadataQueryStrategyVersions.VERSION_2);
       });
     });
   });

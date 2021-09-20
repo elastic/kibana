@@ -9,10 +9,29 @@
 function toArray(value: string | string[]): string[] {
   return typeof value === 'string' ? [value] : value;
 }
+
+const ROOT_FIELDS = [
+  'namespace',
+  'namespaces',
+  'type',
+  'references',
+  'migrationVersion',
+  'coreMigrationVersion',
+  'updated_at',
+  'originId',
+];
+
+export function getRootFields() {
+  return [...ROOT_FIELDS];
+}
+
 /**
  * Provides an array of paths for ES source filtering
  */
-export function includedFields(type: string | string[] = '*', fields?: string[] | string) {
+export function includedFields(
+  type: string | string[] = '*',
+  fields?: string[] | string
+): string[] | undefined {
   if (!fields || fields.length === 0) {
     return;
   }
@@ -25,13 +44,6 @@ export function includedFields(type: string | string[] = '*', fields?: string[] 
     .reduce((acc: string[], t) => {
       return [...acc, ...sourceFields.map((f) => `${t}.${f}`)];
     }, [])
-    .concat('namespace')
-    .concat('namespaces')
-    .concat('type')
-    .concat('references')
-    .concat('migrationVersion')
-    .concat('coreMigrationVersion')
-    .concat('updated_at')
-    .concat('originId')
+    .concat(ROOT_FIELDS)
     .concat(fields); // v5 compatibility
 }

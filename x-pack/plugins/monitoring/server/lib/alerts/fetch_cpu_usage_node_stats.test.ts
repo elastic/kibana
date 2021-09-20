@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { fetchCpuUsageNodeStats } from './fetch_cpu_usage_node_stats';
 
 describe('fetchCpuUsageNodeStats', () => {
-  let callCluster = jest.fn();
+  const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
   const clusters = [
     {
       clusterUuid: 'abc123',
@@ -21,8 +24,9 @@ describe('fetchCpuUsageNodeStats', () => {
   const size = 10;
 
   it('fetch normal stats', async () => {
-    callCluster = jest.fn().mockImplementation((...args) => {
-      return {
+    esClient.search.mockReturnValue(
+      // @ts-expect-error not full response interface
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {
             buckets: [
@@ -56,9 +60,9 @@ describe('fetchCpuUsageNodeStats', () => {
             ],
           },
         },
-      };
-    });
-    const result = await fetchCpuUsageNodeStats(callCluster, clusters, index, startMs, endMs, size);
+      })
+    );
+    const result = await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size);
     expect(result).toEqual([
       {
         clusterUuid: clusters[0].clusterUuid,
@@ -74,8 +78,9 @@ describe('fetchCpuUsageNodeStats', () => {
   });
 
   it('fetch container stats', async () => {
-    callCluster = jest.fn().mockImplementation((...args) => {
-      return {
+    esClient.search.mockReturnValue(
+      // @ts-expect-error not full response interface
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {
             buckets: [
@@ -122,9 +127,9 @@ describe('fetchCpuUsageNodeStats', () => {
             ],
           },
         },
-      };
-    });
-    const result = await fetchCpuUsageNodeStats(callCluster, clusters, index, startMs, endMs, size);
+      })
+    );
+    const result = await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size);
     expect(result).toEqual([
       {
         clusterUuid: clusters[0].clusterUuid,
@@ -140,8 +145,9 @@ describe('fetchCpuUsageNodeStats', () => {
   });
 
   it('fetch properly return ccs', async () => {
-    callCluster = jest.fn().mockImplementation((...args) => {
-      return {
+    esClient.search.mockReturnValue(
+      // @ts-expect-error not full response interface
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {
             buckets: [
@@ -181,21 +187,24 @@ describe('fetchCpuUsageNodeStats', () => {
             ],
           },
         },
-      };
-    });
-    const result = await fetchCpuUsageNodeStats(callCluster, clusters, index, startMs, endMs, size);
+      })
+    );
+    const result = await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size);
     expect(result[0].ccs).toBe('foo');
   });
 
   it('should use consistent params', async () => {
     let params = null;
-    callCluster = jest.fn().mockImplementation((...args) => {
-      params = args[1];
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return elasticsearchClientMock.createSuccessTransportRequestPromise(
+        {} as estypes.SearchResponse
+      );
     });
-    await fetchCpuUsageNodeStats(callCluster, clusters, index, startMs, endMs, size);
+    await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size);
     expect(params).toStrictEqual({
       index: '.monitoring-es-*',
-      filterPath: ['aggregations'],
+      filter_path: ['aggregations'],
       body: {
         size: 0,
         query: {

@@ -15,8 +15,9 @@ import {
   UsageCollectionStart,
 } from './shared_imports';
 import { OpenFieldEditorOptions } from './open_editor';
+import { OpenFieldDeleteModalOptions } from './open_delete_modal';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
-import { DeleteProviderProps } from './components/delete_field_provider';
+import { DeleteFieldProviderProps } from './components';
 
 export interface PluginSetup {
   fieldFormatEditors: FormatEditorServiceSetup['fieldFormatEditors'];
@@ -24,11 +25,12 @@ export interface PluginSetup {
 
 export interface PluginStart {
   openEditor(options: OpenFieldEditorOptions): () => void;
+  openDeleteModal(options: OpenFieldDeleteModalOptions): () => void;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   userPermissions: {
     editIndexPattern: () => boolean;
   };
-  DeleteRuntimeFieldProvider: FunctionComponent<DeleteProviderProps>;
+  DeleteRuntimeFieldProvider: FunctionComponent<DeleteFieldProviderProps>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -60,4 +62,20 @@ export interface EsRuntimeField {
   script?: {
     source: string;
   };
+}
+
+export type CloseEditor = () => void;
+
+export type FieldPreviewContext =
+  | 'boolean_field'
+  | 'date_field'
+  | 'double_field'
+  | 'geo_point_field'
+  | 'ip_field'
+  | 'keyword_field'
+  | 'long_field';
+
+export interface FieldPreviewResponse {
+  values: unknown[];
+  error?: Record<string, any>;
 }

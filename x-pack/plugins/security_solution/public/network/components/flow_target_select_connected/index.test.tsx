@@ -12,7 +12,7 @@ import { MemoryRouter } from 'react-router-dom';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 import { FlowTargetSelectConnectedComponent } from './index';
-import { FlowTarget } from '../../../graphql/types';
+import { FlowTarget } from '../../../../common/search_strategy';
 
 describe('Flow Target Select Connected', () => {
   test('renders correctly against snapshot flowTarget source', () => {

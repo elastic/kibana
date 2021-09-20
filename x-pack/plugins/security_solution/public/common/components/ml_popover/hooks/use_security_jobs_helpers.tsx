@@ -44,6 +44,7 @@ export const moduleToSecurityJob = (
     isInstalled: false,
     isElasticJob: true,
     awaitingNodeAssignment: false,
+    jobTags: {},
   };
 };
 

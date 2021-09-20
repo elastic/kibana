@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { SearchSourceService, SearchSourceDependencies } from './';
 
@@ -19,10 +18,6 @@ describe('SearchSource service', () => {
       getConfig: jest.fn(),
       search: jest.fn(),
       onResponse: jest.fn(),
-      legacy: {
-        callMsearch: jest.fn(),
-        loadingCount$: new BehaviorSubject(0),
-      },
     };
   });
 

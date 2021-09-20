@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
+
 import { SO_SEARCH_LIMIT } from '../constants';
-import { ListWithKuery } from '../types';
+import type { ListWithKuery } from '../types';
 
 /**
  * Escape a value with double quote to use with saved object search
@@ -18,9 +19,9 @@ export function escapeSearchQueryPhrase(val: string): string {
   return `"${val.replace(/["]/g, '"')}"`;
 }
 
-// Adds `.attribute` to any kuery strings that are missing it, this comes from
-// internal SO structure. Kuery strings that come from UI will typicall have
-// `.attribute` hidden to simplify UX, so this normalizes any kuery string for
+// Adds `.attributes` to any kuery strings that are missing it, this comes from
+// internal SO structure. Kuery strings that come from UI will typically have
+// `.attributes` hidden to simplify UX, so this normalizes any kuery string for
 // filtering SOs
 export const normalizeKuery = (savedObjectType: string, kuery: string): string => {
   return kuery.replace(

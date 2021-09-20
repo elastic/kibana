@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import { EditorFrameState } from '../state_management';
+import { mapValues } from 'lodash';
+import type { LayerType } from '../../../../common';
+import { LensAppState } from '../../../state_management';
+
 import { Datasource, Visualization } from '../../../types';
 
 interface RemoveLayerOptions {
   trackUiEvent: (name: string) => void;
-  state: EditorFrameState;
+  state: LensAppState;
   layerId: string;
   activeVisualization: Pick<Visualization, 'getLayerIds' | 'clearLayer' | 'removeLayer'>;
   datasourceMap: Record<string, Pick<Datasource, 'clearLayer' | 'removeLayer'>>;
@@ -19,13 +21,14 @@ interface RemoveLayerOptions {
 
 interface AppendLayerOptions {
   trackUiEvent: (name: string) => void;
-  state: EditorFrameState;
+  state: LensAppState;
   generateId: () => string;
   activeDatasource: Pick<Datasource, 'insertLayer' | 'id'>;
   activeVisualization: Pick<Visualization, 'appendLayer'>;
+  layerType: LayerType;
 }
 
-export function removeLayer(opts: RemoveLayerOptions): EditorFrameState {
+export function removeLayer(opts: RemoveLayerOptions): LensAppState {
   const { state, trackUiEvent: trackUiEvent, activeVisualization, layerId, datasourceMap } = opts;
   const isOnlyLayer = activeVisualization
     .getLayerIds(state.visualization.state)
@@ -35,7 +38,7 @@ export function removeLayer(opts: RemoveLayerOptions): EditorFrameState {
 
   return {
     ...state,
-    datasourceStates: _.mapValues(state.datasourceStates, (datasourceState, datasourceId) => {
+    datasourceStates: mapValues(state.datasourceStates, (datasourceState, datasourceId) => {
       const datasource = datasourceMap[datasourceId!];
       return {
         ...datasourceState,
@@ -61,7 +64,8 @@ export function appendLayer({
   state,
   generateId,
   activeDatasource,
-}: AppendLayerOptions): EditorFrameState {
+  layerType,
+}: AppendLayerOptions): LensAppState {
   trackUiEvent('layer_added');
 
   if (!activeVisualization.appendLayer) {
@@ -84,7 +88,7 @@ export function appendLayer({
     },
     visualization: {
       ...state.visualization,
-      state: activeVisualization.appendLayer(state.visualization.state, layerId),
+      state: activeVisualization.appendLayer(state.visualization.state, layerId, layerType),
     },
     stagedPreview: undefined,
   };

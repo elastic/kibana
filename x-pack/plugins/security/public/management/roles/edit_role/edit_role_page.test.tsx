@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
-import React from 'react';
 import { act } from '@testing-library/react';
+import type { ReactWrapper } from 'enzyme';
+import React from 'react';
+
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { Capabilities } from 'src/core/public';
+import type { Capabilities } from 'src/core/public';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+
 import { KibanaFeature } from '../../../../../features/public';
-import { Role } from '../../../../common/model';
+import type { Space } from '../../../../../spaces/public';
+import { licenseMock } from '../../../../common/licensing/index.mock';
+import type { Role } from '../../../../common/model';
+import { userAPIClientMock } from '../../users/index.mock';
+import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
+import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
 import { EditRolePage } from './edit_role_page';
 import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
-
-import { TransformErrorSection } from './privileges/kibana/transform_error_section';
-import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { licenseMock } from '../../../../common/licensing/index.mock';
-import { userAPIClientMock } from '../../users/index.mock';
-import { rolesAPIClientMock, indicesAPIClientMock, privilegesAPIClientMock } from '../index.mock';
-import { Space } from '../../../../../spaces/public';
 import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
-import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
+import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 
 const buildFeatures = () => {
   return [
@@ -142,7 +143,8 @@ function getProps({
   rolesAPIClient.getRole.mockResolvedValue(role);
 
   const indexPatterns = dataPluginMock.createStartContract().indexPatterns;
-  indexPatterns.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*']);
+  // `undefined` titles can technically happen via import/export or other manual manipulation
+  indexPatterns.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*', undefined]);
 
   const indicesAPIClient = indicesAPIClientMock.create();
 
@@ -479,23 +481,25 @@ describe('<EditRolePage />', () => {
     });
   });
 
-  it('can render if features are not available', async () => {
-    const { http } = coreMock.createStart();
-    http.get.mockImplementation(async (path: any) => {
-      if (path === '/api/features') {
-        const error = { response: { status: 404 } };
-        throw error;
-      }
-
-      if (path === '/api/spaces/space') {
-        return buildSpaces();
-      }
-    });
-
-    const wrapper = mountWithIntl(<EditRolePage {...{ ...getProps({ action: 'edit' }), http }} />);
+  it('registers fatal error if features endpoint fails unexpectedly', async () => {
+    const error = { response: { status: 500 } };
+    const getFeatures = jest.fn().mockRejectedValue(error);
+    const props = getProps({ action: 'edit' });
+    const wrapper = mountWithIntl(<EditRolePage {...props} getFeatures={getFeatures} />);
 
     await waitForRender(wrapper);
+    expect(props.fatalErrors.add).toHaveBeenLastCalledWith(error);
+    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(0);
+  });
 
+  it('can render if features call is not allowed', async () => {
+    const error = { response: { status: 403 } };
+    const getFeatures = jest.fn().mockRejectedValue(error);
+    const props = getProps({ action: 'edit' });
+    const wrapper = mountWithIntl(<EditRolePage {...props} getFeatures={getFeatures} />);
+
+    await waitForRender(wrapper);
+    expect(props.fatalErrors.add).not.toHaveBeenCalled();
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
     expectSaveFormButtons(wrapper);

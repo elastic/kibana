@@ -44,7 +44,7 @@ export default new Chainable('label', {
         // that it doesn't prevent Kibana from starting up and we only have an issue using Timelion labels
         const RE2 = require('re2');
         eachSeries.label = eachSeries.label.replace(new RE2(config.regex), config.label);
-      } else {
+      } else if (config.label) {
         eachSeries.label = config.label;
       }
 

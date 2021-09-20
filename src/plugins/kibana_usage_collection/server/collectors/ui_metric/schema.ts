@@ -12,8 +12,8 @@ import { UIMetricUsage } from './telemetry_ui_metric_collector';
 const commonSchema: MakeSchemaFrom<UIMetricUsage>[string] = {
   type: 'array',
   items: {
-    key: { type: 'keyword' },
-    value: { type: 'long' },
+    key: { type: 'keyword', _meta: { description: 'The event that is tracked' } },
+    value: { type: 'long', _meta: { description: 'The value of the event' } },
   },
 };
 
@@ -28,14 +28,12 @@ const uiMetricFromDataPluginSchema: MakeSchemaFrom<UIMetricUsage> = {
   kibana: commonSchema, // It's a forward app so we'll likely never report it
   management: commonSchema,
   short_url_redirect: commonSchema, // It's a forward app so we'll likely never report it
-  timelion: commonSchema,
   visualize: commonSchema,
 
   // X-Pack
   apm: commonSchema,
   csm: commonSchema,
   canvas: commonSchema,
-  dashboard_mode: commonSchema, // It's a forward app so we'll likely never report it
   enterpriseSearch: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,

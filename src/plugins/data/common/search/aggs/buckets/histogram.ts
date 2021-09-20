@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'kibana/public';
 
 import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
+
+import { ExtendedBounds, extendedBoundsToAst } from '../../expressions';
 import { AggTypesDependencies } from '../agg_types';
 import { BaseAggParams } from '../types';
 
@@ -18,7 +20,6 @@ import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggHistogramFnName } from './histogram_fn';
-import { ExtendedBounds } from './lib/extended_bounds';
 import { isAutoInterval, autoInterval } from './_interval_options';
 import { calculateHistogramInterval } from './lib/histogram_calculate_interval';
 
@@ -85,7 +86,7 @@ export const getHistogramBucketAgg = ({
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
+        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.NUMBER_RANGE],
       },
       {
         /*
@@ -105,6 +106,11 @@ export const getHistogramBucketAgg = ({
           options: any
         ) {
           const field = aggConfig.getField();
+          if (field?.type === 'number_range') {
+            // Can't scale number_histogram requests
+            return;
+          }
+
           const aggBody = field.scripted
             ? { script: { source: field.script, lang: field.lang } }
             : { field: field.name };
@@ -163,7 +169,9 @@ export const getHistogramBucketAgg = ({
       {
         name: 'maxBars',
         shouldShow(agg) {
-          return isAutoInterval(get(agg, 'params.interval'));
+          const field = agg.getField();
+          // Show this for empty field and number field, but not range
+          return field?.type !== 'number_range' && isAutoInterval(get(agg, 'params.interval'));
         },
         write: () => {},
       },
@@ -197,6 +205,7 @@ export const getHistogramBucketAgg = ({
           }
         },
         shouldShow: (aggConfig: IBucketAggConfig) => aggConfig.params.has_extended_bounds,
+        toExpressionAst: extendedBoundsToAst,
       },
     ],
   });

@@ -11,3 +11,4 @@ export {
   createDefaultLayerDescriptor,
   esDocumentsLayerWizardConfig,
 } from './es_documents_layer_wizard';
+export { esTopHitsLayerWizardConfig } from './top_hits';

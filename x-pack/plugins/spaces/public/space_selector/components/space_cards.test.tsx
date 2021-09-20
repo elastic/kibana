@@ -7,6 +7,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+
 import { SpaceCards } from './space_cards';
 
 test('it renders without crashing', () => {

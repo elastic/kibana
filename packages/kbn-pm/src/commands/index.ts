@@ -18,11 +18,16 @@ export interface ICommandConfig {
 export interface ICommand {
   name: string;
   description: string;
+  reportTiming?: {
+    group: string;
+    id: string;
+  };
 
   run: (projects: ProjectMap, projectGraph: ProjectGraph, config: ICommandConfig) => Promise<void>;
 }
 
 import { BootstrapCommand } from './bootstrap';
+import { BuildCommand } from './build';
 import { CleanCommand } from './clean';
 import { ResetCommand } from './reset';
 import { RunCommand } from './run';
@@ -31,6 +36,7 @@ import { Kibana } from '../utils/kibana';
 
 export const commands: { [key: string]: ICommand } = {
   bootstrap: BootstrapCommand,
+  build: BuildCommand,
   clean: CleanCommand,
   reset: ResetCommand,
   run: RunCommand,

@@ -49,6 +49,11 @@ import {
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { createAddBookToLibraryAction } from './book/add_book_to_library_action';
 import { createUnlinkBookFromLibraryAction } from './book/unlink_book_from_library_action';
+import {
+  SIMPLE_EMBEDDABLE,
+  SimpleEmbeddableFactory,
+  SimpleEmbeddableFactoryDefinition,
+} from './migrations';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -68,6 +73,7 @@ interface ExampleEmbeddableFactories {
   getTodoEmbeddableFactory: () => TodoEmbeddableFactory;
   getTodoRefEmbeddableFactory: () => TodoRefEmbeddableFactory;
   getBookEmbeddableFactory: () => BookEmbeddableFactory;
+  getMigrationsEmbeddableFactory: () => SimpleEmbeddableFactory;
 }
 
 export interface EmbeddableExamplesStart {
@@ -92,6 +98,11 @@ export class EmbeddableExamplesPlugin
     this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
       HELLO_WORLD_EMBEDDABLE,
       new HelloWorldEmbeddableFactoryDefinition()
+    );
+
+    this.exampleEmbeddableFactories.getMigrationsEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
+      SIMPLE_EMBEDDABLE,
+      new SimpleEmbeddableFactoryDefinition()
     );
 
     this.exampleEmbeddableFactories.getMultiTaskTodoEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(

@@ -7,12 +7,11 @@
  */
 
 import { access, link, unlink, chmod } from 'fs';
-import { resolve } from 'path';
+import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, kibanaPackageJson } from '@kbn/dev-utils';
 
-import { branch } from '../../../../../../package.json';
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import { TemplateContext } from './template_context';
@@ -33,6 +32,8 @@ export async function runDockerGenerator(
     image: boolean;
     ubi?: boolean;
     ironbank?: boolean;
+    cloud?: boolean;
+    dockerBuildDate?: string;
   }
 ) {
   // UBI var config
@@ -42,34 +43,39 @@ export async function runDockerGenerator(
   let imageFlavor = '';
   if (flags.ubi) imageFlavor += `-${ubiVersionTag}`;
   if (flags.ironbank) imageFlavor += '-ironbank';
-  if (build.isOss()) imageFlavor += '-oss';
+  if (flags.cloud) imageFlavor += '-cloud';
 
   // General docker var config
-  const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
+  const license = 'Elastic License';
   const imageTag = 'docker.elastic.co/kibana/kibana';
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
-  const artifactFlavor = build.isOss() ? '-oss' : '';
-  const artifactPrefix = `kibana${artifactFlavor}-${version}-linux`;
+  const artifactPrefix = `kibana-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
+  const metricbeatTarball = `metricbeat-${version}-linux-${artifactArchitecture}.tar.gz`;
+  const filebeatTarball = `filebeat-${version}-linux-${artifactArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
-  const dockerBuildDate = new Date().toISOString();
+  const beatsDir = config.resolveFromRepo('.beats');
+  const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
   // That would produce oss, default and default-ubi7
-  const dockerBuildDir = config.resolveFromRepo(
-    'build',
-    'kibana-docker',
-    build.isOss() ? `oss` : `default${imageFlavor}`
-  );
+  const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', `default${imageFlavor}`);
   const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
   const dockerTargetFilename = config.resolveFromTarget(
     `kibana${imageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );
+  const dependencies = [
+    resolve(artifactsDir, artifactTarball),
+    ...(flags.cloud
+      ? [resolve(beatsDir, metricbeatTarball), resolve(beatsDir, filebeatTarball)]
+      : []),
+  ];
+
   const scope: TemplateContext = {
     artifactPrefix,
     artifactTarball,
     imageFlavor,
     version,
-    branch,
+    branch: kibanaPackageJson.branch,
     license,
     artifactsDir,
     imageTag,
@@ -78,6 +84,9 @@ export async function runDockerGenerator(
     baseOSImage,
     dockerBuildDate,
     ubi: flags.ubi,
+    cloud: flags.cloud,
+    metricbeatTarball,
+    filebeatTarball,
     ironbank: flags.ironbank,
     architecture: flags.architecture,
     revision: config.getBuildSha(),
@@ -88,31 +97,13 @@ export async function runDockerGenerator(
     x64: 'x64',
     arm64: 'aarch64',
   };
-  const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture && flags.image;
-  if (!buildArchitectureSupported) {
+  const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
+  if (flags.architecture && !buildArchitectureSupported) {
     return;
   }
 
-  // Verify if we have the needed kibana target in order
-  // to build the kibana docker image.
-  // Also create the docker build target folder
-  // and  delete the current linked target into the
-  // kibana docker build folder if we have one.
-  try {
-    await accessAsync(resolve(artifactsDir, artifactTarball));
-    await mkdirp(dockerBuildDir);
-    await unlinkAsync(resolve(dockerBuildDir, artifactTarball));
-  } catch (e) {
-    if (e && e.code === 'ENOENT' && e.syscall === 'access') {
-      throw new Error(
-        `Kibana linux target (${artifactTarball}) is needed in order to build ${''}the docker image. None was found at ${artifactsDir}`
-      );
-    }
-  }
-
-  // Create the kibana linux target inside the
-  // Kibana docker build
-  await linkAsync(resolve(artifactsDir, artifactTarball), resolve(dockerBuildDir, artifactTarball));
+  // Create the docker build target folder
+  await mkdirp(dockerBuildDir);
 
   // Write all the needed docker config files
   // into kibana-docker folder
@@ -142,11 +133,27 @@ export async function runDockerGenerator(
   await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
 
   // Only build images on native targets
+  if (flags.image) {
+    // Link dependencies
+    for (const src of dependencies) {
+      const file = basename(src);
+      const dest = resolve(dockerBuildDir, file);
+      try {
+        await accessAsync(src);
+        await unlinkAsync(dest);
+      } catch (e) {
+        if (e && e.code === 'ENOENT' && e.syscall === 'access') {
+          throw new Error(`${src} is needed in order to build the docker image.`);
+        }
+      }
+      await linkAsync(src, dest);
+    }
 
-  await exec(log, `./build_docker.sh`, [], {
-    cwd: dockerBuildDir,
-    level: 'info',
-  });
+    await exec(log, `./build_docker.sh`, [], {
+      cwd: dockerBuildDir,
+      level: 'info',
+    });
+  }
 
   // Pack Dockerfiles and create a target for them
   if (flags.context) {

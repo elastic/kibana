@@ -93,7 +93,7 @@ export function _enrichStateWithStatsAggregation(
   const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
 
   const verticesWithStatsBuckets =
-    statsAggregation.aggregations.pipelines.scoped.vertices.vertex_id.buckets;
+    statsAggregation.aggregations?.pipelines.scoped.vertices.vertex_id.buckets ?? [];
   verticesWithStatsBuckets.forEach((vertexStatsBucket: any) => {
     // Each vertexStats bucket contains a list of stats for a single vertex within a single timeseries interval
     const vertexId = vertexStatsBucket.key;
@@ -132,9 +132,9 @@ export async function getPipeline(
   // Determine metrics' timeseries interval based on version's timespan
   const minIntervalSeconds = config.get('monitoring.ui.min_interval_seconds');
   const timeseriesInterval = calculateTimeseriesInterval(
-    version.firstSeen,
-    version.lastSeen,
-    minIntervalSeconds
+    Number(version.firstSeen),
+    Number(version.lastSeen),
+    Number(minIntervalSeconds)
   );
 
   const [stateDocument, statsAggregation] = await Promise.all([
@@ -142,7 +142,7 @@ export async function getPipeline(
     getPipelineStatsAggregation(req, lsIndexPattern, timeseriesInterval, options),
   ]);
 
-  if (stateDocument === null) {
+  if (stateDocument === null || !statsAggregation) {
     return boom.notFound(
       `Pipeline [${pipelineId} @ ${version.hash}] not found in the selected time range for cluster [${clusterUuid}].`
     );

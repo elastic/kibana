@@ -47,3 +47,45 @@
 @mixin lnsDroppableNotAllowed {
   opacity: .5;
 }
+
+// Removes EUI focus ring
+@mixin removeEuiFocusRing {
+  @include kbnThemeStyle('v7') {
+    animation: none !important; // sass-lint:disable-line no-important
+  }
+
+  @include kbnThemeStyle('v8') {
+    outline: none;
+
+    &:focus-visible {
+      outline-style: none;
+    }
+  }
+}
+
+// Passes focus ring styles down to a child of a focused element
+@mixin passDownFocusRing($target) {
+  @include removeEuiFocusRing;
+
+  #{$target} {
+    @include euiFocusBackground;
+
+    @include kbnThemeStyle('v7') {
+      @include euiFocusRing;
+    }
+
+    @include kbnThemeStyle('v8') {
+      outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
+    }
+  }
+
+  @include kbnThemeStyle('v8') {
+    &:focus-visible #{$target} {
+      outline-style: auto; // Chrome
+    }
+
+    &:not(:focus-visible) #{$target} {
+      outline: none;
+    }
+  }
+}

@@ -8,14 +8,16 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { RoundedBadgeAntenna } from './rounded_badge_antenna';
+import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({ eui: { euiColorLightShade: '#ece' } });
 
 describe('RoundedBadgeAntenna', () => {
   test('it renders top and bottom antenna bars', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <RoundedBadgeAntenna type="and" />
       </ThemeProvider>
     );
@@ -27,7 +29,7 @@ describe('RoundedBadgeAntenna', () => {
 
   test('it renders "and" when "type" is "and"', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <RoundedBadgeAntenna type="and" />
       </ThemeProvider>
     );
@@ -37,7 +39,7 @@ describe('RoundedBadgeAntenna', () => {
 
   test('it renders "or" when "type" is "or"', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <RoundedBadgeAntenna type="or" />
       </ThemeProvider>
     );

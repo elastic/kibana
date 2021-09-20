@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Incoming DCOM Lateral Movement with MMC",
   "query": "sequence by host.id with maxspan=1m\n [network where event.type == \"start\" and process.name : \"mmc.exe\" and\n  source.port >= 49152 and destination.port >= 49152 and source.address not in (\"127.0.0.1\", \"::1\") and\n  network.direction == \"incoming\" and network.transport == \"tcp\"\n ] by process.entity_id\n [process where event.type in (\"start\", \"process_started\") and process.parent.name : \"mmc.exe\"\n ] by process.parent.entity_id\n",
   "references": [

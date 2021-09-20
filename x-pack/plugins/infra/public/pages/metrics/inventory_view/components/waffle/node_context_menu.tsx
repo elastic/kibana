@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPopoverProps, EuiCode } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -21,11 +21,11 @@ import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kiba
 import {
   Section,
   SectionLinkProps,
-  ActionMenu,
   SectionTitle,
   SectionSubtitle,
   SectionLinks,
   SectionLink,
+  ActionMenuDivider,
 } from '../../../../../../../observability/public';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 
@@ -34,25 +34,10 @@ interface Props {
   currentTime: number;
   node: InfraWaffleMapNode;
   nodeType: InventoryItemType;
-  isPopoverOpen: boolean;
-  closePopover: () => void;
-  popoverPosition: EuiPopoverProps['anchorPosition'];
-  openNewOverlay?: () => void;
 }
 
 export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme(
-  ({
-    options,
-    currentTime,
-    children,
-    node,
-    isPopoverOpen,
-    closePopover,
-    nodeType,
-    popoverPosition,
-    theme,
-    openNewOverlay,
-  }) => {
+  ({ options, currentTime, node, nodeType }) => {
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
@@ -71,6 +56,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     const showUptimeLink =
       inventoryModel.crosslinkSupport.uptime &&
       (['pod', 'container'].includes(nodeType) || node.ip);
+    const showCreateAlertLink = uiCapabilities?.infrastructure?.save;
 
     const inventoryId = useMemo(() => {
       if (nodeType === 'host') {
@@ -152,65 +138,63 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     };
 
     const createAlertMenuItem: SectionLinkProps = {
-      label: i18n.translate('xpack.infra.nodeContextMenu.createAlertLink', {
-        defaultMessage: 'Create alert',
+      label: i18n.translate('xpack.infra.nodeContextMenu.createRuleLink', {
+        defaultMessage: 'Create inventory rule',
       }),
-      style: { color: theme?.eui.euiLinkColor || '#006BB4', fontWeight: 500, padding: 0 },
       onClick: () => {
         setFlyoutVisible(true);
       },
+      isDisabled: !showCreateAlertLink,
     };
 
     return (
       <>
-        <ActionMenu
-          closePopover={closePopover}
-          id={`${node.pathId}-popover`}
-          isOpen={isPopoverOpen}
-          button={children!}
-          anchorPosition={popoverPosition}
-        >
-          <div style={{ maxWidth: 300 }} data-test-subj="nodeContextMenu">
-            <Section>
-              <SectionTitle>
-                <FormattedMessage
-                  id="xpack.infra.nodeContextMenu.title"
-                  defaultMessage="{inventoryName} details"
-                  values={{ inventoryName: inventoryModel.singularDisplayName }}
-                />
-              </SectionTitle>
-              {inventoryId.label && (
-                <SectionSubtitle>
-                  <div style={{ wordBreak: 'break-all' }}>
-                    <FormattedMessage
-                      id="xpack.infra.nodeContextMenu.description"
-                      defaultMessage="View details for {label} {value}"
-                      values={{ label: inventoryId.label, value: inventoryId.value }}
-                    />
-                  </div>
-                </SectionSubtitle>
-              )}
-              <SectionLinks>
-                <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
-                <SectionLink {...nodeDetailMenuItem} />
-                <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
-                <SectionLink {...uptimeMenuItem} />
-                <SectionLink {...createAlertMenuItem} />
-              </SectionLinks>
-            </Section>
-          </div>
-        </ActionMenu>
-        <AlertFlyout
-          filter={
-            options.fields
-              ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
-              : ''
-          }
-          options={options}
-          nodeType={nodeType}
-          setVisible={setFlyoutVisible}
-          visible={flyoutVisible}
-        />
+        <div style={{ maxWidth: 300 }} data-test-subj="nodeContextMenu">
+          <Section>
+            <SectionTitle>
+              <FormattedMessage
+                id="xpack.infra.nodeContextMenu.title"
+                defaultMessage="{inventoryName} details"
+                values={{ inventoryName: inventoryModel.singularDisplayName }}
+              />
+            </SectionTitle>
+            {inventoryId.label && (
+              <SectionSubtitle>
+                <div style={{ wordBreak: 'break-all' }}>
+                  <FormattedMessage
+                    id="xpack.infra.nodeContextMenu.description"
+                    defaultMessage="View details for {label} {value}"
+                    values={{ label: inventoryId.label, value: inventoryId.value }}
+                  />
+                </div>
+              </SectionSubtitle>
+            )}
+            <SectionLinks>
+              <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
+              <SectionLink {...nodeDetailMenuItem} />
+              <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
+              <SectionLink {...uptimeMenuItem} />
+            </SectionLinks>
+            <ActionMenuDivider />
+            <SectionLinks>
+              <SectionLink iconType={'bell'} color={'primary'} {...createAlertMenuItem} />
+            </SectionLinks>
+          </Section>
+        </div>
+
+        {flyoutVisible && (
+          <AlertFlyout
+            filter={
+              options.fields
+                ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
+                : ''
+            }
+            options={options}
+            nodeType={nodeType}
+            setVisible={setFlyoutVisible}
+            visible={flyoutVisible}
+          />
+        )}
       </>
     );
   }

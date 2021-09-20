@@ -6,7 +6,7 @@
 
 // In order to override the TM (Textmate) theme of Ace/Brace, everywhere,
 // it is being scoped by a known outer selector
-.application {
+.kbnBody {
   .ace-tm {
     $aceBackground: tintOrShade($euiColorLightShade, 50%, 0);
 

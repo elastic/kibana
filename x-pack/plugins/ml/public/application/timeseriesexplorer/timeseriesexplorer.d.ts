@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-
-import { TimeRangeBounds } from '../explorer/explorer_utils';
+import { TimeRangeBounds } from '../util/time_buckets';
 
 interface Props {
   appStateHandler: (action: string, payload: any) => void;

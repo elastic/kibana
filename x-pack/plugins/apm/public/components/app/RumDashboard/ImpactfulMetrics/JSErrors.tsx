@@ -30,7 +30,7 @@ interface JSErrorItem {
 }
 
 export function JSErrors() {
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams, uxUiFilters } = useUrlParams();
 
   const { start, end, serviceName, searchTerm } = urlParams;
 
@@ -46,7 +46,7 @@ export function JSErrors() {
               start,
               end,
               urlQuery: searchTerm || undefined,
-              uiFilters: JSON.stringify(uiFilters),
+              uiFilters: JSON.stringify(uxUiFilters),
               pageSize: String(pagination.pageSize),
               pageIndex: String(pagination.pageIndex),
             },
@@ -55,7 +55,7 @@ export function JSErrors() {
       }
       return Promise.resolve(null);
     },
-    [start, end, serviceName, uiFilters, pagination, searchTerm]
+    [start, end, serviceName, uxUiFilters, pagination, searchTerm]
   );
 
   const {

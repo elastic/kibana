@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaLocation } from 'src/plugins/share/public';
 import React from 'react';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DashboardStart } from 'src/plugins/dashboard/public';
@@ -20,7 +21,6 @@ import {
   CollectConfigProps,
   StartServicesGetter,
 } from '../../../../../../../src/plugins/kibana_utils/public';
-import { KibanaURL } from '../../../../../../../src/plugins/share/public';
 import { Config } from './types';
 
 export interface Params {
@@ -39,7 +39,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
 
   public abstract readonly supportedTriggers: () => string[];
 
-  protected abstract getURL(config: Config, context: Context): Promise<KibanaURL>;
+  protected abstract getLocation(config: Config, context: Context): Promise<KibanaLocation>;
 
   public readonly order = 100;
 
@@ -65,19 +65,25 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
   };
 
   public readonly getHref = async (config: Config, context: Context): Promise<string> => {
-    const url = await this.getURL(config, context);
-    return url.path;
+    const { app, path } = await this.getLocation(config, context);
+    const url = await this.params.start().core.application.getUrlForApp(app, {
+      path,
+      absolute: true,
+    });
+    return url;
   };
 
   public readonly execute = async (config: Config, context: Context) => {
-    const url = await this.getURL(config, context);
-    await this.params.start().core.application.navigateToApp(url.appName, { path: url.appPath });
+    const { app, path, state } = await this.getLocation(config, context);
+    await this.params.start().core.application.navigateToApp(app, {
+      path,
+      state,
+    });
   };
 
-  protected get urlGenerator() {
-    const urlGenerator = this.params.start().plugins.dashboard.dashboardUrlGenerator;
-    if (!urlGenerator)
-      throw new Error('Dashboard URL generator is required for dashboard drilldown.');
-    return urlGenerator;
+  protected get locator() {
+    const locator = this.params.start().plugins.dashboard.locator;
+    if (!locator) throw new Error('Dashboard locator is required for dashboard drilldown.');
+    return locator;
   }
 }

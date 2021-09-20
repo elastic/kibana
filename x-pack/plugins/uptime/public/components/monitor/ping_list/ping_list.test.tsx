@@ -62,7 +62,7 @@ describe('PingList component', () => {
       ...response,
       error: undefined,
       loading: false,
-      failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
+      failedSteps: { steps: [], checkGroups: ['1-f-4d-4f'] },
     });
   });
 
@@ -72,7 +72,7 @@ describe('PingList component', () => {
       total: 0,
       error: undefined,
       loading: true,
-      failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
+      failedSteps: { steps: [], checkGroups: ['1-f-4d-4f'] },
     });
     const { getByText } = render(<PingList />);
     expect(getByText('Loading history...')).toBeInTheDocument();
@@ -84,7 +84,7 @@ describe('PingList component', () => {
       total: 0,
       error: undefined,
       loading: false,
-      failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
+      failedSteps: { steps: [], checkGroups: ['1-f-4d-4f'] },
     });
     const { getByText } = render(<PingList />);
     expect(getByText('No history found')).toBeInTheDocument();

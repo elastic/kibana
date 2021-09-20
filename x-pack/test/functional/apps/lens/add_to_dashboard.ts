@@ -23,28 +23,58 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const security = getService('security');
 
-  describe('lens add-to-dashboards tests', () => {
-    it('should allow new lens vizs be added to a new dashboard', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+  const createNewLens = async () => {
+    await PageObjects.visualize.navigateToNewVisualization();
+    await PageObjects.visualize.clickVisType('lens');
+    await PageObjects.lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
-        field: 'bytes',
-      });
+    await PageObjects.lens.configureDimension({
+      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+      operation: 'average',
+      field: 'bytes',
+    });
 
-      await PageObjects.lens.switchToVisualization('lnsMetric');
+    await PageObjects.lens.switchToVisualization('lnsMetric');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+    await PageObjects.lens.waitForVisualization();
+    await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+  };
 
-      await PageObjects.lens.save('New Lens from Modal', false, false, 'new');
+  const createAndSaveDashboard = async (dashboardName: string) => {
+    await PageObjects.common.navigateToApp('dashboard');
+    await PageObjects.dashboard.clickNewDashboard();
+    await dashboardAddPanel.clickOpenAddPanel();
+    await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
+    await find.clickByButtonText('lnsXYvis');
+    await dashboardAddPanel.closeAddPanel();
+    await PageObjects.lens.goToTimeRange();
+
+    await PageObjects.dashboard.saveDashboard(dashboardName);
+    await PageObjects.dashboard.gotoDashboardLandingPage();
+    await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
+  };
+
+  const loadExistingLens = async () => {
+    await PageObjects.visualize.gotoVisualizationLandingPage();
+    await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
+    await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
+    await PageObjects.lens.goToTimeRange();
+    await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+  };
+
+  // FLAKY: https://github.com/elastic/kibana/issues/111628
+  describe.skip('lens add-to-dashboards tests', () => {
+    it('should allow new lens to be added by value to a new dashboard', async () => {
+      await createNewLens();
+      await PageObjects.lens.save('New Lens from Modal', false, false, false, 'new');
 
       await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'New Lens from Modal'
+      );
+      expect(isLinked).to.be(false);
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -52,18 +82,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timeToVisualize.resetNewDashboard();
     });
 
-    it('should allow existing lens vizs be added to a new dashboard', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
-      await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
-
-      await PageObjects.lens.save('Artistpreviouslyknownaslens Copy', true, false, 'new');
+    it('should allow existing lens be added by value to a new dashboard', async () => {
+      await loadExistingLens();
+      await PageObjects.lens.save('Artistpreviouslyknownaslens Copy', true, false, false, 'new');
 
       await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'Artistpreviouslyknownaslens Copy'
+      );
+      expect(isLinked).to.be(false);
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -71,36 +100,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timeToVisualize.resetNewDashboard();
     });
 
-    it('should allow new lens vizs be added to an existing dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
-      await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
-      await find.clickByButtonText('lnsXYvis');
-      await dashboardAddPanel.closeAddPanel();
-      await PageObjects.lens.goToTimeRange();
-
-      await PageObjects.dashboard.saveDashboard('My Very Cool Dashboard');
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await listingTable.searchAndExpectItemsCount('dashboard', 'My Very Cool Dashboard', 1);
-
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
-
-      await PageObjects.lens.configureDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
-        field: 'bytes',
-      });
-
-      await PageObjects.lens.switchToVisualization('lnsMetric');
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+    it('should allow new lens be added by value to an existing dashboard', async () => {
+      await createAndSaveDashboard('My Very Cool Dashboard');
+      await createNewLens();
 
       await PageObjects.lens.save(
         'New Lens from Modal',
+        false,
         false,
         false,
         'existing',
@@ -110,33 +116,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'New Lens from Modal'
+      );
+      expect(isLinked).to.be(false);
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
     });
 
-    it('should allow existing lens vizs be added to an existing dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
-      await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
-      await find.clickByButtonText('lnsXYvis');
-      await dashboardAddPanel.closeAddPanel();
-      await PageObjects.lens.goToTimeRange();
-
-      await PageObjects.dashboard.saveDashboard('My Wonderful Dashboard');
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await listingTable.searchAndExpectItemsCount('dashboard', 'My Wonderful Dashboard', 1);
-
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
-      await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+    it('should allow existing lens be added by value to an existing dashboard', async () => {
+      await createAndSaveDashboard('My Wonderful Dashboard');
+      await loadExistingLens();
 
       await PageObjects.lens.save(
         'Artistpreviouslyknownaslens Copy',
         true,
+        false,
         false,
         'existing',
         'My Wonderful Dashboard'
@@ -145,9 +141,153 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'Artistpreviouslyknownaslens Copy'
+      );
+      expect(isLinked).to.be(false);
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
+    });
+
+    it('should allow new lens to be added by reference to a new dashboard', async () => {
+      await createNewLens();
+      await PageObjects.lens.save('New by ref Lens from Modal', false, false, true, 'new');
+
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'New by ref Lens from Modal'
+      );
+      expect(isLinked).to.be(true);
+
+      const panelCount = await PageObjects.dashboard.getPanelCount();
+      expect(panelCount).to.eql(1);
+
+      await PageObjects.timeToVisualize.resetNewDashboard();
+    });
+
+    it('should allow existing lens be added by reference to a new dashboard', async () => {
+      await loadExistingLens();
+      await PageObjects.lens.save('Artistpreviouslyknownaslens by ref', true, false, true, 'new');
+
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'Artistpreviouslyknownaslens by ref'
+      );
+      expect(isLinked).to.be(true);
+
+      const panelCount = await PageObjects.dashboard.getPanelCount();
+      expect(panelCount).to.eql(1);
+
+      await PageObjects.timeToVisualize.resetNewDashboard();
+    });
+
+    it('should allow new lens be added by reference to an existing dashboard', async () => {
+      await createAndSaveDashboard('My Very Cool Dashboard 2');
+      await createNewLens();
+
+      await PageObjects.lens.save(
+        'New Lens by ref from Modal',
+        false,
+        false,
+        true,
+        'existing',
+        'My Very Cool Dashboard 2'
+      );
+
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'New Lens by ref from Modal'
+      );
+      expect(isLinked).to.be(true);
+
+      const panelCount = await PageObjects.dashboard.getPanelCount();
+      expect(panelCount).to.eql(2);
+    });
+
+    it('should allow existing lens be added by reference to an existing dashboard', async () => {
+      await createAndSaveDashboard('My Wonderful Dashboard 2');
+      await loadExistingLens();
+
+      await PageObjects.lens.save(
+        'Artistpreviouslyknownaslens by ref 2',
+        true,
+        false,
+        true,
+        'existing',
+        'My Wonderful Dashboard 2'
+      );
+
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'Artistpreviouslyknownaslens by ref 2'
+      );
+      expect(isLinked).to.be(true);
+
+      const panelCount = await PageObjects.dashboard.getPanelCount();
+      expect(panelCount).to.eql(2);
+    });
+
+    // issue #111104
+    it('should add a Lens heatmap to the dashboard', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+
+      await PageObjects.dashboard.saveDashboard('My Wonderful Heatmap dashboard');
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await listingTable.searchAndExpectItemsCount(
+        'dashboard',
+        'My Wonderful Heatmap dashboard',
+        1
+      );
+
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'ip',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.waitForVisualization();
+
+      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+
+      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
+      await PageObjects.lens.openPalettePanel('lnsHeatmap');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.lens.save(
+        'New Lens Heatmap',
+        false,
+        false,
+        true,
+        'existing',
+        'My Wonderful Heatmap dashboard'
+      );
+
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      const panelCount = await PageObjects.dashboard.getPanelCount();
+      expect(panelCount).to.eql(1);
     });
 
     describe('Capabilities', function capabilitiesTests() {
@@ -177,16 +317,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.lens.configureDimension({
             dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-            operation: 'avg',
+            operation: 'average',
             field: 'bytes',
           });
 
           await PageObjects.lens.switchToVisualization('lnsMetric');
 
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.lens.waitForVisualization();
           await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.lens.waitForVisualization();
           await testSubjects.click('lnsApp_saveButton');
 
           const hasOptions = await testSubjects.exists('add-to-dashboard-options');
@@ -222,16 +362,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.lens.configureDimension({
             dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-            operation: 'avg',
+            operation: 'average',
             field: 'bytes',
           });
 
           await PageObjects.lens.switchToVisualization('lnsMetric');
 
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.lens.waitForVisualization();
           await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.lens.waitForVisualization();
           await testSubjects.click('lnsApp_saveButton');
 
           const hasOptions = await testSubjects.exists('add-to-dashboard-options');

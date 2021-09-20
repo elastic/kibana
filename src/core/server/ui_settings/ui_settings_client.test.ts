@@ -558,6 +558,15 @@ describe('ui settings', () => {
         bar: 'user-provided',
       });
     });
+
+    it('throws if mutates the result of getAll()', async () => {
+      const { uiSettings } = setup({ esDocSource: {} });
+      const result = await uiSettings.getAll();
+
+      expect(() => {
+        result.foo = 'bar';
+      }).toThrow();
+    });
   });
 
   describe('#get()', () => {

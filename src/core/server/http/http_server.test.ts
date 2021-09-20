@@ -7,9 +7,10 @@
  */
 
 import { Server } from 'http';
-import { readFileSync } from 'fs';
+import { rmdir, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
 import { omit } from 'lodash';
+import { join } from 'path';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
@@ -26,6 +27,8 @@ import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { RequestHandlerContext } from 'kibana/server';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import moment from 'moment';
+import { of } from 'rxjs';
 
 const cookieOptions = {
   name: 'sid',
@@ -45,9 +48,9 @@ const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 let certificate: string;
 let key: string;
 
-beforeAll(() => {
-  certificate = readFileSync(KBN_CERT_PATH, 'utf8');
-  key = readFileSync(KBN_KEY_PATH, 'utf8');
+beforeAll(async () => {
+  certificate = await readFile(KBN_CERT_PATH, 'utf8');
+  key = await readFile(KBN_KEY_PATH, 'utf8');
 });
 
 beforeEach(() => {
@@ -65,6 +68,7 @@ beforeEach(() => {
     cors: {
       enabled: false,
     },
+    shutdownTimeout: moment.duration(500, 'ms'),
   } as any;
 
   configWithSSL = {
@@ -79,7 +83,7 @@ beforeEach(() => {
     },
   } as HttpConfig;
 
-  server = new HttpServer(loggingService, 'tests');
+  server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout));
 });
 
 afterEach(async () => {
@@ -133,6 +137,40 @@ test('log listening address after started when configured with BasePath and rewr
       ],
     ]
   `);
+});
+
+test('does not allow router registration after server is listening', async () => {
+  expect(server.isListening()).toBe(false);
+
+  const { registerRouter } = await server.setup(config);
+
+  const router1 = new Router('/foo', logger, enhanceWithContext);
+  expect(() => registerRouter(router1)).not.toThrowError();
+
+  await server.start();
+
+  expect(server.isListening()).toBe(true);
+
+  const router2 = new Router('/bar', logger, enhanceWithContext);
+  expect(() => registerRouter(router2)).toThrowErrorMatchingInlineSnapshot(
+    `"Routers can be registered only when HTTP server is stopped."`
+  );
+});
+
+test('allows router registration after server is listening via `registerRouterAfterListening`', async () => {
+  expect(server.isListening()).toBe(false);
+
+  const { registerRouterAfterListening } = await server.setup(config);
+
+  const router1 = new Router('/foo', logger, enhanceWithContext);
+  expect(() => registerRouterAfterListening(router1)).not.toThrowError();
+
+  await server.start();
+
+  expect(server.isListening()).toBe(true);
+
+  const router2 = new Router('/bar', logger, enhanceWithContext);
+  expect(() => registerRouterAfterListening(router2)).not.toThrowError();
 });
 
 test('valid params', async () => {
@@ -1288,6 +1326,30 @@ test('should return a stream in the body', async () => {
   });
 });
 
+test('closes sockets on timeout', async () => {
+  const { registerRouter, server: innerServer } = await server.setup({
+    ...config,
+    socketTimeout: 1000,
+  });
+  const router = new Router('', logger, enhanceWithContext);
+
+  router.get({ path: '/a', validate: false }, async (context, req, res) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return res.ok({});
+  });
+  router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+
+  registerRouter(router);
+
+  registerRouter(router);
+
+  await server.start();
+
+  expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
+
+  await supertest(innerServer.listener).get('/b').expect(200);
+});
+
 describe('setup contract', () => {
   describe('#createSessionStorage', () => {
     test('creates session storage factory', async () => {
@@ -1348,12 +1410,130 @@ describe('setup contract', () => {
   });
 
   describe('#registerStaticDir', () => {
+    const assetFolder = join(__dirname, 'integration_tests', 'fixtures', 'static');
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await mkdtemp('cache-test');
+    });
+
+    afterAll(async () => {
+      if (tempDir) {
+        await rmdir(tempDir, { recursive: true });
+      }
+    });
+
     test('does not throw if called after stop', async () => {
       const { registerStaticDir } = await server.setup(config);
       await server.stop();
       expect(() => {
         registerStaticDir('/path1/{path*}', '/path/to/resource');
       }).not.toThrow();
+    });
+
+    test('returns correct headers for static assets', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/static/some_json.json')
+        .expect(200);
+
+      expect(response.get('cache-control')).toEqual('must-revalidate');
+      expect(response.get('etag')).not.toBeUndefined();
+    });
+
+    test('returns compressed version if present', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/static/compression_available.json')
+        .set('accept-encoding', 'gzip')
+        .expect(200);
+
+      expect(response.get('cache-control')).toEqual('must-revalidate');
+      expect(response.get('etag')).not.toBeUndefined();
+      expect(response.get('content-encoding')).toEqual('gzip');
+    });
+
+    test('returns uncompressed version if compressed asset is not available', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/static/some_json.json')
+        .set('accept-encoding', 'gzip')
+        .expect(200);
+
+      expect(response.get('cache-control')).toEqual('must-revalidate');
+      expect(response.get('etag')).not.toBeUndefined();
+      expect(response.get('content-encoding')).toBeUndefined();
+    });
+
+    test('returns a 304 if etag value matches', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/static/some_json.json')
+        .expect(200);
+
+      const etag = response.get('etag');
+      expect(etag).not.toBeUndefined();
+
+      await supertest(innerServer.listener)
+        .get('/static/some_json.json')
+        .set('If-None-Match', etag)
+        .expect(304);
+    });
+
+    test('serves content if etag values does not match', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .get('/static/some_json.json')
+        .set('If-None-Match', `"definitely not a valid etag"`)
+        .expect(200);
+    });
+
+    test('dynamically updates depending on the content of the file', async () => {
+      const tempFile = join(tempDir, 'some_file.json');
+
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+      registerStaticDir('/static/{path*}', tempDir);
+
+      await server.start();
+
+      await supertest(innerServer.listener).get('/static/some_file.json').expect(404);
+
+      await writeFile(tempFile, `{ "over": 9000 }`);
+
+      let response = await supertest(innerServer.listener)
+        .get('/static/some_file.json')
+        .expect(200);
+
+      const etag1 = response.get('etag');
+
+      await writeFile(tempFile, `{ "over": 42 }`);
+
+      response = await supertest(innerServer.listener).get('/static/some_file.json').expect(200);
+
+      const etag2 = response.get('etag');
+
+      expect(etag1).not.toEqual(etag2);
     });
   });
 
@@ -1405,5 +1585,81 @@ describe('setup contract', () => {
         registerAuth((req, res) => res.unauthorized());
       }).not.toThrow();
     });
+  });
+});
+
+describe('Graceful shutdown', () => {
+  let shutdownTimeout: number;
+  let innerServerListener: Server;
+
+  beforeEach(async () => {
+    shutdownTimeout = config.shutdownTimeout.asMilliseconds();
+    const { registerRouter, server: innerServer } = await server.setup(config);
+    innerServerListener = innerServer.listener;
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: false,
+        options: { body: { accepts: 'application/json' } },
+      },
+      async (context, req, res) => {
+        // It takes to resolve the same period of the shutdownTimeout.
+        // Since we'll trigger the stop a few ms after, it should have time to finish
+        await new Promise((resolve) => setTimeout(resolve, shutdownTimeout));
+        return res.ok({ body: { ok: 1 } });
+      }
+    );
+    registerRouter(router);
+
+    await server.start();
+  });
+
+  test('any ongoing requests should be resolved with `connection: close`', async () => {
+    const [response] = await Promise.all([
+      // Trigger a request that should hold the server from stopping until fulfilled
+      supertest(innerServerListener).post('/'),
+      // Stop the server while the request is in progress
+      (async () => {
+        await new Promise((resolve) => setTimeout(resolve, shutdownTimeout / 3));
+        await server.stop();
+      })(),
+    ]);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toStrictEqual({ ok: 1 });
+    // The server is about to be closed, we need to ask connections to close on their end (stop their keep-alive policies)
+    expect(response.header.connection).toBe('close');
+  });
+
+  test('any requests triggered while stopping should be rejected with 503', async () => {
+    const [, , response] = await Promise.all([
+      // Trigger a request that should hold the server from stopping until fulfilled (otherwise the server will stop straight away)
+      supertest(innerServerListener).post('/'),
+      // Stop the server while the request is in progress
+      (async () => {
+        await new Promise((resolve) => setTimeout(resolve, shutdownTimeout / 3));
+        await server.stop();
+      })(),
+      // Trigger a new request while shutting down (should be rejected)
+      (async () => {
+        await new Promise((resolve) => setTimeout(resolve, (2 * shutdownTimeout) / 3));
+        return supertest(innerServerListener).post('/');
+      })(),
+    ]);
+    expect(response.status).toBe(503);
+    expect(response.body).toStrictEqual({
+      statusCode: 503,
+      error: 'Service Unavailable',
+      message: 'Kibana is shutting down and not accepting new incoming requests',
+    });
+    expect(response.header.connection).toBe('close');
+  });
+
+  test('when no ongoing connections, the server should stop without waiting any longer', async () => {
+    const preStop = Date.now();
+    await server.stop();
+    expect(Date.now() - preStop).toBeLessThan(shutdownTimeout);
   });
 });

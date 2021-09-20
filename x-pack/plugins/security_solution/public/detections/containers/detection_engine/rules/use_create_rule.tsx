@@ -7,7 +7,7 @@
 
 import { useEffect, useState, Dispatch } from 'react';
 
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 
 import { createRule } from './api';
@@ -16,32 +16,35 @@ import { transformOutput } from './transforms';
 
 interface CreateRuleReturn {
   isLoading: boolean;
-  isSaved: boolean;
+  ruleId: string | null;
 }
 
 export type ReturnCreateRule = [CreateRuleReturn, Dispatch<CreateRulesSchema | null>];
 
 export const useCreateRule = (): ReturnCreateRule => {
   const [rule, setRule] = useState<CreateRulesSchema | null>(null);
-  const [isSaved, setIsSaved] = useState(false);
+  const [ruleId, setRuleId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
-    setIsSaved(false);
+    setRuleId(null);
     const saveRule = async () => {
       if (rule != null) {
         try {
           setIsLoading(true);
-          await createRule({ rule: transformOutput(rule), signal: abortCtrl.signal });
+          const createRuleResponse = await createRule({
+            rule: transformOutput(rule),
+            signal: abortCtrl.signal,
+          });
           if (isSubscribed) {
-            setIsSaved(true);
+            setRuleId(createRuleResponse.id);
           }
         } catch (error) {
           if (isSubscribed) {
-            errorToToaster({ title: i18n.RULE_ADD_FAILURE, error, dispatchToaster });
+            addError(error, { title: i18n.RULE_ADD_FAILURE });
           }
         }
         if (isSubscribed) {
@@ -55,7 +58,7 @@ export const useCreateRule = (): ReturnCreateRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, dispatchToaster]);
+  }, [rule, addError]);
 
-  return [{ isLoading, isSaved }, setRule];
+  return [{ isLoading, ruleId }, setRule];
 };

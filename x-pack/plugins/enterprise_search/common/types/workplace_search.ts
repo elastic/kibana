@@ -9,9 +9,7 @@ export interface Account {
   id: string;
   groups: string[];
   isAdmin: boolean;
-  isCurated: boolean;
   canCreatePersonalSources: boolean;
-  canCreateInvitations?: boolean;
   viewedOnboardingPage: boolean;
 }
 

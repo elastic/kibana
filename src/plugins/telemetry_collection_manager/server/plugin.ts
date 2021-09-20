@@ -7,7 +7,7 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -15,9 +15,11 @@ import {
   Logger,
   IClusterClient,
   SavedObjectsServiceStart,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
 } from 'src/core/server';
 
-import {
+import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
   BasicStatsPayload,
@@ -27,9 +29,11 @@ import {
   StatsCollectionConfig,
   UsageStatsPayload,
   StatsCollectionContext,
+  UnencryptedStatsGetterConfig,
+  EncryptedStatsGetterConfig,
 } from './types';
-import { isClusterOptedIn } from './util';
 import { encryptTelemetry } from './encryption';
+import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 
 interface TelemetryCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
@@ -38,7 +42,7 @@ interface TelemetryCollectionPluginsDepsSetup {
 export class TelemetryCollectionManagerPlugin
   implements Plugin<TelemetryCollectionManagerPluginSetup, TelemetryCollectionManagerPluginStart> {
   private readonly logger: Logger;
-  private collectionStrategy: CollectionStrategy<any> | undefined;
+  private collectionStrategy: CollectionStrategy | undefined;
   private usageGetterMethodPriority = -1;
   private usageCollection?: UsageCollectionSetup;
   private elasticsearchClient?: IClusterClient;
@@ -115,19 +119,46 @@ export class TelemetryCollectionManagerPlugin
     config: StatsGetterConfig,
     usageCollection: UsageCollectionSetup
   ): StatsCollectionConfig | undefined {
-    // Scope the new elasticsearch Client appropriately and pass to the stats collection config
-    const esClient = config.unencrypted
-      ? this.elasticsearchClient?.asScoped(config.request).asCurrentUser
-      : this.elasticsearchClient?.asInternalUser;
-    // Scope the saved objects client appropriately and pass to the stats collection config
-    const soClient = config.unencrypted
-      ? this.savedObjectsService?.getScopedClient(config.request)
-      : this.savedObjectsService?.createInternalRepository();
+    const esClient = this.getElasticsearchClient(config);
+    const soClient = this.getSavedObjectsClient(config);
     // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
     const kibanaRequest = config.unencrypted ? config.request : void 0;
 
     if (esClient && soClient) {
       return { usageCollection, esClient, soClient, kibanaRequest };
+    }
+  }
+
+  /**
+   * Returns the ES client scoped to the requester or Kibana's internal user
+   * depending on whether the request is encrypted or not:
+   * If the request is unencrypted, we intentionally scope the results to "what the user can see".
+   * @param config {@link StatsGetterConfig}
+   * @private
+   */
+  private getElasticsearchClient(config: StatsGetterConfig): ElasticsearchClient | undefined {
+    return config.unencrypted
+      ? this.elasticsearchClient?.asScoped(config.request).asCurrentUser
+      : this.elasticsearchClient?.asInternalUser;
+  }
+
+  /**
+   * Returns the SavedObjects client scoped to the requester or Kibana's internal user
+   * depending on whether the request is encrypted or not:
+   * If the request is unencrypted, we intentionally scope the results to "what the user can see"
+   * @param config {@link StatsGetterConfig}
+   * @private
+   */
+  private getSavedObjectsClient(config: StatsGetterConfig): SavedObjectsClientContract | undefined {
+    if (config.unencrypted) {
+      // Intentionally using the scoped client here to make use of all the security wrappers.
+      // It also returns spaces-scoped telemetry.
+      return this.savedObjectsService?.getScopedClient(config.request);
+    } else if (this.savedObjectsService) {
+      // Wrapping the internalRepository with the `TelemetrySavedObjectsClient`
+      // to ensure some best practices when collecting "all the telemetry"
+      // (i.e.: `.find` requests should query all spaces)
+      return new TelemetrySavedObjectsClient(this.savedObjectsService.createInternalRepository());
     }
   }
 
@@ -186,6 +217,8 @@ export class TelemetryCollectionManagerPlugin
     }));
   };
 
+  private async getStats(config: UnencryptedStatsGetterConfig): Promise<UsageStatsPayload[]>;
+  private async getStats(config: EncryptedStatsGetterConfig): Promise<string[]>;
   private async getStats(config: StatsGetterConfig) {
     if (!this.usageCollection) {
       return [];
@@ -203,7 +236,7 @@ export class TelemetryCollectionManagerPlugin
               return usageData;
             }
 
-            return encryptTelemetry(usageData.filter(isClusterOptedIn), {
+            return await encryptTelemetry(usageData, {
               useProdKey: this.isDistributable,
             });
           }

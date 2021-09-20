@@ -15,7 +15,7 @@ export function registerCurationsRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/curations',
+      path: '/internal/app_search/engines/{engineName}/curations',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -31,9 +31,26 @@ export function registerCurationsRoutes({
     })
   );
 
+  router.post(
+    {
+      path: '/internal/app_search/engines/{engineName}/curations',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+        }),
+        body: schema.object({
+          queries: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/collection',
+    })
+  );
+
   router.delete(
     {
-      path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -48,7 +65,46 @@ export function registerCurationsRoutes({
 
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/curations/find_or_create',
+      path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
+      validate: {
+        query: schema.object({
+          skip_record_analytics: schema.string(),
+        }),
+        params: schema.object({
+          engineName: schema.string(),
+          curationId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/:curationId',
+    })
+  );
+
+  router.put(
+    {
+      path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+          curationId: schema.string(),
+        }),
+        body: schema.object({
+          query: schema.string(),
+          queries: schema.arrayOf(schema.string()),
+          promoted: schema.arrayOf(schema.string()),
+          hidden: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/:curationId',
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/app_search/engines/{engineName}/curations/find_or_create',
       validate: {
         params: schema.object({
           engineName: schema.string(),

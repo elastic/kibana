@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
+import type { KibanaExecutionContext } from 'src/core/public';
 
-import { ExpressionType, SerializableState } from '../expression_types';
+import { ExpressionType } from '../expression_types';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
-import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
 import { TablesAdapter } from '../util/tables_adapter';
 
 /**
@@ -20,7 +21,7 @@ import { TablesAdapter } from '../util/tables_adapter';
  */
 export interface ExecutionContext<
   InspectorAdapters extends Adapters = Adapters,
-  ExecutionContextSearch extends SerializableState = SerializableState
+  ExecutionContextSearch extends SerializableRecord = SerializableRecord
 > {
   /**
    * Get search context of the expression.
@@ -60,23 +61,14 @@ export interface ExecutionContext<
   getKibanaRequest?: () => KibanaRequest;
 
   /**
-   * Allows to fetch saved objects from ElasticSearch. In browser `getSavedObject`
-   * function is provided automatically by the Expressions plugin. On the server
-   * the caller of the expression has to provide this context function. The
-   * reason is because on the browser we always know the user who tries to
-   * fetch a saved object, thus saved object client is scoped automatically to
-   * that user. However, on the server we can scope that saved object client to
-   * any user, or even not scope it at all and execute it as an "internal" user.
-   */
-  getSavedObject?: <T extends SavedObjectAttributes = SavedObjectAttributes>(
-    type: string,
-    id: string
-  ) => Promise<SavedObject<T>>;
-
-  /**
    * Returns the state (true|false) of the sync colors across panels switch.
    */
   isSyncColorsEnabled?: () => boolean;
+
+  /**
+   * Contains the meta-data about the source of the expression.
+   */
+  getExecutionContext: () => KibanaExecutionContext | undefined;
 }
 
 /**

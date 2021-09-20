@@ -196,12 +196,13 @@ export function SavedQueryManagementComponent({
         panelPaddingSize="none"
         buffer={-8}
         repositionOnScroll
+        ownFocus={true}
       >
         <div
           className="kbnSavedQueryManagement__popover"
           data-test-subj="saved-query-management-popover"
         >
-          <EuiPopoverTitle id={'savedQueryManagementPopoverTitle'}>
+          <EuiPopoverTitle paddingSize="m" id={'savedQueryManagementPopoverTitle'}>
             {savedQueryPopoverTitleText}
           </EuiPopoverTitle>
           {savedQueries.length > 0 ? (
@@ -233,7 +234,7 @@ export function SavedQueryManagementComponent({
               <EuiSpacer size="s" />
             </Fragment>
           )}
-          <EuiPopoverFooter>
+          <EuiPopoverFooter paddingSize="m">
             <EuiFlexGroup
               direction="rowReverse"
               gutterSize="s"

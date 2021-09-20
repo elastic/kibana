@@ -8,37 +8,34 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { AlertsHistogramPanel } from '../../../detections/components/alerts_histogram_panel';
-import { alertsHistogramOptions } from '../../../detections/components/alerts_histogram_panel/config';
+import { AlertsHistogramPanel } from '../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { Filter, Query } from '../../../../../../../src/plugins/data/public';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import * as i18n from '../../pages/translations';
 import { UpdateDateRange } from '../../../common/components/charts/common';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
-interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
+interface Props {
+  combinedQueries?: string;
   filters?: Filter[];
   headerChildren?: React.ReactNode;
   /** Override all defaults, and only display this field */
-  onlyField?: string;
+  onlyField?: AlertsStackByField;
   query?: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   timelineId?: string;
 }
 
 const SignalsByCategoryComponent: React.FC<Props> = ({
-  deleteQuery,
+  combinedQueries,
   filters,
-  from,
   headerChildren,
   onlyField,
   query,
   setAbsoluteRangeDatePickerTarget = 'global',
-  setQuery,
   timelineId,
-  to,
 }) => {
   const dispatch = useDispatch();
   const { signalIndexName } = useSignalIndex();
@@ -61,20 +58,18 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
 
   return (
     <AlertsHistogramPanel
-      deleteQuery={deleteQuery}
+      combinedQueries={combinedQueries}
       filters={filters}
-      from={from}
       headerChildren={headerChildren}
       onlyField={onlyField}
+      titleSize={onlyField == null ? 'm' : 's'}
       query={query}
       signalIndexName={signalIndexName}
-      setQuery={setQuery}
       showTotalAlertsCount={true}
       showLinkToAlerts={onlyField == null ? true : false}
-      stackByOptions={onlyField == null ? alertsHistogramOptions : undefined}
+      showStackBy={onlyField == null}
       legendPosition={'right'}
       timelineId={timelineId}
-      to={to}
       title={i18n.ALERT_COUNT}
       updateDateRange={updateDateRangeCallback}
     />

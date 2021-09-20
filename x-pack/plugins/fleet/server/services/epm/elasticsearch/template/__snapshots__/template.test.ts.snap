@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`tests loading base.yml: base.yml 1`] = `
+exports[`EPM template tests loading base.yml: base.yml 1`] = `
 {
   "priority": 200,
   "index_patterns": [
@@ -8,25 +8,7 @@ exports[`tests loading base.yml: base.yml 1`] = `
   ],
   "template": {
     "settings": {
-      "index": {
-        "lifecycle": {
-          "name": "logs"
-        },
-        "codec": "best_compression",
-        "mapping": {
-          "total_fields": {
-            "limit": "10000"
-          }
-        },
-        "refresh_interval": "5s",
-        "number_of_shards": "1",
-        "query": {
-          "default_field": [
-            "message"
-          ]
-        },
-        "number_of_routing_shards": "30"
-      }
+      "index": {}
     },
     "mappings": {
       "dynamic_templates": [
@@ -86,6 +68,10 @@ exports[`tests loading base.yml: base.yml 1`] = `
         },
         "validarray": {
           "type": "integer"
+        },
+        "cycle_type": {
+          "type": "constant_keyword",
+          "value": "bicycle"
         }
       },
       "_meta": {
@@ -98,7 +84,9 @@ exports[`tests loading base.yml: base.yml 1`] = `
     }
   },
   "data_stream": {},
-  "composed_of": [],
+  "composed_of": [
+    ".fleet_component_template-1"
+  ],
   "_meta": {
     "package": {
       "name": "nginx"
@@ -109,7 +97,7 @@ exports[`tests loading base.yml: base.yml 1`] = `
 }
 `;
 
-exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
+exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
 {
   "priority": 200,
   "index_patterns": [
@@ -117,25 +105,7 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
   ],
   "template": {
     "settings": {
-      "index": {
-        "lifecycle": {
-          "name": "logs"
-        },
-        "codec": "best_compression",
-        "mapping": {
-          "total_fields": {
-            "limit": "10000"
-          }
-        },
-        "refresh_interval": "5s",
-        "number_of_shards": "1",
-        "query": {
-          "default_field": [
-            "message"
-          ]
-        },
-        "number_of_routing_shards": "30"
-      }
+      "index": {}
     },
     "mappings": {
       "dynamic_templates": [
@@ -207,7 +177,9 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
     }
   },
   "data_stream": {},
-  "composed_of": [],
+  "composed_of": [
+    ".fleet_component_template-1"
+  ],
   "_meta": {
     "package": {
       "name": "coredns"
@@ -218,7 +190,7 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
 }
 `;
 
-exports[`tests loading system.yml: system.yml 1`] = `
+exports[`EPM template tests loading system.yml: system.yml 1`] = `
 {
   "priority": 200,
   "index_patterns": [
@@ -226,25 +198,7 @@ exports[`tests loading system.yml: system.yml 1`] = `
   ],
   "template": {
     "settings": {
-      "index": {
-        "lifecycle": {
-          "name": "metrics"
-        },
-        "codec": "best_compression",
-        "mapping": {
-          "total_fields": {
-            "limit": "10000"
-          }
-        },
-        "refresh_interval": "5s",
-        "number_of_shards": "1",
-        "query": {
-          "default_field": [
-            "message"
-          ]
-        },
-        "number_of_routing_shards": "30"
-      }
+      "index": {}
     },
     "mappings": {
       "dynamic_templates": [
@@ -1700,7 +1654,9 @@ exports[`tests loading system.yml: system.yml 1`] = `
     }
   },
   "data_stream": {},
-  "composed_of": [],
+  "composed_of": [
+    ".fleet_component_template-1"
+  ],
   "_meta": {
     "package": {
       "name": "system"

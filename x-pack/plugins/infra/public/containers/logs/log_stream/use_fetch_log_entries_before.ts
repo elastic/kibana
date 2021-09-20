@@ -8,8 +8,9 @@
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
+import { JsonObject } from '@kbn/utility-types';
 import { IKibanaSearchRequest } from '../../../../../../../src/plugins/data/public';
-import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
+import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
 import { LogEntryBeforeCursor } from '../../../../common/log_entry';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
@@ -57,7 +58,7 @@ export const useLogEntriesBeforeRequest = ({
                   columns: columnOverrides,
                   endTimestamp,
                   highlightPhrase,
-                  query,
+                  query: query as JsonObject,
                   size: params.size,
                   sourceId,
                   startTimestamp: params.extendTo ?? startTimestamp,

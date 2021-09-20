@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiLink,
-  EuiIcon,
   EuiConfirmModal,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiIcon,
+  EuiLink,
+  EuiPopover,
 } from '@elastic/eui';
+import React, { useState } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RuleGroup, AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
+
+import type { RuleGroup } from '../../model';
+import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 
 interface Props {
   rule: RuleGroup;

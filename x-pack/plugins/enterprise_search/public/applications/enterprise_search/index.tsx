@@ -19,8 +19,6 @@ import { ProductSelector } from './components/product_selector';
 import { SetupGuide } from './components/setup_guide';
 import { ROOT_PATH, SETUP_GUIDE_PATH } from './routes';
 
-import './index.scss';
-
 export const EnterpriseSearch: React.FC<InitialAppData> = ({ access = {} }) => {
   const { errorConnecting } = useValues(HttpLogic);
   const { config } = useValues(KibanaLogic);

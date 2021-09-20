@@ -14,11 +14,14 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'discover', 'header']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('field_level_security', () => {
     before('initialize tests', async () => {
-      await esArchiver.loadIfNeeded('security/flstest/data'); //( data)
-      await esArchiver.load('security/flstest/kibana'); //(savedobject)
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/flstest/data'); //( data)
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'
+      );
       await browser.setWindowSize(1600, 1000);
     });
 
@@ -108,9 +111,7 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('2');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be(
-        '_id:2 _type: - _index:flstest _score:0 customer_name.keyword:ABC Company customer_ssn:444.555.6666 customer_region.keyword:WEST runtime_customer_ssn:444.555.6666 calculated at runtime customer_region:WEST customer_name:ABC Company customer_ssn.keyword:444.555.6666'
-      );
+      expect(rowData).to.contain('ssn');
     });
 
     it('user customer2 should not see ssn', async function () {
@@ -122,13 +123,14 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('2');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be(
-        '_id:2 _type: - _index:flstest _score:0 customer_name.keyword:ABC Company customer_region.keyword:WEST customer_region:WEST customer_name:ABC Company'
-      );
+      expect(rowData).not.to.contain('ssn');
     });
 
     after(async function () {
       await PageObjects.security.forceLogout();
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'
+      );
     });
   });
 }

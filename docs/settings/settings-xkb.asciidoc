@@ -12,6 +12,7 @@ For more {kib} configuration settings, see <<settings>>.
 
 include::alert-action-settings.asciidoc[]
 include::apm-settings.asciidoc[]
+include::banners-settings.asciidoc[]
 include::dev-settings.asciidoc[]
 include::graph-settings.asciidoc[]
 include::infrastructure-ui-settings.asciidoc[]

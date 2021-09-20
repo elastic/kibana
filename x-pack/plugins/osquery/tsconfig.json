@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -11,7 +10,11 @@
     // add all the folders contains files to be compiled
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "scripts/**/*",
+    "server/**/*",
+    "../../../typings/**/*",
+    // ECS and Osquery schema files
+    "public/common/schemas/*/**.json",
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },

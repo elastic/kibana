@@ -31,14 +31,14 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
       describe(scenario.id, () => {
         it('should handle getAlertState alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/state`)
+            .get(`${getUrlPrefix(space.id)}/internal/alerting/rule/${createdAlert.id}/state`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -57,7 +57,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.key('alertInstances', 'previousStartedAt');
+              expect(response.body).to.key('alerts', 'previous_started_at');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -66,19 +66,19 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
 
         it('should handle getAlertState alert request appropriately when unauthorized', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.unrestricted-noop',
+                rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/state`)
+            .get(`${getUrlPrefix(space.id)}/internal/alerting/rule/${createdAlert.id}/state`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -112,7 +112,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.key('alertInstances', 'previousStartedAt');
+              expect(response.body).to.key('alerts', 'previous_started_at');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -121,14 +121,14 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
 
         it(`shouldn't getAlertState for an alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('other')}/api/alerts/alert/${createdAlert.id}/state`)
+            .get(`${getUrlPrefix('other')}/internal/alerting/rule/${createdAlert.id}/state`)
             .auth(user.username, user.password);
 
           expect(response.statusCode).to.eql(404);
@@ -153,7 +153,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
 
         it(`should handle getAlertState request appropriately when alert doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/1/state`)
+            .get(`${getUrlPrefix(space.id)}/internal/alerting/rule/1/state`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {

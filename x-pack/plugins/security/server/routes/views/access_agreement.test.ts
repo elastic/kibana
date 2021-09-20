@@ -6,23 +6,23 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  RequestHandler,
-  RouteConfig,
-  kibanaResponseFactory,
+import type {
   HttpResources,
   HttpResourcesRequestHandler,
-} from '../../../../../../src/core/server';
-import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
-import type { AuthenticationProvider } from '../../../common/model';
-import { ConfigType } from '../../config';
-import { Session } from '../../session_management';
-import { defineAccessAgreementRoutes } from './access_agreement';
-import type { SecurityRouter, SecurityRequestHandlerContext } from '../../types';
+  RequestHandler,
+  RouteConfig,
+} from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
 
-import { httpResourcesMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
+import type { AuthenticationProvider } from '../../../common/model';
+import type { ConfigType } from '../../config';
+import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { defineAccessAgreementRoutes } from './access_agreement';
 
 describe('Access agreement view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;

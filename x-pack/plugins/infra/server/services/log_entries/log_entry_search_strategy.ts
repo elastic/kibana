@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { concat, defer, of } from 'rxjs';
+import { concat, defer, of, forkJoin } from 'rxjs';
 import { concatMap, filter, map, shareReplay, take } from 'rxjs/operators';
 import type {
   IEsSearchRequest,
@@ -32,6 +32,7 @@ import {
   jsonFromBase64StringRT,
 } from '../../utils/typed_search_strategy';
 import { createGetLogEntryQuery, getLogEntryResponseRT, LogEntryHit } from './queries/log_entry';
+import { resolveLogSourceConfiguration } from '../../../common/log_sources';
 
 type LogEntrySearchRequest = IKibanaSearchRequest<LogEntrySearchRequestParams>;
 type LogEntrySearchResponse = IKibanaSearchResponse<LogEntrySearchResponsePayload>;
@@ -50,9 +51,22 @@ export const logEntrySearchStrategyProvider = ({
       defer(() => {
         const request = decodeOrThrow(asyncRequestRT)(rawRequest);
 
-        const sourceConfiguration$ = defer(() =>
-          sources.getSourceConfiguration(dependencies.savedObjectsClient, request.params.sourceId)
-        ).pipe(shareReplay(1));
+        const resolvedSourceConfiguration$ = defer(() =>
+          forkJoin([
+            sources.getSourceConfiguration(
+              dependencies.savedObjectsClient,
+              request.params.sourceId
+            ),
+            data.indexPatterns.indexPatternsServiceFactory(
+              dependencies.savedObjectsClient,
+              dependencies.esClient.asCurrentUser
+            ),
+          ]).pipe(
+            concatMap(([sourceConfiguration, indexPatternsService]) =>
+              resolveLogSourceConfiguration(sourceConfiguration.configuration, indexPatternsService)
+            )
+          )
+        ).pipe(take(1), shareReplay(1));
 
         const recoveredRequest$ = of(request).pipe(
           filter(asyncRecoveredRequestRT.is),
@@ -62,14 +76,21 @@ export const logEntrySearchStrategyProvider = ({
         const initialRequest$ = of(request).pipe(
           filter(asyncInitialRequestRT.is),
           concatMap(({ params }) =>
-            sourceConfiguration$.pipe(
+            resolvedSourceConfiguration$.pipe(
               map(
-                ({ configuration }): IEsSearchRequest => ({
+                ({
+                  indices,
+                  timestampField,
+                  tiebreakerField,
+                  runtimeMappings,
+                }): IEsSearchRequest => ({
+                  // @ts-expect-error `Field` is not assignable to `SearchRequest.docvalue_fields`
                   params: createGetLogEntryQuery(
-                    configuration.logAlias,
+                    indices,
                     params.logEntryId,
-                    configuration.fields.timestamp,
-                    configuration.fields.tiebreaker
+                    timestampField,
+                    tiebreakerField,
+                    runtimeMappings
                   ),
                 })
               )
@@ -121,5 +142,5 @@ const createLogEntryFromHit = (hit: LogEntryHit) => ({
   id: hit._id,
   index: hit._index,
   cursor: getLogEntryCursorFromHit(hit),
-  fields: Object.entries(hit.fields).map(([field, value]) => ({ field, value })),
+  fields: Object.entries(hit.fields ?? {}).map(([field, value]) => ({ field, value })),
 });

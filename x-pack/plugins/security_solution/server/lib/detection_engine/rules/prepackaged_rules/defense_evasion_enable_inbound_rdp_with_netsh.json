@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Remote Desktop Enabled in Windows Firewall",
   "query": "process where event.type in (\"start\", \"process_started\") and\n (process.name : \"netsh.exe\" or process.pe.original_file_name == \"netsh.exe\") and\n process.args : (\"localport=3389\", \"RemoteDesktop\", \"group=\\\"remote desktop\\\"\") and\n process.args : (\"action=allow\", \"enable=Yes\", \"enable\")\n",
   "risk_score": 47,

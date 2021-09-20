@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 
 import { Inspect, Maybe, PageInfoPaginated } from '../../common';
 import { RequestOptions, RequestOptionsPaginated } from '../..';
 
-export type ActionEdges = SearchResponse<object>['hits']['hits'];
+export type ActionEdges = estypes.SearchResponse<object>['hits']['hits'];
 
-export type ActionResultEdges = SearchResponse<object>['hits']['hits'];
+export type ActionResultEdges = estypes.SearchResponse<object>['hits']['hits'];
 export interface ActionsStrategyResponse extends IEsSearchResponse {
   edges: ActionEdges;
   totalCount: number;
@@ -21,9 +21,10 @@ export interface ActionsStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export type ActionsRequestOptions = RequestOptionsPaginated<{}>;
+export type ActionsRequestOptions = RequestOptionsPaginated;
 
 export interface ActionDetailsStrategyResponse extends IEsSearchResponse {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   actionDetails: Record<string, any>;
   inspect?: Maybe<Inspect>;
 }

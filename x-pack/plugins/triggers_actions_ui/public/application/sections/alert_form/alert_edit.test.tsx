@@ -16,14 +16,14 @@ import {
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../types';
-import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import AlertEdit from './alert_edit';
 import { useKibana } from '../../../common/lib/kibana';
-import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 jest.mock('../../lib/alert_api', () => ({
@@ -98,7 +98,7 @@ describe('alert_edit', () => {
       validate: (): ValidationResult => {
         return { errors: {} };
       },
-      alertParamsExpression: () => <React.Fragment />,
+      alertParamsExpression: () => <></>,
       requiresAppContext: false,
     };
 
@@ -106,12 +106,12 @@ describe('alert_edit', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-        return {};
+      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+        return Promise.resolve({});
       },
-      validateParams: (): GenericValidationResult<unknown> => {
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
-        return validationResult;
+        return Promise.resolve(validationResult);
       },
       actionConnectorFields: null,
     });
@@ -157,9 +157,9 @@ describe('alert_edit', () => {
     };
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
-    alertTypeRegistry.list.mockReturnValue([alertType]);
-    alertTypeRegistry.get.mockReturnValue(alertType);
-    alertTypeRegistry.has.mockReturnValue(true);
+    ruleTypeRegistry.list.mockReturnValue([alertType]);
+    ruleTypeRegistry.get.mockReturnValue(alertType);
+    ruleTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.list.mockReturnValue([actionTypeModel]);
     actionTypeRegistry.has.mockReturnValue(true);
 
@@ -171,7 +171,7 @@ describe('alert_edit', () => {
           return new Promise<void>(() => {});
         }}
         actionTypeRegistry={actionTypeRegistry}
-        alertTypeRegistry={alertTypeRegistry}
+        ruleTypeRegistry={ruleTypeRegistry}
       />
     );
     // Wait for active space to resolve before requesting the component to update

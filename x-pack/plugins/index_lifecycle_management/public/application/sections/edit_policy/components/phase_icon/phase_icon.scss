@@ -23,6 +23,9 @@
   &__inner--cold {
     fill: $euiColorVis1_behindText;
   }
+  &__inner--frozen {
+    fill: $euiColorVis4_behindText;
+  }
   &__inner--delete {
     fill: $euiColorDarkShade;
   }

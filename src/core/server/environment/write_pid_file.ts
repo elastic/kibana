@@ -31,13 +31,23 @@ export const writePidFile = async ({
     if (pidConfig.exclusive) {
       throw new Error(message);
     } else {
-      logger.warn(message, { path, pid });
+      logger.warn(message, {
+        process: {
+          pid: process.pid,
+          path,
+        },
+      });
     }
   }
 
   await writeFile(path, pid);
 
-  logger.debug(`wrote pid file to ${path}`, { path, pid });
+  logger.debug(`wrote pid file to ${path}`, {
+    process: {
+      pid: process.pid,
+      path,
+    },
+  });
 
   const clean = once(() => {
     unlink(path);

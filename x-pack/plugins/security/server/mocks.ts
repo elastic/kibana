@@ -6,10 +6,13 @@
  */
 
 import type { ApiResponse } from '@elastic/elasticsearch';
+
+import { licenseMock } from '../common/licensing/index.mock';
+import type { MockAuthenticatedUserProps } from '../common/model/authenticated_user.mock';
+import { mockAuthenticatedUser } from '../common/model/authenticated_user.mock';
+import { auditServiceMock } from './audit/index.mock';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { authorizationMock } from './authorization/index.mock';
-import { licenseMock } from '../common/licensing/index.mock';
-import { auditServiceMock } from './audit/index.mock';
 
 function createSetupMock() {
   const mockAuthz = authorizationMock.create();
@@ -20,6 +23,7 @@ function createSetupMock() {
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
+      checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
     },
     registerSpacesService: jest.fn(),
@@ -39,6 +43,7 @@ function createStartMock() {
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
+      checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
     },
   };
@@ -61,4 +66,6 @@ export const securityMock = {
   createSetup: createSetupMock,
   createStart: createStartMock,
   createApiResponse: createApiResponseMock,
+  createMockAuthenticatedUser: (props: MockAuthenticatedUserProps = {}) =>
+    mockAuthenticatedUser(props),
 };

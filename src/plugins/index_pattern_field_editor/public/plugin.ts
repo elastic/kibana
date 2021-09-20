@@ -8,10 +8,12 @@
 
 import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 
-import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
+import type { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getFieldEditorOpener } from './open_editor';
-import { FormatEditorService } from './service';
-import { getDeleteProvider } from './components/delete_field_provider';
+import { FormatEditorService } from './service/format_editor_service';
+import { getDeleteFieldProvider } from './components/delete_field_provider';
+import { getFieldDeleteModalOpener } from './open_delete_modal';
+import { initApi } from './lib/api';
 
 export class IndexPatternFieldEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -29,28 +31,32 @@ export class IndexPatternFieldEditorPlugin
     const { fieldFormatEditors } = this.formatEditorService.start();
     const {
       application: { capabilities },
+      http,
     } = core;
     const { data, usageCollection } = plugins;
+    const openDeleteModal = getFieldDeleteModalOpener({
+      core,
+      indexPatternService: data.indexPatterns,
+      usageCollection,
+    });
     return {
       fieldFormatEditors,
       openEditor: getFieldEditorOpener({
         core,
         indexPatternService: data.indexPatterns,
+        apiService: initApi(http),
         fieldFormats: data.fieldFormats,
         fieldFormatEditors,
         search: data.search,
         usageCollection,
       }),
+      openDeleteModal,
       userPermissions: {
         editIndexPattern: () => {
           return capabilities.management.kibana.indexPatterns;
         },
       },
-      DeleteRuntimeFieldProvider: getDeleteProvider(
-        data.indexPatterns,
-        usageCollection,
-        core.notifications
-      ),
+      DeleteRuntimeFieldProvider: getDeleteFieldProvider(openDeleteModal),
     };
   }
 

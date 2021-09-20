@@ -22,6 +22,7 @@ export interface SavedObjectLoaderFindOptions {
 }
 
 /**
+ * @deprecated
  * The SavedObjectLoader class provides some convenience functions
  * to load and save one kind of saved objects (specified in the constructor).
  *

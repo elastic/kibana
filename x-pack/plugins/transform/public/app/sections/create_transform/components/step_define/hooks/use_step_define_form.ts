@@ -51,7 +51,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
   // source config hook
   const advancedSourceEditor = useAdvancedSourceEditor(defaults, previewRequest);
 
-  // runtime mappings config hook
+  // runtime fields config hook
   const runtimeMappingsEditor = useAdvancedRuntimeMappingsEditor(defaults);
 
   useEffect(() => {

@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { RawConfigService, RawConfigurationProvider } from './raw_config_service';
+export { RawConfigService, RawConfigurationProvider, RawConfigAdapter } from './raw_config_service';
 export { getConfigFromFiles } from './read_config';

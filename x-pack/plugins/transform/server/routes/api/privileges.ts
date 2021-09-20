@@ -32,7 +32,6 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
       const {
         body: { has_all_requested: hasAllPrivileges, cluster },
       } = await ctx.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
-        method: 'POST',
         body: {
           cluster: APP_CLUSTER_PRIVILEGES,
         },
@@ -45,9 +44,7 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
       // Get all index privileges the user has
       const {
         body: { indices },
-      } = await ctx.core.elasticsearch.client.asCurrentUser.security.getUserPrivileges({
-        method: 'GET',
-      });
+      } = await ctx.core.elasticsearch.client.asCurrentUser.security.getUserPrivileges();
 
       // Check if they have all the required index privileges for at least one index
       const oneIndexWithAllPrivileges = indices.find(({ privileges }: { privileges: string[] }) => {

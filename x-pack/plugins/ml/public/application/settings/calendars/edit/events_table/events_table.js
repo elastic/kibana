@@ -15,14 +15,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
-function DeleteButton({ onClick, canDeleteCalendar, testSubj }) {
+function DeleteButton({ onClick, testSubj, disabled }) {
   return (
     <Fragment>
       <EuiButtonEmpty
         size="xs"
         color="danger"
         onClick={onClick}
-        isDisabled={canDeleteCalendar === false}
+        isDisabled={disabled}
         data-test-subj={testSubj}
       >
         <FormattedMessage
@@ -42,6 +42,8 @@ export const EventsTable = ({
   showSearchBar,
   showImportModal,
   showNewEventModal,
+  loading,
+  saving,
 }) => {
   const sorting = {
     sort: {
@@ -93,7 +95,7 @@ export const EventsTable = ({
       render: (event) => (
         <DeleteButton
           testSubj="mlCalendarEventDeleteButton"
-          canDeleteCalendar={canDeleteCalendar}
+          disabled={canDeleteCalendar === false || saving === true || loading === true}
           onClick={() => {
             onDeleteClick(event.event_id);
           }}
@@ -105,7 +107,7 @@ export const EventsTable = ({
   const search = {
     toolsRight: [
       <EuiButton
-        isDisabled={canCreateCalendar === false}
+        isDisabled={canCreateCalendar === false || saving === true || loading === true}
         key="ml_new_event"
         data-test-subj="mlCalendarNewEventButton"
         size="s"
@@ -118,7 +120,7 @@ export const EventsTable = ({
         />
       </EuiButton>,
       <EuiButton
-        isDisabled={canCreateCalendar === false}
+        isDisabled={canCreateCalendar === false || saving === true || loading === true}
         key="ml_import_event"
         data-test-subj="mlCalendarImportEventsButton"
         size="s"
@@ -164,6 +166,8 @@ EventsTable.propTypes = {
   showImportModal: PropTypes.func,
   showNewEventModal: PropTypes.func,
   showSearchBar: PropTypes.bool,
+  loading: PropTypes.bool,
+  saving: PropTypes.bool,
 };
 
 EventsTable.defaultProps = {

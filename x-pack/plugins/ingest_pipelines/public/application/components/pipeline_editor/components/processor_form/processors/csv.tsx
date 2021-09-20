@@ -18,6 +18,7 @@ import {
   ToggleField,
   ComboBoxField,
   ValidationFunc,
+  SerializerFunc,
 } from '../../../../../../shared_imports';
 
 import { FieldsConfig } from './shared';
@@ -112,6 +113,7 @@ const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
     deserializer: to.booleanOrUndef,
+    serializer: from.undefinedIfValue(false),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.trimFieldLabel', {
       defaultMessage: 'Trim',
     }),
@@ -148,17 +150,41 @@ export const CSV: FunctionComponent = () => {
         config={fieldsConfig.target_fields}
         component={ComboBoxField}
         path="fields.target_fields"
+        data-test-subj="targetFieldsField"
       />
 
-      <UseField config={fieldsConfig.separator} component={Field} path="fields.separator" />
+      <UseField
+        config={fieldsConfig.separator}
+        component={Field}
+        path="fields.separator"
+        data-test-subj="separatorValueField"
+      />
 
-      <UseField config={fieldsConfig.quote} component={Field} path="fields.quote" />
+      <UseField
+        config={fieldsConfig.quote}
+        component={Field}
+        path="fields.quote"
+        data-test-subj="quoteValueField"
+      />
 
-      <UseField config={fieldsConfig.trim} component={ToggleField} path="fields.trim" />
+      <UseField
+        config={fieldsConfig.trim}
+        component={ToggleField}
+        path="fields.trim"
+        data-test-subj="trimSwitch"
+      />
 
-      <UseField config={fieldsConfig.empty_value} component={Field} path="fields.empty_value" />
+      <UseField
+        config={fieldsConfig.empty_value}
+        component={Field}
+        path="fields.empty_value"
+        data-test-subj="emptyValueField"
+      />
 
-      <IgnoreMissingField />
+      <IgnoreMissingField
+        defaultValue={true}
+        serializer={from.undefinedIfValue(true) as SerializerFunc<boolean>}
+      />
     </>
   );
 };

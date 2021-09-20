@@ -12,13 +12,13 @@ import { Plugin } from './plugin';
 import { spacesMock } from '../../spaces/server/mocks';
 
 describe('event_log plugin', () => {
-  it('can setup and start', async () => {
+  it('can setup and start', () => {
     const initializerContext = coreMock.createPluginInitializerContext({});
     const coreSetup = coreMock.createSetup() as CoreSetup<IEventLogService>;
     const coreStart = coreMock.createStart() as CoreStart;
 
     const plugin = new Plugin(initializerContext);
-    const setup = await plugin.setup(coreSetup);
+    const setup = plugin.setup(coreSetup);
     expect(typeof setup.getLogger).toBe('function');
     expect(typeof setup.getProviderActions).toBe('function');
     expect(typeof setup.isEnabled).toBe('function');
@@ -29,7 +29,7 @@ describe('event_log plugin', () => {
     expect(typeof setup.registerSavedObjectProvider).toBe('function');
 
     const spaces = spacesMock.createStart();
-    const start = await plugin.start(coreStart, { spaces });
+    const start = plugin.start(coreStart, { spaces });
     expect(typeof start.getClient).toBe('function');
   });
 
@@ -41,8 +41,8 @@ describe('event_log plugin', () => {
 
     const plugin = new Plugin(initializerContext);
     const spaces = spacesMock.createStart();
-    await plugin.setup(coreSetup);
-    await plugin.start(coreStart, { spaces });
+    plugin.setup(coreSetup);
+    plugin.start(coreStart, { spaces });
     await plugin.stop();
     expect(mockLogger.debug).toBeCalledWith('shutdown: waiting to finish');
     expect(mockLogger.debug).toBeCalledWith('shutdown: finished');

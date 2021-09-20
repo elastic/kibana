@@ -68,6 +68,7 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
   return (
     <>
       <EuiButtonEmpty
+        data-test-subj="createConnectorButton"
         iconType="plusInCircleFilled"
         iconSide="left"
         onClick={() => setAddFlyoutVisibility(true)}

@@ -6,43 +6,61 @@
  */
 
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
-import { AppCounts, AvailableTotal, JobTypes, RangeStats, ReportingUsageType } from './types';
+import {
+  AppCounts,
+  AvailableTotal,
+  ByAppCounts,
+  JobTypes,
+  LayoutCounts,
+  RangeStats,
+  ReportingUsageType,
+} from './types';
 
 const appCountsSchema: MakeSchemaFrom<AppCounts> = {
+  search: { type: 'long' },
   'canvas workpad': { type: 'long' },
   dashboard: { type: 'long' },
   visualization: { type: 'long' },
 };
 
-const byAppCountsSchema: MakeSchemaFrom<RangeStats['statuses']['cancelled']> = {
+const layoutCountsSchema: MakeSchemaFrom<LayoutCounts> = {
+  canvas: { type: 'long' },
+  print: { type: 'long' },
+  preserve_layout: { type: 'long' },
+};
+
+const byAppCountsSchema: MakeSchemaFrom<ByAppCounts> = {
   csv: appCountsSchema,
+  csv_searchsource: appCountsSchema,
+  csv_searchsource_immediate: appCountsSchema,
   PNG: appCountsSchema,
+  PNGV2: appCountsSchema,
   printable_pdf: appCountsSchema,
+  printable_pdf_v2: appCountsSchema,
 };
 
 const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   available: { type: 'boolean' },
   total: { type: 'long' },
+  deprecated: { type: 'long' },
+  app: appCountsSchema,
+  layout: layoutCountsSchema,
 };
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
   csv: availableTotalSchema,
+  csv_searchsource: availableTotalSchema,
+  csv_searchsource_immediate: availableTotalSchema,
   PNG: availableTotalSchema,
-  printable_pdf: {
-    ...availableTotalSchema,
-    app: appCountsSchema,
-    layout: {
-      print: { type: 'long' },
-      preserve_layout: { type: 'long' },
-    },
-  },
+  PNGV2: availableTotalSchema,
+  printable_pdf: availableTotalSchema,
+  printable_pdf_v2: availableTotalSchema,
 };
 
 const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
   ...jobTypesSchema,
   _all: { type: 'long' },
   status: {
-    cancelled: { type: 'long' },
     completed: { type: 'long' },
     completed_with_warnings: { type: 'long' },
     failed: { type: 'long' },
@@ -50,7 +68,6 @@ const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
     processing: { type: 'long' },
   },
   statuses: {
-    cancelled: byAppCountsSchema,
     completed: byAppCountsSchema,
     completed_with_warnings: byAppCountsSchema,
     failed: byAppCountsSchema,

@@ -1,0 +1,57 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies NullSessionPipe registry modifications that specify which pipes can be accessed anonymously. This could be indicative of adversary lateral movement preparation by making the added pipe available to everyone.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "NullSessionPipe Registry Modification",
+  "query": "registry where\nregistry.path : \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\services\\\\LanmanServer\\\\Parameters\\\\NullSessionPipes\" and\nregistry.data.strings != null\n",
+  "references": [
+    "https://www.welivesecurity.com/2019/05/29/turla-powershell-usage/",
+    "https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-access-restrict-anonymous-access-to-named-pipes-and-shares"
+  ],
+  "risk_score": 47,
+  "rule_id": "ddab1f5f-7089-44f5-9fda-de5b11322e77",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Lateral Movement"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/",
+          "subtechnique": [
+            {
+              "id": "T1021.002",
+              "name": "SMB/Windows Admin Shares",
+              "reference": "https://attack.mitre.org/techniques/T1021/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

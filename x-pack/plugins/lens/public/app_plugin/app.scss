@@ -5,19 +5,15 @@
 }
 
 .lnsApp {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-}
 
-.lnsApp__header {
-  border-bottom: $euiBorderThin;
+  > .kbnTopNavMenu__wrapper {
+    border-bottom: $euiBorderThin;
+  }
 }
 
 .lnsApp__frame {
@@ -30,13 +26,15 @@
 .lensChartIcon__subdued {
   fill: $euiTextSubduedColor;
 
-  // Not great, but the easiest way to fix the gray fill when stuck in a button with a fill
-  // Like when selected in a button group
-  .euiButton--fill & {
+  .lnsLayerChartSwitch__item-isSelected & {
     fill: currentColor;
   }
 }
 
 .lensChartIcon__accent {
   fill: $euiColorVis0;
+
+  .lnsLayerChartSwitch__item-isSelected & {
+    fill: makeGraphicContrastColor($euiColorVis0, $euiColorDarkShade);
+  }
 }

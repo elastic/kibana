@@ -62,6 +62,8 @@ export interface HttpResponseOptions {
   body?: HttpResponsePayload;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
+  /** Bypass the default error formatting */
+  bypassErrorFormat?: boolean;
 }
 
 /**
@@ -79,6 +81,8 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
   body?: T;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
+  /** Bypass the default error formatting */
+  bypassErrorFormat?: boolean;
   statusCode: number;
 }
 
@@ -303,7 +307,7 @@ export const kibanaResponseFactory = {
       );
     }
     const { statusCode: code, body, ...rest } = options;
-    return new KibanaResponse(code, body, rest);
+    return new KibanaResponse(code, body, { ...rest });
   },
 };
 

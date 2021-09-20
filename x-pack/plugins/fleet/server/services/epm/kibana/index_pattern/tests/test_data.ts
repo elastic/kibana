@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IndexPatternField } from '../install';
+import type { FieldSpec } from 'src/plugins/data/common';
 
-export const dupeFields: IndexPatternField[] = [
+export const dupeFields: FieldSpec[] = [
   {
     name: '1',
     type: 'integer',
@@ -15,10 +15,8 @@ export const dupeFields: IndexPatternField[] = [
     aggregatable: true,
     count: 0,
     indexed: true,
-    doc_values: true,
     readFromDocValues: true,
     scripted: false,
-    analyzed: true,
   },
   {
     name: '2',
@@ -27,10 +25,8 @@ export const dupeFields: IndexPatternField[] = [
     aggregatable: true,
     count: 0,
     indexed: true,
-    doc_values: true,
     readFromDocValues: true,
     scripted: false,
-    analyzed: true,
   },
   {
     name: '3',
@@ -39,10 +35,8 @@ export const dupeFields: IndexPatternField[] = [
     aggregatable: true,
     count: 0,
     indexed: true,
-    doc_values: true,
     readFromDocValues: true,
     scripted: false,
-    analyzed: true,
   },
   {
     name: '1',
@@ -51,10 +45,8 @@ export const dupeFields: IndexPatternField[] = [
     aggregatable: false,
     count: 2,
     indexed: true,
-    doc_values: true,
     readFromDocValues: true,
     scripted: false,
-    analyzed: true,
   },
   {
     name: '1.1',
@@ -63,10 +55,8 @@ export const dupeFields: IndexPatternField[] = [
     aggregatable: false,
     count: 0,
     indexed: true,
-    doc_values: true,
     readFromDocValues: true,
     scripted: false,
-    analyzed: true,
   },
   {
     name: '4',
@@ -75,10 +65,8 @@ export const dupeFields: IndexPatternField[] = [
     aggregatable: false,
     count: 0,
     indexed: true,
-    doc_values: true,
     readFromDocValues: true,
     scripted: false,
-    analyzed: true,
   },
   {
     name: '2',
@@ -87,10 +75,8 @@ export const dupeFields: IndexPatternField[] = [
     aggregatable: false,
     count: 0,
     indexed: true,
-    doc_values: true,
     readFromDocValues: true,
     scripted: false,
-    analyzed: true,
   },
   {
     name: '1',
@@ -99,9 +85,7 @@ export const dupeFields: IndexPatternField[] = [
     aggregatable: false,
     count: 1,
     indexed: true,
-    doc_values: true,
     readFromDocValues: true,
     scripted: false,
-    analyzed: false,
   },
 ];

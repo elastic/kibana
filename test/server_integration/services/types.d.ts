@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+import { GenericFtrProviderContext } from '@kbn/test';
 import { services as kibanaCommonServices } from '../../common/services';
 import { services as kibanaApiIntegrationServices } from '../../api_integration/services';
 

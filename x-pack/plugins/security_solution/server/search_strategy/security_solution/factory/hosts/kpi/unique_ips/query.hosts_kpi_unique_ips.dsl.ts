@@ -41,7 +41,7 @@ export const buildHostsKpiUniqueIpsQuery = ({
         unique_source_ips_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
-            buckets: '6',
+            buckets: 6,
           },
           aggs: {
             count: {
@@ -59,7 +59,7 @@ export const buildHostsKpiUniqueIpsQuery = ({
         unique_destination_ips_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
-            buckets: '6',
+            buckets: 6,
           },
           aggs: {
             count: {

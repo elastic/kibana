@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './es_raw_response';
 export * from './esaggs';
 export * from './esdsl';
+export * from '../../../common/search/expressions';

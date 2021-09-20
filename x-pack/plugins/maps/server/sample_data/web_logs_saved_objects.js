@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { emsWorldLayerId } from '../../common/constants';
 
 const layerList = [
   {
@@ -23,13 +24,13 @@ const layerList = [
   },
   {
     id: 'edh66',
-    label: 'Total Requests by Country',
+    label: 'Total Requests by Destination',
     minZoom: 0,
     maxZoom: 24,
     alpha: 0.5,
     sourceDescriptor: {
       type: 'EMS_FILE',
-      id: 'world_countries',
+      id: emsWorldLayerId,
       tooltipProperties: ['name', 'iso2'],
     },
     visible: true,
@@ -40,7 +41,7 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              name: '__kbnjoin__count_groupby_kibana_sample_data_logs.geo.src',
+              name: '__kbnjoin__count_groupby_kibana_sample_data_logs.geo.dest',
               origin: 'join',
             },
             color: 'Greys',
@@ -74,7 +75,7 @@ const layerList = [
           type: 'ES_TERM_SOURCE',
           id: '673ff994-fc75-4c67-909b-69fcb0e1060e',
           indexPatternTitle: 'kibana_sample_data_logs',
-          term: 'geo.src',
+          term: 'geo.dest',
           indexPatternRefName: 'layer_1_join_0_index_pattern',
           metrics: [
             {

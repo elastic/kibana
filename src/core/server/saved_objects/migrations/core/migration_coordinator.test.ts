@@ -19,6 +19,7 @@ describe('coordinateMigration', () => {
       throw { body: { error: { index: '.foo', type: 'resource_already_exists_exception' } } };
     });
     const isMigrated = jest.fn();
+    const setStatus = jest.fn();
 
     isMigrated.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
 
@@ -27,6 +28,7 @@ describe('coordinateMigration', () => {
       runMigration,
       pollInterval,
       isMigrated,
+      setStatus,
     });
 
     expect(runMigration).toHaveBeenCalledTimes(1);
@@ -39,12 +41,14 @@ describe('coordinateMigration', () => {
     const pollInterval = 1;
     const runMigration = jest.fn<any, any>(() => Promise.resolve());
     const isMigrated = jest.fn(() => Promise.resolve(true));
+    const setStatus = jest.fn();
 
     await coordinateMigration({
       log,
       runMigration,
       pollInterval,
       isMigrated,
+      setStatus,
     });
     expect(isMigrated).not.toHaveBeenCalled();
   });
@@ -55,6 +59,7 @@ describe('coordinateMigration', () => {
       throw new Error('Doh');
     });
     const isMigrated = jest.fn(() => Promise.resolve(true));
+    const setStatus = jest.fn();
 
     await expect(
       coordinateMigration({
@@ -62,6 +67,7 @@ describe('coordinateMigration', () => {
         runMigration,
         pollInterval,
         isMigrated,
+        setStatus,
       })
     ).rejects.toThrow(/Doh/);
     expect(isMigrated).not.toHaveBeenCalled();

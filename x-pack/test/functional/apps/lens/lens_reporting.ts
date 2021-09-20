@@ -17,15 +17,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens reporting', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('lens/reporting');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/reporting');
       await security.testUser.setRoles(
-        ['test_logstash_reader', 'global_dashboard_read', 'reporting_user'],
+        [
+          'test_logstash_reader',
+          'global_dashboard_read',
+          'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+        ],
         false
       );
     });
 
     after(async () => {
-      await esArchiver.unload('lens/reporting');
+      await esArchiver.unload('x-pack/test/functional/es_archives/lens/reporting');
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,

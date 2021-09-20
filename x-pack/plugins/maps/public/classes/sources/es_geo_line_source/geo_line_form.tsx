@@ -64,7 +64,12 @@ export function GeoLineForm(props: Props) {
           onChange={onSortFieldChange}
           fields={props.indexPattern.fields.filter((field) => {
             const isSplitField = props.splitField ? field.name === props.splitField : false;
-            return !isSplitField && field.sortable && !indexPatterns.isNestedField(field);
+            return (
+              !isSplitField &&
+              field.sortable &&
+              !indexPatterns.isNestedField(field) &&
+              ['number', 'date'].includes(field.type)
+            );
           })}
           isClearable={false}
         />

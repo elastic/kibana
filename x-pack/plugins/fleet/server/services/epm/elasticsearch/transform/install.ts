@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getPathParts } from '../../archive';
-import {
-  ElasticsearchAssetType,
-  EsAssetReference,
-  InstallablePackage,
-} from '../../../../../common/types/models';
-import { CallESAsCurrentUser } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../../common/types/models';
+import type { EsAssetReference, InstallablePackage } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
+import { appContextService } from '../../../app_context';
+
 import { deleteTransforms, deleteTransformRefs } from './remove';
 import { getAsset } from './common';
-import { appContextService } from '../../../app_context';
-import { isLegacyESClientError } from '../../../../errors';
 
 interface TransformInstallation {
   installationName: string;
@@ -29,7 +26,7 @@ interface TransformInstallation {
 export const installTransform = async (
   installablePackage: InstallablePackage,
   paths: string[],
-  callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   const logger = appContextService.getLogger();
@@ -53,7 +50,7 @@ export const installTransform = async (
 
   // delete all previous transform
   await deleteTransforms(
-    callCluster,
+    esClient,
     previousInstalledTransformEsAssets.map((asset) => asset.id)
   );
 
@@ -85,7 +82,7 @@ export const installTransform = async (
     });
 
     const installationPromises = transforms.map(async (transform) => {
-      return handleTransformInstall({ callCluster, transform });
+      return handleTransformInstall({ esClient, transform });
     });
 
     installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
@@ -115,34 +112,33 @@ const isTransform = (path: string) => {
 };
 
 async function handleTransformInstall({
-  callCluster,
+  esClient,
   transform,
 }: {
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   transform: TransformInstallation;
 }): Promise<EsAssetReference> {
   try {
     // defer validation on put if the source index is not available
-    await callCluster('transport.request', {
-      method: 'PUT',
-      path: `/_transform/${transform.installationName}`,
-      query: 'defer_validation=true',
+    await esClient.transform.putTransform({
+      transform_id: transform.installationName,
+      defer_validation: true,
+      // @ts-expect-error expect object, but given a string
       body: transform.content,
     });
   } catch (err) {
     // swallow the error if the transform already exists.
     const isAlreadyExistError =
-      isLegacyESClientError(err) && err?.body?.error?.type === 'resource_already_exists_exception';
+      err instanceof ResponseError &&
+      err?.body?.error?.type === 'resource_already_exists_exception';
     if (!isAlreadyExistError) {
       throw err;
     }
   }
-  await callCluster('transport.request', {
-    method: 'POST',
-    path: `/_transform/${transform.installationName}/_start`,
-    // Ignore error if the transform is already started
-    ignore: [409],
-  });
+  await esClient.transform.startTransform(
+    { transform_id: transform.installationName },
+    { ignore: [409] }
+  );
 
   return { id: transform.installationName, type: ElasticsearchAssetType.transform };
 }

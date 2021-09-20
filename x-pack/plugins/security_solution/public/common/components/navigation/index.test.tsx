@@ -9,12 +9,12 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { CONSTANTS } from '../url_state/constants';
-import { SiemNavigationComponent } from './';
+import { TabNavigationComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
 import { navTabs } from '../../../app/home/home_navigations';
 import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from '../../utils/route/types';
-import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
+import { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
 import { TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('react-router-dom', () => {
@@ -32,7 +32,8 @@ jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
 const mockGetUrlForApp = jest.fn();
-jest.mock('../../lib/kibana', () => {
+const mockNavigateToUrl = jest.fn();
+jest.mock('../../lib/kibana/kibana_react', () => {
   return {
     useKibana: () => ({
       services: {
@@ -40,6 +41,7 @@ jest.mock('../../lib/kibana', () => {
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: mockGetUrlForApp,
+          navigateToUrl: mockNavigateToUrl,
         },
       },
     }),
@@ -47,8 +49,17 @@ jest.mock('../../lib/kibana', () => {
 });
 jest.mock('../link_to');
 
+jest.mock('react-router-dom', () => ({
+  useLocation: jest.fn(() => ({
+    search: '',
+  })),
+  useHistory: jest.fn(),
+}));
+
 describe('SIEM Navigation', () => {
-  const mockProps: SiemNavigationComponentProps & SiemNavigationProps & RouteSpyState = {
+  const mockProps: TabNavigationComponentProps &
+    SecuritySolutionTabNavigationProps &
+    RouteSpyState = {
     pageName: 'hosts',
     pathName: '/',
     detailName: undefined,
@@ -89,63 +100,13 @@ describe('SIEM Navigation', () => {
       },
     },
   };
-  const wrapper = mount(<SiemNavigationComponent {...mockProps} />);
+  const wrapper = mount(<TabNavigationComponent {...mockProps} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
     expect(setBreadcrumbs).toHaveBeenNthCalledWith(
       1,
       {
         detailName: undefined,
-        navTabs: {
-          detections: {
-            disabled: false,
-            href: '/app/security/detections',
-            id: 'detections',
-            name: 'Detections',
-            urlKey: 'detections',
-          },
-          case: {
-            disabled: false,
-            href: '/app/security/cases',
-            id: 'case',
-            name: 'Cases',
-            urlKey: 'case',
-          },
-          administration: {
-            disabled: false,
-            href: '/app/security/administration',
-            id: 'administration',
-            name: 'Administration',
-            urlKey: 'administration',
-          },
-          hosts: {
-            disabled: false,
-            href: '/app/security/hosts',
-            id: 'hosts',
-            name: 'Hosts',
-            urlKey: 'host',
-          },
-          network: {
-            disabled: false,
-            href: '/app/security/network',
-            id: 'network',
-            name: 'Network',
-            urlKey: 'network',
-          },
-          overview: {
-            disabled: false,
-            href: '/app/security/overview',
-            id: 'overview',
-            name: 'Overview',
-            urlKey: 'overview',
-          },
-          timelines: {
-            disabled: false,
-            href: '/app/security/timelines',
-            id: 'timelines',
-            name: 'Timelines',
-            urlKey: 'timeline',
-          },
-        },
+        navTabs,
         pageName: 'hosts',
         pathName: '/',
         search: '',
@@ -186,7 +147,8 @@ describe('SIEM Navigation', () => {
         },
       },
       undefined,
-      mockGetUrlForApp
+      mockGetUrlForApp,
+      mockNavigateToUrl
     );
   });
   test('it calls setBreadcrumbs with correct path on update', () => {
@@ -202,57 +164,7 @@ describe('SIEM Navigation', () => {
         detailName: undefined,
         filters: [],
         flowTarget: undefined,
-        navTabs: {
-          detections: {
-            disabled: false,
-            href: '/app/security/detections',
-            id: 'detections',
-            name: 'Detections',
-            urlKey: 'detections',
-          },
-          case: {
-            disabled: false,
-            href: '/app/security/cases',
-            id: 'case',
-            name: 'Cases',
-            urlKey: 'case',
-          },
-          hosts: {
-            disabled: false,
-            href: '/app/security/hosts',
-            id: 'hosts',
-            name: 'Hosts',
-            urlKey: 'host',
-          },
-          administration: {
-            disabled: false,
-            href: '/app/security/administration',
-            id: 'administration',
-            name: 'Administration',
-            urlKey: 'administration',
-          },
-          network: {
-            disabled: false,
-            href: '/app/security/network',
-            id: 'network',
-            name: 'Network',
-            urlKey: 'network',
-          },
-          overview: {
-            disabled: false,
-            href: '/app/security/overview',
-            id: 'overview',
-            name: 'Overview',
-            urlKey: 'overview',
-          },
-          timelines: {
-            disabled: false,
-            href: '/app/security/timelines',
-            id: 'timelines',
-            name: 'Timelines',
-            urlKey: 'timeline',
-          },
-        },
+        navTabs,
         pageName: 'network',
         pathName: '/',
         query: { language: 'kuery', query: '' },
@@ -286,7 +198,8 @@ describe('SIEM Navigation', () => {
         },
       },
       undefined,
-      mockGetUrlForApp
+      mockGetUrlForApp,
+      mockNavigateToUrl
     );
   });
 });

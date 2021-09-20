@@ -23,7 +23,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.securityCommon.cleanTransformUsers();
       await transform.securityCommon.cleanTransformRoles();
 
-      await esArchiver.unload('ml/farequote');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
 
       await transform.testResources.resetKibanaTimeZone();
     });
@@ -32,6 +32,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./start_transforms'));
     loadTestFile(require.resolve('./stop_transforms'));
     loadTestFile(require.resolve('./transforms'));
+    loadTestFile(require.resolve('./transforms_nodes'));
     loadTestFile(require.resolve('./transforms_preview'));
     loadTestFile(require.resolve('./transforms_stats'));
     loadTestFile(require.resolve('./transforms_update'));

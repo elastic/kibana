@@ -10,19 +10,9 @@ import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../sr
 import { configSchema, ConfigSchema } from '../config';
 import { TimelionPlugin } from './plugin';
 
-export { PluginSetupContract } from './plugin';
-
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
-  exposeToBrowser: {
-    ui: true,
-  },
-  deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('timelion_vis.enabled', 'vis_type_timelion.enabled'),
-    renameFromRoot('timelion.enabled', 'vis_type_timelion.enabled'),
-    renameFromRoot('timelion.graphiteUrls', 'vis_type_timelion.graphiteUrls'),
-    renameFromRoot('timelion.ui.enabled', 'vis_type_timelion.ui.enabled', true),
-  ],
 };
+
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new TimelionPlugin(initializerContext);

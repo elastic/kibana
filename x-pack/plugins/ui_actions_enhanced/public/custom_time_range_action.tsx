@@ -7,14 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
+import {
+  IEmbeddable,
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+} from 'src/plugins/embeddable/public';
 import { Action, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
 import { TimeRange } from '../../../../src/plugins/data/public';
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { OpenModal, CommonlyUsedRange } from './types';
 
 export const CUSTOM_TIME_RANGE = 'CUSTOM_TIME_RANGE';
-const SEARCH_EMBEDDABLE_TYPE = 'search';
 
 export interface TimeRangeInput extends EmbeddableInput {
   timeRange: TimeRange;
@@ -27,7 +31,8 @@ function hasTimeRange(
 }
 
 const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
-type VisualizeEmbeddable = any;
+
+type VisualizeEmbeddable = IEmbeddable<{ id: string }, EmbeddableOutput & { visTypeName: string }>;
 
 function isVisualizeEmbeddable(
   embeddable: IEmbeddable | VisualizeEmbeddable
@@ -80,13 +85,7 @@ export class CustomTimeRangeAction implements Action<TimeRangeActionContext> {
       isVisualizeEmbeddable(embeddable) &&
       (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
     return Boolean(
-      embeddable &&
-        hasTimeRange(embeddable) &&
-        // Saved searches don't listen to the time range from the container that is passed down to them so it
-        // won't work without a fix.  For now, just leave them out.
-        embeddable.type !== SEARCH_EMBEDDABLE_TYPE &&
-        !isInputControl &&
-        !isMarkdown
+      embeddable && embeddable.parent && hasTimeRange(embeddable) && !isInputControl && !isMarkdown
     );
   }
 

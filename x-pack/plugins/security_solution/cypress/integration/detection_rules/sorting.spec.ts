@@ -31,26 +31,31 @@ import {
   resetAllRulesIdleModalTimeout,
   sortByActivatedRules,
   waitForRulesTableToBeLoaded,
-  waitForRuleToBeActivated,
+  waitForRuleToChangeStatus,
 } from '../../tasks/alerts_detection_rules';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { DEFAULT_RULE_REFRESH_INTERVAL_VALUE } from '../../../common/constants';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
-import { existingRule, newOverrideRule, newRule, newThresholdRule } from '../../objects/rule';
+import {
+  getExistingRule,
+  getNewOverrideRule,
+  getNewRule,
+  getNewThresholdRule,
+} from '../../objects/rule';
 
 describe('Alerts detection rules', () => {
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule, '1');
-    createCustomRule(existingRule, '2');
-    createCustomRule(newOverrideRule, '3');
-    createCustomRule(newThresholdRule, '4');
+    createCustomRule(getNewRule(), '1');
+    createCustomRule(getExistingRule(), '2');
+    createCustomRule(getNewOverrideRule(), '3');
+    createCustomRule(getNewThresholdRule(), '4');
   });
 
   it('Sorts by activated rules', () => {
@@ -62,13 +67,13 @@ describe('Alerts detection rules', () => {
       .invoke('text')
       .then((secondInitialRuleName) => {
         activateRule(SECOND_RULE);
-        waitForRuleToBeActivated();
+        waitForRuleToChangeStatus();
         cy.get(RULE_NAME)
           .eq(FOURTH_RULE)
           .invoke('text')
           .then((fourthInitialRuleName) => {
             activateRule(FOURTH_RULE);
-            waitForRuleToBeActivated();
+            waitForRuleToChangeStatus();
             sortByActivatedRules();
             cy.get(RULE_NAME)
               .eq(FIRST_RULE)
@@ -90,8 +95,8 @@ describe('Alerts detection rules', () => {
   });
 
   it('Pagination updates page number and results', () => {
-    createCustomRule({ ...newRule, name: 'Test a rule' }, '5');
-    createCustomRule({ ...newRule, name: 'Not same as first rule' }, '6');
+    createCustomRule({ ...getNewRule(), name: 'Test a rule' }, '5');
+    createCustomRule({ ...getNewRule(), name: 'Not same as first rule' }, '6');
 
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
@@ -129,7 +134,13 @@ describe('Alerts detection rules', () => {
   });
 
   it('Auto refreshes rules', () => {
-    cy.clock(Date.now());
+    /**
+     * Ran into the error: timer created with setInterval() but cleared with cancelAnimationFrame()
+     * There are no cancelAnimationFrames in the codebase that are used to clear a setInterval so
+     * explicitly set the below overrides. see https://docs.cypress.io/api/commands/clock#Function-names
+     */
+
+    cy.clock(Date.now(), ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date']);
 
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();

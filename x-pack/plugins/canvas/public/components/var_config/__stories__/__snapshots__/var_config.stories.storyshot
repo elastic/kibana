@@ -35,7 +35,6 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
           >
             <span
               className="euiToolTipAnchor"
-              onKeyUp={[Function]}
               onMouseOut={[Function]}
               onMouseOver={[Function]}
             >
@@ -53,13 +52,12 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
         >
           <span
             className="euiToolTipAnchor"
-            onKeyUp={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Add a variable"
-              className="euiButtonIcon euiButtonIcon--primary"
+              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
               disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
@@ -69,6 +67,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
               <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="plusInCircle"
                 size="m"
               />

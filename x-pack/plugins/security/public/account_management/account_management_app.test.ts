@@ -7,12 +7,13 @@
 
 jest.mock('./account_management_page');
 
-import { AppMount, AppNavLinkStatus } from 'src/core/public';
-import { UserAPIClient } from '../management';
-import { accountManagementApp } from './account_management_app';
+import type { AppMount } from 'src/core/public';
+import { AppNavLinkStatus } from 'src/core/public';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
-import { coreMock, scopedHistoryMock } from '../../../../../src/core/public/mocks';
+import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
+import { accountManagementApp } from './account_management_app';
 
 describe('accountManagementApp', () => {
   it('properly registers application', () => {

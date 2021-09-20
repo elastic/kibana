@@ -9,6 +9,7 @@ import { SignalsMigrationSOClient } from './saved_objects_client';
 
 const create = () =>
   ({
+    bulkGet: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
     find: jest.fn(),

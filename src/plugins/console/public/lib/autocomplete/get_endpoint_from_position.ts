@@ -8,13 +8,14 @@
 
 import { CoreEditor, Position } from '../../types';
 import { getCurrentMethodAndTokenPaths } from './autocomplete';
+import type RowParser from '../row_parser';
 
 // @ts-ignore
 import { getTopLevelUrlCompleteComponents } from '../kb/kb';
 // @ts-ignore
 import { populateContext } from './engine';
 
-export function getEndpointFromPosition(editor: CoreEditor, pos: Position, parser: any) {
+export function getEndpointFromPosition(editor: CoreEditor, pos: Position, parser: RowParser) {
   const lineValue = editor.getLineValue(pos.lineNumber);
   const context = {
     ...getCurrentMethodAndTokenPaths(

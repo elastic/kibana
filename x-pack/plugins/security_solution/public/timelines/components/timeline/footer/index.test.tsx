@@ -12,6 +12,8 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { FooterComponent, PagingControlComponent } from './index';
 
+jest.mock('../../../../common/lib/kibana');
+
 describe('Footer Timeline Component', () => {
   const loadMore = jest.fn();
   const updatedAt = 1546878704036;
@@ -158,6 +160,50 @@ describe('Footer Timeline Component', () => {
 
       wrapper.find('[data-test-subj="timelineSizeRowPopover"] button').first().simulate('click');
       expect(wrapper.find('[data-test-subj="timelinePickSizeRow"]').exists()).toBeTruthy();
+    });
+
+    test('it renders last updated when updated at is > 0', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <FooterComponent
+            activePage={0}
+            updatedAt={updatedAt}
+            height={100}
+            id={'timeline-id'}
+            isLive={false}
+            isLoading={false}
+            itemsCount={itemsCount}
+            itemsPerPage={2}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangePage={loadMore}
+            totalCount={serverSideEventCount}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="fixed-width-last-updated"]').exists()).toBeTruthy();
+    });
+
+    test('it does NOT render last updated when updated at is 0', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <FooterComponent
+            activePage={0}
+            updatedAt={0}
+            height={100}
+            id={'timeline-id'}
+            isLive={false}
+            isLoading={false}
+            itemsCount={itemsCount}
+            itemsPerPage={2}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangePage={loadMore}
+            totalCount={serverSideEventCount}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="fixed-width-last-updated"]').exists()).toBeFalsy();
     });
   });
 

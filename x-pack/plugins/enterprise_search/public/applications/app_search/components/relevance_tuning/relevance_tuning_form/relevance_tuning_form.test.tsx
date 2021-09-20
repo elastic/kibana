@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow, mount, ReactWrapper, ShallowWrapper } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiFieldSearch } from '@elastic/eui';
 
 import { BoostType } from '../types';
 
 import { RelevanceTuningForm } from './relevance_tuning_form';
-import { RelevanceTuningItem } from './relevance_tuning_item';
+import { RelevanceTuningItemContent } from './relevance_tuning_item_content';
 
 describe('RelevanceTuningForm', () => {
   const values = {
     filterInputValue: '',
     schemaFields: ['foo', 'bar', 'baz'],
     filteredSchemaFields: ['foo', 'bar'],
+    filteredSchemaFieldsWithConflicts: [],
     schema: {
       foo: 'text',
       bar: 'number',
@@ -33,6 +34,7 @@ describe('RelevanceTuningForm', () => {
           {
             factor: 2,
             type: BoostType.Value,
+            value: [],
           },
         ],
       },
@@ -53,14 +55,14 @@ describe('RelevanceTuningForm', () => {
   });
 
   describe('fields', () => {
-    let wrapper: ReactWrapper;
+    let wrapper: ShallowWrapper;
     let relevantTuningItems: any;
 
     beforeAll(() => {
       setMockValues(values);
 
-      wrapper = mount(<RelevanceTuningForm />);
-      relevantTuningItems = wrapper.find(RelevanceTuningItem);
+      wrapper = shallow(<RelevanceTuningForm />);
+      relevantTuningItems = wrapper.find(RelevanceTuningItemContent);
     });
 
     it('renders a list of fields that may or may not have been filterd by user input', () => {
@@ -84,6 +86,7 @@ describe('RelevanceTuningForm', () => {
         {
           factor: 2,
           type: BoostType.Value,
+          value: [],
         },
       ]);
       expect(relevantTuningItems.at(1).prop('boosts')).toBeUndefined();
@@ -95,6 +98,27 @@ describe('RelevanceTuningForm', () => {
         weight: 1,
       });
     });
+
+    it('wont show disabled fields section if there are no fields with schema conflicts', () => {
+      expect(wrapper.find('[data-test-subj="DisabledFieldsSection"]').exists()).toBe(false);
+    });
+  });
+
+  it('will show a disabled fields section if there are fields that have schema conflicts', () => {
+    // There will only ever be fields with schema conflicts if this is the relevance tuning
+    // page for a meta engine
+    setMockValues({
+      ...values,
+      filteredSchemaFieldsWithConflicts: ['fe', 'fi', 'fo'],
+    });
+
+    const wrapper = shallow(<RelevanceTuningForm />);
+    expect(wrapper.find('[data-test-subj="DisabledFieldsSection"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="DisabledField"]').map((f) => f.text())).toEqual([
+      'fe',
+      'fi',
+      'fo',
+    ]);
   });
 
   describe('field filtering', () => {

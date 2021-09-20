@@ -25,6 +25,7 @@ import { AppLogic } from '../../../../app_logic';
 import { Features, FeatureIds } from '../../../../types';
 
 import {
+  INCLUDED_FEATURES_TITLE,
   SOURCE_FEATURES_SEARCHABLE,
   SOURCE_FEATURES_REMOTE_FEATURE,
   SOURCE_FEATURES_PRIVATE_FEATURE,
@@ -63,20 +64,20 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
             </>
           )}
           <EuiFlexItem>
-            <EuiText size="xs">
+            <EuiText size="s">
               <strong>{title}</strong>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiText size="xs">{children}</EuiText>
+        <EuiText size="s">{children}</EuiText>
       </>
     );
   };
 
   const SyncFrequencyFeature = (
     <Feature icon="clock" title="Syncs every 2 hours">
-      <EuiText size="xs">
+      <EuiText size="s">
         <p>
           <FormattedMessage
             id="xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.syncFrequency.text"
@@ -94,11 +95,11 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   const SyncedItemsFeature = (
     <Feature icon="documents" title="Synced items">
       <>
-        <EuiText size="xs">
+        <EuiText size="s">
           <p>{SOURCE_FEATURES_SEARCHABLE}</p>
         </EuiText>
         <EuiSpacer size="xs" />
-        <EuiText size="xs">
+        <EuiText size="s">
           <ul>
             {objTypes!.map((objType, i) => (
               <li key={i}>{objType}</li>
@@ -178,21 +179,14 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
 
     return (
       <>
-        <EuiTitle size="xs">
-          <h3>
-            <strong>Included features</strong>
-          </h3>
+        <EuiTitle size="s">
+          <h2>{INCLUDED_FEATURES_TITLE}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiFlexGroup>
           {includedFeatures.map((featureId, i) => (
             <EuiFlexItem key={i}>
-              <EuiPanel
-                hasShadow={false}
-                color="subdued"
-                className="euiPanel--inset"
-                paddingSize="l"
-              >
+              <EuiPanel hasShadow={false} paddingSize="l">
                 <FeaturesRouter featureId={featureId as IncludedFeatureIds} />
               </EuiPanel>
             </EuiFlexItem>

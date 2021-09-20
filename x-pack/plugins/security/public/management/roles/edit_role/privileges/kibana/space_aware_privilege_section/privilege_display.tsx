@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiText, PropsOf } from '@elastic/eui';
+import type { PropsOf } from '@elastic/eui';
+import { EuiIcon, EuiText } from '@elastic/eui';
 import _ from 'lodash';
-import React, { ReactNode, FC } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
+
 import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props extends PropsOf<typeof EuiText> {

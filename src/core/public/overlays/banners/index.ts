@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { OverlayBannersStart, OverlayBannersService } from './banners_service';
+export { OverlayBannersService } from './banners_service';
+export type { OverlayBannersStart } from './banners_service';

@@ -6,58 +6,54 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function NewsfeedPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const log = getService('log');
-  const find = getService('find');
-  const retry = getService('retry');
-  const flyout = getService('flyout');
-  const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+export class NewsfeedPageObject extends FtrService {
+  private readonly log = this.ctx.getService('log');
+  private readonly find = this.ctx.getService('find');
+  private readonly retry = this.ctx.getService('retry');
+  private readonly flyout = this.ctx.getService('flyout');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly common = this.ctx.getPageObject('common');
 
-  class NewsfeedPage {
-    async resetPage() {
-      await PageObjects.common.navigateToUrl('home', '', { useActualUrl: true });
-    }
-
-    async closeNewsfeedPanel() {
-      await flyout.ensureClosed('NewsfeedFlyout');
-      log.debug('clickNewsfeed icon');
-      await retry.waitFor('newsfeed flyout', async () => {
-        if (await testSubjects.exists('NewsfeedFlyout')) {
-          await testSubjects.click('NewsfeedFlyout > euiFlyoutCloseButton');
-          return false;
-        }
-        return true;
-      });
-    }
-
-    async openNewsfeedPanel() {
-      log.debug('clickNewsfeed icon');
-      return await testSubjects.exists('NewsfeedFlyout');
-    }
-
-    async getRedButtonSign() {
-      return await find.existsByCssSelector('.euiHeaderSectionItemButton__notification--dot');
-    }
-
-    async getNewsfeedList() {
-      const list = await testSubjects.find('NewsfeedFlyout');
-      const cells = await list.findAllByTestSubject('newsHeadAlert');
-
-      const objects = [];
-      for (const cell of cells) {
-        objects.push(await cell.getVisibleText());
-      }
-
-      return objects;
-    }
-
-    async openNewsfeedEmptyPanel() {
-      return await testSubjects.exists('emptyNewsfeed');
-    }
+  async resetPage() {
+    await this.common.navigateToUrl('home', '', { useActualUrl: true });
   }
 
-  return new NewsfeedPage();
+  async closeNewsfeedPanel() {
+    await this.flyout.ensureClosed('NewsfeedFlyout');
+    this.log.debug('clickNewsfeed icon');
+    await this.retry.waitFor('newsfeed flyout', async () => {
+      if (await this.testSubjects.exists('NewsfeedFlyout')) {
+        await this.testSubjects.click('NewsfeedFlyout > euiFlyoutCloseButton');
+        return false;
+      }
+      return true;
+    });
+  }
+
+  async openNewsfeedPanel() {
+    this.log.debug('clickNewsfeed icon');
+    return await this.testSubjects.exists('NewsfeedFlyout');
+  }
+
+  async getRedButtonSign() {
+    return await this.find.existsByCssSelector('.euiHeaderSectionItemButton__notification--dot');
+  }
+
+  async getNewsfeedList() {
+    const list = await this.testSubjects.find('NewsfeedFlyout');
+    const cells = await list.findAllByTestSubject('newsHeadAlert');
+
+    const objects = [];
+    for (const cell of cells) {
+      objects.push(await cell.getVisibleText());
+    }
+
+    return objects;
+  }
+
+  async openNewsfeedEmptyPanel() {
+    return await this.testSubjects.exists('emptyNewsfeed');
+  }
 }

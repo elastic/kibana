@@ -13,6 +13,8 @@ import { useMountAppended } from '../../../../../../common/utils/use_mount_appen
 import { RegistryEventDetailsLine } from './registry_event_details_line';
 import { MODIFIED_REGISTRY_KEY } from '../system/translations';
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {

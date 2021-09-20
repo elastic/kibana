@@ -11,7 +11,7 @@ exports[`BytesFormatEditor should render normally 1`] = `
     helpText={
       <span>
         <EuiLink
-          href="https://adamwdraper.github.io/Numeral-js/"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/numeral.html"
           target="_blank"
         >
           <FormattedMessage
@@ -43,6 +43,7 @@ exports[`BytesFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldText
+      data-test-subj="numberEditorFormatPattern"
       isInvalid={false}
       onChange={[Function]}
       placeholder="0,0.[000]b"

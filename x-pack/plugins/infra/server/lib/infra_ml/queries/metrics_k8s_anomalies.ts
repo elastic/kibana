@@ -15,6 +15,7 @@ import {
   defaultRequestParameters,
   createAnomalyScoreFilter,
   createInfluencerFilter,
+  createJobIdsQuery,
 } from './common';
 import { InfluencerFilter } from '../common';
 import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
@@ -36,6 +37,7 @@ export const createMetricsK8sAnomaliesQuery = ({
   sort,
   pagination,
   influencerFilter,
+  jobQuery,
 }: {
   jobIds: string[];
   anomalyThreshold: ANOMALY_THRESHOLD;
@@ -44,17 +46,20 @@ export const createMetricsK8sAnomaliesQuery = ({
   sort: Sort;
   pagination: Pagination;
   influencerFilter?: InfluencerFilter;
+  jobQuery?: string;
 }) => {
   const { field } = sort;
   const { pageSize } = pagination;
 
-  const filters = [
+  let filters: any = [
     ...createJobIdsFilters(jobIds),
     ...createAnomalyScoreFilter(anomalyThreshold),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];
-
+  if (jobQuery) {
+    filters = [...filters, ...createJobIdsQuery(jobQuery)];
+  }
   const influencerQuery = influencerFilter
     ? { must: createInfluencerFilter(influencerFilter) }
     : {};
@@ -64,6 +69,7 @@ export const createMetricsK8sAnomaliesQuery = ({
     'record_score',
     'typical',
     'actual',
+    'partition_field_name',
     'partition_field_value',
     'timestamp',
     'bucket_span',
@@ -116,6 +122,8 @@ export const metricsK8sAnomalyHitRT = rt.type({
       timestamp: rt.number,
     }),
     rt.partial({
+      partition_field_name: rt.string,
+      partition_field_value: rt.string,
       by_field_value: rt.string,
     }),
   ]),

@@ -9,6 +9,13 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { METRIC_TYPE } from '@kbn/analytics';
 
+const applicationUsageReportSchema = schema.object({
+  minutesOnScreen: schema.number(),
+  numberOfClicks: schema.number(),
+  appId: schema.string(),
+  viewId: schema.string(),
+});
+
 export const reportSchema = schema.object({
   reportVersion: schema.maybe(schema.oneOf([schema.literal(3)])),
   userAgent: schema.maybe(
@@ -38,17 +45,8 @@ export const reportSchema = schema.object({
       })
     )
   ),
-  application_usage: schema.maybe(
-    schema.recordOf(
-      schema.string(),
-      schema.object({
-        minutesOnScreen: schema.number(),
-        numberOfClicks: schema.number(),
-        appId: schema.string(),
-        viewId: schema.string(),
-      })
-    )
-  ),
+  application_usage: schema.maybe(schema.recordOf(schema.string(), applicationUsageReportSchema)),
 });
 
 export type ReportSchemaType = TypeOf<typeof reportSchema>;
+export type ApplicationUsageReport = TypeOf<typeof applicationUsageReportSchema>;

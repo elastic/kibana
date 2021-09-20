@@ -1,8 +1,8 @@
 {
   "type": "doc",
   "value": {
-    "index": "auditbeat-7.0.0-alpha1-2018.11.27",
-    "type": "doc",
+    "index": "auditbeat-users",
+    "type": "_doc",
     "id": "Xa2ipWkBCQofM5eXEgsv",
     "source": {
       "@timestamp": "2018-11-27T02:59:28.060Z",
@@ -29,8 +29,7 @@
         "session": "unset"
       },
       "destination" : {
-        "ip" : "0.0.0.0",
-        "port" : "22"
+        "ip" : "0.0.0.0"
       },
       "event": {
         "type": "user_err",
@@ -51,7 +50,8 @@
         "pid": "13647"
       },
       "source": {
-        "ip": "51.38.82.60"
+        "ip": "51.38.82.60",
+        "port": "22"
       },
       "network": {
         "direction": "incoming"

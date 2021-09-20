@@ -12,7 +12,7 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-  ILegacyScopedClusterClient,
+  ElasticsearchClient,
 } from 'kibana/server';
 import { Logger } from '../../../../../../src/core/server';
 
@@ -49,7 +49,10 @@ export function createFieldsRoute(logger: Logger, router: IRouter, baseRoute: st
     }
 
     try {
-      rawFields = await getRawFields(ctx.core.elasticsearch.legacy.client, req.body.indexPatterns);
+      rawFields = await getRawFields(
+        ctx.core.elasticsearch.client.asCurrentUser,
+        req.body.indexPatterns
+      );
     } catch (err) {
       const indexPatterns = req.body.indexPatterns.join(',');
       logger.warn(
@@ -90,19 +93,15 @@ interface Field {
   aggregatable: boolean;
 }
 
-async function getRawFields(
-  dataClient: ILegacyScopedClusterClient,
-  indexes: string[]
-): Promise<RawFields> {
+async function getRawFields(esClient: ElasticsearchClient, indexes: string[]): Promise<RawFields> {
   const params = {
     index: indexes,
     fields: ['*'],
-    ignoreUnavailable: true,
-    allowNoIndices: true,
-    ignore: 404,
+    ignore_unavailable: true,
+    allow_no_indices: true,
   };
-  const result = await dataClient.callAsCurrentUser('fieldCaps', params);
-  return result as RawFields;
+  const result = await esClient.fieldCaps(params);
+  return result.body as RawFields;
 }
 
 function getFieldsFromRawFields(rawFields: RawFields): Field[] {

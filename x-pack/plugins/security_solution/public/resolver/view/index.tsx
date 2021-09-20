@@ -25,9 +25,7 @@ export const Resolver = React.memo((props: ResolverProps) => {
     context,
   ]);
 
-  const store = useMemo(() => {
-    return resolverStoreFactory(dataAccessLayer);
-  }, [dataAccessLayer]);
+  const store = useMemo(() => resolverStoreFactory(dataAccessLayer), [dataAccessLayer]);
 
   const [activeStore, updateActiveStore] = useState(store);
 

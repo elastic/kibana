@@ -21,6 +21,7 @@ import {
   EuiIconTip,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiRangeProps,
 } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
@@ -32,6 +33,13 @@ import { StyledDescriptionList } from './panels/styles';
 import { CubeForProcess } from './panels/cube_for_process';
 import { GeneratedText } from './generated_text';
 
+// EuiRange is currently only horizontally positioned. This reorients the track to a vertical position
+const StyledEuiRange = styled(EuiRange)<EuiRangeProps>`
+  & .euiRangeTrack:after {
+    left: -65px;
+    transform: rotate(90deg);
+  }
+`;
 interface StyledGraphControlProps {
   $backgroundColor: string;
   $iconColor: string;
@@ -207,7 +215,7 @@ export const GraphControls = React.memo(
           />
         </StyledGraphControlsColumn>
         <StyledGraphControlsColumn>
-          <EuiPanel className="panning-controls" paddingSize="none" hasShadow>
+          <EuiPanel className="panning-controls" paddingSize="none" hasBorder>
             <div className="panning-controls-top">
               <button
                 className="north-button"
@@ -265,7 +273,7 @@ export const GraphControls = React.memo(
               </button>
             </div>
           </EuiPanel>
-          <EuiPanel className="zoom-controls" paddingSize="none" hasShadow>
+          <EuiPanel className="zoom-controls" paddingSize="none" hasBorder>
             <button
               title={i18n.translate('xpack.securitySolution.resolver.graphControls.zoomIn', {
                 defaultMessage: 'Zoom In',
@@ -275,7 +283,7 @@ export const GraphControls = React.memo(
             >
               <EuiIcon type="plusInCircle" />
             </button>
-            <EuiRange
+            <StyledEuiRange
               className="zoom-slider"
               data-test-subj="resolver:graph-controls:zoom-slider"
               min={0}

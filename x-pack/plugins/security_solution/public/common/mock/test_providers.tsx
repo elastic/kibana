@@ -7,16 +7,14 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { I18nProvider } from '@kbn/i18n/react';
-import { InMemoryCache as Cache } from 'apollo-cache-inmemory';
-import ApolloClient from 'apollo-client';
-import { ApolloLink } from 'apollo-link';
+
 import React from 'react';
-import { ApolloProvider } from 'react-apollo';
 import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
+import { Capabilities } from 'src/core/public';
 
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
@@ -27,21 +25,16 @@ import {
 import { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
+import { UserPrivilegesProvider } from '../components/user_privileges';
 
 const state: State = mockGlobalState;
 
 interface Props {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   store?: Store;
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
 }
 
-export const apolloClient = new ApolloClient({
-  cache: new Cache(),
-  link: new ApolloLink((o, f) => (f ? f(o) : null)),
-});
-
-export const apolloClientObservable = new BehaviorSubject(apolloClient);
 export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
 
 Object.defineProperty(window, 'localStorage', {
@@ -52,31 +45,50 @@ const MockKibanaContextProvider = createKibanaContextProviderMock();
 const { storage } = createSecuritySolutionStorageMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<Props> = ({
+export const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  ),
+  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
 }) => (
   <I18nProvider>
     <MockKibanaContextProvider>
-      <ApolloProvider client={apolloClient}>
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+      <ReduxStoreProvider store={store}>
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+        </ThemeProvider>
+      </ReduxStoreProvider>
+    </MockKibanaContextProvider>
+  </I18nProvider>
+);
+
+/**
+ * A utility for wrapping children in the providers required to run most tests
+ * WITH user privileges provider.
+ */
+const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
+  children,
+  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
+  onDragEnd = jest.fn(),
+}) => (
+  <I18nProvider>
+    <MockKibanaContextProvider>
+      <ReduxStoreProvider store={store}>
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <UserPrivilegesProvider
+            kibanaCapabilities={
+              ({ siem: { crud_alerts: true, read_alerts: true } } as unknown) as Capabilities
+            }
+          >
             <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-          </ThemeProvider>
-        </ReduxStoreProvider>
-      </ApolloProvider>
+          </UserPrivilegesProvider>
+        </ThemeProvider>
+      </ReduxStoreProvider>
     </MockKibanaContextProvider>
   </I18nProvider>
 );
 
 export const TestProviders = React.memo(TestProvidersComponent);
+export const TestProvidersWithPrivileges = React.memo(TestProvidersWithPrivilegesComponent);
 
 export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => {
   return {
@@ -84,6 +96,8 @@ export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook
     type: 'type',
     value: ('mockedValue' as unknown) as T,
     isPristine: false,
+    isDirty: false,
+    isModified: false,
     isValidating: false,
     isValidated: false,
     isChangingValue: false,

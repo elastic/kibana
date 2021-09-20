@@ -16,8 +16,16 @@ import {
   Logger,
 } from 'src/core/server';
 
-import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
-import { ConfigType } from '../index';
+import { ConfigType } from '../';
+
+import {
+  ENTERPRISE_SEARCH_KIBANA_COOKIE,
+  JSON_HEADER,
+  ERROR_CONNECTING_HEADER,
+  READ_ONLY_MODE_HEADER,
+} from '../../common/constants';
+
+import { entSearchHttpAgent } from './enterprise_search_http_agent';
 
 interface ConstructorDependencies {
   config: ConfigType;
@@ -26,6 +34,7 @@ interface ConstructorDependencies {
 interface RequestParams {
   path: string;
   params?: object;
+  hasJsonResponse?: boolean;
   hasValidData?: Function;
 }
 interface ErrorResponse {
@@ -56,7 +65,12 @@ export class EnterpriseSearchRequestHandler {
     this.enterpriseSearchUrl = config.host as string;
   }
 
-  createRequest({ path, params = {}, hasValidData = () => true }: RequestParams) {
+  createRequest({
+    path,
+    params = {},
+    hasJsonResponse = true,
+    hasValidData = () => true,
+  }: RequestParams) {
     return async (
       _context: RequestHandlerContext,
       request: KibanaRequest<unknown, unknown, unknown>,
@@ -72,14 +86,15 @@ export class EnterpriseSearchRequestHandler {
         const url = encodeURI(this.enterpriseSearchUrl) + encodedPath + queryString;
 
         // Set up API options
-        const { method } = request.route;
-        const headers = { Authorization: request.headers.authorization as string, ...JSON_HEADER };
-        const body = !this.isEmptyObj(request.body as object)
-          ? JSON.stringify(request.body)
-          : undefined;
+        const options = {
+          method: request.route.method as string,
+          headers: { Authorization: request.headers.authorization as string, ...JSON_HEADER },
+          body: this.getBodyAsString(request.body as object | Buffer),
+          agent: entSearchHttpAgent.getHttpAgent(),
+        };
 
         // Call the Enterprise Search API
-        const apiResponse = await fetch(url, { method, headers, body });
+        const apiResponse = await fetch(url, options);
 
         // Handle response headers
         this.setResponseHeaders(apiResponse);
@@ -108,22 +123,50 @@ export class EnterpriseSearchRequestHandler {
         }
 
         // Check returned data
-        const json = await apiResponse.json();
-        if (!hasValidData(json)) {
-          return this.handleInvalidDataError(response, url, json);
+        let responseBody;
+
+        if (hasJsonResponse) {
+          const json = await apiResponse.json();
+
+          if (!hasValidData(json)) {
+            return this.handleInvalidDataError(response, url, json);
+          }
+
+          // Intercept data that is meant for the server side session
+          const { _sessionData, ...responseJson } = json;
+          if (_sessionData) {
+            this.setSessionData(_sessionData);
+            responseBody = responseJson;
+          } else {
+            responseBody = json;
+          }
+        } else {
+          responseBody = apiResponse.body;
         }
 
         // Pass successful responses back to the front-end
         return response.custom({
           statusCode: status,
           headers: this.headers,
-          body: json,
+          body: responseBody,
         });
       } catch (e) {
-        // Catch connection/auth errors
+        // Catch connection errors
         return this.handleConnectionError(response, e);
       }
     };
+  }
+
+  /**
+   * There are a number of different expected incoming bodies that we handle & pass on to Enterprise Search for ingestion:
+   * - Standard object data (should be JSON stringified)
+   * - Empty (should be passed as undefined and not as an empty obj)
+   * - Raw buffers (passed on as a string, occurs when using the `skipBodyValidation` lib helper)
+   */
+  getBodyAsString(body: object | Buffer): string | undefined {
+    if (Buffer.isBuffer(body)) return body.toString();
+    if (this.isEmptyObj(body)) return undefined;
+    return JSON.stringify(body);
   }
 
   /**
@@ -240,11 +283,12 @@ export class EnterpriseSearchRequestHandler {
 
   handleConnectionError(response: KibanaResponseFactory, e: Error) {
     const errorMessage = `Error connecting to Enterprise Search: ${e?.message || e.toString()}`;
+    const headers = { ...this.headers, [ERROR_CONNECTING_HEADER]: 'true' };
 
     this.log.error(errorMessage);
     if (e instanceof Error) this.log.debug(e.stack as string);
 
-    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
+    return response.customError({ statusCode: 502, headers, body: errorMessage });
   }
 
   /**
@@ -253,9 +297,10 @@ export class EnterpriseSearchRequestHandler {
    */
   handleAuthenticationError(response: KibanaResponseFactory) {
     const errorMessage = 'Cannot authenticate Enterprise Search user';
+    const headers = { ...this.headers, [ERROR_CONNECTING_HEADER]: 'true' };
 
     this.log.error(errorMessage);
-    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
+    return response.customError({ statusCode: 502, headers, body: errorMessage });
   }
 
   /**
@@ -268,6 +313,27 @@ export class EnterpriseSearchRequestHandler {
   setResponseHeaders(apiResponse: Response) {
     const readOnlyMode = apiResponse.headers.get(READ_ONLY_MODE_HEADER);
     this.headers[READ_ONLY_MODE_HEADER] = readOnlyMode as 'true' | 'false';
+  }
+
+  /**
+   * Extract Session Data
+   *
+   * In the future, this will set the keys passed back from Enterprise Search
+   * into the Kibana login session.
+   * For now we'll explicity look for the Workplace Search OAuth token package
+   * and stuff it into a cookie so it can be picked up later when we proxy the
+   * OAuth callback.
+   */
+  setSessionData(sessionData: { [key: string]: string }) {
+    if (sessionData.wsOAuthTokenPackage) {
+      const anHourFromNow = new Date(Date.now());
+      anHourFromNow.setHours(anHourFromNow.getHours() + 1);
+
+      const cookiePayload = `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${sessionData.wsOAuthTokenPackage};`;
+      const cookieRestrictions = `Path=/; Expires=${anHourFromNow.toUTCString()}; SameSite=Lax; HttpOnly`;
+
+      this.headers['set-cookie'] = `${cookiePayload} ${cookieRestrictions}`;
+    }
   }
 
   /**

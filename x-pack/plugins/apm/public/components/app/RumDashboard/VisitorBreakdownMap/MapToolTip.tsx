@@ -20,7 +20,7 @@ import {
   TRANSACTION_DURATION_COUNTRY,
   TRANSACTION_DURATION_REGION,
 } from './useLayerList';
-import { RenderTooltipContentParams } from '../../../../../../maps/public';
+import type { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { I18LABELS } from '../translations';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;
@@ -59,7 +59,11 @@ function MapToolTipComponent({
   useEffect(() => {
     const loadRegionInfo = async () => {
       if (loadFeatureProperties) {
-        const items = await loadFeatureProperties({ layerId, featureId });
+        const items = await loadFeatureProperties({
+          layerId,
+          featureId,
+          mbProperties: {},
+        });
         items.forEach((item) => {
           if (
             item.getPropertyKey() === COUNTRY_NAME ||

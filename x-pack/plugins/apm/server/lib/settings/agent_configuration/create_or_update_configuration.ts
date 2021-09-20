@@ -12,7 +12,6 @@ import {
   AgentConfigurationIntake,
 } from '../../../../common/agent_configuration/configuration_types';
 import { APMIndexDocumentParams } from '../../helpers/create_es_client/create_internal_es_client';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 export function createOrUpdateConfiguration({
   configurationId,
@@ -23,30 +22,28 @@ export function createOrUpdateConfiguration({
   configurationIntake: AgentConfigurationIntake;
   setup: Setup;
 }) {
-  return withApmSpan('create_or_update_configuration', async () => {
-    const { internalClient, indices } = setup;
+  const { internalClient, indices } = setup;
 
-    const params: APMIndexDocumentParams<AgentConfiguration> = {
-      refresh: true,
-      index: indices.apmAgentConfigurationIndex,
-      body: {
-        agent_name: configurationIntake.agent_name,
-        service: {
-          name: configurationIntake.service.name,
-          environment: configurationIntake.service.environment,
-        },
-        settings: configurationIntake.settings,
-        '@timestamp': Date.now(),
-        applied_by_agent: false,
-        etag: hash(configurationIntake),
+  const params: APMIndexDocumentParams<AgentConfiguration> = {
+    refresh: true,
+    index: indices.apmAgentConfigurationIndex,
+    body: {
+      agent_name: configurationIntake.agent_name,
+      service: {
+        name: configurationIntake.service.name,
+        environment: configurationIntake.service.environment,
       },
-    };
+      settings: configurationIntake.settings,
+      '@timestamp': Date.now(),
+      applied_by_agent: false,
+      etag: hash(configurationIntake),
+    },
+  };
 
-    // by specifying an id elasticsearch will delete the previous doc and insert the updated doc
-    if (configurationId) {
-      params.id = configurationId;
-    }
+  // by specifying an id elasticsearch will delete the previous doc and insert the updated doc
+  if (configurationId) {
+    params.id = configurationId;
+  }
 
-    return internalClient.index(params);
-  });
+  return internalClient.index('create_or_update_agent_configuration', params);
 }

@@ -26,5 +26,5 @@ export interface ChromeNavLink
 |  [order](./kibana-plugin-core-public.chromenavlink.order.md) | <code>number</code> | An ordinal used to sort nav links relative to one another for display. |
 |  [title](./kibana-plugin-core-public.chromenavlink.title.md) | <code>string</code> | The title of the application. |
 |  [tooltip](./kibana-plugin-core-public.chromenavlink.tooltip.md) | <code>string</code> | A tooltip shown when hovering over an app link. |
-|  [url](./kibana-plugin-core-public.chromenavlink.url.md) | <code>string</code> | The route used to open the  of an application. If unset, <code>baseUrl</code> will be used instead. |
+|  [url](./kibana-plugin-core-public.chromenavlink.url.md) | <code>string</code> | The route used to open the default path and the deep links of an application. |
 

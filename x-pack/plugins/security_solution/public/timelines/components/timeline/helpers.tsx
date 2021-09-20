@@ -8,13 +8,14 @@
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 
+import { EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import {
   handleSkipFocus,
   elementOrChildrenHasFocus,
   getFocusedAriaColindexCell,
   getTableSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../../../common/components/accessibility/helpers';
+} from '../../../../../timelines/public';
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
 
 import {
@@ -24,12 +25,7 @@ import {
   EXISTS_OPERATOR,
 } from './data_providers/data_provider';
 import { BrowserFields } from '../../../common/containers/source';
-import {
-  IIndexPattern,
-  Query,
-  EsQueryConfig,
-  Filter,
-} from '../../../../../../../src/plugins/data/public';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
@@ -64,6 +60,35 @@ const checkIfFieldTypeIsDate = (field: string, browserFields: BrowserFields) => 
   return false;
 };
 
+const convertNestedFieldToQuery = (
+  field: string,
+  value: string | number,
+  browserFields: BrowserFields
+) => {
+  const pathBrowserField = getBrowserFieldPath(field, browserFields);
+  const browserField = get(pathBrowserField, browserFields);
+  const nestedPath = browserField.subType.nested.path;
+  const key = field.replace(`${nestedPath}.`, '');
+  return `${nestedPath}: { ${key}: ${browserField.type === 'date' ? `"${value}"` : value} }`;
+};
+
+const convertNestedFieldToExistQuery = (field: string, browserFields: BrowserFields) => {
+  const pathBrowserField = getBrowserFieldPath(field, browserFields);
+  const browserField = get(pathBrowserField, browserFields);
+  const nestedPath = browserField.subType.nested.path;
+  const key = field.replace(`${nestedPath}.`, '');
+  return `${nestedPath}: { ${key}: * }`;
+};
+
+const checkIfFieldTypeIsNested = (field: string, browserFields: BrowserFields) => {
+  const pathBrowserField = getBrowserFieldPath(field, browserFields);
+  const browserField = get(pathBrowserField, browserFields);
+  if (browserField != null && browserField.subType && browserField.subType.nested) {
+    return true;
+  }
+  return false;
+};
+
 const buildQueryMatch = (
   dataProvider: DataProvider | DataProvidersAnd,
   browserFields: BrowserFields
@@ -71,13 +96,21 @@ const buildQueryMatch = (
   `${dataProvider.excluded ? 'NOT ' : ''}${
     dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
     dataProvider.type !== DataProviderType.template
-      ? checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
+      ? checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
+        ? convertNestedFieldToQuery(
+            dataProvider.queryMatch.field,
+            dataProvider.queryMatch.value,
+            browserFields
+          )
+        : checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
             isNumber(dataProvider.queryMatch.value)
               ? dataProvider.queryMatch.value
               : escapeQueryValue(dataProvider.queryMatch.value)
           }`
+      : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
+      ? convertNestedFieldToExistQuery(dataProvider.queryMatch.field, browserFields)
       : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
   }`.trim();
 
@@ -124,27 +157,48 @@ export const combineQueries = ({
   kqlQuery: Query;
   kqlMode: string;
   isEventViewer?: boolean;
-}): { filterQuery: string } | null => {
+}): { filterQuery?: string; kqlError?: Error } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
+  } else if (
+    isEmpty(dataProviders) &&
+    isEmpty(kqlQuery.query) &&
+    (isEventViewer || !isEmpty(filters))
+  ) {
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
-    };
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
-    return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery,
+      kqlError,
     };
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
     kuery.query = `(${kqlQuery.query})`;
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery,
+      kqlError,
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery,
+      kqlError,
     };
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
@@ -152,8 +206,15 @@ export const combineQueries = ({
   kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery.query as string
   )})`;
+  const [filterQuery, kqlError] = convertToBuildEsQuery({
+    config,
+    queries: [kuery],
+    indexPattern,
+    filters,
+  });
   return {
-    filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+    filterQuery,
+    kqlError,
   };
 };
 

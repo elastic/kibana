@@ -6,42 +6,52 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities } from 'src/core/public';
 import { EuiCheckboxGroup } from '@elastic/eui';
-import React from 'react';
-import { ReactElement, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import React, { ReactElement, useState } from 'react';
+import type { Capabilities } from 'src/core/public';
 import { DashboardSavedObject } from '../..';
+import { shareModalStrings } from '../../dashboard_strings';
+import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
+import { TimeRange } from '../../services/data';
+import { ViewMode } from '../../services/embeddable';
 import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
 import { SharePluginStart } from '../../services/share';
+import { DashboardAppCapabilities, DashboardState } from '../../types';
 import { dashboardUrlParams } from '../dashboard_router';
-import { DashboardStateManager } from '../dashboard_state_manager';
-import { shareModalStrings } from '../../dashboard_strings';
-import { DashboardCapabilities } from '../types';
+import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 
 const showFilterBarId = 'showFilterBar';
 
 interface ShowShareModalProps {
+  isDirty: boolean;
+  kibanaVersion: string;
   share: SharePluginStart;
   anchorElement: HTMLElement;
   savedDashboard: DashboardSavedObject;
-  dashboardCapabilities: DashboardCapabilities;
-  dashboardStateManager: DashboardStateManager;
+  currentDashboardState: DashboardState;
+  dashboardCapabilities: DashboardAppCapabilities;
+  timeRange: TimeRange;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.dashboard) return false;
 
-  const dashboard = (anonymousUserCapabilities.dashboard as unknown) as DashboardCapabilities;
+  const dashboard = (anonymousUserCapabilities.dashboard as unknown) as DashboardAppCapabilities;
 
   return !!dashboard.show;
 };
 
 export function ShowShareModal({
   share,
+  isDirty,
+  kibanaVersion,
   anchorElement,
   savedDashboard,
   dashboardCapabilities,
-  dashboardStateManager,
+  currentDashboardState,
+  timeRange,
 }: ShowShareModalProps) {
   const EmbedUrlParamExtension = ({
     setParamValue,
@@ -100,22 +110,51 @@ export function ShowShareModal({
     );
   };
 
+  const rawDashboardState = stateToRawDashboardState({
+    state: currentDashboardState,
+    version: kibanaVersion,
+  });
+
+  const locatorParams: DashboardAppLocatorParams = {
+    dashboardId: savedDashboard.id,
+    filters: rawDashboardState.filters,
+    preserveSavedFilters: true,
+    query: rawDashboardState.query,
+    savedQuery: rawDashboardState.savedQuery,
+    useHash: false,
+    panels: rawDashboardState.panels,
+    timeRange,
+    viewMode: ViewMode.VIEW, // For share locators we always load the dashboard in view mode
+    refreshInterval: undefined, // We don't share refresh interval externally
+    options: rawDashboardState.options,
+  };
+
   share.toggleShareContextMenu({
+    isDirty,
     anchorElement,
     allowEmbed: true,
     allowShortUrl: dashboardCapabilities.createShortUrl,
     shareableUrl: setStateToKbnUrl(
       '_a',
-      dashboardStateManager.getAppState(),
+      rawDashboardState,
       { useHash: false, storeInHashQuery: true },
       unhashUrl(window.location.href)
     ),
     objectId: savedDashboard.id,
     objectType: 'dashboard',
     sharingData: {
-      title: savedDashboard.title,
+      title:
+        savedDashboard.title ||
+        i18n.translate('dashboard.share.defaultDashboardTitle', {
+          defaultMessage: 'Dashboard [{date}]',
+          values: { date: moment().toISOString(true) },
+        }),
+      locatorParams: {
+        id: DASHBOARD_APP_LOCATOR,
+        version: kibanaVersion,
+        params: locatorParams,
+      },
     },
-    isDirty: dashboardStateManager.getIsDirty(),
     embedUrlParamExtensions: [
       {
         paramName: 'embed',

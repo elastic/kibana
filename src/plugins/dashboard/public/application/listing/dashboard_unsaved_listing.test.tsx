@@ -11,14 +11,14 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import React from 'react';
+
 import { DashboardSavedObject } from '../..';
-import { coreMock } from '../../../../../core/public/mocks';
-import { KibanaContextProvider } from '../../services/kibana_react';
+import { DashboardAppServices } from '../../types';
 import { SavedObjectLoader } from '../../services/saved_objects';
-import { DashboardPanelStorage } from '../lib';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
-import { DashboardAppServices } from '../types';
+import { KibanaContextProvider } from '../../services/kibana_react';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
+import { makeDefaultServices } from '../test_helpers';
 
 const mockedDashboards: { [key: string]: DashboardSavedObject } = {
   dashboardUnsavedOne: {
@@ -35,20 +35,16 @@ const mockedDashboards: { [key: string]: DashboardSavedObject } = {
   } as DashboardSavedObject,
 };
 
-function makeDefaultServices(): DashboardAppServices {
-  const core = coreMock.createStart();
-  core.overlays.openConfirm = jest.fn().mockResolvedValue(true);
+function makeServices(): DashboardAppServices {
+  const services = makeDefaultServices();
   const savedDashboards = {} as SavedObjectLoader;
   savedDashboards.get = jest
     .fn()
     .mockImplementation((id: string) => Promise.resolve(mockedDashboards[id]));
-  const dashboardPanelStorage = {} as DashboardPanelStorage;
-  dashboardPanelStorage.clearPanels = jest.fn();
-  return ({
-    dashboardPanelStorage,
+  return {
+    ...services,
     savedDashboards,
-    core,
-  } as unknown) as DashboardAppServices;
+  };
 }
 
 const makeDefaultProps = (): DashboardUnsavedListingProps => ({
@@ -64,7 +60,7 @@ function mountWith({
   services?: DashboardAppServices;
   props?: DashboardUnsavedListingProps;
 }) {
-  const services = incomingServices ?? makeDefaultServices();
+  const services = incomingServices ?? makeServices();
   const props = incomingProps ?? makeDefaultProps();
   const wrappingComponent: React.FC<{
     children: React.ReactNode;
@@ -140,14 +136,14 @@ describe('Unsaved listing', () => {
     waitFor(() => {
       component.update();
       expect(services.core.overlays.openConfirm).toHaveBeenCalled();
-      expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith(
+      expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith(
         'dashboardUnsavedOne'
       );
     });
   });
 
   it('removes unsaved changes from any dashboard which errors on fetch', async () => {
-    const services = makeDefaultServices();
+    const services = makeServices();
     const props = makeDefaultProps();
     services.savedDashboards.get = jest.fn().mockImplementation((id: string) => {
       if (id === 'failCase1' || id === 'failCase2') {
@@ -166,12 +162,12 @@ describe('Unsaved listing', () => {
     const { component } = mountWith({ services, props });
     waitFor(() => {
       component.update();
-      expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith('failCase1');
-      expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith('failCase2');
+      expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith('failCase1');
+      expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith('failCase2');
 
       // clearing panels from dashboard with errors should cause getDashboardIdsWithUnsavedChanges to be called again.
       expect(
-        services.dashboardPanelStorage.getDashboardIdsWithUnsavedChanges
+        services.dashboardSessionStorage.getDashboardIdsWithUnsavedChanges
       ).toHaveBeenCalledTimes(2);
     });
   });

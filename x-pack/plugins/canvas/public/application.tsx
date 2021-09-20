@@ -17,14 +17,14 @@ import { includes, remove } from 'lodash';
 
 import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/public';
 
-import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
-// @ts-expect-error untyped local
-import { App } from './components/app';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+import { PluginServices } from '../../../../src/plugins/presentation_util/public';
+
+import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
+import { App } from './components/app';
 import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
-import { getDocumentationLinks } from './lib/documentation_links';
 import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore } from './store';
 
@@ -32,11 +32,12 @@ import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import { startServices, services, ServicesProvider } from './services';
-// @ts-expect-error untyped local
-import { createHistory, destroyHistory } from './lib/history_provider';
-// @ts-expect-error untyped local
-import { stopRouter } from './lib/router_provider';
+import {
+  startLegacyServices,
+  services,
+  LegacyServicesProvider,
+  CanvasPluginServices,
+} from './services';
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
@@ -50,24 +51,38 @@ import './style/index.scss';
 
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
-export const renderApp = (
-  coreStart: CoreStart,
-  plugins: CanvasStartDeps,
-  { element }: AppMountParameters,
-  canvasStore: Store
-) => {
+export const renderApp = ({
+  coreStart,
+  startPlugins,
+  params,
+  canvasStore,
+  pluginServices,
+}: {
+  coreStart: CoreStart;
+  startPlugins: CanvasStartDeps;
+  params: AppMountParameters;
+  canvasStore: Store;
+  pluginServices: PluginServices<CanvasPluginServices>;
+}) => {
+  const { presentationUtil } = startPlugins;
+  const { element } = params;
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
+  const ServicesContextProvider = pluginServices.getContextProvider();
 
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...plugins, ...coreStart }}>
-      <ServicesProvider providers={services}>
-        <I18nProvider>
-          <Provider store={canvasStore}>
-            <App />
-          </Provider>
-        </I18nProvider>
-      </ServicesProvider>
+    <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
+      <ServicesContextProvider>
+        <LegacyServicesProvider providers={services}>
+          <presentationUtil.ContextProvider>
+            <I18nProvider>
+              <Provider store={canvasStore}>
+                <App />
+              </Provider>
+            </I18nProvider>
+          </presentationUtil.ContextProvider>
+        </LegacyServicesProvider>
+      </ServicesContextProvider>
     </KibanaContextProvider>,
     element
   );
@@ -83,31 +98,30 @@ export const initializeCanvas = async (
   setupPlugins: CanvasSetupDeps,
   startPlugins: CanvasStartDeps,
   registries: SetupRegistries,
-  appUpdater: BehaviorSubject<AppUpdater>
+  appUpdater: BehaviorSubject<AppUpdater>,
+  pluginServices: PluginServices<CanvasPluginServices>
 ) => {
-  await startServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
+  await startLegacyServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
+  const { expressions } = pluginServices.getServices();
 
   // Adding these functions here instead of in plugin.ts.
   // Some of these functions have deep dependencies into Canvas, which was bulking up the size
   // of our bundle entry point. Moving them here pushes that load to when canvas is actually loaded.
   const canvasFunctions = initFunctions({
     timefilter: setupPlugins.data.query.timefilter.timefilter,
-    prependBasePath: coreSetup.http.basePath.prepend,
+    prependBasePath: coreStart.http.basePath.prepend,
     types: setupPlugins.expressions.getTypes(),
     paletteService: await setupPlugins.charts.palettes.getPalettes(),
   });
 
   for (const fn of canvasFunctions) {
-    services.expressions.getService().registerFunction(fn);
+    expressions.registerFunction(fn);
   }
 
-  // Re-initialize our history
-  createHistory();
-
   // Create Store
-  const canvasStore = await createStore(coreSetup, setupPlugins);
+  const canvasStore = await createStore(coreSetup);
 
-  registerLanguage(Object.values(services.expressions.getService().getFunctions()));
+  registerLanguage(Object.values(expressions.getFunctions()));
 
   // Init Registries
   initRegistries();
@@ -124,6 +138,8 @@ export const initializeCanvas = async (
         }
   );
 
+  // Setup documentation links
+  const { docLinks } = coreStart;
   // Set help extensions
   coreStart.chrome.setHelpExtension({
     appName: i18n.translate('xpack.canvas.helpMenu.appName', {
@@ -132,14 +148,11 @@ export const initializeCanvas = async (
     links: [
       {
         linkType: 'documentation',
-        href: getDocumentationLinks().canvas,
+        href: docLinks.links.canvas.guide,
       },
     ],
     content: (domNode) => {
-      ReactDOM.render(
-        <HelpMenu functionRegistry={services.expressions.getService().getFunctions()} />,
-        domNode
-      );
+      ReactDOM.render(<HelpMenu functionRegistry={expressions.getFunctions()} />, domNode);
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });
@@ -151,7 +164,7 @@ export const initializeCanvas = async (
   return canvasStore;
 };
 
-export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDeps) => {
+export const teardownCanvas = (coreStart: CoreStart) => {
   destroyRegistries();
 
   // Canvas pollutes the jQuery plot plugins collection with custom plugins that only work in Canvas.
@@ -174,7 +187,4 @@ export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDe
 
   coreStart.chrome.setBadge(undefined);
   coreStart.chrome.setHelpExtension(undefined);
-
-  destroyHistory();
-  stopRouter();
 };

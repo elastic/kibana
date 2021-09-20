@@ -23,6 +23,8 @@ describe('Discover grid view button ', function () {
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
       isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(
@@ -49,6 +51,8 @@ describe('Discover grid view button ', function () {
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
       isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(
@@ -75,6 +79,8 @@ describe('Discover grid view button ', function () {
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
       isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(

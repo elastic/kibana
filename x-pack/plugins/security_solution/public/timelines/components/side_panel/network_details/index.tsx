@@ -42,19 +42,19 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 `;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  flex: 0;
-`;
-
-const StyledEuiFlexItem = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    flex: 1 0 0;
-    overflow-y: scroll;
-    overflow-x: hidden;
-  }
+  flex: 1 0 auto;
 `;
 
 const StyledEuiFlexButtonWrapper = styled(EuiFlexItem)`
   align-self: flex-start;
+  flex: 1 0 auto;
+`;
+
+const StyledPanelContent = styled.div`
+  display: block;
+  height: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
 `;
 
 interface NetworkDetailsProps {
@@ -62,10 +62,17 @@ interface NetworkDetailsProps {
   expandedNetwork: { ip: string; flowTarget: FlowTarget };
   handleOnNetworkClosed: () => void;
   isFlyoutView?: boolean;
+  isDraggable?: boolean;
 }
 
 export const NetworkDetailsPanel = React.memo(
-  ({ contextID, expandedNetwork, handleOnNetworkClosed, isFlyoutView }: NetworkDetailsProps) => {
+  ({
+    contextID,
+    expandedNetwork,
+    handleOnNetworkClosed,
+    isFlyoutView,
+    isDraggable,
+  }: NetworkDetailsProps) => {
     const { ip } = expandedNetwork;
 
     return isFlyoutView ? (
@@ -104,9 +111,13 @@ export const NetworkDetailsPanel = React.memo(
           <ExpandableNetworkDetailsPageLink expandedNetwork={expandedNetwork} />
         </StyledEuiFlexButtonWrapper>
         <EuiSpacer size="m" />
-        <StyledEuiFlexItem grow={true}>
-          <ExpandableNetworkDetails contextID={contextID} expandedNetwork={expandedNetwork} />
-        </StyledEuiFlexItem>
+        <StyledPanelContent>
+          <ExpandableNetworkDetails
+            contextID={contextID}
+            expandedNetwork={expandedNetwork}
+            isDraggable={isDraggable}
+          />
+        </StyledPanelContent>
       </>
     );
   }

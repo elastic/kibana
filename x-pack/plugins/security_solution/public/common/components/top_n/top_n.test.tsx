@@ -35,7 +35,7 @@ jest.mock('uuid', () => {
   };
 });
 
-const field = 'process.name';
+const field = 'host.name';
 const value = 'nice';
 const combinedQueries = {
   bool: {
@@ -101,7 +101,6 @@ describe('TopN', () => {
     field,
     filters: [],
     from: '2020-04-14T00:31:47.695Z',
-    indexNames: [],
     indexPattern: mockIndexPattern,
     options: defaultOptions,
     query,

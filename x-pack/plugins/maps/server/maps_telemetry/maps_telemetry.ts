@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { SavedObject } from 'kibana/server';
-import { IFieldType } from 'src/plugins/data/public';
+import type { IndexPatternField } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
   LAYER_TYPE,
@@ -23,13 +23,19 @@ import {
 } from '../../common/descriptor_types';
 import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { getIndexPatternsService, getInternalRepository } from '../kibana_server_services';
-import { MapsConfigType } from '../../config';
-// @ts-expect-error
 import { injectReferences } from '././../../common/migrations/references';
-
-interface Settings {
-  showMapVisualizationTypes: boolean;
-}
+import {
+  getBaseMapsPerCluster,
+  getGridResolutionsPerCluster,
+  getScalingOptionsPerCluster,
+  getTelemetryLayerTypesPerCluster,
+  getTermJoinsPerCluster,
+  TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER,
+  TELEMETRY_GRID_RESOLUTION_COUNTS_PER_CLUSTER,
+  TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER,
+  TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER,
+  TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER,
+} from './util';
 
 interface IStats {
   [key: string]: {
@@ -53,6 +59,11 @@ export interface GeoIndexPatternsUsage {
 export interface LayersStatsUsage {
   mapsTotalCount: number;
   timeCaptured: string;
+  layerTypes: TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER;
+  scalingOptions: TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER;
+  joins: TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER;
+  basemaps: TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER;
+  resolutions: TELEMETRY_GRID_RESOLUTION_COUNTS_PER_CLUSTER;
   attributesPerMap: {
     dataSourcesCount: {
       min: number;
@@ -69,9 +80,7 @@ export interface LayersStatsUsage {
   };
 }
 
-export interface MapsUsage extends LayersStatsUsage, GeoIndexPatternsUsage {
-  settings: Settings;
-}
+export type MapsUsage = LayersStatsUsage & GeoIndexPatternsUsage;
 
 function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
   const uniqueLayerTypes = _.uniq(_.flatten(layerCountsList.map((lTypes) => Object.keys(lTypes))));
@@ -126,9 +135,9 @@ async function isFieldGeoShape(
   if (!indexPattern) {
     return false;
   }
-  const fieldsForIndexPattern = await indexPatternsService.getFieldsForIndexPattern(indexPattern);
-  return fieldsForIndexPattern.some(
-    (fieldDescriptor: IFieldType) => fieldDescriptor.name && fieldDescriptor.name === geoField!
+  return indexPattern.fields.some(
+    (fieldDescriptor: IndexPatternField) =>
+      fieldDescriptor.name && fieldDescriptor.name === geoField!
   );
 }
 
@@ -193,13 +202,9 @@ async function filterIndexPatternsByField(fields: string[]) {
   await Promise.all(
     indexPatternIds.map(async (indexPatternId: string) => {
       const indexPattern = await indexPatternsService.get(indexPatternId);
-      const fieldsForIndexPattern = await indexPatternsService.getFieldsForIndexPattern(
-        indexPattern
-      );
       const containsField = fields.some((field: string) =>
-        fieldsForIndexPattern.some(
-          (fieldDescriptor: IFieldType) =>
-            fieldDescriptor.esTypes && fieldDescriptor.esTypes.includes(field)
+        indexPattern.fields.some(
+          (fieldDescriptor) => fieldDescriptor.esTypes && fieldDescriptor.esTypes.includes(field)
         )
       );
       if (containsField) {
@@ -252,11 +257,22 @@ export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]):
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
 
+  const telemetryLayerTypeCounts = getTelemetryLayerTypesPerCluster(layerLists);
+  const scalingOptions = getScalingOptionsPerCluster(layerLists);
+  const joins = getTermJoinsPerCluster(layerLists);
+  const basemaps = getBaseMapsPerCluster(layerLists);
+  const resolutions = getGridResolutionsPerCluster(layerLists);
+
   return {
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture
     timeCaptured: new Date().toISOString(),
+    layerTypes: telemetryLayerTypeCounts,
+    scalingOptions,
+    joins,
+    basemaps,
+    resolutions,
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {
@@ -305,7 +321,7 @@ export async function execTransformOverMultipleSavedObjectPages<T>(
   } while (page * perPage < total);
 }
 
-export async function getMapsTelemetry(config: MapsConfigType): Promise<MapsUsage> {
+export async function getMapsTelemetry(): Promise<MapsUsage> {
   // Get layer descriptors for Maps saved objects. This is not set up
   // to be done incrementally (i.e. - per page) but minimally we at least
   // build a list of small footprint objects
@@ -314,7 +330,10 @@ export async function getMapsTelemetry(config: MapsConfigType): Promise<MapsUsag
     MAP_SAVED_OBJECT_TYPE,
     (savedObjects) => {
       const savedObjectsWithIndexPatternIds = savedObjects.map((savedObject) => {
-        return injectReferences(savedObject);
+        return {
+          ...savedObject,
+          ...injectReferences(savedObject),
+        };
       });
       return layerLists.push(...getLayerLists(savedObjectsWithIndexPatternIds));
     }
@@ -325,9 +344,6 @@ export async function getMapsTelemetry(config: MapsConfigType): Promise<MapsUsag
   const indexPatternsTelemetry = await buildMapsIndexPatternsTelemetry(layerLists);
 
   return {
-    settings: {
-      showMapVisualizationTypes: config.showMapVisualizationTypes,
-    },
     ...indexPatternsTelemetry,
     ...savedObjectsTelemetry,
   };

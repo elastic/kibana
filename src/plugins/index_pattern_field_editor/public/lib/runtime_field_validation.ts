@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { DataPublicPluginStart } from '../shared_imports';
-import { EsRuntimeField } from '../types';
+import type { EsRuntimeField } from '../types';
 
 export interface RuntimeFieldPainlessError {
   message: string;
@@ -60,12 +60,15 @@ const getScriptExceptionError = (error: Error): Error | null => {
   return scriptExceptionError;
 };
 
-const parseEsError = (error?: Error): RuntimeFieldPainlessError | null => {
+export const parseEsError = (
+  error?: Error,
+  isScriptError = false
+): RuntimeFieldPainlessError | null => {
   if (error === undefined) {
     return null;
   }
 
-  const scriptError = getScriptExceptionError(error.caused_by);
+  const scriptError = isScriptError ? error : getScriptExceptionError(error.caused_by);
 
   if (scriptError === null) {
     return null;

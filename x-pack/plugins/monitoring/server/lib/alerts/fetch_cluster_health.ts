@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
-import { ElasticsearchSource } from '../../../common/types/es';
+import { ElasticsearchSource, ElasticsearchResponse } from '../../../common/types/es';
 
 export async function fetchClusterHealth(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string
 ): Promise<AlertClusterHealth[]> {
   const params = {
     index,
-    filterPath: [
+    filter_path: [
       'hits.hits._source.cluster_state.status',
       'hits.hits._source.cluster_uuid',
       'hits.hits._index',
@@ -24,8 +25,8 @@ export async function fetchClusterHealth(
       sort: [
         {
           timestamp: {
-            order: 'desc',
-            unmapped_type: 'long',
+            order: 'desc' as const,
+            unmapped_type: 'long' as const,
           },
         },
       ],
@@ -58,11 +59,12 @@ export async function fetchClusterHealth(
     },
   };
 
-  const response = await callCluster('search', params);
-  return response.hits.hits.map((hit: { _source: ElasticsearchSource; _index: string }) => {
+  const result = await esClient.search<ElasticsearchSource>(params);
+  const response: ElasticsearchResponse = result.body as ElasticsearchResponse;
+  return (response.hits?.hits ?? []).map((hit) => {
     return {
-      health: hit._source.cluster_state?.status,
-      clusterUuid: hit._source.cluster_uuid,
+      health: hit._source!.cluster_state?.status,
+      clusterUuid: hit._source!.cluster_uuid,
       ccs: hit._index.includes(':') ? hit._index.split(':')[0] : undefined,
     } as AlertClusterHealth;
   });

@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import {
+import type {
   ApplicationSetup,
-  StartServicesAccessor,
-  HttpSetup,
   FatalErrorsSetup,
+  HttpSetup,
+  StartServicesAccessor,
 } from 'src/core/public';
-import { AuthenticatedUser } from '../../common/model';
-import { ConfigType } from '../config';
-import { PluginStartDependencies } from '../plugin';
+
+import type { AuthenticatedUser } from '../../common/model';
+import type { ConfigType } from '../config';
+import type { PluginStartDependencies } from '../plugin';
 import { accessAgreementApp } from './access_agreement';
+import { captureURLApp } from './capture_url';
+import { loggedOutApp } from './logged_out';
 import { loginApp } from './login';
 import { logoutApp } from './logout';
-import { loggedOutApp } from './logged_out';
 import { overwrittenSessionApp } from './overwritten_session';
-import { captureURLApp } from './capture_url';
 
 interface SetupParams {
   application: ApplicationSetup;
@@ -40,6 +41,11 @@ export interface AuthenticationServiceSetup {
    */
   areAPIKeysEnabled: () => Promise<boolean>;
 }
+
+/**
+ * Start has the same contract as Setup for now.
+ */
+export type AuthenticationServiceStart = AuthenticationServiceSetup;
 
 export class AuthenticationService {
   public setup({

@@ -91,7 +91,10 @@ export const ScriptField = React.memo(({ existingConcreteFields, links, syntaxEr
                 const painlessSyntaxErrors = PainlessLang.getSyntaxErrors();
                 // It is possible for there to be more than one editor in a view,
                 // so we need to get the syntax errors based on the editor (aka model) ID
-                const editorHasSyntaxErrors = editorId && painlessSyntaxErrors[editorId].length > 0;
+                const editorHasSyntaxErrors =
+                  editorId &&
+                  painlessSyntaxErrors[editorId] &&
+                  painlessSyntaxErrors[editorId].length > 0;
 
                 if (editorHasSyntaxErrors) {
                   return resolve({
@@ -136,6 +139,7 @@ export const ScriptField = React.memo(({ existingConcreteFields, links, syntaxEr
           <>
             <EuiFormRow
               label={label}
+              id="runtimeFieldScript"
               error={errorMessage}
               isInvalid={syntaxError.error !== null || !isValid}
               helpText={

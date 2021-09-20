@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { AlertingActions } from './alerting';
 import { ApiActions } from './api';
 import { AppActions } from './app';
+import { CasesActions } from './cases';
 import { SavedObjectActions } from './saved_object';
 import { SpaceActions } from './space';
 import { UIActions } from './ui';
-import { AlertingActions } from './alerting';
 
 /** Actions are used to create the "actions" that are associated with Elasticsearch's
  * application privileges, and are used to perform the authorization checks implemented
- * by the various `checkPrivilegesWithRequest` derivatives
+ * by the various `checkPrivilegesWithRequest` derivatives.
  */
 export class Actions {
   public readonly api = new ApiActions(this.versionNumber);
 
   public readonly app = new AppActions(this.versionNumber);
+
+  public readonly cases = new CasesActions(this.versionNumber);
 
   public readonly login = 'login:';
 

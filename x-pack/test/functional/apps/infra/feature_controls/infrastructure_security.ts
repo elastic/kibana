@@ -62,7 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -82,11 +82,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('infrastructure landing page with data', () => {
         before(async () => {
-          await esArchiver.load('infra/metrics_and_logs');
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         after(async () => {
-          await esArchiver.unload('infra/metrics_and_logs');
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         it(`shows Wafflemap`, async () => {
@@ -160,7 +160,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -180,11 +180,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('infrastructure landing page with data', () => {
         before(async () => {
-          await esArchiver.load('infra/metrics_and_logs');
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         after(async () => {
-          await esArchiver.unload('infra/metrics_and_logs');
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         it(`shows Wafflemap`, async () => {
@@ -259,11 +259,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('infrastructure landing page with data', () => {
         before(async () => {
-          await esArchiver.load('infra/metrics_and_logs');
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         after(async () => {
-          await esArchiver.unload('infra/metrics_and_logs');
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
       });
     });
@@ -312,11 +312,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('infrastructure landing page with data', () => {
         before(async () => {
-          await esArchiver.load('infra/metrics_and_logs');
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         after(async () => {
-          await esArchiver.unload('infra/metrics_and_logs');
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
       });
     });

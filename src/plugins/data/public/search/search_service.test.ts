@@ -38,7 +38,6 @@ describe('Search service', () => {
       } as unknown) as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
       expect(setup).toHaveProperty('usageCollector');
-      expect(setup).toHaveProperty('__enhance');
       expect(setup).toHaveProperty('sessionsClient');
       expect(setup).toHaveProperty('session');
     });

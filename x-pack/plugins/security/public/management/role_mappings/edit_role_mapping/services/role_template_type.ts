@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
-  RoleTemplate,
-  StoredRoleTemplate,
+import type {
   InlineRoleTemplate,
   InvalidRoleTemplate,
+  RoleTemplate,
+  StoredRoleTemplate,
 } from '../../../../../common/model';
 
 export function isStoredRoleTemplate(

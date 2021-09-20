@@ -427,13 +427,15 @@ describe('OptimizerConfig::create()', () => {
   it('passes parsed options to findKibanaPlatformPlugins, getBundles, and assignBundlesToWorkers', () => {
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
+      limitsPath: '/foo/limits.yml',
     });
 
     expect(config).toMatchInlineSnapshot(`
       OptimizerConfig {
-        "bundles": Symbol(filtered bundles),
+        "bundles": Symbol(focused bundles),
         "cache": Symbol(parsed cache),
         "dist": Symbol(parsed dist),
+        "filteredBundles": Symbol(filtered bundles),
         "inspectWorkers": Symbol(parsed inspect workers),
         "maxWorkerCount": Symbol(parsed max worker count),
         "plugins": Symbol(new platform plugins),
@@ -444,78 +446,33 @@ describe('OptimizerConfig::create()', () => {
       }
     `);
 
-    expect(findKibanaPlatformPlugins.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Symbol(parsed plugin scan dirs),
-            Symbol(parsed plugin paths),
-          ],
+    expect(findKibanaPlatformPlugins.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Symbol(parsed plugin scan dirs),
+          Symbol(parsed plugin paths),
         ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          22,
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Symbol(new platform plugins),
-          },
-        ],
-      }
+      ]
     `);
 
-    expect(filterById.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Array [],
-            Symbol(focused bundles),
-          ],
+    expect(filterById.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Array [],
+          Symbol(focused bundles),
         ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          25,
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Symbol(filtered bundles),
-          },
-        ],
-      }
+      ]
     `);
 
-    expect(getPluginBundles.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Symbol(new platform plugins),
-            Symbol(parsed repo root),
-            Symbol(parsed output root),
-            Symbol(limits),
-          ],
+    expect(getPluginBundles.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Symbol(new platform plugins),
+          Symbol(parsed repo root),
+          Symbol(parsed output root),
+          Symbol(limits),
         ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          23,
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Array [
-              Symbol(bundle1),
-              Symbol(bundle2),
-            ],
-          },
-        ],
-      }
+      ]
     `);
   });
 });

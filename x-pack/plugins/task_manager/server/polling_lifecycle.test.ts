@@ -19,7 +19,10 @@ import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
 import type { TaskClaiming as TaskClaimingClass } from './queries/task_claiming';
 import { asOk, Err, isErr, isOk, Result } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
+import { ElasticsearchResponseError } from './lib/identify_es_error';
+import { executionContextServiceMock } from '../../../../src/core/server/mocks';
 
+const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
 jest.mock('./queries/task_claiming', () => {
   return {
@@ -44,6 +47,10 @@ describe('TaskPollingLifecycle', () => {
       max_poll_inactivity_cycles: 10,
       request_capacity: 1000,
       monitored_aggregated_stats_refresh_rate: 5000,
+      monitored_stats_health_verbose_log: {
+        enabled: false,
+        warn_delayed_task_start_in_seconds: 60,
+      },
       monitored_stats_required_freshness: 5000,
       monitored_stats_running_average_window: 50,
       monitored_task_execution_thresholds: {
@@ -53,6 +60,13 @@ describe('TaskPollingLifecycle', () => {
         },
         custom: {},
       },
+      ephemeral_tasks: {
+        enabled: true,
+        request_capacity: 10,
+      },
+      unsafe: {
+        exclude_task_types: [],
+      },
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
@@ -60,6 +74,7 @@ describe('TaskPollingLifecycle', () => {
     middleware: createInitialMiddleware(),
     maxWorkersConfiguration$: of(100),
     pollIntervalConfiguration$: of(100),
+    executionContext,
   };
 
   beforeEach(() => {
@@ -204,12 +219,46 @@ describe('TaskPollingLifecycle', () => {
       taskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(
         () =>
           new Observable<Result<ClaimOwnershipResult, FillPoolResult>>((observer) => {
-            observer.error(
-              Object.assign(new Error(), {
-                response:
-                  '{"error":{"root_cause":[{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts"}],"type":"search_phase_execution_exception","reason":"all shards failed","phase":"query","grouped":true,"failed_shards":[{"shard":0,"index":".kibana_task_manager_1","node":"24A4QbjHSK6prvtopAKLKw","reason":{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts"}}],"caused_by":{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts","caused_by":{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts"}}},"status":400}',
-              })
-            );
+            observer.error({
+              name: 'ResponseError',
+              meta: {
+                body: {
+                  error: {
+                    root_cause: [
+                      {
+                        type: 'illegal_argument_exception',
+                        reason: 'cannot execute [inline] scripts',
+                      },
+                    ],
+                    type: 'search_phase_execution_exception',
+                    reason: 'all shards failed',
+                    phase: 'query',
+                    grouped: true,
+                    failed_shards: [
+                      {
+                        shard: 0,
+                        index: '.kibana_task_manager_1',
+                        node: '24A4QbjHSK6prvtopAKLKw',
+                        reason: {
+                          type: 'illegal_argument_exception',
+                          reason: 'cannot execute [inline] scripts',
+                        },
+                      },
+                    ],
+                    caused_by: {
+                      type: 'illegal_argument_exception',
+                      reason: 'cannot execute [inline] scripts',
+                      caused_by: {
+                        type: 'illegal_argument_exception',
+                        reason: 'cannot execute [inline] scripts',
+                      },
+                    },
+                  },
+                  status: 400,
+                },
+              },
+              statusCode: 400,
+            } as ElasticsearchResponseError);
           })
       );
 

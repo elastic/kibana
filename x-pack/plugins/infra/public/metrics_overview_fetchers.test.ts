@@ -69,9 +69,11 @@ describe('Metrics UI Observability Homepage Functions', () => {
         bucketSize,
       });
       expect(core.http.post).toHaveBeenCalledTimes(1);
-      expect(core.http.post).toHaveBeenCalledWith('/api/metrics/overview', {
+      expect(core.http.post).toHaveBeenCalledWith('/api/metrics/overview/top', {
         body: JSON.stringify({
           sourceId: 'default',
+          bucketSize,
+          size: 5,
           timerange: {
             from: startTime.valueOf(),
             to: endTime.valueOf(),

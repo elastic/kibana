@@ -12,9 +12,9 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Attempt to Install Root Certificate",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:security and process.args:\"add-trusted-cert\"",
+  "query": "event.category:process and event.type:(start or process_started) and\n  process.name:security and process.args:\"add-trusted-cert\"\n",
   "references": [
     "https://ss64.com/osx/security-cert.html"
   ],

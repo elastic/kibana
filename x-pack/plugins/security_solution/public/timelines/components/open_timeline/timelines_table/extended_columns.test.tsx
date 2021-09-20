@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
@@ -20,11 +19,13 @@ import { TimelinesTable, TimelinesTableProps } from '.';
 
 import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('#getExtendedColumns', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
 
   beforeEach(() => {
@@ -37,7 +38,7 @@ describe('#getExtendedColumns', () => {
         ...getMockTimelinesTableProps(mockResults),
       };
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <TimelinesTable {...testProps} />
         </ThemeProvider>
       );
@@ -50,7 +51,7 @@ describe('#getExtendedColumns', () => {
         ...getMockTimelinesTableProps(mockResults),
       };
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <TimelinesTable {...testProps} />
         </ThemeProvider>
       );
@@ -66,7 +67,7 @@ describe('#getExtendedColumns', () => {
         ...getMockTimelinesTableProps(missingUpdatedBy),
       };
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <TimelinesTable {...testProps} />
         </ThemeProvider>
       );

@@ -11,13 +11,19 @@ import {
   createSearchStartMock,
   createSearchRequestHandlerContext,
 } from './search/mocks';
-import { createFieldFormatsSetupMock, createFieldFormatsStartMock } from './field_formats/mocks';
+import {
+  createFieldFormatsSetupMock,
+  createFieldFormatsStartMock,
+} from '../../field_formats/server/mocks';
 import { createIndexPatternsStartMock } from './index_patterns/mocks';
 import { DataRequestHandlerContext } from './search';
 
 function createSetupContract() {
   return {
     search: createSearchSetupMock(),
+    /**
+     * @deprecated - use directly from "fieldFormats" plugin instead
+     */
     fieldFormats: createFieldFormatsSetupMock(),
   };
 }
@@ -25,6 +31,9 @@ function createSetupContract() {
 function createStartContract() {
   return {
     search: createSearchStartMock(),
+    /**
+     * @deprecated - use directly from "fieldFormats" plugin instead
+     */
     fieldFormats: createFieldFormatsStartMock(),
     indexPatterns: createIndexPatternsStartMock(),
   };

@@ -10,23 +10,27 @@ import { Role } from './role';
 import { User } from './user';
 import { RoleMappings } from './role_mappings';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { createTestUserService, TestUserSupertestProvider } from './test_user';
+import { createTestUserService, TestUserSupertestProvider, TestUser } from './test_user';
 
-export async function SecurityServiceProvider(context: FtrProviderContext) {
-  const { getService } = context;
-  const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
+export class SecurityService {
+  constructor(
+    public readonly roleMappings: RoleMappings,
+    public readonly testUser: TestUser,
+    public readonly role: Role,
+    public readonly user: User,
+    public readonly testUserSupertest: ReturnType<typeof TestUserSupertestProvider>
+  ) {}
+}
+
+export async function SecurityServiceProvider(ctx: FtrProviderContext) {
+  const log = ctx.getService('log');
+  const kibanaServer = ctx.getService('kibanaServer');
 
   const role = new Role(log, kibanaServer);
   const user = new User(log, kibanaServer);
-  const testUser = await createTestUserService(role, user, context);
-  const testUserSupertest = TestUserSupertestProvider(context);
+  const testUser = await createTestUserService(ctx, role, user);
+  const testUserSupertest = TestUserSupertestProvider(ctx);
+  const roleMappings = new RoleMappings(log, kibanaServer);
 
-  return new (class SecurityService {
-    roleMappings = new RoleMappings(log, kibanaServer);
-    testUser = testUser;
-    role = role;
-    user = user;
-    testUserSupertest = testUserSupertest;
-  })();
+  return new SecurityService(roleMappings, testUser, role, user, testUserSupertest);
 }

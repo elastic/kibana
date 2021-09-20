@@ -52,6 +52,7 @@ export interface SnapshotDetails {
 export interface SnapshotDetailsEs {
   snapshot: string;
   uuid: string;
+  repository: string;
   version_id: number;
   version: string;
   indices: string[];

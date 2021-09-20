@@ -65,6 +65,12 @@ custom: {{ custom }}
 {{#if key.patterns}}
 key.patterns: {{key.patterns}}
 {{/if}}
+{{#if emptyfield}}
+emptyfield: {{emptyfield}}
+{{/if}}
+{{#if nullfield}}
+nullfield: {{nullfield}}
+{{/if}}
 {{ testEmpty }}
       `;
     const vars = {
@@ -82,6 +88,8 @@ foo: bar
         `,
       },
       password: { type: 'password', value: '' },
+      emptyfield: { type: 'yaml', value: '' },
+      nullfield: { type: 'yaml' },
     };
 
     const output = compileTemplate(vars, streamTemplate);
@@ -123,6 +131,13 @@ password: {{password}}
 hidden_password: {{password}}
 {{/if}}
       `;
+    const streamTemplateWithString = `
+{{#if (contains ".pcap" file)}}
+pcap: true
+{{else}}
+pcap: false
+{{/if}}
+      `;
 
     it('should support when a value is not contained in the array', () => {
       const vars = {
@@ -160,6 +175,28 @@ hidden_password: {{password}}
         tags: ['foo', 'bar'],
       });
     });
+
+    it('should support strings', () => {
+      const vars = {
+        file: { value: 'foo.pcap' },
+      };
+
+      const output = compileTemplate(vars, streamTemplateWithString);
+      expect(output).toEqual({
+        pcap: true,
+      });
+    });
+
+    it('should support strings with no match', () => {
+      const vars = {
+        file: { value: 'file' },
+      };
+
+      const output = compileTemplate(vars, streamTemplateWithString);
+      expect(output).toEqual({
+        pcap: false,
+      });
+    });
   });
 
   it('should support optional yaml values at root level', () => {
@@ -183,71 +220,36 @@ input: logs
   it('should escape string values when necessary', () => {
     const stringTemplate = `
 my-package:
-    opencurly: {{opencurly}}
-    closecurly: {{closecurly}}
-    opensquare: {{opensquare}}
-    closesquare: {{closesquare}}
-    ampersand: {{ampersand}}
-    asterisk: {{asterisk}}
-    question: {{question}}
-    pipe: {{pipe}}
-    hyphen: {{hyphen}}
-    openangle: {{openangle}}
-    closeangle: {{closeangle}}
-    equals: {{equals}}
-    exclamation: {{exclamation}}
-    percent: {{percent}}
-    at: {{at}}
-    colon: {{colon}}
+    asteriskOnly: {{asteriskOnly}}
+    startsWithAsterisk: {{startsWithAsterisk}}
     numeric: {{numeric}}
-    mixed: {{mixed}}`;
+    mixed: {{mixed}}
+    concatenatedEnd: {{a}}{{b}}
+    concatenatedMiddle: {{c}}{{d}}
+    mixedMultiline: |-
+        {{{ search }}} | streamstats`;
 
-    // List of special chars that may lead to YAML parsing errors when not quoted.
-    // See YAML specification section 5.3 Indicator characters
-    // https://yaml.org/spec/1.2/spec.html#id2772075
-    // {,},[,],&,*,?,|,-,<,>,=,!,%,@,:
     const vars = {
-      opencurly: { value: '{', type: 'string' },
-      closecurly: { value: '}', type: 'string' },
-      opensquare: { value: '[', type: 'string' },
-      closesquare: { value: ']', type: 'string' },
-      comma: { value: ',', type: 'string' },
-      ampersand: { value: '&', type: 'string' },
-      asterisk: { value: '*', type: 'string' },
-      question: { value: '?', type: 'string' },
-      pipe: { value: '|', type: 'string' },
-      hyphen: { value: '-', type: 'string' },
-      openangle: { value: '<', type: 'string' },
-      closeangle: { value: '>', type: 'string' },
-      equals: { value: '=', type: 'string' },
-      exclamation: { value: '!', type: 'string' },
-      percent: { value: '%', type: 'string' },
-      at: { value: '@', type: 'string' },
-      colon: { value: ':', type: 'string' },
-      numeric: { value: '100', type: 'string' },
-      mixed: { value: '1s', type: 'string' },
+      asteriskOnly: { value: '"*"', type: 'text' },
+      startsWithAsterisk: { value: '"*lala"', type: 'text' },
+      numeric: { value: '100', type: 'text' },
+      mixed: { value: '1s', type: 'text' },
+      a: { value: '/opt/package/*', type: 'text' },
+      b: { value: '/logs/my.log*', type: 'text' },
+      c: { value: '/opt/*/package/', type: 'text' },
+      d: { value: 'logs/*my.log', type: 'text' },
+      search: { value: 'search sourcetype="access*"', type: 'text' },
     };
 
     const targetOutput = {
       'my-package': {
-        opencurly: '{',
-        closecurly: '}',
-        opensquare: '[',
-        closesquare: ']',
-        ampersand: '&',
-        asterisk: '*',
-        question: '?',
-        pipe: '|',
-        hyphen: '-',
-        openangle: '<',
-        closeangle: '>',
-        equals: '=',
-        exclamation: '!',
-        percent: '%',
-        at: '@',
-        colon: ':',
+        asteriskOnly: '*',
+        startsWithAsterisk: '*lala',
         numeric: '100',
         mixed: '1s',
+        concatenatedEnd: '/opt/package/*/logs/my.log*',
+        concatenatedMiddle: '/opt/*/package/logs/*my.log',
+        mixedMultiline: 'search sourcetype="access*" | streamstats',
       },
     };
 

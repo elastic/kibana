@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import '../../__mocks__/engine_logic.mock';
+
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
@@ -14,9 +16,9 @@ import { CurationsRouter } from './';
 
 describe('CurationsRouter', () => {
   it('renders', () => {
-    const wrapper = shallow(<CurationsRouter engineBreadcrumb={['Engines', 'some-engine']} />);
+    const wrapper = shallow(<CurationsRouter />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(5);
+    expect(wrapper.find(Route)).toHaveLength(3);
   });
 });

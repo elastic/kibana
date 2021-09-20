@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { Client } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
-import { getSearchListMock } from '../../../common/schemas/elastic_response/search_es_list_schema.mock';
-import { getShardMock } from '../../../common/get_shard.mock';
-import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
-import { getCallClusterMockMultiTimes } from '../../../common/get_call_cluster.mock';
 import { LIST_ID, LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
+import { getShardMock } from '../../schemas/common/get_shard.mock';
 
 import { FindListItemOptions } from './find_list_item';
 
-export const getFindCount = (): ReturnType<Client['count']> => {
+export const getFindCount = (): Promise<estypes.CountResponse> => {
   return Promise.resolve({
     _shards: getShardMock(),
     count: 1,
@@ -23,14 +22,9 @@ export const getFindCount = (): ReturnType<Client['count']> => {
 };
 
 export const getFindListItemOptionsMock = (): FindListItemOptions => {
-  const callCluster = getCallClusterMockMultiTimes([
-    getSearchListMock(),
-    getFindCount(),
-    getSearchListItemMock(),
-  ]);
   return {
-    callCluster,
     currentIndexPosition: 0,
+    esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
     filter: '',
     listId: LIST_ID,
     listIndex: LIST_INDEX,

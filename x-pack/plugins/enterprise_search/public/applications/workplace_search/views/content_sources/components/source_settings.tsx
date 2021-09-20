@@ -6,26 +6,30 @@
  */
 
 import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 import { isEmpty } from 'lodash';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiConfirmModal,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { HttpLogic } from '../../../../shared/http';
+import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { NAV } from '../../../constants';
+
 import {
   CANCEL_BUTTON,
   OK_BUTTON,
@@ -36,6 +40,7 @@ import {
 import { SourceDataItem } from '../../../types';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
+  SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
   SOURCE_SETTINGS_DESCRIPTION,
   SOURCE_NAME_LABEL,
@@ -44,16 +49,43 @@ import {
   SOURCE_CONFIG_LINK,
   SOURCE_REMOVE_TITLE,
   SOURCE_REMOVE_DESCRIPTION,
+  SYNC_DIAGNOSTICS_TITLE,
+  SYNC_DIAGNOSTICS_DESCRIPTION,
+  SYNC_DIAGNOSTICS_BUTTON,
+  SYNC_MANAGEMENT_TITLE,
+  SYNC_MANAGEMENT_DESCRIPTION,
+  SYNC_MANAGEMENT_SYNCHRONIZE_LABEL,
+  SYNC_MANAGEMENT_THUMBNAILS_LABEL,
+  SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL,
+  SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL,
 } from '../constants';
 import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
 
+import { SourceLayout } from './source_layout';
+
 export const SourceSettings: React.FC = () => {
-  const { updateContentSource, removeContentSource, resetSourceState } = useActions(SourceLogic);
+  const { http } = useValues(HttpLogic);
+
+  const { updateContentSource, removeContentSource } = useActions(SourceLogic);
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
-    contentSource: { name, id, serviceType },
+    contentSource: {
+      name,
+      id,
+      serviceType,
+      custom: isCustom,
+      isIndexedSource,
+      areThumbnailsConfigEnabled,
+      indexing: {
+        enabled,
+        features: {
+          contentExtraction: { enabled: contentExtractionEnabled },
+          thumbnails: { enabled: thumbnailsEnabled },
+        },
+      },
+    },
     buttonLoading,
   } = useValues(SourceLogic);
 
@@ -65,7 +97,6 @@ export const SourceSettings: React.FC = () => {
 
   useEffect(() => {
     getSourceConfigData(serviceType);
-    return resetSourceState;
   }, []);
 
   const {
@@ -79,14 +110,37 @@ export const SourceSettings: React.FC = () => {
   const hideConfirm = () => setModalVisibility(false);
 
   const showConfig = isOrganization && !isEmpty(configuredFields);
+  const showSyncControls = isOrganization && isIndexedSource && !isCustom;
+
+  const [synchronizeChecked, setSynchronize] = useState(enabled);
+  const [thumbnailsChecked, setThumbnails] = useState(thumbnailsEnabled);
+  const [contentExtractionChecked, setContentExtraction] = useState(contentExtractionEnabled);
 
   const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
+
+  const diagnosticsPath = isOrganization
+    ? http.basePath.prepend(`/internal/workplace_search/org/sources/${id}/download_diagnostics`)
+    : http.basePath.prepend(
+        `/internal/workplace_search/account/sources/${id}/download_diagnostics`
+      );
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
   const submitNameChange = (e: FormEvent) => {
     e.preventDefault();
     updateContentSource(id, { name: inputValue });
+  };
+
+  const submitSyncControls = () => {
+    updateContentSource(id, {
+      indexing: {
+        enabled: synchronizeChecked,
+        features: {
+          content_extraction: { enabled: contentExtractionChecked },
+          thumbnails: { enabled: thumbnailsChecked },
+        },
+      },
+    });
   };
 
   const handleSourceRemoval = () => {
@@ -121,8 +175,8 @@ export const SourceSettings: React.FC = () => {
   );
 
   return (
-    <>
-      <ViewContentHeader title="Source settings" />
+    <SourceLayout pageChrome={[NAV.SETTINGS]} pageViewTelemetry="source_settings">
+      <ViewContentHeader title={SOURCE_SETTINGS_HEADING} />
       <ContentSection title={SOURCE_SETTINGS_TITLE} description={SOURCE_SETTINGS_DESCRIPTION}>
         <form onSubmit={submitNameChange}>
           <EuiFlexGroup>
@@ -161,12 +215,75 @@ export const SourceSettings: React.FC = () => {
             baseUrl={baseUrl}
           />
           <EuiFormRow>
-            <Link to={editPath}>
-              <EuiButtonEmpty flush="left">{SOURCE_CONFIG_LINK}</EuiButtonEmpty>
-            </Link>
+            <EuiButtonEmptyTo to={editPath} flush="left">
+              {SOURCE_CONFIG_LINK}
+            </EuiButtonEmptyTo>
           </EuiFormRow>
         </ContentSection>
       )}
+      {showSyncControls && (
+        <ContentSection title={SYNC_MANAGEMENT_TITLE} description={SYNC_MANAGEMENT_DESCRIPTION}>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={synchronizeChecked}
+                onChange={(e) => setSynchronize(e.target.checked)}
+                label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
+                data-test-subj="SynchronizeToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={thumbnailsChecked}
+                onChange={(e) => setThumbnails(e.target.checked)}
+                label={
+                  areThumbnailsConfigEnabled
+                    ? SYNC_MANAGEMENT_THUMBNAILS_LABEL
+                    : SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL
+                }
+                disabled={!areThumbnailsConfigEnabled}
+                data-test-subj="ThumbnailsToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={contentExtractionChecked}
+                onChange={(e) => setContentExtraction(e.target.checked)}
+                label={SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL}
+                data-test-subj="ContentExtractionToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                onClick={submitSyncControls}
+                data-test-subj="SaveSyncControlsButton"
+              >
+                {SAVE_CHANGES_BUTTON}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </ContentSection>
+      )}
+      <ContentSection title={SYNC_DIAGNOSTICS_TITLE} description={SYNC_DIAGNOSTICS_DESCRIPTION}>
+        <EuiButton
+          target="_blank"
+          href={diagnosticsPath}
+          isLoading={buttonLoading}
+          data-test-subj="DownloadDiagnosticsButton"
+          download={`${id}_${serviceType}_${Date.now()}_diagnostics.json`}
+        >
+          {SYNC_DIAGNOSTICS_BUTTON}
+        </EuiButton>
+      </ContentSection>
       <ContentSection title={SOURCE_REMOVE_TITLE} description={SOURCE_REMOVE_DESCRIPTION}>
         <EuiButton
           isLoading={buttonLoading}
@@ -179,6 +296,6 @@ export const SourceSettings: React.FC = () => {
         </EuiButton>
         {confirmModalVisible && confirmModal}
       </ContentSection>
-    </>
+    </SourceLayout>
   );
 };

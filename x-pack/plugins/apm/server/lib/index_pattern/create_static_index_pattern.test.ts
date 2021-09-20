@@ -5,73 +5,131 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
 import { createStaticIndexPattern } from './create_static_index_pattern';
 import { Setup } from '../helpers/setup_request';
-import * as HistoricalAgentData from '../services/get_services/has_historical_agent_data';
-import { APMRequestHandlerContext } from '../../routes/typings';
+import * as HistoricalAgentData from '../../routes/historical_data/has_historical_agent_data';
 import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
+import { APMConfig } from '../..';
 
-function getMockContext(config: Record<string, unknown>) {
+function getMockSavedObjectsClient(existingIndexPatternTitle: string) {
   return ({
-    config,
-    core: {
-      savedObjects: {
-        client: {
-          create: jest.fn(),
-        },
+    get: jest.fn(() => ({
+      attributes: {
+        title: existingIndexPatternTitle,
       },
-    },
-  } as unknown) as APMRequestHandlerContext;
-}
-function getMockSavedObjectsClient() {
-  return ({
+    })),
     create: jest.fn(),
   } as unknown) as InternalSavedObjectsClient;
 }
 
+const setup = ({
+  indices: {
+    'apm_oss.transactionIndices': 'apm-*-transaction-*',
+    'apm_oss.spanIndices': 'apm-*-span-*',
+    'apm_oss.errorIndices': 'apm-*-error-*',
+    'apm_oss.metricsIndices': 'apm-*-metrics-*',
+  },
+} as unknown) as Setup;
+
 describe('createStaticIndexPattern', () => {
   it(`should not create index pattern if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
-    const setup = {} as Setup;
-    const context = getMockContext({
-      'xpack.apm.autocreateApmIndexPattern': false,
+    const savedObjectsClient = getMockSavedObjectsClient('apm-*');
+    await createStaticIndexPattern({
+      setup,
+      config: { 'xpack.apm.autocreateApmIndexPattern': false } as APMConfig,
+      savedObjectsClient,
+      spaceId: 'default',
     });
-    const savedObjectsClient = getMockSavedObjectsClient();
-    await createStaticIndexPattern(setup, context, savedObjectsClient);
     expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   it(`should not create index pattern if no APM data is found`, async () => {
-    const setup = {} as Setup;
-    const context = getMockContext({
-      'xpack.apm.autocreateApmIndexPattern': true,
-    });
-
     // does not have APM data
     jest
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
       .mockResolvedValue(false);
 
-    const savedObjectsClient = getMockSavedObjectsClient();
+    const savedObjectsClient = getMockSavedObjectsClient('apm-*');
 
-    await createStaticIndexPattern(setup, context, savedObjectsClient);
+    await createStaticIndexPattern({
+      setup,
+      config: { 'xpack.apm.autocreateApmIndexPattern': true } as APMConfig,
+      savedObjectsClient,
+      spaceId: 'default',
+    });
     expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   it(`should create index pattern`, async () => {
-    const setup = {} as Setup;
-    const context = getMockContext({
-      'xpack.apm.autocreateApmIndexPattern': true,
-    });
-
     // does have APM data
     jest
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
       .mockResolvedValue(true);
 
-    const savedObjectsClient = getMockSavedObjectsClient();
+    const savedObjectsClient = getMockSavedObjectsClient('apm-*');
 
-    await createStaticIndexPattern(setup, context, savedObjectsClient);
+    await createStaticIndexPattern({
+      setup,
+      config: { 'xpack.apm.autocreateApmIndexPattern': true } as APMConfig,
+      savedObjectsClient,
+      spaceId: 'default',
+    });
 
     expect(savedObjectsClient.create).toHaveBeenCalled();
+  });
+
+  it(`should overwrite the index pattern if the new index pattern title does not match the old index pattern title`, async () => {
+    // does have APM data
+    jest
+      .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
+      .mockResolvedValue(true);
+
+    const savedObjectsClient = getMockSavedObjectsClient('apm-*');
+    const expectedIndexPatternTitle =
+      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*';
+
+    await createStaticIndexPattern({
+      setup,
+      config: {
+        'xpack.apm.autocreateApmIndexPattern': true,
+      } as APMConfig,
+      savedObjectsClient,
+      spaceId: 'default',
+    });
+
+    expect(savedObjectsClient.get).toHaveBeenCalled();
+    expect(savedObjectsClient.create).toHaveBeenCalled();
+    // @ts-ignore
+    expect(savedObjectsClient.create.mock.calls[0][1].title).toBe(
+      expectedIndexPatternTitle
+    );
+    // @ts-ignore
+    expect(savedObjectsClient.create.mock.calls[0][2].overwrite).toBe(true);
+  });
+
+  it(`should not overwrite an index pattern if the new index pattern title matches the old index pattern title`, async () => {
+    // does have APM data
+    jest
+      .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
+      .mockResolvedValue(true);
+
+    const savedObjectsClient = getMockSavedObjectsClient(
+      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
+    );
+
+    await createStaticIndexPattern({
+      setup,
+      config: {
+        'xpack.apm.autocreateApmIndexPattern': true,
+      } as APMConfig,
+      savedObjectsClient,
+      spaceId: 'default',
+    });
+
+    expect(savedObjectsClient.get).toHaveBeenCalled();
+    expect(savedObjectsClient.create).toHaveBeenCalled();
+    // @ts-ignore
+    expect(savedObjectsClient.create.mock.calls[0][2].overwrite).toBe(false);
   });
 });

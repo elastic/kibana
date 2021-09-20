@@ -6,29 +6,30 @@
  */
 
 import * as React from 'react';
-import { SpacesManager } from '../spaces_manager';
-import { ShareToSpacesData } from '../types';
-import { SpacesReactContext, SpacesReactContextValue, KibanaServices } from './types';
+
+import type { CoreStart } from 'src/core/public';
+
+import type { SpacesManager } from '../spaces_manager';
+import type { SpacesData } from '../types';
+import type { SpacesReactContext, SpacesReactContextValue } from './types';
 
 const { useContext, createElement, createContext } = React;
 
-const context = createContext<Partial<SpacesReactContextValue<KibanaServices>>>({});
+const context = createContext<Partial<SpacesReactContextValue<Partial<CoreStart>>>>({});
 
-export const useSpaces = <Extra extends object = {}>(): SpacesReactContextValue<
-  KibanaServices & Extra
-> =>
-  useContext(
-    (context as unknown) as React.Context<SpacesReactContextValue<KibanaServices & Extra>>
-  );
+export const useSpaces = <
+  Services extends Partial<CoreStart>
+>(): SpacesReactContextValue<Services> =>
+  useContext((context as unknown) as React.Context<SpacesReactContextValue<Services>>);
 
-export const createSpacesReactContext = <Services extends KibanaServices>(
+export const createSpacesReactContext = <Services extends Partial<CoreStart>>(
   services: Services,
   spacesManager: SpacesManager,
-  shareToSpacesDataPromise: Promise<ShareToSpacesData>
+  spacesDataPromise: Promise<SpacesData>
 ): SpacesReactContext<Services> => {
   const value: SpacesReactContextValue<Services> = {
     spacesManager,
-    shareToSpacesDataPromise,
+    spacesDataPromise,
     services,
   };
   const Provider: React.FC = ({ children }) =>

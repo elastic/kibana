@@ -10,7 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { promisify } from 'util';
 
-import { CiStatsMetrics } from '@kbn/dev-utils';
+import { CiStatsMetric } from '@kbn/dev-utils';
 
 import { mkdirp, compressTar, compressZip, Task } from '../lib';
 
@@ -45,6 +45,7 @@ export const CreateArchives: Task = {
                 },
               },
               createRootDirectory: true,
+              rootDirectoryName: build.getRootDirectory(),
             }),
           });
           break;
@@ -63,6 +64,7 @@ export const CreateArchives: Task = {
                 },
               },
               createRootDirectory: true,
+              rootDirectoryName: build.getRootDirectory(),
             }),
           });
           break;
@@ -72,17 +74,17 @@ export const CreateArchives: Task = {
       }
     }
 
-    const metrics: CiStatsMetrics = [];
+    const metrics: CiStatsMetric[] = [];
     for (const { format, path, fileCount } of archives) {
       metrics.push({
-        group: `${build.isOss() ? 'oss ' : ''}distributable size`,
+        group: `distributable size`,
         id: format,
         value: (await asyncStat(path)).size,
       });
 
       metrics.push({
         group: 'distributable file count',
-        id: build.isOss() ? 'oss' : 'default',
+        id: 'default',
         value: fileCount,
       });
     }

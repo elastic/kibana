@@ -11,12 +11,24 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { InspectorPanel } from './inspector_panel';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
-import type { IUiSettingsClient } from 'kibana/public';
+import type { ApplicationStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
+import { SharePluginStart } from '../../../share/public';
+import { applicationServiceMock } from '../../../../core/public/mocks';
 
 describe('InspectorPanel', () => {
   let adapters: Adapters;
   let views: InspectorViewDescription[];
-  const uiSettings: IUiSettingsClient = {} as IUiSettingsClient;
+  const dependencies = ({
+    application: applicationServiceMock.createStartContract(),
+    http: {},
+    share: {},
+    uiSettings: {},
+  } as unknown) as {
+    application: ApplicationStart;
+    http: HttpSetup;
+    share: SharePluginStart;
+    uiSettings: IUiSettingsClient;
+  };
 
   beforeEach(() => {
     adapters = {
@@ -54,14 +66,14 @@ describe('InspectorPanel', () => {
 
   it('should render as expected', () => {
     const component = mountWithIntl(
-      <InspectorPanel adapters={adapters} views={views} dependencies={{ uiSettings }} />
+      <InspectorPanel adapters={adapters} views={views} dependencies={dependencies} />
     );
     expect(component).toMatchSnapshot();
   });
 
   it('should not allow updating adapters', () => {
     const component = mountWithIntl(
-      <InspectorPanel adapters={adapters} views={views} dependencies={{ uiSettings }} />
+      <InspectorPanel adapters={adapters} views={views} dependencies={dependencies} />
     );
     adapters.notAllowed = {};
     expect(() => component.setProps({ adapters })).toThrow();

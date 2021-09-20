@@ -35,19 +35,13 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
 }) => (
   <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
     <EuiFlexItem>
-      <EuiFlexGroup gutterSize="none" justifyContent="flexStart" alignItems="center">
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={null}>
-          <SourceIcon
-            className="content-source-meta__icon"
-            serviceType={sourceType}
-            name={sourceType}
-            fullBleed
-            size="l"
-          />
+          <SourceIcon serviceType={sourceType} name={sourceType} size="l" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h5 style={{ paddingLeft: 8 }}>{sourceName}</h5>
+            <h1>{sourceName}</h1>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -70,16 +64,12 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
       </EuiText>
 
       {isFederatedSource && (
-        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="center">
+        <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={null}>
-            <EuiText textAlign="right" size="s">
-              <strong>{STATUS_LABEL}</strong>
-            </EuiText>
+            <strong>{STATUS_LABEL}</strong>
           </EuiFlexItem>
           <EuiFlexItem grow={null}>
-            <EuiText textAlign="right" size="s">
-              <EuiHealth color="success">{READY_TEXT}</EuiHealth>
-            </EuiText>
+            <EuiHealth color="success">{READY_TEXT}</EuiHealth>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

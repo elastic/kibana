@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { NameList } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import { IAggConfigs } from 'src/plugins/data/public';
 import { Query } from '../..';
 import { Filter } from '../../es_query';
 import { IndexPattern } from '../../index_patterns';
@@ -41,12 +41,20 @@ export enum SortDirection {
   desc = 'desc',
 }
 
+export interface SortDirectionFormat {
+  order: SortDirection;
+  format?: string;
+}
+
 export interface SortDirectionNumeric {
   order: SortDirection;
   numeric_type?: 'double' | 'long' | 'date' | 'date_nanos';
 }
 
-export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
+export type EsQuerySortValue = Record<
+  string,
+  SortDirection | SortDirectionNumeric | SortDirectionFormat
+>;
 
 interface SearchField {
   [key: string]: SearchFieldValue;
@@ -78,10 +86,10 @@ export interface SearchSourceFields {
   /**
    * {@link AggConfigs}
    */
-  aggs?: any;
+  aggs?: object | IAggConfigs | (() => object);
   from?: number;
   size?: number;
-  source?: NameList;
+  source?: boolean | estypes.Fields;
   version?: boolean;
   /**
    * Retrieve fields via the search Fields API
@@ -92,7 +100,7 @@ export interface SearchSourceFields {
    *
    * @deprecated It is recommended to use `fields` wherever possible.
    */
-  fieldsFromSource?: NameList;
+  fieldsFromSource?: estypes.Fields;
   /**
    * {@link IndexPatternService}
    */
@@ -147,7 +155,7 @@ export interface ShardFailure {
       type: string;
     };
     reason: string;
-    lang?: string;
+    lang?: estypes.ScriptLanguage;
     script?: string;
     script_stack?: string[];
     type: string;

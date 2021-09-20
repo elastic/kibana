@@ -6,29 +6,25 @@
  */
 
 import type { EuiDataGridSorting } from '@elastic/eui';
-import type { Datatable } from 'src/plugins/expressions';
+import type { Datatable, DatatableColumn } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../../types';
-import type {
-  LensGridDirection,
-  LensResizeAction,
-  LensSortAction,
-  LensToggleAction,
-} from './types';
-import { ColumnConfig } from './table_basic';
-
-import { desanitizeFilterContext } from '../../utils';
+import type { LensMultiTable } from '../../../common';
+import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
+import type { ColumnConfig, LensGridDirection } from '../../../common/expressions';
+import { getOriginalId } from '../../../common/expressions';
 
 export const createGridResizeHandler = (
   columnConfig: ColumnConfig,
   setColumnConfig: React.Dispatch<React.SetStateAction<ColumnConfig>>,
   onEditAction: (data: LensResizeAction['data']) => void
 ) => (eventData: { columnId: string; width: number | undefined }) => {
+  const originalColumnId = getOriginalId(eventData.columnId);
   // directly set the local state of the component to make sure the visualization re-renders immediately,
   // re-layouting and taking up all of the available space.
   setColumnConfig({
     ...columnConfig,
     columns: columnConfig.columns.map((column) => {
-      if (column.columnId === eventData.columnId) {
+      if (column.columnId === eventData.columnId || column.originalColumnId === originalColumnId) {
         return { ...column, width: eventData.width };
       }
       return column;
@@ -36,7 +32,7 @@ export const createGridResizeHandler = (
   });
   return onEditAction({
     action: 'resize',
-    columnId: eventData.columnId,
+    columnId: originalColumnId,
     width: eventData.width,
   });
 };
@@ -46,11 +42,12 @@ export const createGridHideHandler = (
   setColumnConfig: React.Dispatch<React.SetStateAction<ColumnConfig>>,
   onEditAction: (data: LensToggleAction['data']) => void
 ) => (eventData: { columnId: string }) => {
+  const originalColumnId = getOriginalId(eventData.columnId);
   // directly set the local state of the component to make sure the visualization re-renders immediately
   setColumnConfig({
     ...columnConfig,
     columns: columnConfig.columns.map((column) => {
-      if (column.columnId === eventData.columnId) {
+      if (column.columnId === eventData.columnId || column.originalColumnId === originalColumnId) {
         return { ...column, hidden: true };
       }
       return column;
@@ -58,7 +55,7 @@ export const createGridHideHandler = (
   });
   return onEditAction({
     action: 'toggle',
-    columnId: eventData.columnId,
+    columnId: originalColumnId,
   });
 };
 
@@ -89,7 +86,40 @@ export const createGridFilterHandler = (
     timeFieldName,
   };
 
-  onClickValue(desanitizeFilterContext(data));
+  onClickValue(data);
+};
+
+export const createTransposeColumnFilterHandler = (
+  onClickValue: (data: LensFilterEvent['data']) => void,
+  untransposedDataRef: React.MutableRefObject<LensMultiTable | undefined>
+) => (
+  bucketValues: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>,
+  negate: boolean = false
+) => {
+  if (!untransposedDataRef.current) return;
+  const originalTable = Object.values(untransposedDataRef.current.tables)[0];
+  const timeField = bucketValues.find(
+    ({ originalBucketColumn }) => originalBucketColumn.meta.type === 'date'
+  )?.originalBucketColumn;
+  const isDate = Boolean(timeField);
+  const timeFieldName = negate && isDate ? undefined : timeField?.meta?.field;
+
+  const data: LensFilterEvent['data'] = {
+    negate,
+    data: bucketValues.map(({ originalBucketColumn, value }) => {
+      const columnIndex = originalTable.columns.findIndex((c) => c.id === originalBucketColumn.id);
+      const rowIndex = originalTable.rows.findIndex((r) => r[originalBucketColumn.id] === value);
+      return {
+        row: rowIndex,
+        column: columnIndex,
+        value,
+        table: originalTable,
+      };
+    }),
+    timeFieldName,
+  };
+
+  onClickValue(data);
 };
 
 export const createGridSortingConfig = (

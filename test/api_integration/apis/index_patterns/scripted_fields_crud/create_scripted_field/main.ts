@@ -11,11 +11,23 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('main', () => {
+    before(async () => {
+      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
+    });
+
+    after(async () => {
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
+    });
+
     it('can create a new scripted field', async () => {
       const title = `foo-${Date.now()}-${Math.random()}*`;
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
+        override: true,
         index_pattern: {
           title,
         },
@@ -40,8 +52,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('newly created scripted field is materialized in the index_pattern object', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
+      const title = `basic_index`;
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
+        override: true,
         index_pattern: {
           title,
         },
@@ -51,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/api/index_patterns/index_pattern/${response1.body.index_pattern.id}/scripted_field`)
         .send({
           field: {
-            name: 'bar',
+            name: 'bar2',
             type: 'number',
             scripted: true,
             script: "doc['field_name'].value",
@@ -64,12 +77,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response2.status).to.be(200);
 
-      const field = response2.body.index_pattern.fields.bar;
+      const field = response2.body.index_pattern.fields.bar2;
 
-      expect(field.name).to.be('bar');
+      expect(field.name).to.be('bar2');
       expect(field.type).to.be('number');
       expect(field.scripted).to.be(true);
       expect(field.script).to.be("doc['field_name'].value");
+      await supertest.delete(
+        '/api/index_patterns/index_pattern/' + response1.body.index_pattern.id
+      );
     });
   });
 }

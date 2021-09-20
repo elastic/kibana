@@ -23,14 +23,25 @@ export * from './dns';
 export * from './events';
 
 export const MatrixHistogramQuery = 'matrixHistogram';
+export const MatrixHistogramQueryEntities = 'matrixHistogramEntities';
 
 export enum MatrixHistogramType {
   authentications = 'authentications',
+  authenticationsEntities = 'authenticationsEntities',
   anomalies = 'anomalies',
   events = 'events',
   alerts = 'alerts',
   dns = 'dns',
 }
+
+export const MatrixHistogramTypeToAggName = {
+  [MatrixHistogramType.alerts]: 'aggregations.alertsGroup.buckets',
+  [MatrixHistogramType.anomalies]: 'aggregations.anomalyActionGroup.buckets',
+  [MatrixHistogramType.authentications]: 'aggregations.eventActionGroup.buckets',
+  [MatrixHistogramType.authenticationsEntities]: 'aggregations.events.buckets',
+  [MatrixHistogramType.dns]: 'aggregations.dns_name_query_count.buckets',
+  [MatrixHistogramType.events]: 'aggregations.eventActionGroup.buckets',
+};
 
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
@@ -38,14 +49,17 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   stackByField: string;
   threshold?:
     | {
-        field: string | string[] | undefined;
-        value: number;
-        cardinality_field?: string | undefined;
-        cardinality_value?: number | undefined;
+        field: string[];
+        value: string;
+        cardinality?: {
+          field: string[];
+          value: string;
+        };
       }
     | undefined;
   inspect?: Maybe<Inspect>;
   isPtrIncluded?: boolean;
+  includeMissingData?: boolean;
 }
 
 export interface MatrixHistogramStrategyResponse extends IEsSearchResponse {

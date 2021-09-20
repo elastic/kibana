@@ -6,14 +6,12 @@
  */
 
 import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isEqual from 'lodash/isEqual';
+import { isEqual } from 'lodash';
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
+import { DEFAULT_INDEX_KEY, DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
@@ -54,7 +52,7 @@ import {
 import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
-import { PreviewQuery, Threshold } from '../query_preview';
+import { PreviewQuery } from '../query_preview';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -65,7 +63,7 @@ interface StepDefineRuleProps extends RuleStepProps {
 const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
   index: [],
-  machineLearningJobId: '',
+  machineLearningJobId: [],
   ruleType: 'query',
   threatIndex: [],
   queryBar: {
@@ -82,8 +80,10 @@ const stepDefineDefaultValue: DefineStepRule = {
   threshold: {
     field: [],
     value: '200',
-    cardinality_field: [],
-    cardinality_value: '2',
+    cardinality: {
+      field: [],
+      value: '',
+    },
   },
   timeline: {
     id: null,
@@ -102,7 +102,7 @@ const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
   query: { ...stepDefineDefaultValue.queryBar.query, query: '*:*' },
 };
 
-const MyLabelButton = styled(EuiButtonEmpty)`
+export const MyLabelButton = styled(EuiButtonEmpty)`
   height: 18px;
   font-size: 12px;
 
@@ -135,10 +135,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
+  const [threatIndexModified, setThreatIndexModified] = useState(false);
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
   const initialState = defaultValues ?? {
     ...stepDefineDefaultValue,
     index: indicesConfig,
+    threatIndex: threatIndicesConfig,
   };
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
@@ -152,28 +155,19 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       ruleType: formRuleType,
       queryBar: formQuery,
       threatIndex: formThreatIndex,
-      'threshold.field': formThresholdField,
-      'threshold.value': formThresholdValue,
-      'threshold.cardinality_field': formThresholdCardinalityField,
-      'threshold.cardinality_value': formThresholdCardinalityValue,
+      threshold: formThreshold,
     },
-  ] = useFormData<
-    DefineStepRule & {
-      'threshold.field': string[] | undefined;
-      'threshold.value': number | undefined;
-      'threshold.cardinality_field': string[] | undefined;
-      'threshold.cardinality_value': number | undefined;
-    }
-  >({
+  ] = useFormData<DefineStepRule>({
     form,
     watch: [
       'index',
       'ruleType',
       'queryBar',
+      'threshold',
       'threshold.field',
       'threshold.value',
-      'threshold.cardinality_field',
-      'threshold.cardinality_value',
+      'threshold.cardinality.field',
+      'threshold.cardinality.value',
       'threatIndex',
     ],
   });
@@ -181,8 +175,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
-  const queryBarQuery =
-    formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
   const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
     (groupAcc, [groupName, groupValue]) => {
@@ -216,6 +208,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   useEffect(() => {
     setIndexModified(!isEqual(index, indicesConfig));
   }, [index, indicesConfig]);
+
+  useEffect(() => {
+    setThreatIndexModified(!isEqual(threatIndex, threatIndicesConfig));
+  }, [threatIndex, threatIndicesConfig]);
 
   /**
    * When a rule type is changed to or from a threat match this will modify the
@@ -280,6 +276,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     indexField.setValue(indicesConfig);
   }, [getFields, indicesConfig]);
 
+  const handleResetThreatIndices = useCallback(() => {
+    const threatIndexField = getFields().threatIndex;
+    threatIndexField.setValue(threatIndicesConfig);
+  }, [getFields, threatIndicesConfig]);
+
   const handleOpenTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(true);
   }, []);
@@ -287,25 +288,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const handleCloseTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(false);
   }, []);
-
-  const thresholdFormValue = useMemo((): Threshold | undefined => {
-    return formThresholdValue != null &&
-      formThresholdField != null &&
-      formThresholdCardinalityField != null &&
-      formThresholdCardinalityValue != null
-      ? {
-          field: formThresholdField[0],
-          value: formThresholdValue,
-          cardinality_field: formThresholdCardinalityField[0],
-          cardinality_value: formThresholdCardinalityValue,
-        }
-      : undefined;
-  }, [
-    formThresholdField,
-    formThresholdValue,
-    formThresholdCardinalityField,
-    formThresholdCardinalityValue,
-  ]);
 
   const ThresholdInputChildren = useCallback(
     ({ thresholdField, thresholdValue, thresholdCardinalityField, thresholdCardinalityValue }) => (
@@ -323,16 +305,24 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const ThreatMatchInputChildren = useCallback(
     ({ threatMapping }) => (
       <ThreatMatchInput
-        threatBrowserFields={threatBrowserFields}
+        handleResetThreatIndices={handleResetThreatIndices}
         indexPatterns={indexPatterns as IndexPattern}
+        threatBrowserFields={threatBrowserFields}
+        threatIndexModified={threatIndexModified}
         threatIndexPatterns={threatIndexPatterns as IndexPattern}
-        threatMapping={threatMapping}
         threatIndexPatternsLoading={threatIndexPatternsLoading}
+        threatMapping={threatMapping}
       />
     ),
-    [threatBrowserFields, threatIndexPatternsLoading, threatIndexPatterns, indexPatterns]
+    [
+      handleResetThreatIndices,
+      indexPatterns,
+      threatBrowserFields,
+      threatIndexModified,
+      threatIndexPatterns,
+      threatIndexPatternsLoading,
+    ]
   );
-
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
@@ -373,7 +363,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   'data-test-subj': 'detectionEngineStepDefineRuleIndices',
                   euiFieldProps: {
                     fullWidth: true,
-                    isDisabled: isLoading,
                     placeholder: '',
                   },
                 }}
@@ -460,10 +449,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     path: 'threshold.value',
                   },
                   thresholdCardinalityField: {
-                    path: 'threshold.cardinality_field',
+                    path: 'threshold.cardinality.field',
                   },
                   thresholdCardinalityValue: {
-                    path: 'threshold.cardinality_value',
+                    path: 'threshold.cardinality.value',
                   },
                 }}
               >
@@ -507,8 +496,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               ruleType={ruleType}
               index={index}
               query={formQuery}
-              isDisabled={queryBarQuery.trim() === '' || !isQueryBarValid || index.length === 0}
-              threshold={thresholdFormValue}
+              isDisabled={!isQueryBarValid || index.length === 0}
+              threshold={formThreshold}
             />
           </>
         )}

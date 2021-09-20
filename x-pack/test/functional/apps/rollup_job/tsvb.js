@@ -9,9 +9,10 @@ import expect from '@kbn/expect';
 import mockRolledUpData from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
-  const es = getService('legacyEs');
-  const esArchiver = getService('esArchiver');
+  const es = getService('es');
   const retry = getService('retry');
+  const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const PageObjects = getPageObjects([
     'common',
@@ -26,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `tsvb-test-rollup-job-${Date.now()}`;
     const rollupSourceIndexName = 'rollup-source-data';
-    const rollupTargetIndexName = `rollup-target-data`;
+    const rollupTargetIndexName = 'rollup-target-data';
     const pastDates = [
       new Date('October 15, 2019 05:35:32'),
       new Date('October 15, 2019 05:34:32'),
@@ -35,7 +36,13 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       // load visualize to have an index pattern ready, otherwise visualize will redirect
-      await esArchiver.load('visualize/default');
+      await security.testUser.setRoles(['global_visualize_all', 'test_rollup_reader']);
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup.json'
+      );
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'rollup',
+      });
     });
 
     it('create rollup tsvb', async () => {
@@ -49,9 +56,8 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         //Create a rollup for kibana to recognize
-        await es.transport.request({
-          path: `/_rollup/job/${rollupJobName}`,
-          method: 'PUT',
+        await es.rollup.putJob({
+          id: rollupJobName,
           body: {
             index_pattern: rollupSourceIndexName,
             rollup_index: rollupTargetIndexName,
@@ -83,7 +89,9 @@ export default function ({ getService, getPageObjects }) {
         'Oct 15, 2019 @ 19:31:44.000'
       );
       await PageObjects.visualBuilder.clickPanelOptions('metric');
-      await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName);
+      await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName, false);
+      await PageObjects.visualBuilder.selectIndexPatternTimeField('@timestamp');
+      await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
       await PageObjects.visualBuilder.setIntervalValue('1d');
       await PageObjects.visualBuilder.setDropLastBucket(false);
       await PageObjects.common.sleep(3000);
@@ -99,7 +107,10 @@ export default function ({ getService, getPageObjects }) {
       });
 
       await esDeleteAllIndices([rollupTargetIndexName, rollupSourceIndexName]);
-      await esArchiver.load('empty_kibana');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup.json'
+      );
+      await security.testUser.restoreDefaults();
     });
   });
 }

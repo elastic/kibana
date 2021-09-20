@@ -61,13 +61,21 @@ const TopNav = ({
     const session = embeddableHandler.openInspector();
     setInspectorSession(session);
   }, [embeddableHandler]);
+
+  const doReload = useCallback(async () => {
+    // start a new session to make sure all data is up to date
+    services.data.search.session.start();
+
+    await visInstance.embeddableHandler.reload();
+  }, [visInstance.embeddableHandler, services.data.search.session]);
+
   const handleRefresh = useCallback(
     (_payload: any, isUpdate?: boolean) => {
       if (isUpdate === false) {
-        visInstance.embeddableHandler.reload();
+        doReload();
       }
     },
-    [visInstance.embeddableHandler]
+    [doReload]
   );
 
   const config = useMemo(() => {
@@ -183,13 +191,17 @@ const TopNav = ({
   useEffect(() => {
     const autoRefreshFetchSub = services.data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
-      .subscribe(() => {
-        visInstance.embeddableHandler.reload();
+      .subscribe(async (done) => {
+        try {
+          await doReload();
+        } finally {
+          done();
+        }
       });
     return () => {
       autoRefreshFetchSub.unsubscribe();
     };
-  }, [services.data.query.timefilter.timefilter, visInstance.embeddableHandler]);
+  }, [services.data.query.timefilter.timefilter, doReload]);
 
   return isChromeVisible ? (
     /**

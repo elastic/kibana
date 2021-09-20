@@ -10,20 +10,22 @@ import { ThunkDispatch } from 'redux-thunk';
 import { Query } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
+  createLayerInstance,
+  getEditState,
   getLayerById,
   getLayerList,
   getLayerListRaw,
-  getSelectedLayerId,
-  getMapReady,
   getMapColors,
-  createLayerInstance,
+  getMapReady,
+  getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { cancelRequest } from '../reducers/non_serializable_instances';
-import { updateFlyout } from './ui_actions';
+import { setDrawMode, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
+  CLEAR_LAYER_PROP,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
   REMOVE_TRACKED_LAYER_STATE,
@@ -40,14 +42,21 @@ import {
 } from './map_action_constants';
 import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
-import { JoinDescriptor, LayerDescriptor, StyleDescriptor } from '../../common/descriptor_types';
+import {
+  Attribution,
+  JoinDescriptor,
+  LayerDescriptor,
+  StyleDescriptor,
+  TileMetaFeature,
+} from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
-import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
+import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
+import { getDrawMode } from '../selectors/ui_selectors';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -71,7 +80,7 @@ export function rollbackToTrackedLayerStateForSelectedLayer() {
     // syncDataForLayer may not trigger endDataLoad if no re-fetch is required
     dispatch(updateStyleMeta(layerId));
 
-    dispatch(syncDataForLayerId(layerId));
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
@@ -140,7 +149,7 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
       type: ADD_LAYER,
       layer: layerDescriptor,
     });
-    dispatch(syncDataForLayerId(layerDescriptor.id));
+    dispatch(syncDataForLayerId(layerDescriptor.id, false));
 
     const layer = createLayerInstance(layerDescriptor);
     const features = await layer.getLicensedFeatures();
@@ -217,7 +226,7 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
       visibility: makeVisible,
     });
     if (makeVisible) {
-      dispatch(syncDataForLayerId(layerId));
+      dispatch(syncDataForLayerId(layerId, false));
     }
   };
 }
@@ -237,6 +246,32 @@ export function toggleLayerVisible(layerId: string) {
   };
 }
 
+export function showThisLayerOnly(layerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    getLayerList(getState()).forEach((layer: ILayer, index: number) => {
+      if (layer.isBasemap(index)) {
+        return;
+      }
+
+      // show target layer
+      if (layer.getId() === layerId) {
+        if (!layer.isVisible()) {
+          dispatch(setLayerVisibility(layerId, true));
+        }
+        return;
+      }
+
+      // hide all other layers
+      if (layer.isVisible()) {
+        dispatch(setLayerVisibility(layer.getId(), false));
+      }
+    });
+  };
+}
+
 export function setSelectedLayer(layerId: string | null) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -248,6 +283,10 @@ export function setSelectedLayer(layerId: string | null) {
     }
     if (layerId) {
       dispatch(trackCurrentLayerState(layerId));
+      // Reset draw mode only if setting a new selected layer
+      if (getDrawMode(getState()) !== DRAW_MODE.NONE) {
+        dispatch(setDrawMode(DRAW_MODE.NONE));
+      }
     }
     dispatch({
       type: SET_SELECTED_LAYER,
@@ -291,7 +330,7 @@ function updateMetricsProp(layerId: string, value: unknown) {
       value,
     });
     await dispatch(updateStyleProperties(layerId, previousFields as IESAggField[]));
-    dispatch(syncDataForLayerId(layerId));
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
@@ -317,7 +356,7 @@ export function updateSourceProp(
     if (newLayerType) {
       dispatch(updateLayerType(layerId, newLayerType));
     }
-    dispatch(syncDataForLayerId(layerId));
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
@@ -346,6 +385,23 @@ export function updateLayerLabel(id: string, newLabel: string) {
     id,
     propName: 'label',
     newValue: newLabel,
+  };
+}
+
+export function setLayerAttribution(id: string, attribution: Attribution) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'attribution',
+    newValue: attribution,
+  };
+}
+
+export function clearLayerAttribution(id: string) {
+  return {
+    type: CLEAR_LAYER_PROP,
+    id,
+    propName: 'attribution',
   };
 }
 
@@ -385,6 +441,15 @@ export function updateLabelsOnTop(id: string, areLabelsOnTop: boolean) {
   };
 }
 
+export function updateFittableFlag(id: string, includeInFitToBounds: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'includeInFitToBounds',
+    newValue: includeInFitToBounds,
+  };
+}
+
 export function setLayerQuery(id: string, query: Query) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch({
@@ -394,7 +459,7 @@ export function setLayerQuery(id: string, query: Query) {
       newValue: query,
     });
 
-    dispatch(syncDataForLayerId(id));
+    dispatch(syncDataForLayerId(id, false));
   };
 }
 
@@ -445,6 +510,11 @@ function removeLayerFromLayerList(layerId: string) {
       type: REMOVE_LAYER,
       id: layerId,
     });
+    // Clean up draw state if needed
+    const editState = getEditState(getState());
+    if (layerId === editState?.layerId) {
+      dispatch(setDrawMode(DRAW_MODE.NONE));
+    }
   };
 }
 
@@ -493,7 +563,7 @@ export function updateLayerStyle(layerId: string, styleDescriptor: StyleDescript
     dispatch(updateStyleMeta(layerId));
 
     // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
-    dispatch(syncDataForLayerId(layerId));
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
@@ -519,7 +589,7 @@ export function setJoinsForLayer(layer: ILayer, joins: JoinDescriptor[]) {
       joins,
     });
     await dispatch(updateStyleProperties(layer.getId(), previousFields));
-    dispatch(syncDataForLayerId(layer.getId()));
+    dispatch(syncDataForLayerId(layer.getId(), false));
   };
 }
 
@@ -537,5 +607,34 @@ export function setHiddenLayers(hiddenLayerIds: string[]) {
         dispatch(setLayerVisibility(layer.id, !hiddenLayerIds.includes(layer.id)))
       );
     }
+  };
+}
+
+export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id: layerId,
+    propName: '__areTilesLoaded',
+    newValue: areTilesLoaded,
+  };
+}
+
+export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFeature[]) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layerId,
+      propName: '__metaFromTiles',
+      newValue: mbMetaFeatures,
+    });
+    await dispatch(updateStyleMeta(layerId));
   };
 }

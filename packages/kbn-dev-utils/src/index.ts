@@ -23,7 +23,6 @@ export {
   KBN_P12_PATH,
   KBN_P12_PASSWORD,
 } from './certs';
-export * from './kbn_client';
 export * from './run';
 export * from './axios';
 export * from './stdio';
@@ -32,3 +31,5 @@ export * from './plugin_list';
 export * from './plugins';
 export * from './streams';
 export * from './babel';
+export * from './extract';
+export * from './vscode_config';

@@ -12,7 +12,10 @@ import { ListPlugin } from './plugin';
 
 // exporting these since its required at top level in siem plugin
 export { ListClient } from './services/lists/list_client';
-export { CreateExceptionListItemOptions } from './services/exception_lists/exception_list_client_types';
+export {
+  CreateExceptionListItemOptions,
+  UpdateExceptionListItemOptions,
+} from './services/exception_lists/exception_list_client_types';
 export { ExceptionListClient } from './services/exception_lists/exception_list_client';
 export type { ListPluginSetup, ListsApiRequestHandlerContext } from './types';
 

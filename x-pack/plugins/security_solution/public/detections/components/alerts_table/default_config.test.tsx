@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
-import { buildAlertsRuleIdFilter } from './default_config';
+import { ExistsFilter, Filter } from '@kbn/es-query';
+import {
+  buildAlertsRuleIdFilter,
+  buildAlertStatusesFilter,
+  buildAlertStatusFilter,
+  buildThreatMatchFilter,
+} from './default_config';
 
 jest.mock('./actions');
 
@@ -34,7 +39,128 @@ describe('alerts default_config', () => {
       expect(filters).toHaveLength(1);
       expect(filters[0]).toEqual(expectedFilter);
     });
+
+    describe('buildThreatMatchFilter', () => {
+      test('given a showOnlyThreatIndicatorAlerts=true this will return an array with a single filter', () => {
+        const filters: Filter[] = buildThreatMatchFilter(true);
+        const expectedFilter: ExistsFilter = {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+            key: 'signal.rule.threat_mapping',
+            type: 'exists',
+            value: 'exists',
+          },
+          exists: {
+            field: 'signal.rule.threat_mapping',
+          },
+        };
+        expect(filters).toHaveLength(1);
+        expect(filters[0]).toEqual(expectedFilter);
+      });
+      test('given a showOnlyThreatIndicatorAlerts=false this will return an empty filter', () => {
+        const filters: Filter[] = buildThreatMatchFilter(false);
+        expect(filters).toHaveLength(0);
+      });
+    });
   });
+
+  describe('buildAlertStatusFilter', () => {
+    test('when status is acknowledged, filter will build for both `in-progress` and `acknowledged`', () => {
+      const filters = buildAlertStatusFilter('acknowledged');
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          key: 'signal.status',
+          negate: false,
+          params: {
+            query: 'acknowledged',
+          },
+          type: 'phrase',
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'signal.status': 'acknowledged',
+                },
+              },
+              {
+                term: {
+                  'signal.status': 'in-progress',
+                },
+              },
+            ],
+          },
+        },
+      };
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+
+    test('when status is `open` or `closed`, filter will build for solely that status', () => {
+      const filters = buildAlertStatusFilter('open');
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          key: 'signal.status',
+          negate: false,
+          params: {
+            query: 'open',
+          },
+          type: 'phrase',
+        },
+        query: {
+          term: {
+            'signal.status': 'open',
+          },
+        },
+      };
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+  });
+
+  describe('buildAlertStatusesFilter', () => {
+    test('builds filter containing all statuses passed into function', () => {
+      const filters = buildAlertStatusesFilter(['open', 'acknowledged', 'in-progress']);
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'signal.status': 'open',
+                },
+              },
+              {
+                term: {
+                  'signal.status': 'acknowledged',
+                },
+              },
+              {
+                term: {
+                  'signal.status': 'in-progress',
+                },
+              },
+            ],
+          },
+        },
+      };
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+  });
+
   // TODO: move these tests to ../timelines/components/timeline/body/events/event_column_view.tsx
   // describe.skip('getAlertActions', () => {
   //   let setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;

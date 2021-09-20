@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Privacy Control Bypass via Localhost Secure Copy",
   "query": "process where event.type in (\"start\", \"process_started\") and \n process.name:\"scp\" and\n process.args:\"StrictHostKeyChecking=no\" and \n process.command_line:(\"scp *localhost:/*\", \"scp *127.0.0.1:/*\") and\n not process.args:\"vagrant@*127.0.0.1*\"\n",
   "references": [

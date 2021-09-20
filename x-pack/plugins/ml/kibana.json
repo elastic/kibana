@@ -10,25 +10,25 @@
     "data",
     "cloud",
     "features",
-    "fileUpload",
+    "dataVisualizer",
     "licensing",
     "share",
     "embeddable",
     "uiActions",
     "kibanaLegacy",
-    "indexPatternManagement",
     "discover",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "fieldFormats"
   ],
   "optionalPlugins": [
-    "alerts",
+    "alerting",
     "home",
     "security",
     "spaces",
     "management",
     "licenseManagement",
     "maps",
-    "lens"
+    "usageCollection"
   ],
   "server": true,
   "ui": true,
@@ -39,9 +39,16 @@
     "dashboard",
     "savedObjects",
     "home",
-    "maps"
+    "maps",
+    "usageCollection",
+    "fieldFormats"
   ],
   "extraPublicDirs": [
     "common"
-  ]
+  ],
+  "owner": {
+    "name": "Machine Learning UI",
+    "githubTeam": "ml-ui"
+  },
+  "description": "This plugin provides access to the machine learning features provided by Elastic."
 }

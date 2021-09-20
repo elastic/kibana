@@ -85,6 +85,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       systemLogger: this.systemLogger,
       kibanaUUID: this.context.env.instanceUuid,
       savedObjectProviderRegistry: this.savedObjectProviderRegistry,
+      kibanaVersion: this.kibanaVersion,
     });
 
     this.eventLogService.registerProviderActions(PROVIDER, Object.values(ACTIONS));

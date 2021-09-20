@@ -133,6 +133,9 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
               optional: true,
               formKey: 'etaGrowthRatePerTree',
             },
+            feature_processors: {
+              optional: true,
+            },
             max_optimization_rounds_per_hyperparameter: {
               optional: true,
               formKey: 'maxOptimizationRoundsPerHyperparameter',
@@ -235,6 +238,9 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             loss_function_parameter: {
               optional: true,
             },
+            feature_processors: {
+              optional: true,
+            },
             early_stopping_enabled: {
               optional: true,
               ignore: true,
@@ -288,6 +294,11 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
       defaultValue: {
         match_all: {},
       },
+    },
+    runtime_mappings: {
+      optional: true,
+      formKey: 'runtimeMappings',
+      defaultValue: undefined,
     },
     _source: {
       optional: true,

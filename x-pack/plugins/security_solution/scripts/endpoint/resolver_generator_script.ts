@@ -10,16 +10,10 @@ import yargs from 'yargs';
 import fs from 'fs';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { KbnClient, ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
-import { AxiosResponse } from 'axios';
+import { ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
-import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../fleet/common/constants';
-import {
-  CreateFleetSetupResponse,
-  PostIngestSetupResponse,
-} from '../../../fleet/common/types/rest_spec';
-import { KbnClientWithApiKeySupport } from './kbn_client_with_api_key_support';
 
 main();
 
@@ -40,40 +34,6 @@ async function deleteIndices(indices: string[], client: Client) {
     } catch (err) {
       handleErr(err);
     }
-  }
-}
-
-async function doIngestSetup(kbnClient: KbnClient) {
-  // Setup Ingest
-  try {
-    const setupResponse = (await kbnClient.request({
-      path: SETUP_API_ROUTE,
-      method: 'POST',
-    })) as AxiosResponse<PostIngestSetupResponse>;
-
-    if (!setupResponse.data.isInitialized) {
-      console.error(setupResponse.data);
-      throw new Error('Initializing the ingest manager failed, existing');
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-
-  // Setup Fleet
-  try {
-    const setupResponse = (await kbnClient.request({
-      path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
-      method: 'POST',
-    })) as AxiosResponse<CreateFleetSetupResponse>;
-
-    if (!setupResponse.data.isInitialized) {
-      console.error(setupResponse.data);
-      throw new Error('Initializing Fleet failed, existing');
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
   }
 }
 
@@ -213,14 +173,14 @@ async function main() {
     },
   }).argv;
   let ca: Buffer;
-  let kbnClient: KbnClientWithApiKeySupport;
+  let kbnClient: KbnClient;
   let clientOptions: ClientOptions;
 
   if (argv.ssl) {
     ca = fs.readFileSync(CA_CERT_PATH);
     const url = argv.kibana.replace('http:', 'https:');
     const node = argv.node.replace('http:', 'https:');
-    kbnClient = new KbnClientWithApiKeySupport({
+    kbnClient = new KbnClient({
       log: new ToolingLog({
         level: 'info',
         writeTo: process.stdout,
@@ -230,7 +190,7 @@ async function main() {
     });
     clientOptions = { node, ssl: { ca: [ca] } };
   } else {
-    kbnClient = new KbnClientWithApiKeySupport({
+    kbnClient = new KbnClient({
       log: new ToolingLog({
         level: 'info',
         writeTo: process.stdout,
@@ -240,13 +200,6 @@ async function main() {
     clientOptions = { node: argv.node };
   }
   const client = new Client(clientOptions);
-
-  try {
-    await doIngestSetup(kbnClient);
-  } catch (error) {
-    // eslint-disable-next-line no-process-exit
-    process.exit(1);
-  }
 
   if (argv.delete) {
     await deleteIndices(

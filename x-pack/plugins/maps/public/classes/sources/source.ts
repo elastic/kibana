@@ -8,16 +8,25 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-
 import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
-
 import { IField } from '../fields/field';
-import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
-import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
-import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
+import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import {
+  AbstractSourceDescriptor,
+  Attribution,
+  DataRequestMeta,
+  Timeslice,
+} from '../../../common/descriptor_types';
 import { LICENSED_FEATURES } from '../../licensed_features';
+import { PreIndexedShape } from '../../../common/elasticsearch_util';
+
+export type OnSourceChangeArgs = {
+  propName: string;
+  value: unknown;
+  newLayerType?: LAYER_TYPE;
+};
 
 export type SourceEditorArgs = {
   onChange: (...args: OnSourceChangeArgs[]) => void;
@@ -30,17 +39,6 @@ export type ImmutableSourceProperty = {
   link?: string;
 };
 
-export type Attribution = {
-  url: string;
-  label: string;
-};
-
-export type PreIndexedShape = {
-  index: string;
-  id: string | number;
-  path: string;
-};
-
 export interface ISource {
   destroy(): void;
   getDisplayName(): Promise<string>;
@@ -49,10 +47,9 @@ export interface ISource {
   isFilterByMapBounds(): boolean;
   isGeoGridPrecisionAware(): boolean;
   isQueryAware(): boolean;
-  isRefreshTimerAware(): boolean;
   isTimeAware(): Promise<boolean>;
   getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
-  getAttributions(): Promise<Attribution[]>;
+  getAttributionProvider(): (() => Promise<Attribution[]>) | null;
   isESSource(): boolean;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
@@ -62,6 +59,7 @@ export interface ISource {
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
   getApplyGlobalTime(): boolean;
+  getApplyForceRefresh(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(zoom: number): number;
@@ -71,6 +69,7 @@ export interface ISource {
   getMinZoom(): number;
   getMaxZoom(): number;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
+  getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean;
 }
 
 export class AbstractSource implements ISource {
@@ -89,7 +88,7 @@ export class AbstractSource implements ISource {
   }
 
   async supportsFitToBounds(): Promise<boolean> {
-    return true;
+    return false;
   }
 
   /**
@@ -108,15 +107,11 @@ export class AbstractSource implements ISource {
     return '';
   }
 
-  async getAttributions(): Promise<Attribution[]> {
-    return [];
+  getAttributionProvider(): (() => Promise<Attribution[]>) | null {
+    return null;
   }
 
   isFieldAware(): boolean {
-    return false;
-  }
-
-  isRefreshTimerAware(): boolean {
     return false;
   }
 
@@ -141,6 +136,10 @@ export class AbstractSource implements ISource {
   }
 
   getApplyGlobalTime(): boolean {
+    return false;
+  }
+
+  getApplyForceRefresh(): boolean {
     return false;
   }
 
@@ -200,5 +199,9 @@ export class AbstractSource implements ISource {
 
   async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
     return [];
+  }
+
+  getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {
+    return true;
   }
 }

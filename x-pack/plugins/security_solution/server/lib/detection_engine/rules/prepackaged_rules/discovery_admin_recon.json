@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Enumeration of Administrator Accounts",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  (((process.name : \"net.exe\" or process.pe.original_file_name == \"net.exe\") or\n    ((process.name : \"net1.exe\" or process.pe.original_file_name == \"net1.exe\") and\n        not process.parent.name : \"net.exe\")) and\n   process.args : (\"group\", \"user\", \"localgroup\") and\n   process.args : (\"admin\", \"Domain Admins\", \"Remote Desktop Users\", \"Enterprise Admins\", \"Organization Management\") and\n   not process.args : \"/add\")\n\n   or\n\n  ((process.name : \"wmic.exe\" or process.pe.original_file_name == \"wmic.exe\") and\n     process.args : (\"group\", \"useraccount\"))\n",
   "risk_score": 21,

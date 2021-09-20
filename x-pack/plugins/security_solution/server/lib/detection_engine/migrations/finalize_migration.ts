@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { getIndexCount } from '../index/get_index_count';
+import { getIndexCount } from '@kbn/securitysolution-es-utils';
 import { isMigrationPending } from './helpers';
 import { applyMigrationCleanupPolicy } from './migration_cleanup';
 import { replaceSignalsIndexAlias } from './replace_signals_index_alias';

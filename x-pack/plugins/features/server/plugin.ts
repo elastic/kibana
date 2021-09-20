@@ -26,6 +26,14 @@ import {
   KibanaFeature,
   KibanaFeatureConfig,
 } from '../common';
+import type {
+  FeaturePrivilegeIterator,
+  SubFeaturePrivilegeIterator,
+} from './feature_privilege_iterator';
+import {
+  featurePrivilegeIterator,
+  subFeaturePrivilegeIterator,
+} from './feature_privilege_iterator';
 
 /**
  * Describes public Features plugin contract returned at the `setup` stage.
@@ -46,15 +54,31 @@ export interface PluginSetupContract {
    * */
   getElasticsearchFeatures(): ElasticsearchFeature[];
   getFeaturesUICapabilities(): UICapabilities;
+
+  /*
+   * In the future, OSS features should register their own subfeature
+   * privileges. This can be done when parts of Reporting are moved to
+   * src/plugins. For now, this method exists for `reporting` to tell
+   * `features` to include Reporting when registering OSS features.
+   */
+  enableReportingUiCapabilities(): void;
+
+  /**
+   * Utility for iterating through all privileges belonging to a specific feature.
+   * {@see FeaturePrivilegeIterator }
+   */
+  featurePrivilegeIterator: FeaturePrivilegeIterator;
+
+  /**
+   * Utility for iterating through all sub-feature privileges belonging to a specific feature.
+   * {@see SubFeaturePrivilegeIterator }
+   */
+  subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator;
 }
 
 export interface PluginStartContract {
   getElasticsearchFeatures(): ElasticsearchFeature[];
   getKibanaFeatures(): KibanaFeature[];
-}
-
-interface TimelionSetupContract {
-  uiEnabled: boolean;
 }
 
 /**
@@ -65,18 +89,13 @@ export class FeaturesPlugin
     Plugin<RecursiveReadonly<PluginSetupContract>, RecursiveReadonly<PluginStartContract>> {
   private readonly logger: Logger;
   private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
-  private isTimelionEnabled: boolean = false;
+  private isReportingEnabled: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(
-    core: CoreSetup,
-    { visTypeTimelion }: { visTypeTimelion?: TimelionSetupContract }
-  ): RecursiveReadonly<PluginSetupContract> {
-    this.isTimelionEnabled = visTypeTimelion !== undefined && visTypeTimelion.uiEnabled;
-
+  public setup(core: CoreSetup): RecursiveReadonly<PluginSetupContract> {
     defineRoutes({
       router: core.http.createRouter(),
       featureRegistry: this.featureRegistry,
@@ -100,6 +119,9 @@ export class FeaturesPlugin
         this.featureRegistry
       ),
       getFeaturesUICapabilities,
+      enableReportingUiCapabilities: this.enableReportingUiCapabilities.bind(this),
+      featurePrivilegeIterator,
+      subFeaturePrivilegeIterator,
     });
   }
 
@@ -118,20 +140,30 @@ export class FeaturesPlugin
 
   private registerOssFeatures(savedObjects: SavedObjectsServiceStart) {
     const registry = savedObjects.getTypeRegistry();
-    const savedObjectTypes = registry.getVisibleTypes().map((t) => t.name);
+    const savedObjectVisibleTypes = registry.getVisibleTypes().map((t) => t.name);
+    const savedObjectImportableAndExportableHiddenTypes = registry
+      .getImportableAndExportableTypes()
+      .filter((t) => registry.isHidden(t.name))
+      .map((t) => t.name);
 
-    this.logger.debug(
-      `Registering OSS features with SO types: ${savedObjectTypes.join(', ')}. "includeTimelion": ${
-        this.isTimelionEnabled
-      }.`
+    const savedObjectTypes = Array.from(
+      new Set([...savedObjectVisibleTypes, ...savedObjectImportableAndExportableHiddenTypes])
     );
+
     const features = buildOSSFeatures({
       savedObjectTypes,
-      includeTimelion: this.isTimelionEnabled,
+      includeReporting: this.isReportingEnabled,
     });
 
     for (const feature of features) {
       this.featureRegistry.registerKibanaFeature(feature);
     }
+  }
+
+  private enableReportingUiCapabilities() {
+    this.logger.debug(
+      `Feature controls for Reporting plugin are enabled. Please assign access to Reporting use Kibana feature controls for applications.`
+    );
+    this.isReportingEnabled = true;
   }
 }

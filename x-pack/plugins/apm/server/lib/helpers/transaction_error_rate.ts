@@ -10,7 +10,7 @@ import { EventOutcome } from '../../../common/event_outcome';
 import {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../typings/elasticsearch/aggregations';
+} from '../../../../../../src/core/types/elasticsearch';
 
 export const getOutcomeAggregation = () => ({
   terms: {
@@ -21,7 +21,21 @@ export const getOutcomeAggregation = () => ({
 
 type OutcomeAggregation = ReturnType<typeof getOutcomeAggregation>;
 
-export function calculateTransactionErrorPercentage(
+export const getTimeseriesAggregation = (
+  start: number,
+  end: number,
+  intervalString: string
+) => ({
+  date_histogram: {
+    field: '@timestamp',
+    fixed_interval: intervalString,
+    min_doc_count: 0,
+    extended_bounds: { min: start, max: end },
+  },
+  aggs: { outcomes: getOutcomeAggregation() },
+});
+
+export function calculateFailedTransactionRate(
   outcomeResponse: AggregationResultOf<OutcomeAggregation, {}>
 ) {
   const outcomes = Object.fromEntries(
@@ -34,7 +48,7 @@ export function calculateTransactionErrorPercentage(
   return failedTransactions / (successfulTransactions + failedTransactions);
 }
 
-export function getTransactionErrorRateTimeSeries(
+export function getFailedTransactionRateTimeSeries(
   buckets: AggregationResultOf<
     {
       date_histogram: AggregationOptionsByType['date_histogram'];
@@ -46,7 +60,7 @@ export function getTransactionErrorRateTimeSeries(
   return buckets.map((dateBucket) => {
     return {
       x: dateBucket.key,
-      y: calculateTransactionErrorPercentage(dateBucket.outcomes),
+      y: calculateFailedTransactionRate(dateBucket.outcomes),
     };
   });
 }

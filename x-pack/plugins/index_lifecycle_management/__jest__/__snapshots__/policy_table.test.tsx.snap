@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`policy table should change pages when a pagination link is clicked on 1`] = `
+exports[`policy table changes pages when a pagination link is clicked on 1`] = `
 Array [
   "testy0",
   "testy1",
@@ -15,7 +15,7 @@ Array [
 ]
 `;
 
-exports[`policy table should change pages when a pagination link is clicked on 2`] = `
+exports[`policy table changes pages when a pagination link is clicked on 2`] = `
 Array [
   "testy13",
   "testy14",
@@ -30,88 +30,74 @@ Array [
 ]
 `;
 
-exports[`policy table should filter based on content of search input 1`] = `
+exports[`policy table filters based on content of search input 1`] = `
 Array [
   "testy0",
-  "testy1",
-  "testy10",
-  "testy100",
-  "testy101",
-  "testy102",
-  "testy103",
-  "testy104",
-  "testy11",
-  "testy12",
 ]
 `;
 
-exports[`policy table should show empty state when there are not any policies 1`] = `
-<main
-  class="euiPageBody"
+exports[`policy table shows empty state when there are no policies 1`] = `
+<div
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+  role="main"
 >
   <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+    class="euiEmptyPrompt"
   >
+    <span
+      color="subdued"
+      data-euiicon-type="managementApp"
+    />
     <div
-      class="euiEmptyPrompt"
+      class="euiSpacer euiSpacer--m"
+    />
+    <h1
+      class="euiTitle euiTitle--medium"
+    >
+      Create your first index lifecycle policy
+    </h1>
+    <span
+      class="euiTextColor euiTextColor--subdued"
+    >
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiText euiText--medium"
+      >
+        <p>
+           An index lifecycle policy helps you manage your indices as they age.
+        </p>
+      </div>
+    </span>
+    <div
+      class="euiSpacer euiSpacer--l"
+    />
+    <button
+      class="euiButton euiButton--primary euiButton--fill"
+      data-test-subj="createPolicyButton"
+      type="button"
     >
       <span
-        color="subdued"
-        data-euiicon-type="managementApp"
-      />
-      <div
-        class="euiSpacer euiSpacer--s"
-      />
-      <span
-        class="euiTextColor euiTextColor--subdued"
-      >
-        <h1
-          class="euiTitle euiTitle--medium"
-        >
-          Create your first index lifecycle policy
-        </h1>
-        <div
-          class="euiSpacer euiSpacer--m"
-        />
-        <div
-          class="euiText euiText--medium"
-        >
-          <p>
-             An index lifecycle policy helps you manage your indices as they age.
-          </p>
-        </div>
-      </span>
-      <div
-        class="euiSpacer euiSpacer--l"
-      />
-      <div
-        class="euiSpacer euiSpacer--s"
-      />
-      <button
-        class="euiButton euiButton--primary euiButton--fill"
-        data-test-subj="createPolicyButton"
-        type="button"
+        class="euiButtonContent euiButton__content"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="plusInCircle"
+        />
+        <span
+          class="euiButton__text"
         >
-          <span
-            class="euiButtonContent__icon"
-            data-euiicon-type="plusInCircle"
-          />
-          <span
-            class="euiButton__text"
-          >
-            Create policy
-          </span>
+          Create policy
         </span>
-      </button>
-    </div>
+      </span>
+    </button>
   </div>
-</main>
+</div>
 `;
 
-exports[`policy table should sort when linked indices header is clicked 1`] = `
+exports[`policy table sorts when linked index templates header is clicked 1`] = `
 Array [
   "testy1",
   "testy3",
@@ -126,23 +112,54 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when linked indices header is clicked 2`] = `
+exports[`policy table sorts when linked index templates header is clicked 2`] = `
 Array [
-  "testy104",
-  "testy102",
-  "testy100",
-  "testy98",
-  "testy96",
-  "testy94",
-  "testy92",
-  "testy90",
-  "testy88",
-  "testy86",
+  "testy0",
+  "testy2",
+  "testy4",
+  "testy6",
+  "testy8",
+  "testy10",
+  "testy12",
+  "testy14",
+  "testy16",
+  "testy18",
 ]
 `;
 
-exports[`policy table should sort when modified date header is clicked 1`] = `
+exports[`policy table sorts when linked indices header is clicked 1`] = `
 Array [
+  "testy1",
+  "testy3",
+  "testy5",
+  "testy7",
+  "testy9",
+  "testy11",
+  "testy13",
+  "testy15",
+  "testy17",
+  "testy19",
+]
+`;
+
+exports[`policy table sorts when linked indices header is clicked 2`] = `
+Array [
+  "testy0",
+  "testy2",
+  "testy4",
+  "testy6",
+  "testy8",
+  "testy10",
+  "testy12",
+  "testy14",
+  "testy16",
+  "testy18",
+]
+`;
+
+exports[`policy table sorts when modified date header is clicked 1`] = `
+Array [
+  "testy0",
   "testy104",
   "testy103",
   "testy102",
@@ -152,13 +169,11 @@ Array [
   "testy98",
   "testy97",
   "testy96",
-  "testy95",
 ]
 `;
 
-exports[`policy table should sort when modified date header is clicked 2`] = `
+exports[`policy table sorts when modified date header is clicked 2`] = `
 Array [
-  "testy0",
   "testy1",
   "testy2",
   "testy3",
@@ -168,10 +183,11 @@ Array [
   "testy7",
   "testy8",
   "testy9",
+  "testy10",
 ]
 `;
 
-exports[`policy table should sort when name header is clicked 1`] = `
+exports[`policy table sorts when name header is clicked 1`] = `
 Array [
   "testy99",
   "testy98",
@@ -186,22 +202,7 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when name header is clicked 2`] = `
-Array [
-  "testy0",
-  "testy1",
-  "testy10",
-  "testy100",
-  "testy101",
-  "testy102",
-  "testy103",
-  "testy104",
-  "testy11",
-  "testy12",
-]
-`;
-
-exports[`policy table should sort when version header is clicked 1`] = `
+exports[`policy table sorts when name header is clicked 2`] = `
 Array [
   "testy0",
   "testy1",
@@ -213,20 +214,5 @@ Array [
   "testy7",
   "testy8",
   "testy9",
-]
-`;
-
-exports[`policy table should sort when version header is clicked 2`] = `
-Array [
-  "testy104",
-  "testy103",
-  "testy102",
-  "testy101",
-  "testy100",
-  "testy99",
-  "testy98",
-  "testy97",
-  "testy96",
-  "testy95",
 ]
 `;

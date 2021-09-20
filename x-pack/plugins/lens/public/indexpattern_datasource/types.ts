@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { IFieldType } from 'src/plugins/data/common';
-import { IndexPatternColumn, IncompleteColumn } from './operations';
-import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
-import { DragDropIdentifier } from '../drag_drop/providers';
+import type { IndexPatternColumn, IncompleteColumn } from './operations';
+import type { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
+import type { FieldSpec } from '../../../../../src/plugins/data/common';
+import type { DragDropIdentifier } from '../drag_drop/providers';
+import type { FieldFormatParams } from '../../../../../src/plugins/field_formats/common';
 
 export {
+  FieldBasedIndexPatternColumn,
   IndexPatternColumn,
   OperationType,
   IncompleteColumn,
@@ -31,6 +33,9 @@ export {
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  OverallSumIndexPatternColumn,
 } from './operations';
 
 export type DraggedField = DragDropIdentifier & {
@@ -47,16 +52,17 @@ export interface IndexPattern {
     string,
     {
       id: string;
-      params: unknown;
+      params: FieldFormatParams;
     }
   >;
   hasRestrictions: boolean;
 }
 
-export type IndexPatternField = IFieldType & {
+export type IndexPatternField = FieldSpec & {
   displayName: string;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
   meta?: boolean;
+  runtime?: boolean;
 };
 
 export interface IndexPatternLayer {
@@ -85,6 +91,9 @@ export interface IndexPatternPrivateState {
   existingFields: Record<string, Record<string, boolean>>;
   isFirstExistenceFetch: boolean;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
+
+  isDimensionClosePrevented?: boolean;
 }
 
 export interface IndexPatternRef {

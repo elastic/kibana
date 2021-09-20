@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '../../../core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+
 import { createClusterDataCheck } from './check_cluster_data';
 
 describe('checkClusterForUserData', () => {
@@ -30,15 +31,15 @@ describe('checkClusterForUserData', () => {
         body: [
           {
             index: '.kibana',
-            'docs.count': 500,
+            'docs.count': '500',
           },
           {
             index: 'kibana_sample_ecommerce_data',
-            'docs.count': 20,
+            'docs.count': '20',
           },
           {
             index: '.somethingElse',
-            'docs.count': 20,
+            'docs.count': '20',
           },
         ],
       })
@@ -58,11 +59,11 @@ describe('checkClusterForUserData', () => {
         body: [
           {
             index: '.kibana',
-            'docs.count': 500,
+            'docs.count': '500',
           },
           {
             index: 'some_real_index',
-            'docs.count': 20,
+            'docs.count': '20',
           },
         ],
       })
@@ -88,7 +89,7 @@ describe('checkClusterForUserData', () => {
           body: [
             {
               index: '.kibana',
-              'docs.count': 500,
+              'docs.count': '500',
             },
           ],
         })
@@ -98,7 +99,7 @@ describe('checkClusterForUserData', () => {
           body: [
             {
               index: 'some_real_index',
-              'docs.count': 20,
+              'docs.count': '20',
             },
           ],
         })

@@ -1326,7 +1326,12 @@ exports[`Field for image setting should render as read only if saving is disable
       disabled={true}
       display="large"
       fullWidth={true}
-      initialPromptText="Select or drag and drop a file"
+      initialPromptText={
+        <EuiI18n
+          default="Select or drag and drop a file"
+          token="euiFilePicker.promptText"
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -1472,7 +1477,12 @@ exports[`Field for image setting should render custom setting icon if it is cust
       disabled={false}
       display="large"
       fullWidth={true}
-      initialPromptText="Select or drag and drop a file"
+      initialPromptText={
+        <EuiI18n
+          default="Select or drag and drop a file"
+          token="euiFilePicker.promptText"
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -1526,7 +1536,12 @@ exports[`Field for image setting should render default value if there is no user
       disabled={false}
       display="large"
       fullWidth={true}
-      initialPromptText="Select or drag and drop a file"
+      initialPromptText={
+        <EuiI18n
+          default="Select or drag and drop a file"
+          token="euiFilePicker.promptText"
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -1597,7 +1612,12 @@ exports[`Field for image setting should render unsaved value if there are unsave
       disabled={false}
       display="large"
       fullWidth={true}
-      initialPromptText="Select or drag and drop a file"
+      initialPromptText={
+        <EuiI18n
+          default="Select or drag and drop a file"
+          token="euiFilePicker.promptText"
+        />
+      }
       onChange={[Function]}
     />
     <EuiScreenReaderOnly>
@@ -1791,6 +1811,7 @@ exports[`Field for json setting should render as read only if saving is disabled
         maxLines={30}
         minLines={6}
         mode="json"
+        name="advancedSetting-editField-json:test:setting-editor"
         onChange={[Function]}
         setOptions={
           Object {
@@ -1897,6 +1918,7 @@ exports[`Field for json setting should render as read only with help text if ove
         maxLines={30}
         minLines={6}
         mode="json"
+        name="advancedSetting-editField-json:test:setting-editor"
         onChange={[Function]}
         setOptions={
           Object {
@@ -1979,6 +2001,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
         maxLines={30}
         minLines={6}
         mode="json"
+        name="advancedSetting-editField-json:test:setting-editor"
         onChange={[Function]}
         setOptions={
           Object {
@@ -2092,6 +2115,7 @@ exports[`Field for json setting should render default value if there is no user 
         maxLines={30}
         minLines={6}
         mode="json"
+        name="advancedSetting-editField-json:test:setting-editor"
         onChange={[Function]}
         setOptions={
           Object {
@@ -2181,6 +2205,7 @@ exports[`Field for json setting should render unsaved value if there are unsaved
         maxLines={30}
         minLines={6}
         mode="json"
+        name="advancedSetting-editField-json:test:setting-editor"
         onChange={[Function]}
         setOptions={
           Object {
@@ -2305,6 +2330,7 @@ exports[`Field for json setting should render user value if there is user value 
         maxLines={30}
         minLines={6}
         mode="json"
+        name="advancedSetting-editField-json:test:setting-editor"
         onChange={[Function]}
         setOptions={
           Object {
@@ -2376,6 +2402,7 @@ exports[`Field for markdown setting should render as read only if saving is disa
         maxLines={30}
         minLines={6}
         mode="markdown"
+        name="advancedSetting-editField-markdown:test:setting-editor"
         onChange={[Function]}
         setOptions={
           Object {
@@ -2479,6 +2506,7 @@ exports[`Field for markdown setting should render as read only with help text if
         maxLines={30}
         minLines={6}
         mode="markdown"
+        name="advancedSetting-editField-markdown:test:setting-editor"
         onChange={[Function]}
         setOptions={
           Object {
@@ -2561,6 +2589,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
         maxLines={30}
         minLines={6}
         mode="markdown"
+        name="advancedSetting-editField-markdown:test:setting-editor"
         onChange={[Function]}
         setOptions={
           Object {
@@ -2632,6 +2661,7 @@ exports[`Field for markdown setting should render default value if there is no u
         maxLines={30}
         minLines={6}
         mode="markdown"
+        name="advancedSetting-editField-markdown:test:setting-editor"
         onChange={[Function]}
         setOptions={
           Object {
@@ -2721,6 +2751,7 @@ exports[`Field for markdown setting should render unsaved value if there are uns
         maxLines={30}
         minLines={6}
         mode="markdown"
+        name="advancedSetting-editField-markdown:test:setting-editor"
         onChange={[Function]}
         setOptions={
           Object {
@@ -2838,6 +2869,7 @@ exports[`Field for markdown setting should render user value if there is user va
         maxLines={30}
         minLines={6}
         mode="markdown"
+        name="advancedSetting-editField-markdown:test:setting-editor"
         onChange={[Function]}
         setOptions={
           Object {

@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { FullAgentPolicy } from './agent_policy';
-import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
+import type {
+  AGENT_TYPE_EPHEMERAL,
+  AGENT_TYPE_PERMANENT,
+  AGENT_TYPE_TEMPORARY,
+} from '../../constants';
+
+import type { FullAgentPolicy } from './agent_policy';
 
 export type AgentType =
   | typeof AGENT_TYPE_EPHEMERAL
@@ -31,8 +36,7 @@ export type AgentActionType =
   | 'UNENROLL'
   | 'UPGRADE'
   | 'SETTINGS'
-  // INTERNAL* actions are mean to interupt long polling calls these actions will not be distributed to the agent
-  | 'INTERNAL_POLICY_REASSIGN';
+  | 'POLICY_REASSIGN';
 
 export interface NewAgentAction {
   type: AgentActionType;
@@ -89,38 +93,6 @@ export type AgentPolicyActionSOAttributes = CommonAgentActionSOAttributes & {
 };
 export type BaseAgentActionSOAttributes = AgentActionSOAttributes | AgentPolicyActionSOAttributes;
 
-export interface NewAgentEvent {
-  type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';
-  subtype: // State
-  | 'RUNNING'
-    | 'STARTING'
-    | 'IN_PROGRESS'
-    | 'CONFIG'
-    | 'FAILED'
-    | 'STOPPING'
-    | 'STOPPED'
-    | 'DEGRADED'
-    | 'UPDATING'
-    // Action results
-    | 'DATA_DUMP'
-    // Actions
-    | 'ACKNOWLEDGED'
-    | 'UNKNOWN';
-  timestamp: string;
-  message: string;
-  payload?: any;
-  agent_id: string;
-  action_id?: string;
-  policy_id?: string;
-  stream_id?: string;
-}
-
-export interface AgentEvent extends NewAgentEvent {
-  id: string;
-}
-
-export type AgentEventSOAttributes = NewAgentEvent;
-
 export interface AgentMetadata {
   [x: string]: any;
 }
@@ -145,14 +117,12 @@ interface AgentBase {
 
 export interface Agent extends AgentBase {
   id: string;
-  current_error_events: AgentEvent[];
   access_api_key?: string;
-  status?: string;
+  status?: AgentStatus;
   packages: string[];
 }
 
 export interface AgentSOAttributes extends AgentBase {
-  current_error_events?: string;
   packages?: string[];
 }
 

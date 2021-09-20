@@ -42,7 +42,7 @@ export const getSignalsIndicesInRange = async ({
     return [];
   }
 
-  const response = await esClient.search<IndexesResponse>({
+  const response = await esClient.search({
     index,
     body: {
       aggs: {
@@ -71,5 +71,6 @@ export const getSignalsIndicesInRange = async ({
     },
   });
 
-  return response.body.aggregations.indexes.buckets.map((bucket) => bucket.key);
+  const aggs = response.body.aggregations as IndexesResponse['aggregations'];
+  return aggs.indexes.buckets.map((bucket) => bucket.key);
 };

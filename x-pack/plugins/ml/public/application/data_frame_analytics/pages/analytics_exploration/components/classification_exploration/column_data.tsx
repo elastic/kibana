@@ -18,19 +18,31 @@ import { ConfusionMatrix } from '../../../../common/analytics';
 
 const COL_INITIAL_WIDTH = 165; // in pixels
 
-interface ColumnData {
+export interface ConfusionMatrixColumn {
+  id: string;
+  display?: JSX.Element;
+  initialWidth?: number;
+}
+
+export interface ConfusionMatrixColumnData {
   actual_class: string;
   actual_class_doc_count: number;
-  [key: string]: string | number;
+  other: number;
+  predicted_classes_count: Record<string, number>;
 }
 
 export const ACTUAL_CLASS_ID = 'actual_class';
 export const OTHER_CLASS_ID = 'other';
 export const MAX_COLUMNS = 6;
 
-export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
-  const colData: Partial<ColumnData[]> = [];
-  const columns: Array<{ id: string; display?: any; initialWidth?: number }> = [
+export function getColumnData(
+  confusionMatrixData: ConfusionMatrix[]
+): {
+  columns: ConfusionMatrixColumn[];
+  columnData: ConfusionMatrixColumnData[];
+} {
+  const colData: ConfusionMatrixColumnData[] = [];
+  const columns: ConfusionMatrixColumn[] = [
     {
       id: ACTUAL_CLASS_ID,
       display: <span />,
@@ -40,17 +52,18 @@ export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
 
   let showOther = false;
 
-  confusionMatrixData.forEach((classData) => {
+  for (const classData of confusionMatrixData) {
     const otherCount = classData.other_predicted_class_doc_count;
 
     if (otherCount > 0) {
       showOther = true;
     }
 
-    const col: any = {
+    const col: ConfusionMatrixColumnData = {
       actual_class: classData.actual_class,
       actual_class_doc_count: classData.actual_class_doc_count,
       other: otherCount,
+      predicted_classes_count: {},
     };
 
     const predictedClasses = classData.predicted_classes || [];
@@ -60,11 +73,11 @@ export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
     for (let i = 0; i < predictedClasses.length; i++) {
       const predictedClass = predictedClasses[i].predicted_class;
       const predictedClassCount = predictedClasses[i].count;
-      col[predictedClass] = predictedClassCount;
+      col.predicted_classes_count[predictedClass] = predictedClassCount;
     }
 
     colData.push(col);
-  });
+  }
 
   if (showOther) {
     columns.push({ id: OTHER_CLASS_ID, initialWidth: COL_INITIAL_WIDTH });

@@ -16,7 +16,8 @@ import { ManifestManager } from '../../services/artifacts/manifest_manager';
 import { buildManifestManagerMock } from '../../services/artifacts/manifest_manager/manifest_manager.mock';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import { getMockArtifacts } from './mocks';
-import { Manifest } from './manifest';
+import { InvalidInternalManifestError } from '../../services/artifacts/errors';
+import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
 
 describe('task', () => {
   const MOCK_TASK_INSTANCE = {
@@ -79,14 +80,16 @@ describe('task', () => {
   });
 
   describe('Artifacts generation flow tests', () => {
+    let mockContext: ReturnType<typeof createMockEndpointAppContext>;
+
     const runTask = async (manifestManager: ManifestManager) => {
-      const mockContext = createMockEndpointAppContext();
       const mockTaskManager = taskManagerMock.createSetup();
 
-      new ManifestTask({
+      const manifestTaskInstance = new ManifestTask({
         endpointAppContext: mockContext,
         taskManager: mockTaskManager,
       });
+      manifestTaskInstance.start({ taskManager: taskManagerMock.createStart() });
 
       mockContext.service.getManifestManager = jest.fn().mockReturnValue(manifestManager);
 
@@ -106,10 +109,14 @@ describe('task', () => {
     let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
 
     beforeAll(async () => {
-      const artifacts = await getMockArtifacts({ compress: true });
+      const artifacts = await getMockArtifacts();
       ARTIFACT_EXCEPTIONS_MACOS = artifacts[0];
       ARTIFACT_EXCEPTIONS_WINDOWS = artifacts[1];
       ARTIFACT_TRUSTED_APPS_MACOS = artifacts[2];
+    });
+
+    beforeEach(() => {
+      mockContext = createMockEndpointAppContext();
     });
 
     test('Should not run the process when no current manifest manager', async () => {
@@ -129,7 +136,7 @@ describe('task', () => {
 
     test('Should stop the process when no building new manifest throws error', async () => {
       const manifestManager = buildManifestManagerMock();
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
 
       manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
       manifestManager.buildNewManifest = jest.fn().mockRejectedValue(new Error());
@@ -144,14 +151,33 @@ describe('task', () => {
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
     });
 
+    test('Should recover if last Computed Manifest threw an InvalidInternalManifestError error', async () => {
+      const manifestManager = buildManifestManagerMock();
+      const logger = loggingSystemMock.createLogger();
+      const newManifest = ManifestManager.createDefaultManifest();
+
+      manifestManager.buildNewManifest = jest.fn().mockRejectedValue(newManifest);
+      mockContext.logFactory.get = jest.fn().mockReturnValue(logger);
+      manifestManager.getLastComputedManifest = jest.fn(async () => {
+        throw new InvalidInternalManifestError(
+          'Internal Manifest map SavedObject is missing version'
+        );
+      });
+
+      await runTask(manifestManager);
+
+      expect(logger.info).toHaveBeenCalledWith('recovering from invalid internal manifest');
+      expect(logger.error).toHaveBeenNthCalledWith(1, expect.any(InvalidInternalManifestError));
+    });
+
     test('Should not bump version and commit manifest when no diff in the manifest', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
       lastManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       lastManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
@@ -167,7 +193,7 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([], newManifest);
       expect(manifestManager.commit).not.toHaveBeenCalled();
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).toHaveBeenCalledWith([]);
@@ -176,9 +202,9 @@ describe('task', () => {
     test('Should stop the process when there are errors pushing new artifacts', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
 
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
@@ -192,10 +218,10 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
-        ARTIFACT_EXCEPTIONS_MACOS,
-        ARTIFACT_TRUSTED_APPS_MACOS,
-      ]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_TRUSTED_APPS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).not.toHaveBeenCalled();
       expect(manifestManager.tryDispatch).not.toHaveBeenCalled();
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
@@ -204,9 +230,9 @@ describe('task', () => {
     test('Should stop the process when there are errors committing manifest', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
 
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
@@ -221,10 +247,10 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
-        ARTIFACT_EXCEPTIONS_MACOS,
-        ARTIFACT_TRUSTED_APPS_MACOS,
-      ]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_TRUSTED_APPS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).not.toHaveBeenCalled();
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
@@ -233,9 +259,9 @@ describe('task', () => {
     test('Should stop the process when there are errors dispatching manifest', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
 
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
@@ -251,10 +277,10 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
-        ARTIFACT_EXCEPTIONS_MACOS,
-        ARTIFACT_TRUSTED_APPS_MACOS,
-      ]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_TRUSTED_APPS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
@@ -263,11 +289,11 @@ describe('task', () => {
     test('Should succeed the process and delete old artifacts', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
       lastManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       lastManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
@@ -284,7 +310,10 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_TRUSTED_APPS_MACOS]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+        [ARTIFACT_TRUSTED_APPS_MACOS],
+        newManifest
+      );
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).toHaveBeenCalledWith([ARTIFACT_ID_1]);
@@ -293,11 +322,11 @@ describe('task', () => {
     test('Should succeed the process but not add or delete artifacts when there are only transitions', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
       lastManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       lastManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
 
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
 
@@ -314,7 +343,7 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([], newManifest);
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).toHaveBeenCalledWith([]);

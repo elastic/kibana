@@ -91,7 +91,14 @@ export const query = async (
     return {
       series: groupings.buckets.map((bucket) => {
         const keys = Object.values(bucket.key);
-        return convertHistogramBucketsToTimeseries(keys, options, bucket.histogram.buckets);
+        const metricsetNames = bucket.metricsets.buckets.map((m) => m.key);
+        const timeseries = convertHistogramBucketsToTimeseries(
+          keys,
+          options,
+          bucket.histogram.buckets,
+          bucketSize * 1000
+        );
+        return { ...timeseries, metricsets: metricsetNames };
       }),
       info: {
         afterKey: returnAfterKey ? afterKey : null,
@@ -108,7 +115,8 @@ export const query = async (
         convertHistogramBucketsToTimeseries(
           ['*'],
           options,
-          response.aggregations.histogram.buckets
+          response.aggregations.histogram.buckets,
+          bucketSize * 1000
         ),
       ],
       info: {
@@ -120,5 +128,5 @@ export const query = async (
     ThrowReporter.report(HistogramResponseRT.decode(response.aggregations));
   }
 
-  throw new Error('Elasticsearch responsed with an unrecoginzed format.');
+  throw new Error('Elasticsearch responded with an unrecognized format.');
 };

@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
-import { ElasticsearchSource } from '../../../common/types/es';
+import { ElasticsearchSource, ElasticsearchResponse } from '../../../common/types/es';
 
 export async function fetchElasticsearchVersions(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
   size: number
 ): Promise<AlertVersions[]> {
   const params = {
     index,
-    filterPath: [
+    filter_path: [
       'hits.hits._source.cluster_stats.nodes.versions',
       'hits.hits._index',
       'hits.hits._source.cluster_uuid',
@@ -25,8 +26,8 @@ export async function fetchElasticsearchVersions(
       sort: [
         {
           timestamp: {
-            order: 'desc',
-            unmapped_type: 'long',
+            order: 'desc' as const,
+            unmapped_type: 'long' as const,
           },
         },
       ],
@@ -59,13 +60,14 @@ export async function fetchElasticsearchVersions(
     },
   };
 
-  const response = await callCluster('search', params);
-  return response.hits.hits.map((hit: { _source: ElasticsearchSource; _index: string }) => {
-    const versions = hit._source.cluster_stats?.nodes?.versions;
+  const result = await esClient.search<ElasticsearchSource>(params);
+  const response: ElasticsearchResponse = result.body as ElasticsearchResponse;
+  return (response.hits?.hits ?? []).map((hit) => {
+    const versions = hit._source!.cluster_stats?.nodes?.versions ?? [];
     return {
       versions,
-      clusterUuid: hit._source.cluster_uuid,
-      ccs: hit._index.includes(':') ? hit._index.split(':')[0] : null,
+      clusterUuid: hit._source!.cluster_uuid,
+      ccs: hit._index.includes(':') ? hit._index.split(':')[0] : undefined,
     };
   });
 }

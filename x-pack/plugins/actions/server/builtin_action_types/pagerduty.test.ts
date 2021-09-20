@@ -152,14 +152,15 @@ describe('validateParams()', () => {
 `);
   });
 
-  test('should validate and throw error when timestamp has spaces', () => {
+  test('should validate and pass when valid timestamp has spaces', () => {
     const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
     const timestamp = `  ${randoDate}`;
-    expect(() => {
-      validateParams(actionType, {
-        timestamp,
-      });
-    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
+    expect(validateParams(actionType, { timestamp })).toEqual({ timestamp });
+  });
+
+  test('should validate and pass when timestamp is empty string', () => {
+    const timestamp = '';
+    expect(validateParams(actionType, { timestamp })).toEqual({ timestamp });
   });
 
   test('should validate and throw error when timestamp is invalid', () => {
@@ -409,7 +410,7 @@ describe('execute()', () => {
     `);
   });
 
-  test('should fail when sendPagerdury throws', async () => {
+  test('should fail when sendPagerduty throws', async () => {
     const secrets = { routingKey: 'super-secret' };
     const config = { apiUrl: null };
     const params = {};
@@ -560,6 +561,197 @@ describe('execute()', () => {
             "source": "the-source",
             "summary": "the summary",
             "timestamp": "1963-09-23T01:23:45.000Z",
+          },
+        },
+        "headers": Object {
+          "Content-Type": "application/json",
+          "X-Routing-Key": "super-secret",
+        },
+      }
+    `);
+    expect(actionResponse).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
+      }
+    `);
+  });
+
+  test('should succeed when timestamp contains valid date and extraneous spaces', async () => {
+    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
+    const secrets = {
+      routingKey: 'super-secret',
+    };
+    const config = {
+      apiUrl: 'the-api-url',
+    };
+    const params: ActionParamsType = {
+      eventAction: 'trigger',
+      dedupKey: 'a-dedup-key',
+      summary: 'the summary',
+      source: 'the-source',
+      severity: 'critical',
+      timestamp: `   ${randoDate}  `,
+      component: 'the-component',
+      group: 'the-group',
+      class: 'the-class',
+    };
+
+    postPagerdutyMock.mockImplementation(() => {
+      return { status: 202, data: 'data-here' };
+    });
+
+    const actionId = 'some-action-id';
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
+    const actionResponse = await actionType.executor(executorOptions);
+    const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
+    expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
+      Object {
+        "apiUrl": "the-api-url",
+        "data": Object {
+          "dedup_key": "a-dedup-key",
+          "event_action": "trigger",
+          "payload": Object {
+            "class": "the-class",
+            "component": "the-component",
+            "group": "the-group",
+            "severity": "critical",
+            "source": "the-source",
+            "summary": "the summary",
+            "timestamp": "1963-09-23T01:23:45.000Z",
+          },
+        },
+        "headers": Object {
+          "Content-Type": "application/json",
+          "X-Routing-Key": "super-secret",
+        },
+      }
+    `);
+    expect(actionResponse).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
+      }
+    `);
+  });
+
+  test('should not pass timestamp field when timestamp is empty string', async () => {
+    const secrets = {
+      routingKey: 'super-secret',
+    };
+    const config = {
+      apiUrl: 'the-api-url',
+    };
+    const params: ActionParamsType = {
+      eventAction: 'trigger',
+      dedupKey: 'a-dedup-key',
+      summary: 'the summary',
+      source: 'the-source',
+      severity: 'critical',
+      timestamp: '',
+      component: 'the-component',
+      group: 'the-group',
+      class: 'the-class',
+    };
+
+    postPagerdutyMock.mockImplementation(() => {
+      return { status: 202, data: 'data-here' };
+    });
+
+    const actionId = 'some-action-id';
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
+    const actionResponse = await actionType.executor(executorOptions);
+    const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
+    expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
+      Object {
+        "apiUrl": "the-api-url",
+        "data": Object {
+          "dedup_key": "a-dedup-key",
+          "event_action": "trigger",
+          "payload": Object {
+            "class": "the-class",
+            "component": "the-component",
+            "group": "the-group",
+            "severity": "critical",
+            "source": "the-source",
+            "summary": "the summary",
+          },
+        },
+        "headers": Object {
+          "Content-Type": "application/json",
+          "X-Routing-Key": "super-secret",
+        },
+      }
+    `);
+    expect(actionResponse).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
+      }
+    `);
+  });
+
+  test('should not pass timestamp field when timestamp is string of spaces', async () => {
+    const secrets = {
+      routingKey: 'super-secret',
+    };
+    const config = {
+      apiUrl: 'the-api-url',
+    };
+    const params: ActionParamsType = {
+      eventAction: 'trigger',
+      dedupKey: 'a-dedup-key',
+      summary: 'the summary',
+      source: 'the-source',
+      severity: 'critical',
+      timestamp: '   ',
+      component: 'the-component',
+      group: 'the-group',
+      class: 'the-class',
+    };
+
+    postPagerdutyMock.mockImplementation(() => {
+      return { status: 202, data: 'data-here' };
+    });
+
+    const actionId = 'some-action-id';
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
+    const actionResponse = await actionType.executor(executorOptions);
+    const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
+    expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
+      Object {
+        "apiUrl": "the-api-url",
+        "data": Object {
+          "dedup_key": "a-dedup-key",
+          "event_action": "trigger",
+          "payload": Object {
+            "class": "the-class",
+            "component": "the-component",
+            "group": "the-group",
+            "severity": "critical",
+            "source": "the-source",
+            "summary": "the summary",
           },
         },
         "headers": Object {

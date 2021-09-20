@@ -8,6 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
+// @ts-expect-error not full interface
 const JOB_CONFIG: Job = {
   job_id: `fq_single_1_smv`,
   description: 'mean(responsetime) on farequote dataset with 15m bucket span',
@@ -27,6 +28,7 @@ const JOB_CONFIG: Job = {
   model_plot_config: { enabled: true },
 };
 
+// @ts-expect-error not full interface
 const DATAFEED_CONFIG: Datafeed = {
   datafeed_id: 'datafeed-fq_single_1_smv',
   indices: ['ft_farequote'],
@@ -43,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('with single metric job', function () {
       before(async () => {
-        await esArchiver.loadIfNeeded('ml/farequote');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
         await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
         await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -91,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with entity fields', function () {
+      // @ts-expect-error not full interface
       const jobConfig: Job = {
         job_id: `ecom_01`,
         description:
@@ -121,6 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
         model_plot_config: { enabled: true },
       };
 
+      // @ts-expect-error not full interface
       const datafeedConfig: Datafeed = {
         datafeed_id: 'datafeed-ecom_01',
         indices: ['ft_ecommerce'],
@@ -129,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        await esArchiver.loadIfNeeded('ml/ecommerce');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
         await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
         await ml.testResources.setKibanaTimeZoneToUTC();
         await ml.api.createAndRunAnomalyDetectionLookbackJob(jobConfig, datafeedConfig);

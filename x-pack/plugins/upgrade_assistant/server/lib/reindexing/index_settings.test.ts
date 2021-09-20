@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { mockKibanaSemverVersion, mockKibanaVersion } from '../../../common/constants';
 import { versionService } from '../version';
-import { MOCK_VERSION_STRING, getMockVersionInfo } from '../__fixtures__/version';
+import { getMockVersionInfo } from '../__fixtures__/version';
 
 import {
   generateNewIndexName,
@@ -39,6 +40,7 @@ describe('transformFlatSettings', () => {
           'index.number_of_shards': '5',
 
           // Blacklisted settings
+          // @ts-expect-error @elastic/elasticsearch doesn't declare it
           'index.allocation.existing_shards_allocator': 'gateway_allocator',
           'index.blocks.write': 'true',
           'index.creation_date': '1547052614626',
@@ -62,6 +64,11 @@ describe('transformFlatSettings', () => {
           'index.verified_before_close': 'true',
           'index.version.created': '123123',
           'index.version.upgraded': '123123',
+
+          // Deprecated settings
+          'index.force_memory_term_dictionary': '1024',
+          'index.max_adjacency_matrix_filters': 'true',
+          'index.soft_deletes.enabled': 'true',
         },
         mappings: {},
       })
@@ -74,107 +81,176 @@ describe('transformFlatSettings', () => {
     });
   });
 
-  it('does not allow index.mapper.dynamic to be set', () => {
-    expect(() =>
-      transformFlatSettings({
-        settings: {
-          'index.mapper.dynamic': 'true',
-        },
-        mappings: {},
-      })
-    ).toThrowError(`'index.mapper.dynamic' is no longer supported.`);
-  });
-
-  it('does not allow index.merge.policy.reclaim_deletes_weight to be set', () => {
-    expect(() =>
-      transformFlatSettings({
-        settings: {
-          'index.merge.policy.reclaim_deletes_weight': '2.0d',
-        },
-        mappings: {},
-      })
-    ).toThrowError(`'index.merge.policy.reclaim_deletes_weight' is no longer supported.`);
-  });
-
-  it('does not allow index.force_memory_term_dictionary to be set', () => {
-    expect(() =>
-      transformFlatSettings({
-        settings: {
-          'index.force_memory_term_dictionary': 'false',
-        },
-        mappings: {},
-      })
-    ).toThrowError(`'index.force_memory_term_dictionary' is no longer supported.`);
-  });
-
-  it('does not index.max_adjacency_matrix_filters to be set', () => {
-    expect(() =>
-      transformFlatSettings({
-        settings: {
-          'index.max_adjacency_matrix_filters': '1024',
-        },
-        mappings: {},
-      })
-    ).toThrowError(
-      `'index.max_adjacency_matrix_filters' is no longer supported; use 'indices.query.bool.max_clause_count' as an alternative.`
-    );
-  });
-});
-
-describe('sourceNameForIndex', () => {
-  beforeEach(() => {
-    versionService.setup(MOCK_VERSION_STRING);
-  });
-
-  it('parses internal indices', () => {
-    expect(sourceNameForIndex('.myInternalIndex')).toEqual('.myInternalIndex');
-  });
-
-  it('parses non-internal indices', () => {
-    expect(sourceNameForIndex('myIndex')).toEqual('myIndex');
-  });
-
-  it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor} in newIndexName`, () => {
-    expect(sourceNameForIndex(`reindexed-v${prevMajor}-myIndex`)).toEqual('myIndex');
-    expect(sourceNameForIndex(`.reindexed-v${prevMajor}-myInternalIndex`)).toEqual(
-      '.myInternalIndex'
-    );
-  });
-});
-
-describe('generateNewIndexName', () => {
-  beforeEach(() => {
-    versionService.setup(MOCK_VERSION_STRING);
-  });
-
-  it('parses internal indices', () => {
-    expect(generateNewIndexName('.myInternalIndex')).toEqual(
-      `.reindexed-v${currentMajor}-myInternalIndex`
-    );
-  });
-
-  it('parses non-internal indices', () => {
-    expect(generateNewIndexName('myIndex')).toEqual(`reindexed-v${currentMajor}-myIndex`);
-  });
-
-  it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor} in generateNewIndexName`, () => {
-    expect(generateNewIndexName(`reindexed-v${prevMajor}-myIndex`)).toEqual(
-      `reindexed-v${currentMajor}-myIndex`
-    );
-
-    expect(generateNewIndexName(`.reindexed-v${prevMajor}-myInternalIndex`)).toEqual(
-      `.reindexed-v${currentMajor}-myInternalIndex`
-    );
-  });
-});
-
-describe('getReindexWarnings', () => {
-  it('does not blow up for empty mappings', () => {
+  it('removes index.translog.retention.size if soft deletes is enabled', () => {
     expect(
-      getReindexWarnings({
-        settings: {},
+      transformFlatSettings({
+        settings: {
+          // Settings that should get preserved
+          'index.number_of_replicas': '1',
+          'index.number_of_shards': '5',
+
+          // Deprecated settings
+          // @ts-expect-error @elastic/elasticsearch doesn't declare it
+          'index.soft_deletes.enabled': 'true',
+          'index.translog.retention.size': '5b',
+        },
         mappings: {},
       })
-    ).toEqual([]);
+    ).toEqual({
+      settings: {
+        'index.number_of_replicas': '1',
+        'index.number_of_shards': '5',
+      },
+      mappings: {},
+    });
+  });
+
+  it('removes index.translog.retention.age if soft deletes is enabled', () => {
+    expect(
+      transformFlatSettings({
+        settings: {
+          // Settings that should get preserved
+          'index.number_of_replicas': '1',
+          'index.number_of_shards': '5',
+
+          // Deprecated settings
+          // @ts-expect-error @elastic/elasticsearch doesn't declare it
+          'index.soft_deletes.enabled': 'true',
+          'index.translog.retention.age': '5d',
+        },
+        mappings: {},
+      })
+    ).toEqual({
+      settings: {
+        'index.number_of_replicas': '1',
+        'index.number_of_shards': '5',
+      },
+      mappings: {},
+    });
+  });
+
+  describe('sourceNameForIndex', () => {
+    beforeEach(() => {
+      versionService.setup(mockKibanaVersion);
+    });
+
+    it('parses internal indices', () => {
+      expect(sourceNameForIndex('.myInternalIndex')).toEqual('.myInternalIndex');
+    });
+
+    it('parses non-internal indices', () => {
+      expect(sourceNameForIndex('myIndex')).toEqual('myIndex');
+    });
+
+    it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor} in newIndexName`, () => {
+      expect(sourceNameForIndex(`reindexed-v${prevMajor}-myIndex`)).toEqual('myIndex');
+      expect(sourceNameForIndex(`.reindexed-v${prevMajor}-myInternalIndex`)).toEqual(
+        '.myInternalIndex'
+      );
+    });
+  });
+
+  describe('generateNewIndexName', () => {
+    beforeEach(() => {
+      versionService.setup(mockKibanaVersion);
+    });
+
+    it('parses internal indices', () => {
+      expect(generateNewIndexName('.myInternalIndex')).toEqual(
+        `.reindexed-v${currentMajor}-myInternalIndex`
+      );
+    });
+
+    it('parses non-internal indices', () => {
+      expect(generateNewIndexName('myIndex')).toEqual(`reindexed-v${currentMajor}-myIndex`);
+    });
+
+    it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor} in generateNewIndexName`, () => {
+      expect(generateNewIndexName(`reindexed-v${prevMajor}-myIndex`)).toEqual(
+        `reindexed-v${currentMajor}-myIndex`
+      );
+
+      expect(generateNewIndexName(`.reindexed-v${prevMajor}-myInternalIndex`)).toEqual(
+        `.reindexed-v${currentMajor}-myInternalIndex`
+      );
+    });
+  });
+
+  describe('getReindexWarnings', () => {
+    it('does not blow up for empty mappings', () => {
+      expect(
+        getReindexWarnings({
+          settings: {},
+          mappings: {},
+        })
+      ).toEqual([]);
+    });
+
+    if (mockKibanaSemverVersion.major === 7) {
+      describe('[7.x] customTypeName warning', () => {
+        it('returns customTypeName warning for non-_doc mapping types', () => {
+          expect(
+            getReindexWarnings({
+              settings: {},
+              mappings: { doc: {} },
+            })
+          ).toEqual([
+            {
+              warningType: 'customTypeName',
+              meta: {
+                typeName: 'doc',
+              },
+            },
+          ]);
+        });
+        it('does not return customTypeName warning for _doc mapping types', () => {
+          expect(
+            getReindexWarnings({
+              settings: {},
+              mappings: { _doc: {} },
+            })
+          ).toEqual([]);
+        });
+      });
+
+      describe('[7.x] deprecatedSetting warning', () => {
+        it('returns deprecatedSetting warning for deprecated index settings', () => {
+          expect(
+            getReindexWarnings({
+              settings: {
+                // Deprecated settings
+                // @ts-expect-error @elastic/elasticsearch doesn't declare it
+                'index.force_memory_term_dictionary': '1024',
+                'index.max_adjacency_matrix_filters': 'true',
+                'index.soft_deletes.enabled': 'true',
+              },
+              mappings: {},
+            })
+          ).toEqual([
+            {
+              warningType: 'indexSetting',
+              meta: {
+                deprecatedSettings: [
+                  'index.force_memory_term_dictionary',
+                  'index.max_adjacency_matrix_filters',
+                  'index.soft_deletes.enabled',
+                ],
+              },
+            },
+          ]);
+        });
+
+        it('does not return a deprecatedSetting warning for there are no deprecated index settings', () => {
+          expect(
+            getReindexWarnings({
+              settings: {
+                'index.number_of_replicas': '1',
+              },
+              mappings: {},
+            })
+          ).toEqual([]);
+        });
+      });
+    }
   });
 });

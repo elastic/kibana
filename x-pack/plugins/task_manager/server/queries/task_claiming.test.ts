@@ -15,15 +15,16 @@ import { SearchOpts, StoreOpts, UpdateByQueryOpts, UpdateByQuerySearchOpts } fro
 import { asTaskClaimEvent, ClaimTaskErr, TaskClaimErrorType, TaskEvent } from '../task_events';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { BoolClauseWithAnyCondition, TermFilter } from '../queries/query_clauses';
+import type { MustNotCondition } from '../queries/query_clauses';
 import { mockLogger } from '../test_utils';
 import { TaskClaiming, OwnershipClaimingOpts, TaskClaimingOpts } from './task_claiming';
 import { Observable } from 'rxjs';
 import { taskStoreMock } from '../task_store.mock';
+import apm from 'elastic-apm-node';
 
 const taskManagerLogger = mockLogger();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => jest.clearAllMocks());
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,7 +53,19 @@ taskDefinitions.registerTaskDefinitions({
   },
 });
 
+const mockApmTrans = {
+  end: jest.fn(),
+};
+
 describe('TaskClaiming', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest
+      .spyOn(apm, 'startTransaction')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .mockImplementation(() => mockApmTrans as any);
+  });
+
   test(`should log when a certain task type is skipped due to having a zero concurency configuration`, () => {
     const definitions = new TaskTypeDictionary(mockLogger());
     definitions.registerTaskDefinitions({
@@ -89,6 +102,7 @@ describe('TaskClaiming', () => {
     new TaskClaiming({
       logger: taskManagerLogger,
       definitions,
+      excludedTaskTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
       getCapacity: () => 10,
@@ -106,11 +120,13 @@ describe('TaskClaiming', () => {
       taskClaimingOpts = {},
       hits = [generateFakeTasks(1)],
       versionConflicts = 2,
+      excludedTaskTypes = [],
     }: {
       storeOpts: Partial<StoreOpts>;
       taskClaimingOpts: Partial<TaskClaimingOpts>;
       hits?: ConcreteTaskInstance[][];
       versionConflicts?: number;
+      excludedTaskTypes?: string[];
     }) {
       const definitions = storeOpts.definitions ?? taskDefinitions;
       const store = taskStoreMock.create({ taskManagerId: storeOpts.taskManagerId });
@@ -138,6 +154,7 @@ describe('TaskClaiming', () => {
         logger: taskManagerLogger,
         definitions,
         taskStore: store,
+        excludedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
         getCapacity: taskClaimingOpts.getCapacity ?? (() => 10),
         ...taskClaimingOpts,
@@ -152,22 +169,31 @@ describe('TaskClaiming', () => {
       claimingOpts,
       hits = [generateFakeTasks(1)],
       versionConflicts = 2,
+      excludedTaskTypes = [],
     }: {
       storeOpts: Partial<StoreOpts>;
       taskClaimingOpts: Partial<TaskClaimingOpts>;
       claimingOpts: Omit<OwnershipClaimingOpts, 'size' | 'taskTypes'>;
       hits?: ConcreteTaskInstance[][];
       versionConflicts?: number;
+      excludedTaskTypes?: string[];
     }) {
       const getCapacity = taskClaimingOpts.getCapacity ?? (() => 10);
       const { taskClaiming, store } = initialiseTestClaiming({
         storeOpts,
         taskClaimingOpts,
+        excludedTaskTypes,
         hits,
         versionConflicts,
       });
 
       const results = await getAllAsPromise(taskClaiming.claimAvailableTasks(claimingOpts));
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        'markAvailableTasksAsClaimed',
+        'taskManager markAvailableTasksAsClaimed'
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(store.updateByQuery.mock.calls[0][1]).toMatchObject({
         max_docs: getCapacity(),
@@ -177,7 +203,7 @@ describe('TaskClaiming', () => {
         result,
         args: {
           search: store.fetch.mock.calls[index][0] as SearchOpts & {
-            query: BoolClauseWithAnyCondition<TermFilter>;
+            query: MustNotCondition;
           },
           updateByQuery: store.updateByQuery.mock.calls[index] as [
             UpdateByQuerySearchOpts,
@@ -186,6 +212,49 @@ describe('TaskClaiming', () => {
         },
       }));
     }
+
+    test('makes calls to APM as expected when markAvailableTasksAsClaimed throws error', async () => {
+      const maxAttempts = _.random(2, 43);
+      const customMaxAttempts = _.random(44, 100);
+
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+        bar: {
+          title: 'bar',
+          maxAttempts: customMaxAttempts,
+          createTaskRunner: jest.fn(),
+        },
+      });
+
+      const { taskClaiming, store } = initialiseTestClaiming({
+        storeOpts: {
+          definitions,
+        },
+        taskClaimingOpts: {
+          maxAttempts,
+        },
+      });
+
+      store.updateByQuery.mockRejectedValue(new Error('Oh no'));
+
+      await expect(
+        getAllAsPromise(
+          taskClaiming.claimAvailableTasks({
+            claimOwnershipUntil: new Date(),
+          })
+        )
+      ).rejects.toMatchInlineSnapshot(`[Error: Oh no]`);
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        'markAvailableTasksAsClaimed',
+        'taskManager markAvailableTasksAsClaimed'
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+    });
 
     test('it filters claimed tasks down by supported types, maxAttempts, status, and runAt', async () => {
       const maxAttempts = _.random(2, 43);
@@ -199,6 +268,11 @@ describe('TaskClaiming', () => {
         },
         bar: {
           title: 'bar',
+          maxAttempts: customMaxAttempts,
+          createTaskRunner: jest.fn(),
+        },
+        foobar: {
+          title: 'foobar',
           maxAttempts: customMaxAttempts,
           createTaskRunner: jest.fn(),
         },
@@ -220,6 +294,7 @@ describe('TaskClaiming', () => {
         claimingOpts: {
           claimOwnershipUntil: new Date(),
         },
+        excludedTaskTypes: ['foobar'],
       });
       expect(query).toMatchObject({
         bool: {
@@ -767,12 +842,12 @@ if (doc['task.runAt'].size()!=0) {
         ).map(
           (result, index) =>
             (store.updateByQuery.mock.calls[index][0] as {
-              query: BoolClauseWithAnyCondition<TermFilter>;
+              query: MustNotCondition;
               size: number;
               sort: string | string[];
               script: {
                 params: {
-                  claimableTaskTypes: string[];
+                  [claimableTaskTypes: string]: string[];
                 };
               };
             }).script.params.claimableTaskTypes
@@ -1105,6 +1180,7 @@ if (doc['task.runAt'].size()!=0) {
           startedAt: null,
           retryAt: null,
           scheduledAt: new Date(),
+          traceparent: 'parent',
         },
         {
           id: 'claimed-by-schedule',
@@ -1121,6 +1197,7 @@ if (doc['task.runAt'].size()!=0) {
           startedAt: null,
           retryAt: null,
           scheduledAt: new Date(),
+          traceparent: 'newParent',
         },
         {
           id: 'already-running',
@@ -1137,6 +1214,7 @@ if (doc['task.runAt'].size()!=0) {
           startedAt: null,
           retryAt: null,
           scheduledAt: new Date(),
+          traceparent: '',
         },
       ];
 
@@ -1176,6 +1254,7 @@ if (doc['task.runAt'].size()!=0) {
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
         definitions,
+        excludedTaskTypes: [],
         taskStore,
         maxAttempts: 2,
         getCapacity,
@@ -1222,6 +1301,7 @@ if (doc['task.runAt'].size()!=0) {
             startedAt: null,
             retryAt: null,
             scheduledAt: new Date(),
+            traceparent: 'parent',
           })
         )
       );
@@ -1277,6 +1357,7 @@ if (doc['task.runAt'].size()!=0) {
               startedAt: null,
               retryAt: null,
               scheduledAt: new Date(),
+              traceparent: '',
             },
           ],
           // second cycle
@@ -1296,6 +1377,7 @@ if (doc['task.runAt'].size()!=0) {
               startedAt: null,
               retryAt: null,
               scheduledAt: new Date(),
+              traceparent: '',
             },
           ],
         ],
@@ -1347,6 +1429,7 @@ if (doc['task.runAt'].size()!=0) {
               startedAt: null,
               retryAt: null,
               scheduledAt: new Date(),
+              traceparent: '',
             }),
             errorType: TaskClaimErrorType.CLAIMED_BY_ID_OUT_OF_CAPACITY,
           })
@@ -1393,6 +1476,7 @@ if (doc['task.runAt'].size()!=0) {
             startedAt: null,
             retryAt: null,
             scheduledAt: new Date(),
+            traceparent: 'newParent',
           })
         )
       );
@@ -1437,6 +1521,7 @@ if (doc['task.runAt'].size()!=0) {
               startedAt: null,
               retryAt: null,
               scheduledAt: new Date(),
+              traceparent: '',
             }),
             errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_IN_CLAIMING_STATUS,
           })
@@ -1499,6 +1584,7 @@ function mockInstance(instance: Partial<ConcreteTaskInstance> = {}) {
       status: 'idle',
       user: 'example',
       ownerId: null,
+      traceparent: '',
     },
     instance
   );

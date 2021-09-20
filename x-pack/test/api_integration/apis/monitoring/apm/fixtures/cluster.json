@@ -2,14 +2,16 @@
   "stats": {
     "totalEvents": 18,
     "memRss": 3821568,
-    "memTotal": 2404475016,
     "apms": {
       "total": 2
     },
     "config": {
       "container": false
     },
-    "timeOfLastEvent": "2018-08-31T13:59:21.201Z"
+    "timeOfLastEvent": "2018-08-31T13:59:21.199Z",
+    "versions": [
+      "7.0.0-alpha1"
+    ]
   },
   "metrics": {
     "apm_cpu": [
@@ -1051,6 +1053,107 @@
             0
           ]
         ]
+      }
+    ],
+    "apm_memory_cgroup": [
+      {
+        "bucket_size": "30 seconds",
+        "data": [
+          [
+            1535723880000,
+            null
+          ],
+          [
+            1535723910000,
+            null
+          ],
+          [
+            1535723940000,
+            null
+          ]
+        ],
+        "metric": {
+          "app": "apm",
+          "description": "Memory usage of the container",
+          "field": "beats_stats.metrics.beat.cgroup.memory.mem.usage.bytes",
+          "format": "0,0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "Memory Utilization (cgroup)",
+          "metricAgg": "max",
+          "title": "Memory",
+          "units": "B"
+        },
+        "timeRange": {
+          "max": 1535723989104,
+          "min": 1535720389104
+        }
+      },
+      {
+        "bucket_size": "30 seconds",
+        "data": [
+          [
+            1535723880000,
+            null
+          ],
+          [
+            1535723910000,
+            null
+          ],
+          [
+            1535723940000,
+            null
+          ]
+        ],
+        "metric": {
+          "app": "apm",
+          "description": "Memory limit of the container",
+          "field": "beats_stats.metrics.beat.cgroup.memory.mem.limit.bytes",
+          "format": "0,0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "Memory Limit",
+          "metricAgg": "max",
+          "title": "Memory",
+          "units": "B"
+        },
+        "timeRange": {
+          "max": 1535723989104,
+          "min": 1535720389104
+        }
+      },
+      {
+        "bucket_size": "30 seconds",
+        "data": [
+          [
+            1535723880000,
+            5212816
+          ],
+          [
+            1535723910000,
+            4996912
+          ],
+          [
+            1535723940000,
+            4886176
+          ]
+        ],
+        "metric": {
+          "app": "apm",
+          "description": "Limit of allocated memory at which garbage collection will occur",
+          "field": "beats_stats.metrics.beat.memstats.gc_next",
+          "format": "0,0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false,
+          "label": "GC Next",
+          "metricAgg": "max",
+          "title": "Memory",
+          "units": "B"
+        },
+        "timeRange": {
+          "max": 1535723989104,
+          "min": 1535720389104
+        }
       }
     ]
   }

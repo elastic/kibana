@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   COMMENTS,
   DESCRIPTION,
@@ -19,8 +21,6 @@ import {
   OS_TYPES,
   TAGS,
 } from '../../constants.mock';
-
-import { UpdateExceptionListItemSchema } from './update_exception_list_item_schema';
 
 export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
   _version: undefined,

@@ -88,14 +88,12 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     !needsDestIndexPattern &&
     isOutlierAnalysis(jobConfig?.analysis) &&
     jobConfig?.analysis.outlier_detection.compute_feature_influence === true &&
-    columnsWithCharts.findIndex(
-      (d) => d.id === `${resultsField}.${FEATURE_INFLUENCE}.feature_name`
-    ) === -1;
+    columnsWithCharts.findIndex((d) => d.id === `${resultsField}.${FEATURE_INFLUENCE}`) === -1;
 
   const scatterplotFieldOptions = useScatterplotFieldOptions(
     indexPattern,
-    jobConfig?.analyzed_fields.includes,
-    jobConfig?.analyzed_fields.excludes,
+    jobConfig?.analyzed_fields?.includes,
+    jobConfig?.analyzed_fields?.excludes,
     resultsField
   );
 

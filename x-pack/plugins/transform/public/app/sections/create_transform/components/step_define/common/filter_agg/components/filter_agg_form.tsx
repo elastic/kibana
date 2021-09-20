@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useMemo } from 'react';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
@@ -16,7 +16,7 @@ import { getFilterAggTypeConfig } from '../config';
 import type { FilterAggType, PivotAggsConfigFilter } from '../types';
 import type { RuntimeMappings } from '../../types';
 import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
-import { isPopulatedObject } from '../../../../../../../common/utils/object_utils';
+import { isPopulatedObject } from '../../../../../../../../../common/shared_imports';
 
 /**
  * Resolves supported filters for provided field.
@@ -39,7 +39,7 @@ export function getSupportedFilterAggs(
     ];
   }
 
-  throw new Error(`The field ${fieldName} does not exist in the index or runtime mappings`);
+  throw new Error(`The field ${fieldName} does not exist in the index or runtime fields`);
 }
 
 /**
@@ -72,10 +72,22 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
     <>
       <EuiFormRow
         label={
-          <FormattedMessage
-            id="xpack.transform.agg.popoverForm.filerAggLabel"
-            defaultMessage="Filter query"
-          />
+          <>
+            <FormattedMessage
+              id="xpack.transform.agg.popoverForm.filerAggLabel"
+              defaultMessage="Filter query"
+            />
+            <EuiToolTip
+              content={
+                <FormattedMessage
+                  id="xpack.transform.agg.popoverForm.filerQueryAdvancedSuggestionTooltip"
+                  defaultMessage="To add other filter query aggregations, edit the JSON config."
+                />
+              }
+            >
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </EuiToolTip>
+          </>
         }
       >
         <EuiSelect

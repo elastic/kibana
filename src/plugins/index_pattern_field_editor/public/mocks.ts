@@ -29,6 +29,7 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   return {
     openEditor: jest.fn(),
+    openDeleteModal: jest.fn(),
     fieldFormatEditors: {
       getAll: jest.fn(),
       getById: jest.fn(),

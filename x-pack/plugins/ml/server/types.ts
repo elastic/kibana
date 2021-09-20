@@ -12,11 +12,21 @@ import type { SecurityPluginSetup } from '../../security/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginSetup } from '../../licensing/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
+
 import type { MlLicense } from '../common/license';
 import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { RouteGuard } from './lib/route_guard';
-import type { AlertingPlugin } from '../../alerts/server';
+import type { AlertingPlugin } from '../../alerting/server';
 import type { ActionsPlugin } from '../../actions/server';
+import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import type {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../src/plugins/data/server';
+import type {
+  FieldFormatsSetup,
+  FieldFormatsStart,
+} from '../../../../src/plugins/field_formats/server';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -40,16 +50,21 @@ export interface SavedObjectsRouteDeps {
 
 export interface PluginsSetup {
   cloud: CloudSetup;
+  data: DataPluginSetup;
+  fieldFormats: FieldFormatsSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
-  alerts?: AlertingPlugin['setup'];
+  alerting?: AlertingPlugin['setup'];
   actions?: ActionsPlugin['setup'];
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface PluginsStart {
+  data: DataPluginStart;
+  fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
 }
 

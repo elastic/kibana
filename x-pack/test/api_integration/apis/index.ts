@@ -22,7 +22,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./kibana'));
     loadTestFile(require.resolve('./metrics_ui'));
-    loadTestFile(require.resolve('./beats'));
     loadTestFile(require.resolve('./console'));
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./uptime'));
@@ -36,5 +35,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./upgrade_assistant'));
     loadTestFile(require.resolve('./searchprofiler'));
     loadTestFile(require.resolve('./painless_lab'));
+    loadTestFile(require.resolve('./file_upload'));
   });
 }

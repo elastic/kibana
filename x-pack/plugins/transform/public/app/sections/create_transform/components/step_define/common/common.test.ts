@@ -44,6 +44,7 @@ describe('Transform: Define Pivot Common', () => {
             { label: 'sum( the-f[i]e>ld )' },
             { label: 'value_count( the-f[i]e>ld )' },
             { label: 'filter( the-f[i]e>ld )' },
+            { label: 'top_metrics( the-f[i]e>ld )' },
           ],
         },
       ],
@@ -133,6 +134,7 @@ describe('Transform: Define Pivot Common', () => {
             { label: 'sum( the-f[i]e>ld )' },
             { label: 'value_count( the-f[i]e>ld )' },
             { label: 'filter( the-f[i]e>ld )' },
+            { label: 'top_metrics( the-f[i]e>ld )' },
           ],
         },
         {
@@ -146,6 +148,7 @@ describe('Transform: Define Pivot Common', () => {
             { label: 'sum(rt_bytes_bigger)' },
             { label: 'value_count(rt_bytes_bigger)' },
             { label: 'filter(rt_bytes_bigger)' },
+            { label: 'top_metrics(rt_bytes_bigger)' },
           ],
         },
       ],

@@ -11,19 +11,18 @@ import Path from 'path';
 
 import dedent from 'dedent';
 import Yaml from 'js-yaml';
-import { createFailError, ToolingLog, CiStatsMetrics } from '@kbn/dev-utils';
+import { createFailError, ToolingLog, CiStatsMetric } from '@kbn/dev-utils';
 
 import { OptimizerConfig, Limits } from './optimizer';
 
-const LIMITS_PATH = require.resolve('../limits.yml');
 const DEFAULT_BUDGET = 15000;
 
 const diff = <T>(a: T[], b: T[]): T[] => a.filter((item) => !b.includes(item));
 
-export function readLimits(): Limits {
+export function readLimits(path: string): Limits {
   let yaml;
   try {
-    yaml = Fs.readFileSync(LIMITS_PATH, 'utf8');
+    yaml = Fs.readFileSync(path, 'utf8');
   } catch (error) {
     if (error.code !== 'ENOENT') {
       throw error;
@@ -33,8 +32,12 @@ export function readLimits(): Limits {
   return yaml ? Yaml.safeLoad(yaml) : {};
 }
 
-export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerConfig) {
-  const limitBundleIds = Object.keys(readLimits().pageLoadAssetSize || {});
+export function validateLimitsForAllBundles(
+  log: ToolingLog,
+  config: OptimizerConfig,
+  limitsPath: string
+) {
+  const limitBundleIds = Object.keys(readLimits(limitsPath).pageLoadAssetSize || {});
   const configBundleIds = config.bundles.map((b) => b.id);
 
   const missingBundleIds = diff(configBundleIds, limitBundleIds);
@@ -73,11 +76,17 @@ interface UpdateBundleLimitsOptions {
   log: ToolingLog;
   config: OptimizerConfig;
   dropMissing: boolean;
+  limitsPath: string;
 }
 
-export function updateBundleLimits({ log, config, dropMissing }: UpdateBundleLimitsOptions) {
-  const limits = readLimits();
-  const metrics: CiStatsMetrics = config.bundles
+export function updateBundleLimits({
+  log,
+  config,
+  dropMissing,
+  limitsPath,
+}: UpdateBundleLimitsOptions) {
+  const limits = readLimits(limitsPath);
+  const metrics: CiStatsMetric[] = config.filteredBundles
     .map((bundle) =>
       JSON.parse(Fs.readFileSync(Path.resolve(bundle.outputDir, 'metrics.json'), 'utf-8'))
     )
@@ -102,6 +111,6 @@ export function updateBundleLimits({ log, config, dropMissing }: UpdateBundleLim
     pageLoadAssetSize,
   };
 
-  Fs.writeFileSync(LIMITS_PATH, Yaml.safeDump(newLimits));
-  log.success(`wrote updated limits to ${LIMITS_PATH}`);
+  Fs.writeFileSync(limitsPath, Yaml.safeDump(newLimits));
+  log.success(`wrote updated limits to ${limitsPath}`);
 }

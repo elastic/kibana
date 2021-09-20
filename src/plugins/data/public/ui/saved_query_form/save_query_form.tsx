@@ -143,7 +143,7 @@ export function SaveQueryForm({
         })}
         helpText={i18n.translate('data.search.searchBar.savedQueryNameHelpText', {
           defaultMessage:
-            'Name is required. Name cannot contain leading or trailing whitespace. Name must be unique.',
+            'Name is required, it cannot contain leading or trailing whitespace and must be unique.',
         })}
         isInvalid={hasErrors}
       >

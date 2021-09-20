@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ApplicationStart } from 'kibana/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
@@ -38,4 +39,5 @@ export interface AppServicesContext {
   breadcrumbService: BreadcrumbService;
   license: ILicense;
   cloud?: CloudSetup;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }

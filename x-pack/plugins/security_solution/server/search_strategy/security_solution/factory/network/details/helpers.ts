@@ -13,7 +13,7 @@ import {
   NetworkDetailsHostHit,
   NetworkHit,
 } from '../../../../../../common/search_strategy/security_solution/network';
-import { toStringArray } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 
 export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) => {
   const firstSeen = getOr(null, `firstSeen.value_as_string`, networkHit);
@@ -53,7 +53,7 @@ const formatHostEcs = (data: Record<string, unknown> | null): HostEcs | null => 
     }
     return {
       ...acc,
-      [key]: toStringArray(value),
+      [key]: toObjectArrayOfStrings(value).map(({ str }) => str),
     };
   }, {});
 };

@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { FieldFormatsStart } from '../../field_formats';
+import { FieldFormatsStart } from '../../../../field_formats/public';
 import { calculateBounds, TimeRange } from '../../../common';
 import {
   aggsRequiredUiSettings,
@@ -91,16 +91,13 @@ export class AggsService {
   public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
     const isDefaultTimezone = () => uiSettings.isDefault('dateFormat:tz');
 
-    const {
-      calculateAutoTimeExpression,
-      getDateMetaByDatatableColumn,
-      datatableUtilities,
-      types,
-    } = this.aggsCommonService.start({
-      getConfig: this.getConfig!,
-      getIndexPattern: indexPatterns.get,
-      isDefaultTimezone,
-    });
+    const { calculateAutoTimeExpression, datatableUtilities, types } = this.aggsCommonService.start(
+      {
+        getConfig: this.getConfig!,
+        getIndexPattern: indexPatterns.get,
+        isDefaultTimezone,
+      }
+    );
 
     const aggTypesDependencies: AggTypesDependencies = {
       calculateBounds: this.calculateBounds,
@@ -140,7 +137,6 @@ export class AggsService {
 
     return {
       calculateAutoTimeExpression,
-      getDateMetaByDatatableColumn,
       datatableUtilities,
       createAggConfigs: (indexPattern, configStates = []) => {
         return new AggConfigs(indexPattern, configStates, { typesRegistry });

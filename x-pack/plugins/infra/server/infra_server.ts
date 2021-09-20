@@ -32,9 +32,8 @@ import {
 } from './routes/log_entries';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
 import { initLogSourceConfigurationRoutes, initLogSourceStatusRoutes } from './routes/log_sources';
-import { initSourceRoute } from './routes/source';
+import { initMetricsSourceConfigurationRoutes } from './routes/metrics_sources';
 import { initOverviewRoute } from './routes/overview';
-import { initAlertPreviewRoute } from './routes/alerting';
 import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
 import { initProcessListRoute } from './routes/process_list';
 
@@ -50,7 +49,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initGetHostsAnomaliesRoute(libs);
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
-  initSourceRoute(libs);
+  initMetricsSourceConfigurationRoutes(libs);
   initValidateLogAnalysisDatasetsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
   initGetLogEntryExamplesRoute(libs);
@@ -63,7 +62,6 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initInventoryMetaRoute(libs);
   initLogSourceConfigurationRoutes(libs);
   initLogSourceStatusRoutes(libs);
-  initAlertPreviewRoute(libs);
   initGetLogAlertsChartPreviewDataRoute(libs);
   initProcessListRoute(libs);
   initOverviewRoute(libs);

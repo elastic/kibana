@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockKibanaValues } from '../../__mocks__/kibana_logic.mock';
+import { mockKibanaValues } from '../../__mocks__/kea_logic/kibana_logic.mock';
 
 import { resetContext } from 'kea';
 
@@ -15,11 +15,13 @@ import { FlashMessagesLogic, mountFlashMessagesLogic } from './flash_messages_lo
 import { IFlashMessage } from './types';
 
 describe('FlashMessagesLogic', () => {
-  const mount = () => mountFlashMessagesLogic();
+  const mount = () => {
+    resetContext({});
+    return mountFlashMessagesLogic();
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetContext({});
   });
 
   it('has default values', () => {
@@ -27,67 +29,112 @@ describe('FlashMessagesLogic', () => {
     expect(FlashMessagesLogic.values).toEqual({
       messages: [],
       queuedMessages: [],
+      toastMessages: [],
       historyListener: expect.any(Function),
     });
   });
 
-  describe('setFlashMessages()', () => {
-    it('sets an array of messages', () => {
-      const messages: IFlashMessage[] = [
-        { type: 'success', message: 'Hello world!!' },
-        { type: 'error', message: 'Whoa nelly!', description: 'Uh oh' },
-        { type: 'info', message: 'Everything is fine, nothing is ruined' },
-      ];
-
+  describe('messages', () => {
+    beforeAll(() => {
       mount();
-      FlashMessagesLogic.actions.setFlashMessages(messages);
-
-      expect(FlashMessagesLogic.values.messages).toEqual(messages);
     });
 
-    it('automatically converts to an array if a single message obj is passed in', () => {
-      const message = { type: 'success', message: 'I turn into an array!' } as IFlashMessage;
+    describe('setFlashMessages', () => {
+      it('sets an array of messages', () => {
+        const messages: IFlashMessage[] = [
+          { type: 'success', message: 'Hello world!!' },
+          { type: 'error', message: 'Whoa nelly!', description: 'Uh oh' },
+          { type: 'info', message: 'Everything is fine, nothing is ruined' },
+        ];
 
-      mount();
-      FlashMessagesLogic.actions.setFlashMessages(message);
+        FlashMessagesLogic.actions.setFlashMessages(messages);
 
-      expect(FlashMessagesLogic.values.messages).toEqual([message]);
+        expect(FlashMessagesLogic.values.messages).toEqual(messages);
+      });
+
+      it('automatically converts to an array if a single message obj is passed in', () => {
+        const message = { type: 'success', message: 'I turn into an array!' } as IFlashMessage;
+
+        FlashMessagesLogic.actions.setFlashMessages(message);
+
+        expect(FlashMessagesLogic.values.messages).toEqual([message]);
+      });
     });
-  });
 
-  describe('clearFlashMessages()', () => {
-    it('sets messages back to an empty array', () => {
-      mount();
-      FlashMessagesLogic.actions.setFlashMessages('test' as any);
-      FlashMessagesLogic.actions.clearFlashMessages();
+    describe('clearFlashMessages', () => {
+      it('resets messages back to an empty array', () => {
+        FlashMessagesLogic.actions.clearFlashMessages();
 
-      expect(FlashMessagesLogic.values.messages).toEqual([]);
-    });
-  });
-
-  describe('setQueuedMessages()', () => {
-    it('sets an array of messages', () => {
-      const queuedMessage: IFlashMessage = { type: 'error', message: 'You deleted a thing' };
-
-      mount();
-      FlashMessagesLogic.actions.setQueuedMessages(queuedMessage);
-
-      expect(FlashMessagesLogic.values.queuedMessages).toEqual([queuedMessage]);
+        expect(FlashMessagesLogic.values.messages).toEqual([]);
+      });
     });
   });
 
-  describe('clearQueuedMessages()', () => {
-    it('sets queued messages back to an empty array', () => {
+  describe('queuedMessages', () => {
+    beforeAll(() => {
       mount();
-      FlashMessagesLogic.actions.setQueuedMessages('test' as any);
-      FlashMessagesLogic.actions.clearQueuedMessages();
+    });
 
-      expect(FlashMessagesLogic.values.queuedMessages).toEqual([]);
+    describe('setQueuedMessages', () => {
+      it('sets an array of messages', () => {
+        const queuedMessage: IFlashMessage = { type: 'error', message: 'You deleted a thing' };
+
+        FlashMessagesLogic.actions.setQueuedMessages(queuedMessage);
+
+        expect(FlashMessagesLogic.values.queuedMessages).toEqual([queuedMessage]);
+      });
+    });
+
+    describe('clearQueuedMessages', () => {
+      it('resets queued messages back to an empty array', () => {
+        FlashMessagesLogic.actions.clearQueuedMessages();
+
+        expect(FlashMessagesLogic.values.queuedMessages).toEqual([]);
+      });
+    });
+  });
+
+  describe('toastMessages', () => {
+    beforeAll(() => {
+      mount();
+    });
+
+    describe('addToastMessage', () => {
+      it('appends a toast message to the current toasts array', () => {
+        FlashMessagesLogic.actions.addToastMessage({ id: 'hello' });
+        FlashMessagesLogic.actions.addToastMessage({ id: 'world' });
+        FlashMessagesLogic.actions.addToastMessage({ id: 'lorem ipsum' });
+
+        expect(FlashMessagesLogic.values.toastMessages).toEqual([
+          { id: 'hello' },
+          { id: 'world' },
+          { id: 'lorem ipsum' },
+        ]);
+      });
+    });
+
+    describe('dismissToastMessage', () => {
+      it('removes a specific toast ID from the current toasts array', () => {
+        FlashMessagesLogic.actions.dismissToastMessage({ id: 'world' });
+
+        expect(FlashMessagesLogic.values.toastMessages).toEqual([
+          { id: 'hello' },
+          { id: 'lorem ipsum' },
+        ]);
+      });
+    });
+
+    describe('clearToastMessages', () => {
+      it('resets toast messages back to an empty array', () => {
+        FlashMessagesLogic.actions.clearToastMessages();
+
+        expect(FlashMessagesLogic.values.toastMessages).toEqual([]);
+      });
     });
   });
 
   describe('history listener logic', () => {
-    describe('setHistoryListener()', () => {
+    describe('setHistoryListener', () => {
       it('sets the historyListener value', () => {
         mount();
         FlashMessagesLogic.actions.setHistoryListener('test' as any);

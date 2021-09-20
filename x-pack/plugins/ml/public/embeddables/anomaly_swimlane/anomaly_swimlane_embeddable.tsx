@@ -22,8 +22,8 @@ import {
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
 } from '..';
-
-export const getDefaultPanelTitle = (jobIds: JobId[]) =>
+import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
+export const getDefaultSwimlanePanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
     defaultMessage: 'ML anomaly swim lane for {jobIds}',
     values: { jobIds: jobIds.join(', ') },
@@ -62,7 +62,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     ReactDOM.render(
       <I18nContext>
         <KibanaContextProvider services={{ ...this.services[0] }}>
-          <Suspense fallback={null}>
+          <Suspense fallback={<EmbeddableLoading />}>
             <EmbeddableSwimLaneContainer
               id={this.input.id}
               embeddableContext={this}

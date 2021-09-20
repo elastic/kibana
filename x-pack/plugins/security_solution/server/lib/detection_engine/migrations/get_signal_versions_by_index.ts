@@ -50,7 +50,7 @@ export const getSignalVersionsByIndex = async ({
   esClient: ElasticsearchClient;
   index: string[];
 }): Promise<SignalVersionsByIndex> => {
-  const { body } = await esClient.search<SignalVersionsAggResponse>({
+  const response = await esClient.search({
     index,
     size: 0,
     body: {
@@ -71,7 +71,9 @@ export const getSignalVersionsByIndex = async ({
       },
     },
   });
-  const indexBuckets = body.aggregations.signals_indices.buckets;
+
+  const aggs = response.body.aggregations as SignalVersionsAggResponse['aggregations'];
+  const indexBuckets = aggs.signals_indices.buckets;
 
   return index.reduce<SignalVersionsByIndex>((agg, _index) => {
     const bucket = indexBuckets.find((ib) => ib.key === _index);

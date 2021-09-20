@@ -32,10 +32,20 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldLabel', {
       defaultMessage: 'Formats',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldHelpText', {
-      defaultMessage:
-        'Expected date formats. Provided formats are applied sequentially. Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N formats.',
-    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldHelpText"
+        defaultMessage="Expected date formats. Provided formats are applied sequentially. Accepts a Java time pattern or one of the following formats: {allowedFormats}."
+        values={{
+          allowedFormats: (
+            <>
+              <EuiCode>{'ISO8601'}</EuiCode>,<EuiCode>{'UNIX'}</EuiCode>,
+              <EuiCode>{'UNIX_MS'}</EuiCode>,<EuiCode>{'TAI64N'}</EuiCode>
+            </>
+          ),
+        }}
+      />
+    ),
     validations: [
       {
         validator: minLengthField({
@@ -79,6 +89,29 @@ const fieldsConfig: FieldsConfig = {
       />
     ),
   },
+  output_format: {
+    type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.outputFormatFieldLabel', {
+      defaultMessage: 'Output format (optional)',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.dateForm.outputFormatHelpText"
+        defaultMessage="Format to use when writing the date to {targetField}. Accepts a Java time pattern or one of the following formats: {allowedFormats}. Defaults to {defaultFormat}."
+        values={{
+          targetField: <EuiCode>{'target_field'}</EuiCode>,
+          allowedFormats: (
+            <>
+              <EuiCode>{'ISO8601'}</EuiCode>,<EuiCode>{'UNIX'}</EuiCode>,
+              <EuiCode>{'UNIX_MS'}</EuiCode>,<EuiCode>{'TAI64N'}</EuiCode>
+            </>
+          ),
+          defaultFormat: <EuiCode>{`yyyy-MM-dd'T'HH:mm:ss.SSSXXX`}</EuiCode>,
+        }}
+      />
+    ),
+  },
 };
 
 /**
@@ -94,7 +127,12 @@ export const DateProcessor: FunctionComponent = () => {
         )}
       />
 
-      <UseField config={fieldsConfig.formats} component={ComboBoxField} path="fields.formats" />
+      <UseField
+        data-test-subj="formatsValueField"
+        config={fieldsConfig.formats}
+        component={ComboBoxField}
+        path="fields.formats"
+      />
 
       <TargetField
         helpText={
@@ -108,9 +146,26 @@ export const DateProcessor: FunctionComponent = () => {
         }
       />
 
-      <UseField config={fieldsConfig.timezone} component={Field} path="fields.timezone" />
+      <UseField
+        data-test-subj="timezoneField"
+        config={fieldsConfig.timezone}
+        component={Field}
+        path="fields.timezone"
+      />
 
-      <UseField config={fieldsConfig.locale} component={Field} path="fields.locale" />
+      <UseField
+        data-test-subj="localeField"
+        config={fieldsConfig.locale}
+        component={Field}
+        path="fields.locale"
+      />
+
+      <UseField
+        data-test-subj="outputFormatField"
+        config={fieldsConfig.output_format}
+        component={Field}
+        path="fields.output_format"
+      />
     </>
   );
 };

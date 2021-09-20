@@ -32,17 +32,10 @@ describe('FiltersExpressionSelect', () => {
           tags: [],
         }}
         setAlertParams={jest.fn()}
-        setUpdatedFieldValues={jest.fn()}
         shouldUpdateUrl={false}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <Fragment>
-        <EuiSpacer
-          size="xs"
-        />
-      </Fragment>
-    `);
+    expect(component).toMatchInlineSnapshot(`<Fragment />`);
   });
 
   it.each([
@@ -71,7 +64,6 @@ describe('FiltersExpressionSelect', () => {
           locations: [],
         }}
         setAlertParams={jest.fn()}
-        setUpdatedFieldValues={jest.fn()}
         shouldUpdateUrl={false}
       />
     );
@@ -99,7 +91,6 @@ describe('FiltersExpressionSelect', () => {
           locations: ['nyc'],
         }}
         setAlertParams={setAlertParamsMock}
-        setUpdatedFieldValues={jest.fn()}
         shouldUpdateUrl={false}
       />
     );
@@ -194,7 +185,6 @@ describe('FiltersExpressionSelect', () => {
           onRemoveFilter={jest.fn()}
           filters={filters}
           setAlertParams={jest.fn()}
-          setUpdatedFieldValues={jest.fn()}
           shouldUpdateUrl={false}
         />
       );

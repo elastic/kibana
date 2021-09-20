@@ -27,6 +27,15 @@ export const policyFactory = (): PolicyConfig => {
       },
       ransomware: {
         mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      memory_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
       },
       popup: {
         malware: {
@@ -34,6 +43,14 @@ export const policyFactory = (): PolicyConfig => {
           enabled: true,
         },
         ransomware: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
           message: '',
           enabled: true,
         },
@@ -54,15 +71,16 @@ export const policyFactory = (): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
       },
-      ransomware: {
+      behavior_protection: {
         mode: ProtectionModes.prevent,
+        supported: true,
       },
       popup: {
         malware: {
           message: '',
           enabled: true,
         },
-        ransomware: {
+        behavior_protection: {
           message: '',
           enabled: true,
         },
@@ -76,6 +94,23 @@ export const policyFactory = (): PolicyConfig => {
         process: true,
         file: true,
         network: true,
+      },
+      malware: {
+        mode: ProtectionModes.prevent,
+      },
+      behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
       },
       logging: {
         file: 'info',
@@ -96,6 +131,15 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.windows,
       ransomware: {
         mode: ProtectionModes.off,
+        supported: false,
+      },
+      memory_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
+      behavior_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
       },
       popup: {
         ...policy.windows.popup,
@@ -107,12 +151,21 @@ export const policyFactoryWithoutPaidFeatures = (
           message: '',
           enabled: false,
         },
+        memory_protection: {
+          message: '',
+          enabled: false,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: false,
+        },
       },
     },
     mac: {
       ...policy.mac,
-      ransomware: {
+      behavior_protection: {
         mode: ProtectionModes.off,
+        supported: false,
       },
       popup: {
         ...policy.mac.popup,
@@ -120,7 +173,25 @@ export const policyFactoryWithoutPaidFeatures = (
           message: '',
           enabled: true,
         },
-        ransomware: {
+        behavior_protection: {
+          message: '',
+          enabled: false,
+        },
+      },
+    },
+    linux: {
+      ...policy.linux,
+      behavior_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
+      popup: {
+        ...policy.linux.popup,
+        malware: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
           message: '',
           enabled: false,
         },
@@ -130,6 +201,47 @@ export const policyFactoryWithoutPaidFeatures = (
 };
 
 /**
+ * Strips paid features from an existing or new `PolicyConfig` for gold and below license
+ */
+export const policyFactoryWithSupportedFeatures = (
+  policy: PolicyConfig = policyFactory()
+): PolicyConfig => {
+  return {
+    ...policy,
+    windows: {
+      ...policy.windows,
+      ransomware: {
+        ...policy.windows.ransomware,
+        supported: true,
+      },
+      memory_protection: {
+        ...policy.windows.memory_protection,
+        supported: true,
+      },
+      behavior_protection: {
+        ...policy.windows.behavior_protection,
+        supported: true,
+      },
+    },
+    mac: {
+      ...policy.mac,
+      behavior_protection: {
+        ...policy.windows.behavior_protection,
+        supported: true,
+      },
+    },
+    linux: {
+      ...policy.linux,
+      behavior_protection: {
+        ...policy.windows.behavior_protection,
+        supported: true,
+      },
+    },
+  };
+};
+
+/**
  * Reflects what string the Endpoint will use when message field is default/empty
  */
-export const DefaultMalwareMessage = 'Elastic Security {action} {filename}';
+export const DefaultPolicyNotificationMessage = 'Elastic Security {action} {filename}';
+export const DefaultPolicyRuleNotificationMessage = 'Elastic Security {action} {rule}';

@@ -17,7 +17,7 @@ import {
   EuiCommentProps,
   EuiText,
 } from '@elastic/eui';
-import { Comment } from '../../../shared_imports';
+import type { Comment } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from './translations';
 import { useCurrentUser } from '../../lib/kibana';
 import { getFormattedComments } from './helpers';
@@ -106,7 +106,7 @@ export const AddExceptionComments = memo(function AddExceptionComments({
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem grow={false}>
           <MyAvatar
-            name={currentUser !== null ? currentUser.username.toUpperCase() ?? '' : ''}
+            name={currentUser != null ? currentUser.username.toUpperCase() ?? '' : ''}
             size="l"
           />
         </EuiFlexItem>

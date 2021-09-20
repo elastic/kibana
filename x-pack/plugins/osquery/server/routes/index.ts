@@ -5,47 +5,30 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
-import { schema } from '@kbn/config-schema';
-import moment from 'moment';
-
 import { IRouter } from '../../../../../src/core/server';
+import { initActionRoutes } from './action';
+import { OsqueryAppContext } from '../lib/osquery_app_context_services';
+import { initSavedQueryRoutes } from './saved_query';
+import { initStatusRoutes } from './status';
+import { initFleetWrapperRoutes } from './fleet_wrapper';
+import { initPackRoutes } from './pack';
+import { initScheduledQueryGroupRoutes } from './scheduled_query_group';
+import { initPrivilegesCheckRoutes } from './privileges_check';
 
-export function defineRoutes(router: IRouter) {
-  router.post(
-    {
-      path: '/api/osquery/queries',
-      validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
-        body: schema.object({}, { unknowns: 'allow' }),
-      },
-    },
-    async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
-      const query = await esClient.index<{}, {}>({
-        index: '.fleet-actions-new',
-        body: {
-          action_id: uuid.v4(),
-          '@timestamp': moment().toISOString(),
-          expiration: moment().add(2, 'days').toISOString(),
-          type: 'APP_ACTION',
-          input_id: 'osquery',
-          // @ts-expect-error
-          agents: request.body.agents,
-          data: {
-            commands: [
-              {
-                id: uuid.v4(),
-                // @ts-expect-error
-                query: request.body.command.query,
-              },
-            ],
-          },
-        },
-      });
-      return response.ok({
-        body: query,
-      });
-    }
-  );
-}
+export const defineRoutes = (router: IRouter, context: OsqueryAppContext) => {
+  const config = context.config();
+
+  initActionRoutes(router, context);
+  initStatusRoutes(router, context);
+  initScheduledQueryGroupRoutes(router, context);
+  initFleetWrapperRoutes(router, context);
+  initPrivilegesCheckRoutes(router, context);
+
+  if (config.packs) {
+    initPackRoutes(router);
+  }
+
+  if (config.savedQueries) {
+    initSavedQueryRoutes(router);
+  }
+};

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import {
-  KibanaRequest,
-  OnPreRoutingToolkit,
-  LifecycleResponseFactory,
+import type {
   CoreSetup,
+  KibanaRequest,
+  LifecycleResponseFactory,
+  OnPreRoutingToolkit,
 } from 'src/core/server';
+
 import { getSpaceIdFromPath } from '../../../common';
 
 export interface OnRequestInterceptorDeps {

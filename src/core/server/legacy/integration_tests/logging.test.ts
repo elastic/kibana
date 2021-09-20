@@ -18,6 +18,7 @@ function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
   return kbnTestServer.createRoot({
     migrations: { skip: true }, // otherwise stuck in polling ES
     plugins: { initialize: false },
+    elasticsearch: { skipStartupConnectionCheck: true },
     logging: {
       // legacy platform config
       silent: false,
@@ -67,6 +68,7 @@ describe('logging service', () => {
       beforeAll(async () => {
         root = createRoot();
 
+        await root.preboot();
         await root.setup();
         await root.start();
       }, 30000);
@@ -119,6 +121,7 @@ describe('logging service', () => {
       it('"silent": true', async () => {
         root = createRoot({ silent: true });
 
+        await root.preboot();
         await root.setup();
         await root.start();
 
@@ -150,6 +153,7 @@ describe('logging service', () => {
       it('"quiet": true', async () => {
         root = createRoot({ quiet: true });
 
+        await root.preboot();
         await root.setup();
         await root.start();
 
@@ -187,6 +191,7 @@ describe('logging service', () => {
       it('"verbose": true', async () => {
         root = createRoot({ verbose: true });
 
+        await root.preboot();
         await root.setup();
         await root.start();
 

@@ -1,26 +1,23 @@
 {
-  "configPath": [
-    "xpack",
-    "osquery"
-  ],
-  "extraPublicDirs": [
-    "common"
-  ],
+  "configPath": ["xpack", "osquery"],
+  "extraPublicDirs": ["common"],
   "id": "osquery",
+  "owner": {
+    "name": "Security asset management",
+    "githubTeam": "security-asset-management"
+  },
   "kibanaVersion": "kibana",
-  "optionalPlugins": [
-    "home"
-  ],
-  "requiredBundles": [
-    "esUiShared",
-    "kibanaUtils",
-    "kibanaReact"
-  ],
+  "optionalPlugins": ["fleet", "home", "usageCollection", "lens"],
+  "requiredBundles": ["esUiShared", "fleet", "kibanaUtils", "kibanaReact"],
   "requiredPlugins": [
+    "actions",
     "data",
     "dataEnhanced",
-    "fleet",
-    "navigation"
+    "discover",
+    "features",
+    "navigation",
+    "triggersActionsUi",
+    "security"
   ],
   "server": true,
   "ui": true,

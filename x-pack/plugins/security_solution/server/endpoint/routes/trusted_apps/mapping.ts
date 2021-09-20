@@ -7,22 +7,30 @@
 
 import uuid from 'uuid';
 
-import { OsType } from '../../../../../lists/common/schemas/common';
-import {
+import type {
   EntriesArray,
   EntryMatch,
+  EntryMatchWildcard,
   EntryNested,
-  ExceptionListItemSchema,
   NestedEntriesArray,
-} from '../../../../../lists/common/shared_exports';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
-import { CreateExceptionListItemOptions } from '../../../../../lists/server';
+  OsType,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type {
+  CreateExceptionListItemOptions,
+  UpdateExceptionListItemOptions,
+} from '../../../../../lists/server';
 import {
   ConditionEntry,
   ConditionEntryField,
+  EffectScope,
   NewTrustedApp,
   OperatingSystem,
   TrustedApp,
+  UpdateTrustedApp,
+  TrustedAppEntryTypes,
 } from '../../../../common/endpoint/types';
 
 type ConditionEntriesMap = { [K in ConditionEntryField]?: ConditionEntry<K> };
@@ -40,15 +48,34 @@ const OPERATING_SYSTEM_TO_OS_TYPE: Mapping<OperatingSystem, OsType> = {
   [OperatingSystem.WINDOWS]: 'windows',
 };
 
+const POLICY_REFERENCE_PREFIX = 'policy:';
+const OPERATOR_VALUE = 'included';
+
 const filterUndefined = <T>(list: Array<T | undefined>): T[] => {
   return list.filter((item: T | undefined): item is T => item !== undefined);
 };
 
 export const createConditionEntry = <T extends ConditionEntryField>(
   field: T,
+  type: TrustedAppEntryTypes,
   value: string
 ): ConditionEntry<T> => {
-  return { field, value, type: 'match', operator: 'included' };
+  return { field, value, type, operator: OPERATOR_VALUE };
+};
+
+export const tagsToEffectScope = (tags: string[]): EffectScope => {
+  const policyReferenceTags = tags.filter((tag) => tag.startsWith(POLICY_REFERENCE_PREFIX));
+
+  if (policyReferenceTags.some((tag) => tag === `${POLICY_REFERENCE_PREFIX}all`)) {
+    return {
+      type: 'global',
+    };
+  } else {
+    return {
+      type: 'policy',
+      policies: policyReferenceTags.map((tag) => tag.substr(POLICY_REFERENCE_PREFIX.length)),
+    };
+  }
 };
 
 export const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEntriesMap => {
@@ -56,12 +83,23 @@ export const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEn
     if (entry.field.startsWith('process.hash') && entry.type === 'match') {
       return {
         ...result,
-        [ConditionEntryField.HASH]: createConditionEntry(ConditionEntryField.HASH, entry.value),
+        [ConditionEntryField.HASH]: createConditionEntry(
+          ConditionEntryField.HASH,
+          entry.type,
+          entry.value
+        ),
       };
-    } else if (entry.field === 'process.executable.caseless' && entry.type === 'match') {
+    } else if (
+      entry.field === 'process.executable.caseless' &&
+      (entry.type === 'match' || entry.type === 'wildcard')
+    ) {
       return {
         ...result,
-        [ConditionEntryField.PATH]: createConditionEntry(ConditionEntryField.PATH, entry.value),
+        [ConditionEntryField.PATH]: createConditionEntry(
+          ConditionEntryField.PATH,
+          entry.type,
+          entry.value
+        ),
       };
     } else if (entry.field === 'process.Ext.code_signature' && entry.type === 'nested') {
       const subjectNameCondition = entry.entries.find((subEntry): subEntry is EntryMatch => {
@@ -73,6 +111,7 @@ export const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEn
           ...result,
           [ConditionEntryField.SIGNER]: createConditionEntry(
             ConditionEntryField.SIGNER,
+            subjectNameCondition.type,
             subjectNameCondition.value
           ),
         };
@@ -96,10 +135,14 @@ export const exceptionListItemToTrustedApp = (
 
     return {
       id: exceptionListItem.id,
+      version: exceptionListItem._version || '',
       name: exceptionListItem.name,
       description: exceptionListItem.description,
+      effectScope: tagsToEffectScope(exceptionListItem.tags),
       created_at: exceptionListItem.created_at,
       created_by: exceptionListItem.created_by,
+      updated_at: exceptionListItem.updated_at,
+      updated_by: exceptionListItem.updated_by,
       ...(os === OperatingSystem.LINUX || os === OperatingSystem.MAC
         ? {
             os,
@@ -140,11 +183,23 @@ const hashType = (hash: string): 'md5' | 'sha256' | 'sha1' | undefined => {
 };
 
 export const createEntryMatch = (field: string, value: string): EntryMatch => {
-  return { field, value, type: 'match', operator: 'included' };
+  return { field, value, type: 'match', operator: OPERATOR_VALUE };
+};
+
+export const createEntryMatchWildcard = (field: string, value: string): EntryMatchWildcard => {
+  return { field, value, type: 'wildcard', operator: OPERATOR_VALUE };
 };
 
 export const createEntryNested = (field: string, entries: NestedEntriesArray): EntryNested => {
   return { field, entries, type: 'nested' };
+};
+
+export const effectScopeToTags = (effectScope: EffectScope) => {
+  if (effectScope.type === 'policy') {
+    return effectScope.policies.map((policy) => `${POLICY_REFERENCE_PREFIX}${policy}`);
+  } else {
+    return [`${POLICY_REFERENCE_PREFIX}all`];
+  }
 };
 
 export const conditionEntriesToEntries = (conditionEntries: ConditionEntry[]): EntriesArray => {
@@ -159,6 +214,11 @@ export const conditionEntriesToEntries = (conditionEntries: ConditionEntry[]): E
         createEntryMatch('trusted', 'true'),
         createEntryMatch('subject_name', conditionEntry.value),
       ]);
+    } else if (
+      conditionEntry.field === ConditionEntryField.PATH &&
+      conditionEntry.type === 'wildcard'
+    ) {
+      return createEntryMatchWildcard(`process.executable.caseless`, conditionEntry.value);
     } else {
       return createEntryMatch(`process.executable.caseless`, conditionEntry.value);
     }
@@ -173,6 +233,7 @@ export const newTrustedAppToCreateExceptionListItemOptions = ({
   entries,
   name,
   description = '',
+  effectScope,
 }: NewTrustedApp): CreateExceptionListItemOptions => {
   return {
     comments: [],
@@ -184,7 +245,42 @@ export const newTrustedAppToCreateExceptionListItemOptions = ({
     name,
     namespaceType: 'agnostic',
     osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
-    tags: ['policy:all'],
+    tags: effectScopeToTags(effectScope),
     type: 'simple',
+  };
+};
+
+/**
+ * Map UpdateTrustedApp to UpdateExceptionListItemOptions
+ *
+ * @param {ExceptionListItemSchema} currentTrustedAppExceptionItem
+ * @param {UpdateTrustedApp} updatedTrustedApp
+ */
+export const updatedTrustedAppToUpdateExceptionListItemOptions = (
+  {
+    id,
+    item_id: itemId,
+    namespace_type: namespaceType,
+    type,
+    comments,
+    meta,
+  }: ExceptionListItemSchema,
+  { os, entries, name, description = '', effectScope, version }: UpdateTrustedApp
+): UpdateExceptionListItemOptions => {
+  return {
+    _version: version,
+    name,
+    description,
+    entries: conditionEntriesToEntries(entries),
+    osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
+    tags: effectScopeToTags(effectScope),
+
+    // Copied from current trusted app exception item
+    id,
+    comments,
+    itemId,
+    meta,
+    namespaceType,
+    type,
   };
 };

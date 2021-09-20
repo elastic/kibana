@@ -6,8 +6,14 @@
  */
 
 import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
-import { loadSavedWorkspace, loadingSaga, saveWorkspace, savingSaga } from './persistence';
-import { GraphWorkspaceSavedObject, UrlTemplate, AdvancedSettings, WorkspaceField } from '../types';
+import {
+  loadSavedWorkspace,
+  loadingSaga,
+  saveWorkspace,
+  savingSaga,
+  LoadSavedWorkspacePayload,
+} from './persistence';
+import { UrlTemplate, AdvancedSettings, WorkspaceField, GraphWorkspaceSavedObject } from '../types';
 import { IndexpatternDatasource, datasourceSelector } from './datasource';
 import { fieldsSelector } from './fields';
 import { metaDataSelector, updateMetaData } from './meta_data';
@@ -55,7 +61,9 @@ describe('persistence sagas', () => {
     });
     it('should deserialize saved object and populate state', async () => {
       env.store.dispatch(
-        loadSavedWorkspace({ title: 'my workspace' } as GraphWorkspaceSavedObject)
+        loadSavedWorkspace({
+          savedWorkspace: { title: 'my workspace' },
+        } as LoadSavedWorkspacePayload)
       );
       await waitForPromise();
       const resultingState = env.store.getState();
@@ -70,7 +78,7 @@ describe('persistence sagas', () => {
 
     it('should warn with a toast and abort if index pattern is not found', async () => {
       (migrateLegacyIndexPatternRef as jest.Mock).mockReturnValueOnce({ success: false });
-      env.store.dispatch(loadSavedWorkspace({} as GraphWorkspaceSavedObject));
+      env.store.dispatch(loadSavedWorkspace({ savedWorkspace: {} } as LoadSavedWorkspacePayload));
       await waitForPromise();
       expect(env.mockedDeps.notifications.toasts.addDanger).toHaveBeenCalled();
       const resultingState = env.store.getState();
@@ -96,11 +104,10 @@ describe('persistence sagas', () => {
           savePolicy: 'configAndDataWithConsent',
         },
       });
-      env.mockedDeps.getSavedWorkspace().id = '123';
     });
 
     it('should serialize saved object and save after confirmation', async () => {
-      env.store.dispatch(saveWorkspace());
+      env.store.dispatch(saveWorkspace({ id: '123' } as GraphWorkspaceSavedObject));
       (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, true);
       expect(appStateToSavedWorkspace).toHaveBeenCalled();
       await waitForPromise();
@@ -112,7 +119,7 @@ describe('persistence sagas', () => {
     });
 
     it('should not save data if user does not give consent in the modal', async () => {
-      env.store.dispatch(saveWorkspace());
+      env.store.dispatch(saveWorkspace({} as GraphWorkspaceSavedObject));
       (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, false);
       // serialize function is called with `canSaveData` set to false
       expect(appStateToSavedWorkspace).toHaveBeenCalledWith(
@@ -123,9 +130,8 @@ describe('persistence sagas', () => {
     });
 
     it('should not change url if it was just updating existing workspace', async () => {
-      env.mockedDeps.getSavedWorkspace().id = '123';
       env.store.dispatch(updateMetaData({ savedObjectId: '123' }));
-      env.store.dispatch(saveWorkspace());
+      env.store.dispatch(saveWorkspace({} as GraphWorkspaceSavedObject));
       await waitForPromise();
       expect(env.mockedDeps.changeUrl).not.toHaveBeenCalled();
     });

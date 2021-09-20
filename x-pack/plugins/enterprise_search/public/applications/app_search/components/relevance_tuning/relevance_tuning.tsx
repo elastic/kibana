@@ -7,67 +7,83 @@
 
 import React, { useEffect } from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTextColor,
-} from '@elastic/eui';
-
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SAVE_BUTTON_LABEL } from '../../../shared/constants';
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
+import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../constants';
+import { getEngineBreadcrumbs } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
 
+import { EmptyState } from './components';
+import { PrecisionSlider } from './components/precision_slider';
 import { RELEVANCE_TUNING_TITLE } from './constants';
+import { RelevanceTuningCallouts } from './relevance_tuning_callouts';
 import { RelevanceTuningForm } from './relevance_tuning_form';
-import { RelevanceTuningLogic } from './relevance_tuning_logic';
+import { RelevanceTuningPreview } from './relevance_tuning_preview';
 
-interface Props {
-  engineBreadcrumb: string[];
-}
+import { RelevanceTuningLogic } from '.';
 
-export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const { initializeRelevanceTuning } = useActions(RelevanceTuningLogic);
+export const RelevanceTuning: React.FC = () => {
+  const { dataLoading, engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
+  const { initializeRelevanceTuning, resetSearchSettings, updateSearchSettings } = useActions(
+    RelevanceTuningLogic
+  );
 
   useEffect(() => {
     initializeRelevanceTuning();
   }, []);
 
   return (
-    <>
-      <SetPageChrome trail={[...engineBreadcrumb, RELEVANCE_TUNING_TITLE]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{RELEVANCE_TUNING_TITLE}</h1>
-          </EuiTitle>
-          <EuiText>
-            <EuiTextColor color="subdued">
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.description',
-                {
-                  defaultMessage: 'Set field weights and boosts',
-                }
-              )}
-            </EuiTextColor>
-          </EuiText>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiSpacer />
-      <FlashMessages />
-      <EuiFlexGroup>
-        <EuiFlexItem>
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs([RELEVANCE_TUNING_TITLE])}
+      pageHeader={{
+        pageTitle: RELEVANCE_TUNING_TITLE,
+        description: i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.description',
+          { defaultMessage: 'Manage precision and relevance settings for your engine' }
+        ),
+        rightSideItems: engineHasSchemaFields
+          ? [
+              <EuiButton
+                data-test-subj="SaveRelevanceTuning"
+                color="primary"
+                fill
+                onClick={updateSearchSettings}
+              >
+                {SAVE_BUTTON_LABEL}
+              </EuiButton>,
+              <EuiButton
+                data-test-subj="ResetRelevanceTuning"
+                color="danger"
+                onClick={resetSearchSettings}
+              >
+                {RESTORE_DEFAULTS_BUTTON_LABEL}
+              </EuiButton>,
+            ]
+          : [],
+      }}
+      isLoading={dataLoading}
+      isEmptyState={!engineHasSchemaFields}
+      emptyState={<EmptyState />}
+    >
+      <UnsavedChangesPrompt hasUnsavedChanges={unsavedChanges} />
+      <RelevanceTuningCallouts />
+
+      <EuiFlexGroup alignItems="flexStart">
+        <EuiFlexItem grow={3}>
+          <EuiSpacer size="m" />
+          <PrecisionSlider />
+          <EuiSpacer />
           <RelevanceTuningForm />
         </EuiFlexItem>
-        <EuiFlexItem />
+        <EuiFlexItem grow={4}>
+          <RelevanceTuningPreview />
+        </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </AppSearchPageTemplate>
   );
 };

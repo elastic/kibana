@@ -7,4 +7,5 @@
  */
 
 require('./no_transpilation');
+// eslint-disable-next-line import/no-extraneous-dependencies
 require('@kbn/optimizer').registerNodeAutoTranspilation();

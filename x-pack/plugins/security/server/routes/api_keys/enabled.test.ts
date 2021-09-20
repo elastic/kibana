@@ -6,16 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
+
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { kibanaResponseFactory, RequestHandler } from '../../../../../../src/core/server';
+import type { RequestHandler } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { routeDefinitionParamsMock } from '../index.mock';
-
-import type { AuthenticationServiceStart } from '../../authentication';
-import { defineEnabledApiKeysRoutes } from './enabled';
+import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import type { SecurityRequestHandlerContext } from '../../types';
+import { routeDefinitionParamsMock } from '../index.mock';
+import { defineEnabledApiKeysRoutes } from './enabled';
 
 describe('API keys enabled', () => {
   function getMockContext(
@@ -27,7 +28,7 @@ describe('API keys enabled', () => {
   }
 
   let routeHandler: RequestHandler<any, any, any, any>;
-  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
+  let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   beforeEach(() => {
     authc = authenticationServiceMock.createStart();
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();

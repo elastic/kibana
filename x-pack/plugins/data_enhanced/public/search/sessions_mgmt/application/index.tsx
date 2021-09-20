@@ -22,6 +22,7 @@ export class SearchSessionsMgmtApp {
   constructor(
     private coreSetup: CoreSetup<IManagementSectionsPluginsStart>,
     private config: SessionsConfigSchema,
+    private kibanaVersion: string,
     private params: ManagementAppMountParams,
     private pluginsSetup: IManagementSectionsPluginsSetup
   ) {}
@@ -65,6 +66,7 @@ export class SearchSessionsMgmtApp {
       i18n,
       uiSettings,
       share,
+      kibanaVersion: this.kibanaVersion,
     };
 
     const { element } = params;

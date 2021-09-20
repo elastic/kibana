@@ -159,19 +159,19 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 {
                   loader: 'sass-loader',
                   options: {
-                    prependData(loaderContext: webpack.loader.LoaderContext) {
+                    additionalData(content: string, loaderContext: webpack.loader.LoaderContext) {
                       return `@import ${stringifyRequest(
                         loaderContext,
                         Path.resolve(
                           worker.repoRoot,
                           `src/core/public/core_app/styles/_globals_${theme}.scss`
                         )
-                      )};\n`;
+                      )};\n${content}`;
                     },
                     webpackImporter: false,
                     implementation: require('node-sass'),
                     sassOptions: {
-                      outputStyle: 'nested',
+                      outputStyle: worker.dist ? 'compressed' : 'nested',
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMapRoot: `/${bundle.type}:${bundle.id}`,
                     },
@@ -224,6 +224,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       alias: {
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
       },
+      symlinks: false,
     },
 
     performance: {
@@ -269,7 +270,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           extractComments: false,
           parallel: false,
           terserOptions: {
-            compress: false,
+            compress: true,
             mangle: false,
           },
         }),

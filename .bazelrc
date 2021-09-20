@@ -16,3 +16,12 @@ build --workspace_status_command="node ./src/dev/bazel_workspace_status.js"
 # build --build_metadata=VISIBILITY=PUBLIC
 build --build_metadata=TEST_GROUPS=//packages
 
+###############################
+# Offline Support             #
+# Turn on these settings with #
+#  --config=offline           #
+###############################
+
+## Reset remote cache and backend support
+build:offline --bes_backend="" --remote_cache=""
+run:offline --bes_backend="" --remote_cache=""

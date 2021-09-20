@@ -37,12 +37,30 @@ and select *Relationships*.
 [[managing-saved-objects-export-objects]]
 === Import and export
 
-Using the import and export commands, you can move objects between different
+Using the import and export actions, you can move objects between different
 {kib} instances. This action is useful when you
 have multiple environments for development and production.
 Import and export also work well when you have a large number
 of objects to update and want to batch the process.
 
+In addition to the user interface, {kib} provides beta <<saved-objects-api-import, import>> and <<saved-objects-api-export, export>> APIs if
+you want to automate this process.
+
+[float]
+==== Compatibility across versions
+
+With each release, {kib} introduces changes to the way saved objects are stored. When importing a saved object, {kib} will run the necessary migrations to ensure that the imported saved objects are compatible with the current version.
+
+However, saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of {kib}. See the table below for compatibility examples:
+
+|=======
+| Exporting version | Importing version | Compatible?
+| 6.7.0 | 6.8.1 | Yes
+| 6.8.1 | 7.3.0 | Yes
+| 7.3.0 | 7.11.1 | Yes
+| 7.11.1 | 7.6.0 | No
+| 6.8.1 | 8.0.0 | No
+|=======
 
 [float]
 ==== Import
@@ -51,6 +69,12 @@ You can import multiple objects in a single operation. Click *Import* and
 navigate to the NDJSON file that
 represents the objects to import.  By default,
 saved objects already in {kib} are overwritten.
+
+NOTE: The <<savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
+limits the number of saved objects which may be included in this file. Similarly, the
+<<savedObjects-maxImportPayloadBytes, `savedObjects.maxImportPayloadBytes`>> setting limits the overall
+size of the file that can be imported.
+
 
 [float]
 ==== Export
@@ -62,6 +86,10 @@ You have two options for exporting saved objects.
 
 This action creates an NDJSON with all your saved objects. By default, the NDJSON includes child objects that are related to the saved
 objects. Exported dashboards include their associated index patterns.
+
+NOTE: The <<savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
+limits the number of saved objects which may be exported.
+
 
 [float]
 [role="xpack"]

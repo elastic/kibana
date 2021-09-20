@@ -126,6 +126,7 @@ function TimelionInterval({ value, setValue, setValidity }: TimelionIntervalProp
         placeholder={i18n.translate('timelion.vis.selectIntervalPlaceholder', {
           defaultMessage: 'Select an interval',
         })}
+        data-test-subj="timelionIntervalComboBox"
       />
     </EuiFormRow>
   );

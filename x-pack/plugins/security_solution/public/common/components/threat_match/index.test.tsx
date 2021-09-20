@@ -8,7 +8,6 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { waitFor } from '@testing-library/react';
 
 import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
@@ -18,6 +17,13 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ThreatMatchComponent } from './';
 import { ThreatMapEntries } from './types';
 import { IndexPattern } from 'src/plugins/data/public';
+import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
+  eui: {
+    euiColorLightShade: '#ece',
+  },
+});
 
 jest.mock('../../../common/lib/kibana');
 
@@ -51,7 +57,7 @@ describe('ThreatMatchComponent', () => {
 
   test('it displays empty entry if no "listItems" are passed in', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={[]}
           indexPatterns={
@@ -80,7 +86,7 @@ describe('ThreatMatchComponent', () => {
 
   test('it displays "Search" for "listItems" that are passed in', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={getPayLoad()}
           indexPatterns={
@@ -109,7 +115,7 @@ describe('ThreatMatchComponent', () => {
 
   test('it displays "or", "and" enabled', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={[]}
           indexPatterns={
@@ -137,7 +143,7 @@ describe('ThreatMatchComponent', () => {
 
   test('it adds an entry when "and" clicked', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={[]}
           indexPatterns={
@@ -174,7 +180,7 @@ describe('ThreatMatchComponent', () => {
 
   test('it adds an item when "or" clicked', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={[]}
           indexPatterns={
@@ -211,7 +217,7 @@ describe('ThreatMatchComponent', () => {
 
   test('it removes one row if user deletes a row', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={getDoublePayLoad()}
           indexPatterns={
@@ -241,7 +247,7 @@ describe('ThreatMatchComponent', () => {
 
   test('it displays "and" badge if at least one item includes more than one entry', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={[]}
           indexPatterns={
@@ -272,7 +278,7 @@ describe('ThreatMatchComponent', () => {
 
   test('it does not display "and" badge if none of the items include more than one entry', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={[]}
           indexPatterns={

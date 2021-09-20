@@ -15,3 +15,5 @@ export { NumberInputOption } from './number_input';
 export { RangeOption } from './range';
 export { RequiredNumberInputOption } from './required_number_input';
 export { TextInputOption } from './text_input';
+export { PercentageModeOption } from './percentage_mode';
+export { LongLegendOptions } from './long_legend_options';

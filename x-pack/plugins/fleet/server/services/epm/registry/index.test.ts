@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AssetParts } from '../../../types';
+import type { AssetParts } from '../../../types';
 import { getBufferExtractor, getPathParts, untarBuffer, unzipBuffer } from '../archive';
+
 import { splitPkgKey } from './index';
 
 const testPaths = [
@@ -52,12 +53,6 @@ test('testPathParts', () => {
 });
 
 describe('splitPkgKey tests', () => {
-  it('throws an error if the delimiter is not found', () => {
-    expect(() => {
-      splitPkgKey('awesome_package');
-    }).toThrow();
-  });
-
   it('throws an error if there is nothing before the delimiter', () => {
     expect(() => {
       splitPkgKey('-0.0.1-dev1');
@@ -68,6 +63,12 @@ describe('splitPkgKey tests', () => {
     expect(() => {
       splitPkgKey('awesome-laskdfj');
     }).toThrow();
+  });
+
+  it('returns name and empty version if no delimiter is found', () => {
+    const { pkgName, pkgVersion } = splitPkgKey('awesome_package');
+    expect(pkgName).toBe('awesome_package');
+    expect(pkgVersion).toBe('');
   });
 
   it('returns the name and version if the delimiter is found once', () => {

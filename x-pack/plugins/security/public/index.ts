@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'src/core/public';
-import {
-  SecurityPlugin,
-  SecurityPluginSetup,
-  SecurityPluginStart,
-  PluginSetupDependencies,
-  PluginStartDependencies,
-} from './plugin';
+import type { PluginInitializer, PluginInitializerContext } from 'src/core/public';
+
+import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
+import { SecurityPlugin, SecurityPluginSetup, SecurityPluginStart } from './plugin';
 
 export { SecurityPluginSetup, SecurityPluginStart };
 export { AuthenticatedUser } from '../common/model';
 export { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
-export { UserMenuLink } from '../public/nav_control';
+export { UserMenuLink, SecurityNavControlServiceStart } from '../public/nav_control';
+
+export { AuthenticationServiceStart, AuthenticationServiceSetup } from './authentication';
 
 export const plugin: PluginInitializer<
   SecurityPluginSetup,

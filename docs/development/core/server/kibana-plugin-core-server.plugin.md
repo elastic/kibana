@@ -4,7 +4,7 @@
 
 ## Plugin interface
 
-The interface that should be returned by a `PluginInitializer`<!-- -->.
+The interface that should be returned by a `PluginInitializer` for a `standard` plugin.
 
 <b>Signature:</b>
 

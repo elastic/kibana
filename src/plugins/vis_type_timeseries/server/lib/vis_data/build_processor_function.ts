@@ -6,9 +6,29 @@
  * Side Public License, v 1.
  */
 
-export function buildProcessorFunction(chain: any[], ...args: any) {
+/** @deprecated - this method will be removed after replacing in for new one. **/
+export function _legacyBuildProcessorFunction(chain: any[], ...args: any) {
   return chain.reduceRight(
     (next, fn) => fn(...args)(next),
     (doc: any) => doc
   );
 }
+
+export type ProcessorFunction<TParams = unknown, TInput = unknown, TOutput = TInput> = (
+  params: TParams
+) => (
+  next: (doc: TOutput) => TOutput | Promise<TOutput>
+) => (doc: TInput) => TOutput | Promise<TOutput>;
+
+export const buildProcessorFunction = <
+  TFunction extends Function = Function,
+  TArgs = unknown,
+  TResult = unknown
+>(
+  chain: TFunction[],
+  args: TArgs
+) =>
+  chain.reduceRight(
+    (next, fn) => fn(args)(next),
+    (doc: TResult) => doc
+  );

@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('time_field_range', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.eql(testData.expected.responseBody);
         } else {
           expect(body.error).to.eql(testData.expected.responseBody.error);
-          expect(body.message).to.eql(testData.expected.responseBody.message);
+          expect(body.message).to.contain(testData.expected.responseBody.message);
         }
       });
     }

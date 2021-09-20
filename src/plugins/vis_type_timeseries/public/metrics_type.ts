@@ -7,14 +7,48 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { TSVB_EDITOR_NAME } from './application';
-import { PANEL_TYPES } from '../common/panel_types';
+import uuid from 'uuid/v4';
+import { TSVB_EDITOR_NAME } from './application/editor_controller';
+import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
+import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
+import { TSVB_DEFAULT_COLOR } from '../common/constants';
 import { toExpressionAst } from './to_ast';
-import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
+import {
+  Vis,
+  VIS_EVENT_TO_TRIGGER,
+  VisGroups,
+  VisParams,
+  VisTypeDefinition,
+} from '../../visualizations/public';
 import { getDataStart } from './services';
+import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 
-export const metricsVisDefinition = {
+export const withReplacedIds = (
+  vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
+): Vis<TimeseriesVisParams> => {
+  const doReplace = (
+    obj: Partial<{
+      id: string | (() => string);
+    }>
+  ) => {
+    if (typeof obj?.id === 'function') {
+      obj.id = obj.id();
+    }
+  };
+
+  doReplace(vis.params);
+
+  vis.params.series?.forEach((series) => {
+    doReplace(series);
+    series.metrics?.forEach((metric) => doReplace(metric));
+  });
+
+  return vis;
+};
+
+export const metricsVisDefinition: VisTypeDefinition<
+  TimeseriesVisParams | TimeseriesVisDefaultParams
+> = {
   name: 'metrics',
   title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
   description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
@@ -24,23 +58,26 @@ export const metricsVisDefinition = {
   group: VisGroups.PROMOTED,
   visConfig: {
     defaults: {
-      id: '61ca57f0-469d-11e7-af02-69e470af7417',
+      id: () => uuid(),
       type: PANEL_TYPES.TIMESERIES,
       series: [
         {
-          id: '61ca57f1-469d-11e7-af02-69e470af7417',
-          color: '#68BC00',
+          id: () => uuid(),
+          color: TSVB_DEFAULT_COLOR,
           split_mode: 'everything',
-          split_color_mode: 'kibana',
+          palette: {
+            type: 'palette',
+            name: 'default',
+          },
           metrics: [
             {
-              id: '61ca57f2-469d-11e7-af02-69e470af7417',
+              id: () => uuid(),
               type: 'count',
             },
           ],
           separate_axis: 0,
           axis_position: 'right',
-          formatter: 'number',
+          formatter: 'default',
           chart_type: 'line',
           line_width: 1,
           point_size: 1,
@@ -50,31 +87,53 @@ export const metricsVisDefinition = {
       ],
       time_field: '',
       index_pattern: '',
+      use_kibana_indexes: true,
       interval: '',
       axis_position: 'left',
       axis_formatter: 'number',
       axis_scale: 'normal',
       show_legend: 1,
+      truncate_legend: 1,
+      max_lines_legend: 1,
       show_grid: 1,
-      tooltip_mode: 'show_all',
+      tooltip_mode: TOOLTIP_MODES.SHOW_ALL,
+      drop_last_bucket: 0,
     },
   },
+  setup: (vis) => Promise.resolve(withReplacedIds(vis)),
   editorConfig: {
     editor: TSVB_EDITOR_NAME,
   },
   options: {
-    showQueryBar: false,
-    showFilterBar: false,
+    showQueryBar: true,
+    showFilterBar: true,
     showIndexSelection: false,
   },
   toExpressionAst,
-  getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.applyFilter];
+  getSupportedTriggers: (params?: VisParams) => {
+    if (params?.type === PANEL_TYPES.TIMESERIES) {
+      return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
+    }
+    return [];
   },
   inspectorAdapters: {},
+  requiresSearch: true,
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();
+    const indexPatternValue = params.index_pattern;
 
-    return params.index_pattern ? await indexPatterns.find(params.index_pattern) : [];
+    if (indexPatternValue) {
+      if (isStringTypeIndexPattern(indexPatternValue)) {
+        return await indexPatterns.find(indexPatternValue);
+      }
+
+      if (indexPatternValue.id) {
+        return [await indexPatterns.get(indexPatternValue.id)];
+      }
+    }
+
+    const defaultIndex = await indexPatterns.getDefault();
+
+    return defaultIndex ? [defaultIndex] : [];
   },
 };

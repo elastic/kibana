@@ -7,6 +7,27 @@
  */
 
 import { createSessionStateContainer, SearchSessionState } from './search_session_state';
+import { SearchSessionSavedObject } from './sessions_client';
+import { SearchSessionStatus } from '../../../common';
+
+const mockSavedObject: SearchSessionSavedObject = {
+  id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
+  type: 'search-session',
+  attributes: {
+    name: 'my_name',
+    appId: 'my_app_id',
+    urlGeneratorId: 'my_url_generator_id',
+    idMapping: {},
+    sessionId: 'session_id',
+    touched: new Date().toISOString(),
+    created: new Date().toISOString(),
+    expires: new Date().toISOString(),
+    status: SearchSessionStatus.COMPLETE,
+    persisted: true,
+    version: '8.0.0',
+  },
+  references: [],
+};
 
 describe('Session state container', () => {
   const appName = 'appName';
@@ -66,13 +87,13 @@ describe('Session state container', () => {
     });
 
     test('store -> completed', () => {
-      expect(() => state.transitions.store()).toThrowError();
+      expect(() => state.transitions.store(mockSavedObject)).toThrowError();
 
       state.transitions.start({ appName });
       const search = {};
       state.transitions.trackSearch(search);
       expect(state.selectors.getState()).toBe(SearchSessionState.Loading);
-      state.transitions.store();
+      state.transitions.store(mockSavedObject);
       expect(state.selectors.getState()).toBe(SearchSessionState.BackgroundLoading);
       state.transitions.unTrackSearch(search);
       expect(state.selectors.getState()).toBe(SearchSessionState.BackgroundCompleted);
@@ -84,7 +105,7 @@ describe('Session state container', () => {
       const search = {};
       state.transitions.trackSearch(search);
       expect(state.selectors.getState()).toBe(SearchSessionState.Loading);
-      state.transitions.store();
+      state.transitions.store(mockSavedObject);
       expect(state.selectors.getState()).toBe(SearchSessionState.BackgroundLoading);
       state.transitions.cancel();
       expect(state.selectors.getState()).toBe(SearchSessionState.Canceled);
@@ -106,7 +127,7 @@ describe('Session state container', () => {
       state.transitions.unTrackSearch(search);
 
       expect(state.selectors.getState()).toBe(SearchSessionState.Restored);
-      expect(() => state.transitions.store()).toThrowError();
+      expect(() => state.transitions.store(mockSavedObject)).toThrowError();
       expect(state.selectors.getState()).toBe(SearchSessionState.Restored);
       expect(() => state.transitions.cancel()).toThrowError();
       expect(state.selectors.getState()).toBe(SearchSessionState.Restored);

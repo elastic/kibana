@@ -1,32 +1,28 @@
 [[add-aggregation-based-visualization-panels]]
-== Create aggregation-based visualization panels
+=== Aggregation-based
 
-Aggregation-based visualizations are the core {kib} panels, and are not optimized
-for a specific use case. If you are new to {kib}, <<create-panels-with-lens,Lens>> is recommended as a
-simpler way to get started.
+Aggregation-based visualizations are the core {kib} panels, and are not optimized for a specific use case.
 
-The main features that these panel types have compared to other {kib} panel types are:
+With aggregation-based visualizations, you can:
 
-* Support for heat map, tag cloud, gauge, and goal chart types
-* Support for split charts at up to 3 levels of aggregation, more than *Lens* and *TSVB*
-* Time series data is not required
-* Ability to use a <<save-open-search,saved search>> as an input
-* Data table can be sorted, also supports summary row and percentage column features
-* Can assign specific colors to series
-* Ability for plugin authors to extend the features
+* Split charts up to three aggregation levels, which is more than *Lens* and *TSVB*
+* Create visualization with non-time series data
+* Use a <<save-open-search,saved search>> as an input
+* Sort data tables and use the summary row and percentage column features
+* Assign colors to data series
+* Extend features with plugins
 
-These panel types also have some limitations:
+Aggregation-based visualizations include the following limitations:
 
-* Not as simple as *Lens*
 * Limited styling options
-* No support for math
-* No support for multiple indices
+* Math is unsupported
+* Multiple indices is unsupported
 
 [float]
-[[types-of-visualization-panels]]
-=== Types of aggregation-based panels
+[[types-of-visualizations]]
+==== Types of aggregation-based visualizations
 
-{kib} supports the following types of aggregation-based panels.
+{kib} supports the following types of aggregation-based visualizations.
 
 [cols="50, 50"]
 |===
@@ -106,21 +102,21 @@ create visual art for a specific topic.
 
 [float]
 [[create-aggregation-based-panel]]
-=== Create an aggregation-based panel
+==== Create an aggregation-based visualization panel
 
-Choose the type of panel you want to create, then use the editor to configure the options. Each panel type supports different options. 
+Choose the type of visualization you want to create, then use the editor to configure the options.
 
-. From the dashboard, click *Create panel*, then click *Aggregation based* on the *New visualization* window.
+. On the dashboard, click *All types > Aggregation based*.
 
-.. Click the type of panel you want to create.
+.. Select the visualization type you want to create.
 
-.. Click the data source you want to visualize.
+.. Select the data source you want to visualize.
 
-. From the editor, add the <<aggregation-reference,aggregations>> you want to visualize, then click *Update*. 
+. Add the <<aggregation-reference,aggregations>> you want to visualize using the editor, then click *Update*. 
 +
 NOTE: For the *Date Histogram* to use an *auto interval*, the date field must match the primary time field of the index pattern.
 
-. To change the order, drag the aggregations along the editor. 
+. To change the order, drag and drop the aggregations in the editor. 
 + 
 [role="screenshot"]
 image:images/bar-chart-tutorial-3.png[Option to change the order of aggregations]
@@ -132,13 +128,13 @@ image:images/aggregation-based-color-picker.png[Color picker]
 
 [float]
 [[try-it-aggregation-based-panel]]
-=== Try it: Create an aggregation-based bar chart
+==== Try it: Create an aggregation-based bar chart
 
 You collected data from your web server, and you want to visualize and analyze the data on a dashboard. To create a dashboard panel of the data, create
 a bar chart that displays the top five log traffic sources for every three hours.
 
 [float]
-==== Add the data and create the dashboard
+===== Add the data and create the dashboard
 
 Add the sample web logs data that you'll use to create the bar chart, then create the dashboard.
 
@@ -151,21 +147,17 @@ Add the sample web logs data that you'll use to create the bar chart, then creat
 . On the *Dashboards* page, click *Create dashboard*.
 
 [float]
-==== Open and set up the aggregation-based bar chart
+===== Open and set up the aggregation-based bar chart
 
-Open the bar chart visualization builder and change the time range. 
+Open the *Aggregation based* editor and change the time range. 
 
-. On the dashboard, click *Create panel*.
+. On the dashboard, click *All types > Aggregation based*, select *Vertical bar*, then select *kibana_sample_data_logs*.
 
-. On the *New visualization* window, click *Aggregation based > Vertical bar*.
-
-. On the *Choose a source* window, click *kibana_sample_data_logs*.
-
-. Change the <<set-time-filter, time filter>>> to *Last 7 days*.
+. Make sure the <<set-time-filter, time filter>>> is *Last 7 days*.
 
 [float]
 [[tutorial-configure-the-bar-chart]]
-==== Create the bar chart
+===== Create the bar chart
 
 To create the bar chart, add a <<bucket-aggregations,bucket aggregation>>, then add the terms sub-aggregation to display the top values.
 
@@ -195,21 +187,7 @@ TIP: Aggregation-based panels support a maximum of three *Split series*.
 [role="screenshot"]
 image:images/bar-chart-tutorial-2.png[Bar chart with sample logs data]
 
-[float]
-==== Save the panel
-
-Save and add the visualization panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. Enter the *Title* and optional *Description*. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
 . Click *Save and return*.
-
 
 
 

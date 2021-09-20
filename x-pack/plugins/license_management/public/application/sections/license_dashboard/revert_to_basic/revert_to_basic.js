@@ -92,6 +92,7 @@ export class RevertToBasic extends React.PureComponent {
       <EuiFlexItem>
         {this.acknowledgeModal()}
         <EuiCard
+          hasBorder
           title={
             <FormattedMessage
               id="xpack.licenseMgmt.licenseDashboard.revertToBasic.acknowledgeModalTitle"

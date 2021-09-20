@@ -7,7 +7,7 @@
 
 import { AlertingBuiltinsPlugin } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
-import { alertsMock } from '../../alerts/server/mocks';
+import { alertsMock } from '../../alerting/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
@@ -26,7 +26,7 @@ describe('AlertingBuiltins Plugin', () => {
     it('should register built-in alert types', async () => {
       const alertingSetup = alertsMock.createSetup();
       const featuresSetup = featuresPluginMock.createSetup();
-      await plugin.setup(coreSetup, { alerts: alertingSetup, features: featuresSetup });
+      await plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
 
       expect(alertingSetup.registerType).toHaveBeenCalledTimes(3);
 
@@ -83,7 +83,7 @@ describe('AlertingBuiltins Plugin', () => {
             },
           ],
           "id": ".es-query",
-          "name": "ES query",
+          "name": "Elasticsearch query",
         }
       `);
 

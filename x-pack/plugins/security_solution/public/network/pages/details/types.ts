@@ -21,7 +21,7 @@ export interface OwnProps {
   type: NetworkType;
   startDate: string;
   endDate: string;
-  filterQuery: string | ESTermQuery;
+  filterQuery?: string | ESTermQuery;
   ip: string;
   indexNames: string[];
   skip: boolean;

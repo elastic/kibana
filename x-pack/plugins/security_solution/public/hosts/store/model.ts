@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Direction, HostsFields } from '../../graphql/types';
+import { Direction } from '../../../common/search_strategy';
+import { HostsFields } from '../../../common/search_strategy/security_solution';
 
 export enum HostsType {
   page = 'page',
@@ -18,7 +19,7 @@ export enum HostsTableType {
   events = 'events',
   uncommonProcesses = 'uncommonProcesses',
   anomalies = 'anomalies',
-  alerts = 'alerts',
+  alerts = 'externalAlerts',
 }
 
 export interface BasicQueryPaginated {

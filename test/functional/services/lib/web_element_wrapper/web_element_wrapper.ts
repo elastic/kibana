@@ -9,7 +9,6 @@
 import { delay } from 'bluebird';
 import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
-// @ts-ignore not supported yet
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/dev-utils';
@@ -182,9 +181,9 @@ export class WebElementWrapper {
    *
    * @return {Promise<void>}
    */
-  public async click() {
+  public async click(topOffset?: number) {
     await this.retryCall(async function click(wrapper) {
-      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper.scrollIntoViewIfNecessary(topOffset);
       await wrapper._webElement.click();
     });
   }
@@ -693,11 +692,22 @@ export class WebElementWrapper {
    * @nonstandard
    * @return {Promise<void>}
    */
-  public async scrollIntoViewIfNecessary(): Promise<void> {
+  public async scrollIntoViewIfNecessary(
+    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number }
+  ): Promise<void> {
+    let topOffset: undefined | number;
+    let bottomOffset: undefined | number;
+    if (typeof topOffsetOrOptions === 'number') {
+      topOffset = topOffsetOrOptions;
+    } else {
+      topOffset = topOffsetOrOptions?.topOffset;
+      bottomOffset = topOffsetOrOptions?.bottomOffset;
+    }
     await this.driver.executeScript(
       scrollIntoViewIfNecessary,
       this._webElement,
-      this.fixedHeaderHeight
+      topOffset || this.fixedHeaderHeight,
+      bottomOffset
     );
   }
 

@@ -6,58 +6,61 @@
  */
 
 import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
+import { Direction } from '../../../../common/search_strategy';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
-import { Direction } from '../../../graphql/types';
 import { convertTimelineAsInput } from './epic';
 import { TimelineModel } from './model';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
     test('should return a TimelineInput instead of TimelineModel ', () => {
+      const columns: TimelineModel['columns'] = [
+        {
+          columnHeaderType: 'not-filtered',
+          id: '@timestamp',
+          initialWidth: 190,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'message',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'event.category',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'event.action',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'host.name',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'source.ip',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'destination.ip',
+          initialWidth: 180,
+        },
+        {
+          columnHeaderType: 'not-filtered',
+          id: 'user.name',
+          initialWidth: 180,
+        },
+      ];
       const timelineModel: TimelineModel = {
         activeTab: TimelineTabs.query,
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            width: 190,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'message',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.category',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'event.action',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'host.name',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'source.ip',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'destination.ip',
-            width: 180,
-          },
-          {
-            columnHeaderType: 'not-filtered',
-            id: 'user.name',
-            width: 180,
-          },
-        ],
+        prevActiveTab: TimelineTabs.notes,
+        columns,
+        defaultColumns: columns,
         dataProviders: [
           {
             id: 'hosts-table-hostName-DESKTOP-QBBSCUT',
@@ -89,9 +92,10 @@ describe('Epic Timeline', () => {
         ],
         deletedEventIds: [],
         description: '',
+        documentType: '',
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
         },
         eventIdToNoteIds: {},
@@ -143,6 +147,8 @@ describe('Epic Timeline', () => {
           },
         },
         loadingEventIds: [],
+        queryFields: [],
+        selectAll: false,
         title: 'saved',
         timelineType: TimelineType.default,
         templateTimelineId: null,
@@ -241,7 +247,7 @@ describe('Epic Timeline', () => {
         description: '',
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
         },
         eventType: 'all',

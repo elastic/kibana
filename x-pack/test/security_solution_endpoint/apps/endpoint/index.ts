@@ -16,9 +16,9 @@ export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
   describe('endpoint', function () {
-    this.tags('ciGroup7');
     const ingestManager = getService('ingestManager');
     const log = getService('log');
+    const endpointTestResources = getService('endpointTestResources');
 
     if (!isRegistryEnabled()) {
       log.warning('These tests are being run with an external package registry');
@@ -28,13 +28,17 @@ export default function (providerContext: FtrProviderContext) {
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
     before(async () => {
+      log.info('calling Fleet setup');
       await ingestManager.setup();
+
+      log.info('installing/upgrading Endpoint fleet package');
+      await endpointTestResources.installOrUpgradeEndpointFleetPackage();
     });
     loadTestFile(require.resolve('./endpoint_list'));
     loadTestFile(require.resolve('./policy_details'));
-    loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./endpoint_telemetry'));
     loadTestFile(require.resolve('./trusted_apps_list'));
     loadTestFile(require.resolve('./fleet_integrations'));
+    loadTestFile(require.resolve('./endpoint_permissions'));
   });
 }

@@ -13,6 +13,7 @@ import { TransformListRow } from '../../../../common';
 
 import { useCloneAction } from '../action_clone';
 import { useDeleteAction, DeleteActionModal } from '../action_delete';
+import { useDiscoverAction } from '../action_discover';
 import { EditTransformFlyout } from '../edit_transform_flyout';
 import { useEditAction } from '../action_edit';
 import { useStartAction, StartActionModal } from '../action_start';
@@ -20,16 +21,19 @@ import { useStopAction } from '../action_stop';
 
 export const useActions = ({
   forceDisable,
+  transformNodes,
 }: {
   forceDisable: boolean;
+  transformNodes: number;
 }): {
   actions: EuiTableActionsColumnType<TransformListRow>['actions'];
   modals: JSX.Element;
 } => {
-  const cloneAction = useCloneAction(forceDisable);
+  const cloneAction = useCloneAction(forceDisable, transformNodes);
   const deleteAction = useDeleteAction(forceDisable);
-  const editAction = useEditAction(forceDisable);
-  const startAction = useStartAction(forceDisable);
+  const discoverAction = useDiscoverAction(forceDisable);
+  const editAction = useEditAction(forceDisable, transformNodes);
+  const startAction = useStartAction(forceDisable, transformNodes);
   const stopAction = useStopAction(forceDisable);
 
   return {
@@ -37,12 +41,17 @@ export const useActions = ({
       <>
         {startAction.isModalVisible && <StartActionModal {...startAction} />}
         {editAction.config && editAction.isFlyoutVisible && (
-          <EditTransformFlyout closeFlyout={editAction.closeFlyout} config={editAction.config} />
+          <EditTransformFlyout
+            closeFlyout={editAction.closeFlyout}
+            config={editAction.config}
+            indexPatternId={editAction.indexPatternId}
+          />
         )}
         {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
       </>
     ),
     actions: [
+      discoverAction.action,
       startAction.action,
       stopAction.action,
       editAction.action,

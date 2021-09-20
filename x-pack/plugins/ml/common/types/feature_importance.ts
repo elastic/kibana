@@ -88,15 +88,11 @@ export function isRegressionTotalFeatureImportance(
 export function isClassificationFeatureImportanceBaseline(
   baselineData: any
 ): baselineData is ClassificationFeatureImportanceBaseline {
-  return (
-    isPopulatedObject(baselineData) &&
-    baselineData.hasOwnProperty('classes') &&
-    Array.isArray(baselineData.classes)
-  );
+  return isPopulatedObject(baselineData, ['classes']) && Array.isArray(baselineData.classes);
 }
 
 export function isRegressionFeatureImportanceBaseline(
   baselineData: any
 ): baselineData is RegressionFeatureImportanceBaseline {
-  return isPopulatedObject(baselineData) && baselineData.hasOwnProperty('baseline');
+  return isPopulatedObject(baselineData, ['baseline']);
 }

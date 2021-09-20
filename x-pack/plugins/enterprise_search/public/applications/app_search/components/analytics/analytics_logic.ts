@@ -21,7 +21,6 @@ interface AnalyticsValues extends AnalyticsData, QueryDetails {
 }
 
 interface AnalyticsActions {
-  onAnalyticsUnavailable(): void;
   onAnalyticsDataLoad(data: AnalyticsData): AnalyticsData;
   onQueryDataLoad(data: QueryDetails): QueryDetails;
   loadAnalyticsData(): void;
@@ -31,7 +30,6 @@ interface AnalyticsActions {
 export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsActions>>({
   path: ['enterprise_search', 'app_search', 'analytics_logic'],
   actions: () => ({
-    onAnalyticsUnavailable: true,
     onAnalyticsDataLoad: (data) => data,
     onQueryDataLoad: (data) => data,
     loadAnalyticsData: true,
@@ -43,15 +41,6 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
       {
         loadAnalyticsData: () => true,
         loadQueryData: () => true,
-        onAnalyticsUnavailable: () => false,
-        onAnalyticsDataLoad: () => false,
-        onQueryDataLoad: () => false,
-      },
-    ],
-    analyticsUnavailable: [
-      false,
-      {
-        onAnalyticsUnavailable: () => true,
         onAnalyticsDataLoad: () => false,
         onQueryDataLoad: () => false,
       },
@@ -169,18 +158,12 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
           tag,
           size: 20,
         };
-        const url = `/api/app_search/engines/${engineName}/analytics/queries`;
+        const url = `/internal/app_search/engines/${engineName}/analytics/queries`;
 
         const response = await http.get(url, { query });
-
-        if (response.analyticsUnavailable) {
-          actions.onAnalyticsUnavailable();
-        } else {
-          actions.onAnalyticsDataLoad(response);
-        }
+        actions.onAnalyticsDataLoad(response);
       } catch (e) {
         flashAPIErrors(e);
-        actions.onAnalyticsUnavailable();
       }
     },
     loadQueryData: async (query) => {
@@ -195,18 +178,13 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
           end: end || DEFAULT_END_DATE,
           tag,
         };
-        const url = `/api/app_search/engines/${engineName}/analytics/queries/${query}`;
+        const url = `/internal/app_search/engines/${engineName}/analytics/queries/${query}`;
 
         const response = await http.get(url, { query: queryParams });
 
-        if (response.analyticsUnavailable) {
-          actions.onAnalyticsUnavailable();
-        } else {
-          actions.onQueryDataLoad(response);
-        }
+        actions.onQueryDataLoad(response);
       } catch (e) {
         flashAPIErrors(e);
-        actions.onAnalyticsUnavailable();
       }
     },
   }),

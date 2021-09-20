@@ -27,7 +27,6 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const deployment = getService('deployment');
   const log = getService('log');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -47,10 +46,10 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('discover');
+      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
-      await kibanaServer.uiSettings.update({});
+      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
     });
 
     after(async function afterAll() {
@@ -149,7 +148,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\n18');
         });
       });
@@ -163,14 +162,14 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
           expect(rowData).to.be('Sep 17, 2015 @ 10:53:14.181\n-1');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
           expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.479\n20');
         });
       });
@@ -187,16 +186,14 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const isOss = await deployment.isOss();
-        if (!isOss) {
-          await filterBar.removeAllFilters();
-          await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            'Average of ram_Pain1'
-          );
-        }
+        await filterBar.removeAllFilters();
+        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // verify Lens opens a visualization
+        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          '@timestamp',
+          'Median of ram_Pain1'
+        );
       });
     });
 
@@ -238,7 +235,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ngood');
         });
       });
@@ -252,14 +249,14 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
           expect(rowData).to.be('Sep 17, 2015 @ 09:48:40.594\nbad');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
           expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.479\ngood');
         });
       });
@@ -277,15 +274,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const isOss = await deployment.isOss();
-        if (!isOss) {
-          await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            'Top values of painString'
-          );
-        }
+        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // verify Lens opens a visualization
+        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          'Top values of painString'
+        );
       });
     });
 
@@ -327,7 +321,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ntrue');
         });
       });
@@ -354,28 +348,25 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
           expect(rowData).to.be('updateExpectedResultHere\ntrue');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
           expect(rowData).to.be('updateExpectedResultHere\nfalse');
         });
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const isOss = await deployment.isOss();
-        if (!isOss) {
-          await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            'Top values of painBool'
-          );
-        }
+        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // verify Lens opens a visualization
+        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          'Top values of painBool'
+        );
       });
     });
 
@@ -417,7 +408,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
           expect(rowData).to.be('Sep 18, 2015 @ 06:52:55.953\n2015-09-18 07:00');
         });
       });
@@ -432,14 +423,14 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.click('docTableHeaderFieldSort_@timestamp');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
           expect(rowData).to.be('updateExpectedResultHere\n2015-09-18 07:00');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
           expect(rowData).to.be('updateExpectedResultHere\n2015-09-18 07:00');
         });
       });
@@ -460,15 +451,10 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const isOss = await deployment.isOss();
-        if (!isOss) {
-          await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            'painDate'
-          );
-        }
+        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // verify Lens opens a visualization
+        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain('painDate');
       });
     });
   });

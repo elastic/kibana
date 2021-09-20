@@ -1,5 +1,5 @@
 .canvasPage {
-  @include euiBottomShadowFlat($opacity: .4);
+  @include euiBottomShadowFlat;
   z-index: initial;
   position: absolute;
   top: 0;

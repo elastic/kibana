@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { FatalErrorsSetup, FatalErrorsStart, FatalErrorsService } from './fatal_errors_service';
-export { FatalErrorInfo } from './get_error_info';
+export { FatalErrorsService } from './fatal_errors_service';
+export type { FatalErrorsSetup, FatalErrorsStart } from './fatal_errors_service';
+export type { FatalErrorInfo } from './get_error_info';

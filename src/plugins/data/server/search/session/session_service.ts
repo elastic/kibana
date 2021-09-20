@@ -44,6 +44,9 @@ export class SearchSessionService implements ISearchSessionService {
       delete: async () => {
         throw new Error('delete not implemented in OSS search session service');
       },
+      getConfig: () => {
+        return null;
+      },
     });
   }
 }

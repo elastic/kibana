@@ -9,15 +9,22 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
 
-interface Props {
+interface HeightProps {
   elementId: string;
   height: number;
+  width?: never;
+}
+interface WidthProps {
+  elementId: string;
+  width: number;
+  height?: never;
 }
 
-export class DomPreview extends PureComponent<Props> {
+export class DomPreview extends PureComponent<HeightProps | WidthProps> {
   static propTypes = {
     elementId: PropTypes.string.isRequired,
-    height: PropTypes.number.isRequired,
+    height: PropTypes.number,
+    width: PropTypes.number,
   };
 
   _container: HTMLDivElement | null = null;
@@ -78,9 +85,19 @@ export class DomPreview extends PureComponent<Props> {
     const originalWidth = parseInt(originalStyle.getPropertyValue('width'), 10);
     const originalHeight = parseInt(originalStyle.getPropertyValue('height'), 10);
 
-    const thumbHeight = this.props.height;
-    const scale = thumbHeight / originalHeight;
-    const thumbWidth = originalWidth * scale;
+    let thumbHeight = 0;
+    let thumbWidth = 0;
+    let scale = 1;
+
+    if (this.props.height) {
+      thumbHeight = this.props.height;
+      scale = thumbHeight / originalHeight;
+      thumbWidth = originalWidth * scale;
+    } else if (this.props.width) {
+      thumbWidth = this.props.width;
+      scale = thumbWidth / originalWidth;
+      thumbHeight = originalHeight * scale;
+    }
 
     if (this._content.firstChild) {
       this._content.removeChild(this._content.firstChild);

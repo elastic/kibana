@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 /*
  * Contains utility functions for building and processing queries.
  */
@@ -40,7 +41,10 @@ export function buildBaseFilterCriteria(
 // Wraps the supplied aggregations in a sampler aggregation.
 // A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
 // of less than 1 indicates no sampling, and the aggs are returned as-is.
-export function buildSamplerAggregation(aggs: object, samplerShardSize: number) {
+export function buildSamplerAggregation(
+  aggs: any,
+  samplerShardSize: number
+): Record<string, estypes.AggregationsAggregationContainer> {
   if (samplerShardSize < 1) {
     return aggs;
   }

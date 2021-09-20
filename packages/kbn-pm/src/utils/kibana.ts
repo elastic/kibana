@@ -7,6 +7,7 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
 import multimatch from 'multimatch';
 import isPathInside from 'is-path-inside';
@@ -145,5 +146,17 @@ export class Kibana {
     })!;
 
     return new Map([...kibanaDeps.entries(), ...xpackDeps.entries()]);
+  }
+
+  getUuid() {
+    try {
+      return Fs.readFileSync(this.getAbsolute('data/uuid'), 'utf-8').trim();
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return undefined;
+      }
+
+      throw error;
+    }
   }
 }

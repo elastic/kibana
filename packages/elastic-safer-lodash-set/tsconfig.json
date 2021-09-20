@@ -1,8 +1,6 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/elastic-safer-lodash-set"
-  },
+  "extends": "../../tsconfig.bazel.json",
+  "compilerOptions": {},
   "include": [
     "**/*",
   ],

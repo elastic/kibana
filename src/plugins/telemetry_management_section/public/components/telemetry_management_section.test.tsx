@@ -12,9 +12,11 @@ import TelemetryManagementSection from './telemetry_management_section';
 import { TelemetryService } from '../../../telemetry/public/services';
 import { coreMock } from '../../../../core/public/mocks';
 import { render } from '@testing-library/react';
+import type { DocLinksStart } from 'src/core/public';
 
 describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
+  const docLinks = {} as DocLinksStart['links'];
   const coreSetup = coreMock.createSetup();
 
   it('renders as expected', () => {
@@ -22,14 +24,14 @@ describe('TelemetryManagementSectionComponent', () => {
     const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
+        sendUsageTo: 'staging',
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: true,
-        optInStatusUrl: '',
         sendUsageFrom: 'browser',
       },
+      isScreenshotMode: false,
       reportOptInStatusChange: false,
       currentKibanaVersion: 'mock_kibana_version',
       notifications: coreStart.notifications,
@@ -45,6 +47,7 @@ describe('TelemetryManagementSectionComponent', () => {
           enableSaving={true}
           isSecurityExampleEnabled={isSecurityExampleEnabled}
           toasts={coreStart.notifications.toasts}
+          docLinks={docLinks}
         />
       )
     ).toMatchSnapshot();
@@ -56,13 +59,13 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
-        optInStatusUrl: '',
         sendUsageFrom: 'browser',
+        sendUsageTo: 'staging',
       },
+      isScreenshotMode: false,
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
@@ -78,6 +81,7 @@ describe('TelemetryManagementSectionComponent', () => {
           enableSaving={true}
           isSecurityExampleEnabled={isSecurityExampleEnabled}
           toasts={coreStart.notifications.toasts}
+          docLinks={docLinks}
         />
       </React.Suspense>
     );
@@ -93,6 +97,7 @@ describe('TelemetryManagementSectionComponent', () => {
             enableSaving={true}
             toasts={coreStart.notifications.toasts}
             isSecurityExampleEnabled={isSecurityExampleEnabled}
+            docLinks={docLinks}
           />
         </React.Suspense>
       );
@@ -109,13 +114,13 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
+      isScreenshotMode: false,
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
@@ -130,6 +135,7 @@ describe('TelemetryManagementSectionComponent', () => {
         isSecurityExampleEnabled={isSecurityExampleEnabled}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
+        docLinks={docLinks}
       />
     );
     try {
@@ -156,13 +162,13 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: false,
         optIn: true,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
+      isScreenshotMode: false,
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
@@ -177,6 +183,7 @@ describe('TelemetryManagementSectionComponent', () => {
         enableSaving={true}
         isSecurityExampleEnabled={isSecurityExampleEnabled}
         toasts={coreStart.notifications.toasts}
+        docLinks={docLinks}
       />
     );
     try {
@@ -194,13 +201,13 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
+      isScreenshotMode: false,
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
@@ -215,6 +222,7 @@ describe('TelemetryManagementSectionComponent', () => {
         enableSaving={true}
         isSecurityExampleEnabled={isSecurityExampleEnabled}
         toasts={coreStart.notifications.toasts}
+        docLinks={docLinks}
       />
     );
     try {
@@ -233,13 +241,13 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
+      isScreenshotMode: false,
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
@@ -254,6 +262,7 @@ describe('TelemetryManagementSectionComponent', () => {
         isSecurityExampleEnabled={isSecurityExampleEnabled}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
+        docLinks={docLinks}
       />
     );
     try {
@@ -272,13 +281,13 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
+      isScreenshotMode: false,
       reportOptInStatusChange: false,
       currentKibanaVersion: 'mock_kibana_version',
       notifications: coreStart.notifications,
@@ -293,6 +302,7 @@ describe('TelemetryManagementSectionComponent', () => {
         isSecurityExampleEnabled={isSecurityExampleEnabled}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
+        docLinks={docLinks}
       />
     );
 
@@ -311,13 +321,13 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
+      isScreenshotMode: false,
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
@@ -332,6 +342,7 @@ describe('TelemetryManagementSectionComponent', () => {
         enableSaving={true}
         isSecurityExampleEnabled={isSecurityExampleEnabled}
         toasts={coreStart.notifications.toasts}
+        docLinks={docLinks}
       />
     );
     try {
@@ -339,11 +350,12 @@ describe('TelemetryManagementSectionComponent', () => {
       await expect(
         toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
       ).resolves.toBe(true);
-      expect((component.state() as any).enabled).toBe(true);
+      // TODO: Fix `mountWithIntl` types in @kbn/test/jest to make testing easier
+      expect((component.state() as { enabled: boolean }).enabled).toBe(true);
       await expect(
         toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
       ).resolves.toBe(true);
-      expect((component.state() as any).enabled).toBe(false);
+      expect((component.state() as { enabled: boolean }).enabled).toBe(false);
       telemetryService.setOptIn = jest.fn().mockRejectedValue(Error('test-error'));
       await expect(
         toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
@@ -359,13 +371,13 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         enabled: true,
-        url: '',
         banner: true,
         allowChangingOptInStatus: false,
         optIn: false,
-        optInStatusUrl: '',
+        sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
       },
+      isScreenshotMode: false,
       reportOptInStatusChange: false,
       notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
@@ -381,6 +393,7 @@ describe('TelemetryManagementSectionComponent', () => {
           enableSaving={true}
           toasts={coreStart.notifications.toasts}
           isSecurityExampleEnabled={isSecurityExampleEnabled}
+          docLinks={docLinks}
         />
       ).html()
     ).toMatchSnapshot();

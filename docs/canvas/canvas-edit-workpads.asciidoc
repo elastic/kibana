@@ -12,6 +12,7 @@ When you frequently use copy and paste, create variables to easily reuse strings
 each element instead of updating them manually.
 
 . Create the variables.
+.. Expand the *Variables* options.
 .. Click *Add a variable*. 
 .. Specify the variable options, then click *Save changes*.
 
@@ -22,15 +23,15 @@ each element instead of updating them manually.
 
 For example, to change the index pattern for a set of charts:
 
-Specify the variable options.
-
+. Specify the variable options.
++
 [role="screenshot"]
-image::images/specify_variable_syntax.png[Image describing how to specify the variable syntax]
-
-Copy the variable, then apply it to each element you want to update in the *Expression editor*.
-
+image::images/specify_variable_syntax.png[Variable syntax options]
++
+. Copy the variable, then apply it to each element you want to update in the *Expression editor*.
++
 [role="screenshot"]
-image::images/copy_variable_syntax.png[Image demonstrating expression editor]
+image::images/copy_variable_syntax.png[Copied variable syntax pasted in the Expression editor]
 
 [float]
 [[apply-changes-to-the-entire-workpad]]
@@ -83,9 +84,6 @@ text.align: center;
 To use an element with the same functionality and appearance in multiple places, clone the element.
 
 Select the element, then click *Edit > Clone*. 
-
-[role="screenshot"]
-image::images/clone_element.gif[Image showing how to clone elements]
 
 [float]
 [[move-and-resize-elements]]

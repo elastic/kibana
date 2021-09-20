@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '../../../../../src/core/server';
+import type { ElasticsearchClient, Logger } from 'src/core/server';
+
 import type { AuthenticationInfo } from '../elasticsearch';
-import { getErrorStatusCode } from '../errors';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
 /**
  * Represents a pair of access and refresh tokens.
@@ -59,18 +60,24 @@ export class Tokens {
         refresh_token: refreshToken,
         authentication: authenticationInfo,
       } = (
-        await this.options.client.security.getToken<{
-          access_token: string;
-          refresh_token: string;
-          authentication: AuthenticationInfo;
-        }>({ body: { grant_type: 'refresh_token', refresh_token: existingRefreshToken } })
+        await this.options.client.security.getToken({
+          body: {
+            grant_type: 'refresh_token',
+            refresh_token: existingRefreshToken,
+          },
+        })
       ).body;
 
       this.logger.debug('Access token has been successfully refreshed.');
 
-      return { accessToken, refreshToken, authenticationInfo };
+      return {
+        accessToken,
+        refreshToken,
+        // @ts-expect-error @elastic/elasticsearch user metadata defined as Record<string, any>
+        authenticationInfo: authenticationInfo as AuthenticationInfo,
+      };
     } catch (err) {
-      this.logger.debug(`Failed to refresh access token: ${err.message}`);
+      this.logger.debug(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
 
       // There are at least two common cases when refresh token request can fail:
       // 1. Refresh token is valid only for 24 hours and if it hasn't been used it expires.
@@ -116,7 +123,7 @@ export class Tokens {
           })
         ).body.invalidated_tokens;
       } catch (err) {
-        this.logger.debug(`Failed to invalidate refresh token: ${err.message}`);
+        this.logger.debug(`Failed to invalidate refresh token: ${getDetailedErrorMessage(err)}`);
 
         // When using already deleted refresh token, Elasticsearch responds with 404 and a body that
         // shows that no tokens were invalidated.
@@ -148,7 +155,7 @@ export class Tokens {
           })
         ).body.invalidated_tokens;
       } catch (err) {
-        this.logger.debug(`Failed to invalidate access token: ${err.message}`);
+        this.logger.debug(`Failed to invalidate access token: ${getDetailedErrorMessage(err)}`);
 
         // When using already deleted access token, Elasticsearch responds with 404 and a body that
         // shows that no tokens were invalidated.

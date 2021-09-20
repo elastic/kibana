@@ -13,9 +13,9 @@ import { Query } from '@elastic/eui';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
+import type { SpacesApi, SpacesContextProps } from '../../../../../x-pack/plugins/spaces/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
-import type { SpacesAvailableStartContract } from '../../../spaces_oss/public';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
@@ -23,7 +23,7 @@ import {
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 
-const EmptyFunctionComponent: React.FC = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 const SavedObjectsTablePage = ({
   coreStart,
@@ -39,7 +39,7 @@ const SavedObjectsTablePage = ({
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
   taggingApi?: SavedObjectsTaggingApi;
-  spacesApi?: SpacesAvailableStartContract;
+  spacesApi?: SpacesApi;
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
@@ -71,7 +71,8 @@ const SavedObjectsTablePage = ({
   }, [setBreadcrumbs]);
 
   const ContextWrapper = useMemo(
-    () => spacesApi?.ui.components.SpacesContext || EmptyFunctionComponent,
+    () =>
+      spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
     [spacesApi]
   );
 
@@ -102,7 +103,9 @@ const SavedObjectsTablePage = ({
         }}
         canGoInApp={(savedObject) => {
           const { inAppUrl } = savedObject.meta;
-          return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;
+          if (!inAppUrl) return false;
+          if (!inAppUrl.uiCapabilitiesPath) return true;
+          return Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath));
         }}
       />
     </ContextWrapper>

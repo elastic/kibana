@@ -7,9 +7,7 @@
  */
 
 export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } from './lib';
-export {
-  SavedObjectsComplexFieldMapping,
-  SavedObjectsCoreFieldMapping,
+export type {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsTypeMappingDefinitions,
   SavedObjectsMappingProperties,

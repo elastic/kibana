@@ -1,14 +1,13 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true
   },
   "include": [
-    "../../typings/**/*",
+    "../../../typings/**/*",
     "common/**/*",
     "public/**/*",
     "scripts/**/*",
@@ -25,7 +24,7 @@
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/vis_type_timeseries/tsconfig.json" },
     { "path": "../data_enhanced/tsconfig.json" },
-    { "path": "../alerts/tsconfig.json" },
+    { "path": "../alerting/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../license_management/tsconfig.json" },
     { "path": "../ml/tsconfig.json" },

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { get } from 'lodash';
 import { calculateClass } from '../lib/calculate_class';
 import { vents } from '../lib/vents';
 import { i18n } from '@kbn/i18n';
@@ -65,9 +66,11 @@ export class Shard extends React.Component {
 
   generateKey = (relocating) => {
     const shard = this.props.shard;
-    const shardType = shard.primary ? 'primary' : 'replica';
-    const additionId = shard.state === 'UNASSIGNED' ? Math.random() : '';
-    const node = relocating ? shard.relocating_node : shard.node;
+    const shardType = get(shard, 'shard.primary', shard.primary) ? 'primary' : 'replica';
+    const additionId = get(shard, 'shard.state', shard.state) === 'UNASSIGNED' ? Math.random() : '';
+    const node = relocating
+      ? get(shard, 'relocation_node.uuid', shard.relocating_node)
+      : get(shard, 'shard.name', shard.node);
     return shard.index + '.' + node + '.' + shardType + '.' + shard.shard + additionId;
   };
 
@@ -93,9 +96,9 @@ export class Shard extends React.Component {
     const shard = this.props.shard;
     const classes = calculateClass(shard);
     const color = getColor(classes);
-    const classification = classes + ' ' + shard.shard;
+    const classification = classes + ' ' + get(shard, 'shard.number', shard.shard);
 
-    let shardUi = <EuiBadge color={color}>{shard.shard}</EuiBadge>;
+    let shardUi = <EuiBadge color={color}>{get(shard, 'shard.number', shard.shard)}</EuiBadge>;
     const tooltipContent =
       shard.tooltip_message ||
       i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.shardDisplayName', {

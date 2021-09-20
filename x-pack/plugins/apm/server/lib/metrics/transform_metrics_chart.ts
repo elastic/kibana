@@ -6,7 +6,7 @@
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import { getVizColorForIndex } from '../../../common/viz_colors';
 import { GenericMetricsRequest } from './fetch_and_transform_metrics';
 import { ChartBase } from './types';

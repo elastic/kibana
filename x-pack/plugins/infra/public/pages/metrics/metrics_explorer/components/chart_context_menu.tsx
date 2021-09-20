@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import DateMath from '@elastic/datemath';
 import { Capabilities } from 'src/core/public';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
@@ -33,14 +33,14 @@ export interface Props {
   options: MetricsExplorerOptions;
   onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;
-  source?: InfraSourceConfiguration;
+  source?: MetricsSourceConfigurationProperties;
   timeRange: MetricsExplorerTimeOptions;
   uiCapabilities?: Capabilities;
   chartOptions: MetricsExplorerChartOptions;
 }
 
 const fieldToNodeType = (
-  source: InfraSourceConfiguration,
+  source: MetricsSourceConfigurationProperties,
   groupBy: string | string[]
 ): InventoryItemType | undefined => {
   const fields = Array.isArray(groupBy) ? groupBy : [groupBy];
@@ -152,20 +152,21 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       ]
     : [];
 
-  const itemPanels = [
-    ...filterByItem,
-    ...openInVisualize,
-    ...viewNodeDetail,
-    {
-      name: i18n.translate('xpack.infra.metricsExplorer.alerts.createAlertButton', {
-        defaultMessage: 'Create alert',
-      }),
-      icon: 'bell',
-      onClick() {
-        setFlyoutVisible(true);
-      },
-    },
-  ];
+  const createAlert = uiCapabilities?.infrastructure?.save
+    ? [
+        {
+          name: i18n.translate('xpack.infra.metricsExplorer.alerts.createRuleButton', {
+            defaultMessage: 'Create threshold rule',
+          }),
+          icon: 'bell',
+          onClick() {
+            setFlyoutVisible(true);
+          },
+        },
+      ]
+    : [];
+
+  const itemPanels = [...filterByItem, ...openInVisualize, ...viewNodeDetail, ...createAlert];
 
   // If there are no itemPanels then there is no reason to show the actions button.
   if (itemPanels.length === 0) return null;

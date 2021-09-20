@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ValuesType } from 'utility-types';
 import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
-import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
+import type { estypes } from '@elastic/elasticsearch';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { TelemetryTask } from '.';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
@@ -21,6 +20,7 @@ import {
   CONTAINER_ID,
   ERROR_GROUP_ID,
   HOST_NAME,
+  HOST_OS_PLATFORM,
   OBSERVER_HOSTNAME,
   PARENT_ID,
   POD_NAME,
@@ -60,9 +60,7 @@ export const tasks: TelemetryTask[] = [
     // the transaction count for that time range.
     executor: async ({ indices, search }) => {
       async function getBucketCountFromPaginatedQuery(
-        sources: Array<
-          ValuesType<AggregationOptionsByType['composite']['sources']>[string]
-        >,
+        sources: estypes.AggregationsCompositeAggregationSource[],
         prevResult?: {
           transaction_count: number;
           expected_metric_document_count: number;
@@ -151,7 +149,7 @@ export const tasks: TelemetryTask[] = [
             },
             size: 1,
             sort: {
-              '@timestamp': 'desc',
+              '@timestamp': 'desc' as const,
             },
           },
         })
@@ -297,6 +295,53 @@ export const tasks: TelemetryTask[] = [
     },
   },
   {
+    name: 'host',
+    executor: async ({ indices, search }) => {
+      function getBucketKeys({
+        buckets,
+      }: {
+        buckets: Array<{
+          doc_count: number;
+          key: string | number;
+        }>;
+      }) {
+        return buckets.map((bucket) => bucket.key as string);
+      }
+
+      const response = await search({
+        index: [
+          indices['apm_oss.errorIndices'],
+          indices['apm_oss.metricsIndices'],
+          indices['apm_oss.spanIndices'],
+          indices['apm_oss.transactionIndices'],
+        ],
+        body: {
+          size: 0,
+          timeout,
+          aggs: {
+            platform: {
+              terms: {
+                field: HOST_OS_PLATFORM,
+              },
+            },
+          },
+        },
+      });
+
+      const { aggregations } = response;
+
+      if (!aggregations) {
+        return { host: { os: { platform: [] } } };
+      }
+      const host = {
+        os: {
+          platform: getBucketKeys(aggregations.platform),
+        },
+      };
+      return { host };
+    },
+  },
+  {
     name: 'environments',
     executor: async ({ indices, search }) => {
       const response = await search({
@@ -317,7 +362,7 @@ export const tasks: TelemetryTask[] = [
             service_environments: {
               composite: {
                 size: 1000,
-                sources: [
+                sources: asMutableArray([
                   {
                     [SERVICE_ENVIRONMENT]: {
                       terms: {
@@ -333,7 +378,7 @@ export const tasks: TelemetryTask[] = [
                       },
                     },
                   },
-                ],
+                ] as const),
               },
             },
           },

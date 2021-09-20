@@ -585,10 +585,54 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.fileaccess',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.fileaccess',
+      {
+        defaultMessage:
+          'Report limited file access (read) events. Paths are not user-configurable. Default value is true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.registryaccess',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.registryaccess',
+      {
+        defaultMessage:
+          'Report limited registry access (queryvalue, savekey) events. Paths are not user-configurable. Default value is true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.diagnostic.enabled',
     first_supported_version: '7.11',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.diagnostic.enabled',
+      {
+        defaultMessage:
+          "A value of 'false' disables running diagnostic features on Endpoint. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.diagnostic.enabled',
+    first_supported_version: '7.12',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.diagnostic.enabled',
+      {
+        defaultMessage:
+          "A value of 'false' disables running diagnostic features on Endpoint. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.diagnostic.enabled',
+    first_supported_version: '7.12',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.diagnostic.enabled',
       {
         defaultMessage:
           "A value of 'false' disables running diagnostic features on Endpoint. Default: true.",
@@ -623,6 +667,82 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.mbr',
       {
         defaultMessage: "A value of 'false' disables Ransomware MBR protection. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.ransomware.canary',
+    first_supported_version: '7.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.canary',
+      {
+        defaultMessage: "A value of 'false' disables Ransomware canary protection. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.shellcode',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode',
+      {
+        defaultMessage:
+          'Enable shellcode injection detection as a part of memory protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.memory_scan',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.memory_scan',
+      {
+        defaultMessage:
+          'Enable scanning for malicious memory regions as a part of memory protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.malware.quarantine',
+    first_supported_version: '7.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.quarantine',
+      {
+        defaultMessage:
+          'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.shellcode_collect_sample',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_collect_sample',
+      {
+        defaultMessage:
+          'Collect 4MB of memory surrounding detected shellcode regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.memory_scan_collect_sample',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.memory_scan_collect_sample',
+      {
+        defaultMessage:
+          'Collect 4MB of memory surrounding detected malicious memory regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.shellcode_enhanced_pe_parsing',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.memory_protection.shellcode_enhanced_pe_parsing',
+      {
+        defaultMessage:
+          'Attempt to identify and extract PE metadata from injected shellcode, including Authenticode signatures and version resource information. Default: true.',
       }
     ),
   },

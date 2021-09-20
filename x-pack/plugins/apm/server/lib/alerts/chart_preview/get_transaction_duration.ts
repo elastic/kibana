@@ -5,92 +5,116 @@
  * 2.0.
  */
 
-import { MetricsAggregationResponsePart } from '../../../../../../typings/elasticsearch/aggregations';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { rangeQuery } from '../../../../../observability/server';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
-  TRANSACTION_DURATION,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
-import { withApmSpan } from '../../../utils/with_apm_span';
-import { getBucketSize } from '../../helpers/get_bucket_size';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+  getSearchAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
-export function getTransactionDurationChartPreview({
+export async function getTransactionDurationChartPreview({
   alertParams,
   setup,
 }: {
   alertParams: AlertParams;
   setup: Setup & SetupTimeRange;
 }) {
-  return withApmSpan('get_transaction_duration_chart_preview', async () => {
-    const { apmEventClient, start, end } = setup;
-    const {
-      aggregationType,
-      environment,
-      serviceName,
-      transactionType,
-    } = alertParams;
+  const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    ...setup,
+    kuery: '',
+  });
 
-    const query = {
-      bool: {
-        filter: [
-          { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-          ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
-          ...(transactionType
-            ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-            : []),
-          ...rangeQuery(start, end),
-          ...environmentQuery(environment),
-        ],
-      },
-    };
+  const { apmEventClient, start, end } = setup;
+  const {
+    aggregationType,
+    environment,
+    serviceName,
+    transactionType,
+    interval,
+  } = alertParams;
 
-    const { intervalString } = getBucketSize({ start, end, numBuckets: 20 });
+  const query = {
+    bool: {
+      filter: [
+        ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
+        ...(transactionType
+          ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
+          : []),
+        ...rangeQuery(start, end),
+        ...environmentQuery(environment),
+        ...getDocumentTypeFilterForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ] as QueryDslQueryContainer[],
+    },
+  };
 
-    const aggs = {
-      timeseries: {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: intervalString,
+  const transactionDurationField = getTransactionDurationFieldForAggregatedTransactions(
+    searchAggregatedTransactions
+  );
+
+  const aggs = {
+    timeseries: {
+      date_histogram: {
+        field: '@timestamp',
+        fixed_interval: interval,
+        min_doc_count: 0,
+        extended_bounds: {
+          min: start,
+          max: end,
         },
-        aggs: {
-          agg:
-            aggregationType === 'avg'
-              ? { avg: { field: TRANSACTION_DURATION } }
-              : {
-                  percentiles: {
-                    field: TRANSACTION_DURATION,
-                    percents: [aggregationType === '95th' ? 95 : 99],
-                  },
+      },
+      aggs: {
+        agg:
+          aggregationType === 'avg'
+            ? { avg: { field: transactionDurationField } }
+            : {
+                percentiles: {
+                  field: transactionDurationField,
+                  percents: [aggregationType === '95th' ? 95 : 99],
                 },
-        },
+              },
       },
-    };
-    const params = {
-      apm: { events: [ProcessorEvent.transaction] },
-      body: { size: 0, query, aggs },
-    };
-    const resp = await apmEventClient.search(params);
+    },
+  };
+  const params = {
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
+    body: { size: 0, query, aggs },
+  };
+  const resp = await apmEventClient.search(
+    'get_transaction_duration_chart_preview',
+    params
+  );
 
-    if (!resp.aggregations) {
-      return [];
-    }
+  if (!resp.aggregations) {
+    return [];
+  }
 
-    return resp.aggregations.timeseries.buckets.map((bucket) => {
-      const percentilesKey = aggregationType === '95th' ? '95.0' : '99.0';
-      const x = bucket.key;
-      const y =
-        aggregationType === 'avg'
-          ? (bucket.agg as MetricsAggregationResponsePart).value
-          : (bucket.agg as { values: Record<string, number | null> }).values[
-              percentilesKey
-            ];
+  return resp.aggregations.timeseries.buckets.map((bucket) => {
+    const percentilesKey = aggregationType === '95th' ? '95.0' : '99.0';
+    const x = bucket.key;
+    const y =
+      aggregationType === 'avg'
+        ? (bucket.agg as { value: number | null }).value
+        : (bucket.agg as { values: Record<string, number | null> }).values[
+            percentilesKey
+          ];
 
-      return { x, y };
-    });
+    return { x, y };
   });
 }

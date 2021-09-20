@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { SAVE_BUTTON_LABEL, CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
+
 import { EngineLogic } from '../../engine';
 
 interface Props {
@@ -124,14 +126,7 @@ export const CustomizationModal: React.FC<Props> = ({
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.cancel',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-        </EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onClose}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
         <EuiButton
           fill
           onClick={() => {
@@ -141,12 +136,7 @@ export const CustomizationModal: React.FC<Props> = ({
             });
           }}
         >
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.save',
-            {
-              defaultMessage: 'Save',
-            }
-          )}
+          {SAVE_BUTTON_LABEL}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

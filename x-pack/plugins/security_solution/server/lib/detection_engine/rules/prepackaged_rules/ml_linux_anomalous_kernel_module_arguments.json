@@ -9,12 +9,9 @@
   ],
   "from": "now-45m",
   "interval": "15m",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "machine_learning_job_id": "linux_rare_kernel_module_arguments",
   "name": "Anomalous Kernel Module Activity",
-  "references": [
-    "references"
-  ],
   "risk_score": 21,
   "rule_id": "37b0816d-af40-40b4-885f-bb162b3c88a9",
   "severity": "low",
@@ -50,5 +47,5 @@
     }
   ],
   "type": "machine_learning",
-  "version": 2
+  "version": 4
 }

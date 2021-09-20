@@ -8,7 +8,8 @@
 import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 
 export const MICRO_TO_SEC = 1000000;
 
@@ -64,7 +65,7 @@ export async function getPageLoadDistribution({
   maxPercentile,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   minPercentile?: string;
   maxPercentile?: string;
   urlQuery?: string;
@@ -117,7 +118,7 @@ export async function getPageLoadDistribution({
   const {
     aggregations,
     hits: { total },
-  } = await apmEventClient.search(params);
+  } = await apmEventClient.search('get_page_load_distribution', params);
 
   if (total.value === 0) {
     return null;
@@ -144,12 +145,16 @@ export async function getPageLoadDistribution({
   }
 
   // calculate the diff to get actual page load on specific duration value
-  let pageDist = pageDistVals.map(({ key, value }, index: number, arr) => {
-    return {
-      x: microToSec(key),
-      y: index === 0 ? value : value - arr[index - 1].value,
-    };
-  });
+  let pageDist = pageDistVals.map(
+    ({ key, value: maybeNullValue }, index: number, arr) => {
+      // FIXME: values from percentile* aggs can be null
+      const value = maybeNullValue!;
+      return {
+        x: microToSec(key),
+        y: index === 0 ? value : value - arr[index - 1].value!,
+      };
+    }
+  );
 
   pageDist = removeZeroesFromTail(pageDist);
 
@@ -172,7 +177,7 @@ const getPercentilesDistribution = async ({
   minDuration,
   maxDuration,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   minDuration: number;
   maxDuration: number;
 }) => {
@@ -206,7 +211,10 @@ const getPercentilesDistribution = async ({
 
   const { apmEventClient } = setup;
 
-  const { aggregations } = await apmEventClient.search(params);
+  const { aggregations } = await apmEventClient.search(
+    'get_page_load_distribution',
+    params
+  );
 
   return aggregations?.loadDistribution.values ?? [];
 };

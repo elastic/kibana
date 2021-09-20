@@ -7,13 +7,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, from, Observable, of, Subject } from 'rxjs';
-import { isEqual } from 'lodash';
 import {
   catchError,
   debounceTime,
   distinctUntilChanged,
   map,
   pluck,
+  shareReplay,
   skipWhile,
   startWith,
   switchMap,
@@ -28,41 +28,23 @@ import {
   SWIMLANE_TYPE,
   SwimlaneType,
 } from '../../application/explorer/explorer_constants';
-import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
-import { Query } from '../../../../../../src/plugins/data/common/query';
-import { esKuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
-import { ExplorerJob, OverallSwimlaneData } from '../../application/explorer/explorer_utils';
-import { parseInterval } from '../../../common/util/parse_interval';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
 } from '..';
+import { processFilters } from '../common/process_filters';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../..';
+import { getJobsObservable } from '../common/get_jobs_observable';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
-function getJobsObservable(
-  embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
-  anomalyDetectorService: AnomalyDetectorService,
-  setErrorHandler: (e: Error) => void
-) {
-  return embeddableInput.pipe(
-    pluck('jobIds'),
-    distinctUntilChanged(isEqual),
-    switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds)),
-    catchError((e) => {
-      setErrorHandler(e.body ?? e);
-      return of(undefined);
-    })
-  );
-}
-
 export function useSwimlaneInputResolver(
-  embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
+  embeddableInput$: Observable<AnomalySwimlaneEmbeddableInput>,
   onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void,
   refresh: Observable<any>,
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
@@ -86,6 +68,30 @@ export function useSwimlaneInputResolver(
   const [isLoading, setIsLoading] = useState(false);
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
+
+  const selectedJobs$ = useMemo(() => {
+    return getJobsObservable(embeddableInput$, anomalyDetectorService, setError).pipe(
+      shareReplay(1)
+    );
+  }, []);
+
+  const bucketInterval$ = useMemo(() => {
+    return combineLatest([
+      selectedJobs$,
+      chartWidth$,
+      embeddableInput$.pipe(pluck('timeRange')),
+    ]).pipe(
+      skipWhile(([jobs, width]) => !Array.isArray(jobs) || !width),
+      tap(([, , timeRange]) => {
+        anomalyTimelineService.setTimeRange(timeRange);
+      }),
+      map(([jobs, width]) => anomalyTimelineService.getSwimlaneBucketInterval(jobs!, width)),
+      distinctUntilChanged((prev, curr) => {
+        return prev.asSeconds() === curr.asSeconds();
+      })
+    );
+  }, []);
+
   const fromPage$ = useMemo(() => new Subject<number>(), []);
   const perPage$ = useMemo(() => new Subject<number>(), []);
 
@@ -100,9 +106,9 @@ export function useSwimlaneInputResolver(
 
   useEffect(() => {
     const subscription = combineLatest([
-      getJobsObservable(embeddableInput, anomalyDetectorService, setError),
-      embeddableInput,
-      chartWidth$.pipe(skipWhile((v) => !v)),
+      selectedJobs$,
+      embeddableInput$,
+      bucketInterval$,
       fromPage$,
       perPage$.pipe(
         startWith(undefined),
@@ -116,8 +122,8 @@ export function useSwimlaneInputResolver(
       .pipe(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
-        switchMap(([jobs, input, swimlaneContainerWidth, fromPageInput, perPageFromState]) => {
-          if (!jobs) {
+        switchMap(([explorerJobs, input, bucketInterval, fromPageInput, perPageFromState]) => {
+          if (!explorerJobs) {
             // couldn't load the list of jobs
             return of(undefined);
           }
@@ -126,30 +132,18 @@ export function useSwimlaneInputResolver(
             viewBy,
             swimlaneType: swimlaneTypeInput,
             perPage: perPageInput,
-            timeRange,
             filters,
             query,
             viewMode,
           } = input;
 
-          anomalyTimelineService.setTimeRange(timeRange);
-
           if (!swimlaneType) {
             setSwimlaneType(swimlaneTypeInput);
           }
 
-          const explorerJobs: ExplorerJob[] = jobs.map((job) => {
-            const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-            return {
-              id: job.job_id,
-              selected: true,
-              bucketSpanSeconds: bucketSpan!.asSeconds(),
-            };
-          });
-
           let appliedFilters: any;
           try {
-            appliedFilters = processFilters(filters, query);
+            appliedFilters = processFilters(filters, query, CONTROLLED_BY_SWIM_LANE_FILTER);
           } catch (e) {
             // handle query syntax errors
             setError(e);
@@ -157,7 +151,7 @@ export function useSwimlaneInputResolver(
           }
 
           return from(
-            anomalyTimelineService.loadOverallData(explorerJobs, swimlaneContainerWidth)
+            anomalyTimelineService.loadOverallData(explorerJobs, undefined, bucketInterval)
           ).pipe(
             switchMap((overallSwimlaneData) => {
               const { earliest, latest } = overallSwimlaneData;
@@ -184,8 +178,9 @@ export function useSwimlaneInputResolver(
                       : ANOMALY_SWIM_LANE_HARD_LIMIT,
                     perPageFromState ?? perPageInput ?? SWIM_LANE_DEFAULT_PAGE_SIZE,
                     fromPageInput,
-                    swimlaneContainerWidth,
-                    appliedFilters
+                    undefined,
+                    appliedFilters,
+                    bucketInterval
                   )
                 ).pipe(
                   map((viewBySwimlaneData) => {
@@ -241,45 +236,4 @@ export function useSwimlaneInputResolver(
     isLoading,
     error,
   ];
-}
-
-export function processFilters(filters: Filter[], query: Query) {
-  const inputQuery =
-    query.language === 'kuery'
-      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string))
-      : query.query;
-
-  const must = [inputQuery];
-  const mustNot = [];
-  for (const filter of filters) {
-    // ignore disabled filters as well as created by swim lane selection
-    if (filter.meta.disabled || filter.meta.controlledBy === CONTROLLED_BY_SWIM_LANE_FILTER)
-      continue;
-
-    const {
-      meta: { negate, type, key: fieldName },
-    } = filter;
-
-    let filterQuery = filter.query;
-
-    if (filterQuery === undefined && type === 'exists') {
-      filterQuery = {
-        exists: {
-          field: fieldName,
-        },
-      };
-    }
-
-    if (negate) {
-      mustNot.push(filterQuery);
-    } else {
-      must.push(filterQuery);
-    }
-  }
-  return {
-    bool: {
-      must,
-      must_not: mustNot,
-    },
-  };
 }

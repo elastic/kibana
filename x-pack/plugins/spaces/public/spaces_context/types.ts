@@ -5,21 +5,37 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { CoreStart } from 'src/core/public';
-import { ShareToSpacesData } from '../types';
-import { SpacesManager } from '../spaces_manager';
+import type * as React from 'react';
 
-export type KibanaServices = Partial<CoreStart>;
+import type { CoreStart, StartServicesAccessor } from 'src/core/public';
 
-export interface SpacesReactContextValue<Services extends KibanaServices> {
+import type { PluginsStart } from '../plugin';
+import type { SpacesManager } from '../spaces_manager';
+import type { SpacesData } from '../types';
+
+export interface SpacesReactContextValue<Services extends Partial<CoreStart>> {
   readonly spacesManager: SpacesManager;
-  readonly shareToSpacesDataPromise: Promise<ShareToSpacesData>;
+  readonly spacesDataPromise: Promise<SpacesData>;
   readonly services: Services;
 }
 
-export interface SpacesReactContext<T extends KibanaServices> {
-  value: SpacesReactContextValue<T>;
+export interface SpacesReactContext<Services extends Partial<CoreStart>> {
+  value: SpacesReactContextValue<Services>;
   Provider: React.FC;
-  Consumer: React.Consumer<SpacesReactContextValue<T>>;
+  Consumer: React.Consumer<SpacesReactContextValue<Services>>;
+}
+
+export interface InternalProps {
+  spacesManager: SpacesManager;
+  getStartServices: StartServicesAccessor<PluginsStart>;
+}
+
+/**
+ * Properties for the SpacesContext.
+ */
+export interface SpacesContextProps {
+  /**
+   * If a feature is specified, all Spaces components will treat it appropriately if the feature is disabled in a given Space.
+   */
+  feature?: string;
 }

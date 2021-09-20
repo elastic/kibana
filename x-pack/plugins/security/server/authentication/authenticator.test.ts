@@ -11,25 +11,32 @@ jest.mock('./providers/saml');
 jest.mock('./providers/http');
 
 import Boom from '@hapi/boom';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  loggingSystemMock,
-  httpServiceMock,
-  httpServerMock,
   elasticsearchServiceMock,
-} from '../../../../../src/core/server/mocks';
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from 'src/core/server/mocks';
+
+import {
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+} from '../../common/constants';
+import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
-import { sessionMock } from '../session_management/index.mock';
-import { SecurityLicenseFeatures } from '../../common/licensing';
 import { ConfigSchema, createConfig } from '../config';
-import { SessionValue } from '../session_management';
-import { AuthenticationResult } from './authentication_result';
-import { Authenticator, AuthenticatorOptions } from './authenticator';
-import { DeauthenticationResult } from './deauthentication_result';
-import { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
+import type { SessionValue } from '../session_management';
+import { sessionMock } from '../session_management/index.mock';
+import { AuthenticationResult } from './authentication_result';
+import type { AuthenticatorOptions } from './authenticator';
+import { Authenticator } from './authenticator';
+import { DeauthenticationResult } from './deauthentication_result';
+import type { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
 
 function getMockOptions({
   providers,
@@ -48,6 +55,7 @@ function getMockOptions({
     basePath: httpServiceMock.createSetupContract().basePath,
     license: licenseMock.create(),
     loggers: loggingSystemMock.create(),
+    getServerBaseURL: jest.fn(),
     config: createConfig(
       ConfigSchema.validate({ authc: { selector, providers, http } }),
       loggingSystemMock.create().get(),
@@ -334,7 +342,7 @@ describe('Authenticator', () => {
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          event: { action: 'user_login', category: 'authentication', outcome: 'success' },
+          event: { action: 'user_login', category: ['authentication'], outcome: 'success' },
         })
       );
     });
@@ -350,7 +358,7 @@ describe('Authenticator', () => {
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          event: { action: 'user_login', category: 'authentication', outcome: 'failure' },
+          event: { action: 'user_login', category: ['authentication'], outcome: 'failure' },
         })
       );
     });
@@ -582,8 +590,8 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
     });
 
     it('clears session if provider asked to do so in `succeeded` result.', async () => {
@@ -602,8 +610,8 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
     });
 
     it('clears session if provider asked to do so in `redirected` result.', async () => {
@@ -621,8 +629,8 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
     });
 
     describe('with Access Agreement', () => {
@@ -1188,7 +1196,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('extends session for non-system API calls.', async () => {
@@ -1210,7 +1218,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.extend).toHaveBeenCalledWith(request, mockSessVal);
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('does not touch session for system API calls if authentication fails with non-401 reason.', async () => {
@@ -1231,7 +1239,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('does not touch session for non-system API calls if authentication fails with non-401 reason.', async () => {
@@ -1252,7 +1260,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('replaces existing session with the one returned by authentication provider for system API requests', async () => {
@@ -1278,7 +1286,7 @@ describe('Authenticator', () => {
       });
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('replaces existing session with the one returned by authentication provider for non-system API requests', async () => {
@@ -1304,7 +1312,7 @@ describe('Authenticator', () => {
       });
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('clears session if provider failed to authenticate system API request with 401 with active session.', async () => {
@@ -1321,8 +1329,8 @@ describe('Authenticator', () => {
         AuthenticationResult.failed(Boom.unauthorized())
       );
 
-      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
@@ -1342,8 +1350,8 @@ describe('Authenticator', () => {
         AuthenticationResult.failed(Boom.unauthorized())
       );
 
-      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
@@ -1361,8 +1369,8 @@ describe('Authenticator', () => {
         AuthenticationResult.redirectTo('some-url', { state: null })
       );
 
-      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
@@ -1379,7 +1387,7 @@ describe('Authenticator', () => {
         AuthenticationResult.notHandled()
       );
 
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
@@ -1396,7 +1404,7 @@ describe('Authenticator', () => {
         AuthenticationResult.notHandled()
       );
 
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
@@ -1468,6 +1476,29 @@ describe('Authenticator', () => {
             '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath'
           )
         );
+        expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
+      });
+
+      it('redirects to the Login Selector with auth provider hint when needed.', async () => {
+        const request = httpServerMock.createKibanaRequest({
+          query: { [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]: 'custom1' },
+        });
+
+        // Includes hint if there is no active session.
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.redirectTo(
+            '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath%3Fauth_provider_hint%3Dcustom1&auth_provider_hint=custom1'
+          )
+        );
+
+        // Includes hint if session is unauthenticated.
+        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: undefined });
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.redirectTo(
+            '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath%3Fauth_provider_hint%3Dcustom1&auth_provider_hint=custom1'
+          )
+        );
+
         expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
       });
     });
@@ -1777,16 +1808,16 @@ describe('Authenticator', () => {
       );
     });
 
-    it('returns `notHandled` if session does not exist.', async () => {
+    it('redirects to login form if session does not exist.', async () => {
       const request = httpServerMock.createKibanaRequest();
       mockOptions.session.get.mockResolvedValue(null);
       mockBasicAuthenticationProvider.logout.mockResolvedValue(DeauthenticationResult.notHandled());
 
       await expect(authenticator.logout(request)).resolves.toEqual(
-        DeauthenticationResult.notHandled()
+        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
       );
 
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('clears session and returns whatever authentication provider returns.', async () => {
@@ -1801,7 +1832,7 @@ describe('Authenticator', () => {
       );
 
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).toHaveBeenCalled();
     });
 
     it('if session does not exist but provider name is valid, returns whatever authentication provider returns.', async () => {
@@ -1820,7 +1851,7 @@ describe('Authenticator', () => {
 
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledWith(request, null);
-      expect(mockOptions.session.clear).toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).toHaveBeenCalled();
     });
 
     it('if session does not exist and provider name is not available, returns whatever authentication provider returns.', async () => {
@@ -1837,19 +1868,19 @@ describe('Authenticator', () => {
 
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledWith(request);
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
-    it('returns `notHandled` if session does not exist and provider name is invalid', async () => {
+    it('redirects to login form if session does not exist and provider name is invalid', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { provider: 'foo' } });
       mockOptions.session.get.mockResolvedValue(null);
 
       await expect(authenticator.logout(request)).resolves.toEqual(
-        DeauthenticationResult.notHandled()
+        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
       );
 
       expect(mockBasicAuthenticationProvider.logout).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).toHaveBeenCalled();
     });
   });
 
@@ -1932,6 +1963,66 @@ describe('Authenticator', () => {
       expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).toHaveBeenCalledTimes(
         1
       );
+    });
+  });
+
+  describe('`getRequestOriginalURL` method', () => {
+    let authenticator: Authenticator;
+    let mockOptions: ReturnType<typeof getMockOptions>;
+    beforeEach(() => {
+      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      authenticator = new Authenticator(mockOptions);
+    });
+
+    it('filters out auth specific query parameters', () => {
+      expect(authenticator.getRequestOriginalURL(httpServerMock.createKibanaRequest())).toBe(
+        '/mock-server-basepath/path'
+      );
+
+      expect(
+        authenticator.getRequestOriginalURL(
+          httpServerMock.createKibanaRequest({
+            query: {
+              [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]: 'saml1',
+            },
+          })
+        )
+      ).toBe('/mock-server-basepath/path');
+
+      expect(
+        authenticator.getRequestOriginalURL(
+          httpServerMock.createKibanaRequest({
+            query: {
+              [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]: 'saml1',
+              [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: '#some-hash',
+            },
+          })
+        )
+      ).toBe('/mock-server-basepath/path');
+    });
+
+    it('allows to include additional query parameters', () => {
+      expect(
+        authenticator.getRequestOriginalURL(httpServerMock.createKibanaRequest(), [
+          ['some-param', 'some-value'],
+          ['some-param2', 'some-value2'],
+        ])
+      ).toBe('/mock-server-basepath/path?some-param=some-value&some-param2=some-value2');
+
+      expect(
+        authenticator.getRequestOriginalURL(
+          httpServerMock.createKibanaRequest({
+            query: {
+              [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]: 'saml1',
+              [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: '#some-hash',
+            },
+          }),
+          [
+            ['some-param', 'some-value'],
+            [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER, 'oidc1'],
+          ]
+        )
+      ).toBe('/mock-server-basepath/path?some-param=some-value&auth_provider_hint=oidc1');
     });
   });
 });

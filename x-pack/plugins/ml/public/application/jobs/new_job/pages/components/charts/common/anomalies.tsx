@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, FC } from 'react';
-import { AnnotationDomainTypes, LineAnnotation } from '@elastic/charts';
+import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { Anomaly } from '../../../../common/results_loader';
 import { getSeverityColor } from '../../../../../../../../common/util/anomaly_utils';
 import { ANOMALY_THRESHOLD } from '../../../../../../../../common/constants/anomalies';
@@ -59,35 +59,35 @@ export const Anomalies: FC<Props> = ({ anomalyData }) => {
     <Fragment>
       <LineAnnotation
         id="low"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         dataValues={severities.low}
         style={getAnomalyStyle(ANOMALY_THRESHOLD.LOW)}
         hideTooltips={true}
       />
       <LineAnnotation
         id="warning"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         dataValues={severities.warning}
         style={getAnomalyStyle(ANOMALY_THRESHOLD.WARNING)}
         hideTooltips={true}
       />
       <LineAnnotation
         id="minor"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         dataValues={severities.minor}
         style={getAnomalyStyle(ANOMALY_THRESHOLD.MINOR)}
         hideTooltips={true}
       />
       <LineAnnotation
         id="major"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         dataValues={severities.major}
         style={getAnomalyStyle(ANOMALY_THRESHOLD.MAJOR)}
         hideTooltips={true}
       />
       <LineAnnotation
         id="critical"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         dataValues={severities.critical}
         style={getAnomalyStyle(ANOMALY_THRESHOLD.CRITICAL)}
         hideTooltips={true}

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { docLinksServiceMock } from '../../../../../src/core/public/mocks';
+import { docLinksServiceMock } from 'src/core/public/mocks';
+
 import { DocumentationLinksService } from './documentation_links';
 
 describe('DocumentationLinksService', () => {

@@ -7,13 +7,14 @@
  */
 
 import supertest from 'supertest';
-import request from 'request';
+import { parse as parseCookie } from 'tough-cookie';
 import { schema } from '@kbn/config-schema';
 
 import { ensureRawRequest } from '../router';
 import { HttpService } from '../http_service';
 
 import { contextServiceMock } from '../../context/context_service.mock';
+import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 
@@ -25,11 +26,13 @@ const contextSetup = contextServiceMock.createSetupContract();
 
 const setupDeps = {
   context: contextSetup,
+  executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
 
-beforeEach(() => {
+beforeEach(async () => {
   logger = loggingSystemMock.create();
   server = createHttpServer({ logger });
+  await server.preboot({ context: contextServiceMock.createPrebootContract() });
 });
 
 afterEach(async () => {
@@ -824,7 +827,7 @@ describe('Auth', () => {
     const cookies = response.header['set-cookie'];
     expect(cookies).toHaveLength(1);
 
-    const sessionCookie = request.cookie(cookies[0]);
+    const sessionCookie = parseCookie(cookies[0]);
     if (!sessionCookie) {
       throw new Error('session cookie expected to be defined');
     }

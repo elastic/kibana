@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQuery } from 'react-query';
 
+import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
   ResultEdges,
   PageInfoPaginated,
-  DocValueFields,
   OsqueryQueries,
   ResultsRequestOptions,
   ResultsStrategyResponse,
@@ -21,12 +20,8 @@ import {
 } from '../../common/search_strategy';
 import { ESTermQuery } from '../../common/typed_json';
 
-import * as i18n from './translations';
-import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
-
-const ID = 'resultsAllQuery';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ResultsArgs {
   results: ResultEdges;
@@ -40,126 +35,58 @@ export interface ResultsArgs {
 interface UseAllResults {
   actionId: string;
   activePage: number;
-  direction: Direction;
   limit: number;
-  sortField: string;
-  docValueFields?: DocValueFields[];
+  sort: Array<{ field: string; direction: Direction }>;
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
+  isLive?: boolean;
 }
 
 export const useAllResults = ({
   actionId,
   activePage,
-  direction,
   limit,
-  sortField,
-  docValueFields,
+  sort,
   filterQuery,
   skip = false,
-}: UseAllResults): [boolean, ResultsArgs] => {
-  const { data, notifications } = useKibana().services;
+  isLive = false,
+}: UseAllResults) => {
+  const { data } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
-  const abortCtrl = useRef(new AbortController());
-  const [loading, setLoading] = useState(false);
-  const [resultsRequest, setHostRequest] = useState<ResultsRequestOptions | null>(null);
-
-  const [resultsResponse, setResultsResponse] = useState<ResultsArgs>({
-    results: [],
-    id: ID,
-    inspect: {
-      dsl: [],
-      response: [],
-    },
-    isInspected: false,
-    pageInfo: {
-      activePage: 0,
-      fakeTotalCount: 0,
-      showMorePagesIndicator: false,
-    },
-    totalCount: -1,
-  });
-
-  const resultsSearch = useCallback(
-    (request: ResultsRequestOptions | null) => {
-      if (request == null || skip) {
-        return;
-      }
-
-      let didCancel = false;
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-
-        const searchSubscription$ = data.search
-          .search<ResultsRequestOptions, ResultsStrategyResponse>(request, {
+  return useQuery(
+    ['allActionResults', { actionId, activePage, limit, sort }],
+    async () => {
+      const responseData = await data.search
+        .search<ResultsRequestOptions, ResultsStrategyResponse>(
+          {
+            actionId,
+            factoryQueryType: OsqueryQueries.results,
+            filterQuery: createFilter(filterQuery),
+            pagination: generateTablePaginationOptions(activePage, limit),
+            sort,
+          },
+          {
             strategy: 'osquerySearchStrategy',
-            abortSignal: abortCtrl.current.signal,
-          })
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setResultsResponse((prevResponse) => ({
-                    ...prevResponse,
-                    results: response.edges,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    pageInfo: response.pageInfo,
-                    totalCount: response.totalCount,
-                  }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_ALL_RESULTS);
-                searchSubscription$.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({ title: i18n.FAIL_ALL_RESULTS, text: msg.message });
-              }
-            },
-          });
-      };
-      abortCtrl.current.abort();
-      asyncSearch();
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
+          }
+        )
+        .toPromise();
+
+      return {
+        ...responseData,
+        inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
     },
-    [data.search, notifications.toasts, skip]
+    {
+      refetchInterval: isLive ? 5000 : false,
+      enabled: !skip,
+      onSuccess: () => setErrorToast(),
+      onError: (error: Error) =>
+        setErrorToast(error, {
+          title: i18n.translate('xpack.osquery.results.fetchError', {
+            defaultMessage: 'Error while fetching results',
+          }),
+        }),
+    }
   );
-
-  useEffect(() => {
-    setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        actionId,
-        docValueFields: docValueFields ?? [],
-        factoryQueryType: OsqueryQueries.results,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort: {
-          direction,
-          field: sortField,
-        },
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [actionId, activePage, direction, docValueFields, filterQuery, limit, sortField]);
-
-  useEffect(() => {
-    resultsSearch(resultsRequest);
-  }, [resultsRequest, resultsSearch]);
-
-  return [loading, resultsResponse];
 };

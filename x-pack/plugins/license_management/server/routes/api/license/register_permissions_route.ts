@@ -11,13 +11,18 @@ import { addBasePath } from '../../helpers';
 
 export function registerPermissionsRoute({
   router,
+  lib: { handleEsError },
   config: { isSecurityEnabled },
 }: RouteDependencies) {
   router.post({ path: addBasePath('/permissions'), validate: false }, async (ctx, req, res) => {
-    const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+    const { client } = ctx.core.elasticsearch;
 
-    return res.ok({
-      body: await getPermissions({ callAsCurrentUser, isSecurityEnabled }),
-    });
+    try {
+      return res.ok({
+        body: await getPermissions({ client, isSecurityEnabled }),
+      });
+    } catch (error) {
+      return handleEsError({ error, response: res });
+    }
   });
 }

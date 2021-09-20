@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -13,7 +12,7 @@
     "public/**/*",
     "server/**/*",
     "test/**/*",
-    "../../typings/**/*",
+    "../../../typings/**/*",
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },

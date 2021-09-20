@@ -8,10 +8,11 @@
 
 import { useCallback } from 'react';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
+import { ESRequest } from '../../../types';
 import { restoreRequestFromHistory } from './restore_request_from_history';
 
 export const useRestoreRequestFromHistory = () => {
-  return useCallback((req: any) => {
+  return useCallback((req: ESRequest) => {
     const editor = registry.getInputEditor();
     restoreRequestFromHistory(editor, req);
   }, []);

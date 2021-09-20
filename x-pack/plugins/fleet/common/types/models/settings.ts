@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes } from 'src/core/public';
+import type { SavedObjectAttributes } from 'src/core/public';
 
 export interface BaseSettings {
-  agent_auto_upgrade: boolean;
-  package_auto_upgrade: boolean;
-  kibana_urls: string[];
-  kibana_ca_sha256?: string;
   has_seen_add_data_notice?: boolean;
+  has_seen_fleet_migration_notice?: boolean;
+  fleet_server_hosts: string[];
 }
 
 export interface Settings extends BaseSettings {

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler, ResponseHeaders } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler, ResponseHeaders } from 'src/core/server';
 import bluebird from 'bluebird';
+import { safeDump } from 'js-yaml';
+
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
-import { listAgents } from '../../services/agents';
+import { getAgentsByKuery } from '../../services/agents';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import {
+import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
   CreateAgentPolicyRequestSchema,
@@ -20,10 +22,10 @@ import {
   CopyAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
-  AgentPolicy,
-  NewPackagePolicy,
 } from '../../types';
-import {
+import type { AgentPolicy, NewPackagePolicy } from '../../types';
+import { FLEET_SYSTEM_PACKAGE } from '../../../common';
+import type {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
   GetOneAgentPolicyResponse,
@@ -32,7 +34,6 @@ import {
   CopyAgentPolicyResponse,
   DeleteAgentPolicyResponse,
   GetFullAgentPolicyResponse,
-  defaultPackages,
 } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 
@@ -58,7 +59,7 @@ export const getAgentPoliciesHandler: RequestHandler<
     await bluebird.map(
       items,
       (agentPolicy: GetAgentPoliciesResponseItem) =>
-        listAgents(soClient, esClient, {
+        getAgentsByKuery(esClient, {
           showInactive: false,
           perPage: 0,
           page: 1,
@@ -104,7 +105,6 @@ export const createAgentPolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   try {
@@ -121,7 +121,7 @@ export const createAgentPolicyHandler: RequestHandler<
       // successfully
       withSysMonitoring
         ? packagePolicyService
-            .buildPackagePolicyFromPackage(soClient, defaultPackages.System)
+            .buildPackagePolicyFromPackage(soClient, FLEET_SYSTEM_PACKAGE)
             .catch(() => undefined)
         : undefined,
     ]);
@@ -130,7 +130,7 @@ export const createAgentPolicyHandler: RequestHandler<
     if (withSysMonitoring && newSysPackagePolicy !== undefined && agentPolicy !== undefined) {
       newSysPackagePolicy.policy_id = agentPolicy.id;
       newSysPackagePolicy.namespace = agentPolicy.namespace;
-      await packagePolicyService.create(soClient, esClient, callCluster, newSysPackagePolicy, {
+      await packagePolicyService.create(soClient, esClient, newSysPackagePolicy, {
         user,
         bumpRevision: false,
       });
@@ -270,7 +270,7 @@ export const downloadFullAgentPolicy: RequestHandler<
       standalone: request.query.standalone === true,
     });
     if (fullAgentPolicy) {
-      const body = fullAgentPolicyToYaml(fullAgentPolicy);
+      const body = fullAgentPolicyToYaml(fullAgentPolicy, safeDump);
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
         'content-disposition': `attachment; filename="elastic-agent.yml"`,

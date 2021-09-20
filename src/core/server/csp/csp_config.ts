@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { config } from './config';
+import { config, CspConfigType } from './config';
+import { CspDirectives } from './csp_directives';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
 
@@ -33,6 +34,12 @@ export interface ICspConfig {
   readonly warnLegacyBrowsers: boolean;
 
   /**
+   * Whether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled *and* no custom rules have been
+   * defined, a restrictive 'frame-ancestors' rule will be added to the default CSP rules.
+   */
+  readonly disableEmbedding: boolean;
+
+  /**
    * The CSP rules in a formatted directives string for use
    * in a `Content-Security-Policy` header.
    */
@@ -44,23 +51,31 @@ export interface ICspConfig {
  * @public
  */
 export class CspConfig implements ICspConfig {
-  static readonly DEFAULT = new CspConfig();
+  static readonly DEFAULT = new CspConfig(DEFAULT_CONFIG);
 
+  readonly #directives: CspDirectives;
   public readonly rules: string[];
   public readonly strict: boolean;
   public readonly warnLegacyBrowsers: boolean;
+  public readonly disableEmbedding: boolean;
   public readonly header: string;
 
   /**
    * Returns the default CSP configuration when passed with no config
    * @internal
    */
-  constructor(rawCspConfig: Partial<Omit<ICspConfig, 'header'>> = {}) {
-    const source = { ...DEFAULT_CONFIG, ...rawCspConfig };
+  constructor(rawCspConfig: CspConfigType) {
+    this.#directives = CspDirectives.fromConfig(rawCspConfig);
+    if (!rawCspConfig.rules?.length && rawCspConfig.disableEmbedding) {
+      this.#directives.clearDirectiveValues('frame-ancestors');
+      this.#directives.addDirectiveValue('frame-ancestors', `'self'`);
+    }
 
-    this.rules = source.rules;
-    this.strict = source.strict;
-    this.warnLegacyBrowsers = source.warnLegacyBrowsers;
-    this.header = source.rules.join('; ');
+    this.rules = this.#directives.getRules();
+    this.header = this.#directives.getCspHeader();
+
+    this.strict = rawCspConfig.strict;
+    this.warnLegacyBrowsers = rawCspConfig.warnLegacyBrowsers;
+    this.disableEmbedding = rawCspConfig.disableEmbedding;
   }
 }

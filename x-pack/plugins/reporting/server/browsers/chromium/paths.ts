@@ -7,41 +7,97 @@
 
 import path from 'path';
 
-export const paths = {
-  archivesPath: path.resolve(__dirname, '../../../../../../.chromium'),
-  baseUrl: 'https://storage.googleapis.com/headless_shell/',
-  packages: [
+interface PackageInfo {
+  platform: string;
+  architecture: string;
+  archiveFilename: string;
+  archiveChecksum: string;
+  binaryChecksum: string;
+  binaryRelativePath: string;
+}
+
+enum BaseUrl {
+  // see https://www.chromium.org/getting-involved/download-chromium
+  common = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots',
+  // A GCS bucket under the Kibana team
+  custom = 'https://storage.googleapis.com/headless_shell',
+}
+
+interface CustomPackageInfo extends PackageInfo {
+  location: 'custom';
+}
+interface CommonPackageInfo extends PackageInfo {
+  location: 'common';
+  archivePath: string;
+}
+
+export class ChromiumArchivePaths {
+  public readonly revision = '856583';
+
+  public readonly packages: Array<CustomPackageInfo | CommonPackageInfo> = [
     {
-      platforms: ['darwin', 'freebsd', 'openbsd'],
+      platform: 'darwin',
       architecture: 'x64',
-      archiveFilename: 'chromium-ef768c9-darwin_x64.zip',
-      archiveChecksum: 'd87287f6b2159cff7c64babac873cc73',
-      binaryChecksum: '8d777b3380a654e2730fc36afbfb11e1',
+      archiveFilename: 'chromium-d163fd7-darwin_x64.zip',
+      archiveChecksum: '19aa88bd59e2575816425bf72786c53f',
+      binaryChecksum: 'dfcd6e007214175997663c50c8d871ea',
       binaryRelativePath: 'headless_shell-darwin_x64/headless_shell',
+      location: 'custom',
     },
     {
-      platforms: ['linux'],
+      platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-ef768c9-linux_x64.zip',
-      archiveChecksum: '85575e8fd56849f4de5e3584e05712c0',
-      binaryChecksum: '38c4d849c17683def1283d7e5aa56fe9',
+      archiveFilename: 'chromium-d163fd7-linux_x64.zip',
+      archiveChecksum: 'fba0a240d409228a3494aef415c300fc',
+      binaryChecksum: '99cfab472d516038b94ef86649e52871',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
+      location: 'custom',
     },
     {
-      platforms: ['linux'],
+      platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-ef768c9-linux_arm64.zip',
-      archiveChecksum: '20b09b70476bea76a276c583bf72eac7',
-      binaryChecksum: 'dcfd277800c1a5c7d566c445cbdc225c',
+      archiveFilename: 'chromium-d163fd7-linux_arm64.zip',
+      archiveChecksum: '29834735bc2f0e0d9134c33bc0580fb6',
+      binaryChecksum: '13baccf2e5c8385cb9d9588db6a9e2c2',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
+      location: 'custom',
     },
     {
-      platforms: ['win32'],
+      platform: 'win32',
       architecture: 'x64',
-      archiveFilename: 'chromium-ef768c9-windows_x64.zip',
-      archiveChecksum: '33301c749b5305b65311742578c52f15',
-      binaryChecksum: '9f28dd56c7a304a22bf66f0097fa4de9',
-      binaryRelativePath: 'headless_shell-windows_x64\\headless_shell.exe',
+      archiveFilename: 'chrome-win.zip',
+      archiveChecksum: '64999a384bfb6c96c50c4cb6810dbc05',
+      binaryChecksum: '13b8bbb4a12f9036b8cc3b57b3a71fec',
+      binaryRelativePath: 'chrome-win\\chrome.exe',
+      location: 'common',
+      archivePath: 'Win',
     },
-  ],
-};
+  ];
+
+  // zip files get downloaded to a .chromium directory in the kibana root
+  public readonly archivesPath = path.resolve(__dirname, '../../../../../../.chromium');
+
+  public find(platform: string, architecture: string) {
+    return this.packages.find((p) => p.platform === platform && p.architecture === architecture);
+  }
+
+  public resolvePath(p: PackageInfo) {
+    return path.resolve(this.archivesPath, p.archiveFilename);
+  }
+
+  public getAllArchiveFilenames(): string[] {
+    return this.packages.map((p) => this.resolvePath(p));
+  }
+
+  public getDownloadUrl(p: CustomPackageInfo | CommonPackageInfo) {
+    if (p.location === 'common') {
+      return `${BaseUrl.common}/${p.archivePath}/${this.revision}/${p.archiveFilename}`;
+    }
+    return BaseUrl.custom + '/' + p.archiveFilename;
+  }
+
+  public getBinaryPath(p: PackageInfo) {
+    const chromiumPath = path.resolve(__dirname, '../../../chromium');
+    return path.join(chromiumPath, p.binaryRelativePath);
+  }
+}

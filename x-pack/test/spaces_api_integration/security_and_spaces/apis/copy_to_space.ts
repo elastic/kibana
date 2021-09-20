@@ -7,14 +7,14 @@
 
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
-import { TestInvoker } from '../../common/lib/types';
 import { copyToSpaceTestSuiteFactory } from '../../common/suites/copy_to_space';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestInvoker) {
+export default function copyToSpaceSpacesAndSecuritySuite({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const {
     copyToSpaceTest,

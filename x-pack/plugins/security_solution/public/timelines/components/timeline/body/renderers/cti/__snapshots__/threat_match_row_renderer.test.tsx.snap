@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`threatMatchRowRenderer #renderRow renders correctly against snapshot 1`] = `
+<span>
+  <RowRendererContainer
+    data-test-subj="threat-match-row-renderer"
+  >
+    <styled.div>
+      <ThreatMatchRow
+        contextId="threat-match-row-test-1-0"
+        data={
+          Object {
+            "matched": Object {
+              "atomic": Array [
+                "matched.atomic",
+              ],
+              "field": Array [
+                "matched.atomic",
+              ],
+              "type": Array [
+                "matched.domain",
+              ],
+            },
+          }
+        }
+        eventId="1"
+        isDraggable={true}
+      />
+    </styled.div>
+  </RowRendererContainer>
+</span>
+`;

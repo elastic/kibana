@@ -201,7 +201,6 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
       closePopover={handleClosePopover}
       anchorPosition="downLeft"
       panelPaddingSize="none"
-      ownFocus={true}
       repositionOnScroll
     >
       {content}

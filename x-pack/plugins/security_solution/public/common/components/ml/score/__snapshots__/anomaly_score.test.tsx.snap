@@ -93,7 +93,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
       id="anomaly-score-popover"
       isOpen={false}
       onClick={[Function]}
-      ownFocus={false}
+      ownFocus={true}
       panelPaddingSize="m"
       repositionOnScroll={true}
     >

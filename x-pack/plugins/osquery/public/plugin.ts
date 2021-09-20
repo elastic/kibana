@@ -11,10 +11,22 @@ import {
   Plugin,
   PluginInitializerContext,
   CoreStart,
-} from 'src/core/public';
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { OsqueryPluginSetup, OsqueryPluginStart, AppPluginStartDependencies } from './types';
-import { PLUGIN_NAME } from '../common';
+import {
+  OsqueryPluginSetup,
+  OsqueryPluginStart,
+  StartPlugins,
+  AppPluginStartDependencies,
+} from './types';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
+import {
+  LazyOsqueryManagedPolicyCreateImportExtension,
+  LazyOsqueryManagedPolicyEditExtension,
+  LazyOsqueryManagedCustomButtonExtension,
+} from './fleet_integration';
+import { getLazyOsqueryAction } from './shared_components';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -25,7 +37,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   }
 
   public setup(core: CoreSetup): OsqueryPluginSetup {
-    const config = this.initializerContext.config.get<{ enabled: boolean }>();
+    const config = this.initializerContext.config.get<{
+      enabled: boolean;
+      actionEnabled: boolean;
+      scheduledQueries: boolean;
+      savedQueries: boolean;
+      packs: boolean;
+    }>();
 
     if (!config.enabled) {
       return {};
@@ -37,6 +55,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     core.application.register({
       id: 'osquery',
       title: PLUGIN_NAME,
+      order: 9030,
+      category: DEFAULT_APP_CATEGORIES.management,
       async mount(params: AppMountParameters) {
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
@@ -57,9 +77,51 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     return {};
   }
 
-  public start(core: CoreStart): OsqueryPluginStart {
-    return {};
+  public start(core: CoreStart, plugins: StartPlugins): OsqueryPluginStart {
+    const config = this.initializerContext.config.get<{
+      enabled: boolean;
+      actionEnabled: boolean;
+      scheduledQueries: boolean;
+      savedQueries: boolean;
+      packs: boolean;
+    }>();
+
+    if (!config.enabled) {
+      return {};
+    }
+
+    if (plugins.fleet) {
+      const { registerExtension } = plugins.fleet;
+
+      registerExtension({
+        package: OSQUERY_INTEGRATION_NAME,
+        view: 'package-policy-create',
+        Component: LazyOsqueryManagedPolicyCreateImportExtension,
+      });
+
+      registerExtension({
+        package: OSQUERY_INTEGRATION_NAME,
+        view: 'package-policy-edit',
+        Component: LazyOsqueryManagedPolicyEditExtension,
+      });
+
+      registerExtension({
+        package: OSQUERY_INTEGRATION_NAME,
+        view: 'package-detail-custom',
+        Component: LazyOsqueryManagedCustomButtonExtension,
+      });
+    }
+
+    return {
+      OsqueryAction: getLazyOsqueryAction({
+        ...core,
+        ...plugins,
+        storage: this.storage,
+        kibanaVersion: this.kibanaVersion,
+      }),
+    };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public stop() {}
 }

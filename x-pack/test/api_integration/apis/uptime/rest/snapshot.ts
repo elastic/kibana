@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
 
               const makeMonitorChecks = async (monitorId: string, status: 'up' | 'down') => {
                 return makeChecksWithStatus(
-                  getService('legacyEs'),
+                  getService('es'),
                   monitorId,
                   checksPerMonitor,
                   numIps,

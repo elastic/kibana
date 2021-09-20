@@ -24,41 +24,9 @@ export const hostSystemOverview: TSVBMetricModelCreator = (
       split_mode: 'everything',
       metrics: [
         {
-          field: 'system.cpu.user.pct',
-          id: 'avg-cpu-user',
+          field: 'system.cpu.total.norm.pct',
+          id: 'avg-cpu-total',
           type: 'avg',
-        },
-        {
-          field: 'system.cpu.cores',
-          id: 'max-cpu-cores',
-          type: 'max',
-        },
-        {
-          field: 'system.cpu.system.pct',
-          id: 'avg-cpu-system',
-          type: 'avg',
-        },
-        {
-          id: 'calc-user-system-cores',
-          script: '(params.users + params.system) / params.cores',
-          type: 'calculation',
-          variables: [
-            {
-              field: 'avg-cpu-user',
-              id: 'var-users',
-              name: 'users',
-            },
-            {
-              field: 'avg-cpu-system',
-              id: 'var-system',
-              name: 'system',
-            },
-            {
-              field: 'max-cpu-cores',
-              id: 'var-cores',
-              name: 'cores',
-            },
-          ],
         },
       ],
     },

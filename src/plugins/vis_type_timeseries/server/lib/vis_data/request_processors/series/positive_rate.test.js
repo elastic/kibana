@@ -12,6 +12,7 @@ describe('positiveRate(req, panel, series)', () => {
   let series;
   let req;
   let uiSettings;
+  let buildSeriesMetaParams;
 
   beforeEach(() => {
     panel = {
@@ -32,7 +33,7 @@ describe('positiveRate(req, panel, series)', () => {
       ],
     };
     req = {
-      payload: {
+      body: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
@@ -42,18 +43,39 @@ describe('positiveRate(req, panel, series)', () => {
     uiSettings = {
       get: async () => 50,
     };
+    buildSeriesMetaParams = jest.fn().mockResolvedValue({
+      interval: 'auto',
+    });
   });
 
   test('calls next when finished', async () => {
     const next = jest.fn();
-    await positiveRate(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
+    await positiveRate(
+      req,
+      panel,
+      series,
+      {},
+      {},
+      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
+      uiSettings,
+      buildSeriesMetaParams
+    )(next)({});
 
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns positive rate aggs', async () => {
     const next = (doc) => doc;
-    const doc = await positiveRate(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
+    const doc = await positiveRate(
+      req,
+      panel,
+      series,
+      {},
+      {},
+      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
+      uiSettings,
+      buildSeriesMetaParams
+    )(next)({});
 
     expect(doc).toEqual({
       aggs: {

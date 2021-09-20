@@ -13,7 +13,7 @@ type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElem
 
 /**
  * Provides an event handler that can be used with (for example) `onClick` props to prevent the
- * event's default behaviour and instead navigate to to a route via the Router
+ * event's default behaviour and instead navigate to a route via the Router
  *
  * @param routeTo
  * @param onClick

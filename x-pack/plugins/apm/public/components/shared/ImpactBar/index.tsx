@@ -7,18 +7,23 @@
 
 import { EuiProgress } from '@elastic/eui';
 import React from 'react';
+import { unit } from '../../../utils/style';
 
 // TODO: extend from EUI's EuiProgress prop interface
 export interface ImpactBarProps extends Record<string, unknown> {
   value: number;
-  size?: 'l' | 'm';
+  size?: 's' | 'l' | 'm';
   max?: number;
+  color?: string;
 }
+
+const style = { width: `${unit * 6}px` };
 
 export function ImpactBar({
   value,
-  size = 'l',
+  size = 'm',
   max = 100,
+  color = 'primary',
   ...rest
 }: ImpactBarProps) {
   return (
@@ -26,7 +31,8 @@ export function ImpactBar({
       size={size}
       value={value}
       max={max}
-      color="primary"
+      color={color}
+      style={style}
       {...rest}
     />
   );

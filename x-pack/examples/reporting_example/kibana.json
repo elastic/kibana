@@ -4,6 +4,11 @@
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
+  "owner": {
+    "name": "Kibana Reporting Services",
+    "githubTeam": "kibana-reporting-services"
+  },
+  "description": "Example integration code for applications to feature reports.",
   "optionalPlugins": [],
-  "requiredPlugins": ["reporting", "developerExamples", "navigation"]
+  "requiredPlugins": ["reporting", "developerExamples", "navigation", "screenshotMode", "share"]
 }

@@ -17,20 +17,19 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggSelect } from '../agg_select';
-// @ts-ignore
 import { FieldSelect } from '../field_select';
 // @ts-ignore
 import { createChangeHandler } from '../../lib/create_change_handler';
-// @ts-ignore
 import { createSelectHandler } from '../../lib/create_select_handler';
-// @ts-ignore
 import { createNumberHandler } from '../../lib/create_number_handler';
 
 import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-import { MetricsItemsSchema, PanelSchema, SanitizedFieldType } from '../../../../../common/types';
+import { KBN_FIELD_TYPES } from '../../../../../../data/public';
+import type { Metric, Panel, SanitizedFieldType, Series } from '../../../../../common/types';
+import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';
+
 import { DragHandleProps } from '../../../../types';
 import { PercentileHdr } from '../percentile_hdr';
 
@@ -40,9 +39,10 @@ interface PercentileRankAggProps {
   disableDelete: boolean;
   fields: Record<string, SanitizedFieldType[]>;
   indexPattern: string;
-  model: MetricsItemsSchema;
-  panel: PanelSchema;
-  siblings: MetricsItemsSchema[];
+  model: Metric;
+  panel: Panel;
+  siblings: Metric[];
+  series: Series;
   dragHandleProps: DragHandleProps;
   onAdd(): void;
   onChange(): void;
@@ -51,7 +51,7 @@ interface PercentileRankAggProps {
 
 export const PercentileRankAgg = (props: PercentileRankAggProps) => {
   const { panel, fields, indexPattern } = props;
-  const defaults = { values: [''] };
+  const defaults = { values: [''], colors: [TSVB_DEFAULT_COLOR] };
   const model = { ...defaults, ...props.model };
 
   const htmlId = htmlIdGenerator();
@@ -59,11 +59,17 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleNumberChange = createNumberHandler(handleChange);
+  const percentileRankSeries =
+    panel.series.find((s) => s.id === props.series.id) || panel.series[0];
+  // If the series is grouped by, then these colors are not respected, no need to display the color picker */
+  const isGroupedBy = panel.series.length > 0 && percentileRankSeries.split_mode !== 'everything';
+  const enableColorPicker = !isGroupedBy && !['table', 'metric', 'markdown'].includes(panel.type);
 
-  const handlePercentileRankValuesChange = (values: MetricsItemsSchema['values']) => {
+  const handlePercentileRankValuesChange = (values: Metric['values'], colors: Metric['colors']) => {
     handleChange({
       ...model,
       values,
+      colors,
     });
   };
   return (
@@ -93,24 +99,20 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('field')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.percentileRank.fieldLabel"
                 defaultMessage="Field"
               />
             }
-          >
-            <FieldSelect
-              fields={fields}
-              type={model.type}
-              restrict={RESTRICT_FIELDS}
-              indexPattern={indexPattern}
-              value={model.field ?? ''}
-              onChange={handleSelectChange('field')}
-            />
-          </EuiFormRow>
+            fields={fields}
+            type={model.type}
+            restrict={RESTRICT_FIELDS}
+            indexPattern={indexPattern}
+            value={model.field ?? ''}
+            onChange={handleSelectChange('field')}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -126,8 +128,10 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
               disableAdd={isTablePanel}
               disableDelete={isTablePanel}
               showOnlyLastRow={isTablePanel}
-              model={model.values!}
+              values={model.values!}
+              colors={model.colors!}
               onChange={handlePercentileRankValuesChange}
+              enableColorPicker={enableColorPicker}
             />
           </EuiFormRow>
         </EuiFlexItem>

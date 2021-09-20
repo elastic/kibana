@@ -6,9 +6,9 @@
  */
 
 import {
+  ElasticsearchClient,
   IContextProvider,
   IRouter,
-  LegacyAPICaller,
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from 'kibana/server';
@@ -27,7 +27,7 @@ export interface PluginsStart {
 }
 
 export type GetListClientType = (
-  dataClient: LegacyAPICaller,
+  esClient: ElasticsearchClient,
   spaceId: string,
   user: string
 ) => ListClient;

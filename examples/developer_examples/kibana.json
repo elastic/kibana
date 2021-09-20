@@ -1,9 +1,10 @@
 {
   "id": "developerExamples",
-  "version": "0.0.1",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
   "kibanaVersion": "kibana",
-  "server": false,
-  "ui": true,
-  "requiredPlugins": [],
-  "optionalPlugins": []
+  "version": "0.0.1",
+  "ui": true
 }

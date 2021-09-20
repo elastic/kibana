@@ -11,10 +11,10 @@ describe('beats/get_stats', () => {
   it('Handle empty response', () => {
     expect(handleResponse()).toEqual({
       stats: {
-        bytesSent: null,
-        totalEvents: null,
+        bytesSent: 0,
+        totalEvents: 0,
       },
-      total: null,
+      total: 0,
       types: [],
     });
   });

@@ -7,7 +7,8 @@
 
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 
 const LONG_TASK_SUM_FIELD = 'transaction.experience.longtask.sum';
 const LONG_TASK_COUNT_FIELD = 'transaction.experience.longtask.count';
@@ -18,7 +19,7 @@ export async function getLongTaskMetrics({
   urlQuery,
   percentile = 50,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   urlQuery?: string;
   percentile?: number;
 }) {
@@ -64,7 +65,7 @@ export async function getLongTaskMetrics({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search('get_long_task_metrics', params);
 
   const pkey = percentile.toFixed(1);
 

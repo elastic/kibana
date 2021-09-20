@@ -6,32 +6,16 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { once } from 'lodash';
 import { createHashHistory } from 'history';
-import { ScopedHistory, AppMountParameters } from 'kibana/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import type { ScopedHistory, AppMountParameters } from 'kibana/public';
+import type { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DiscoverServices } from './build_services';
 import { createGetterSetter } from '../../kibana_utils/public';
-import { search } from '../../data/public';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 
-let angularModule: any = null;
 let services: DiscoverServices | null = null;
 let uiActions: UiActionsStart;
-
-/**
- * set bootstrapped inner angular module
- */
-export function setAngularModule(module: any) {
-  angularModule = module;
-}
-
-/**
- * get boostrapped inner angular module
- */
-export function getAngularModule() {
-  return angularModule;
-}
 
 export function getServices(): DiscoverServices {
   if (!services) {
@@ -40,7 +24,7 @@ export function getServices(): DiscoverServices {
   return services;
 }
 
-export function setServices(newServices: any) {
+export function setServices(newServices: DiscoverServices) {
   services = newServices;
 }
 
@@ -59,10 +43,17 @@ export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
 export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<DocViewsRegistry>(
   'DocViewsRegistry'
 );
+
 /**
  * Makes sure discover and context are using one instance of history.
  */
-export const getHistory = _.once(() => createHashHistory());
+export const getHistory = once(() => {
+  const history = createHashHistory();
+  history.listen(() => {
+    // keep at least one listener so that `history.location` always in sync
+  });
+  return history;
+});
 
 /**
  * Discover currently uses two `history` instances: one from Kibana Platform and
@@ -80,19 +71,3 @@ export const syncHistoryLocations = () => {
 export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHistory>(
   'scopedHistory'
 );
-
-export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
-export { unhashUrl, redirectWhenMissing } from '../../kibana_utils/public';
-export { formatMsg, formatStack, subscribeWithScope } from '../../kibana_legacy/public';
-
-// EXPORT types
-export {
-  IndexPatternsContract,
-  IIndexPattern,
-  IndexPattern,
-  indexPatterns,
-  IFieldType,
-  ISearchSource,
-  EsQuerySortValue,
-  SortDirection,
-} from '../../data/public';

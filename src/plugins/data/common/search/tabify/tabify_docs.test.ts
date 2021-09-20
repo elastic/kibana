@@ -8,7 +8,7 @@
 
 import { tabifyDocs } from './tabify_docs';
 import { IndexPattern } from '../../index_patterns/index_patterns';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 describe('tabifyDocs', () => {
   const fieldFormats = {
@@ -33,6 +33,7 @@ describe('tabifyDocs', () => {
     fieldFormats: fieldFormats as any,
   });
 
+  // @ts-expect-error not full inteface
   const response = {
     hits: {
       hits: [
@@ -46,7 +47,7 @@ describe('tabifyDocs', () => {
         },
       ],
     },
-  } as SearchResponse<unknown>;
+  } as estypes.SearchResponse<unknown>;
 
   it('converts fields by default', () => {
     const table = tabifyDocs(response, index);

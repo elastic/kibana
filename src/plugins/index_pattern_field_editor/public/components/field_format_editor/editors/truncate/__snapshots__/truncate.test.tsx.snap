@@ -19,6 +19,7 @@ exports[`TruncateFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldNumber
+      data-test-subj="truncateEditorLength"
       defaultValue={5}
       isInvalid={false}
       min={1}

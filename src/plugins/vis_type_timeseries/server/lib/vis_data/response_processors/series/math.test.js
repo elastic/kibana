@@ -54,7 +54,7 @@ describe('math(resp, panel, series)', () => {
       aggregations: {
         test: {
           meta: {
-            bucketSize: 5,
+            intervalString: '5s',
           },
           buckets: [
             {
@@ -124,6 +124,25 @@ describe('math(resp, panel, series)', () => {
     );
   });
 
+  test('should works with predefined variables (params._interval)', async () => {
+    const expectedInterval = 5000;
+
+    series.metrics[2].script = 'params._interval';
+
+    const next = await mathAgg(resp, panel, series)((results) => results);
+    const results = await stdMetric(resp, panel, series)(next)([]);
+
+    expect(results).toHaveLength(1);
+    expect(results[0]).toEqual(
+      expect.objectContaining({
+        data: [
+          [1, expectedInterval],
+          [2, expectedInterval],
+        ],
+      })
+    );
+  });
+
   test('throws on actual tinymath expression errors #1', async () => {
     series.metrics[2].script = 'notExistingFn(params.a)';
 
@@ -149,7 +168,7 @@ describe('math(resp, panel, series)', () => {
       )(await mathAgg(resp, panel, series)((results) => results))([]);
     } catch (e) {
       expect(e.message).toEqual(
-        'Failed to parse expression. Expected "*", "+", "-", "/", or end of input but "(" found.'
+        'Failed to parse expression. Expected "*", "+", "-", "/", end of input, or whitespace but "(" found.'
       );
     }
   });

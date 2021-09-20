@@ -5,17 +5,24 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from 'src/core/server';
+
 // Cloud has its own system for managing SLM policies and we want to make
 // this clear when Snapshot and Restore is used in a Cloud deployment.
 // Retrieve the Cloud-managed policies so that UI can switch
 // logical paths based on this information.
-export const getManagedPolicyNames = async (callWithInternalUser: any): Promise<string[]> => {
+export const getManagedPolicyNames = async (
+  clusterClient: ElasticsearchClient
+): Promise<string[]> => {
   try {
-    const { persistent, transient, defaults } = await callWithInternalUser('cluster.getSettings', {
-      filterPath: '*.*managed_policies',
-      flatSettings: true,
-      includeDefaults: true,
+    const {
+      body: { persistent, transient, defaults },
+    } = await clusterClient.cluster.getSettings({
+      filter_path: '*.*managed_policies',
+      flat_settings: true,
+      include_defaults: true,
     });
+
     const { 'cluster.metadata.managed_policies': managedPolicyNames = [] } = {
       ...defaults,
       ...persistent,

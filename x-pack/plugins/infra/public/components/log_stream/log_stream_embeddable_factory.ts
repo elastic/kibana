@@ -40,6 +40,16 @@ export class LogStreamEmbeddableFactoryDefinition
     });
   }
 
+  public getDescription() {
+    return i18n.translate('xpack.infra.logStreamEmbeddable.description', {
+      defaultMessage: 'Add a table of live streaming logs.',
+    });
+  }
+
+  public getIconType() {
+    return 'logsApp';
+  }
+
   public async getExplicitInput() {
     return {
       title: i18n.translate('xpack.infra.logStreamEmbeddable.title', {

@@ -11,8 +11,8 @@ import { parseThemeTags } from './theme_tags';
 it('returns default tags when passed undefined', () => {
   expect(parseThemeTags()).toMatchInlineSnapshot(`
     Array [
-      "v7dark",
-      "v7light",
+      "v8dark",
+      "v8light",
     ]
   `);
 });

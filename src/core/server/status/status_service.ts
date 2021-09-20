@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Observable, combineLatest, Subscription } from 'rxjs';
+import { Observable, combineLatest, Subscription, Subject } from 'rxjs';
 import { map, distinctUntilChanged, shareReplay, take, debounceTime } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
+import { Logger, LogMeta } from '../logging';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { InternalHttpServiceSetup } from '../http';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
@@ -20,11 +20,17 @@ import { PluginName } from '../plugins';
 import { InternalMetricsServiceSetup } from '../metrics';
 import { registerStatusRoute } from './routes';
 import { InternalEnvironmentServiceSetup } from '../environment';
+import type { InternalCoreUsageDataSetup } from '../core_usage_data';
 
 import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './plugins_status';
+import { getOverallStatusChanges } from './log_overall_status';
+
+interface StatusLogMeta extends LogMeta {
+  kibana: { status: ServiceStatus };
+}
 
 interface SetupDeps {
   elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
@@ -33,12 +39,15 @@ interface SetupDeps {
   http: InternalHttpServiceSetup;
   metrics: InternalMetricsServiceSetup;
   savedObjects: Pick<InternalSavedObjectsServiceSetup, 'status$'>;
+  coreUsageData: Pick<InternalCoreUsageDataSetup, 'incrementUsageCounter'>;
 }
 
 export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private readonly logger: Logger;
   private readonly config$: Observable<StatusConfigType>;
+  private readonly stop$ = new Subject<void>();
 
+  private overall$?: Observable<ServiceStatus>;
   private pluginsStatus?: PluginsStatusService;
   private overallSubscription?: Subscription;
 
@@ -54,15 +63,13 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     metrics,
     savedObjects,
     environment,
+    coreUsageData,
   }: SetupDeps) {
     const statusConfig = await this.config$.pipe(take(1)).toPromise();
     const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 
-    const overall$: Observable<ServiceStatus> = combineLatest([
-      core$,
-      this.pluginsStatus.getAll$(),
-    ]).pipe(
+    this.overall$ = combineLatest([core$, this.pluginsStatus.getAll$()]).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
       debounceTime(500),
       map(([coreStatus, pluginsStatus]) => {
@@ -70,7 +77,11 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
           ...Object.entries(coreStatus),
           ...Object.entries(pluginsStatus),
         ]);
-        this.logger.debug(`Recalculated overall status`, { status: summary });
+        this.logger.debug<StatusLogMeta>(`Recalculated overall status`, {
+          kibana: {
+            status: summary,
+          },
+        });
         return summary;
       }),
       distinctUntilChanged(isDeepStrictEqual),
@@ -78,11 +89,9 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     );
 
     // Create an unused subscription to ensure all underlying lazy observables are started.
-    this.overallSubscription = overall$.subscribe();
+    this.overallSubscription = this.overall$.subscribe();
 
-    const router = http.createRouter('');
-    registerStatusRoute({
-      router,
+    const commonRouteDeps = {
       config: {
         allowAnonymous: statusConfig.allowAnonymous,
         packageInfo: this.coreContext.env.packageInfo,
@@ -91,15 +100,35 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       },
       metrics,
       status: {
-        overall$,
+        overall$: this.overall$,
         plugins$: this.pluginsStatus.getAll$(),
         core$,
       },
+      incrementUsageCounter: coreUsageData.incrementUsageCounter,
+    };
+
+    const router = http.createRouter('');
+    registerStatusRoute({
+      router,
+      ...commonRouteDeps,
     });
+
+    if (commonRouteDeps.config.allowAnonymous) {
+      http.registerPrebootRoutes('', (prebootRouter) => {
+        registerStatusRoute({
+          router: prebootRouter,
+          ...commonRouteDeps,
+          config: {
+            ...commonRouteDeps.config,
+            allowAnonymous: true,
+          },
+        });
+      });
+    }
 
     return {
       core$,
-      overall$,
+      overall$: this.overall$,
       plugins: {
         set: this.pluginsStatus.set.bind(this.pluginsStatus),
         getDependenciesStatus$: this.pluginsStatus.getDependenciesStatus$.bind(this.pluginsStatus),
@@ -109,9 +138,21 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     };
   }
 
-  public start() {}
+  public start() {
+    if (!this.pluginsStatus || !this.overall$) {
+      throw new Error(`StatusService#setup must be called before #start`);
+    }
+    this.pluginsStatus.blockNewRegistrations();
+
+    getOverallStatusChanges(this.overall$, this.stop$).subscribe((message) => {
+      this.logger.info(message);
+    });
+  }
 
   public stop() {
+    this.stop$.next();
+    this.stop$.complete();
+
     if (this.overallSubscription) {
       this.overallSubscription.unsubscribe();
       this.overallSubscription = undefined;

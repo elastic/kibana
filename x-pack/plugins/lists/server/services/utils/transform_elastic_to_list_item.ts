@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
-import { ListItemArraySchema, SearchEsListItemSchema, Type } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
-import { encodeHitVersion } from './encode_hit_version';
 import { findSourceValue } from './find_source_value';
 
 export interface TransformElasticToListItemOptions {
-  response: SearchResponse<SearchEsListItemSchema>;
+  response: estypes.SearchResponse<SearchEsListItemSchema>;
   type: Type;
 }
 
 export interface TransformElasticHitToListItemOptions {
-  hits: SearchResponse<SearchEsListItemSchema>['hits']['hits'];
+  hits: Array<estypes.SearchHit<SearchEsListItemSchema>>;
   type: Type;
 }
 
@@ -35,22 +36,21 @@ export const transformElasticHitsToListItem = ({
   type,
 }: TransformElasticHitToListItemOptions): ListItemArraySchema => {
   return hits.map((hit) => {
+    const { _id, _source } = hit;
     const {
-      _id,
-      _source: {
-        /* eslint-disable @typescript-eslint/naming-convention */
-        created_at,
-        deserializer,
-        serializer,
-        updated_at,
-        updated_by,
-        created_by,
-        list_id,
-        tie_breaker_id,
-        meta,
-        /* eslint-enable @typescript-eslint/naming-convention */
-      },
-    } = hit;
+      /* eslint-disable @typescript-eslint/naming-convention */
+      created_at,
+      deserializer,
+      serializer,
+      updated_at,
+      updated_by,
+      created_by,
+      list_id,
+      tie_breaker_id,
+      meta,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    } = _source!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    // @ts-expect-error _source is optional
     const value = findSourceValue(hit._source);
     if (value == null) {
       throw new ErrorWithStatusCode(`Was expected ${type} to not be null/undefined`, 400);

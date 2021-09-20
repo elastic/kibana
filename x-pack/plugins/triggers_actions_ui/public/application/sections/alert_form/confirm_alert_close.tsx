@@ -21,7 +21,7 @@ export const ConfirmAlertClose: React.FC<Props> = ({ onConfirm, onCancel }) => {
       title={i18n.translate(
         'xpack.triggersActionsUI.sections.confirmAlertClose.confirmAlertCloseTitle',
         {
-          defaultMessage: 'Discard unsaved changes to alert?',
+          defaultMessage: 'Discard unsaved changes to rule?',
         }
       )}
       onCancel={onCancel}

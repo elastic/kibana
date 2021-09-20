@@ -5,23 +5,42 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { ElasticsearchClient } from 'kibana/server';
 import { ApiResponse } from '@elastic/elasticsearch';
 
-import { IndexLifecyclePolicy, PolicyFromES } from '../../../../common/types';
+import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 interface PoliciesMap {
-  [K: string]: Omit<PolicyFromES, 'name'>;
+  [K: string]: {
+    modified_date: string;
+    policy: SerializedPolicy;
+    version: number;
+    in_use_by: {
+      indices: string[];
+      data_streams: string[];
+      composable_templates: string[];
+    };
+  };
 }
 function formatPolicies(policiesMap: PoliciesMap): PolicyFromES[] {
   return Object.keys(policiesMap).reduce((accum: PolicyFromES[], lifecycleName: string) => {
     const policyEntry = policiesMap[lifecycleName];
+    const {
+      in_use_by: { indices, data_streams: dataStreams, composable_templates: indexTemplates },
+      modified_date: modifiedDate,
+      policy,
+      version,
+    } = policyEntry;
     accum.push({
-      ...policyEntry,
       name: lifecycleName,
+      modifiedDate,
+      version,
+      policy,
+      indices,
+      dataStreams,
+      indexTemplates,
     });
     return accum;
   }, []);
@@ -33,37 +52,14 @@ async function fetchPolicies(client: ElasticsearchClient): Promise<ApiResponse<P
     ignore: [404],
   };
 
+  // @ts-expect-error Policy doesn't contain all known properties (name, in_use_by)
   return client.ilm.getLifecycle({}, options);
 }
 
-async function addLinkedIndices(client: ElasticsearchClient, policiesMap: PoliciesMap) {
-  const options = {
-    // we allow 404 since they may have no policies
-    ignore: [404],
-  };
-
-  const response = await client.ilm.explainLifecycle<{
-    indices: { [indexName: string]: IndexLifecyclePolicy };
-  }>({ index: '*,.*' }, options); // '*,.*' will include hidden indices
-  const policyExplanation = response.body;
-  Object.entries(policyExplanation.indices).forEach(([indexName, { policy }]) => {
-    if (policy && policiesMap[policy]) {
-      policiesMap[policy].linkedIndices = policiesMap[policy].linkedIndices || [];
-      policiesMap[policy].linkedIndices!.push(indexName);
-    }
-  });
-}
-
-const querySchema = schema.object({
-  withIndices: schema.boolean({ defaultValue: false }),
-});
-
 export function registerFetchRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/policies'), validate: { query: querySchema } },
+    { path: addBasePath('/policies'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
-      const query = request.query as typeof querySchema.type;
-      const { withIndices } = query;
       const { asCurrentUser } = context.core.elasticsearch.client;
 
       try {
@@ -71,11 +67,8 @@ export function registerFetchRoute({ router, license, lib: { handleEsError } }: 
         if (policiesResponse.statusCode === 404) {
           return response.ok({ body: [] });
         }
-        const { body: policiesMap } = policiesResponse;
-        if (withIndices) {
-          await addLinkedIndices(asCurrentUser, policiesMap);
-        }
-        return response.ok({ body: formatPolicies(policiesMap) });
+
+        return response.ok({ body: formatPolicies(policiesResponse.body) });
       } catch (error) {
         return handleEsError({ error, response });
       }

@@ -7,15 +7,9 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { Filter, FieldFilter } from '@kbn/es-query';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
-import {
-  isFilterable,
-  IIndexPattern,
-  IFieldType,
-  Ipv4Address,
-  Filter,
-  FieldFilter,
-} from '../../../../../common';
+import { isFilterable, IIndexPattern, IFieldType, IpAddress } from '../../../../../common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {
   return indexPattern.fields.find((field) => field.name === filter.meta.key);
@@ -44,7 +38,7 @@ export function validateParams(params: any, type: string) {
       return Boolean(typeof params === 'string' && moment && moment.isValid());
     case 'ip':
       try {
-        return Boolean(new Ipv4Address(params));
+        return Boolean(new IpAddress(params));
       } catch (e) {
         return false;
       }

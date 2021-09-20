@@ -24,6 +24,7 @@ export const StatisticCard: React.FC<StatisticCardProps> = ({ title, count = 0, 
       layout="horizontal"
       title={title}
       titleSize="xs"
+      display="plain"
       description={
         <EuiTitle size="l">
           <EuiTextColor color="default">{count}</EuiTextColor>
@@ -36,6 +37,7 @@ export const StatisticCard: React.FC<StatisticCardProps> = ({ title, count = 0, 
       layout="horizontal"
       title={title}
       titleSize="xs"
+      display="plain"
       description={
         <EuiTitle size="l">
           <EuiTextColor color="subdued">{count}</EuiTextColor>

@@ -9,40 +9,48 @@
 import { i18n } from '@kbn/i18n';
 import { getCoreStart, getDataStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
-import { SanitizedFieldType } from '../../../common/types';
+import type { SanitizedFieldType, IndexPatternValue } from '../../../common/types';
+import { getIndexPatternKey } from '../../../common/index_patterns_utils';
+import { toSanitizedFieldType } from '../../../common/fields_utils';
+
+export type VisFields = Record<string, SanitizedFieldType[]>;
 
 export async function fetchFields(
-  indexes: string[] = [],
+  indexes: IndexPatternValue[] = [],
   signal?: AbortSignal
-): Promise<Record<string, SanitizedFieldType[]>> {
+): Promise<VisFields> {
   const patterns = Array.isArray(indexes) ? indexes : [indexes];
   const coreStart = getCoreStart();
   const dataStart = getDataStart();
+  const defaultIndex = coreStart.uiSettings.get('defaultIndex');
 
   try {
-    const defaultIndexPattern = await dataStart.indexPatterns.getDefault();
     const indexFields = await Promise.all(
       patterns.map(async (pattern) => {
-        return coreStart.http.get(ROUTES.FIELDS, {
-          query: {
-            index: pattern,
-          },
-          signal,
-        });
+        if (typeof pattern !== 'string' && pattern?.id) {
+          return toSanitizedFieldType(
+            (await dataStart.indexPatterns.get(pattern.id)).getNonScriptedFields()
+          );
+        } else {
+          return coreStart.http.get(ROUTES.FIELDS, {
+            query: {
+              index: `${pattern ?? ''}`,
+            },
+            signal,
+          });
+        }
       })
     );
 
-    const fields: Record<string, SanitizedFieldType[]> = patterns.reduce(
-      (cumulatedFields, currentPattern, index) => ({
+    const fields: VisFields = patterns.reduce((cumulatedFields, currentPattern, index) => {
+      const key = getIndexPatternKey(currentPattern);
+      return {
         ...cumulatedFields,
-        [currentPattern]: indexFields[index],
-      }),
-      {}
-    );
+        [key]: indexFields[index],
+        ...(key === defaultIndex ? { '': indexFields[index] } : {}),
+      };
+    }, {});
 
-    if (defaultIndexPattern?.title && patterns.includes(defaultIndexPattern.title)) {
-      fields[''] = fields[defaultIndexPattern.title];
-    }
     return fields;
   } catch (error) {
     if (error.name !== 'AbortError') {

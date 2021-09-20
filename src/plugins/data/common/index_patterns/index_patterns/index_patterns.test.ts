@@ -7,10 +7,11 @@
  */
 
 import { defaults } from 'lodash';
-import { IndexPatternsService, IndexPattern } from '.';
-import { fieldFormatsMock } from '../../field_formats/mocks';
-import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
+import { DataViewsService, DataView } from '.';
+import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
+
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
+import { stubbedSavedObjectIndexPattern } from '../index_pattern.stub';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
@@ -26,8 +27,27 @@ function setDocsourcePayload(id: string | null, providedPayload: any) {
   object = defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
 }
 
+const savedObject = {
+  id: 'id',
+  version: 'version',
+  attributes: {
+    title: 'kibana-*',
+    timeFieldName: '@timestamp',
+    fields: '[]',
+    sourceFilters: '[{"value":"item1"},{"value":"item2"}]',
+    fieldFormatMap: '{"field":{}}',
+    typeMeta: '{}',
+    type: '',
+    runtimeFieldMap:
+      '{"aRuntimeField": { "type": "keyword", "script": {"source": "emit(\'hello\')"}}}',
+    fieldAttrs: '{"aRuntimeField": { "count": 5, "customLabel": "A Runtime Field"}}',
+  },
+  type: 'index-pattern',
+  references: [],
+};
+
 describe('IndexPatterns', () => {
-  let indexPatterns: IndexPatternsService;
+  let indexPatterns: DataViewsService;
   let savedObjectsClient: SavedObjectsClientCommon;
   let SOClientGetDelay = 0;
 
@@ -65,7 +85,7 @@ describe('IndexPatterns', () => {
         };
       });
 
-    indexPatterns = new IndexPatternsService({
+    indexPatterns = new DataViewsService({
       uiSettings: ({
         get: () => Promise.resolve(false),
         getAll: () => {},
@@ -118,11 +138,11 @@ describe('IndexPatterns', () => {
     expect((await indexPatterns.get(id)).fields.length).toBe(1);
   });
 
-  test('savedObjectCache pre-fetches only title', async () => {
+  test('savedObjectCache pre-fetches title, type, typeMeta', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['title', 'type', 'typeMeta'],
       perPage: 10000,
     });
   });
@@ -187,7 +207,7 @@ describe('IndexPatterns', () => {
     indexPatterns.refreshFields = jest.fn();
 
     const indexPattern = await indexPatterns.create({ title }, true);
-    expect(indexPattern).toBeInstanceOf(IndexPattern);
+    expect(indexPattern).toBeInstanceOf(DataView);
     expect(indexPattern.title).toBe(title);
     expect(indexPatterns.refreshFields).not.toBeCalled();
 
@@ -211,7 +231,12 @@ describe('IndexPatterns', () => {
 
   test('createAndSave', async () => {
     const title = 'kibana-*';
-    indexPatterns.createSavedObject = jest.fn();
+
+    indexPatterns.createSavedObject = jest.fn(() =>
+      Promise.resolve(({
+        id: 'id',
+      } as unknown) as DataView)
+    );
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
     expect(indexPatterns.createSavedObject).toBeCalled();
@@ -219,23 +244,14 @@ describe('IndexPatterns', () => {
   });
 
   test('savedObjectToSpec', () => {
-    const savedObject = {
-      id: 'id',
-      version: 'version',
-      attributes: {
-        title: 'kibana-*',
-        timeFieldName: '@timestamp',
-        fields: '[]',
-        sourceFilters: '[{"value":"item1"},{"value":"item2"}]',
-        fieldFormatMap: '{"field":{}}',
-        typeMeta: '{}',
-        type: '',
-      },
-      type: 'index-pattern',
-      references: [],
-    };
+    const spec = indexPatterns.savedObjectToSpec(savedObject);
+    expect(spec).toMatchSnapshot();
+  });
 
-    expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
+  test('correctly composes runtime field', async () => {
+    setDocsourcePayload('id', savedObject);
+    const indexPattern = await indexPatterns.get('id');
+    expect(indexPattern.fields).toMatchSnapshot();
   });
 
   test('failed requests are not cached', async () => {

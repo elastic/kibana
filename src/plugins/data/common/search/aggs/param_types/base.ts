@@ -26,7 +26,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   ) => void;
   serialize: (value: any, aggConfig?: TAggConfig) => any;
   deserialize: (value: any, aggConfig?: TAggConfig) => any;
-  toExpressionAst?: (value: any) => ExpressionAstExpression | undefined;
+  toExpressionAst?: (value: any) => ExpressionAstExpression[] | ExpressionAstExpression | undefined;
   options: any[];
   valueType?: any;
 

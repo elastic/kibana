@@ -8,6 +8,7 @@
 
 require('../../src/setup_node_env');
 const _ = require('lodash');
+// eslint-disable-next-line no-restricted-modules
 const template = require('lodash/template');
 const fp = require('lodash/fp');
 const fpTemplate = require('lodash/fp/template');
@@ -24,6 +25,7 @@ test('test setup ok', (t) => {
   t.end();
 });
 
+// eslint-disable-next-line no-restricted-properties
 [_.template, template].forEach((fn) => {
   test(`_.template('<%= foo %>')`, (t) => {
     const output = fn('<%= foo %>')({ foo: 'bar' });

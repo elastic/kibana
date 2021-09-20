@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { LocationDurationLine, MonitorDurationResult } from '../../../common/types';
 import { QUERY, UNNAMED_LOCATION } from '../../../common/constants';
@@ -32,7 +33,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
           { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
           { term: { 'monitor.id': monitorId } },
           { range: { 'monitor.duration.us': { gt: 0 } } },
-        ],
+        ] as QueryDslQueryContainer[],
       },
     },
     size: 0,

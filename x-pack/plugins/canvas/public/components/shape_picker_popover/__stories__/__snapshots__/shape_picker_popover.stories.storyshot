@@ -8,7 +8,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
     className="euiPopover__anchor"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain"
+      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow"
     >
       <button
         className="euiLink euiLink--primary"
@@ -38,7 +38,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
     className="euiPopover__anchor"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain"
+      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow"
     >
       <button
         className="euiLink euiLink--primary"
@@ -53,14 +53,21 @@ exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
       >
         <div
           className="canvasShapePreview"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"-2.5 -2.5 105 105\\" fill=\\"none\\" stroke=\\"black\\">
-      <rect x=\\"0\\" y=\\"0\\" width=\\"100\\" height=\\"100\\"/>
-    </svg>",
-            }
-          }
-        />
+        >
+          <svg
+            fill="none"
+            stroke="black"
+            viewBox="-2.5 -2.5 105 105"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              height="100"
+              width="100"
+              x="0"
+              y="0"
+            />
+          </svg>
+        </div>
       </button>
     </div>
   </div>
@@ -75,7 +82,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover shape selected 1`] = `
     className="euiPopover__anchor"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain"
+      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow"
     >
       <button
         className="euiLink euiLink--primary"
@@ -90,14 +97,21 @@ exports[`Storyshots components/Shapes/ShapePickerPopover shape selected 1`] = `
       >
         <div
           className="canvasShapePreview"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"-2.5 -2.5 105 105\\" fill=\\"none\\" stroke=\\"black\\">
-      <rect x=\\"0\\" y=\\"0\\" width=\\"100\\" height=\\"100\\"/>
-    </svg>",
-            }
-          }
-        />
+        >
+          <svg
+            fill="none"
+            stroke="black"
+            viewBox="-2.5 -2.5 105 105"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              height="100"
+              width="100"
+              x="0"
+              y="0"
+            />
+          </svg>
+        </div>
       </button>
     </div>
   </div>

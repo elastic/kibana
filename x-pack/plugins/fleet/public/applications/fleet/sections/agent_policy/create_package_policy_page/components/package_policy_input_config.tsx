@@ -16,12 +16,11 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../types';
-import {
-  isAdvancedVar,
-  PackagePolicyConfigValidationResults,
-  validationHasErrors,
-} from '../services';
+
+import type { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../types';
+import type { PackagePolicyConfigValidationResults } from '../services';
+import { isAdvancedVar, validationHasErrors } from '../services';
+
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 
 const FlexItemWithMaxWidth = styled(EuiFlexItem)`
@@ -106,12 +105,13 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
-              const value = packagePolicyInput.vars![varName].value;
+              const { value, frozen } = packagePolicyInput.vars![varName];
               return (
                 <EuiFlexItem key={varName}>
                   <PackagePolicyInputVarField
                     varDef={varDef}
                     value={value}
+                    frozen={frozen}
                     onChange={(newValue: any) => {
                       updatePackagePolicyInput({
                         vars: {
@@ -163,7 +163,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                 {isShowingAdvanced
                   ? advancedVars.map((varDef) => {
                       const { name: varName, type: varType } = varDef;
-                      const value = packagePolicyInput.vars![varName].value;
+                      const value = packagePolicyInput.vars?.[varName]?.value;
                       return (
                         <EuiFlexItem key={varName}>
                           <PackagePolicyInputVarField

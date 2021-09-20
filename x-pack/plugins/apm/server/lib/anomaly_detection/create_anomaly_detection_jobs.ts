@@ -9,9 +9,10 @@ import { Logger } from 'kibana/server';
 import uuid from 'uuid/v4';
 import { snakeCase } from 'lodash';
 import Boom from '@hapi/boom';
+import moment from 'moment';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { environmentQuery } from '../../../server/utils/queries';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { Setup } from '../helpers/setup_request';
 import {
   TRANSACTION_DURATION,
@@ -19,6 +20,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { withApmSpan } from '../../utils/with_apm_span';
+import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
 
 export async function createAnomalyDetectionJobs(
   setup: Setup,
@@ -38,14 +40,19 @@ export async function createAnomalyDetectionJobs(
     throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
+  const uniqueMlJobEnvs = await getUniqueMlJobEnvs(setup, environments, logger);
+  if (uniqueMlJobEnvs.length === 0) {
+    return [];
+  }
+
   return withApmSpan('create_anomaly_detection_jobs', async () => {
     logger.info(
-      `Creating ML anomaly detection jobs for environments: [${environments}].`
+      `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`
     );
 
     const indexPatternName = indices['apm_oss.transactionIndices'];
     const responses = await Promise.all(
-      environments.map((environment) =>
+      uniqueMlJobEnvs.map((environment) =>
         createAnomalyDetectionJob({ ml, environment, indexPatternName })
       )
     );
@@ -81,6 +88,7 @@ async function createAnomalyDetectionJob({
       groups: [APM_ML_JOB_GROUP],
       indexPatternName,
       applyToAllSpaces: true,
+      start: moment().subtract(4, 'weeks').valueOf(),
       query: {
         bool: {
           filter: [
@@ -104,4 +112,25 @@ async function createAnomalyDetectionJob({
       ],
     });
   });
+}
+
+async function getUniqueMlJobEnvs(
+  setup: Setup,
+  environments: string[],
+  logger: Logger
+) {
+  // skip creation of duplicate ML jobs
+  const jobs = await getAnomalyDetectionJobs(setup, logger);
+  const existingMlJobEnvs = jobs.map(({ environment }) => environment);
+  const requestedExistingMlJobEnvs = environments.filter((env) =>
+    existingMlJobEnvs.includes(env)
+  );
+
+  if (requestedExistingMlJobEnvs.length) {
+    logger.warn(
+      `Skipping creation of existing ML jobs for environments: [${requestedExistingMlJobEnvs}]}`
+    );
+  }
+
+  return environments.filter((env) => !existingMlJobEnvs.includes(env));
 }

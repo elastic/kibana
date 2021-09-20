@@ -18,11 +18,11 @@ export default function ({ getService }: FtrProviderContext) {
   describe('search', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.loadIfNeeded('../../../functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     after(async () => {
-      await esArchiver.unload('../../../functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
     describe('post', () => {
       it('should return 200 when correctly formatted searches are provided', async () => {
@@ -97,26 +97,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         verifyErrorResponse(resp.body, 404);
         expect(resp.body.message).to.contain('banana not found');
-      });
-
-      it('should return 400 when index type is provided in OSS', async () => {
-        const resp = await supertest
-          .post(`/internal/search/es`)
-          .send({
-            indexType: 'baad',
-            params: {
-              body: {
-                query: {
-                  match_all: {},
-                },
-              },
-            },
-          })
-          .expect(400);
-
-        verifyErrorResponse(resp.body, 400);
-
-        expect(resp.body.message).to.contain('Unsupported index pattern');
       });
 
       it('should return 400 with illegal ES argument', async () => {

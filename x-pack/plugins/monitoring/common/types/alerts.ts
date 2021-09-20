@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Alert, AlertTypeParams, SanitizedAlert } from '../../../alerts/common';
+import { Alert, AlertTypeParams, SanitizedAlert } from '../../../alerting/common';
 import {
   AlertParamType,
   AlertMessageTokenType,
@@ -15,9 +15,12 @@ import {
 
 export type CommonAlert = Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
 
+export interface RulesByType {
+  [type: string]: CommonAlertStatus[];
+}
 export interface CommonAlertStatus {
   states: CommonAlertState[];
-  rawAlert: Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
+  sanitizedRule: Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
 }
 
 export interface CommonAlertState {
@@ -97,11 +100,9 @@ export interface AlertMemoryUsageState extends AlertNodeState {
   memoryUsage: number;
 }
 
-export interface AlertThreadPoolRejectionsState extends AlertState {
+export interface AlertThreadPoolRejectionsState extends AlertNodeState {
   rejectionCount: number;
   type: string;
-  nodeId: string;
-  nodeName?: string;
 }
 
 export interface AlertLicenseState extends AlertState {
@@ -172,6 +173,7 @@ export interface AlertThreadPoolRejectionsStats {
   nodeId: string;
   nodeName: string;
   rejectionCount: number;
+  type: string;
   ccs?: string;
 }
 

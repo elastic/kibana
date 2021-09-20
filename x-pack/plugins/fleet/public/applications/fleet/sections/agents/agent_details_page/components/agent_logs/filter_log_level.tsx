@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useCallback } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ORDERED_FILTER_LOG_LEVELS, AGENT_LOG_INDEX_PATTERN, LOG_LEVEL_FIELD } from './constants';
+
 import { useStartServices } from '../../../../../hooks';
+
+import { ORDERED_FILTER_LOG_LEVELS, AGENT_LOG_INDEX_PATTERN, LOG_LEVEL_FIELD } from './constants';
 
 function sortLogLevels(levels: string[]): string[] {
   return [
@@ -30,6 +32,9 @@ export const LogLevelFilter: React.FunctionComponent<{
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [levelValues, setLevelValues] = useState<string[]>([]);
+
+  const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), []);
+  const closePopover = useCallback(() => setIsOpen(false), []);
 
   useEffect(() => {
     const fetchValues = async () => {
@@ -57,7 +62,7 @@ export const LogLevelFilter: React.FunctionComponent<{
       button={
         <EuiFilterButton
           iconType="arrowDown"
-          onClick={() => setIsOpen(true)}
+          onClick={togglePopover}
           isSelected={isOpen}
           isLoading={isLoading}
           numFilters={levelValues.length}
@@ -70,7 +75,7 @@ export const LogLevelFilter: React.FunctionComponent<{
         </EuiFilterButton>
       }
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={closePopover}
       panelPaddingSize="none"
     >
       {levelValues.map((level) => (

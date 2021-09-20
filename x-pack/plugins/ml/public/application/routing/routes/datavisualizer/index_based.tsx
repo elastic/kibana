@@ -14,14 +14,14 @@ import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
-import { Page } from '../../../datavisualizer/index_based';
+import { IndexDataVisualizerPage as Page } from '../../../datavisualizer/index_based/index_data_visualizer';
 
 import { checkBasicLicense } from '../../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 export const indexBasedRouteFactory = (

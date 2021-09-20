@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { AlertsClient } from '../../../../../alerts/server';
+import { RulesClient } from '../../../../../alerting/server';
 import { getNonPackagedRules } from './get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { transformAlertsToRules } from '../routes/rules/utils';
 import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
 
 export const getExportAll = async (
-  alertsClient: AlertsClient
+  rulesClient: RulesClient,
+  isRuleRegistryEnabled: boolean
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
 }> => {
-  const ruleAlertTypes = await getNonPackagedRules({ alertsClient });
+  const ruleAlertTypes = await getNonPackagedRules({ rulesClient, isRuleRegistryEnabled });
   const rules = transformAlertsToRules(ruleAlertTypes);
-  const rulesNdjson = transformDataToNdjson(rules);
+  // We do not support importing/exporting actions. When we do, delete this line of code
+  const rulesWithoutActions = rules.map((rule) => ({ ...rule, actions: [] }));
+  const rulesNdjson = transformDataToNdjson(rulesWithoutActions);
   const exportDetails = getExportDetailsNdjson(rules);
   return { rulesNdjson, exportDetails };
 };

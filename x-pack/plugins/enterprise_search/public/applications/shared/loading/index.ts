@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Loading } from './loading';
+export { Loading, LoadingOverlay } from './loading';

@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const clusterList = getService('monitoringClusterList');
   const clusterOverview = getService('monitoringClusterOverview');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['monitoring', 'header']);
+  const PageObjects = getPageObjects(['monitoring', 'header', 'common']);
 
   describe('Cluster listing', () => {
     describe('with trial license clusters', () => {
@@ -21,10 +21,12 @@ export default function ({ getService, getPageObjects }) {
       const UNSUPPORTED_CLUSTER_UUID = '6d-9tDFTRe-qT5GoBytdlQ';
 
       before(async () => {
-        await setup('monitoring/multicluster', {
+        await setup('x-pack/test/functional/es_archives/monitoring/multicluster', {
           from: 'Aug 15, 2017 @ 21:00:00.000',
           to: 'Aug 16, 2017 @ 00:00:00.000',
         });
+
+        await clusterList.closeAlertsModal();
 
         await clusterList.assertDefaults();
       });
@@ -78,10 +80,12 @@ export default function ({ getService, getPageObjects }) {
       const SUPPORTED_CLUSTER_UUID = 'NDKg6VXAT6-TaGzEK2Zy7g';
 
       before(async () => {
-        await setup('monitoring/multi-basic', {
+        await setup('x-pack/test/functional/es_archives/monitoring/multi_basic', {
           from: 'Sep 7, 2017 @ 20:12:04.011',
           to: 'Sep 7, 2017 @ 20:18:55.733',
         });
+
+        await clusterList.closeAlertsModal();
 
         await clusterList.assertDefaults();
       });
@@ -108,8 +112,9 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('primary basic cluster shows cluster metrics', async () => {
+          // PageObjects.common.sleep(10000)
           expect(await clusterList.getClusterName(SUPPORTED_CLUSTER_UUID)).to.be('production');
-          expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('N/A');
+          expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('Clear');
           expect(await clusterList.getClusterNodesCount(SUPPORTED_CLUSTER_UUID)).to.be('2');
           expect(await clusterList.getClusterIndicesCount(SUPPORTED_CLUSTER_UUID)).to.be('4');
           expect(await clusterList.getClusterDataSize(SUPPORTED_CLUSTER_UUID)).to.be('1.6 MB');
@@ -139,6 +144,7 @@ export default function ({ getService, getPageObjects }) {
 
           expect(await clusterOverview.isOnClusterOverview()).to.be(true);
           expect(await clusterOverview.getClusterName()).to.be('production');
+          await PageObjects.monitoring.closeAlertsModal();
 
           await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters'); // reset for next test
         });

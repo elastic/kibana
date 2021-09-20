@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ThreatMap, ThreatMapEntry } from '../../../../common/detection_engine/schemas/types';
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
+import { IndexPatternFieldBase } from '@kbn/es-query';
+import { ThreatMap, ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export interface FormattedEntry {
   id: string;
-  field: IFieldType | undefined;
+  field: IndexPatternFieldBase | undefined;
   type: 'mapping';
-  value: IFieldType | undefined;
+  value: IndexPatternFieldBase | undefined;
   entryIndex: number;
 }
 

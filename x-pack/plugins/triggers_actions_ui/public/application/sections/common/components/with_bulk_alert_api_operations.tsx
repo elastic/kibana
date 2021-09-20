@@ -13,6 +13,7 @@ import {
   AlertTaskState,
   AlertInstanceSummary,
   AlertingFrameworkHealth,
+  ResolvedRule,
 } from '../../../../types';
 import {
   deleteAlerts,
@@ -31,6 +32,7 @@ import {
   loadAlertInstanceSummary,
   loadAlertTypes,
   alertingFrameworkHealth,
+  resolveRule,
 } from '../../../lib/alert_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -62,6 +64,7 @@ export interface ComponentOpts {
   loadAlertInstanceSummary: (id: Alert['id']) => Promise<AlertInstanceSummary>;
   loadAlertTypes: () => Promise<AlertType[]>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
+  resolveRule: (id: Alert['id']) => Promise<ResolvedRule>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -97,12 +100,12 @@ export function withBulkAlertOperations<T>(
         }
         muteAlert={async (alert: Alert) => {
           if (!isAlertMuted(alert)) {
-            return muteAlert({ http, id: alert.id });
+            return await muteAlert({ http, id: alert.id });
           }
         }}
         unmuteAlert={async (alert: Alert) => {
           if (isAlertMuted(alert)) {
-            return unmuteAlert({ http, id: alert.id });
+            return await unmuteAlert({ http, id: alert.id });
           }
         }}
         muteAlertInstance={async (alert: Alert, instanceId: string) => {
@@ -117,12 +120,12 @@ export function withBulkAlertOperations<T>(
         }}
         enableAlert={async (alert: Alert) => {
           if (isAlertDisabled(alert)) {
-            return enableAlert({ http, id: alert.id });
+            return await enableAlert({ http, id: alert.id });
           }
         }}
         disableAlert={async (alert: Alert) => {
           if (!isAlertDisabled(alert)) {
-            return disableAlert({ http, id: alert.id });
+            return await disableAlert({ http, id: alert.id });
           }
         }}
         deleteAlert={async (alert: Alert) => deleteAlerts({ http, ids: [alert.id] })}
@@ -132,6 +135,7 @@ export function withBulkAlertOperations<T>(
           loadAlertInstanceSummary({ http, alertId })
         }
         loadAlertTypes={async () => loadAlertTypes({ http })}
+        resolveRule={async (ruleId: Alert['id']) => resolveRule({ http, ruleId })}
         getHealth={async () => alertingFrameworkHealth({ http })}
       />
     );

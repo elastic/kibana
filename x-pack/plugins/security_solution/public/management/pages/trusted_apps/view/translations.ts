@@ -7,19 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  TrustedApp,
   MacosLinuxConditionEntry,
   WindowsConditionEntry,
-  ConditionEntry,
   ConditionEntryField,
+  OperatorFieldIds,
 } from '../../../../../common/endpoint/types';
 
 export { OS_TITLES } from '../../../common/translations';
 
 export const ABOUT_TRUSTED_APPS = i18n.translate('xpack.securitySolution.trustedapps.aboutInfo', {
   defaultMessage:
-    'Add a trusted application to improve performance or alleviate conflicts with other applications ' +
-    'running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.',
+    'Add a trusted application to improve performance or alleviate conflicts with other applications running on ' +
+    'your hosts.',
 });
 
 export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
@@ -37,29 +36,27 @@ export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
   ),
 };
 
-export const OPERATOR_TITLE: { [K in ConditionEntry['operator']]: string } = {
-  included: i18n.translate('xpack.securitySolution.trustedapps.card.operator.includes', {
-    defaultMessage: 'is',
-  }),
+export const CONDITION_FIELD_DESCRIPTION: { [K in ConditionEntryField]: string } = {
+  [ConditionEntryField.HASH]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.description.hash',
+    { defaultMessage: 'md5, sha1, or sha256' }
+  ),
+  [ConditionEntryField.PATH]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.description.path',
+    { defaultMessage: 'The full path of the application' }
+  ),
+  [ConditionEntryField.SIGNER]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.description.signature',
+    { defaultMessage: 'The signer of the application' }
+  ),
 };
 
-export const PROPERTY_TITLES: Readonly<
-  { [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string }
-> = {
-  name: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.name', {
-    defaultMessage: 'Name',
+export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
+  is: i18n.translate('xpack.securitySolution.trustedapps.card.operator.is', {
+    defaultMessage: 'is',
   }),
-  os: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.os', {
-    defaultMessage: 'OS',
-  }),
-  created_at: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdAt', {
-    defaultMessage: 'Date Created',
-  }),
-  created_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdBy', {
-    defaultMessage: 'Created By',
-  }),
-  description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
-    defaultMessage: 'Description',
+  matches: i18n.translate('xpack.securitySolution.trustedapps.card.operator.matches', {
+    defaultMessage: 'matches',
   }),
 };
 
@@ -77,34 +74,6 @@ export const ENTRY_PROPERTY_TITLES: Readonly<
   }),
 };
 
-export const ACTIONS_COLUMN_TITLE = i18n.translate(
-  'xpack.securitySolution.trustedapps.list.columns.actions',
-  {
-    defaultMessage: 'Actions',
-  }
-);
-
-export const LIST_ACTIONS = {
-  delete: {
-    name: i18n.translate('xpack.securitySolution.trustedapps.list.actions.delete', {
-      defaultMessage: 'Remove',
-    }),
-    description: i18n.translate(
-      'xpack.securitySolution.trustedapps.list.actions.delete.description',
-      {
-        defaultMessage: 'Remove this entry',
-      }
-    ),
-  },
-};
-
-export const CARD_DELETE_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.trustedapps.card.removeButtonLabel',
-  {
-    defaultMessage: 'Remove',
-  }
-);
-
 export const GRID_VIEW_TOGGLE_LABEL = i18n.translate(
   'xpack.securitySolution.trustedapps.view.toggle.grid',
   {
@@ -119,6 +88,42 @@ export const LIST_VIEW_TOGGLE_LABEL = i18n.translate(
   }
 );
 
-export const NO_RESULTS_MESSAGE = i18n.translate('xpack.securitySolution.trustedapps.noResults', {
-  defaultMessage: 'No items found',
-});
+export const CREATE_TRUSTED_APP_ERROR: { [K in string]: string } = {
+  [`duplicatedEntry.${ConditionEntryField.HASH}`]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.hash',
+    { defaultMessage: 'Hash value can only be used once. Please enter a single valid hash.' }
+  ),
+  [`duplicatedEntry.${ConditionEntryField.PATH}`]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.path',
+    { defaultMessage: 'Path value can only be used once. Please enter a single valid path.' }
+  ),
+  [`duplicatedEntry.${ConditionEntryField.SIGNER}`]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.signature',
+    {
+      defaultMessage:
+        'Signature value can only be used once. Please enter a single valid signature.',
+    }
+  ),
+  [`invalidField.${ConditionEntryField.HASH}`]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.invalid.hash',
+    {
+      defaultMessage:
+        'An invalid Hash was entered. Please enter in a valid Hash (md5, sha1, or sha256).',
+    }
+  ),
+  [`invalidField.${ConditionEntryField.PATH}`]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.invalid.path',
+    { defaultMessage: 'An invalid Path was entered. Please enter in a valid Path.' }
+  ),
+  [`invalidField.${ConditionEntryField.SIGNER}`]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.invalid.signature',
+    { defaultMessage: 'An invalid Signature was entered. Please enter in a valid Signature.' }
+  ),
+};
+
+export const SEARCH_TRUSTED_APP_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.trustedapps.list.search.placeholder',
+  {
+    defaultMessage: 'Search on the fields below: name, description, value',
+  }
+);

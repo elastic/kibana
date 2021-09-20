@@ -6,40 +6,37 @@
  * Side Public License, v 1.
  */
 
-import './application/index.scss';
-
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { VisualizePluginSetup } from '../../visualize/public';
-import { EditorController, TSVB_EDITOR_NAME } from './application';
+import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
 
 import { createMetricsFn } from './metrics_fn';
 import { metricsVisDefinition } from './metrics_type';
 import {
-  setSavedObjectsClient,
   setUISettings,
   setI18n,
   setFieldFormats,
   setCoreStart,
   setDataStart,
-  setChartsSetup,
+  setCharts,
 } from './services';
 import { DataPublicPluginStart } from '../../data/public';
-import { ChartsPluginSetup } from '../../charts/public';
+import { ChartsPluginStart } from '../../charts/public';
 import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
 
 /** @internal */
 export interface MetricsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  charts: ChartsPluginSetup;
   visualize: VisualizePluginSetup;
 }
 
 /** @internal */
 export interface MetricsPluginStartDependencies {
   data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
 }
 
 /** @internal */
@@ -52,7 +49,7 @@ export class MetricsPlugin implements Plugin<void, void> {
 
   public setup(
     core: CoreSetup,
-    { expressions, visualizations, charts, visualize }: MetricsPluginSetupDependencies
+    { expressions, visualizations, visualize }: MetricsPluginSetupDependencies
   ) {
     visualize.visEditorsRegistry.register(TSVB_EDITOR_NAME, EditorController);
     expressions.registerFunction(createMetricsFn);
@@ -62,12 +59,11 @@ export class MetricsPlugin implements Plugin<void, void> {
       })
     );
     setUISettings(core.uiSettings);
-    setChartsSetup(charts);
     visualizations.createBaseVisualization(metricsVisDefinition);
   }
 
-  public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {
-    setSavedObjectsClient(core.savedObjects);
+  public start(core: CoreStart, { data, charts }: MetricsPluginStartDependencies) {
+    setCharts(charts);
     setI18n(core.i18n);
     setFieldFormats(data.fieldFormats);
     setDataStart(data);

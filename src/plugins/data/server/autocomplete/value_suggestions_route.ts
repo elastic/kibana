@@ -6,20 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { get, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { IRouter, SharedGlobalConfig } from 'kibana/server';
-
+import { IRouter } from 'kibana/server';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { IFieldType, Filter } from '../index';
-import { findIndexPatternById, getFieldByName } from '../index_patterns';
 import { getRequestAbortedSignal } from '../lib';
+import { getKbnServerError, reportServerError } from '../../../kibana_utils/server';
+import type { ConfigSchema } from '../../config';
+import { termsEnumSuggestions } from './terms_enum';
+import { termsAggSuggestions } from './terms_agg';
 
-export function registerValueSuggestionsRoute(
-  router: IRouter,
-  config$: Observable<SharedGlobalConfig>
-) {
+export function registerValueSuggestionsRoute(router: IRouter, config$: Observable<ConfigSchema>) {
   router.post(
     {
       path: '/api/kibana/suggestions/values/{index}',
@@ -35,6 +32,10 @@ export function registerValueSuggestionsRoute(
             field: schema.string(),
             query: schema.string(),
             filters: schema.maybe(schema.any()),
+            fieldMeta: schema.maybe(schema.any()),
+            method: schema.maybe(
+              schema.oneOf([schema.literal('terms_agg'), schema.literal('terms_enum')])
+            ),
           },
           { unknowns: 'allow' }
         ),
@@ -42,85 +43,28 @@ export function registerValueSuggestionsRoute(
     },
     async (context, request, response) => {
       const config = await config$.pipe(first()).toPromise();
-      const { field: fieldName, query, filters } = request.body;
+      const { field: fieldName, query, filters, fieldMeta, method } = request.body;
       const { index } = request.params;
-      const { client } = context.core.elasticsearch.legacy;
-      const signal = getRequestAbortedSignal(request.events.aborted$);
+      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
-      const autocompleteSearchOptions = {
-        timeout: `${config.kibana.autocompleteTimeout.asMilliseconds()}ms`,
-        terminate_after: config.kibana.autocompleteTerminateAfter.asMilliseconds(),
-      };
-
-      const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
-
-      const field = indexPattern && getFieldByName(fieldName, indexPattern);
-      const body = await getBody(autocompleteSearchOptions, field || fieldName, query, filters);
-
-      const result = await client.callAsCurrentUser('search', { index, body }, { signal });
-
-      const buckets: any[] =
-        get(result, 'aggregations.suggestions.buckets') ||
-        get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
-
-      return response.ok({ body: map(buckets || [], 'key') });
+      try {
+        const fn = method === 'terms_agg' ? termsAggSuggestions : termsEnumSuggestions;
+        const body = await fn(
+          config,
+          context.core.savedObjects.client,
+          context.core.elasticsearch.client.asCurrentUser,
+          index,
+          fieldName,
+          query,
+          filters,
+          fieldMeta,
+          abortSignal
+        );
+        return response.ok({ body });
+      } catch (e) {
+        const kbnErr = getKbnServerError(e);
+        return reportServerError(response, kbnErr);
+      }
     }
   );
-}
-
-async function getBody(
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  { timeout, terminate_after }: Record<string, any>,
-  field: IFieldType | string,
-  query: string,
-  filters: Filter[] = []
-) {
-  const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
-
-  // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
-  const getEscapedQuery = (q: string = '') =>
-    q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
-
-  // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
-  const executionHint = 'map';
-
-  // We don't care about the accuracy of the counts, just the content of the terms, so this reduces
-  // the amount of information that needs to be transmitted to the coordinating node
-  const shardSize = 10;
-  const body = {
-    size: 0,
-    timeout,
-    terminate_after,
-    query: {
-      bool: {
-        filter: filters,
-      },
-    },
-    aggs: {
-      suggestions: {
-        terms: {
-          field: isFieldObject(field) ? field.name : field,
-          include: `${getEscapedQuery(query)}.*`,
-          execution_hint: executionHint,
-          shard_size: shardSize,
-        },
-      },
-    },
-  };
-
-  if (isFieldObject(field) && field.subType && field.subType.nested) {
-    return {
-      ...body,
-      aggs: {
-        nestedSuggestions: {
-          nested: {
-            path: field.subType.nested.path,
-          },
-          aggs: body.aggs,
-        },
-      },
-    };
-  }
-
-  return body;
 }

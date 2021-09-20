@@ -6,22 +6,23 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import {
+
+import { coreMock } from 'src/core/public/mocks';
+import type {
+  DefinedSections,
   ManagementApp,
   ManagementSetup,
-  DefinedSections,
-} from '../../../../../src/plugins/management/public';
-import { createManagementSectionMock } from '../../../../../src/plugins/management/public/mocks';
-import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
-import { ManagementService } from './management_service';
-import { usersManagementApp } from './users';
+} from 'src/plugins/management/public';
+import { createManagementSectionMock } from 'src/plugins/management/public/mocks';
 
-import { coreMock } from '../../../../../src/core/public/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
+import type { SecurityLicenseFeatures } from '../../common/licensing/license_features';
 import { securityMock } from '../mocks';
-import { rolesManagementApp } from './roles';
 import { apiKeysManagementApp } from './api_keys';
+import { ManagementService } from './management_service';
 import { roleMappingsManagementApp } from './role_mappings';
+import { rolesManagementApp } from './roles';
+import { usersManagementApp } from './users';
 
 const mockSection = createManagementSectionMock();
 
@@ -39,6 +40,7 @@ describe('ManagementService', () => {
             security: mockSection,
           } as DefinedSections,
         },
+        locator: {} as any,
       };
 
       const service = new ManagementService();
@@ -67,7 +69,7 @@ describe('ManagementService', () => {
         id: 'api_keys',
         mount: expect.any(Function),
         order: 30,
-        title: 'API Keys',
+        title: 'API keys',
       });
       expect(mockSection.registerApp).toHaveBeenCalledWith({
         id: 'role_mappings',
@@ -100,6 +102,7 @@ describe('ManagementService', () => {
             security: mockSection,
           } as DefinedSections,
         },
+        locator: {} as any,
       };
 
       service.setup({

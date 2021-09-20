@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildProcessorFunction } from '../build_processor_function';
+import { _legacyBuildProcessorFunction } from '../build_processor_function';
 // @ts-ignore
 import { processors } from '../request_processors/series/index';
 
@@ -18,13 +18,13 @@ import { processors } from '../request_processors/series/index';
  *   panel: {Object} - a panel object,
  *   series: {Object} - an series object,
  *   esQueryConfig: {Object} - es query config object,
- *   indexPatternObject: {Object} - an index pattern object,
+ *   seriesIndex: {Object} - an index pattern object,
  *   capabilities: {Object} - a search capabilities object
  * ]
  * @returns {Object} doc - processed body
  */
 export async function buildRequestBody(...args: any[]) {
-  const processor = buildProcessorFunction(processors, ...args);
+  const processor = _legacyBuildProcessorFunction(processors, ...args);
   const doc = await processor({});
   return doc;
 }

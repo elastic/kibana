@@ -6,209 +6,32 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/109904
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
+
+export * from './deprecated';
 
 /*
  * Filters:
  */
 
-import {
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildQueryFilter,
-  buildRangeFilter,
-  disableFilter,
-  FILTERS,
-  FilterStateStore,
-  getDisplayValueFromFilter,
-  getPhraseFilterField,
-  getPhraseFilterValue,
-  isExistsFilter,
-  isFilterPinned,
-  isMatchAllFilter,
-  isMissingFilter,
-  isPhraseFilter,
-  isPhrasesFilter,
-  isQueryStringFilter,
-  isRangeFilter,
-  toggleFilterNegated,
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-} from '../common';
-
-import { FilterLabel } from './ui';
-
-import {
-  generateFilters,
-  onlyDisabledFiltersChanged,
-  changeTimeFilter,
-  mapAndFlattenFilters,
-  extractTimeFilter,
-  extractTimeRange,
-  convertRangeFilterToTimeRangeString,
-} from './query';
-
-// Filter helpers namespace:
-export const esFilters = {
-  FilterLabel,
-
-  FILTERS,
-  FilterStateStore,
-
-  buildEmptyFilter,
-  buildPhrasesFilter,
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildQueryFilter,
-  buildRangeFilter,
-
-  isPhraseFilter,
-  isExistsFilter,
-  isPhrasesFilter,
-  isRangeFilter,
-  isMatchAllFilter,
-  isMissingFilter,
-  isQueryStringFilter,
-  isFilterPinned,
-
-  toggleFilterNegated,
-  disableFilter,
-  getPhraseFilterField,
-  getPhraseFilterValue,
-  getDisplayValueFromFilter,
-
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  generateFilters,
-  onlyDisabledFiltersChanged,
-
-  changeTimeFilter,
-  convertRangeFilterToTimeRangeString,
-  mapAndFlattenFilters,
-  extractTimeFilter,
-  extractTimeRange,
-};
-
-export {
-  RangeFilter,
-  RangeFilterMeta,
-  RangeFilterParams,
-  ExistsFilter,
-  PhrasesFilter,
-  PhraseFilter,
-  CustomFilter,
-  MatchAllFilter,
-} from '../common';
-
-/*
- * esQuery and esKuery:
- */
-
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  nodeTypes,
-  buildEsQuery,
-  getEsQueryConfig,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-  decorateQuery,
-} from '../common';
-
-export const esKuery = {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-};
-
-export const esQuery = {
-  buildEsQuery,
-  getEsQueryConfig,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-  decorateQuery,
-};
-
-export { EsQueryConfig, KueryNode } from '../common';
-
-/*
- * Field Formatters:
- */
-
-import {
-  FieldFormat,
-  FieldFormatsRegistry,
-  DEFAULT_CONVERTER_COLOR,
-  HTML_CONTEXT_TYPE,
-  TEXT_CONTEXT_TYPE,
-  FIELD_FORMAT_IDS,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-} from '../common/field_formats';
-
-import { DateNanosFormat, DateFormat } from './field_formats';
-export { baseFormattersPublic, FieldFormatsStart } from './field_formats';
-
-// Field formats helpers namespace:
-export const fieldFormats = {
-  FieldFormat,
-  FieldFormatsRegistry, // exported only for tests. Consider mock.
-
-  DEFAULT_CONVERTER_COLOR,
-  HTML_CONTEXT_TYPE,
-  TEXT_CONTEXT_TYPE,
-  FIELD_FORMAT_IDS,
-
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-};
-
-export {
-  IFieldFormat,
-  FieldFormatInstanceType,
-  IFieldFormatsRegistry,
-  FieldFormatsContentType,
-  FieldFormatsGetConfigFn,
-  FieldFormatConfig,
-  FieldFormatId,
-  FieldFormat,
-} from '../common';
+export { getEsQueryConfig } from '../common';
+export { FilterLabel, FilterItem } from './ui';
+export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
 
 /**
  * Exporters (CSV)
  */
 
-import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+import { datatableToCSV, CSV_MIME_TYPE, cellHasFormulas, tableHasFormulas } from '../common';
 export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
+  cellHasFormulas,
+  tableHasFormulas,
 };
 
 /*
@@ -223,9 +46,8 @@ import {
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
   isDefault,
-  validateIndexPattern,
+  validateDataView,
   flattenHitWrapper,
-  formatHitProvider,
 } from './index_patterns';
 
 export type { IndexPatternsService } from './index_patterns';
@@ -239,42 +61,44 @@ export const indexPatterns = {
   isDefault,
   isFilterable,
   isNestedField,
-  validate: validateIndexPattern,
+  validate: validateDataView,
   flattenHitWrapper,
-  formatHitProvider,
 };
 
 export {
   IndexPatternsContract,
+  DataViewsContract,
   IndexPattern,
-  IIndexPatternFieldList,
   IndexPatternField,
+  TypeMeta,
 } from './index_patterns';
 
 export {
   IIndexPattern,
   IFieldType,
-  IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
   UI_SETTINGS,
-  TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
+  GetFieldsOptions,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  AggregationRestrictions,
+  IndexPatternType,
+  IndexPatternListItem,
 } from '../common';
 
-export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
+export { DuplicateDataViewError } from '../common/index_patterns/errors';
 
 /*
  * Autocomplete query suggestions:
  */
 
-export {
+export type {
   QuerySuggestion,
-  QuerySuggestionTypes,
   QuerySuggestionGetFn,
   QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
@@ -282,6 +106,7 @@ export {
   AutocompleteStart,
 } from './autocomplete';
 
+export { QuerySuggestionTypes } from './autocomplete';
 /*
  * Search:
  */
@@ -301,7 +126,7 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
-  Ipv4Address,
+  IpAddress,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
@@ -309,33 +134,30 @@ import {
   toAbsoluteDates,
   boundsDescendingRaw,
   getNumberHistogramIntervalByDatatableColumn,
-  // expressions utils
-  getRequestInspectorStats,
+  getDateHistogramMetaDataByDatatableColumn,
   getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
 } from '../common';
 
-export {
+export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
+
+export type {
   // aggs
   AggConfigSerialized,
-  AggGroupLabels,
   AggGroupName,
-  AggGroupNames,
   AggFunctionsMapping,
   AggParam,
   AggParamOption,
   AggParamType,
   AggConfigOptions,
-  BUCKET_TYPES,
   EsaggsExpressionFunctionDefinition,
   IAggConfig,
   IAggConfigs,
   IAggType,
   IFieldParamType,
   IMetricAggType,
-  METRIC_TYPES,
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
@@ -349,44 +171,43 @@ export {
 
 export type { AggConfigs, AggConfig } from '../common';
 
-export {
+export type {
   // search
   ES_SEARCH_STRATEGY,
   EsQuerySortValue,
-  extractSearchSourceReferences,
-  getEsPreference,
-  getSearchParamsFromRequest,
   IEsSearchRequest,
   IEsSearchResponse,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  injectSearchSourceReferences,
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,
   ISearchGeneric,
   ISearchSource,
-  parseSearchSourceJSON,
-  SearchInterceptor,
-  SearchInterceptorDeps,
   SearchRequest,
   SearchSourceFields,
-  SortDirection,
-  SearchSessionState,
-  // expression functions and types
-  EsdslExpressionFunctionDefinition,
-  EsRawResponseExpressionTypeDefinition,
   // errors
-  SearchError,
-  SearchTimeoutError,
-  TimeoutErrorMode,
-  PainlessError,
+  IEsError,
+  Reason,
+  WaitUntilNextSessionCompletesOptions,
+} from './search';
+
+export {
+  parseSearchSourceJSON,
+  injectSearchSourceReferences,
+  extractSearchSourceReferences,
+  getSearchParamsFromRequest,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
+  waitUntilNextSessionCompletes$,
+  isEsError,
+  SearchSessionState,
+  SortDirection,
 } from './search';
 
 export type {
   SearchSource,
+  // TODO: remove these when data_enhanced is merged into data
   ISessionService,
   SearchSessionInfoProvider,
   ISessionsClient,
@@ -403,7 +224,7 @@ export const search = {
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
-    Ipv4Address,
+    IpAddress,
     isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
     isNumberType,
     isStringType,
@@ -419,8 +240,8 @@ export const search = {
     toAbsoluteDates,
     boundsDescendingRaw,
     getNumberHistogramIntervalByDatatableColumn,
+    getDateHistogramMetaDataByDatatableColumn,
   },
-  getRequestInspectorStats,
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
@@ -430,40 +251,43 @@ export const search = {
  * UI components
  */
 
-export {
-  SearchBar,
+export type {
   SearchBarProps,
   StatefulSearchBarProps,
   IndexPatternSelectProps,
-  QueryStringInput,
   QueryStringInputProps,
 } from './ui';
+
+export { QueryStringInput, SearchBar } from './ui';
 
 /**
  * Types to be shared externally
  * @public
  */
-export { Filter, Query, RefreshInterval, TimeRange } from '../common';
+export type { RefreshInterval, TimeRange } from '../common';
 
 export {
   createSavedQueryService,
   connectToQueryState,
   syncQueryStateWithUrl,
-  QueryState,
   getDefaultQuery,
   FilterManager,
+  TimeHistory,
+} from './query';
+
+export type {
+  QueryState,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
-  InputTimeRange,
-  TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
   QueryStateChange,
   QueryStart,
+  AutoRefreshDoneFn,
 } from './query';
 
-export { AggsStart } from './search/aggs';
+export type { AggsStart } from './search/aggs';
 
 export {
   getTime,
@@ -472,7 +296,7 @@ export {
   getKbnTypeNames,
 } from '../common';
 
-export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
+export { isTimeRange, isQuery } from '../common';
 
 export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
 export { APPLY_FILTER_TRIGGER } from './triggers';
@@ -487,7 +311,7 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
   return new DataPublicPlugin(initializerContext);
 }
 
-export {
+export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   IDataPluginServices,
@@ -496,4 +320,4 @@ export {
 } from './types';
 
 // Export plugin after all other imports
-export { DataPublicPlugin as Plugin };
+export type { DataPublicPlugin as DataPlugin };

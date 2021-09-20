@@ -7,7 +7,8 @@
 
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
@@ -17,7 +18,7 @@ export async function getVisitorBreakdown({
   setup,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   urlQuery?: string;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
@@ -51,7 +52,7 @@ export async function getVisitorBreakdown({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search('get_visitor_breakdown', params);
   const { browsers, os } = response.aggregations!;
 
   const totalItems = response.hits.total.value;

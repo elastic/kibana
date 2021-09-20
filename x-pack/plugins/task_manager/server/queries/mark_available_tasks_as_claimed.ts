@@ -4,27 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import {
-  SortClause,
+  ScriptBasedSortClause,
   ScriptClause,
-  ExistsFilter,
-  TermFilter,
-  RangeFilter,
   mustBeAllOf,
   MustCondition,
-  BoolClauseWithAnyCondition,
-  ShouldCondition,
-  FilterCondition,
+  MustNotCondition,
 } from './query_clauses';
 
-export const TaskWithSchedule: ExistsFilter = {
-  exists: { field: 'task.schedule' },
-};
-export function taskWithLessThanMaxAttempts(
-  type: string,
-  maxAttempts: number
-): MustCondition<TermFilter | RangeFilter> {
+export function taskWithLessThanMaxAttempts(type: string, maxAttempts: number): MustCondition {
   return {
     bool: {
       must: [
@@ -41,7 +30,7 @@ export function taskWithLessThanMaxAttempts(
   };
 }
 
-export function tasksOfType(taskTypes: string[]): ShouldCondition<TermFilter> {
+export function tasksOfType(taskTypes: string[]): estypes.QueryDslQueryContainer {
   return {
     bool: {
       should: [...taskTypes].map((type) => ({ term: { 'task.taskType': type } })),
@@ -51,7 +40,7 @@ export function tasksOfType(taskTypes: string[]): ShouldCondition<TermFilter> {
 
 export function tasksClaimedByOwner(
   taskManagerId: string,
-  ...taskFilters: Array<FilterCondition<TermFilter> | ShouldCondition<TermFilter>>
+  ...taskFilters: estypes.QueryDslQueryContainer[]
 ) {
   return mustBeAllOf(
     {
@@ -64,15 +53,13 @@ export function tasksClaimedByOwner(
   );
 }
 
-export const IdleTaskWithExpiredRunAt: MustCondition<TermFilter | RangeFilter> = {
+export const IdleTaskWithExpiredRunAt: MustCondition = {
   bool: {
     must: [{ term: { 'task.status': 'idle' } }, { range: { 'task.runAt': { lte: 'now' } } }],
   },
 };
 
-// TODO: Fix query clauses to support this
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const InactiveTasks: BoolClauseWithAnyCondition<any> = {
+export const InactiveTasks: MustNotCondition = {
   bool: {
     must_not: [
       {
@@ -85,7 +72,7 @@ export const InactiveTasks: BoolClauseWithAnyCondition<any> = {
   },
 };
 
-export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition<TermFilter | RangeFilter> = {
+export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition = {
   bool: {
     must: [
       {
@@ -98,7 +85,7 @@ export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition<TermFilter |
   },
 };
 
-export const SortByRunAtAndRetryAt: SortClause = {
+const SortByRunAtAndRetryAtScript: ScriptBasedSortClause = {
   _script: {
     type: 'number',
     order: 'asc',
@@ -115,6 +102,10 @@ if (doc['task.runAt'].size()!=0) {
     },
   },
 };
+export const SortByRunAtAndRetryAt = (SortByRunAtAndRetryAtScript as unknown) as Record<
+  string,
+  estypes.SearchSort
+>;
 
 export const updateFieldsAndMarkAsFailed = (
   fieldUpdates: {

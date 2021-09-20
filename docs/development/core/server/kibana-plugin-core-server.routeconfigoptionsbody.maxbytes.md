@@ -6,7 +6,7 @@
 
 Limits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.
 
-Default value: The one set in the kibana.yml config file under the parameter `server.maxPayloadBytes`<!-- -->.
+Default value: The one set in the kibana.yml config file under the parameter `server.maxPayload`<!-- -->.
 
 <b>Signature:</b>
 

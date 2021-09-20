@@ -30,6 +30,8 @@ export const userMlCapabilities = {
   canGetAnnotations: false,
   canCreateAnnotation: false,
   canDeleteAnnotation: false,
+  // Alerts
+  canUseMlAlerts: false,
 };
 
 export const adminMlCapabilities = {
@@ -38,6 +40,7 @@ export const adminMlCapabilities = {
   canDeleteJob: false,
   canOpenJob: false,
   canCloseJob: false,
+  canResetJob: false,
   canUpdateJob: false,
   canForecastJob: false,
   canCreateDatafeed: false,
@@ -59,6 +62,7 @@ export const adminMlCapabilities = {
   canStartStopDataFrameAnalytics: false,
   // Alerts
   canCreateMlAlerts: false,
+  canUseMlAlerts: false,
 };
 
 export type UserMlCapabilities = typeof userMlCapabilities;
@@ -102,7 +106,7 @@ export function getPluginPrivileges() {
   return {
     admin: {
       ...privilege,
-      api: ['fileUpload:import', ...allMlCapabilitiesKeys.map((k) => `ml:${k}`)],
+      api: ['fileUpload:analyzeFile', ...allMlCapabilitiesKeys.map((k) => `ml:${k}`)],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       ui: allMlCapabilitiesKeys,
       savedObject: {
@@ -110,13 +114,17 @@ export function getPluginPrivileges() {
         read: savedObjects,
       },
       alerting: {
-        all: Object.values(ML_ALERT_TYPES),
-        read: [],
+        rule: {
+          all: Object.values(ML_ALERT_TYPES),
+        },
+        alert: {
+          all: Object.values(ML_ALERT_TYPES),
+        },
       },
     },
     user: {
       ...privilege,
-      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      api: ['fileUpload:analyzeFile', ...userMlCapabilitiesKeys.map((k) => `ml:${k}`)],
       catalogue: [PLUGIN_ID],
       management: { insightsAndAlerting: [] },
       ui: userMlCapabilitiesKeys,
@@ -125,8 +133,12 @@ export function getPluginPrivileges() {
         read: savedObjects,
       },
       alerting: {
-        all: [],
-        read: Object.values(ML_ALERT_TYPES),
+        rule: {
+          read: Object.values(ML_ALERT_TYPES),
+        },
+        alert: {
+          read: Object.values(ML_ALERT_TYPES),
+        },
       },
     },
     apmUser: {

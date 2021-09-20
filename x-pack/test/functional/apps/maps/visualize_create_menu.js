@@ -29,9 +29,8 @@ export default function ({ getService, getPageObjects }) {
         it('should take users to Maps application when Maps is clicked', async () => {
           await PageObjects.visualize.clickMapsApp();
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.maps.waitForLayersToLoad();
-          const doesLayerExist = await PageObjects.maps.doesLayerExist('Road map');
-          expect(doesLayerExist).to.equal(true);
+          const onMapPage = await PageObjects.maps.onMapPage();
+          expect(onMapPage).to.equal(true);
         });
       });
 
@@ -65,12 +64,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not show legacy region map visualizion in create menu', async () => {
-        const hasLegecyViz = await PageObjects.visualize.hasRegionMap();
+        const hasLegecyViz = await PageObjects.visualize.hasVisType('region_map');
         expect(hasLegecyViz).to.equal(false);
       });
 
       it('should not show legacy tilemap map visualizion in create menu', async () => {
-        const hasLegecyViz = await PageObjects.visualize.hasTileMap();
+        const hasLegecyViz = await PageObjects.visualize.hasVisType('tile_map');
         expect(hasLegecyViz).to.equal(false);
       });
     });

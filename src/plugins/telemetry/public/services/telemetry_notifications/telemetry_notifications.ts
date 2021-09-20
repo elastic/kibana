@@ -17,6 +17,9 @@ interface TelemetryNotificationsConstructor {
   telemetryService: TelemetryService;
 }
 
+/**
+ * Helpers to the Telemetry banners spread through the code base in Welcome and Home landing pages.
+ */
 export class TelemetryNotifications {
   private readonly http: CoreStart['http'];
   private readonly overlays: CoreStart['overlays'];
@@ -30,12 +33,18 @@ export class TelemetryNotifications {
     this.overlays = overlays;
   }
 
+  /**
+   * Should the opted-in banner be shown to the user?
+   */
   public shouldShowOptedInNoticeBanner = (): boolean => {
     const userShouldSeeOptInNotice = this.telemetryService.getUserShouldSeeOptInNotice();
     const bannerOnScreen = typeof this.optedInNoticeBannerId !== 'undefined';
     return !bannerOnScreen && userShouldSeeOptInNotice;
   };
 
+  /**
+   * Renders the banner that claims the cluster is opted-in, and gives the option to opt-out.
+   */
   public renderOptedInNoticeBanner = (): void => {
     const bannerId = renderOptedInNoticeBanner({
       http: this.http,
@@ -46,12 +55,18 @@ export class TelemetryNotifications {
     this.optedInNoticeBannerId = bannerId;
   };
 
+  /**
+   * Should the banner to opt-in be shown to the user?
+   */
   public shouldShowOptInBanner = (): boolean => {
     const isOptedIn = this.telemetryService.getIsOptedIn();
     const bannerOnScreen = typeof this.optInBannerId !== 'undefined';
     return !bannerOnScreen && isOptedIn === null;
   };
 
+  /**
+   * Renders the banner that claims the cluster is opted-out, and gives the option to opt-in.
+   */
   public renderOptInBanner = (): void => {
     const bannerId = renderOptInBanner({
       setOptIn: this.onSetOptInClick,
@@ -61,6 +76,10 @@ export class TelemetryNotifications {
     this.optInBannerId = bannerId;
   };
 
+  /**
+   * Opt-in/out button handler
+   * @param isOptIn true/false whether the user opts-in/out
+   */
   private onSetOptInClick = async (isOptIn: boolean) => {
     if (this.optInBannerId) {
       this.overlays.banners.remove(this.optInBannerId);
@@ -70,6 +89,9 @@ export class TelemetryNotifications {
     await this.telemetryService.setOptIn(isOptIn);
   };
 
+  /**
+   * Clears the banner and stores the user's dismissal of the banner.
+   */
   public setOptedInNoticeSeen = async (): Promise<void> => {
     if (this.optedInNoticeBannerId) {
       this.overlays.banners.remove(this.optedInNoticeBannerId);

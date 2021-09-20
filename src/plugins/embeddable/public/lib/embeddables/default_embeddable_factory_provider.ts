@@ -37,11 +37,14 @@ export const defaultEmbeddableFactoryProvider = <
     type: def.type,
     isEditable: def.isEditable.bind(def),
     getDisplayName: def.getDisplayName.bind(def),
+    getDescription: def.getDescription ? def.getDescription.bind(def) : () => '',
+    getIconType: def.getIconType ? def.getIconType.bind(def) : () => 'empty',
     savedObjectMetaData: def.savedObjectMetaData,
     telemetry: def.telemetry || (() => ({})),
     inject: def.inject || ((state: EmbeddableStateWithType) => state),
     extract: def.extract || ((state: EmbeddableStateWithType) => ({ state, references: [] })),
     migrations: def.migrations || {},
+    grouping: def.grouping,
   };
   return factory;
 };

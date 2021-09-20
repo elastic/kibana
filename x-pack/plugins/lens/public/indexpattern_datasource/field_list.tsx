@@ -14,6 +14,7 @@ import { NoFieldsCallout } from './no_fields_callout';
 import { IndexPatternField } from './types';
 import { FieldItemSharedProps, FieldsAccordion } from './fields_accordion';
 import { DatasourceDataPanelProps } from '../types';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 const PAGINATION_SIZE = 50;
 
 export type FieldGroups = Record<
@@ -45,6 +46,7 @@ export const FieldList = React.memo(function FieldList({
   exists,
   fieldGroups,
   existenceFetchFailed,
+  existenceFetchTimeout,
   fieldProps,
   hasSyncedExistingFields,
   filter,
@@ -52,12 +54,16 @@ export const FieldList = React.memo(function FieldList({
   existFieldsInIndex,
   dropOntoWorkspace,
   hasSuggestionForField,
+  editField,
+  removeField,
+  uiActions,
 }: {
   exists: (field: IndexPatternField) => boolean;
   fieldGroups: FieldGroups;
   fieldProps: FieldItemSharedProps;
   hasSyncedExistingFields: boolean;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
   filter: {
     nameFilter: string;
     typeFilter: string[];
@@ -66,6 +72,9 @@ export const FieldList = React.memo(function FieldList({
   existFieldsInIndex: boolean;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
+  editField?: (name: string) => void;
+  removeField?: (name: string) => void;
+  uiActions: UiActionsStart;
 }) {
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
@@ -141,12 +150,15 @@ export const FieldList = React.memo(function FieldList({
                   {...fieldProps}
                   exists={exists(field)}
                   field={field}
+                  editField={editField}
+                  removeField={removeField}
                   hideDetails={true}
                   key={field.name}
                   itemIndex={index}
                   groupIndex={0}
                   dropOntoWorkspace={dropOntoWorkspace}
                   hasSuggestionForField={hasSuggestionForField}
+                  uiActions={uiActions}
                 />
               ))
             )}
@@ -165,6 +177,8 @@ export const FieldList = React.memo(function FieldList({
                 label={fieldGroup.title}
                 helpTooltip={fieldGroup.helpText}
                 exists={exists}
+                editField={editField}
+                removeField={removeField}
                 hideDetails={fieldGroup.hideDetails}
                 hasLoaded={!!hasSyncedExistingFields}
                 fieldsCount={fieldGroup.fields.length}
@@ -186,6 +200,7 @@ export const FieldList = React.memo(function FieldList({
                   );
                 }}
                 showExistenceFetchError={existenceFetchFailed}
+                showExistenceFetchTimeout={existenceFetchTimeout}
                 renderCallout={
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
@@ -195,6 +210,7 @@ export const FieldList = React.memo(function FieldList({
                     defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
                   />
                 }
+                uiActions={uiActions}
               />
               <EuiSpacer size="m" />
             </Fragment>

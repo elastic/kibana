@@ -13,7 +13,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Incoming Execution via WinRM Remote Shell",
   "query": "sequence by host.id with maxspan=30s\n   [network where process.pid == 4 and network.direction == \"incoming\" and\n    destination.port in (5985, 5986) and network.protocol == \"http\" and not source.address in (\"::1\", \"127.0.0.1\")\n   ]\n   [process where event.type == \"start\" and process.parent.name : \"winrshost.exe\" and not process.name : \"conhost.exe\"]\n",
   "risk_score": 47,

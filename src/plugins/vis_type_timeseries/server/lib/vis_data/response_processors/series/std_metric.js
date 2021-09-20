@@ -6,27 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { getDefaultDecoration } from '../../helpers/get_default_decoration';
-import { getSplits } from '../../helpers/get_splits';
-import { getLastMetric } from '../../helpers/get_last_metric';
-import { mapBucket } from '../../helpers/map_bucket';
-import { METRIC_TYPES } from '../../../../../common/metric_types';
+import { getDefaultDecoration, getSplits, getLastMetric, mapEmptyToZero } from '../../helpers';
+import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 
 export function stdMetric(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
     const metric = getLastMetric(series);
-    if (metric.type === METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
+    if (metric.type === TSVB_METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
       return next(results);
     }
 
-    if ([METRIC_TYPES.PERCENTILE_RANK, METRIC_TYPES.PERCENTILE].includes(metric.type)) {
+    if ([TSVB_METRIC_TYPES.PERCENTILE_RANK, TSVB_METRIC_TYPES.PERCENTILE].includes(metric.type)) {
       return next(results);
     }
     if (/_bucket$/.test(metric.type)) return next(results);
     const decoration = getDefaultDecoration(series);
 
     (await getSplits(resp, panel, series, meta, extractFields)).forEach((split) => {
-      const data = split.timeseries.buckets.map(mapBucket(metric));
+      const data = mapEmptyToZero(metric, split.timeseries.buckets);
       results.push({
         id: `${split.id}`,
         label: split.label,

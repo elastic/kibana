@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiIconProps } from '@elastic/eui';
 import { UserConfiguredActionConnector } from '../../../types';
 
 export interface EmailActionParams {
@@ -42,6 +43,7 @@ export interface PagerDutyActionParams {
 
 export interface IndexActionParams {
   documents: Array<Record<string, any>>;
+  indexOverride?: string;
 }
 
 export enum ServerLogLevelOptions {
@@ -76,6 +78,7 @@ export interface EmailConfig {
   port: number;
   secure?: boolean;
   hasAuth: boolean;
+  service: string;
 }
 
 export interface EmailSecrets {
@@ -131,3 +134,5 @@ export interface TeamsSecrets {
 }
 
 export type TeamsActionConnector = UserConfiguredActionConnector<unknown, TeamsSecrets>;
+
+export type LogoProps = Omit<EuiIconProps, 'type'>;

@@ -13,6 +13,7 @@ import {
   ILocationProvider,
   IModule,
   IRootScopeService,
+  IRequestConfig,
 } from 'angular';
 import $ from 'jquery';
 import { set } from '@elastic/safer-lodash-set';
@@ -22,7 +23,6 @@ import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
 import { History } from 'history';
 
 import { CoreStart } from 'kibana/public';
-import { isSystemApiRequest } from '../utils';
 import { formatAngularHttpError, isAngularHttpError } from '../notify/lib';
 
 export interface RouteConfiguration {
@@ -36,6 +36,11 @@ export interface RouteConfiguration {
   template?: string;
   k7Breadcrumbs?: (...args: any[]) => ChromeBreadcrumb[];
   requireUICapability?: string;
+}
+
+function isSystemApiRequest(request: IRequestConfig) {
+  const { headers } = request;
+  return headers && !!headers['kbn-system-request'];
 }
 
 /**

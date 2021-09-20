@@ -2,10 +2,10 @@
   "cat.tasks": {
     "url_params": {
       "format": "",
-      "node_id": [],
+      "nodes": [],
       "actions": [],
       "detailed": "__flag__",
-      "parent_task": "",
+      "parent_task_id": "",
       "h": [],
       "help": "__flag__",
       "s": [],

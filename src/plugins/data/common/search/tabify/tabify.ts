@@ -139,7 +139,7 @@ export function tabifyAggResponse(
   const write = new TabbedAggResponseWriter(aggConfigs, respOpts || {});
   const topLevelBucket: AggResponseBucket = {
     ...esResponse.aggregations,
-    doc_count: esResponse.hits.total,
+    doc_count: esResponse.aggregations?.doc_count || esResponse.hits?.total,
   };
 
   collectBucket(aggConfigs, write, topLevelBucket, '', 1);

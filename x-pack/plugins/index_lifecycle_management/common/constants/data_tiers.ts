@@ -13,7 +13,15 @@ const WARM_PHASE_NODE_PREFERENCE: DataTierRole[] = ['data_warm', 'data_hot'];
 
 const COLD_PHASE_NODE_PREFERENCE: DataTierRole[] = ['data_cold', 'data_warm', 'data_hot'];
 
+const FROZEN_PHASE_NODE_PREFERENCE: DataTierRole[] = [
+  'data_frozen',
+  'data_cold',
+  'data_warm',
+  'data_hot',
+];
+
 export const phaseToNodePreferenceMap: Record<PhaseWithAllocation, DataTierRole[]> = Object.freeze({
   warm: WARM_PHASE_NODE_PREFERENCE,
   cold: COLD_PHASE_NODE_PREFERENCE,
+  frozen: FROZEN_PHASE_NODE_PREFERENCE,
 });

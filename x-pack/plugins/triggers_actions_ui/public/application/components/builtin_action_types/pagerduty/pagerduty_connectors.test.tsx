@@ -91,4 +91,29 @@ describe('PagerDutyActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
   });
+
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      secrets: {
+        routingKey: 'test',
+      },
+      id: 'test',
+      actionTypeId: '.pagerduty',
+      isMissingSecrets: true,
+      name: 'pagerduty',
+      config: {
+        apiUrl: 'http:\\test',
+      },
+    } as PagerDutyActionConnector;
+    const wrapper = mountWithIntl(
+      <PagerDutyActionConnectorFields
+        action={actionConnector}
+        errors={{ index: [], routingKey: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
+  });
 });

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../../../__mocks__';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+} from '../../../../../__mocks__/kea_logic';
 import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -22,8 +26,9 @@ jest.mock('../../../../app_logic', () => ({
 const spyScrollTo = jest.fn();
 Object.defineProperty(global.window, 'scrollTo', { value: spyScrollTo });
 
-import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
+import { defaultErrorMessage } from '../../../../../shared/flash_messages/handle_api_errors';
+import { SchemaType } from '../../../../../shared/schema/types';
 import { AppLogic } from '../../../../app_logic';
 
 import {
@@ -38,7 +43,7 @@ describe('SchemaLogic', () => {
   const {
     clearFlashMessages,
     flashAPIErrors,
-    setSuccessMessage,
+    flashSuccessToast,
     setErrorMessage,
   } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SchemaLogic);
@@ -54,7 +59,7 @@ describe('SchemaLogic', () => {
     addFieldFormErrors: null,
     mostRecentIndexJob: {},
     fieldCoercionErrors: {},
-    newFieldType: TEXT,
+    newFieldType: SchemaType.Text,
     rawFieldName: '',
     formUnchanged: true,
     dataLoading: true,
@@ -113,7 +118,7 @@ describe('SchemaLogic', () => {
       expect(SchemaLogic.values.activeSchema).toEqual(schema);
       expect(SchemaLogic.values.serverSchema).toEqual(schema);
       expect(SchemaLogic.values.mostRecentIndexJob).toEqual(mostRecentIndexJob);
-      expect(SchemaLogic.values.newFieldType).toEqual(TEXT);
+      expect(SchemaLogic.values.newFieldType).toEqual(SchemaType.Text);
       expect(SchemaLogic.values.addFieldFormErrors).toEqual(null);
       expect(SchemaLogic.values.formUnchanged).toEqual(true);
       expect(SchemaLogic.values.showAddFieldModal).toEqual(false);
@@ -128,10 +133,9 @@ describe('SchemaLogic', () => {
     });
 
     it('updateNewFieldType', () => {
-      const NUMBER = 'number';
-      SchemaLogic.actions.updateNewFieldType(NUMBER);
+      SchemaLogic.actions.updateNewFieldType(SchemaType.Number);
 
-      expect(SchemaLogic.values.newFieldType).toEqual(NUMBER);
+      expect(SchemaLogic.values.newFieldType).toEqual(SchemaType.Number);
     });
 
     it('onFieldUpdate', () => {
@@ -204,7 +208,7 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.initializeSchema();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/schemas'
+          '/internal/workplace_search/org/sources/source123/schemas'
         );
         await nextTick();
         expect(onInitializeSchemaSpy).toHaveBeenCalledWith(serverResponse);
@@ -218,7 +222,7 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.initializeSchema();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/schemas'
+          '/internal/workplace_search/account/sources/source123/schemas'
         );
         await nextTick();
         expect(onInitializeSchemaSpy).toHaveBeenCalledWith(serverResponse);
@@ -250,12 +254,12 @@ describe('SchemaLogic', () => {
         );
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/schemas'
+          '/internal/workplace_search/org/sources/source123/schemas'
         );
 
         await initPromise;
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/reindex_job/123'
+          '/internal/workplace_search/org/sources/source123/reindex_job/123'
         );
 
         await promise;
@@ -281,12 +285,12 @@ describe('SchemaLogic', () => {
         );
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/schemas'
+          '/internal/workplace_search/account/sources/source123/schemas'
         );
 
         await initPromise;
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/reindex_job/123'
+          '/internal/workplace_search/account/sources/source123/reindex_job/123'
         );
 
         await promise;
@@ -313,18 +317,19 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.onInitializeSchema(serverResponse);
         const newSchema = {
           ...schema,
-          bar: 'number',
+          bar: SchemaType.Number,
         };
-        SchemaLogic.actions.addNewField('bar', 'number');
+        SchemaLogic.actions.addNewField('bar', SchemaType.Number);
 
         expect(setServerFieldSpy).toHaveBeenCalledWith(newSchema, ADD);
       });
 
       it('handles duplicate', () => {
+        const onSchemaSetFormErrorsSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetFormErrors');
         SchemaLogic.actions.onInitializeSchema(serverResponse);
-        SchemaLogic.actions.addNewField('foo', 'number');
+        SchemaLogic.actions.addNewField('foo', SchemaType.Number);
 
-        expect(setErrorMessage).toHaveBeenCalledWith('New field already exists: foo.');
+        expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith(['New field already exists: foo.']);
       });
     });
 
@@ -332,9 +337,9 @@ describe('SchemaLogic', () => {
       const onFieldUpdateSpy = jest.spyOn(SchemaLogic.actions, 'onFieldUpdate');
       SchemaLogic.actions.onInitializeSchema(serverResponse);
       const newSchema = {
-        foo: 'number',
+        foo: SchemaType.Number,
       };
-      SchemaLogic.actions.updateExistingFieldType('foo', 'number');
+      SchemaLogic.actions.updateExistingFieldType('foo', SchemaType.Number);
 
       expect(onFieldUpdateSpy).toHaveBeenCalledWith({ schema: newSchema, formUnchanged: false });
     });
@@ -360,13 +365,13 @@ describe('SchemaLogic', () => {
           SchemaLogic.actions.setServerField(schema, ADD);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/source123/schemas',
+            '/internal/workplace_search/org/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
           );
           await nextTick();
-          expect(setSuccessMessage).toHaveBeenCalledWith(SCHEMA_FIELD_ADDED_MESSAGE);
+          expect(flashSuccessToast).toHaveBeenCalledWith(SCHEMA_FIELD_ADDED_MESSAGE);
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
@@ -378,7 +383,7 @@ describe('SchemaLogic', () => {
           SchemaLogic.actions.setServerField(schema, ADD);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/account/sources/source123/schemas',
+            '/internal/workplace_search/account/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
@@ -387,13 +392,27 @@ describe('SchemaLogic', () => {
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
-        it('handles error', async () => {
+        it('handles error with message', async () => {
           const onSchemaSetFormErrorsSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetFormErrors');
-          http.post.mockReturnValue(Promise.reject({ message: 'this is an error' }));
+          // We expect body.attributes.errors to be a string[] when it is present
+          http.post.mockReturnValue(
+            Promise.reject({ body: { attributes: { errors: ['this is an error'] } } })
+          );
           SchemaLogic.actions.setServerField(schema, ADD);
           await nextTick();
 
-          expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith('this is an error');
+          expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith(['this is an error']);
+          expect(spyScrollTo).toHaveBeenCalledWith(0, 0);
+        });
+
+        it('handles error with no message', async () => {
+          const onSchemaSetFormErrorsSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetFormErrors');
+          http.post.mockReturnValue(Promise.reject());
+          SchemaLogic.actions.setServerField(schema, ADD);
+          await nextTick();
+
+          expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith([defaultErrorMessage]);
+          expect(spyScrollTo).toHaveBeenCalledWith(0, 0);
         });
       });
 
@@ -405,13 +424,13 @@ describe('SchemaLogic', () => {
           SchemaLogic.actions.setServerField(schema, UPDATE);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/source123/schemas',
+            '/internal/workplace_search/org/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
           );
           await nextTick();
-          expect(setSuccessMessage).toHaveBeenCalledWith(SCHEMA_UPDATED_MESSAGE);
+          expect(flashSuccessToast).toHaveBeenCalledWith(SCHEMA_UPDATED_MESSAGE);
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
@@ -423,7 +442,7 @@ describe('SchemaLogic', () => {
           SchemaLogic.actions.setServerField(schema, UPDATE);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/account/sources/source123/schemas',
+            '/internal/workplace_search/account/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
@@ -455,7 +474,7 @@ describe('SchemaLogic', () => {
       it('handles filtered response', () => {
         const newSchema = {
           ...schema,
-          bar: 'number',
+          bar: SchemaType.Number,
         };
         SchemaLogic.actions.onInitializeSchema(serverResponse);
         SchemaLogic.actions.onFieldUpdate({ schema: newSchema, formUnchanged: false });

@@ -6,3 +6,4 @@
  */
 
 export { SCHEMA_TITLE } from './constants';
+export { SchemaRouter } from './schema_router';

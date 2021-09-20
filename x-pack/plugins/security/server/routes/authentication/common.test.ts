@@ -7,30 +7,28 @@
 
 import { Type } from '@kbn/config-schema';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import {
-  kibanaResponseFactory,
-  RequestHandler,
-  RouteConfig,
-} from '../../../../../../src/core/server';
+import type { RequestHandler, RouteConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import type { InternalAuthenticationServiceStart } from '../../authentication';
 import {
   AuthenticationResult,
-  AuthenticationServiceStart,
   DeauthenticationResult,
   OIDCLogin,
   SAMLLogin,
 } from '../../authentication';
-import { defineCommonRoutes } from './common';
-import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
-
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { routeDefinitionParamsMock } from '../index.mock';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
+import { routeDefinitionParamsMock } from '../index.mock';
+import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
+import { defineCommonRoutes } from './common';
 
 describe('Common authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;
-  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
+  let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   let license: jest.Mocked<SecurityLicense>;
   let mockContext: SecurityRequestHandlerContext;
   beforeEach(() => {
@@ -67,7 +65,10 @@ describe('Common authentication routes', () => {
     });
 
     it('correctly defines route.', async () => {
-      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.options).toEqual({
+        authRequired: false,
+        tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+      });
       expect(routeConfig.validate).toEqual({
         body: undefined,
         query: expect.any(Type),
