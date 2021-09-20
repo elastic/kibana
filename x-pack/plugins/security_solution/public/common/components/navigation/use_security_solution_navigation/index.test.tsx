@@ -17,6 +17,7 @@ import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { UrlInputsModel } from '../../../store/inputs/model';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { TestProviders } from '../../../mock';
 
 jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
@@ -96,8 +97,9 @@ describe('useSecuritySolutionNavigation', () => {
   });
 
   it('should create navigation config', async () => {
-    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(() =>
-      useSecuritySolutionNavigation()
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
     );
 
     expect(result.current).toMatchInlineSnapshot(`
@@ -243,8 +245,9 @@ describe('useSecuritySolutionNavigation', () => {
   // TODO: Steph/ueba remove when no longer experimental
   it('should include ueba when feature flag is on', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(() =>
-      useSecuritySolutionNavigation()
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
     );
 
     // @ts-ignore possibly undefined, but if undefined we want this test to fail
@@ -259,8 +262,9 @@ describe('useSecuritySolutionNavigation', () => {
           read: true,
         });
 
-        const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(() =>
-          useSecuritySolutionNavigation()
+        const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+          () => useSecuritySolutionNavigation(),
+          { wrapper: TestProviders }
         );
 
         const caseNavItem = (result.current?.items || [])[3].items?.find(
@@ -286,8 +290,9 @@ describe('useSecuritySolutionNavigation', () => {
           read: false,
         });
 
-        const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(() =>
-          useSecuritySolutionNavigation()
+        const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+          () => useSecuritySolutionNavigation(),
+          { wrapper: TestProviders }
         );
 
         const caseNavItem = (result.current?.items || [])[3].items?.find(
