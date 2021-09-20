@@ -6,22 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonGroup } from '@elastic/eui';
-import React from 'react';
+import { EuiButtonGroup, EuiBetaBadge } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DISCOVER_VIEW_MODE } from './constants';
 import './_index.scss';
-
-const toggleButtons = [
-  {
-    id: DISCOVER_VIEW_MODE.DOCUMENT_LEVEL,
-    label: 'Document view',
-  },
-  {
-    id: DISCOVER_VIEW_MODE.FIELD_LEVEL,
-    label: 'Aggregated view',
-  },
-];
 
 export const DocumentViewModeToggle = ({
   discoverViewMode,
@@ -30,6 +20,37 @@ export const DocumentViewModeToggle = ({
   discoverViewMode: DISCOVER_VIEW_MODE;
   setDiscoverViewMode: (discoverViewMode: DISCOVER_VIEW_MODE) => void;
 }) => {
+  const toggleButtons = useMemo(
+    () => [
+      {
+        id: DISCOVER_VIEW_MODE.DOCUMENT_LEVEL,
+        label: i18n.translate('discover.viewModes.document.label', {
+          defaultMessage: 'Documents',
+        }),
+      },
+      {
+        id: DISCOVER_VIEW_MODE.FIELD_LEVEL,
+        label: (
+          <div className="fieldStatsButton">
+            <FormattedMessage
+              id="discover.viewModes.fieldStatistics.label"
+              defaultMessage="Field Statistics"
+            />
+            <EuiBetaBadge
+              label={i18n.translate('discover.viewModes.fieldStatistics.betaTitle', {
+                defaultMessage: 'Beta',
+              })}
+              size="s"
+              iconType="beaker"
+              className="fieldStatsBetaBadge"
+            />
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
   return (
     <EuiButtonGroup
       className={'dscViewModeToggle'}
