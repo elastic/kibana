@@ -69,18 +69,13 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
                   size="xs"
                   label={kibanaFieldFormat(value.key, fieldFormat)}
                   className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
+                  valueText={
+                    progressBarMax !== undefined
+                      ? getPercentLabel(value.doc_count, progressBarMax)
+                      : undefined
+                  }
                 />
               </EuiFlexItem>
-              {progressBarMax !== undefined && (
-                <EuiFlexItem
-                  grow={false}
-                  className={classNames('eui-textTruncate', 'topValuesPercentLabelContainer')}
-                >
-                  <EuiText size="xs" textAlign="left" color="subdued">
-                    {getPercentLabel(value.doc_count, progressBarMax)}
-                  </EuiText>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           ))}
         {isTopValuesSampled === true && (
