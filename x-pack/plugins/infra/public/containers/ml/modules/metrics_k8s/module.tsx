@@ -76,6 +76,5 @@ export const useMetricK8sModule = ({
   };
 };
 
-export const [MetricK8sModuleProvider, useMetricK8sModuleContext] = createContainer(
-  useMetricK8sModule
-);
+export const [MetricK8sModuleProvider, useMetricK8sModuleContext] =
+  createContainer(useMetricK8sModule);

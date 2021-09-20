@@ -33,7 +33,7 @@ describe('EQL search strategy', () => {
   let mockLogger: Logger;
 
   beforeEach(() => {
-    mockLogger = ({ debug: jest.fn() } as unknown) as Logger;
+    mockLogger = { debug: jest.fn() } as unknown as Logger;
   });
 
   describe('strategy interface', () => {
@@ -58,7 +58,7 @@ describe('EQL search strategy', () => {
     beforeEach(() => {
       mockEqlSearch = jest.fn().mockResolvedValueOnce(getMockEqlResponse());
       mockEqlGet = jest.fn().mockResolvedValueOnce(getMockEqlResponse());
-      mockDeps = ({
+      mockDeps = {
         uiSettingsClient: {
           get: jest.fn(),
         },
@@ -70,7 +70,7 @@ describe('EQL search strategy', () => {
             },
           },
         },
-      } as unknown) as SearchStrategyDependencies;
+      } as unknown as SearchStrategyDependencies;
       params = {
         index: 'logstash-*',
         body: { query: 'process where 1 == 1' },
