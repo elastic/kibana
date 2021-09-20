@@ -86,10 +86,10 @@ describe('ML - validateModelMemoryLimit', () => {
       fieldCaps: () => Promise.resolve({ body: fieldCapsResponse }),
     };
 
-    return ({
+    return {
       asCurrentUser: callAs,
       asInternalUser: callAs,
-    } as unknown) as IScopedClusterClient;
+    } as unknown as IScopedClusterClient;
   };
 
   const getMockMlClient = ({
@@ -105,7 +105,7 @@ describe('ML - validateModelMemoryLimit', () => {
   };
 
   function getJobConfig(influencers: string[] = [], detectors: Detector[] = []) {
-    return ({
+    return {
       analysis_config: { detectors, influencers },
       data_description: { time_field: '@timestamp' },
       datafeed_config: {
@@ -114,7 +114,7 @@ describe('ML - validateModelMemoryLimit', () => {
       analysis_limits: {
         model_memory_limit: '20mb',
       },
-    } as unknown) as CombinedJob;
+    } as unknown as CombinedJob;
   }
 
   // create a specified number of mock detectors

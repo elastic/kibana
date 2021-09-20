@@ -21,11 +21,11 @@ jest.mock('../../services', () => {
   };
 });
 
-const application = ({
+const application = {
   getUrlForApp: jest.fn((appId: string, options?: { path?: string; absolute?: boolean }) => {
     return `/app/${appId}${options?.path}`;
   }),
-} as unknown) as ApplicationStart;
+} as unknown as ApplicationStart;
 
 const history = createHashHistory();
 const kbnUrlStateStorage = createKbnUrlStateStorage({

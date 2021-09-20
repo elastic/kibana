@@ -22,7 +22,9 @@ const applyTaskManagerDeprecations = (settings: Record<string, unknown> = {}) =>
       deprecation,
       path: CONFIG_PATH,
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,

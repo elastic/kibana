@@ -68,9 +68,9 @@ describe('i18n utils', () => {
   });
 
   test('should detect object property with defined key', () => {
-    const objectExpresssionNode = [
-      ...traverseNodes(parse(objectPropertySource).program.body),
-    ].find((node) => isObjectExpression(node));
+    const objectExpresssionNode = [...traverseNodes(parse(objectPropertySource).program.body)].find(
+      (node) => isObjectExpression(node)
+    );
     const [objectExpresssionProperty] = objectExpresssionNode.properties;
 
     expect(isPropertyWithKey(objectExpresssionProperty, 'id')).toBe(true);

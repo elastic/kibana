@@ -66,19 +66,19 @@ export const setupEnvironment = () => {
   };
 };
 
-export const WithAppDependencies = (Comp: any, overridingDependencies: any = {}) => (
-  props: any
-) => {
-  const mergedDependencies = merge({}, appDependencies, overridingDependencies);
-  return (
-    <AppContextProvider value={mergedDependencies}>
-      <MappingsEditorProvider>
-        <ComponentTemplatesProvider value={componentTemplatesMockDependencies}>
-          <GlobalFlyoutProvider>
-            <Comp {...props} />
-          </GlobalFlyoutProvider>
-        </ComponentTemplatesProvider>
-      </MappingsEditorProvider>
-    </AppContextProvider>
-  );
-};
+export const WithAppDependencies =
+  (Comp: any, overridingDependencies: any = {}) =>
+  (props: any) => {
+    const mergedDependencies = merge({}, appDependencies, overridingDependencies);
+    return (
+      <AppContextProvider value={mergedDependencies}>
+        <MappingsEditorProvider>
+          <ComponentTemplatesProvider value={componentTemplatesMockDependencies}>
+            <GlobalFlyoutProvider>
+              <Comp {...props} />
+            </GlobalFlyoutProvider>
+          </ComponentTemplatesProvider>
+        </MappingsEditorProvider>
+      </AppContextProvider>
+    );
+  };
