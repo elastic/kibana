@@ -18,7 +18,8 @@ import { callGetLogEntryCategoryDatasetsAPI } from './service_calls/get_log_entr
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 type TopLogEntryCategories = GetLogEntryCategoriesSuccessResponsePayload['data']['categories'];
-type LogEntryCategoryDatasets = GetLogEntryCategoryDatasetsSuccessResponsePayload['data']['datasets'];
+type LogEntryCategoryDatasets =
+  GetLogEntryCategoryDatasetsSuccessResponsePayload['data']['datasets'];
 
 export type SortOptions = CategoriesSort;
 export type ChangeSortOptions = (sortOptions: CategoriesSort) => void;
@@ -46,10 +47,8 @@ export const useLogEntryCategoriesResults = ({
   });
   const { services } = useKibanaContextForPlugin();
   const [topLogEntryCategories, setTopLogEntryCategories] = useState<TopLogEntryCategories>([]);
-  const [
-    logEntryCategoryDatasets,
-    setLogEntryCategoryDatasets,
-  ] = useState<LogEntryCategoryDatasets>([]);
+  const [logEntryCategoryDatasets, setLogEntryCategoryDatasets] =
+    useState<LogEntryCategoryDatasets>([]);
 
   const [getTopLogEntryCategoriesRequest, getTopLogEntryCategories] = useTrackedPromise(
     {

@@ -15,9 +15,9 @@ import { SavedObjectWithMetadata } from '../../../../common';
 describe('Inspect component', () => {
   let defaultProps: { object: SavedObjectWithMetadata };
   const shallowRender = (overrides: Partial<SavedObjectWithMetadata> = {}) => {
-    return (shallowWithI18nProvider(
+    return shallowWithI18nProvider(
       <Inspect {...defaultProps} {...overrides} />
-    ) as unknown) as ShallowWrapper<InspectProps>;
+    ) as unknown as ShallowWrapper<InspectProps>;
   };
   beforeEach(() => {
     defaultProps = {
@@ -56,7 +56,7 @@ describe('Inspect component', () => {
     const codeEditorComponent = component.find('CodeEditor');
     // find could return nothing
     const editorValue = codeEditorComponent
-      ? ((codeEditorComponent.prop('value') as unknown) as string)
+      ? (codeEditorComponent.prop('value') as unknown as string)
       : '';
     // we assert against the expected object props rather than asserting that 'meta' is removed
     expect(Object.keys(JSON.parse(editorValue))).toEqual([

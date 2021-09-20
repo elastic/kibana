@@ -24,9 +24,8 @@ export const IndexPatternEditor = ({
   defaultTypeIsRollup = false,
   requireTimestampField = false,
 }: IndexPatternEditorPropsWithServices) => {
-  const {
-    Provider: KibanaReactContextProvider,
-  } = createKibanaReactContext<IndexPatternEditorContext>(services);
+  const { Provider: KibanaReactContextProvider } =
+    createKibanaReactContext<IndexPatternEditorContext>(services);
 
   return (
     <KibanaReactContextProvider>

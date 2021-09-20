@@ -41,9 +41,9 @@ describe('SavedObjectEdition', () => {
   let docLinks: ReturnType<typeof docLinksServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectEditionProps> = {}) => {
-    return (shallowWithI18nProvider(
+    return shallowWithI18nProvider(
       <SavedObjectEdition {...defaultProps} {...overrides} />
-    ) as unknown) as ShallowWrapper<
+    ) as unknown as ShallowWrapper<
       SavedObjectEditionProps,
       SavedObjectEditionState,
       SavedObjectEdition
