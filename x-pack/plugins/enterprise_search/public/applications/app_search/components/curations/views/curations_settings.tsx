@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { CurationsTable } from './curations_table';
-export { EmptyState } from './empty_state';
+import React from 'react';
+
+export const CurationsSettings: React.FC = () => {
+  return null;
+};
