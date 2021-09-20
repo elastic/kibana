@@ -166,6 +166,7 @@ TBD
 [float]
 [[operational-alerts-anomaly-jobs]]
 ==== Operational alerts for {anomaly-jobs}
+
 The new {anomaly-job} alert monitors the job health and notifies when an 
 operational issue is detected. Four types of checks can be enabled: datafeed is 
 not started, model memory limit has been hit, the job is experiencing delayed 
