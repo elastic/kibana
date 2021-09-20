@@ -104,7 +104,7 @@ beforeEach(() => {
     executionEnqueuer,
     ephemeralExecutionEnqueuer,
     request,
-    authorization: (authorization as unknown) as ActionsAuthorization,
+    authorization: authorization as unknown as ActionsAuthorization,
     auditLogger,
     usageCounter: mockUsageCounter,
   });
@@ -482,7 +482,7 @@ describe('create()', () => {
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
     });
 
     const savedObjectCreateResult = {
@@ -583,7 +583,7 @@ describe('get()', () => {
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -639,7 +639,7 @@ describe('get()', () => {
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -756,7 +756,7 @@ describe('get()', () => {
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -826,7 +826,7 @@ describe('getAll()', () => {
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -964,7 +964,7 @@ describe('getAll()', () => {
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -1040,7 +1040,7 @@ describe('getBulk()', () => {
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -1172,7 +1172,7 @@ describe('getBulk()', () => {
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -1905,7 +1905,7 @@ describe('isPreconfigured()', () => {
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -1935,7 +1935,7 @@ describe('isPreconfigured()', () => {
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',

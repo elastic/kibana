@@ -36,12 +36,12 @@ describe('getLegendAction', function () {
     wrapperProps = {
       color: 'rgb(109, 204, 177)',
       label: 'Bar',
-      series: ([
+      series: [
         {
           specId: 'donut',
           key: 'Bar',
         },
-      ] as unknown) as SeriesIdentifier[],
+      ] as unknown as SeriesIdentifier[],
     };
   });
 
@@ -55,12 +55,12 @@ describe('getLegendAction', function () {
     const newProps = {
       ...wrapperProps,
       label: 'Hi',
-      series: ([
+      series: [
         {
           specId: 'donut',
           key: 'Hi',
         },
-      ] as unknown) as SeriesIdentifier[],
+      ] as unknown as SeriesIdentifier[],
     };
     wrapper = mountWithIntl(<Component {...newProps} />);
     expect(wrapper.find(EuiPopover).length).toBe(1);

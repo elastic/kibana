@@ -214,11 +214,8 @@ export class ActionsClient {
       );
       throw error;
     }
-    const {
-      attributes,
-      references,
-      version,
-    } = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    const { attributes, references, version } =
+      await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
