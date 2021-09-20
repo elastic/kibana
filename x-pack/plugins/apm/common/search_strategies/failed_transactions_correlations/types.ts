@@ -25,14 +25,15 @@ export interface FailedTransactionsCorrelation extends FieldValuePair {
   histogram: HistogramItem[];
 }
 
-export type FailedTransactionsCorrelationsImpactThreshold = typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
+export type FailedTransactionsCorrelationsImpactThreshold =
+  typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
 
 export interface FailedTransactionsCorrelationsParams {
   percentileThreshold: number;
 }
 
-export type FailedTransactionsCorrelationsRequestParams = FailedTransactionsCorrelationsParams &
-  SearchStrategyClientParams;
+export type FailedTransactionsCorrelationsRequestParams =
+  FailedTransactionsCorrelationsParams & SearchStrategyClientParams;
 
 export interface FailedTransactionsCorrelationsRawResponse
   extends RawResponseBase {

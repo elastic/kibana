@@ -97,7 +97,8 @@ describe('SavedObjectsService', () => {
       deprecationsSetup.getRegistry.mockReturnValue(mockRegistry);
 
       const deprecations = Symbol('deprecations');
-      const mockedGetSavedObjectsDeprecationsProvider = getSavedObjectsDeprecationsProvider as jest.Mock;
+      const mockedGetSavedObjectsDeprecationsProvider =
+        getSavedObjectsDeprecationsProvider as jest.Mock;
       mockedGetSavedObjectsDeprecationsProvider.mockReturnValue(deprecations);
       await soService.setup(createSetupDeps());
 
@@ -233,8 +234,10 @@ describe('SavedObjectsService', () => {
       await soService.setup(setupDeps);
       soService.start(createStartDeps());
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
-      ((setupDeps.elasticsearch
-        .esNodesCompatibility$ as any) as BehaviorSubject<NodesVersionCompatibility>).next({
+      (
+        setupDeps.elasticsearch
+          .esNodesCompatibility$ as any as BehaviorSubject<NodesVersionCompatibility>
+      ).next({
         isCompatible: true,
         incompatibleNodes: [],
         warningNodes: [],
@@ -311,9 +314,9 @@ describe('SavedObjectsService', () => {
 
         expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(req);
 
-        const [
-          [, , , , , includedHiddenTypes],
-        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [[, , , , , includedHiddenTypes]] = (
+          SavedObjectsRepository.createRepository as jest.Mocked<any>
+        ).mock.calls;
 
         expect(includedHiddenTypes).toEqual([]);
       });
@@ -329,9 +332,9 @@ describe('SavedObjectsService', () => {
         const req = httpServerMock.createKibanaRequest();
         createScopedRepository(req, ['someHiddenType']);
 
-        const [
-          [, , , , , includedHiddenTypes],
-        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [[, , , , , includedHiddenTypes]] = (
+          SavedObjectsRepository.createRepository as jest.Mocked<any>
+        ).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);
       });
@@ -348,9 +351,9 @@ describe('SavedObjectsService', () => {
 
         createInternalRepository();
 
-        const [
-          [, , , client, , includedHiddenTypes],
-        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [[, , , client, , includedHiddenTypes]] = (
+          SavedObjectsRepository.createRepository as jest.Mocked<any>
+        ).mock.calls;
 
         expect(coreStart.elasticsearch.client.asInternalUser).toBe(client);
         expect(includedHiddenTypes).toEqual([]);
@@ -365,9 +368,9 @@ describe('SavedObjectsService', () => {
 
         createInternalRepository(['someHiddenType']);
 
-        const [
-          [, , , , , includedHiddenTypes],
-        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [[, , , , , includedHiddenTypes]] = (
+          SavedObjectsRepository.createRepository as jest.Mocked<any>
+        ).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);
       });
