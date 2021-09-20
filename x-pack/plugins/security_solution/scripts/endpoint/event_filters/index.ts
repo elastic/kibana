@@ -71,7 +71,7 @@ const createEventFilters: RunFn = async ({ flags, log }) => {
   await ensureCreateEndpointEventFiltersList(kbn);
 
   await bluebird.map(
-    Array.from({ length: (flags.count as unknown) as number }),
+    Array.from({ length: flags.count as unknown as number }),
     () =>
       kbn
         .request({

@@ -162,12 +162,14 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   const { showModuleList, showModuleSetup } = useLogAnalysisSetupFlyoutStateContext();
 
-  const showLogEntryRateSetup = useCallback(() => showModuleSetup('logs_ui_analysis'), [
-    showModuleSetup,
-  ]);
-  const showLogEntryCategoriesSetup = useCallback(() => showModuleSetup('logs_ui_categories'), [
-    showModuleSetup,
-  ]);
+  const showLogEntryRateSetup = useCallback(
+    () => showModuleSetup('logs_ui_analysis'),
+    [showModuleSetup]
+  );
+  const showLogEntryCategoriesSetup = useCallback(
+    () => showModuleSetup('logs_ui_categories'),
+    [showModuleSetup]
+  );
 
   const hasAnomalyResults = logEntryAnomalies.length > 0;
 

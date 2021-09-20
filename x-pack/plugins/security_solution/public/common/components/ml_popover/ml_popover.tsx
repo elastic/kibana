@@ -97,9 +97,12 @@ export const MlPopover = React.memo(() => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
-  const { isMlAdmin, isLicensed, loading: isLoadingSecurityJobs, jobs } = useSecurityJobs(
-    refreshToggle
-  );
+  const {
+    isMlAdmin,
+    isLicensed,
+    loading: isLoadingSecurityJobs,
+    jobs,
+  } = useSecurityJobs(refreshToggle);
   const [, dispatchToaster] = useStateToaster();
   const docLinks = useKibana().services.docLinks;
   const handleJobStateChange = useCallback(

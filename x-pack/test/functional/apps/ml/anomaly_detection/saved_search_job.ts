@@ -265,7 +265,8 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('saved search', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/104174
+  describe.skip('saved search', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
