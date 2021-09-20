@@ -423,8 +423,8 @@ export const onFieldsBrowserTabPressed = ({
   }
 };
 
-export const CountBadge = (styled(EuiBadge)`
+export const CountBadge = styled(EuiBadge)`
   margin-left: 5px;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 CountBadge.displayName = 'CountBadge';
