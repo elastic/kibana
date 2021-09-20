@@ -116,11 +116,14 @@ export const fetchTransactionDurationCorrelation = async (
   }
 
   const result = {
-    ranges: (resp.body.aggregations
-      .latency_ranges as estypes.AggregationsMultiBucketAggregate).buckets,
-    correlation: (resp.body.aggregations
-      .transaction_duration_correlation as estypes.AggregationsValueAggregate)
-      .value,
+    ranges: (
+      resp.body.aggregations
+        .latency_ranges as estypes.AggregationsMultiBucketAggregate
+    ).buckets,
+    correlation: (
+      resp.body.aggregations
+        .transaction_duration_correlation as estypes.AggregationsValueAggregate
+    ).value,
     // @ts-ignore
     ksTest: resp.body.aggregations.ks_test.less,
   };
