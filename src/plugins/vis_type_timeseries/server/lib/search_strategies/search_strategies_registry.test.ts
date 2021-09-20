@@ -25,7 +25,7 @@ class MockSearchStrategy extends AbstractSearchStrategy {
 }
 
 describe('SearchStrategyRegister', () => {
-  const requestContext = ({
+  const requestContext = {
     core: {
       uiSettings: {
         client: {
@@ -33,7 +33,7 @@ describe('SearchStrategyRegister', () => {
         },
       },
     },
-  } as unknown) as VisTypeTimeseriesRequestHandlerContext;
+  } as unknown as VisTypeTimeseriesRequestHandlerContext;
   let registry: SearchStrategyRegistry;
 
   beforeAll(() => {
@@ -52,7 +52,7 @@ describe('SearchStrategyRegister', () => {
   });
 
   test('should return a DefaultSearchStrategy instance', async () => {
-    const req = { body: {} } as VisTypeTimeseriesRequest;
+    const req = { body: { panels: [] } } as VisTypeTimeseriesRequest;
 
     const { searchStrategy, capabilities } = (await registry.getViableStrategy(
       requestContext,
@@ -73,7 +73,7 @@ describe('SearchStrategyRegister', () => {
   });
 
   test('should return a MockSearchStrategy instance', async () => {
-    const req = { body: {} } as VisTypeTimeseriesRequest;
+    const req = { body: { panels: [] } } as VisTypeTimeseriesRequest;
     const anotherSearchStrategy = new MockSearchStrategy();
     registry.addStrategy(anotherSearchStrategy);
 

@@ -19,7 +19,12 @@ import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { TGridCellAction, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import {
+  BulkActionsProp,
+  TGridCellAction,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 
 import type {
   CellValueElementProps,
@@ -95,6 +100,7 @@ const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 export interface TGridIntegratedProps {
   additionalFilters: React.ReactNode;
   browserFields: BrowserFields;
+  bulkActions?: BulkActionsProp;
   columns: ColumnHeaderOptions[];
   data?: DataPublicPluginStart;
   dataProviders: DataProvider[];
@@ -135,6 +141,7 @@ export interface TGridIntegratedProps {
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   additionalFilters,
   browserFields,
+  bulkActions = true,
   columns,
   data,
   dataProviders,
@@ -206,10 +213,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     [isLoadingIndexPattern, combinedQueries, start, end]
   );
 
-  const fields = useMemo(() => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])], [
-    columnsHeader,
-    queryFields,
-  ]);
+  const fields = useMemo(
+    () => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])],
+    [columnsHeader, queryFields]
+  );
 
   const sortField = useMemo(
     () =>
@@ -221,25 +228,23 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     [sort]
   );
 
-  const [
-    loading,
-    { events, loadPage, pageInfo, refetch, totalCount = 0, inspect },
-  ] = useTimelineEvents({
-    // We rely on entityType to determine Events vs Alerts
-    alertConsumers: SECURITY_ALERTS_CONSUMERS,
-    data,
-    docValueFields,
-    endDate: end,
-    entityType,
-    fields,
-    filterQuery: combinedQueries!.filterQuery,
-    id,
-    indexNames,
-    limit: itemsPerPage,
-    skip: !canQueryTimeline,
-    sort: sortField,
-    startDate: start,
-  });
+  const [loading, { events, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
+    useTimelineEvents({
+      // We rely on entityType to determine Events vs Alerts
+      alertConsumers: SECURITY_ALERTS_CONSUMERS,
+      data,
+      docValueFields,
+      endDate: end,
+      entityType,
+      fields,
+      filterQuery: combinedQueries!.filterQuery,
+      id,
+      indexNames,
+      limit: itemsPerPage,
+      skip: !canQueryTimeline,
+      sort: sortField,
+      startDate: start,
+    });
 
   const filterQuery = useMemo(
     () =>
@@ -265,10 +270,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const hasAlerts = totalCountMinusDeleted > 0;
 
-  const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
-    deletedEventIds,
-    events,
-  ]);
+  const nonDeletedEvents = useMemo(
+    () => events.filter((e) => !deletedEventIds.includes(e._id)),
+    [deletedEventIds, events]
+  );
 
   useEffect(() => {
     setIsQueryLoading(loading);
@@ -334,6 +339,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                           hasAlertsCrud={hasAlertsCrud}
                           activePage={pageInfo.activePage}
                           browserFields={browserFields}
+                          bulkActions={bulkActions}
                           filterQuery={filterQuery}
                           data={nonDeletedEvents}
                           defaultCellActions={defaultCellActions}

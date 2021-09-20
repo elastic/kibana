@@ -30,6 +30,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       <EuiToolTip
         content="Add Y-axis"
         delay="regular"
+        display="inlineBlock"
         position="bottom"
       >
         <EuiButtonIcon
@@ -55,6 +56,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
         <EuiToolTip
           content="Count"
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <React.Fragment>
@@ -70,6 +72,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       <EuiToolTip
         content="Remove Y-axis"
         delay="regular"
+        display="inlineBlock"
         position="bottom"
       >
         <EuiButtonIcon
@@ -163,6 +166,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
         <EuiToolTip
           content="Average"
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <React.Fragment>
@@ -178,6 +182,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       <EuiToolTip
         content="Remove Y-axis"
         delay="regular"
+        display="inlineBlock"
         position="bottom"
       >
         <EuiButtonIcon
