@@ -230,12 +230,10 @@ const createPinnedEvent = async ({
 
   const pinnedEventWithCreator = pickSavedPinnedEvent(null, savedPinnedEvent, request.user);
 
-  const {
-    transformedFields: migratedAttributes,
-    references,
-  } = pinnedEventFieldsMigrator.extractFieldsToReferences<PinnedEventWithoutExternalRefs>({
-    data: pinnedEventWithCreator,
-  });
+  const { transformedFields: migratedAttributes, references } =
+    pinnedEventFieldsMigrator.extractFieldsToReferences<PinnedEventWithoutExternalRefs>({
+      data: pinnedEventWithCreator,
+    });
 
   const createdPinnedEvent = await savedObjectsClient.create<PinnedEventWithoutExternalRefs>(
     pinnedEventSavedObjectType,
@@ -243,9 +241,8 @@ const createPinnedEvent = async ({
     { references }
   );
 
-  const repopulatedSavedObject = pinnedEventFieldsMigrator.populateFieldsFromReferences(
-    createdPinnedEvent
-  );
+  const repopulatedSavedObject =
+    pinnedEventFieldsMigrator.populateFieldsFromReferences(createdPinnedEvent);
 
   // create Pinned Event on Timeline
   return convertSavedObjectToSavedPinnedEvent(repopulatedSavedObject, timelineVersion);
@@ -271,9 +268,8 @@ const getAllSavedPinnedEvents = async (
   const savedObjects = await savedObjectsClient.find<PinnedEventWithoutExternalRefs>(options);
 
   return savedObjects.saved_objects.map((savedObject) => {
-    const populatedPinnedEvent = pinnedEventFieldsMigrator.populateFieldsFromReferences(
-      savedObject
-    );
+    const populatedPinnedEvent =
+      pinnedEventFieldsMigrator.populateFieldsFromReferences(savedObject);
 
     return convertSavedObjectToSavedPinnedEvent(populatedPinnedEvent);
   });
