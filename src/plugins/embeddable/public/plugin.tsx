@@ -100,10 +100,8 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
 export type EmbeddablePanelHOC = React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
-  private readonly embeddableFactoryDefinitions: Map<
-    string,
-    EmbeddableFactoryDefinition
-  > = new Map();
+  private readonly embeddableFactoryDefinitions: Map<string, EmbeddableFactoryDefinition> =
+    new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private readonly enhancements: EnhancementsRegistry = new Map();
   private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
@@ -155,27 +153,24 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
     this.isRegistryReady = true;
 
-    const getEmbeddablePanelHoc = () => ({
-      embeddable,
-      hideHeader,
-    }: {
-      embeddable: IEmbeddable;
-      hideHeader?: boolean;
-    }) => (
-      <EmbeddablePanel
-        hideHeader={hideHeader}
-        embeddable={embeddable}
-        stateTransfer={this.stateTransferService}
-        getActions={uiActions.getTriggerCompatibleActions}
-        getEmbeddableFactory={this.getEmbeddableFactory}
-        getAllEmbeddableFactories={this.getEmbeddableFactories}
-        overlays={core.overlays}
-        notifications={core.notifications}
-        application={core.application}
-        inspector={inspector}
-        SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
-      />
-    );
+    const getEmbeddablePanelHoc =
+      () =>
+      ({ embeddable, hideHeader }: { embeddable: IEmbeddable; hideHeader?: boolean }) =>
+        (
+          <EmbeddablePanel
+            hideHeader={hideHeader}
+            embeddable={embeddable}
+            stateTransfer={this.stateTransferService}
+            getActions={uiActions.getTriggerCompatibleActions}
+            getEmbeddableFactory={this.getEmbeddableFactory}
+            getAllEmbeddableFactories={this.getEmbeddableFactories}
+            overlays={core.overlays}
+            notifications={core.notifications}
+            application={core.application}
+            inspector={inspector}
+            SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
+          />
+        );
 
     const commonContract = {
       getEmbeddableFactory: this.getEmbeddableFactory,

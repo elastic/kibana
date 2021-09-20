@@ -41,14 +41,16 @@ export function migrateAppState(
     );
   }
 
-  const panelNeedsMigration = (appState.panels as Array<
-    | SavedDashboardPanelTo60
-    | SavedDashboardPanel610
-    | SavedDashboardPanel620
-    | SavedDashboardPanel630
-    | SavedDashboardPanel640To720
-    | SavedDashboardPanel730ToLatest
-  >).some((panel) => {
+  const panelNeedsMigration = (
+    appState.panels as Array<
+      | SavedDashboardPanelTo60
+      | SavedDashboardPanel610
+      | SavedDashboardPanel620
+      | SavedDashboardPanel630
+      | SavedDashboardPanel640To720
+      | SavedDashboardPanel730ToLatest
+    >
+  ).some((panel) => {
     if ((panel as { version?: string }).version === undefined) return true;
 
     const version = (panel as SavedDashboardPanel730ToLatest).version;

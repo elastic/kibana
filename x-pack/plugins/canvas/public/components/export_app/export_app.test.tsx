@@ -24,7 +24,7 @@ jest.mock('../routing', () => ({
 
 describe('<ExportApp />', () => {
   test('renders as expected', () => {
-    const sampleWorkpad = ({
+    const sampleWorkpad = {
       id: 'my-workpad-abcd',
       css: '',
       pages: [
@@ -35,7 +35,7 @@ describe('<ExportApp />', () => {
           elements: [3, 4, 5, 6],
         },
       ],
-    } as any) as CanvasWorkpad;
+    } as any as CanvasWorkpad;
 
     const page1 = mount(
       <ExportApp workpad={sampleWorkpad} selectedPageIndex={0} initializeWorkpad={() => {}} />
