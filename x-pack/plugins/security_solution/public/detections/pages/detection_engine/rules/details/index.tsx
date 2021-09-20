@@ -178,7 +178,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).graphEventId
   );
   const updatedAt = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
+    (state) =>
+      (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).updated
   );
   const isAlertsLoading = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).isLoading
@@ -352,7 +353,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: Status) => {
-      const timelineId = TimelineId.detectionsPage;
+      const timelineId = TimelineId.detectionsRulesDetailsPage;
       clearEventsLoading!({ id: timelineId });
       clearEventsDeleted!({ id: timelineId });
       clearSelected!({ id: timelineId });
