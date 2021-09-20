@@ -34,6 +34,44 @@ import {
   createLoadingResourceState,
   createUninitialisedResourceState,
 } from '../../../../state';
+import { parseQueryFilterToKQL } from '../../../../common/utils';
+import { SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
+
+const searchTrustedApps = async (state, trustedAppsService, dispatch) => {
+  const location = getCurrentArtifactsLocation(state);
+  const policyId = policyIdFromParams(state);
+
+  dispatch({
+    type: 'policyArtifactsAvailableListPageDataChanged',
+    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+    // @ts-ignore
+    payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+  });
+
+  const kuery = [
+    `(not exception-list-agnostic.attributes.tags:"policy:${policyId}") AND (not exception-list-agnostic.attributes.tags:"policy:all")`,
+  ];
+
+  const filterKuery = parseQueryFilterToKQL(location.filter, SEARCHABLE_FIELDS) || undefined;
+  if (filterKuery) kuery.push(filterKuery);
+
+  const trustedApps = await trustedAppsService.getTrustedAppsList({
+    page: 1,
+    per_page: 100,
+    kuery: kuery.join(' AND '),
+  });
+
+  dispatch({
+    type: 'policyArtifactsAvailableListPageDataChanged',
+    payload: createLoadedResourceState({
+      items: trustedApps.data,
+      pageIndex: 1,
+      pageSize: 100,
+      totalItemsCount: trustedApps.total,
+      timestamp: Date.now(),
+    }),
+  });
+};
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
   coreStart
@@ -108,31 +146,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       isOnPolicyTrustedAppsPage(state) &&
       getCurrentArtifactsLocation(state).show === 'list'
     ) {
-      const policyId = policyIdFromParams(state);
-
-      dispatch({
-        type: 'policyArtifactsAvailableListPageDataChanged',
-        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-        // @ts-ignore
-        payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
-      });
-
-      const trustedApps = await trustedAppsService.getTrustedAppsList({
-        page: 1,
-        per_page: 100,
-        kuery: `(not exception-list-agnostic.attributes.tags:"policy:${policyId}") AND (not exception-list-agnostic.attributes.tags:"policy:all")`,
-      });
-
-      dispatch({
-        type: 'policyArtifactsAvailableListPageDataChanged',
-        payload: createLoadedResourceState({
-          items: trustedApps.data,
-          pageIndex: 1,
-          pageSize: 100,
-          totalItemsCount: trustedApps.total,
-          timestamp: Date.now(),
-        }),
-      });
+      searchTrustedApps(state, trustedAppsService, dispatch);
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
       const { id } = policyDetails(state) as PolicyData;
       const updatedPolicyItem = policyDetailsForUpdate(state) as NewPolicyData;

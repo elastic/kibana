@@ -32,6 +32,7 @@ import {
 } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyArtifactsList } from '../../artifacts/list';
+import { SearchExceptions } from '../../../../../components/search_exceptions';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const [_, setSelectedArtifactIds] = useState<string[]>([]);
@@ -68,6 +69,9 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
   );
 
   const handleOnConfirmAction = useCallback(() => {}, []);
+  const handleOnSearch = usePolicyDetailsNavigateCallback((filter) => ({
+    filter,
+  }));
 
   const addArtifactsFlyout = useMemo(
     () => (
@@ -89,6 +93,17 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
+          <SearchExceptions
+            defaultValue={location.filter}
+            onSearch={handleOnSearch}
+            placeholder={i18n.translate(
+              'xpack.securitySolution.endpoint.policy.trustedApps.layout.searh.label',
+              {
+                defaultMessage: 'Search trusted applications',
+              }
+            )}
+          />
+          <EuiSpacer size="m" />
           <PolicyArtifactsList
             artifacts={availableArtifactsList}
             defaultSelectedArtifactIds={[]}
@@ -128,10 +143,12 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
       </EuiFlyout>
     ),
     [
-      availableArtifactsList,
       handleListFlyoutClose,
-      isAvailableArtifactsListLoading,
       policyName,
+      location.filter,
+      handleOnSearch,
+      availableArtifactsList,
+      isAvailableArtifactsListLoading,
       handleOnConfirmAction,
     ]
   );
