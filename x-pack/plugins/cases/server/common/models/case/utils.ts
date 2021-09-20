@@ -64,3 +64,21 @@ export const getOrUpdateLensReferences = (
 
   return currentNonLensReferences.concat(newCommentLensReferences);
 };
+
+/**
+ * TODO: split this up into a class for lens and timeline
+ *
+ * A class can implement an interface that
+ * defines a method extractReferences
+ *
+ * Then have a function that does:
+ *
+ * oldRefs = extractReferences(oldSavedObject)
+ *
+ * refsNotIncludingType = xor(oldSavedObject.refs, oldRefs)
+ *
+ * newRefs = extractReferences(newComment)
+ *
+ * Do that for both lens and timeline, then add newRefs together and return it
+ *
+ */
