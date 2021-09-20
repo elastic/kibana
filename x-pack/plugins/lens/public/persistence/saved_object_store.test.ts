@@ -17,7 +17,7 @@ describe('LensStore', () => {
 
     return {
       client,
-      store: new SavedObjectIndexStore((client as unknown) as SavedObjectsClientContract),
+      store: new SavedObjectIndexStore(client as unknown as SavedObjectsClientContract),
     };
   }
 

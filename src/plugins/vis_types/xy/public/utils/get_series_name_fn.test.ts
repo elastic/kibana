@@ -63,7 +63,7 @@ const aspects = {
   ],
 };
 
-const series = ({
+const series = {
   specId: 'histogram-col-1-1',
   seriesKeys: ['col-1-1'],
   yAccessor: 'col-1-1',
@@ -73,12 +73,12 @@ const series = ({
   groupId: '__pseudo_stacked_group-ValueAxis-1__',
   seriesType: 'bar',
   isStacked: true,
-} as unknown) as XYChartSeriesIdentifier;
+} as unknown as XYChartSeriesIdentifier;
 
 const splitAccessors = new Map();
 splitAccessors.set('col-1-3', 'Weather Delay');
 
-const seriesSplitAccessors = ({
+const seriesSplitAccessors = {
   specId: 'histogram-col-2-1',
   seriesKeys: ['Weather Delay', 'col-2-1'],
   yAccessor: 'col-2-1',
@@ -88,7 +88,7 @@ const seriesSplitAccessors = ({
   groupId: '__pseudo_stacked_group-ValueAxis-1__',
   seriesType: 'bar',
   isStacked: true,
-} as unknown) as XYChartSeriesIdentifier;
+} as unknown as XYChartSeriesIdentifier;
 
 describe('getSeriesNameFn', () => {
   it('returns the y aspects title if splitAccessors are empty array', () => {

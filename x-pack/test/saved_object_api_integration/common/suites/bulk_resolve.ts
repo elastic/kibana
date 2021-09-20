@@ -31,38 +31,40 @@ export { TEST_CASES }; // re-export the (non-bulk) resolve test cases
 
 export function bulkResolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_get');
-  const expectResponseBody = (
-    testCases: BulkResolveTestCase | BulkResolveTestCase[],
-    statusCode: 200 | 403
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
-    if (statusCode === 403) {
-      const types = testCaseArray.map((x) => x.type);
-      await expectSavedObjectForbidden(types)(response);
-    } else {
-      // permitted
-      const resolvedObjects = response.body.resolved_objects;
-      expect(resolvedObjects).length(testCaseArray.length);
-      for (let i = 0; i < resolvedObjects.length; i++) {
-        const resolvedObject = resolvedObjects[i];
-        const testCase = testCaseArray[i];
-        const { expectedId: id, expectedOutcome, expectedAliasTargetId } = testCase;
-        await expectResponses.permitted(resolvedObject.saved_object, {
-          ...testCase,
-          ...(!testCase.failure && id && { id }), // use expected ID instead of the requested ID iff the case was *not* a failure
-        });
-        if (!testCase.failure) {
-          expect(resolvedObject.outcome).to.eql(expectedOutcome);
-          if (expectedOutcome === 'conflict' || expectedOutcome === 'aliasMatch') {
-            expect(resolvedObject.alias_target_id).to.eql(expectedAliasTargetId);
-          } else {
-            expect(resolvedObject.alias_target_id).to.eql(undefined);
+  const expectResponseBody =
+    (
+      testCases: BulkResolveTestCase | BulkResolveTestCase[],
+      statusCode: 200 | 403
+    ): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
+      if (statusCode === 403) {
+        const types = testCaseArray.map((x) => x.type);
+        await expectSavedObjectForbidden(types)(response);
+      } else {
+        // permitted
+        const resolvedObjects = response.body.resolved_objects;
+        expect(resolvedObjects).length(testCaseArray.length);
+        for (let i = 0; i < resolvedObjects.length; i++) {
+          const resolvedObject = resolvedObjects[i];
+          const testCase = testCaseArray[i];
+          const { expectedId: id, expectedOutcome, expectedAliasTargetId } = testCase;
+          await expectResponses.permitted(resolvedObject.saved_object, {
+            ...testCase,
+            ...(!testCase.failure && id && { id }), // use expected ID instead of the requested ID iff the case was *not* a failure
+          });
+          if (!testCase.failure) {
+            expect(resolvedObject.outcome).to.eql(expectedOutcome);
+            if (expectedOutcome === 'conflict' || expectedOutcome === 'aliasMatch') {
+              expect(resolvedObject.alias_target_id).to.eql(expectedAliasTargetId);
+            } else {
+              expect(resolvedObject.alias_target_id).to.eql(undefined);
+            }
+            // TODO: add assertions for redacted namespaces (#112455)
           }
-          // TODO: add assertions for redacted namespaces (#112455)
         }
       }
-    }
-  };
+    };
   const createTestDefinitions = (
     testCases: BulkResolveTestCase | BulkResolveTestCase[],
     forbidden: boolean,
@@ -96,36 +98,35 @@ export function bulkResolveTestSuiteFactory(esArchiver: any, supertest: SuperTes
     ];
   };
 
-  const makeBulkResolveTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: BulkResolveTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeBulkResolveTest =
+    (describeFn: Mocha.SuiteFunction) =>
+    (description: string, definition: BulkResolveTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_resolve`)
-            .auth(user?.username, user?.password)
-            .send(test.request)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            await supertest
+              .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_resolve`)
+              .auth(user?.username, user?.password)
+              .send(test.request)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeBulkResolveTest(describe);
   // @ts-ignore

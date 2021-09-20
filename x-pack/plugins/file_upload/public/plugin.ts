@@ -36,7 +36,8 @@ export class FileUploadPlugin
       FileUploadPluginStart,
       FileUploadSetupDependencies,
       FileUploadStartDependencies
-    > {
+    >
+{
   public setup() {}
 
   public start(core: CoreStart, plugins: FileUploadStartDependencies): FileUploadStartApi {
