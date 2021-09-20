@@ -145,11 +145,6 @@ describe('schema_extractor', () => {
             documentation: '',
             type: 'boolean',
           },
-          {
-            name: 'ignore_throttled',
-            documentation: '',
-            type: 'boolean',
-          },
         ],
       },
     ]);
