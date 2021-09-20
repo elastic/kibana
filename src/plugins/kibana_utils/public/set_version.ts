@@ -16,6 +16,6 @@ export const setVersion = (history: Pick<History, 'location' | 'replace'>, versi
     history.location.pathname +
     '?' +
     search.toString() +
-    (history.location.hash ? '#' : history.location.hash);
+    (history.location.hash ? '#' + history.location.hash : '');
   history.replace(path);
 };
