@@ -7,10 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import {
-  DEFAULT_ALERTS_INDEX,
-  DETECTION_ENGINE_QUERY_SIGNALS_URL,
-} from '../../../../../common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
@@ -18,10 +15,11 @@ import {
   querySignalsSchema,
   QuerySignalsSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
 export const querySignalsRoute = (
   router: SecuritySolutionPluginRouter,
-  isRuleRegistryEnabled: boolean
+  ruleDataClient: IRuleDataClient | null
 ) => {
   router.post(
     {
@@ -51,13 +49,23 @@ export const querySignalsRoute = (
           body: '"value" must have at least 1 children',
         });
       }
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const siemClient = context.securitySolution!.getAppClient();
 
       try {
+        const result = await ruleDataClient?.getReader().search({
+          body: {
+            query,
+            // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }
+            aggs: { ...aggs },
+            _source,
+            track_total_hits,
+            size,
+          },
+          ignore_unavailable: true,
+        });
+        /*
         const { body } = await esClient.search({
           index: isRuleRegistryEnabled
-            ? `${DEFAULT_ALERTS_INDEX}-default-*`
+            ? `.internal${DEFAULT_ALERTS_INDEX}-default-*`
             : siemClient.getSignalsIndex(),
           body: {
             query,
@@ -69,7 +77,8 @@ export const querySignalsRoute = (
           },
           ignore_unavailable: true,
         });
-        return response.ok({ body });
+        */
+        return response.ok({ body: result });
       } catch (err) {
         // error while getting or updating signal with id: id in signal index .siem-signals
         const error = transformError(err);

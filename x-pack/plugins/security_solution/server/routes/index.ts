@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleDataPluginService } from '../../../rule_registry/server';
+import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
 
@@ -64,8 +64,10 @@ export const initRoutes = (
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
   ruleDataService: RuleDataPluginService,
-  isRuleRegistryEnabled: boolean
+  // isRuleRegistryEnabled: boolean
+  ruleDataClient: IRuleDataClient | null
 ) => {
+  const isRuleRegistryEnabled = ruleDataClient != null;
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
   createRulesRoute(router, ml, isRuleRegistryEnabled);
@@ -110,7 +112,7 @@ export const initRoutes = (
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
   setSignalsStatusRoute(router);
-  querySignalsRoute(router, isRuleRegistryEnabled);
+  querySignalsRoute(router, ruleDataClient);
   getSignalsMigrationStatusRoute(router);
   createSignalsMigrationRoute(router, security);
   finalizeSignalsMigrationRoute(router, security);

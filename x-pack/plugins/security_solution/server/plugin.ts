@@ -277,7 +277,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.security,
       plugins.ml,
       ruleDataService,
-      isRuleRegistryEnabled
+      ruleDataClient
+      // isRuleRegistryEnabled
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
