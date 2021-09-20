@@ -5,17 +5,99 @@
  * 2.0.
  */
 
-import React from 'react';
-import { getListItems } from '../store/selector';
+// TODO remove this, do not merge with this
+/* eslint-disable no-console */
+
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { useCallback } from 'react';
+import { EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
+import {
+  getListFetchError,
+  getListIsLoading,
+  getListItems,
+  getListPagination,
+} from '../store/selector';
 import { useHostIsolationExceptionsSelector } from './hooks';
+import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
+import { Immutable } from '../../../../../common/endpoint/types';
+import { AdministrationListPage } from '../../../components/administration_list_page';
+
+type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
+  Immutable<ExceptionListItemSchema>,
+  typeof ExceptionItem
+>;
 
 export const HostIsolationExceptions = () => {
   const listItems = useHostIsolationExceptionsSelector(getListItems);
+  const pagination = useHostIsolationExceptionsSelector(getListPagination);
+  const isLoading = useHostIsolationExceptionsSelector(getListIsLoading);
+  const fetchError = useHostIsolationExceptionsSelector(getListFetchError);
 
-  console.log(listItems);
+  const handleItemEdit = useCallback(() => {}, []);
+  const handleItemDelete = useCallback(() => {}, []);
+
+  const handleItemComponentProps: HostIsolationExceptionPaginatedContent['itemComponentProps'] =
+    useCallback(
+      (exceptionItem) => ({
+        exceptionItem: exceptionItem as ExceptionListItemSchema,
+        loadingItemIds: [],
+        commentsAccordionId: '',
+        onEditException: handleItemEdit,
+        onDeleteException: handleItemDelete,
+        showModified: true,
+        showName: true,
+        'data-test-subj': `eventFilterCard`,
+      }),
+      [handleItemDelete, handleItemEdit]
+    );
+
+  const handlePaginatedContentChange: HostIsolationExceptionPaginatedContent['onChange'] =
+    useCallback(({ pageIndex, pageSize }) => {
+      console.log('callback');
+    }, []);
+
+  const handleAddButtonClick = () => {
+    console.log('add host isolation exception');
+  };
+  const showFlyout = false;
+
   return (
-    <>
-      <h1>Exceptions list</h1>
-    </>
+    <AdministrationListPage
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.HostIsolationExceptions.list.pageTitle"
+          defaultMessage="Host Isolation Exceptions"
+        />
+      }
+      actions={
+        <EuiButton
+          fill
+          iconType="plusInCircle"
+          isDisabled={showFlyout}
+          onClick={handleAddButtonClick}
+          data-test-subj="eventFiltersPageAddButton"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.eventFilters.list.pageAddButton"
+            defaultMessage="Add event filter"
+          />
+        </EuiButton>
+      }
+    >
+      <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof ExceptionItem>
+        items={listItems}
+        ItemComponent={ExceptionItem}
+        itemComponentProps={handleItemComponentProps}
+        onChange={handlePaginatedContentChange}
+        error={fetchError?.message}
+        loading={isLoading}
+        pagination={pagination}
+        contentClassName="host-isolation-exceptions-container"
+        data-test-subj="HostIsolationExceptionsContent"
+        noItemsMessage={<h1>{' Nothing yet'}</h1>}
+      />
+    </AdministrationListPage>
   );
 };

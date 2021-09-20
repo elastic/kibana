@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { Pagination } from '@elastic/eui';
 import {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { HostIsolationExceptionsPageState } from '../types';
+import { createSelector } from 'reselect';
 import { Immutable } from '../../../../../common/endpoint/types';
-import { getLastLoadedResourceState } from '../../../state/async_resource_state';
+import { ServerApiError } from '../../../../common/types';
+import {
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
+} from '../../../common/constants';
+import {
+  getLastLoadedResourceState,
+  isFailedResourceState,
+  isLoadingResourceState,
+} from '../../../state/async_resource_state';
+import { HostIsolationExceptionsPageState } from '../types';
 
 type StoreState = Immutable<HostIsolationExceptionsPageState>;
 type HostIsolationExceptionsSelector<T> = (state: StoreState) => T;
@@ -35,3 +45,27 @@ export const getListItems: HostIsolationExceptionsSelector<Immutable<ExceptionLi
   createSelector(getListApiSuccessResponse, (apiResponseData) => {
     return apiResponseData?.data || [];
   });
+
+export const getListPagination: HostIsolationExceptionsSelector<Pagination> = createSelector(
+  getListApiSuccessResponse,
+  // memoized via `reselect` until the API response changes
+  (response) => {
+    return {
+      totalItemCount: response?.total ?? 0,
+      pageSize: response?.per_page ?? MANAGEMENT_DEFAULT_PAGE_SIZE,
+      pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+      pageIndex: (response?.page ?? 1) - 1,
+    };
+  }
+);
+
+export const getListIsLoading: HostIsolationExceptionsSelector<boolean> = createSelector(
+  getCurrentListPageDataState,
+  (listDataState) => isLoadingResourceState(listDataState)
+);
+
+export const getListFetchError: HostIsolationExceptionsSelector<
+  Immutable<ServerApiError> | undefined
+> = createSelector(getCurrentListPageDataState, (listPageDataState) => {
+  return (isFailedResourceState(listPageDataState) && listPageDataState.error) || undefined;
+});
