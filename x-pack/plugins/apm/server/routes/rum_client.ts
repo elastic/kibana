@@ -7,11 +7,7 @@
 import * as t from 'io-ts';
 import { Logger } from 'kibana/server';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
-import {
-  setupRequest,
-  Setup,
-  SetupRequestParams,
-} from '../lib/helpers/setup_request';
+import { setupRequest, Setup } from '../lib/helpers/setup_request';
 import { getClientMetrics } from '../lib/rum_client/get_client_metrics';
 import { getJSErrors } from '../lib/rum_client/get_js_errors';
 import { getLongTaskMetrics } from '../lib/rum_client/get_long_task_metrics';
@@ -31,12 +27,6 @@ import { APMRouteHandlerResources } from '../routes/typings';
 
 export type SetupUX = Setup & {
   uiFilters: UxUIFilters;
-};
-
-type SetupUXRequestParams = Omit<SetupRequestParams, 'query'> & {
-  query: SetupRequestParams['query'] & {
-    uiFilters?: string;
-  };
 };
 
 export const percentileRangeRt = t.partial({
@@ -62,13 +52,15 @@ const rumClientMetricsRoute = createApmServerRoute({
     const setup = await setupUXRequest(resources);
 
     const {
-      query: { urlQuery, percentile },
+      query: { urlQuery, percentile, start, end },
     } = resources.params;
 
     return getClientMetrics({
       setup,
       urlQuery,
       percentile: percentile ? Number(percentile) : undefined,
+      start,
+      end,
     });
   },
 });
@@ -83,7 +75,7 @@ const rumPageLoadDistributionRoute = createApmServerRoute({
     const setup = await setupUXRequest(resources);
 
     const {
-      query: { minPercentile, maxPercentile, urlQuery },
+      query: { minPercentile, maxPercentile, urlQuery, start, end },
     } = resources.params;
 
     const pageLoadDistribution = await getPageLoadDistribution({
@@ -91,6 +83,8 @@ const rumPageLoadDistributionRoute = createApmServerRoute({
       minPercentile,
       maxPercentile,
       urlQuery,
+      start,
+      end,
     });
 
     return { pageLoadDistribution };
@@ -111,7 +105,7 @@ const rumPageLoadDistBreakdownRoute = createApmServerRoute({
     const setup = await setupUXRequest(resources);
 
     const {
-      query: { minPercentile, maxPercentile, breakdown, urlQuery },
+      query: { minPercentile, maxPercentile, breakdown, urlQuery, start, end },
     } = resources.params;
 
     const pageLoadDistBreakdown = await getPageLoadDistBreakdown({
@@ -120,6 +114,8 @@ const rumPageLoadDistBreakdownRoute = createApmServerRoute({
       maxPercentile: Number(maxPercentile),
       breakdown,
       urlQuery,
+      start,
+      end,
     });
 
     return { pageLoadDistBreakdown };
@@ -136,13 +132,15 @@ const rumPageViewsTrendRoute = createApmServerRoute({
     const setup = await setupUXRequest(resources);
 
     const {
-      query: { breakdowns, urlQuery },
+      query: { breakdowns, urlQuery, start, end },
     } = resources.params;
 
     return getPageViewTrends({
       setup,
       breakdowns,
       urlQuery,
+      start,
+      end,
     });
   },
 });
@@ -155,8 +153,10 @@ const rumServicesRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupUXRequest(resources);
-
-    const rumServices = await getRumServices({ setup });
+    const {
+      query: { start, end },
+    } = resources.params;
+    const rumServices = await getRumServices({ setup, start, end });
     return { rumServices };
   },
 });
@@ -171,12 +171,14 @@ const rumVisitorsBreakdownRoute = createApmServerRoute({
     const setup = await setupUXRequest(resources);
 
     const {
-      query: { urlQuery },
+      query: { urlQuery, start, end },
     } = resources.params;
 
     return getVisitorBreakdown({
       setup,
       urlQuery,
+      start,
+      end,
     });
   },
 });
@@ -191,13 +193,15 @@ const rumWebCoreVitals = createApmServerRoute({
     const setup = await setupUXRequest(resources);
 
     const {
-      query: { urlQuery, percentile },
+      query: { urlQuery, percentile, start, end },
     } = resources.params;
 
     return getWebCoreVitals({
       setup,
       urlQuery,
       percentile: percentile ? Number(percentile) : undefined,
+      start,
+      end,
     });
   },
 });
@@ -212,13 +216,15 @@ const rumLongTaskMetrics = createApmServerRoute({
     const setup = await setupUXRequest(resources);
 
     const {
-      query: { urlQuery, percentile },
+      query: { urlQuery, percentile, start, end },
     } = resources.params;
 
     return getLongTaskMetrics({
       setup,
       urlQuery,
       percentile: percentile ? Number(percentile) : undefined,
+      start,
+      end,
     });
   },
 });
@@ -233,10 +239,16 @@ const rumUrlSearch = createApmServerRoute({
     const setup = await setupUXRequest(resources);
 
     const {
-      query: { urlQuery, percentile },
+      query: { urlQuery, percentile, start, end },
     } = resources.params;
 
-    return getUrlSearch({ setup, urlQuery, percentile: Number(percentile) });
+    return getUrlSearch({
+      setup,
+      urlQuery,
+      percentile: Number(percentile),
+      start,
+      end,
+    });
   },
 });
 
@@ -255,7 +267,7 @@ const rumJSErrors = createApmServerRoute({
     const setup = await setupUXRequest(resources);
 
     const {
-      query: { pageSize, pageIndex, urlQuery },
+      query: { pageSize, pageIndex, urlQuery, start, end },
     } = resources.params;
 
     return getJSErrors({
@@ -263,6 +275,8 @@ const rumJSErrors = createApmServerRoute({
       urlQuery,
       pageSize: Number(pageSize),
       pageIndex: Number(pageIndex),
+      start,
+      end,
     });
   },
 });
@@ -279,7 +293,10 @@ const rumHasDataRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupUXRequest(resources);
-    return await hasRumData({ setup });
+    const {
+      query: { start, end },
+    } = resources.params;
+    return await hasRumData({ setup, start, end });
   },
 });
 
@@ -298,9 +315,7 @@ function decodeUiFilters(
   }
 }
 
-async function setupUXRequest<TParams extends SetupUXRequestParams>(
-  resources: APMRouteHandlerResources & { params: TParams }
-) {
+async function setupUXRequest(resources: APMRouteHandlerResources) {
   const setup = await setupRequest(resources);
   return {
     ...setup,

@@ -25,14 +25,16 @@ const tracesRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { environment, kuery } = params.query;
+    const { environment, kuery, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
+      start,
+      end,
     });
 
     return getTopTransactionGroupList(
-      { environment, kuery, searchAggregatedTransactions },
+      { environment, kuery, searchAggregatedTransactions, start, end },
       setup
     );
   },
@@ -50,9 +52,10 @@ const tracesByIdRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-
     const { traceId } = params.path;
-    return getTraceItems(traceId, setup);
+    const { start, end } = params.query;
+
+    return getTraceItems(traceId, setup, start, end);
   },
 });
 
@@ -78,13 +81,17 @@ const transactionByIdRoute = createApmServerRoute({
     path: t.type({
       transactionId: t.string,
     }),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const { params } = resources;
     const { transactionId } = params.path;
+    const { start, end } = params.query;
     const setup = await setupRequest(resources);
-    return { transaction: await getTransaction({ transactionId, setup }) };
+    return {
+      transaction: await getTransaction({ transactionId, setup, start, end }),
+    };
   },
 });
 
