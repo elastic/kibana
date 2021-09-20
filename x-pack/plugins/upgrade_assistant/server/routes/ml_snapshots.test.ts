@@ -192,7 +192,7 @@ describe('ML snapshots APIs', () => {
 
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
-        mlUpgradeMode: true,
+        mlUpgradeModeEnabled: true,
       });
     });
   });

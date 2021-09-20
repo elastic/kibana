@@ -160,7 +160,7 @@ export const FixSnapshotsFlyout = ({
   snapshotState,
   upgradeSnapshot,
   deleteSnapshot,
-  mlUpgradeMode,
+  mlUpgradeModeEnabled,
 }: FixSnapshotsFlyoutProps) => {
   const {
     services: {
@@ -207,7 +207,7 @@ export const FixSnapshotsFlyout = ({
           </>
         )}
 
-        {mlUpgradeMode && (
+        {mlUpgradeModeEnabled && (
           <>
             <EuiCallOut
               title={i18nTexts.upgradeModeEnabledErrorTitle}
@@ -240,7 +240,7 @@ export const FixSnapshotsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          {!isResolved && !mlUpgradeMode && (
+          {!isResolved && !mlUpgradeModeEnabled && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
                 <EuiFlexItem>

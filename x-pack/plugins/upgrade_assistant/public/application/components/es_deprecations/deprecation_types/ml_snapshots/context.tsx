@@ -12,7 +12,7 @@ import { useSnapshotState, SnapshotState } from './use_snapshot_state';
 
 export interface MlSnapshotContext {
   snapshotState: SnapshotState;
-  mlUpgradeMode: boolean;
+  mlUpgradeModeEnabled: boolean;
   upgradeSnapshot: () => Promise<void>;
   deleteSnapshot: () => Promise<void>;
 }
@@ -32,14 +32,14 @@ interface Props {
   children: React.ReactNode;
   snapshotId: string;
   jobId: string;
-  mlUpgradeMode: boolean;
+  mlUpgradeModeEnabled: boolean;
 }
 
 export const MlSnapshotsStatusProvider: React.FunctionComponent<Props> = ({
   api,
   snapshotId,
   jobId,
-  mlUpgradeMode,
+  mlUpgradeModeEnabled,
   children,
 }) => {
   const { updateSnapshotStatus, snapshotState, upgradeSnapshot, deleteSnapshot } = useSnapshotState(
@@ -60,7 +60,7 @@ export const MlSnapshotsStatusProvider: React.FunctionComponent<Props> = ({
         snapshotState,
         upgradeSnapshot,
         deleteSnapshot,
-        mlUpgradeMode,
+        mlUpgradeModeEnabled,
       }}
     >
       {children}

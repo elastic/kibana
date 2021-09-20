@@ -23,7 +23,7 @@ describe('Machine learning deprecation flyout', () => {
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
-    httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({ mlUpgradeMode: false });
+    httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({ mlUpgradeModeEnabled: false });
     httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
       snapshotId: MOCK_SNAPSHOT_ID,
@@ -134,7 +134,7 @@ describe('Machine learning deprecation flyout', () => {
     });
 
     it('Doesnt allow to take actions if ml_upgrade_mode is enabled', async () => {
-      httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({ mlUpgradeMode: true });
+      httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({ mlUpgradeModeEnabled: true });
 
       await act(async () => {
         testBed = await setupElasticsearchPage({ isReadOnlyMode: false });

@@ -321,7 +321,7 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
 
           return response.ok({
             body: {
-              mlUpgradeMode: mlInfo.upgrade_mode,
+              mlUpgradeModeEnabled: mlInfo.upgrade_mode,
             },
           });
         } catch (e) {

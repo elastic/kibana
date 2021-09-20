@@ -21,7 +21,7 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
-  mlUpgradeMode: boolean;
+  mlUpgradeModeEnabled: boolean;
 }
 
 export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = ({
@@ -86,7 +86,7 @@ export const MlSnapshotsTableRow: React.FunctionComponent<TableRowProps> = (prop
     <MlSnapshotsStatusProvider
       snapshotId={(props.deprecation.correctiveAction as MlAction).snapshotId}
       jobId={(props.deprecation.correctiveAction as MlAction).jobId}
-      mlUpgradeMode={props.mlUpgradeMode}
+      mlUpgradeModeEnabled={props.mlUpgradeModeEnabled}
       api={api}
     >
       <MlSnapshotsTableRowCells {...props} />

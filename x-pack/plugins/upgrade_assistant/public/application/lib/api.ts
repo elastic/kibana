@@ -183,7 +183,7 @@ export class ApiService {
 
   public useLoadMLUpgradeMode() {
     return this.useRequest<{
-      mlUpgradeMode: boolean;
+      mlUpgradeModeEnabled: boolean;
     }>({
       path: `${API_BASE_PATH}/ml_upgrade_mode`,
       method: 'get',

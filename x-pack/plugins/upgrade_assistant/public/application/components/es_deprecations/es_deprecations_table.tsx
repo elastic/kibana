@@ -102,14 +102,17 @@ const cellToLabelMap = {
 const cellTypes = Object.keys(cellToLabelMap) as DeprecationTableColumns[];
 const pageSizeOptions = PAGINATION_CONFIG.pageSizeOptions;
 
-const renderTableRowCells = (deprecation: EnrichedDeprecationInfo, mlUpgradeMode: boolean) => {
+const renderTableRowCells = (
+  deprecation: EnrichedDeprecationInfo,
+  mlUpgradeModeEnabled: boolean
+) => {
   switch (deprecation.correctiveAction?.type) {
     case 'mlSnapshot':
       return (
         <MlSnapshotsTableRow
           deprecation={deprecation}
           rowFieldNames={cellTypes}
-          mlUpgradeMode={mlUpgradeMode}
+          mlUpgradeModeEnabled={mlUpgradeModeEnabled}
         />
       );
 
@@ -158,7 +161,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   } = useAppContext();
 
   const { data } = api.useLoadMLUpgradeMode();
-  const mlUpgradeMode = !!data?.mlUpgradeMode;
+  const mlUpgradeModeEnabled = !!data?.mlUpgradeModeEnabled;
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     isSortAscending: true,
@@ -305,7 +308,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
             {visibleDeprecations.map((deprecation, index) => {
               return (
                 <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
-                  {renderTableRowCells(deprecation, mlUpgradeMode)}
+                  {renderTableRowCells(deprecation, mlUpgradeModeEnabled)}
                 </EuiTableRow>
               );
             })}
