@@ -50,8 +50,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardReplacePanel.replaceEmbeddable(AREA_CHART_VIS_NAME);
       await PageObjects.header.waitUntilLoadingHasFinished();
       const panelTitles = await PageObjects.dashboard.getPanelTitles();
-      expect(panelTitles.length).to.be(2);
-      expect(panelTitles[0]).to.be(AREA_CHART_VIS_NAME);
+      const visiblePanelTitles = panelTitles.map((panelTitle) => panelTitle.split('\n')[1]);
+      expect(visiblePanelTitles.length).to.be(2);
+      expect(visiblePanelTitles[0]).to.be(AREA_CHART_VIS_NAME);
       const newDimensions = await PageObjects.dashboard.getPanelDimensions();
       expect(intialDimensions![0]).to.eql(newDimensions[0]);
     });
