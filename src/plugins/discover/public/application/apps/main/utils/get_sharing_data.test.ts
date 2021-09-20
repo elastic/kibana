@@ -17,7 +17,7 @@ describe('getSharingData', () => {
   let mockConfig: IUiSettingsClient;
 
   beforeEach(() => {
-    mockConfig = ({
+    mockConfig = {
       get: (key: string) => {
         if (key === SORT_DEFAULT_ORDER_SETTING) {
           return 'desc';
@@ -27,7 +27,7 @@ describe('getSharingData', () => {
         }
         return false;
       },
-    } as unknown) as IUiSettingsClient;
+    } as unknown as IUiSettingsClient;
   });
 
   test('returns valid data for sharing', async () => {
@@ -116,14 +116,14 @@ describe('getSharingData', () => {
   });
 
   test('fields conditionally do not have prepended timeField', async () => {
-    mockConfig = ({
+    mockConfig = {
       get: (key: string) => {
         if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
           return true;
         }
         return false;
       },
-    } as unknown) as IUiSettingsClient;
+    } as unknown as IUiSettingsClient;
 
     const index = { ...indexPatternMock } as IndexPattern;
     index.timeFieldName = 'cool-timefield';

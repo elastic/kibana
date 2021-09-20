@@ -78,20 +78,19 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
       }
 
       try {
-        const {
-          body: resp,
-        } = await ctx.core.elasticsearch.client.asCurrentUser.search<AuditMessage>({
-          index: ML_DF_NOTIFICATION_INDEX_PATTERN,
-          ignore_unavailable: true,
-          size: SIZE,
-          body: {
-            sort: [
-              { timestamp: { order: 'desc' as const } },
-              { transform_id: { order: 'asc' as const } },
-            ],
-            query,
-          },
-        });
+        const { body: resp } =
+          await ctx.core.elasticsearch.client.asCurrentUser.search<AuditMessage>({
+            index: ML_DF_NOTIFICATION_INDEX_PATTERN,
+            ignore_unavailable: true,
+            size: SIZE,
+            body: {
+              sort: [
+                { timestamp: { order: 'desc' as const } },
+                { transform_id: { order: 'asc' as const } },
+              ],
+              query,
+            },
+          });
 
         let messages: AuditMessage[] = [];
         // TODO: remove typeof checks when appropriate overloading is added for the `search` API

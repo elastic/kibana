@@ -13,19 +13,21 @@ import { notificationService } from '../../services/notification';
 
 export const freezeIndicesStart = createAction('INDEX_MANAGEMENT_FREEZE_INDICES_START');
 
-export const freezeIndices = ({ indexNames }) => async (dispatch) => {
-  dispatch(freezeIndicesStart({ indexNames }));
-  try {
-    await request(indexNames);
-  } catch (error) {
-    notificationService.showDangerToast(error.message);
-    return dispatch(clearRowStatus({ indexNames }));
-  }
-  dispatch(reloadIndices(indexNames));
-  notificationService.showSuccessToast(
-    i18n.translate('xpack.idxMgmt.freezeIndicesAction.successfullyFrozeIndicesMessage', {
-      defaultMessage: 'Successfully froze: [{indexNames}]',
-      values: { indexNames: indexNames.join(', ') },
-    })
-  );
-};
+export const freezeIndices =
+  ({ indexNames }) =>
+  async (dispatch) => {
+    dispatch(freezeIndicesStart({ indexNames }));
+    try {
+      await request(indexNames);
+    } catch (error) {
+      notificationService.showDangerToast(error.message);
+      return dispatch(clearRowStatus({ indexNames }));
+    }
+    dispatch(reloadIndices(indexNames));
+    notificationService.showSuccessToast(
+      i18n.translate('xpack.idxMgmt.freezeIndicesAction.successfullyFrozeIndicesMessage', {
+        defaultMessage: 'Successfully froze: [{indexNames}]',
+        values: { indexNames: indexNames.join(', ') },
+      })
+    );
+  };

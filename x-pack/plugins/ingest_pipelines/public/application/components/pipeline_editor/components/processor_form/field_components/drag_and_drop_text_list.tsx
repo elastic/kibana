@@ -152,9 +152,8 @@ function DragAndDropTextListComponent({
                               readDefaultValueOnForm={!item.isNew}
                             >
                               {(field) => {
-                                const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(
-                                  field
-                                );
+                                const { isInvalid, errorMessage } =
+                                  getFieldValidityAndErrorMessage(field);
                                 return (
                                   <EuiFlexGroup gutterSize="none" alignItems="center">
                                     <EuiFlexItem>

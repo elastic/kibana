@@ -66,11 +66,9 @@ interface ValidationResult {
   isValid: boolean;
 
   /** Individual form field validations */
-  result: Partial<
-    {
-      [key in keyof NewTrustedApp]: FieldValidationState;
-    }
-  >;
+  result: Partial<{
+    [key in keyof NewTrustedApp]: FieldValidationState;
+  }>;
 }
 
 const addResultToValidation = (
@@ -224,11 +222,9 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     );
 
     const [wasVisited, setWasVisited] = useState<
-      Partial<
-        {
-          [key in keyof NewTrustedApp]: boolean;
-        }
-      >
+      Partial<{
+        [key in keyof NewTrustedApp]: boolean;
+      }>
     >({});
 
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -360,14 +356,15 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       [notifyOfChange, trustedApp]
     );
 
-    const handleConditionBuilderOnVisited: LogicalConditionBuilderProps['onVisited'] = useCallback(() => {
-      setWasVisited((prevState) => {
-        return {
-          ...prevState,
-          entries: true,
-        };
-      });
-    }, []);
+    const handleConditionBuilderOnVisited: LogicalConditionBuilderProps['onVisited'] =
+      useCallback(() => {
+        setWasVisited((prevState) => {
+          return {
+            ...prevState,
+            entries: true,
+          };
+        });
+      }, []);
 
     const handlePolicySelectChange: EffectedPolicySelectProps['onChange'] = useCallback(
       (selection) => {
