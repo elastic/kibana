@@ -126,7 +126,7 @@ describe('Sourcerer Hooks', () => {
       });
       await waitForNextUpdate();
       rerender();
-      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch).toBeCalledTimes(3);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
         payload: { id: 'default', loading: true },
@@ -135,9 +135,39 @@ describe('Sourcerer Hooks', () => {
         type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
         payload: { id: 'timeline', loading: true },
       });
+      expect(mockDispatch.mock.calls[2][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
+        payload: {
+          id: 'timeline',
+          selectedDataViewId: 'security-solution',
+          selectedPatterns: [
+            '.siem-signals',
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'traces-apm*',
+            'winlogbeat-*',
+          ],
+        },
+      });
     });
   });
   it('sets signal index name', async () => {
+    store = createStore(
+      {
+        ...state,
+        sourcerer: {
+          ...state.sourcerer,
+          signalIndexName: null,
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
     await act(async () => {
       mockUseUserInfo.mockImplementation(() => ({
         ...userInfoState,
@@ -178,7 +208,7 @@ describe('Sourcerer Hooks', () => {
       );
       await waitForNextUpdate();
       rerender();
-      expect(mockDispatch.mock.calls[1][0]).toEqual({
+      expect(mockDispatch.mock.calls[2][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'detections',

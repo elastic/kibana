@@ -87,7 +87,6 @@ export const requestIndexFieldSearch = async (
 
   // if dataViewId is provided, get fields and indices from the Kibana Data View
   if ('dataViewId' in request) {
-    // TODO: Steph/sourcerer needs unit test
     const dataView = await dataViewService.get(request.dataViewId);
     const patternList = dataView.title.split(',');
     indicesExist = await findExistingIndices(patternList, esClient.asCurrentUser);
@@ -108,7 +107,6 @@ export const requestIndexFieldSearch = async (
           .filter((index, i) => indicesExist[i])
           .map(async (index, n) => {
             if (index.startsWith('.alerts-observability')) {
-              // TODO: Steph/sourcerer needs unit test
               return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
                 pattern: index,
               });

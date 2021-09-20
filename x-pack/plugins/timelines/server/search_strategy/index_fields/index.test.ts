@@ -795,14 +795,29 @@ describe('Fields Provider', () => {
   describe('search', () => {
     const getFieldsForWildcardMock = jest.fn();
     const esClientSearchMock = jest.fn();
-
+    const mockPattern = {
+      title: 'coolbro',
+      fields: {
+        toSpec: () => ({
+          coolio: {
+            name: 'nameio',
+            type: 'typeio',
+            searchable: true,
+            aggregatable: true,
+          },
+        }),
+      },
+      toSpec: () => ({
+        runtimeFieldMap: { runtimeField: { type: 'keyword' } },
+      }),
+    };
     const getStartServices = jest.fn().mockReturnValue([
       null,
       {
         data: {
           indexPatterns: {
             indexPatternsServiceFactory: () => ({
-              get: jest.fn(), // () => new Promise((rs) => rs(mockPattern)),
+              get: jest.fn().mockReturnValue(mockPattern),
             }),
           },
         },
@@ -839,9 +854,6 @@ describe('Fields Provider', () => {
       };
 
       const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
-      // why would we want this?! they said onlyCheckIfIndicesExist, fuck the fields
-      // expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
-
       expect(response.indexFields).toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
     });
@@ -861,6 +873,34 @@ describe('Fields Provider', () => {
       expect(response.indicesExist).toEqual(indices);
     });
 
+    it('should search index fields by data view id', async () => {
+      const dataViewId = 'id';
+      const request = {
+        dataViewId,
+        onlyCheckIfIndicesExist: false,
+      };
+
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
+
+      expect(getFieldsForWildcardMock).not.toHaveBeenCalled();
+
+      expect(response.indexFields).not.toHaveLength(0);
+      expect(response.indicesExist).toEqual(['coolbro']);
+    });
+
+    it('onlyCheckIfIndicesExist by data view id', async () => {
+      const dataViewId = 'id';
+      const request = {
+        dataViewId,
+        onlyCheckIfIndicesExist: true,
+      };
+
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
+
+      expect(response.indexFields).toHaveLength(0);
+      expect(response.indicesExist).toEqual(['coolbro']);
+    });
+
     it('should search apm index fields', async () => {
       const indices = ['apm-*-transaction*', 'traces-apm*'];
       const request = {
@@ -871,9 +911,6 @@ describe('Fields Provider', () => {
       const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
-      // we're calling it every time now
-      // expect(esClientSearchMock).not.toHaveBeenCalled();
-
       expect(response.indexFields).not.toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
     });

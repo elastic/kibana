@@ -323,7 +323,9 @@ export const mockGlobalState: State = {
       [SourcererScopeName.default]: {
         ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: mockSourcererState.defaultDataView.patternList,
+        selectedPatterns: mockSourcererState.defaultDataView.patternList.filter(
+          (p) => p !== DEFAULT_SIGNALS_INDEX
+        ),
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
         docValueFields: mockDocValueFields,
