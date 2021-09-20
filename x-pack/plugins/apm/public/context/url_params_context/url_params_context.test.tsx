@@ -100,12 +100,12 @@ describe('UrlParamsContext', () => {
 
   it('should refresh the time range with new values', async () => {
     const calls = [];
-    const history = ({
+    const history = {
       location: {
         pathname: '/test',
       },
       listen: jest.fn(),
-    } as unknown) as History;
+    } as unknown as History;
 
     const wrapper = mount(
       <Router history={history}>
@@ -151,12 +151,12 @@ describe('UrlParamsContext', () => {
   });
 
   it('should refresh the time range with new values if time range is relative', async () => {
-    const history = ({
+    const history = {
       location: {
         pathname: '/test',
       },
       listen: jest.fn(),
-    } as unknown) as History;
+    } as unknown as History;
 
     jest
       .spyOn(Date, 'now')

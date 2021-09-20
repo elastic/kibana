@@ -63,12 +63,8 @@ export const Page: FC<Props> = ({ jobId }) => {
   const { state } = createAnalyticsForm;
   const { isAdvancedEditorEnabled, disableSwitchToForm, isJobCreated } = state;
   const { jobType } = state.form;
-  const {
-    initiateWizard,
-    setJobClone,
-    switchToAdvancedEditor,
-    switchToForm,
-  } = createAnalyticsForm.actions;
+  const { initiateWizard, setJobClone, switchToAdvancedEditor, switchToForm } =
+    createAnalyticsForm.actions;
 
   useEffect(() => {
     initiateWizard();
