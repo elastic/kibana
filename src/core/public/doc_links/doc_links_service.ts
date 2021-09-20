@@ -269,6 +269,7 @@ export class DocLinksService {
           outlierDetectionRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-roc`,
           regressionEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`,
           classificationAucRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-class-aucroc`,
+          setUpgradeMode: `${ELASTICSEARCH_DOCS}ml-set-upgrade-mode.html`,
         },
         transforms: {
           guide: `${ELASTICSEARCH_DOCS}transforms.html`,

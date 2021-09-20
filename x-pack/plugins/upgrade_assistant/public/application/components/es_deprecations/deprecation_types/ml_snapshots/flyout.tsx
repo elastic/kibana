@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -26,6 +27,7 @@ import {
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { DeprecationBadge } from '../../../shared';
 import { MlSnapshotContext } from './context';
+import { useAppContext } from '../../../../app_context';
 import { SnapshotState } from './use_snapshot_state';
 
 export interface FixSnapshotsFlyoutProps extends MlSnapshotContext {
@@ -97,6 +99,25 @@ const i18nTexts = {
       defaultMessage: 'Learn more about this deprecation',
     }
   ),
+  upgradeModeEnabledErrorTitle: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.upgradeModeEnabledErrorTitle',
+    {
+      defaultMessage: 'Machine learning upgrade mode is enabled',
+    }
+  ),
+  upgradeModeEnabledErrorDescription: (docsLink: string) => (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.esDeprecations.mlSnapshots.upgradeModeEnabledErrorDescription"
+      defaultMessage="No actions can be taken on machine learning snapshots while upgrade mode is enabled. {docsLink}."
+      values={{
+        docsLink: (
+          <EuiLink href={docsLink} target="_blank" data-test-subj="setUpgradeModeDocsLink">
+            Documentation
+          </EuiLink>
+        ),
+      }}
+    />
+  ),
 };
 
 const getDeleteButtonLabel = (snapshotState: SnapshotState) => {
@@ -139,7 +160,13 @@ export const FixSnapshotsFlyout = ({
   snapshotState,
   upgradeSnapshot,
   deleteSnapshot,
+  mlUpgradeMode,
 }: FixSnapshotsFlyoutProps) => {
+  const {
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
   const isResolved = snapshotState.status === 'complete';
 
   const onUpgradeSnapshot = () => {
@@ -179,6 +206,23 @@ export const FixSnapshotsFlyout = ({
             <EuiSpacer />
           </>
         )}
+
+        {mlUpgradeMode && (
+          <>
+            <EuiCallOut
+              title={i18nTexts.upgradeModeEnabledErrorTitle}
+              color="danger"
+              iconType="alert"
+              data-test-subj="mlUpgradeModeEnabledError"
+            >
+              <p>
+                {i18nTexts.upgradeModeEnabledErrorDescription(docLinks.links.ml.setUpgradeMode)}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
+
         <EuiText>
           <p>{deprecation.details}</p>
           <p>
@@ -196,7 +240,7 @@ export const FixSnapshotsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          {!isResolved && (
+          {!isResolved && !mlUpgradeMode && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
                 <EuiFlexItem>
