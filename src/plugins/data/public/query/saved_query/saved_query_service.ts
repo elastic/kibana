@@ -105,10 +105,8 @@ export const createSavedQueryService = (
   };
 
   const getSavedQuery = async (id: string): Promise<SavedQuery> => {
-    const {
-      saved_object: savedObject,
-      outcome,
-    } = await savedObjectsClient.resolve<SerializedSavedQueryAttributes>('query', id);
+    const { saved_object: savedObject, outcome } =
+      await savedObjectsClient.resolve<SerializedSavedQueryAttributes>('query', id);
     if (outcome === 'conflict') {
       throw new Error(`Multiple saved queries found with ID: ${id} (legacy URL alias conflict)`);
     } else if (savedObject.error) {
