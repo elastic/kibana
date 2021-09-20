@@ -35,7 +35,7 @@ import {
   Ecs,
 } from '../../../common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { parseStringAsExternalService } from '../../common/user_actions';
+import { parseString } from '../../containers/utils';
 import { OnUpdateFields } from '../case_view';
 import {
   getConnectorLabelTitle,
@@ -512,14 +512,10 @@ export const UserActionTree = React.memo(
 
             // Pushed information
             if (action.actionField.length === 1 && action.actionField[0] === 'pushed') {
-              const parsedExternalService = parseStringAsExternalService(
-                action.newValConnectorId,
-                action.newValue
-              );
-
+              const parsedValue = parseString(`${action.newValue}`);
               const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
                 caseServices,
-                parsedExternalService,
+                parsedValue,
                 index
               );
 
