@@ -76,9 +76,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
-  const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] = useState<boolean>(
-    false
-  );
+  const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
+    useState<boolean>(false);
 
   // Set breadcrumb and page title
   useEffect(() => {
