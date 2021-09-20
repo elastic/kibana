@@ -181,7 +181,7 @@ export const POLICY_WITH_NODE_ROLE_ALLOCATION: PolicyFromES = {
   name: POLICY_NAME,
 };
 
-export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
+export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = {
   version: 1,
   modified_date: Date.now().toString(),
   policy: {
@@ -219,7 +219,7 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
     name: POLICY_NAME,
   },
   name: POLICY_NAME,
-} as any) as PolicyFromES;
+} as any as PolicyFromES;
 
 export const getGeneratedPolicies = (): PolicyFromES[] => {
   const policy = {
