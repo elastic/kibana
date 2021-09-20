@@ -67,13 +67,13 @@ describe('when using EffectedPolicySelect component', () => {
 
     const selectGlobalPolicy = () => {
       act(() => {
-        fireEvent.click(renderResult.getByTestId('test-global'));
+        fireEvent.click(renderResult.getByTestId('globalPolicy'));
       });
     };
 
     const selectPerPolicy = () => {
       act(() => {
-        fireEvent.click(renderResult.getByTestId('test-perPolicy'));
+        fireEvent.click(renderResult.getByTestId('perPolicy'));
       });
     };
 
@@ -119,7 +119,7 @@ describe('when using EffectedPolicySelect component', () => {
     });
 
     it('should call onChange with selection when global is toggled', () => {
-      render({ isGlobal: false });
+      render();
 
       selectPerPolicy();
       expect(handleOnChange.mock.calls[0][0]).toEqual({
@@ -135,7 +135,7 @@ describe('when using EffectedPolicySelect component', () => {
     });
 
     it('should maintain policies selection even if global was checked, and user switched back to per policy', () => {
-      render({ isGlobal: false });
+      render();
 
       selectPerPolicy();
       clickOnPolicy();
@@ -145,11 +145,11 @@ describe('when using EffectedPolicySelect component', () => {
       });
 
       // Toggle isGlobal back to True
-      /* toggleGlobalPolicy();
+      selectGlobalPolicy();
       expect(handleOnChange.mock.calls[2][0]).toEqual({
         isGlobal: true,
         selected: [componentProps.options[0]],
-        });*/
+      });
     });
   });
 });
