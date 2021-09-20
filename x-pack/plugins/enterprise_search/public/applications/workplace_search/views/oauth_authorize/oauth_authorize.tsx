@@ -48,9 +48,8 @@ import { OAuthAuthorizeLogic } from './oauth_authorize_logic';
 
 export const OAuthAuthorize: React.FC = () => {
   const { search } = useLocation() as Location;
-  const { initializeOAuthPreAuth, allowOAuthAuthorization, denyOAuthAuthorization } = useActions(
-    OAuthAuthorizeLogic
-  );
+  const { initializeOAuthPreAuth, allowOAuthAuthorization, denyOAuthAuthorization } =
+    useActions(OAuthAuthorizeLogic);
 
   const { buttonLoading, dataLoading, cachedPreAuth, hasError } = useValues(OAuthAuthorizeLogic);
 

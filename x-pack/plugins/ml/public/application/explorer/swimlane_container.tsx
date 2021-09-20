@@ -86,31 +86,16 @@ export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
 /**
  * Provides a custom tooltip for the anomaly swim lane chart.
  */
-const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => ({ values }) => {
-  const tooltipData: TooltipValue[] = [];
+const SwimLaneTooltip =
+  (fieldName?: string): FC<{ values: TooltipValue[] }> =>
+  ({ values }) => {
+    const tooltipData: TooltipValue[] = [];
 
-  if (values.length === 1 && fieldName) {
-    // Y-axis tooltip for viewBy swim lane
-    const [yAxis] = values;
-    // @ts-ignore
-    tooltipData.push({ skipHeader: true });
-    tooltipData.push({
-      label: fieldName,
-      value: yAxis.value,
+    if (values.length === 1 && fieldName) {
+      // Y-axis tooltip for viewBy swim lane
+      const [yAxis] = values;
       // @ts-ignore
-      seriesIdentifier: {
-        key: yAxis.value,
-      },
-    });
-  } else if (values.length === 3) {
-    // Cell tooltip
-    const [xAxis, yAxis, cell] = values;
-
-    // Display date using same format as Kibana visualizations.
-    const formattedDate = formatHumanReadableDateTime(parseInt(xAxis.value, 10));
-    tooltipData.push({ label: formattedDate } as TooltipValue);
-
-    if (fieldName !== undefined) {
+      tooltipData.push({ skipHeader: true });
       tooltipData.push({
         label: fieldName,
         value: yAxis.value,
@@ -119,22 +104,39 @@ const SwimLaneTooltip = (fieldName?: string): FC<{ values: TooltipValue[] }> => 
           key: yAxis.value,
         },
       });
-    }
-    tooltipData.push({
-      label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
-        defaultMessage: 'Max anomaly score',
-      }),
-      value: cell.formattedValue === '0' ? ' < 1' : cell.formattedValue,
-      color: cell.color,
-      // @ts-ignore
-      seriesIdentifier: {
-        key: cell.value,
-      },
-    });
-  }
+    } else if (values.length === 3) {
+      // Cell tooltip
+      const [xAxis, yAxis, cell] = values;
 
-  return <FormattedTooltip tooltipData={tooltipData} />;
-};
+      // Display date using same format as Kibana visualizations.
+      const formattedDate = formatHumanReadableDateTime(parseInt(xAxis.value, 10));
+      tooltipData.push({ label: formattedDate } as TooltipValue);
+
+      if (fieldName !== undefined) {
+        tooltipData.push({
+          label: fieldName,
+          value: yAxis.value,
+          // @ts-ignore
+          seriesIdentifier: {
+            key: yAxis.value,
+          },
+        });
+      }
+      tooltipData.push({
+        label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
+          defaultMessage: 'Max anomaly score',
+        }),
+        value: cell.formattedValue === '0' ? ' < 1' : cell.formattedValue,
+        color: cell.color,
+        // @ts-ignore
+        seriesIdentifier: {
+          key: cell.value,
+        },
+      });
+    }
+
+    return <FormattedTooltip tooltipData={tooltipData} />;
+  };
 
 export interface SwimlaneProps {
   filterActive?: boolean;

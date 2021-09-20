@@ -20,17 +20,16 @@ export interface BfetchDeps {
   explorer: ExplorerService;
 }
 
-export const mount = (
-  coreSetup: CoreSetup<BfetchExplorerStartPlugins>,
-  explorer: ExplorerService
-) => async ({ appBasePath, element }: AppMountParameters) => {
-  const [core, plugins] = await coreSetup.getStartServices();
-  const deps: BfetchDeps = { appBasePath, core, plugins, explorer };
-  const reactElement = (
-    <KibanaContextProvider services={deps}>
-      <App />
-    </KibanaContextProvider>
-  );
-  render(reactElement, element);
-  return () => unmountComponentAtNode(element);
-};
+export const mount =
+  (coreSetup: CoreSetup<BfetchExplorerStartPlugins>, explorer: ExplorerService) =>
+  async ({ appBasePath, element }: AppMountParameters) => {
+    const [core, plugins] = await coreSetup.getStartServices();
+    const deps: BfetchDeps = { appBasePath, core, plugins, explorer };
+    const reactElement = (
+      <KibanaContextProvider services={deps}>
+        <App />
+      </KibanaContextProvider>
+    );
+    render(reactElement, element);
+    return () => unmountComponentAtNode(element);
+  };
