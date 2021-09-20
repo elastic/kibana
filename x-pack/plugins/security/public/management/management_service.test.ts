@@ -88,7 +88,7 @@ describe('ManagementService', () => {
       const { fatalErrors, getStartServices } = coreMock.createSetup();
 
       const licenseSubject = new BehaviorSubject<SecurityLicenseFeatures>(
-        (initialFeatures as unknown) as SecurityLicenseFeatures
+        initialFeatures as unknown as SecurityLicenseFeatures
       );
       const license = licenseMock.create();
       license.features$ = licenseSubject;
@@ -116,7 +116,7 @@ describe('ManagementService', () => {
       const getMockedApp = (id: string) => {
         // All apps are enabled by default.
         let enabled = true;
-        return ({
+        return {
           id,
           get enabled() {
             return enabled;
@@ -127,7 +127,7 @@ describe('ManagementService', () => {
           disable: jest.fn().mockImplementation(() => {
             enabled = false;
           }),
-        } as unknown) as jest.Mocked<ManagementApp>;
+        } as unknown as jest.Mocked<ManagementApp>;
       };
       mockSection.getApp = jest.fn().mockImplementation((id) => mockApps.get(id));
       const mockApps = new Map<string, jest.Mocked<ManagementApp>>([
@@ -155,7 +155,7 @@ describe('ManagementService', () => {
       return {
         mockApps,
         updateFeatures(features: Partial<SecurityLicenseFeatures>) {
-          licenseSubject.next((features as unknown) as SecurityLicenseFeatures);
+          licenseSubject.next(features as unknown as SecurityLicenseFeatures);
         },
       };
     }

@@ -51,9 +51,8 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
         addEventRateField(aggs, allFields);
       }
 
-      const { fieldsPreferringKeyword, fieldsPreferringText } = processTextAndKeywordFields(
-        allFields
-      );
+      const { fieldsPreferringKeyword, fieldsPreferringText } =
+        processTextAndKeywordFields(allFields);
       const catFields = fieldsPreferringText.filter(
         (f) => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.TEXT
       );

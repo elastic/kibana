@@ -10,29 +10,30 @@ import { overwrite, bucketTransform } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 import type { TableRequestProcessorsFunction } from './types';
 
-export const siblingBuckets: TableRequestProcessorsFunction = ({ panel }) => (next) => async (
-  doc
-) => {
-  panel.series.forEach((column) => {
-    const aggRoot = calculateAggRoot(doc, column);
+export const siblingBuckets: TableRequestProcessorsFunction =
+  ({ panel }) =>
+  (next) =>
+  async (doc) => {
+    panel.series.forEach((column) => {
+      const aggRoot = calculateAggRoot(doc, column);
 
-    column.metrics
-      .filter((row) => /_bucket$/.test(row.type))
-      .forEach((metric) => {
-        const fn = bucketTransform[metric.type];
+      column.metrics
+        .filter((row) => /_bucket$/.test(row.type))
+        .forEach((metric) => {
+          const fn = bucketTransform[metric.type];
 
-        if (fn) {
-          try {
-            const intervalString = get(doc, aggRoot.replace(/\.aggs$/, '.meta.intervalString'));
-            const bucket = fn(metric, column.metrics, intervalString);
+          if (fn) {
+            try {
+              const intervalString = get(doc, aggRoot.replace(/\.aggs$/, '.meta.intervalString'));
+              const bucket = fn(metric, column.metrics, intervalString);
 
-            overwrite(doc, `${aggRoot}.${metric.id}`, bucket);
-          } catch (e) {
-            // meh
+              overwrite(doc, `${aggRoot}.${metric.id}`, bucket);
+            } catch (e) {
+              // meh
+            }
           }
-        }
-      });
-  });
+        });
+    });
 
-  return next(doc);
-};
+    return next(doc);
+  };

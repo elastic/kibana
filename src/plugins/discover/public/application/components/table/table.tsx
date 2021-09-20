@@ -58,9 +58,10 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
-  const mapping = useCallback((name: string) => indexPattern?.fields.getByName(name), [
-    indexPattern?.fields,
-  ]);
+  const mapping = useCallback(
+    (name: string) => indexPattern?.fields.getByName(name),
+    [indexPattern?.fields]
+  );
 
   const formattedHit = useMemo(() => indexPattern?.formatHit(hit, 'html'), [hit, indexPattern]);
 

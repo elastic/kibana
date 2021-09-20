@@ -47,6 +47,5 @@ const metricsChartsRoute = createApmServerRoute({
   },
 });
 
-export const metricsRouteRepository = createApmServerRouteRepository().add(
-  metricsChartsRoute
-);
+export const metricsRouteRepository =
+  createApmServerRouteRepository().add(metricsChartsRoute);
