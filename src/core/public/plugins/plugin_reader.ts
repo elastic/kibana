@@ -29,7 +29,7 @@ export interface CoreWindow {
  * Reads the plugin's bundle declared in the global context.
  */
 export function read(name: string) {
-  const coreWindow = (window as unknown) as CoreWindow;
+  const coreWindow = window as unknown as CoreWindow;
   const exportId = `plugin/${name}/public`;
 
   if (!coreWindow.__kbnBundles__.has(exportId)) {

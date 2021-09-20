@@ -404,6 +404,6 @@ export const stubLogstashFieldSpecMap: Record<string, FieldSpec> = {
   },
 };
 
-export const stubLogstashFields: IndexPatternField[] = Object.values(
-  stubLogstashFieldSpecMap
-).map((spec) => createIndexPatternFieldStub({ spec }));
+export const stubLogstashFields: IndexPatternField[] = Object.values(stubLogstashFieldSpecMap).map(
+  (spec) => createIndexPatternFieldStub({ spec })
+);
