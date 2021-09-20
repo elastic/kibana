@@ -20,12 +20,15 @@ import { getIssueMetadata } from './issue_metadata';
 import { readTestReport } from './test_report';
 import { addMessagesToReport } from './add_messages_to_report';
 import { getReportMessageIter } from './report_metadata';
+import { reportFailuresToEs } from './report_failures_to_es';
 
 const DEFAULT_PATTERNS = [Path.resolve(REPO_ROOT, 'target/junit/**/*.xml')];
 
 export function runFailedTestsReporterCli() {
   run(
     async ({ log, flags }) => {
+      const indexInEs = flags['index-errors'];
+
       let updateGithub = flags['github-update'];
       if (updateGithub && !process.env.GITHUB_TOKEN) {
         throw createFailError(
@@ -34,16 +37,25 @@ export function runFailedTestsReporterCli() {
       }
 
       if (updateGithub) {
-        // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
-        const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);
-        const branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH;
+        let branch: string | undefined = '';
+        let isPr = false;
+
+        if (process.env.BUILDKITE === 'true') {
+          branch = process.env.BUILDKITE_BRANCH;
+          isPr = process.env.BUILDKITE_PULL_REQUEST === 'true';
+        } else {
+          // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
+          const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);
+          branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH;
+          isPr = !!process.env.ghprbPullId;
+        }
+
         if (!branch) {
           throw createFailError(
             'Unable to determine originating branch from job name or other environment variables'
           );
         }
 
-        const isPr = !!process.env.ghprbPullId;
         const isMasterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
         if (!isMasterOrVersion || isPr) {
           log.info('Failure issues only created on master/version branch jobs');
@@ -83,8 +95,13 @@ export function runFailedTestsReporterCli() {
       for (const reportPath of reportPaths) {
         const report = await readTestReport(reportPath);
         const messages = Array.from(getReportMessageIter(report));
+        const failures = await getFailures(report);
 
-        for (const failure of await getFailures(report)) {
+        if (indexInEs) {
+          await reportFailuresToEs(log, failures);
+        }
+
+        for (const failure of failures) {
           const pushMessage = (msg: string) => {
             messages.push({
               classname: failure.classname,
@@ -153,11 +170,13 @@ export function runFailedTestsReporterCli() {
         default: {
           'github-update': true,
           'report-update': true,
+          'index-errors': true,
           'build-url': process.env.BUILD_URL,
         },
         help: `
           --no-github-update Execute the CLI without writing to Github
           --no-report-update Execute the CLI without writing to the JUnit reports
+          --no-index-errors  Execute the CLI without indexing failures into Elasticsearch
           --build-url        URL of the failed build, defaults to process.env.BUILD_URL
         `,
       },

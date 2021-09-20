@@ -67,10 +67,8 @@ export const createConnectedSearchSessionIndicator = ({
       disableSaveAfterSessionCompleteTimedOut$,
       false
     );
-    const [
-      searchSessionIndicator,
-      setSearchSessionIndicator,
-    ] = useState<SearchSessionIndicatorRef | null>(null);
+    const [searchSessionIndicator, setSearchSessionIndicator] =
+      useState<SearchSessionIndicatorRef | null>(null);
     const searchSessionIndicatorRef = useCallback((ref: SearchSessionIndicatorRef) => {
       if (ref !== null) {
         setSearchSessionIndicator(ref);
