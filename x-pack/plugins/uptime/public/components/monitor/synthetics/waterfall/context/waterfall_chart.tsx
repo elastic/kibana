@@ -83,4 +83,4 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
 };
 
 export const useWaterfallContext = () =>
-  useContext((WaterfallContext as unknown) as Context<IWaterfallContext>);
+  useContext(WaterfallContext as unknown as Context<IWaterfallContext>);

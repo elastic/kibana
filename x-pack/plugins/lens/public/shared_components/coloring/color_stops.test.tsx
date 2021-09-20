@@ -138,9 +138,9 @@ describe('Color Stops component', () => {
       .find('[data-test-subj="my-test_dynamicColoring_stop_value_0"]')
       .first();
     act(() => {
-      firstStopValueInput.prop('onChange')!(({
+      firstStopValueInput.prop('onChange')!({
         target: { value: ' 90' },
-      } as unknown) as React.ChangeEvent);
+      } as unknown as React.ChangeEvent);
     });
 
     component = component.update();
