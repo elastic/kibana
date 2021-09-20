@@ -56,7 +56,7 @@ describe('Doc table row component', () => {
   beforeEach(() => {
     mockInlineFilter = jest.fn();
 
-    defaultProps = ({
+    defaultProps = {
       columns: ['_source'],
       filter: mockInlineFilter,
       indexPattern: indexPatternWithTimefieldMock,
@@ -65,11 +65,11 @@ describe('Doc table row component', () => {
       filterManager: mockFilterManager,
       addBasePath: (path: string) => path,
       hideTimeColumn: true,
-    } as unknown) as TableRowProps;
+    } as unknown as TableRowProps;
 
-    setServices(({
+    setServices({
       uiSettings: uiSettingsMock,
-    } as unknown) as DiscoverServices);
+    } as unknown as DiscoverServices);
 
     setDocViewsRegistry(new DocViewsRegistry());
   });

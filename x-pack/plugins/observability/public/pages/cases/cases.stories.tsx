@@ -21,7 +21,7 @@ export default {
   component: AllCasesPage,
   decorators: [
     (Story: ComponentType) => {
-      const KibanaReactContext = createKibanaReactContext(({
+      const KibanaReactContext = createKibanaReactContext({
         application: {
           capabilities: { [casesFeatureId]: { read_cases: true } },
           getUrlForApp: () => '',
@@ -33,11 +33,11 @@ export default {
           ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         },
         uiSettings: { get: () => true },
-      } as unknown) as Partial<CoreStart>);
+      } as unknown as Partial<CoreStart>);
 
-      const pluginContextValue = ({
+      const pluginContextValue = {
         ObservabilityPageTemplate: KibanaPageTemplate,
-      } as unknown) as PluginContextValue;
+      } as unknown as PluginContextValue;
 
       return (
         <MemoryRouter>

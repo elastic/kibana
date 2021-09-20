@@ -86,9 +86,10 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     const errorCount = countValidationErrors(inputValidationResults);
     const hasErrors = forceShowErrors && errorCount;
 
-    const hasInputStreams = useMemo(() => packageInputStreams.length > 0, [
-      packageInputStreams.length,
-    ]);
+    const hasInputStreams = useMemo(
+      () => packageInputStreams.length > 0,
+      [packageInputStreams.length]
+    );
     const inputStreams = useMemo(
       () =>
         packageInputStreams
