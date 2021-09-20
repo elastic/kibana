@@ -54,9 +54,11 @@ export interface Props {
 }
 
 export const TimeFilter = ({ filter, commit, dateFormat, commonlyUsedRanges = [] }: Props) => {
-  const setFilter = (column: string) => ({ start, end }: OnTimeChangeProps) => {
-    commit(`timefilter from="${start}" to=${end} column=${column}`);
-  };
+  const setFilter =
+    (column: string) =>
+    ({ start, end }: OnTimeChangeProps) => {
+      commit(`timefilter from="${start}" to=${end} column=${column}`);
+    };
 
   const { column, start, end } = getFilterMeta(filter);
 

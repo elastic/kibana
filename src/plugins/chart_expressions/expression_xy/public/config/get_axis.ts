@@ -131,14 +131,16 @@ function getScale<S extends XScaleType | YScaleType>(
   isCategoryAxis: boolean,
   isHistogram: boolean = false
 ): ScaleConfig<S> {
-  const type = (isCategoryAxis
-    ? getScaleType(
-        scale,
-        format?.id === 'number' || (format?.params?.id === 'number' && format?.id !== 'range'),
-        'date' in params,
-        isHistogram
-      )
-    : getScaleType(scale, true)) as S;
+  const type = (
+    isCategoryAxis
+      ? getScaleType(
+          scale,
+          format?.id === 'number' || (format?.params?.id === 'number' && format?.id !== 'range'),
+          'date' in params,
+          isHistogram
+        )
+      : getScaleType(scale, true)
+  ) as S;
 
   return {
     ...scale,

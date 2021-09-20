@@ -10,10 +10,10 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { createGetterSetter } from '../../../kibana_utils/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 
-export const [getPalettesService, setPalettesService] = createGetterSetter<
-  ChartsPluginSetup['palettes']
->('xy charts.palette');
+export const [getPalettesService, setPalettesService] =
+  createGetterSetter<ChartsPluginSetup['palettes']>('xy charts.palette');
 
-export const [getTrackUiMetric, setTrackUiMetric] = createGetterSetter<
-  (metricType: UiCounterMetricType, eventName: string | string[]) => void
->('trackUiMetric');
+export const [getTrackUiMetric, setTrackUiMetric] =
+  createGetterSetter<(metricType: UiCounterMetricType, eventName: string | string[]) => void>(
+    'trackUiMetric'
+  );

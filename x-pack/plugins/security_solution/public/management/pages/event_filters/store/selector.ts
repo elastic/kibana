@@ -53,11 +53,10 @@ export const getListApiSuccessResponse: EventFiltersSelector<
   return getLastLoadedResourceState(listPageData)?.data.content;
 });
 
-export const getListItems: EventFiltersSelector<
-  Immutable<ExceptionListItemSchema[]>
-> = createSelector(getListApiSuccessResponse, (apiResponseData) => {
-  return apiResponseData?.data || [];
-});
+export const getListItems: EventFiltersSelector<Immutable<ExceptionListItemSchema[]>> =
+  createSelector(getListApiSuccessResponse, (apiResponseData) => {
+    return apiResponseData?.data || [];
+  });
 
 export const getTotalCountListItems: EventFiltersSelector<Immutable<number>> = createSelector(
   getListApiSuccessResponse,
@@ -71,12 +70,10 @@ export const getTotalCountListItems: EventFiltersSelector<Immutable<number>> = c
  * of content is being loaded, this selector will then attempt to use the previousState to return
  * the query used.
  */
-export const getCurrentListItemsQuery: EventFiltersSelector<EventFiltersServiceGetListOptions> = createSelector(
-  getCurrentListPageDataState,
-  (pageDataState) => {
+export const getCurrentListItemsQuery: EventFiltersSelector<EventFiltersServiceGetListOptions> =
+  createSelector(getCurrentListPageDataState, (pageDataState) => {
     return getLastLoadedResourceState(pageDataState)?.data.query ?? {};
-  }
-);
+  });
 
 export const getListPagination: EventFiltersSelector<Pagination> = createSelector(
   getListApiSuccessResponse,
@@ -91,15 +88,13 @@ export const getListPagination: EventFiltersSelector<Pagination> = createSelecto
   }
 );
 
-export const getListFetchError: EventFiltersSelector<
-  Immutable<ServerApiError> | undefined
-> = createSelector(getCurrentListPageDataState, (listPageDataState) => {
-  return (isFailedResourceState(listPageDataState) && listPageDataState.error) || undefined;
-});
+export const getListFetchError: EventFiltersSelector<Immutable<ServerApiError> | undefined> =
+  createSelector(getCurrentListPageDataState, (listPageDataState) => {
+    return (isFailedResourceState(listPageDataState) && listPageDataState.error) || undefined;
+  });
 
-export const getListPageDataExistsState: EventFiltersSelector<
-  StoreState['listPage']['dataExist']
-> = ({ listPage: { dataExist } }) => dataExist;
+export const getListPageDataExistsState: EventFiltersSelector<StoreState['listPage']['dataExist']> =
+  ({ listPage: { dataExist } }) => dataExist;
 
 export const getListIsLoading: EventFiltersSelector<boolean> = createSelector(
   getCurrentListPageDataState,
@@ -201,9 +196,8 @@ export const showDeleteModal: EventFiltersSelector<boolean> = createSelector(
   }
 );
 
-export const getItemToDelete: EventFiltersSelector<
-  StoreState['listPage']['deletion']['item']
-> = createSelector(getDeletionState, ({ item }) => item);
+export const getItemToDelete: EventFiltersSelector<StoreState['listPage']['deletion']['item']> =
+  createSelector(getDeletionState, ({ item }) => item);
 
 export const isDeletionInProgress: EventFiltersSelector<boolean> = createSelector(
   getDeletionState,

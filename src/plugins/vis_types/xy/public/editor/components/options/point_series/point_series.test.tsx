@@ -31,7 +31,7 @@ describe('PointSeries Editor', function () {
   let component: ReactWrapper<PointSeriesOptionsProps>;
 
   beforeEach(() => {
-    props = ({
+    props = {
       aggs: getAggs(),
       hasHistogramAgg: false,
       isTabSelected: false,
@@ -41,7 +41,7 @@ describe('PointSeries Editor', function () {
       setValidity: jest.fn(),
       stateParams: getStateParams(ChartType.Histogram, false),
       vis: getVis('date_histogram'),
-    } as unknown) as PointSeriesOptionsProps;
+    } as unknown as PointSeriesOptionsProps;
   });
 
   it('renders the showValuesOnChart switch for a bar chart', async () => {
@@ -52,10 +52,10 @@ describe('PointSeries Editor', function () {
   });
 
   it('not renders the showValuesOnChart switch for an area chart', async () => {
-    const areaVisProps = ({
+    const areaVisProps = {
       ...props,
       stateParams: getStateParams(ChartType.Area, false),
-    } as unknown) as PointSeriesOptionsProps;
+    } as unknown as PointSeriesOptionsProps;
     component = mountWithIntl(<PointSeriesOptions {...areaVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'showValuesOnChart').length).toBe(0);
@@ -71,10 +71,10 @@ describe('PointSeries Editor', function () {
   });
 
   it('renders the orderBucketsBySum switch for a non date histogram bucket', async () => {
-    const newVisProps = ({
+    const newVisProps = {
       ...props,
       vis: getVis('terms'),
-    } as unknown) as PointSeriesOptionsProps;
+    } as unknown as PointSeriesOptionsProps;
     component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'addTimeMarker').length).toBe(0);
@@ -104,10 +104,10 @@ describe('PointSeries Editor', function () {
   });
 
   it('renders the fitting function for a line chart', async () => {
-    const newVisProps = ({
+    const newVisProps = {
       ...props,
       stateParams: getStateParams(ChartType.Line, false),
-    } as unknown) as PointSeriesOptionsProps;
+    } as unknown as PointSeriesOptionsProps;
     component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'fittingFunction').length).toBe(1);
@@ -129,10 +129,10 @@ describe('PointSeries Editor', function () {
   });
 
   it('renders the threshold panel if the Show threshold line switch is on', async () => {
-    const newVisProps = ({
+    const newVisProps = {
       ...props,
       stateParams: getStateParams(ChartType.Histogram, true),
-    } as unknown) as PointSeriesOptionsProps;
+    } as unknown as PointSeriesOptionsProps;
     component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'thresholdValueInputOption').length).toBe(1);
