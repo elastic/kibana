@@ -222,7 +222,7 @@ describe('Alerting Plugin', () => {
           taskManager: taskManagerMock.createStart(),
         });
 
-        const fakeRequest = ({
+        const fakeRequest = {
           headers: {},
           getBasePath: () => '',
           path: '/',
@@ -236,7 +236,7 @@ describe('Alerting Plugin', () => {
             },
           },
           getSavedObjectsClient: jest.fn(),
-        } as unknown) as KibanaRequest;
+        } as unknown as KibanaRequest;
         startContract.getRulesClientWithRequest(fakeRequest);
       });
     });
@@ -276,7 +276,7 @@ describe('Alerting Plugin', () => {
         taskManager: taskManagerMock.createStart(),
       });
 
-      const fakeRequest = ({
+      const fakeRequest = {
         headers: {},
         getBasePath: () => '',
         path: '/',
@@ -290,7 +290,7 @@ describe('Alerting Plugin', () => {
           },
         },
         getSavedObjectsClient: jest.fn(),
-      } as unknown) as KibanaRequest;
+      } as unknown as KibanaRequest;
       startContract.getAlertingAuthorizationWithRequest(fakeRequest);
     });
   });

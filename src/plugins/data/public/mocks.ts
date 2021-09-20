@@ -38,7 +38,7 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
-  const dataViews = ({
+  const dataViews = {
     find: jest.fn((search) => [{ id: search, title: search }]),
     createField: jest.fn(() => {}),
     createFieldList: jest.fn(() => []),
@@ -50,7 +50,7 @@ const createStartContract = (): Start => {
     }),
     get: jest.fn().mockReturnValue(Promise.resolve({})),
     clearCache: jest.fn(),
-  } as unknown) as DataViewsContract;
+  } as unknown as DataViewsContract;
 
   return {
     actions: {
