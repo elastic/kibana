@@ -13,7 +13,7 @@ import {
 import { DefaultSearchStrategy } from './default_search_strategy';
 
 describe('DefaultSearchStrategy', () => {
-  const requestContext = ({
+  const requestContext = {
     core: {
       uiSettings: {
         client: {
@@ -21,15 +21,17 @@ describe('DefaultSearchStrategy', () => {
         },
       },
     },
-  } as unknown) as VisTypeTimeseriesRequestHandlerContext;
+  } as unknown as VisTypeTimeseriesRequestHandlerContext;
 
   let defaultSearchStrategy: DefaultSearchStrategy;
   let req: VisTypeTimeseriesVisDataRequest;
 
   beforeEach(() => {
     req = {
-      body: {},
-    } as VisTypeTimeseriesVisDataRequest;
+      body: {
+        panels: [],
+      },
+    } as unknown as VisTypeTimeseriesVisDataRequest;
     defaultSearchStrategy = new DefaultSearchStrategy();
   });
 
@@ -46,6 +48,7 @@ describe('DefaultSearchStrategy', () => {
     expect(value.capabilities).toMatchInlineSnapshot(`
       DefaultSearchCapabilities {
         "maxBucketsLimit": undefined,
+        "panel": undefined,
         "timezone": undefined,
       }
     `);

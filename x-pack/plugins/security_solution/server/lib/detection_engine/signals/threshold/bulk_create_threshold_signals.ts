@@ -46,7 +46,7 @@ interface BulkCreateThresholdSignalsParams {
   signalsIndex: string;
   startedAt: Date;
   from: Date;
-  thresholdSignalHistory: ThresholdSignalHistory;
+  signalHistory: ThresholdSignalHistory;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
 }
@@ -61,7 +61,7 @@ const getTransformedHits = (
   ruleId: string,
   filter: unknown,
   timestampOverride: TimestampOverrideOrUndefined,
-  thresholdSignalHistory: ThresholdSignalHistory
+  signalHistory: ThresholdSignalHistory
 ) => {
   const aggParts = threshold.field.length
     ? results.aggregations && getThresholdAggregationParts(results.aggregations)
@@ -148,7 +148,7 @@ const getTransformedHits = (
     }
 
     const termsHash = getThresholdTermsHash(bucket.terms);
-    const signalHit = thresholdSignalHistory[termsHash];
+    const signalHit = signalHistory[termsHash];
 
     const source = {
       '@timestamp': timestamp,
@@ -202,7 +202,7 @@ export const transformThresholdResultsToEcs = (
   threshold: ThresholdNormalized,
   ruleId: string,
   timestampOverride: TimestampOverrideOrUndefined,
-  thresholdSignalHistory: ThresholdSignalHistory
+  signalHistory: ThresholdSignalHistory
 ): SignalSearchResponse => {
   const transformedHits = getTransformedHits(
     results,
@@ -214,7 +214,7 @@ export const transformThresholdResultsToEcs = (
     ruleId,
     filter,
     timestampOverride,
-    thresholdSignalHistory
+    signalHistory
   );
   const thresholdResults = {
     ...results,
@@ -246,7 +246,7 @@ export const bulkCreateThresholdSignals = async (
     ruleParams.threshold,
     ruleParams.ruleId,
     ruleParams.timestampOverride,
-    params.thresholdSignalHistory
+    params.signalHistory
   );
 
   return params.bulkCreate(

@@ -32,7 +32,8 @@ export interface SampleTaskManagerFixtureStartDeps {
 
 export class SampleTaskManagerFixturePlugin
   implements
-    Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps> {
+    Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
+{
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
   taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
     .pipe(first())
@@ -229,10 +230,10 @@ export class SampleTaskManagerFixturePlugin
           numberOfTasksRanOverall,
           claimAvailableTasksNoTasks,
           claimAvailableTasksNoAvailableWorkers,
-          elasticsearchApiCalls: (_.mapValues(
+          elasticsearchApiCalls: _.mapValues(
             elasticsearchApiCalls,
             avg
-          ) as unknown) as PerfResult['elasticsearchApiCalls'],
+          ) as unknown as PerfResult['elasticsearchApiCalls'],
           sleepDuration: prettyMilliseconds(stats.sum(sleepDuration)),
           activityDuration: prettyMilliseconds(stats.sum(activityDuration)),
           cycles,
