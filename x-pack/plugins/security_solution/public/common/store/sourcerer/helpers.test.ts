@@ -27,13 +27,99 @@
 //   SourcererScopeName.detections,
 //   SourcererScopeName.timeline,
 // ];
+import { mockGlobalState } from '../../mock';
+import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
+import { SourcererScopeName } from './model';
+import { getScopePatternListSelection, validateSelectedPatterns } from './helpers';
+
+const signalIndexName = mockGlobalState.sourcerer.signalIndexName ?? '';
+
+const dataView = {
+  id: DEFAULT_DATA_VIEW_ID,
+  title: 'auditbeat-*,packetbeat-*',
+  patternList: ['packetbeat-*', 'auditbeat-*', signalIndexName],
+};
 describe('sourcerer store helpers', () => {
-  // TODO: Steph/sourcerer helpers tests
-  it('getScopePatternListSelection', () => {
-    expect(true).toBeTruthy();
+  describe('getScopePatternListSelection', () => {
+    it('is not a default data view, returns patternList sorted', () => {
+      const result = getScopePatternListSelection(
+        {
+          ...dataView,
+          id: '1234',
+        },
+        SourcererScopeName.default,
+        signalIndexName
+      );
+      expect(result).toEqual([signalIndexName, 'auditbeat-*', 'packetbeat-*']);
+    });
+    it('default data view, SourcererScopeName.timeline, returns patternList sorted', () => {
+      const result = getScopePatternListSelection(
+        dataView,
+        SourcererScopeName.timeline,
+        signalIndexName
+      );
+      expect(result).toEqual([signalIndexName, 'auditbeat-*', 'packetbeat-*']);
+    });
+    it('default data view, SourcererScopeName.default, returns patternList sorted without signals index', () => {
+      const result = getScopePatternListSelection(
+        dataView,
+        SourcererScopeName.default,
+        signalIndexName
+      );
+      expect(result).toEqual(['auditbeat-*', 'packetbeat-*']);
+    });
+    it('default data view, SourcererScopeName.detections, returns patternList with only signals index', () => {
+      const result = getScopePatternListSelection(
+        dataView,
+        SourcererScopeName.detections,
+        signalIndexName
+      );
+      expect(result).toEqual([signalIndexName]);
+    });
   });
-  it('validateSelectedPatterns', () => {
-    expect(true).toBeTruthy();
+  describe.only('validateSelectedPatterns', () => {
+    const payload = {
+      id: SourcererScopeName.default,
+      selectedDataViewId: dataView.id,
+      selectedPatterns: ['auditbeat-*'],
+    };
+    const patternListNoSignals = mockGlobalState.sourcerer.defaultDataView.patternList.filter(
+      (p) => p !== signalIndexName
+    );
+    it('sets selectedPattern', () => {
+      const result = validateSelectedPatterns(mockGlobalState.sourcerer, payload);
+      expect(result).toEqual({
+        [SourcererScopeName.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          selectedPatterns: ['auditbeat-*'],
+        },
+      });
+    });
+    it('sets to default when empty array is passed and scope is default', () => {
+      const result = validateSelectedPatterns(mockGlobalState.sourcerer, {
+        ...payload,
+        selectedPatterns: [],
+      });
+      expect(result).toEqual({
+        [SourcererScopeName.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          selectedPatterns: patternListNoSignals.sort(),
+        },
+      });
+    });
+    it('sets to default when empty array is passed and scope is detections', () => {
+      const result = validateSelectedPatterns(mockGlobalState.sourcerer, {
+        ...payload,
+        id: SourcererScopeName.detections,
+        selectedPatterns: [],
+      });
+      expect(result).toEqual({
+        [SourcererScopeName.detections]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.detections],
+          selectedPatterns: [signalIndexName],
+        },
+      });
+    });
   });
   it('defaultDataViewByEventType', () => {
     expect(true).toBeTruthy();
