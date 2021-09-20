@@ -117,9 +117,10 @@ export const MlPopover = React.memo(() => {
   });
 
   const incompatibleJobCount = jobs.filter((j) => !j.isCompatible).length;
-  const installedJobsIds = useMemo(() => jobs.filter((j) => j.isInstalled).map((j) => j.id), [
-    jobs,
-  ]);
+  const installedJobsIds = useMemo(
+    () => jobs.filter((j) => j.isInstalled).map((j) => j.id),
+    [jobs]
+  );
 
   if (!isLicensed) {
     // If the user does not have platinum show upgrade UI
