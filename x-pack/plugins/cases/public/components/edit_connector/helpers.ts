@@ -5,33 +5,23 @@
  * 2.0.
  */
 
-import { ConnectorTypeFields } from '../../../common';
 import { CaseUserActions } from '../../containers/types';
-import { parseStringAsConnector } from '../../common/user_actions';
 
-export const getConnectorFieldsFromUserActions = (
-  id: string,
-  userActions: CaseUserActions[]
-): ConnectorTypeFields['fields'] => {
+export const getConnectorFieldsFromUserActions = (id: string, userActions: CaseUserActions[]) => {
   try {
     for (const action of [...userActions].reverse()) {
       if (action.actionField.length === 1 && action.actionField[0] === 'connector') {
-        const parsedNewConnector = parseStringAsConnector(
-          action.newValConnectorId,
-          action.newValue
-        );
+        if (action.oldValue && action.newValue) {
+          const oldValue = JSON.parse(action.oldValue);
+          const newValue = JSON.parse(action.newValue);
 
-        if (parsedNewConnector && id === parsedNewConnector.id) {
-          return parsedNewConnector.fields;
-        }
+          if (newValue.id === id) {
+            return newValue.fields;
+          }
 
-        const parsedOldConnector = parseStringAsConnector(
-          action.oldValConnectorId,
-          action.oldValue
-        );
-
-        if (parsedOldConnector && id === parsedOldConnector.id) {
-          return parsedOldConnector.fields;
+          if (oldValue.id === id) {
+            return oldValue.fields;
+          }
         }
       }
     }

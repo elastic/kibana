@@ -23,11 +23,10 @@ import {
   CommentType,
   Comment,
   CommentRequestActionsType,
-  noneConnectorId,
 } from '../../../common';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { parseStringAsConnector, parseStringAsExternalService } from '../../common/user_actions';
+import { parseString } from '../../containers/utils';
 import { Tags } from '../tag_list/tags';
 import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 import { UserActionTimestamp } from './user_action_timestamp';
@@ -98,27 +97,23 @@ export const getConnectorLabelTitle = ({
   action: CaseUserActions;
   connectors: ActionConnector[];
 }) => {
-  const oldConnector = parseStringAsConnector(action.oldValConnectorId, action.oldValue);
-  const newConnector = parseStringAsConnector(action.newValConnectorId, action.newValue);
+  const oldValue = parseString(`${action.oldValue}`);
+  const newValue = parseString(`${action.newValue}`);
 
-  if (!oldConnector || !newConnector) {
+  if (oldValue === null || newValue === null) {
     return '';
   }
 
-  // if the ids are the same, assume we just changed the fields
-  if (oldConnector.id === newConnector.id) {
+  // Connector changed
+  if (oldValue.id !== newValue.id) {
+    const newConnector = connectors.find((c) => c.id === newValue.id);
+    return newValue.id != null && newValue.id !== 'none' && newConnector != null
+      ? i18n.SELECTED_THIRD_PARTY(newConnector.name)
+      : i18n.REMOVED_THIRD_PARTY;
+  } else {
+    // Field changed
     return i18n.CHANGED_CONNECTOR_FIELD;
   }
-
-  // ids are not the same so check and see if the id is a valid connector and then return its name
-  // if the connector id is the none connector value then it must have been removed
-  const newConnectorActionInfo = connectors.find((c) => c.id === newConnector.id);
-  if (newConnector.id !== noneConnectorId && newConnectorActionInfo != null) {
-    return i18n.SELECTED_THIRD_PARTY(newConnectorActionInfo.name);
-  }
-
-  // it wasn't a valid connector or it was the none connector, so it must have been removed
-  return i18n.REMOVED_THIRD_PARTY;
 };
 
 const getTagsLabelTitle = (action: CaseUserActions) => {
@@ -138,8 +133,7 @@ const getTagsLabelTitle = (action: CaseUserActions) => {
 };
 
 export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean) => {
-  const externalService = parseStringAsExternalService(action.newValConnectorId, action.newValue);
-
+  const pushedVal = JSON.parse(action.newValue ?? '') as CaseFullExternalService;
   return (
     <EuiFlexGroup
       alignItems="baseline"
@@ -149,12 +143,12 @@ export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: b
     >
       <EuiFlexItem data-test-subj="pushed-label">
         {`${firstPush ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT} ${
-          externalService?.connector_name
+          pushedVal?.connector_name
         }`}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink data-test-subj="pushed-value" href={externalService?.external_url} target="_blank">
-          {externalService?.external_title}
+        <EuiLink data-test-subj="pushed-value" href={pushedVal?.external_url} target="_blank">
+          {pushedVal?.external_title}
         </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -163,19 +157,20 @@ export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: b
 
 export const getPushInfo = (
   caseServices: CaseServices,
-  externalService: CaseFullExternalService | undefined,
+  // a JSON parse failure will result in null for parsedValue
+  parsedValue: { connector_id: string | null; connector_name: string } | null,
   index: number
 ) =>
-  externalService != null && externalService.connector_id != null
+  parsedValue != null && parsedValue.connector_id != null
     ? {
-        firstPush: caseServices[externalService.connector_id]?.firstPushIndex === index,
-        parsedConnectorId: externalService.connector_id,
-        parsedConnectorName: externalService.connector_name,
+        firstPush: caseServices[parsedValue.connector_id]?.firstPushIndex === index,
+        parsedConnectorId: parsedValue.connector_id,
+        parsedConnectorName: parsedValue.connector_name,
       }
     : {
         firstPush: false,
-        parsedConnectorId: noneConnectorId,
-        parsedConnectorName: noneConnectorId,
+        parsedConnectorId: 'none',
+        parsedConnectorName: 'none',
       };
 
 const getUpdateActionIcon = (actionField: string): string => {

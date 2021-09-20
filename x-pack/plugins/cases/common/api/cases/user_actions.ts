@@ -34,6 +34,7 @@ const UserActionRt = rt.union([
   rt.literal('push-to-service'),
 ]);
 
+// TO DO change state to status
 const CaseUserActionBasicRT = rt.type({
   action_field: UserActionFieldRt,
   action: UserActionRt,
@@ -50,8 +51,6 @@ const CaseUserActionResponseRT = rt.intersection([
     action_id: rt.string,
     case_id: rt.string,
     comment_id: rt.union([rt.string, rt.null]),
-    new_val_connector_id: rt.union([rt.string, rt.null]),
-    old_val_connector_id: rt.union([rt.string, rt.null]),
   }),
   rt.partial({ sub_case_id: rt.string }),
 ]);

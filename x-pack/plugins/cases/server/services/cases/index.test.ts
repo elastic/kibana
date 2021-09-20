@@ -40,7 +40,6 @@ import {
   createSavedObjectReferences,
   createCaseSavedObjectResponse,
   basicCaseFields,
-  createSOFindResponse,
 } from '../test_utils';
 import { ESCaseAttributes } from './types';
 
@@ -86,6 +85,13 @@ const createFindSO = (
 ): SavedObjectsFindResult<ESCaseAttributes> => ({
   ...createCaseSavedObjectResponse(params),
   score: 0,
+});
+
+const createSOFindResponse = (savedObjects: Array<SavedObjectsFindResult<ESCaseAttributes>>) => ({
+  saved_objects: savedObjects,
+  total: savedObjects.length,
+  per_page: savedObjects.length,
+  page: 1,
 });
 
 const createCaseUpdateParams = (

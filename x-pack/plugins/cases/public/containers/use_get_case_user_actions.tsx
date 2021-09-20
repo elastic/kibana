@@ -18,8 +18,7 @@ import {
 } from '../../common';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
-import { convertToCamelCase } from './utils';
-import { parseStringAsConnector, parseStringAsExternalService } from '../common/user_actions';
+import { convertToCamelCase, parseString } from './utils';
 import { useToasts } from '../common/lib/kibana';
 
 export interface CaseService extends CaseExternalService {
@@ -59,24 +58,8 @@ export interface UseGetCaseUserActions extends CaseUserActionsState {
   ) => Promise<void>;
 }
 
-const unknownExternalServiceConnectorId = 'unknown';
-
-const getExternalService = (
-  connectorId: string | null,
-  encodedValue: string | null
-): CaseExternalService | null => {
-  const decodedValue = parseStringAsExternalService(connectorId, encodedValue);
-
-  if (decodedValue == null) {
-    return null;
-  }
-  return {
-    ...convertToCamelCase<CaseFullExternalService, CaseExternalService>(decodedValue),
-    // if in the rare case that the connector id is null we'll set it to unknown if we need to reference it in the UI
-    // anywhere. The id would only ever be null if a migration failed or some logic error within the backend occurred
-    connectorId: connectorId ?? unknownExternalServiceConnectorId,
-  };
-};
+const getExternalService = (value: string): CaseExternalService | null =>
+  convertToCamelCase<CaseFullExternalService, CaseExternalService>(parseString(`${value}`));
 
 const groupConnectorFields = (
   userActions: CaseUserActions[]
@@ -86,26 +69,22 @@ const groupConnectorFields = (
       return acc;
     }
 
-    const oldConnector = parseStringAsConnector(mua.oldValConnectorId, mua.oldValue);
-    const newConnector = parseStringAsConnector(mua.newValConnectorId, mua.newValue);
+    const oldValue = parseString(`${mua.oldValue}`);
+    const newValue = parseString(`${mua.newValue}`);
 
-    if (!oldConnector || !newConnector) {
+    if (oldValue == null || newValue == null) {
       return acc;
     }
 
     return {
       ...acc,
-      [oldConnector.id]: [
-        ...(acc[oldConnector.id] || []),
-        ...(oldConnector.id === newConnector.id
-          ? [oldConnector.fields, newConnector.fields]
-          : [oldConnector.fields]),
+      [oldValue.id]: [
+        ...(acc[oldValue.id] || []),
+        ...(oldValue.id === newValue.id ? [oldValue.fields, newValue.fields] : [oldValue.fields]),
       ],
-      [newConnector.id]: [
-        ...(acc[newConnector.id] || []),
-        ...(oldConnector.id === newConnector.id
-          ? [oldConnector.fields, newConnector.fields]
-          : [newConnector.fields]),
+      [newValue.id]: [
+        ...(acc[newValue.id] || []),
+        ...(oldValue.id === newValue.id ? [oldValue.fields, newValue.fields] : [newValue.fields]),
       ],
     };
   }, {} as Record<string, Array<CaseConnector['fields']>>);
@@ -158,7 +137,9 @@ export const getPushedInfo = (
   const hasDataToPushForConnector = (connectorId: string): boolean => {
     const caseUserActionsReversed = [...caseUserActions].reverse();
     const lastPushOfConnectorReversedIndex = caseUserActionsReversed.findIndex(
-      (mua) => mua.action === 'push-to-service' && mua.newValConnectorId === connectorId
+      (mua) =>
+        mua.action === 'push-to-service' &&
+        getExternalService(`${mua.newValue}`)?.connectorId === connectorId
     );
 
     if (lastPushOfConnectorReversedIndex === -1) {
@@ -209,7 +190,7 @@ export const getPushedInfo = (
       return acc;
     }
 
-    const externalService = getExternalService(cua.newValConnectorId, cua.newValue);
+    const externalService = getExternalService(`${cua.newValue}`);
     if (externalService === null) {
       return acc;
     }
