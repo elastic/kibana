@@ -32,5 +32,5 @@ export interface PreconfiguredAgentPolicy extends Omit<NewAgentPolicy, 'namespac
 export type PreconfiguredPackage = Omit<PackagePolicyPackage, 'title'>;
 
 export interface PreconfiguredOutput extends Omit<Output, 'config_yaml'> {
-  config?: any;
+  config?: Record<string, unknown>;
 }

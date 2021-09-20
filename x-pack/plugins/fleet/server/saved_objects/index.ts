@@ -206,7 +206,7 @@ const getSavedObjectTypes = (
         ca_sha256: { type: 'keyword', index: false },
         config: { type: 'flattened', index: false },
         config_yaml: { type: 'text', index: false },
-        is_preconfigured: { type: 'boolean' },
+        is_preconfigured: { type: 'boolean', index: false },
       },
     },
     migrations: {

@@ -65,15 +65,19 @@ export async function ensurePreconfiguredOutputs(
   soClient: SavedObjectsClientContract,
   outputs: PreconfiguredOutput[]
 ) {
+  if (outputs.length === 0) {
+    return;
+  }
+
+  const existingOutputs = await outputService.bulkGet(
+    soClient,
+    outputs.map(({ id }) => id),
+    { ignoreNotFound: true }
+  );
+
   await Promise.all(
     outputs.map(async (output) => {
-      const existingOutput = await outputService.get(soClient, output.id).catch((err) => {
-        if (soClient.errors.isNotFoundError(err)) {
-          return undefined;
-        }
-
-        throw err;
-      });
+      const existingOutput = existingOutputs.find((o) => o.id === output.id);
 
       const { id, config, ...outputData } = output;
 
@@ -90,7 +94,7 @@ export async function ensurePreconfiguredOutputs(
       }
 
       if (!existingOutput) {
-        return outputService.create(soClient, data, { id });
+        return outputService.create(soClient, data, { id, overwrite: true });
       } else if (isPreconfiguredOutputDifferentFromCurrent(existingOutput, data)) {
         return outputService.update(soClient, id, data);
       }
@@ -102,10 +106,12 @@ export async function cleanPreconfiguredOutputs(
   soClient: SavedObjectsClientContract,
   outputs: PreconfiguredOutput[]
 ) {
-  const existingPreconfiguredOutput = await outputService.listPreconfigured(soClient);
+  const existingPreconfiguredOutput = (await outputService.list(soClient)).items.filter(
+    (o) => o.is_preconfigured === true
+  );
   const logger = appContextService.getLogger();
 
-  for (const output of existingPreconfiguredOutput.items) {
+  for (const output of existingPreconfiguredOutput) {
     if (!outputs.find(({ id }) => output.id === id)) {
       logger.info(`Deleting preconfigured output ${output.id}`);
       await outputService.delete(soClient, output.id);

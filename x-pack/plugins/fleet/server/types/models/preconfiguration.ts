@@ -14,7 +14,8 @@ import {
   DEFAULT_FLEET_SERVER_AGENT_POLICY,
   DEFAULT_PACKAGES,
 } from '../../constants';
-import { outputType, PreconfiguredOutput } from '../../../common';
+import type { PreconfiguredOutput } from '../../../common';
+import { outputType } from '../../../common';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';
@@ -76,7 +77,7 @@ export const PreconfiguredOutputsSchema = schema.arrayOf(
     type: schema.oneOf([schema.literal(outputType.Elasticsearch)]),
     hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
     ca_sha256: schema.maybe(schema.string()),
-    config: schema.maybe(schema.any()),
+    config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   }),
   {
     defaultValue: [],

@@ -31,6 +31,7 @@ export function outputIdToUuid(id: string) {
     return id;
   }
 
+  // UUID v5 need a namespace (uuid.DNS), changing this params will result in loosing the ability to generate predicable uuid
   return uuid(id, uuid.DNS);
 }
 
@@ -94,7 +95,7 @@ class OutputService {
   public async create(
     soClient: SavedObjectsClientContract,
     output: NewOutput,
-    options?: { id?: string }
+    options?: { id?: string; overwrite?: boolean }
   ): Promise<Output> {
     const data: OutputSOAttributes = { ...output };
 
@@ -114,16 +115,38 @@ class OutputService {
       data.output_id = options?.id;
     }
 
-    const newSo = await soClient.create<OutputSOAttributes>(
-      SAVED_OBJECT_TYPE,
-      data,
-      options?.id ? { id: outputIdToUuid(options.id) } : undefined
-    );
+    const newSo = await soClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
+      ...options,
+      id: options?.id ? outputIdToUuid(options.id) : undefined,
+    });
 
     return {
       id: options?.id ?? newSo.id,
       ...newSo.attributes,
     };
+  }
+
+  public async bulkGet(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    { ignoreNotFound = false } = { ignoreNotFound: true }
+  ) {
+    const res = await soClient.bulkGet<OutputSOAttributes>(
+      ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
+    );
+
+    return res.saved_objects
+      .map((so) => {
+        if (so.error) {
+          if (!ignoreNotFound || so.error.statusCode !== 404) {
+            throw so.error;
+          }
+          return undefined;
+        }
+
+        return outputSavedObjectToOutput(so);
+      })
+      .filter((output): output is Output => typeof output !== 'undefined');
   }
 
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
@@ -155,22 +178,6 @@ class OutputService {
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
     }
-  }
-
-  public async listPreconfigured(soClient: SavedObjectsClientContract) {
-    const outputs = await soClient.find<OutputSOAttributes>({
-      type: SAVED_OBJECT_TYPE,
-      filter: `${SAVED_OBJECT_TYPE}.attributes.is_preconfigured:true`,
-      page: 1,
-      perPage: 10000,
-    });
-
-    return {
-      items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
-      total: outputs.total,
-      page: 1,
-      perPage: 10000,
-    };
   }
 
   public async list(soClient: SavedObjectsClientContract) {

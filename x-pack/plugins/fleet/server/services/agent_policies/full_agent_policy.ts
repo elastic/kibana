@@ -24,7 +24,7 @@ import {
 import { storedPackagePoliciesToAgentInputs, dataTypes, outputType } from '../../../common';
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
-import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
+import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES, DEFAULT_OUTPUT } from '../../constants';
 
 const MONITORING_DATASETS = [
   'elastic_agent',
@@ -222,7 +222,7 @@ function transformOutputToFullPolicyOutput(
  */
 function getOutputIdForAgentPolicy(output: Output) {
   if (output.is_default) {
-    return 'default';
+    return DEFAULT_OUTPUT.name;
   }
 
   return output.id;
