@@ -9,7 +9,13 @@
 import dateMath from '@elastic/datemath';
 import { omitBy } from 'lodash';
 import type { Moment } from 'moment';
-import { buildRangeFilter, IIndexPattern, TimeRange, TimeRangeBounds, RangeFilterParams } from '../..';
+import {
+  buildRangeFilter,
+  IIndexPattern,
+  TimeRange,
+  TimeRangeBounds,
+  RangeFilterParams,
+} from '../..';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;

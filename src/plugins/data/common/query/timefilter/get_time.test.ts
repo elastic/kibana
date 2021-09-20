@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RangeFilter } from '@kbn/es-query';
 import type { IIndexPattern } from '../..';
+import type { RangeFilter } from '../../es_query/filters';
 import moment from 'moment';
 import sinon from 'sinon';
 import { getTime, getRelativeTime, getAbsoluteTimeRange } from './get_time';
