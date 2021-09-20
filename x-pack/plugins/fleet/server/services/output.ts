@@ -44,7 +44,7 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
 }
 
 class OutputService {
-  public async getDefaultOutput(soClient: SavedObjectsClientContract) {
+  private async _getDefaultOutputsSO(soClient: SavedObjectsClientContract) {
     return await soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
@@ -53,7 +53,7 @@ class OutputService {
   }
 
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
-    const outputs = await this.getDefaultOutput(soClient);
+    const outputs = await this._getDefaultOutputsSO(soClient);
 
     if (!outputs.saved_objects.length) {
       const newDefaultOutput = {
@@ -83,13 +83,13 @@ class OutputService {
   }
 
   public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
-    const outputs = await this.getDefaultOutput(soClient);
+    const outputs = await this._getDefaultOutputsSO(soClient);
 
     if (!outputs.saved_objects.length) {
       return null;
     }
 
-    return outputs.saved_objects[0].id;
+    return outputSavedObjectToOutput(outputs.saved_objects[0]).id;
   }
 
   public async create(

@@ -99,6 +99,34 @@ describe('Output Service', () => {
     });
   });
 
+  describe('getDefaultOutputId', () => {
+    it('work with a predefined id', async () => {
+      const soClient = getMockedSoClient();
+      soClient.find.mockResolvedValue({
+        page: 1,
+        per_page: 100,
+        total: 1,
+        saved_objects: [
+          {
+            id: outputIdToUuid('output-test'),
+            type: 'ingest-outputs',
+            references: [],
+            score: 0,
+            attributes: {
+              output_id: 'output-test',
+              is_default: true,
+            },
+          },
+        ],
+      });
+      const defaultId = await outputService.getDefaultOutputId(soClient);
+
+      expect(soClient.find).toHaveBeenCalled();
+
+      expect(defaultId).toEqual('output-test');
+    });
+  });
+
   describe('getDefaultESHosts', () => {
     afterEach(() => {
       mockedAppContextService.getConfig.mockReset();
