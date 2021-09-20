@@ -6,7 +6,20 @@
  */
 
 import expect from '@kbn/expect';
-import { orderBy, get, omit } from 'lodash';
+import {
+  ALERT_REASON,
+  ALERT_RULE_NAME,
+  ALERT_RULE_RISK_SCORE,
+  ALERT_RULE_RISK_SCORE_MAPPING,
+  ALERT_RULE_RULE_ID,
+  ALERT_RULE_RULE_NAME_OVERRIDE,
+  ALERT_RULE_SEVERITY,
+  ALERT_RULE_SEVERITY_MAPPING,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+} from '@kbn/rule-data-utils';
+
+import { orderBy, get } from 'lodash';
 
 import {
   EqlCreateSchema,
@@ -32,6 +45,14 @@ import {
   waitForSignalsToBePresent,
 } from '../../utils';
 import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_GROUP_ID,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_TIME,
+} from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
+import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
@@ -98,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
-        expect(signalsOpen.hits.hits[0]._source?.signal.rule.rule_id).eql(getSimpleRule().rule_id);
+        expect(signalsOpen.hits.hits[0]._source![ALERT_RULE_RULE_ID]).eql(getSimpleRule().rule_id);
       });
 
       it('should query and get back expected signal structure using a basic KQL query', async () => {
@@ -111,12 +132,9 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
-        // remove rule to cut down on touch points for test changes when the rule format changes
-        // remove reason to avoid failures due to @timestamp mismatches in the reason string
-        const signalNoRule = omit(signal, ['rule', 'reason']);
 
-        expect(signalNoRule).eql({
-          parents: [
+        expect(signal).eql({
+          [ALERT_ANCESTORS]: [
             {
               id: 'BhbXBmkBR346wHgn4PeZ',
               type: 'event',
@@ -124,24 +142,10 @@ export default ({ getService }: FtrProviderContext) => {
               depth: 0,
             },
           ],
-          ancestors: [
-            {
-              id: 'BhbXBmkBR346wHgn4PeZ',
-              type: 'event',
-              index: 'auditbeat-8.0.0-2019.02.19-000001',
-              depth: 0,
-            },
-          ],
-          status: 'open',
-          depth: 1,
-          parent: {
-            id: 'BhbXBmkBR346wHgn4PeZ',
-            type: 'event',
-            index: 'auditbeat-8.0.0-2019.02.19-000001',
-            depth: 0,
-          },
-          original_time: '2019-02-19T17:40:03.790Z',
-          original_event: {
+          [ALERT_STATUS]: 'open',
+          [ALERT_DEPTH]: 1,
+          [ALERT_ORIGINAL_TIME]: '2019-02-19T17:40:03.790Z',
+          [ALERT_ORIGINAL_EVENT]: {
             action: 'socket_closed',
             dataset: 'socket',
             kind: 'event',
@@ -165,11 +169,8 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
-        // remove rule to cut down on touch points for test changes when the rule format changes
-        // remove reason to avoid failures due to @timestamp mismatches in the reason string
-        const signalNoRule = omit(signal, ['rule', 'reason']);
-        expect(signalNoRule).eql({
-          parents: [
+        expect(signal).eql({
+          [ALERT_ANCESTORS]: [
             {
               id: 'BhbXBmkBR346wHgn4PeZ',
               type: 'event',
@@ -177,24 +178,10 @@ export default ({ getService }: FtrProviderContext) => {
               depth: 0,
             },
           ],
-          ancestors: [
-            {
-              id: 'BhbXBmkBR346wHgn4PeZ',
-              type: 'event',
-              index: 'auditbeat-8.0.0-2019.02.19-000001',
-              depth: 0,
-            },
-          ],
-          status: 'open',
-          depth: 1,
-          parent: {
-            id: 'BhbXBmkBR346wHgn4PeZ',
-            type: 'event',
-            index: 'auditbeat-8.0.0-2019.02.19-000001',
-            depth: 0,
-          },
-          original_time: '2019-02-19T17:40:03.790Z',
-          original_event: {
+          [ALERT_STATUS]: 'open',
+          [ALERT_DEPTH]: 1,
+          [ALERT_ORIGINAL_TIME]: '2019-02-19T17:40:03.790Z',
+          [ALERT_ORIGINAL_EVENT]: {
             action: 'socket_closed',
             dataset: 'socket',
             kind: 'event',
@@ -228,20 +215,9 @@ export default ({ getService }: FtrProviderContext) => {
         // Get our single signal on top of a signal
         const signalsOpen = await getSignalsByRuleIds(supertest, ['signal-on-signal']);
 
-        const signal = signalsOpen.hits.hits[0]._source?.signal;
-        // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, ['rule', 'reason']);
-        expect(signalNoRule).eql({
-          parents: [
-            {
-              rule: signalNoRule.parents[0].rule, // rule id is always changing so skip testing it
-              id: '82421e2f4e96058baaa2ed87abbe565403b45edf36348c2b79a4f0e8cc1cd055',
-              type: 'signal',
-              index: '.siem-signals-default-000001',
-              depth: 1,
-            },
-          ],
-          ancestors: [
+        const signal = signalsOpen.hits.hits[0]._source!;
+        expect(signal).eql({
+          [ALERT_ANCESTORS]: [
             {
               id: 'BhbXBmkBR346wHgn4PeZ',
               type: 'event',
@@ -249,24 +225,17 @@ export default ({ getService }: FtrProviderContext) => {
               depth: 0,
             },
             {
-              rule: signalNoRule.ancestors[1].rule, // rule id is always changing so skip testing it
+              rule: (signal[ALERT_ANCESTORS] as Ancestor[])[1].rule, // rule id is always changing so skip testing it
               id: '82421e2f4e96058baaa2ed87abbe565403b45edf36348c2b79a4f0e8cc1cd055',
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
             },
           ],
-          status: 'open',
-          depth: 2,
-          parent: {
-            rule: signalNoRule.parent?.rule, // parent.rule is always changing so skip testing it
-            id: '82421e2f4e96058baaa2ed87abbe565403b45edf36348c2b79a4f0e8cc1cd055',
-            type: 'signal',
-            index: '.siem-signals-default-000001',
-            depth: 1,
-          },
-          original_time: signalNoRule.original_time, // original_time will always be changing sine it's based on a signal created here, so skip testing it
-          original_event: {
+          [ALERT_STATUS]: 'open',
+          [ALERT_DEPTH]: 2,
+          [ALERT_ORIGINAL_TIME]: signal[ALERT_ORIGINAL_TIME], // original_time will always be changing sine it's based on a signal created here, so skip testing it
+          [ALERT_ORIGINAL_EVENT]: {
             action: 'socket_closed',
             dataset: 'socket',
             kind: 'signal',
@@ -361,43 +330,27 @@ export default ({ getService }: FtrProviderContext) => {
                 id: 'unset',
               },
             },
-            signal: {
-              reason:
-                'configuration event on suricata-zeek-sensor-toronto created high alert Signal Testing Query.',
-              rule: fullSignal.signal.rule,
-              original_time: fullSignal.signal.original_time,
-              status: 'open',
-              depth: 1,
-              ancestors: [
-                {
-                  depth: 0,
-                  id: '9xbRBmkBR346wHgngz2D',
-                  index: 'auditbeat-8.0.0-2019.02.19-000001',
-                  type: 'event',
-                },
-              ],
-              original_event: {
-                action: 'changed-audit-configuration',
-                category: 'configuration',
-                module: 'auditd',
-              },
-              parent: {
+            [ALERT_REASON]:
+              'configuration event on suricata-zeek-sensor-toronto created high alert Signal Testing Query.',
+            [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
+            [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+            [ALERT_STATUS]: 'open',
+            [ALERT_DEPTH]: 1,
+            [ALERT_ANCESTORS]: [
+              {
                 depth: 0,
                 id: '9xbRBmkBR346wHgngz2D',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
-              parents: [
-                {
-                  depth: 0,
-                  id: '9xbRBmkBR346wHgngz2D',
-                  index: 'auditbeat-8.0.0-2019.02.19-000001',
-                  type: 'event',
-                },
-              ],
-              _meta: {
-                version: SIGNALS_TEMPLATE_VERSION,
-              },
+            ],
+            [ALERT_ORIGINAL_EVENT]: {
+              action: 'changed-audit-configuration',
+              category: 'configuration',
+              module: 'auditd',
+            },
+            _meta: {
+              version: SIGNALS_TEMPLATE_VERSION,
             },
           });
         });
@@ -409,7 +362,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 100, [id]);
           const signals = await getSignalsByIds(supertest, [id], 1000);
           const filteredSignals = signals.hits.hits.filter(
-            (signal) => signal._source?.signal.depth === 1
+            (signal) => signal._source?.[ALERT_DEPTH] === 1
           );
           expect(filteredSignals.length).eql(100);
         });
@@ -497,43 +450,27 @@ export default ({ getService }: FtrProviderContext) => {
                 id: 'unset',
               },
             },
-            signal: {
-              reason:
-                'configuration event on suricata-zeek-sensor-toronto created high alert Signal Testing Query.',
-              rule: fullSignal.signal.rule,
-              original_time: fullSignal.signal.original_time,
-              status: 'open',
-              depth: 1,
-              ancestors: [
-                {
-                  depth: 0,
-                  id: '9xbRBmkBR346wHgngz2D',
-                  index: 'auditbeat-8.0.0-2019.02.19-000001',
-                  type: 'event',
-                },
-              ],
-              original_event: {
-                action: 'changed-audit-configuration',
-                category: 'configuration',
-                module: 'auditd',
-              },
-              parent: {
+            [ALERT_REASON]:
+              'configuration event on suricata-zeek-sensor-toronto created high alert Signal Testing Query.',
+            [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
+            [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+            [ALERT_STATUS]: 'open',
+            [ALERT_DEPTH]: 1,
+            [ALERT_ANCESTORS]: [
+              {
                 depth: 0,
                 id: '9xbRBmkBR346wHgngz2D',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
-              parents: [
-                {
-                  depth: 0,
-                  id: '9xbRBmkBR346wHgngz2D',
-                  index: 'auditbeat-8.0.0-2019.02.19-000001',
-                  type: 'event',
-                },
-              ],
-              _meta: {
-                version: SIGNALS_TEMPLATE_VERSION,
-              },
+            ],
+            [ALERT_ORIGINAL_EVENT]: {
+              action: 'changed-audit-configuration',
+              category: 'configuration',
+              module: 'auditd',
+            },
+            _meta: {
+              version: SIGNALS_TEMPLATE_VERSION,
             },
           });
         });
@@ -549,8 +486,8 @@ export default ({ getService }: FtrProviderContext) => {
           const signals = await getSignalsByIds(supertest, [id]);
           const buildingBlock = signals.hits.hits.find(
             (signal) =>
-              signal._source?.signal.depth === 1 &&
-              get(signal._source, 'signal.original_event.category') === 'anomoly'
+              signal._source?.[ALERT_DEPTH] === 1 &&
+              get(signal._source, `${ALERT_ORIGINAL_EVENT}.category`) === 'anomoly'
           );
           expect(buildingBlock).not.eql(undefined);
           const fullSignal = buildingBlock?._source;
@@ -663,44 +600,28 @@ export default ({ getService }: FtrProviderContext) => {
                 name: 'root',
               },
             },
-            signal: {
-              reason:
-                'anomoly event with process bro, by root on zeek-sensor-amsterdam created high alert Signal Testing Query.',
-              rule: fullSignal.signal.rule,
-              group: fullSignal.signal.group,
-              original_time: fullSignal.signal.original_time,
-              status: 'open',
-              depth: 1,
-              ancestors: [
-                {
-                  depth: 0,
-                  id: 'VhXOBmkBR346wHgnLP8T',
-                  index: 'auditbeat-8.0.0-2019.02.19-000001',
-                  type: 'event',
-                },
-              ],
-              original_event: {
-                action: 'changed-promiscuous-mode-on-device',
-                category: 'anomoly',
-                module: 'auditd',
-              },
-              parent: {
+            [ALERT_REASON]:
+              'anomoly event with process bro, by root on zeek-sensor-amsterdam created high alert Signal Testing Query.',
+            [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
+            [ALERT_GROUP_ID]: fullSignal[ALERT_GROUP_ID],
+            [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+            [ALERT_STATUS]: 'open',
+            [ALERT_DEPTH]: 1,
+            [ALERT_ANCESTORS]: [
+              {
                 depth: 0,
                 id: 'VhXOBmkBR346wHgnLP8T',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
-              parents: [
-                {
-                  depth: 0,
-                  id: 'VhXOBmkBR346wHgnLP8T',
-                  index: 'auditbeat-8.0.0-2019.02.19-000001',
-                  type: 'event',
-                },
-              ],
-              _meta: {
-                version: SIGNALS_TEMPLATE_VERSION,
-              },
+            ],
+            [ALERT_ORIGINAL_EVENT]: {
+              action: 'changed-promiscuous-mode-on-device',
+              category: 'anomoly',
+              module: 'auditd',
+            },
+            _meta: {
+              version: SIGNALS_TEMPLATE_VERSION,
             },
           });
         });
@@ -715,13 +636,13 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 3, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const sequenceSignal = signalsOpen.hits.hits.find(
-            (signal) => signal._source?.signal.depth === 2
+            (signal) => signal._source?.[ALERT_DEPTH] === 2
           );
           const source = sequenceSignal?._source;
           if (!source) {
             return expect(source).to.be.ok();
           }
-          const eventIds = source?.signal.parents.map((event) => event.id);
+          const eventIds = (source?.[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
           expect(source).eql({
             '@timestamp': source && source['@timestamp'],
             agent: {
@@ -752,60 +673,42 @@ export default ({ getService }: FtrProviderContext) => {
             },
             service: { type: 'auditd' },
             user: { audit: { id: 'unset' }, id: '0', name: 'root' },
-            signal: {
-              status: 'open',
-              depth: 2,
-              group: source.signal.group,
-              reason:
-                'event by root on zeek-sensor-amsterdam created high alert Signal Testing Query.',
-              rule: source.signal.rule,
-              ancestors: [
-                {
-                  depth: 0,
-                  id: 'VhXOBmkBR346wHgnLP8T',
-                  index: 'auditbeat-8.0.0-2019.02.19-000001',
-                  type: 'event',
-                },
-                {
-                  depth: 1,
-                  id: eventIds[0],
-                  index: '.siem-signals-default',
-                  rule: source.signal.rule.id,
-                  type: 'signal',
-                },
-                {
-                  depth: 0,
-                  id: '4hbXBmkBR346wHgn6fdp',
-                  index: 'auditbeat-8.0.0-2019.02.19-000001',
-                  type: 'event',
-                },
-                {
-                  depth: 1,
-                  id: eventIds[1],
-                  index: '.siem-signals-default',
-                  rule: source.signal.rule.id,
-                  type: 'signal',
-                },
-              ],
-              parents: [
-                {
-                  depth: 1,
-                  id: eventIds[0],
-                  index: '.siem-signals-default',
-                  rule: source.signal.rule.id,
-                  type: 'signal',
-                },
-                {
-                  depth: 1,
-                  id: eventIds[1],
-                  index: '.siem-signals-default',
-                  rule: source.signal.rule.id,
-                  type: 'signal',
-                },
-              ],
-              _meta: {
-                version: SIGNALS_TEMPLATE_VERSION,
+            [ALERT_STATUS]: 'open',
+            [ALERT_DEPTH]: 2,
+            [ALERT_GROUP_ID]: source[ALERT_GROUP_ID],
+            [ALERT_REASON]:
+              'event by root on zeek-sensor-amsterdam created high alert Signal Testing Query.',
+            [ALERT_RULE_UUID]: ALERT_RULE_UUID,
+            [ALERT_ANCESTORS]: [
+              {
+                depth: 0,
+                id: 'VhXOBmkBR346wHgnLP8T',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
               },
+              {
+                depth: 1,
+                id: eventIds[0],
+                index: '.siem-signals-default',
+                rule: source[ALERT_RULE_UUID],
+                type: 'signal',
+              },
+              {
+                depth: 0,
+                id: '4hbXBmkBR346wHgn6fdp',
+                index: 'auditbeat-8.0.0-2019.02.19-000001',
+                type: 'event',
+              },
+              {
+                depth: 1,
+                id: eventIds[1],
+                index: '.siem-signals-default',
+                rule: source[ALERT_RULE_UUID],
+                type: 'signal',
+              },
+            ],
+            _meta: {
+              version: SIGNALS_TEMPLATE_VERSION,
             },
           });
         });
@@ -824,10 +727,10 @@ export default ({ getService }: FtrProviderContext) => {
           const signalsOpen = await getSignalsByIds(supertest, [id], 1000);
           expect(signalsOpen.hits.hits.length).eql(300);
           const shellSignals = signalsOpen.hits.hits.filter(
-            (signal) => signal._source?.signal.depth === 2
+            (signal) => signal._source?.[ALERT_DEPTH] === 2
           );
           const buildingBlocks = signalsOpen.hits.hits.filter(
-            (signal) => signal._source?.signal.depth === 1
+            (signal) => signal._source?.[ALERT_DEPTH] === 1
           );
           expect(shellSignals.length).eql(100);
           expect(buildingBlocks.length).eql(200);
@@ -839,7 +742,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule: ThresholdCreateSchema = {
             ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
-              field: 'host.id',
+              field: ['host.id'],
               value: 700,
             },
           };
@@ -852,50 +755,34 @@ export default ({ getService }: FtrProviderContext) => {
           if (!fullSignal) {
             return expect(fullSignal).to.be.ok();
           }
-          const eventIds = fullSignal.signal.parents.map((event) => event.id);
+          const eventIds = (fullSignal?.[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
           expect(fullSignal).eql({
             '@timestamp': fullSignal['@timestamp'],
             'host.id': '8cc95778cce5407c809480e8e32ad76b',
             event: { kind: 'signal' },
-            signal: {
-              _meta: { version: SIGNALS_TEMPLATE_VERSION },
-              parents: [
-                {
-                  depth: 0,
-                  id: eventIds[0],
-                  index: 'auditbeat-*',
-                  type: 'event',
-                },
-              ],
-              ancestors: [
-                {
-                  depth: 0,
-                  id: eventIds[0],
-                  index: 'auditbeat-*',
-                  type: 'event',
-                },
-              ],
-              status: 'open',
-              reason: 'event created high alert Signal Testing Query.',
-              rule: fullSignal.signal.rule,
-              original_time: fullSignal.signal.original_time,
-              depth: 1,
-              parent: {
-                id: eventIds[0],
-                type: 'event',
-                index: 'auditbeat-*',
+            _meta: { version: SIGNALS_TEMPLATE_VERSION },
+            [ALERT_ANCESTORS]: [
+              {
                 depth: 0,
+                id: eventIds[0],
+                index: 'auditbeat-*',
+                type: 'event',
               },
-              threshold_result: {
-                terms: [
-                  {
-                    field: 'host.id',
-                    value: '8cc95778cce5407c809480e8e32ad76b',
-                  },
-                ],
-                count: 788,
-                from: '1900-01-01T00:00:00.000Z',
-              },
+            ],
+            [ALERT_STATUS]: 'open',
+            [ALERT_REASON]: 'event created high alert Signal Testing Query.',
+            [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
+            [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+            [ALERT_DEPTH]: 1,
+            threshold_result: {
+              terms: [
+                {
+                  field: 'host.id',
+                  value: '8cc95778cce5407c809480e8e32ad76b',
+                },
+              ],
+              count: 788,
+              from: '1900-01-01T00:00:00.000Z',
             },
           });
         });
@@ -990,56 +877,40 @@ export default ({ getService }: FtrProviderContext) => {
           if (!fullSignal) {
             return expect(fullSignal).to.be.ok();
           }
-          const eventIds = fullSignal.signal.parents.map((event) => event.id);
+          const eventIds = (fullSignal?.[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
           expect(fullSignal).eql({
             '@timestamp': fullSignal['@timestamp'],
             'host.id': '8cc95778cce5407c809480e8e32ad76b',
             event: { kind: 'signal' },
-            signal: {
-              _meta: { version: SIGNALS_TEMPLATE_VERSION },
-              parents: [
-                {
-                  depth: 0,
-                  id: eventIds[0],
-                  index: 'auditbeat-*',
-                  type: 'event',
-                },
-              ],
-              ancestors: [
-                {
-                  depth: 0,
-                  id: eventIds[0],
-                  index: 'auditbeat-*',
-                  type: 'event',
-                },
-              ],
-              status: 'open',
-              reason: `event created high alert Signal Testing Query.`,
-              rule: fullSignal.signal.rule,
-              original_time: fullSignal.signal.original_time,
-              depth: 1,
-              parent: {
-                id: eventIds[0],
-                type: 'event',
-                index: 'auditbeat-*',
+            _meta: { version: SIGNALS_TEMPLATE_VERSION },
+            [ALERT_ANCESTORS]: [
+              {
                 depth: 0,
+                id: eventIds[0],
+                index: 'auditbeat-*',
+                type: 'event',
               },
-              threshold_result: {
-                terms: [
-                  {
-                    field: 'host.id',
-                    value: '8cc95778cce5407c809480e8e32ad76b',
-                  },
-                ],
-                cardinality: [
-                  {
-                    field: 'destination.ip',
-                    value: 7,
-                  },
-                ],
-                count: 788,
-                from: '1900-01-01T00:00:00.000Z',
-              },
+            ],
+            [ALERT_STATUS]: 'open',
+            [ALERT_REASON]: `event created high alert Signal Testing Query.`,
+            [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
+            [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+            [ALERT_DEPTH]: 1,
+            threshold_result: {
+              terms: [
+                {
+                  field: 'host.id',
+                  value: '8cc95778cce5407c809480e8e32ad76b',
+                },
+              ],
+              cardinality: [
+                {
+                  field: 'destination.ip',
+                  value: 7,
+                },
+              ],
+              count: 788,
+              from: '1900-01-01T00:00:00.000Z',
             },
           });
         });
@@ -1072,60 +943,44 @@ export default ({ getService }: FtrProviderContext) => {
           if (!fullSignal) {
             return expect(fullSignal).to.be.ok();
           }
-          const eventIds = fullSignal.signal.parents.map((event) => event.id);
+          const eventIds = (fullSignal[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
           expect(fullSignal).eql({
             '@timestamp': fullSignal['@timestamp'],
             'event.module': 'system',
             'host.id': '2ab45fc1c41e4c84bbd02202a7e5761f',
             'process.name': 'sshd',
             event: { kind: 'signal' },
-            signal: {
-              _meta: { version: SIGNALS_TEMPLATE_VERSION },
-              parents: [
-                {
-                  depth: 0,
-                  id: eventIds[0],
-                  index: 'auditbeat-*',
-                  type: 'event',
-                },
-              ],
-              ancestors: [
-                {
-                  depth: 0,
-                  id: eventIds[0],
-                  index: 'auditbeat-*',
-                  type: 'event',
-                },
-              ],
-              status: 'open',
-              reason: `event created high alert Signal Testing Query.`,
-              rule: fullSignal.signal.rule,
-              original_time: fullSignal.signal.original_time,
-              depth: 1,
-              parent: {
-                id: eventIds[0],
-                type: 'event',
-                index: 'auditbeat-*',
+            _meta: { version: SIGNALS_TEMPLATE_VERSION },
+            [ALERT_ANCESTORS]: [
+              {
                 depth: 0,
+                id: eventIds[0],
+                index: 'auditbeat-*',
+                type: 'event',
               },
-              threshold_result: {
-                terms: [
-                  {
-                    field: 'event.module',
-                    value: 'system',
-                  },
-                  {
-                    field: 'host.id',
-                    value: '2ab45fc1c41e4c84bbd02202a7e5761f',
-                  },
-                  {
-                    field: 'process.name',
-                    value: 'sshd',
-                  },
-                ],
-                count: 21,
-                from: '1900-01-01T00:00:00.000Z',
-              },
+            ],
+            [ALERT_STATUS]: 'open',
+            [ALERT_REASON]: `event created high alert Signal Testing Query.`,
+            [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
+            [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+            [ALERT_DEPTH]: 1,
+            threshold_result: {
+              terms: [
+                {
+                  field: 'event.module',
+                  value: 'system',
+                },
+                {
+                  field: 'host.id',
+                  value: '2ab45fc1c41e4c84bbd02202a7e5761f',
+                },
+                {
+                  field: 'process.name',
+                  value: 'sshd',
+                },
+              ],
+              count: 21,
+              from: '1900-01-01T00:00:00.000Z',
             },
           });
         });
@@ -1170,7 +1025,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
-        expect(signalsOpen.hits.hits[0]._source?.signal.rule.rule_id).eql(getSimpleRule().rule_id);
+        expect(signalsOpen.hits.hits[0]._source?.[ALERT_RULE_RULE_ID]).eql(getSimpleRule().rule_id);
       });
 
       it('should query and get back expected signal structure using a basic KQL query', async () => {
@@ -1183,11 +1038,8 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signal = signalsOpen.hits.hits[0]._source?.signal;
-        // remove rule to cut down on touch points for test changes when the rule format changes
-        // remove reason to avoid failures due to @timestamp mismatches in the reason string
-        const signalNoRule = omit(signal, ['rule', 'reason']);
-        expect(signalNoRule).eql({
-          parents: [
+        expect(signal).eql({
+          [ALERT_ANCESTORS]: [
             {
               id: '1',
               type: 'event',
@@ -1195,24 +1047,9 @@ export default ({ getService }: FtrProviderContext) => {
               depth: 0,
             },
           ],
-          ancestors: [
-            {
-              id: '1',
-              type: 'event',
-              index: 'signal_name_clash',
-              depth: 0,
-            },
-          ],
-          status: 'open',
-          depth: 1,
-          parent: {
-            id: '1',
-            type: 'event',
-            index: 'signal_name_clash',
-            depth: 0,
-          },
-          original_time: '2020-10-28T05:08:53.000Z',
-          original_signal: 1,
+          [ALERT_STATUS]: 'open',
+          [ALERT_DEPTH]: 1,
+          [ALERT_ORIGINAL_TIME]: '2020-10-28T05:08:53.000Z',
           _meta: {
             version: SIGNALS_TEMPLATE_VERSION,
           },
@@ -1240,21 +1077,10 @@ export default ({ getService }: FtrProviderContext) => {
         // Get our single signal on top of a signal
         const signalsOpen = await getSignalsByRuleIds(supertest, ['signal-on-signal']);
 
-        const signal = signalsOpen.hits.hits[0]._source?.signal;
-        // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, ['rule', 'reason']);
+        const signal = signalsOpen.hits.hits[0]._source!;
 
-        expect(signalNoRule).eql({
-          parents: [
-            {
-              rule: signalNoRule.parents[0].rule, // rule id is always changing so skip testing it
-              id: 'c4db4921f2d9152865fd6518c2a2ef3471738e49f607a21319048c69a303f83f',
-              type: 'signal',
-              index: '.siem-signals-default-000001',
-              depth: 1,
-            },
-          ],
-          ancestors: [
+        expect(signal).eql({
+          [ALERT_ANCESTORS]: [
             {
               id: '1',
               type: 'event',
@@ -1262,24 +1088,17 @@ export default ({ getService }: FtrProviderContext) => {
               depth: 0,
             },
             {
-              rule: signalNoRule.ancestors[1].rule, // rule id is always changing so skip testing it
+              rule: (signal[ALERT_ANCESTORS] as Ancestor[])[1].rule, // rule id is always changing so skip testing it
               id: 'c4db4921f2d9152865fd6518c2a2ef3471738e49f607a21319048c69a303f83f',
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
             },
           ],
-          status: 'open',
-          depth: 2,
-          parent: {
-            rule: signalNoRule.parent?.rule, // parent.rule is always changing so skip testing it
-            id: 'c4db4921f2d9152865fd6518c2a2ef3471738e49f607a21319048c69a303f83f',
-            type: 'signal',
-            index: '.siem-signals-default-000001',
-            depth: 1,
-          },
-          original_time: signalNoRule.original_time, // original_time will always be changing sine it's based on a signal created here, so skip testing it
-          original_event: {
+          [ALERT_STATUS]: 'open',
+          [ALERT_DEPTH]: 2,
+          [ALERT_ORIGINAL_TIME]: signal[ALERT_ORIGINAL_TIME], // original_time will always be changing sine it's based on a signal created here, so skip testing it
+          [ALERT_ORIGINAL_EVENT]: {
             kind: 'signal',
           },
           _meta: {
@@ -1325,7 +1144,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
-        expect(signalsOpen.hits.hits[0]._source?.signal.rule.rule_id).eql(getSimpleRule().rule_id);
+        expect(signalsOpen.hits.hits[0]._source?.[ALERT_RULE_UUID]).eql(getSimpleRule().rule_id);
       });
 
       it('should query and get back expected signal structure using a basic KQL query', async () => {
@@ -1337,12 +1156,9 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
-        const signal = signalsOpen.hits.hits[0]._source?.signal;
-        // remove rule to cut down on touch points for test changes when the rule format changes
-        // remove reason to avoid failures due to @timestamp mismatches in the reason string
-        const signalNoRule = omit(signal, ['rule', 'reason']);
-        expect(signalNoRule).eql({
-          parents: [
+        const signal = signalsOpen.hits.hits[0]._source!;
+        expect(signal).eql({
+          [ALERT_ANCESTORS]: [
             {
               id: '1',
               type: 'event',
@@ -1350,30 +1166,9 @@ export default ({ getService }: FtrProviderContext) => {
               depth: 0,
             },
           ],
-          ancestors: [
-            {
-              id: '1',
-              type: 'event',
-              index: 'signal_object_clash',
-              depth: 0,
-            },
-          ],
-          status: 'open',
-          depth: 1,
-          parent: {
-            id: '1',
-            type: 'event',
-            index: 'signal_object_clash',
-            depth: 0,
-          },
-          original_time: '2020-10-28T05:08:53.000Z',
-          original_signal: {
-            child_1: {
-              child_2: {
-                value: 'some_value',
-              },
-            },
-          },
+          [ALERT_STATUS]: 'open',
+          [ALERT_DEPTH]: 1,
+          [ALERT_ORIGINAL_TIME]: '2020-10-28T05:08:53.000Z',
           _meta: {
             version: SIGNALS_TEMPLATE_VERSION,
           },
@@ -1400,21 +1195,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Get our single signal on top of a signal
         const signalsOpen = await getSignalsByRuleIds(supertest, ['signal-on-signal']);
-        const signal = signalsOpen.hits.hits[0]._source?.signal;
-        // remove rule to cut down on touch points for test changes when the rule format changes
-        const signalNoRule = omit(signal, ['rule', 'reason']);
+        const signal = signalsOpen.hits.hits[0]._source!;
 
-        expect(signalNoRule).eql({
-          parents: [
-            {
-              rule: signalNoRule.parents[0].rule, // rule id is always changing so skip testing it
-              id: '0733d5d2eaed77410a65eec95cfb2df099abc97289b78e2b0b406130e2dbdb33',
-              type: 'signal',
-              index: '.siem-signals-default-000001',
-              depth: 1,
-            },
-          ],
-          ancestors: [
+        expect(signal).eql({
+          [ALERT_ANCESTORS]: [
             {
               id: '1',
               type: 'event',
@@ -1422,24 +1206,17 @@ export default ({ getService }: FtrProviderContext) => {
               depth: 0,
             },
             {
-              rule: signalNoRule.ancestors[1].rule, // rule id is always changing so skip testing it
+              rule: (signal[ALERT_ANCESTORS] as Ancestor[])[1].rule, // rule id is always changing so skip testing it
               id: '0733d5d2eaed77410a65eec95cfb2df099abc97289b78e2b0b406130e2dbdb33',
               type: 'signal',
               index: '.siem-signals-default-000001',
               depth: 1,
             },
           ],
-          status: 'open',
-          depth: 2,
-          parent: {
-            rule: signalNoRule.parent?.rule, // parent.rule is always changing so skip testing it
-            id: '0733d5d2eaed77410a65eec95cfb2df099abc97289b78e2b0b406130e2dbdb33',
-            type: 'signal',
-            index: '.siem-signals-default-000001',
-            depth: 1,
-          },
-          original_time: signalNoRule.original_time, // original_time will always be changing sine it's based on a signal created here, so skip testing it
-          original_event: {
+          [ALERT_STATUS]: 'open',
+          [ALERT_DEPTH]: 2,
+          [ALERT_ORIGINAL_TIME]: signal[ALERT_ORIGINAL_TIME], // original_time will always be changing sine it's based on a signal created here, so skip testing it
+          [ALERT_ORIGINAL_EVENT]: {
             kind: 'signal',
           },
           _meta: {
@@ -1486,11 +1263,11 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(signals.length).equal(4);
         signals.forEach((s) => {
-          expect(s?.signal.rule.severity).equal('medium');
-          expect(s?.signal.rule.severity_mapping).eql([]);
+          expect(s?.[ALERT_RULE_SEVERITY]).equal('medium');
+          expect(s?.[ALERT_RULE_SEVERITY_MAPPING]).eql([]);
 
-          expect(s?.signal.rule.risk_score).equal(75);
-          expect(s?.signal.rule.risk_score_mapping).eql([]);
+          expect(s?.[ALERT_RULE_RISK_SCORE]).equal(75);
+          expect(s?.[ALERT_RULE_RISK_SCORE_MAPPING]).eql([]);
         });
       });
 
@@ -1507,8 +1284,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const signals = await executeRuleAndGetSignals(rule);
         const severities = signals.map((s) => ({
-          id: s?.signal.parent?.id,
-          value: s?.signal.rule.severity,
+          id: (s?.[ALERT_ANCESTORS] as Ancestor[])[0].id,
+          value: s?.[ALERT_RULE_SEVERITY],
         }));
 
         expect(signals.length).equal(4);
@@ -1520,9 +1297,9 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         signals.forEach((s) => {
-          expect(s?.signal.rule.risk_score).equal(75);
-          expect(s?.signal.rule.risk_score_mapping).eql([]);
-          expect(s?.signal.rule.severity_mapping).eql([
+          expect(s?.[ALERT_RULE_RISK_SCORE]).equal(75);
+          expect(s?.[ALERT_RULE_RISK_SCORE_MAPPING]).eql([]);
+          expect(s?.[ALERT_RULE_SEVERITY_MAPPING]).eql([
             { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
             { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
           ]);
@@ -1541,8 +1318,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const signals = await executeRuleAndGetSignals(rule);
         const riskScores = signals.map((s) => ({
-          id: s?.signal.parent?.id,
-          value: s?.signal.rule.risk_score,
+          id: (s?.[ALERT_ANCESTORS] as Ancestor[])[0].id,
+          value: s?.[ALERT_RULE_RISK_SCORE],
         }));
 
         expect(signals.length).equal(4);
@@ -1554,9 +1331,9 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         signals.forEach((s) => {
-          expect(s?.signal.rule.severity).equal('medium');
-          expect(s?.signal.rule.severity_mapping).eql([]);
-          expect(s?.signal.rule.risk_score_mapping).eql([
+          expect(s?.[ALERT_RULE_SEVERITY]).equal('medium');
+          expect(s?.[ALERT_RULE_SEVERITY_MAPPING]).eql([]);
+          expect(s?.[ALERT_RULE_RISK_SCORE_MAPPING]).eql([
             { field: 'my_risk', operator: 'equals', value: '' },
           ]);
         });
@@ -1578,9 +1355,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         const signals = await executeRuleAndGetSignals(rule);
         const values = signals.map((s) => ({
-          id: s?.signal.parent?.id,
-          severity: s?.signal.rule.severity,
-          risk: s?.signal.rule.risk_score,
+          id: (s?.[ALERT_ANCESTORS] as Ancestor[])[0].id,
+          severity: s?.[ALERT_RULE_SEVERITY],
+          risk: s?.[ALERT_RULE_RISK_SCORE],
         }));
 
         expect(signals.length).equal(4);
@@ -1592,11 +1369,11 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         signals.forEach((s) => {
-          expect(s?.signal.rule.severity_mapping).eql([
+          expect(s?.[ALERT_RULE_SEVERITY_MAPPING]).eql([
             { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
             { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
           ]);
-          expect(s?.signal.rule.risk_score_mapping).eql([
+          expect(s?.[ALERT_RULE_RISK_SCORE_MAPPING]).eql([
             { field: 'my_risk', operator: 'equals', value: '' },
           ]);
         });
@@ -1675,48 +1452,30 @@ export default ({ getService }: FtrProviderContext) => {
           },
           message: 'System boot',
           service: { type: 'system' },
-          signal: {
-            _meta: {
-              version: SIGNALS_TEMPLATE_VERSION,
-            },
-            parents: [
-              {
-                depth: 0,
-                id: 'UBXOBmkBR346wHgnLP8T',
-                index: 'auditbeat-8.0.0-2019.02.19-000001',
-                type: 'event',
-              },
-            ],
-            ancestors: [
-              {
-                depth: 0,
-                id: 'UBXOBmkBR346wHgnLP8T',
-                index: 'auditbeat-8.0.0-2019.02.19-000001',
-                type: 'event',
-              },
-            ],
-            status: 'open',
-            reason: `event on zeek-sensor-amsterdam created high alert boot.`,
-            rule: {
-              ...fullSignal.signal.rule,
-              name: 'boot',
-              rule_name_override: 'event.action',
-            },
-            original_time: fullSignal.signal.original_time,
-            depth: 1,
-            parent: {
-              id: 'UBXOBmkBR346wHgnLP8T',
-              type: 'event',
-              index: 'auditbeat-8.0.0-2019.02.19-000001',
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
+          [ALERT_ANCESTORS]: [
+            {
               depth: 0,
+              id: 'UBXOBmkBR346wHgnLP8T',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              type: 'event',
             },
-            original_event: {
-              action: 'boot',
-              dataset: 'login',
-              kind: 'event',
-              module: 'system',
-              origin: '/var/log/wtmp',
-            },
+          ],
+          [ALERT_STATUS]: 'open',
+          [ALERT_REASON]: `event on zeek-sensor-amsterdam created high alert boot.`,
+          [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
+          [ALERT_RULE_NAME]: 'boot',
+          [ALERT_RULE_RULE_NAME_OVERRIDE]: 'event.action',
+          [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+          [ALERT_DEPTH]: 1,
+          [ALERT_ORIGINAL_EVENT]: {
+            action: 'boot',
+            dataset: 'login',
+            kind: 'event',
+            module: 'system',
+            origin: '/var/log/wtmp',
           },
         });
       });

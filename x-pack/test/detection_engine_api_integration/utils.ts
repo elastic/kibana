@@ -32,7 +32,6 @@ import {
   EqlCreateSchema,
   ThresholdCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
-import { Signal } from '../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
 import {
   Status,
@@ -49,6 +48,7 @@ import {
   INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
 } from '../../plugins/security_solution/common/constants';
+import { RACAlert } from '../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -1075,18 +1075,12 @@ export const waitForSignalsToBePresent = async (
 export const getSignalsByRuleIds = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   ruleIds: string[]
-): Promise<
-  estypes.SearchResponse<{
-    signal: Signal;
-    [x: string]: unknown;
-  }>
-> => {
-  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-    await supertest
-      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .set('kbn-xsrf', 'true')
-      .send(getQuerySignalsRuleId(ruleIds))
-      .expect(200);
+): Promise<estypes.SearchResponse<RACAlert>> => {
+  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsRuleId(ruleIds))
+    .expect(200);
   return signalsOpen;
 };
 
@@ -1100,18 +1094,12 @@ export const getSignalsByIds = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   ids: string[],
   size?: number
-): Promise<
-  estypes.SearchResponse<{
-    signal: Signal;
-    [x: string]: unknown;
-  }>
-> => {
-  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-    await supertest
-      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .set('kbn-xsrf', 'true')
-      .send(getQuerySignalsId(ids, size))
-      .expect(200);
+): Promise<estypes.SearchResponse<RACAlert>> => {
+  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsId(ids, size))
+    .expect(200);
   return signalsOpen;
 };
 
@@ -1123,18 +1111,12 @@ export const getSignalsByIds = async (
 export const getSignalsById = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   id: string
-): Promise<
-  estypes.SearchResponse<{
-    signal: Signal;
-    [x: string]: unknown;
-  }>
-> => {
-  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-    await supertest
-      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .set('kbn-xsrf', 'true')
-      .send(getQuerySignalsId([id]))
-      .expect(200);
+): Promise<estypes.SearchResponse<RACAlert>> => {
+  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsId([id]))
+    .expect(200);
   return signalsOpen;
 };
 
