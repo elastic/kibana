@@ -8,9 +8,11 @@
 import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiSpacer, EuiPanel, EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiText, EuiSpacer, EuiPanel, EuiLink, EuiCallOut } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import { useAppContext } from '../../../app_context';
 import { ExternalLinks } from './external_links';
 import { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';
 import { useDeprecationLogging } from './use_deprecation_logging';
@@ -34,6 +36,28 @@ const i18nTexts = {
       defaultMessage: 'Resolve deprecation issues and verify your changes',
     }
   ),
+  apiCompatibilityNoteTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.apiCompatibilityNoteTitle',
+    {
+      defaultMessage: 'Apply API compatibility headers (optional)',
+    }
+  ),
+  apiCompatibilityNoteBody: (docLink: string) => (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.overview.apiCompatibilityNoteBody"
+      defaultMessage="We recommend you resolve all deprecation issues before upgrading. However, it can be challenging to ensure all requests are fixed. For additional safety, include API version compatibility headers in your requests. {learnMoreLink}."
+      values={{
+        learnMoreLink: (
+          <EuiLink href={docLink} target="_blank">
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overview.apiCompatibilityNoteLink"
+              defaultMessage="Learn more"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  ),
   onlyLogWritingEnabledTitle: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningTitle',
     {
@@ -55,6 +79,11 @@ interface Props {
 
 const FixLogsStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   const state = useDeprecationLogging();
+  const {
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
   const [checkpoint, setCheckpoint] = useState(loadLogsCheckpoint());
 
   useEffect(() => {
@@ -113,6 +142,19 @@ const FixLogsStep: FunctionComponent<Props> = ({ setIsComplete }) => {
             setCheckpoint={setCheckpoint}
             setHasNoDeprecationLogs={setIsComplete}
           />
+
+          <EuiSpacer size="xl" />
+          <EuiText data-test-subj="apiCompatibilityNoteTitle">
+            <h4>{i18nTexts.apiCompatibilityNoteTitle}</h4>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiText>
+            <p>
+              {i18nTexts.apiCompatibilityNoteBody(
+                docLinks.links.elasticsearch.apiCompatibilityHeader
+              )}
+            </p>
+          </EuiText>
         </>
       )}
     </>
