@@ -49,10 +49,11 @@ async function loadHostIsolationExceptionsList(
       payload: createLoadedResourceState(entries),
     });
   } catch (error) {
-    dispatch({
-      type: 'eventFiltersListPageDataExistsChanged',
-      payload: createFailedResourceState<boolean>(error.body ?? error),
-    });
+    // TODO handle error
+    // dispatch({
+    // type: 'hostIsolationExceptionsPageDataChanged',
+    // payload: createFailedResourceState(false),
+    // });
   }
 }
 

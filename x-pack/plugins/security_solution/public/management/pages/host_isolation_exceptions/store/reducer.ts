@@ -16,7 +16,13 @@ export const hostIsolationExceptionsPageReducer: StateReducer = (
   state = initialHostIsolationExceptionsPageState(),
   action
 ) => {
-  // switch (action.type) {
-  // }
+  switch (action.type) {
+    case 'hostIsolationExceptionsPageDataChanged': {
+      return {
+        ...state,
+        entries: action.payload,
+      };
+    }
+  }
   return state;
 };
