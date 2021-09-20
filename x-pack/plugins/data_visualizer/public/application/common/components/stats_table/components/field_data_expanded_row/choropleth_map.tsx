@@ -106,23 +106,38 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   return (
     <ExpandedRowPanel
       dataTestSubj={'fileDataVisualizerChoroplethMapTopValues'}
-      className={'dataVisualizerPanelWrapper dataVisualizerMapWrapper'}
+      className={'dataVisualizerPanelWrapper '}
+      grow={true}
     >
-      <EmbeddedMapComponent layerList={layerList} />
-      {isTopValuesSampled === true && (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiText size="xs" textAlign={'center'}>
-            <FormattedMessage
-              id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"
-              defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
-              values={{
-                topValuesSamplerShardSize,
-              }}
-            />
-          </EuiText>
-        </>
-      )}
+      <div className={'dataVisualizerMapWrapper'}>
+        <EmbeddedMapComponent layerList={layerList} />
+      </div>
+      <div>
+        <EuiText size="xs" textAlign={'center'}>
+          <FormattedMessage
+            id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"
+            defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
+            values={{
+              topValuesSamplerShardSize,
+            }}
+          />
+        </EuiText>
+      </div>
+
+      {/* {isTopValuesSampled === true && (*/}
+      {/*  <>*/}
+      {/*    <EuiSpacer size="xs" />*/}
+      {/*    <EuiText size="xs" textAlign={'center'}>*/}
+      {/*      <FormattedMessage*/}
+      {/*        id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"*/}
+      {/*        defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"*/}
+      {/*        values={{*/}
+      {/*          topValuesSamplerShardSize,*/}
+      {/*        }}*/}
+      {/*      />*/}
+      {/*    </EuiText>*/}
+      {/*  </>*/}
+      {/* )}*/}
     </ExpandedRowPanel>
   );
 };
