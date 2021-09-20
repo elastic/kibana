@@ -42,7 +42,6 @@ export const validateSelectedPatterns = (
 ): Partial<SourcererScopeById> => {
   const { id, eventType, ...rest } = payload;
   const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
-  // TODO: Steph/sourcerer needs unit tests
   const selectedPatterns =
     rest.selectedPatterns != null && dataView != null
       ? rest.selectedPatterns.filter(
@@ -78,11 +77,16 @@ export const defaultDataViewByEventType = ({
     signalIndexName,
     defaultDataView: { id, patternList },
   } = state;
-  console.log('eh');
   if (!isEmpty(signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
-    return patternList.filter((index) => index === signalIndexName).sort();
+    return {
+      selectedPatterns: patternList.filter((index) => index === signalIndexName).sort(),
+      selectedDataViewId: id,
+    };
   } else if (eventType === 'raw') {
-    return patternList.filter((index) => index !== signalIndexName).sort();
+    return {
+      selectedPatterns: patternList.filter((index) => index !== signalIndexName).sort(),
+      selectedDataViewId: id,
+    };
   }
   return { selectedPatterns: patternList.sort(), selectedDataViewId: id };
 };

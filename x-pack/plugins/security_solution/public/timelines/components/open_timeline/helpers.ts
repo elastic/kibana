@@ -377,62 +377,65 @@ export const queryTimelineById = <TCache>({
     });
 };
 
-export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeline => ({
-  duplicate,
-  id,
-  forceNotes = false,
-  from,
-  notes,
-  timeline,
-  to,
-  ruleNote,
-}: UpdateTimeline): (() => void) => () => {
-  if (!isEmpty(timeline.indexNames)) {
-    dispatch(
-      sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.timeline,
-        selectedDataViewId: timeline.dataViewId,
-        selectedPatterns: timeline.indexNames,
-        eventType: timeline.eventType,
-      })
-    );
-  }
-  if (
-    timeline.status === TimelineStatus.immutable &&
-    timeline.timelineType === TimelineType.template
-  ) {
-    dispatch(
-      dispatchSetRelativeRangeDatePicker({
-        id: 'timeline',
-        fromStr: 'now-24h',
-        toStr: 'now',
-        from: DEFAULT_FROM_MOMENT.toISOString(),
-        to: DEFAULT_TO_MOMENT.toISOString(),
-      })
-    );
-  } else {
-    dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
-  }
-  dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
-  if (
-    timeline.kqlQuery != null &&
-    timeline.kqlQuery.filterQuery != null &&
-    timeline.kqlQuery.filterQuery.kuery != null &&
-    timeline.kqlQuery.filterQuery.kuery.expression !== ''
-  ) {
-    dispatch(
-      dispatchApplyKqlFilterQuery({
-        id,
-        filterQuery: {
-          kuery: {
-            kind: timeline.kqlQuery.filterQuery.kuery.kind ?? 'kuery',
-            expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
+export const dispatchUpdateTimeline =
+  (dispatch: Dispatch): DispatchUpdateTimeline =>
+  ({
+    duplicate,
+    id,
+    forceNotes = false,
+    from,
+    notes,
+    timeline,
+    to,
+    ruleNote,
+  }: UpdateTimeline): (() => void) =>
+  () => {
+    if (!isEmpty(timeline.indexNames)) {
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: SourcererScopeName.timeline,
+          selectedDataViewId: timeline.dataViewId,
+          selectedPatterns: timeline.indexNames,
+          eventType: timeline.eventType,
+        })
+      );
+    }
+    if (
+      timeline.status === TimelineStatus.immutable &&
+      timeline.timelineType === TimelineType.template
+    ) {
+      dispatch(
+        dispatchSetRelativeRangeDatePicker({
+          id: 'timeline',
+          fromStr: 'now-24h',
+          toStr: 'now',
+          from: DEFAULT_FROM_MOMENT.toISOString(),
+          to: DEFAULT_TO_MOMENT.toISOString(),
+        })
+      );
+    } else {
+      dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
+    }
+    dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
+    if (
+      timeline.kqlQuery != null &&
+      timeline.kqlQuery.filterQuery != null &&
+      timeline.kqlQuery.filterQuery.kuery != null &&
+      timeline.kqlQuery.filterQuery.kuery.expression !== ''
+    ) {
+      dispatch(
+        dispatchApplyKqlFilterQuery({
+          id,
+          filterQuery: {
+            kuery: {
+              kind: timeline.kqlQuery.filterQuery.kuery.kind ?? 'kuery',
+              expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
+            },
+            serializedQuery: timeline.kqlQuery.filterQuery.serializedQuery || '',
           },
-          serializedQuery: timeline.kqlQuery.filterQuery.serializedQuery || '',
-        },
-      })
-    );
-  }
+        })
+      );
+    }
 
     if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
       const newNote = createNote({ newNote: ruleNote });

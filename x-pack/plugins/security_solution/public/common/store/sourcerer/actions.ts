@@ -17,9 +17,8 @@ export const setSource = actionCreator<{
   payload: ManageScopeInit;
 }>('SET_SOURCE');
 
-export const setSignalIndexName = actionCreator<{ signalIndexName: string }>(
-  'SET_SIGNAL_INDEX_NAME'
-);
+export const setSignalIndexName =
+  actionCreator<{ signalIndexName: string }>('SET_SIGNAL_INDEX_NAME');
 
 export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; loading: boolean }>(
   'SET_SOURCERER_SCOPE_LOADING'
