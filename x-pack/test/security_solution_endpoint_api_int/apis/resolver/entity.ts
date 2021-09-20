@@ -82,6 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
             // this value is from the es archive
             id:
               'MTIwNWY1NWQtODRkYS00MzkxLWIyNWQtYTNkNGJmNDBmY2E1LTc1NTItMTMyNDM1NDY1MTQuNjI0MjgxMDA=',
+            originTimestamp: '2020-09-02T18:56:19.134Z',
           },
         ]);
       });
