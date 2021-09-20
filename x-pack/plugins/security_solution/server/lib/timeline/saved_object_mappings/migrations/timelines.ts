@@ -13,7 +13,7 @@ import {
 } from 'kibana/server';
 import { flow } from 'lodash';
 import { SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
-import { createReference } from './utils';
+import { createMigratedDoc, createReference } from './utils';
 import { CreateTimelineSchema } from '../../schemas/timelines';
 import { defaultDataViewRef } from '../../../../../common/constants';
 
@@ -33,13 +33,12 @@ export const migrateSavedQueryIdToReferences = (
     SAVED_QUERY_TYPE
   );
 
-  return {
-    ...doc,
-    attributes: {
-      ...restAttributes,
-    },
-    references: [...docReferences, ...savedQueryIdReferences],
-  };
+  return createMigratedDoc({
+    doc,
+    attributes: restAttributes,
+    docReferences,
+    migratedReferences: savedQueryIdReferences,
+  });
 };
 
 export const migrateDataViewIdToReferences = (

@@ -59,12 +59,12 @@ describe('createTimelines', () => {
   let frameworkRequest: FrameworkRequest;
 
   beforeAll(async () => {
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn(),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
 
     const { context } = requestContextMock.createTools();
     const mockRequest = getCreateTimelinesRequest(createTimelineWithoutTimelineId);
@@ -108,7 +108,7 @@ describe('createTimelines', () => {
     });
 
     test('persistNotes', () => {
-      expect((persistNotes as jest.Mock).mock.calls[0][4]).toEqual([
+      expect((persistNotes as jest.Mock).mock.calls[0][3]).toEqual([
         {
           created: 1603885051655,
           createdBy: 'elastic',

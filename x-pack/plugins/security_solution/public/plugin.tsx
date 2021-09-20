@@ -386,11 +386,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       };
 
       const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
-      const timelineReducer = (reduceReducers(
+      const timelineReducer = reduceReducers(
         timelineInitialState.timeline,
         tGridReducer,
         subPlugins.timelines.store.reducer.timeline
-      ) as unknown) as Reducer<TimelineState, AnyAction>;
+      ) as unknown as Reducer<TimelineState, AnyAction>;
 
       this._store = createStore(
         createInitialState(

@@ -75,8 +75,7 @@ describe('Epic Timeline', () => {
             },
             and: [
               {
-                id:
-                  'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
+                id: 'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
                 name: 'event.module: endgame',
                 enabled: true,
                 excluded: false,
@@ -218,8 +217,7 @@ describe('Epic Timeline', () => {
               {
                 enabled: true,
                 excluded: false,
-                id:
-                  'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
+                id: 'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
                 kqlQuery: '',
                 name: 'event.module: endgame',
                 queryMatch: {

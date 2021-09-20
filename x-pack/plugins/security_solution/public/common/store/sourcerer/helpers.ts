@@ -6,9 +6,10 @@
  */
 
 import { isEmpty } from 'lodash';
-import { KibanaDataView, SourcererModel, SourcererScopeName } from './model';
+import { KibanaDataView, SourcererModel, SourcererScopeById, SourcererScopeName } from './model';
 import { TimelineEventsType } from '../../../../common';
 import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
+import { SelectedDataViewPayload } from './actions';
 
 export interface Args {
   eventType?: TimelineEventsType;
@@ -35,6 +36,36 @@ export const getScopePatternListSelection = (
   return patternList.sort();
 };
 
+export const validateSelectedPatterns = (
+  state: SourcererModel,
+  payload: SelectedDataViewPayload
+): Partial<SourcererScopeById> => {
+  const { id, eventType, ...rest } = payload;
+  const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
+  // TODO: Steph/sourcerer needs unit tests
+  const selectedPatterns =
+    rest.selectedPatterns != null && dataView != null
+      ? rest.selectedPatterns.filter(
+          // ensures all selected patterns are selectable
+          // and no patterns are duplicated
+          (value, index, self) =>
+            self.indexOf(value) === index && dataView.patternList.includes(value)
+        )
+      : [];
+  return {
+    [id]: {
+      ...state.sourcererScopes[id],
+      ...rest,
+      selectedPatterns,
+      ...(isEmpty(selectedPatterns) || dataView == null
+        ? id === SourcererScopeName.timeline
+          ? defaultDataViewByEventType({ state, eventType })
+          : { selectedPatterns: getScopePatternListSelection(dataView, id, state.signalIndexName) }
+        : {}),
+    },
+  };
+};
+
 // TODO: Steph/sourcerer eventType will be alerts only, when ui updates delete raw
 export const defaultDataViewByEventType = ({
   state,
@@ -47,7 +78,7 @@ export const defaultDataViewByEventType = ({
     signalIndexName,
     defaultDataView: { id, patternList },
   } = state;
-
+  console.log('eh');
   if (!isEmpty(signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
     return patternList.filter((index) => index === signalIndexName).sort();
   } else if (eventType === 'raw') {

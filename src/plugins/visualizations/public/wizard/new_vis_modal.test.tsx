@@ -58,7 +58,7 @@ describe('NewVisModal', () => {
   ] as BaseVisType[];
   const visTypes: TypesStart = {
     get<T>(id: string): BaseVisType<T> {
-      return (_visTypes.find((vis) => vis.name === id) as unknown) as BaseVisType<T>;
+      return _visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
     },
     all: () => _visTypes,
     getAliases: () => [],
@@ -190,7 +190,7 @@ describe('NewVisModal', () => {
           originatingApp={'coolJestTestApp'}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
-          application={({ navigateToApp } as unknown) as ApplicationStart}
+          application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           stateTransfer={stateTransfer}
           savedObjects={{} as SavedObjectsStart}
@@ -216,7 +216,7 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42']}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
-          application={({ navigateToApp } as unknown) as ApplicationStart}
+          application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           savedObjects={{} as SavedObjectsStart}
         />

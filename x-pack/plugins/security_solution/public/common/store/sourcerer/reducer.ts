@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
@@ -16,7 +15,7 @@ import {
   setSource,
 } from './actions';
 import { initialSourcererState, SourcererModel } from './model';
-import { defaultDataViewByEventType } from './helpers';
+import { validateSelectedPatterns } from './helpers';
 
 export type SourcererState = SourcererModel;
 
@@ -40,35 +39,13 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       },
     },
   }))
-  .case(setSelectedDataView, (state, payload) => {
-    console.log('setSelectedDataView', { state, payload });
-    const { id, eventType, ...rest } = payload;
-    const pattern = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
-    // TODO: Steph/sourcerer needs unit tests
-    const selectedPatterns =
-      rest.selectedPatterns != null && pattern != null
-        ? rest.selectedPatterns.filter(
-            // ensures all selected patterns are selectable
-            // and no patterns are duplicated
-            (value, index, self) =>
-              self.indexOf(value) === index && pattern.patternList.includes(value)
-          )
-        : [];
-    return {
-      ...state,
-      sourcererScopes: {
-        ...state.sourcererScopes,
-        [id]: {
-          ...state.sourcererScopes[id],
-          ...rest,
-          selectedPatterns,
-          ...(isEmpty(selectedPatterns) || pattern == null
-            ? defaultDataViewByEventType({ state, eventType })
-            : {}),
-        },
-      },
-    };
-  })
+  .case(setSelectedDataView, (state, payload) => ({
+    ...state,
+    sourcererScopes: {
+      ...state.sourcererScopes,
+      ...validateSelectedPatterns(state, payload),
+    },
+  }))
   .case(setSource, (state, { id, payload }) => {
     console.log('setSource', { state, payload });
     return {

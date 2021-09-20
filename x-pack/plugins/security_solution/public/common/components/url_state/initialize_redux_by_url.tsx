@@ -59,56 +59,56 @@ export const dispatchSetInitialStateFromUrl = (
       }
     }
 
-    if (urlKey === CONSTANTS.appQuery && indexPattern != null) {
-      const appQuery = decodeRisonUrlState<Query>(newUrlStateString);
-      if (appQuery != null) {
-        dispatch(
-          inputsActions.setFilterQuery({
-            id: 'global',
-            query: appQuery.query,
-            language: appQuery.language,
-          })
-        );
-      }
-    }
-
-    if (urlKey === CONSTANTS.filters) {
-      const filters = decodeRisonUrlState<Filter[]>(newUrlStateString);
-      filterManager.setFilters(filters || []);
-    }
-
-    if (urlKey === CONSTANTS.savedQuery) {
-      const savedQueryId = decodeRisonUrlState<string>(newUrlStateString);
-      if (savedQueryId != null && savedQueryId !== '') {
-        savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
-          filterManager.setFilters(savedQueryData.attributes.filters || []);
+      if (urlKey === CONSTANTS.appQuery && indexPattern != null) {
+        const appQuery = decodeRisonUrlState<Query>(newUrlStateString);
+        if (appQuery != null) {
           dispatch(
             inputsActions.setFilterQuery({
               id: 'global',
-              ...savedQueryData.attributes.query,
+              query: appQuery.query,
+              language: appQuery.language,
             })
           );
-          dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
-        });
+        }
       }
-    }
 
-    if (urlKey === CONSTANTS.timeline) {
-      const timeline = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
-      if (timeline != null && timeline.id !== '') {
-        queryTimelineById({
-          activeTimelineTab: timeline.activeTab,
-          duplicate: false,
-          graphEventId: timeline.graphEventId,
-          timelineId: timeline.id,
-          openTimeline: timeline.isOpen,
-          updateIsLoading: updateTimelineIsLoading,
-          updateTimeline,
-        });
+      if (urlKey === CONSTANTS.filters) {
+        const filters = decodeRisonUrlState<Filter[]>(newUrlStateString);
+        filterManager.setFilters(filters || []);
       }
-    }
-  });
-};
+
+      if (urlKey === CONSTANTS.savedQuery) {
+        const savedQueryId = decodeRisonUrlState<string>(newUrlStateString);
+        if (savedQueryId != null && savedQueryId !== '') {
+          savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
+            filterManager.setFilters(savedQueryData.attributes.filters || []);
+            dispatch(
+              inputsActions.setFilterQuery({
+                id: 'global',
+                ...savedQueryData.attributes.query,
+              })
+            );
+            dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
+          });
+        }
+      }
+
+      if (urlKey === CONSTANTS.timeline) {
+        const timeline = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
+        if (timeline != null && timeline.id !== '') {
+          queryTimelineById({
+            activeTimelineTab: timeline.activeTab,
+            duplicate: false,
+            graphEventId: timeline.graphEventId,
+            timelineId: timeline.id,
+            openTimeline: timeline.isOpen,
+            updateIsLoading: updateTimelineIsLoading,
+            updateTimeline,
+          });
+        }
+      }
+    });
+  };
 
 const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
   const timerangeStateData = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);

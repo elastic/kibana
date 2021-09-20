@@ -34,6 +34,5 @@ const fallbackToTransactionsRoute = createApmServerRoute({
   },
 });
 
-export const fallbackToTransactionsRouteRepository = createApmServerRouteRepository().add(
-  fallbackToTransactionsRoute
-);
+export const fallbackToTransactionsRouteRepository =
+  createApmServerRouteRepository().add(fallbackToTransactionsRoute);

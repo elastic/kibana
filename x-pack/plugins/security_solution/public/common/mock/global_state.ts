@@ -41,6 +41,7 @@ import { allowedExperimentalValues } from '../../../common/experimental_features
 
 export const mockSourcererState = {
   ...initialSourcererState,
+  signalIndexName: DEFAULT_SIGNALS_INDEX,
   defaultDataView: {
     id: DEFAULT_DATA_VIEW_ID,
     title: [...DEFAULT_INDEX_PATTERN, DEFAULT_SIGNALS_INDEX].join(','),

@@ -13,7 +13,6 @@ import { NoteResult } from '../../../../../common/types/timeline/note';
 export const persistNotes = async (
   frameworkRequest: FrameworkRequest,
   timelineSavedObjectId: string,
-  timelineVersion?: string | null,
   existingNoteIds?: string[],
   newNotes?: NoteResult[],
   overrideOwner: boolean = true
@@ -26,13 +25,12 @@ export const persistNotes = async (
         timelineSavedObjectId,
         overrideOwner
       );
-      return persistNote(
-        frameworkRequest,
-        overrideOwner ? existingNoteIds?.find((nId) => nId === note.noteId) ?? null : null,
-        timelineVersion ?? null,
-        newNote,
-        overrideOwner
-      );
+      return persistNote({
+        request: frameworkRequest,
+        noteId: overrideOwner ? existingNoteIds?.find((nId) => nId === note.noteId) ?? null : null,
+        note: newNote,
+        overrideOwner,
+      });
     }) ?? []
   );
 };

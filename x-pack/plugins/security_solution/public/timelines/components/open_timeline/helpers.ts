@@ -434,30 +434,30 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     );
   }
 
-  if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
-    const newNote = createNote({ newNote: ruleNote });
-    dispatch(dispatchUpdateNote({ note: newNote }));
-    dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
-  }
+    if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
+      const newNote = createNote({ newNote: ruleNote });
+      dispatch(dispatchUpdateNote({ note: newNote }));
+      dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
+    }
 
-  if (!duplicate || forceNotes) {
-    dispatch(
-      dispatchAddNotes({
-        notes:
-          notes != null
-            ? notes.map((note: NoteResult) => ({
-                created: note.created != null ? new Date(note.created) : new Date(),
-                id: note.noteId,
-                lastEdit: note.updated != null ? new Date(note.updated) : new Date(),
-                note: note.note || '',
-                user: note.updatedBy || 'unknown',
-                saveObjectId: note.noteId,
-                version: note.version,
-                eventId: note.eventId ?? null,
-                timelineId: note.timelineId ?? null,
-              }))
-            : [],
-      })
-    );
-  }
-};
+    if (!duplicate || forceNotes) {
+      dispatch(
+        dispatchAddNotes({
+          notes:
+            notes != null
+              ? notes.map((note: NoteResult) => ({
+                  created: note.created != null ? new Date(note.created) : new Date(),
+                  id: note.noteId,
+                  lastEdit: note.updated != null ? new Date(note.updated) : new Date(),
+                  note: note.note || '',
+                  user: note.updatedBy || 'unknown',
+                  saveObjectId: note.noteId,
+                  version: note.version,
+                  eventId: note.eventId ?? null,
+                  timelineId: note.timelineId ?? null,
+                }))
+              : [],
+        })
+      );
+    }
+  };
