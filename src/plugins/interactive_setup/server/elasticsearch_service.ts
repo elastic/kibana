@@ -119,9 +119,8 @@ export class ElasticsearchService {
     elasticsearch,
     connectionCheckInterval,
   }: ElasticsearchServiceSetupDeps): ElasticsearchServiceSetup {
-    const connectionStatusClient = (this.connectionStatusClient = elasticsearch.createClient(
-      'connectionStatus'
-    ));
+    const connectionStatusClient = (this.connectionStatusClient =
+      elasticsearch.createClient('connectionStatus'));
 
     return {
       connectionStatus$: timer(0, connectionCheckInterval.asMilliseconds()).pipe(
@@ -290,6 +289,7 @@ export class ElasticsearchService {
       ssl: { verificationMode: 'none' },
     });
 
+    this.logger.debug(`Connecting to host "${host}"`);
     let authRequired = false;
     try {
       await client.asInternalUser.ping();
@@ -304,10 +304,9 @@ export class ElasticsearchService {
       }
 
       authRequired = getErrorStatusCode(error) === 401;
-    } finally {
-      await client.close();
     }
 
+    this.logger.debug(`Fetching certificate chain from host "${host}"`);
     let certificateChain: Certificate[] | undefined;
     const { protocol, hostname, port } = new URL(host);
     if (protocol === 'https:') {
@@ -320,9 +319,31 @@ export class ElasticsearchService {
         this.logger.error(
           `Failed to fetch peer certificate from host "${host}": ${getDetailedErrorMessage(error)}`
         );
+        await client.close();
         throw error;
       }
     }
+
+    // This check is a security requirement - Do not remove it!
+    this.logger.debug(`Verifying that host "${host}" responds with Elastic product header`);
+
+    try {
+      const response = await client.asInternalUser.transport.request({
+        method: 'OPTIONS',
+        path: '/',
+      });
+      if (response.headers?.['x-elastic-product'] !== 'Elasticsearch') {
+        throw new Error('Host did not respond with valid Elastic product header.');
+      }
+    } catch (error) {
+      this.logger.error(
+        `Host "${host}" is not a valid Elasticsearch cluster: ${getDetailedErrorMessage(error)}`
+      );
+      await client.close();
+      throw error;
+    }
+
+    await client.close();
 
     return {
       authRequired,

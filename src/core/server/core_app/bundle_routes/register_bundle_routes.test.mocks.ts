@@ -11,6 +11,10 @@ jest.doMock('./bundles_route', () => ({
   registerRouteForBundle: registerRouteForBundleMock,
 }));
 
-jest.doMock('@kbn/ui-shared-deps', () => ({
-  distDir: 'uiSharedDepsDistDir',
+jest.doMock('@kbn/ui-shared-deps-src', () => ({
+  distDir: 'uiSharedDepsSrcDistDir',
+}));
+
+jest.doMock('@kbn/ui-shared-deps-npm', () => ({
+  distDir: 'uiSharedDepsNpmDistDir',
 }));

@@ -21,6 +21,7 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../constants';
 import type {
   PackagePolicy,
@@ -617,14 +618,15 @@ class AgentPolicyService {
     }
 
     if (agentPolicy.package_policies && agentPolicy.package_policies.length) {
-      const deletedPackagePolicies: DeletePackagePoliciesResponse = await packagePolicyService.delete(
-        soClient,
-        esClient,
-        agentPolicy.package_policies as string[],
-        {
-          skipUnassignFromAgentPolicies: true,
-        }
-      );
+      const deletedPackagePolicies: DeletePackagePoliciesResponse =
+        await packagePolicyService.delete(
+          soClient,
+          esClient,
+          agentPolicy.package_policies as string[],
+          {
+            skipUnassignFromAgentPolicies: true,
+          }
+        );
       try {
         await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
       } catch (error) {
@@ -677,7 +679,7 @@ class AgentPolicyService {
       '@timestamp': new Date().toISOString(),
       revision_idx: fullPolicy.revision,
       coordinator_idx: 0,
-      data: (fullPolicy as unknown) as FleetServerPolicy['data'],
+      data: fullPolicy as unknown as FleetServerPolicy['data'],
       policy_id: fullPolicy.id,
       default_fleet_server: policy.is_default_fleet_server === true,
     };
@@ -824,7 +826,7 @@ class AgentPolicyService {
       permissions._elastic_agent_checks.indices = [
         {
           names,
-          privileges: ['auto_configure', 'create_doc'],
+          privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
         },
       ];
     }

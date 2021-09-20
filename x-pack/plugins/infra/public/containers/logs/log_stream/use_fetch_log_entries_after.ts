@@ -88,13 +88,8 @@ export const useLogEntriesAfterResponse = <Request extends IKibanaSearchRequest>
     flattenLogEntriesAfterSearchResponse
   );
 
-  const {
-    cancelRequest,
-    isRequestRunning,
-    isResponsePartial,
-    loaded,
-    total,
-  } = useDataSearchResponseState(logEntriesAfterSearchResponse$);
+  const { cancelRequest, isRequestRunning, isResponsePartial, loaded, total } =
+    useDataSearchResponseState(logEntriesAfterSearchResponse$);
 
   return {
     cancelRequest,
