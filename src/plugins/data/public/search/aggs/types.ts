@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { AggsCommonSetup } from '../../../common';
+import { Assign } from 'utility-types';
+import { AggsCommonSetup, AggsCommonStart, AggTypesRegistryStart } from '../../../common';
 
 export type AggsSetup = AggsCommonSetup;
-export { AggsStart } from '../../../common';
+export type AggsStart = Assign<
+  AggsCommonStart,
+  { types: AggTypesRegistryStart & { preloadAll: () => Promise<void> } }
+>;

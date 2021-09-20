@@ -17,11 +17,15 @@ import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import {
   AggsCommonService,
   AggConfigs,
-  AggTypesDependencies,
   aggsRequiredUiSettings,
   calculateBounds,
   TimeRange,
 } from '../../../common';
+import {
+  AggTypesDependencies,
+  getAggTypes,
+  getAggTypesFunctions,
+} from '../../../common/search/aggs/agg_types';
 import { FieldFormatsStart } from '../../../../field_formats/server';
 import { IndexPatternsServiceStart } from '../../index_patterns';
 import { AggsSetup, AggsStart } from './types';
@@ -53,7 +57,18 @@ export class AggsService {
   private calculateBounds = (timeRange: TimeRange) => calculateBounds(timeRange, {});
 
   public setup({ registerFunction }: AggsSetupDependencies): AggsSetup {
-    return this.aggsCommonService.setup({ registerFunction });
+    const aggs = this.aggsCommonService.setup();
+
+    // register each agg type
+    const aggTypes = getAggTypes();
+    aggTypes.buckets.forEach(({ name, fn }) => aggs.types.registerBucket(name, fn));
+    aggTypes.metrics.forEach(({ name, fn }) => aggs.types.registerMetric(name, fn));
+
+    // register expression functions for each agg type
+    const aggFunctions = getAggTypesFunctions();
+    aggFunctions.forEach((fn) => registerFunction(fn));
+
+    return aggs;
   }
 
   public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {

@@ -11,17 +11,25 @@ import { Subscription } from 'rxjs';
 import { IUiSettingsClient } from 'src/core/public';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import { FieldFormatsStart } from '../../../../field_formats/public';
-import { calculateBounds, TimeRange } from '../../../common';
+import { AggTypesRegistryStart, calculateBounds, TimeRange } from '../../../common';
 import {
-  aggsRequiredUiSettings,
-  AggsCommonStartDependencies,
-  AggsCommonService,
   AggConfigs,
-  AggTypesDependencies,
+  AggsCommonService,
+  AggsCommonStartDependencies,
+  aggsRequiredUiSettings,
 } from '../../../common/search/aggs';
 import { AggsSetup, AggsStart } from './types';
 import { IndexPatternsContract } from '../../index_patterns';
 import { NowProviderInternalContract } from '../../now_provider';
+import { KbnRegistry, KbnRegistryItemLoader } from '../../../../kibana_utils/common';
+import type { BucketAggType } from '../../../common/search/aggs/buckets';
+import type { MetricAggType } from '../../../common/search/aggs/metrics';
+import type { AggTypesDependencies } from '../../../common/search/aggs/agg_types';
+import {
+  getAggTypeLoaders,
+  getAggTypes,
+  getAggTypesFunctions,
+} from '../../../common/search/aggs/load_agg_types';
 
 /**
  * Aggs needs synchronous access to specific uiSettings. Since settings can change
@@ -62,6 +70,9 @@ export interface AggsStartDependencies {
   indexPatterns: IndexPatternsContract;
 }
 
+type InitializedAggTypeItem = (BucketAggType | MetricAggType) & { id: string };
+type InitializedAggTypeLoader = KbnRegistryItemLoader<InitializedAggTypeItem> & { type: string };
+
 /**
  * The aggs service provides a means of modeling and manipulating the various
  * Elasticsearch aggregations supported by Kibana, providing the ability to
@@ -69,7 +80,10 @@ export interface AggsStartDependencies {
  */
 export class AggsService {
   private readonly aggsCommonService = new AggsCommonService();
-  private readonly initializedAggTypes = new Map();
+  private readonly initializedAggTypes = new KbnRegistry<
+    InitializedAggTypeItem,
+    InitializedAggTypeLoader
+  >();
   private getConfig?: AggsCommonStartDependencies['getConfig'];
   private subscriptions: Subscription[] = [];
   private nowProvider!: NowProviderInternalContract;
@@ -85,7 +99,24 @@ export class AggsService {
     this.nowProvider = nowProvider;
     this.getConfig = createGetConfig(uiSettings, aggsRequiredUiSettings, this.subscriptions);
 
-    return this.aggsCommonService.setup({ registerFunction });
+    const aggs = this.aggsCommonService.setup();
+
+    // register each agg type
+    const aggTypes = getAggTypes();
+    aggTypes.buckets.forEach(({ name, fn }) => aggs.types.registerBucket(name, fn));
+
+    const aggTypeLoaders = getAggTypeLoaders();
+
+    aggTypeLoaders.metrics.forEach((loader) => {
+      Object.assign(loader.fn, { id: loader.name });
+      aggs.types.registerMetric(loader.name, loader.fn);
+    });
+
+    // register expression functions for each agg type
+    const aggFunctions = getAggTypesFunctions();
+    aggFunctions.forEach((fn) => registerFunction(fn));
+
+    return aggs;
   }
 
   public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
@@ -111,26 +142,41 @@ export class AggsService {
 
     // initialize each agg type and store in memory
     types.getAll().buckets.forEach((type) => {
-      const agg = type(aggTypesDependencies);
-      this.initializedAggTypes.set(agg.name, agg);
+      const aggOrLoader = type(aggTypesDependencies);
+      aggOrLoader.id = aggOrLoader.id || aggOrLoader.name;
+      this.initializedAggTypes.register(aggOrLoader);
     });
     types.getAll().metrics.forEach((type) => {
-      const agg = type(aggTypesDependencies);
-      this.initializedAggTypes.set(agg.name, agg);
+      const aggOrLoader = type(aggTypesDependencies);
+      if (typeof aggOrLoader === 'function') {
+        this.initializedAggTypes.register({
+          id: type.id,
+          load: aggOrLoader,
+          type: 'metrics',
+        });
+      } else {
+        this.initializedAggTypes.register({
+          id: aggOrLoader.name,
+          ...aggOrLoader,
+        });
+      }
     });
 
-    const typesRegistry = {
+    const typesRegistry: AggTypesRegistryStart & { preloadAll: () => Promise<void> } = {
+      preloadAll: async () => {
+        await this.initializedAggTypes.preloadAll();
+      },
       get: (name: string) => {
-        return this.initializedAggTypes.get(name);
+        return this.initializedAggTypes.get(name) as BucketAggType<any> | MetricAggType<any>;
       },
       getAll: () => {
         return {
-          buckets: Array.from(this.initializedAggTypes.values()).filter(
+          buckets: Array.from(this.initializedAggTypes.getAll()).filter(
             (agg) => agg.type === 'buckets'
-          ),
-          metrics: Array.from(this.initializedAggTypes.values()).filter(
+          ) as Array<BucketAggType<any>>,
+          metrics: Array.from(this.initializedAggTypes.getAll()).filter(
             (agg) => agg.type === 'metrics'
-          ),
+          ) as Array<MetricAggType<any>>,
         };
       },
     };

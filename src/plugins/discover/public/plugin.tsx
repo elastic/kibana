@@ -332,6 +332,7 @@ export class DiscoverPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [, depsStart] = await core.getStartServices();
+        await depsStart.data.search.aggs.types.preloadAll();
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();

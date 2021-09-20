@@ -7,30 +7,57 @@
  */
 
 import { Assign } from '@kbn/utility-types';
-import { DatatableColumn } from 'src/plugins/expressions';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import {
+import type { DatatableColumn } from 'src/plugins/expressions';
+import type { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import type {
+  AggTypesRegistry,
+  AggTypesRegistrySetup,
+  AggTypesRegistryStart,
+  CreateAggConfigParams,
+  getCalculateAutoTimeExpression,
+  AggConfig,
+  AggConfigs,
+  AggConfigSerialized,
+} from './';
+
+import type {
+  aggDateHistogram,
+  aggDateRange,
+  aggFilter,
+  aggFilters,
+  aggGeoHash,
+  aggGeoTile,
+  aggHistogram,
+  aggIpRange,
+  AggParamsDateHistogram,
+  AggParamsDateRange,
+  AggParamsFilter,
+  AggParamsFilters,
+  AggParamsGeoHash,
+  AggParamsGeoTile,
+  AggParamsHistogram,
+  AggParamsIpRange,
+  AggParamsRange,
+  AggParamsSignificantTerms,
+  AggParamsTerms,
+  aggRange,
+  aggSignificantTerms,
+  aggTerms,
+  BUCKET_TYPES,
+} from './buckets';
+
+import type {
   aggAvg,
   aggBucketAvg,
   aggBucketMax,
   aggBucketMin,
   aggBucketSum,
   aggCardinality,
-  AggConfigs,
-  AggConfigSerialized,
   aggCount,
   aggCumulativeSum,
-  aggDateHistogram,
-  aggDateRange,
   aggDerivative,
-  aggFilter,
-  aggFilters,
   aggGeoBounds,
   aggGeoCentroid,
-  aggGeoHash,
-  aggGeoTile,
-  aggHistogram,
-  aggIpRange,
   aggMax,
   aggMedian,
   aggMin,
@@ -43,17 +70,9 @@ import {
   AggParamsFilteredMetric,
   AggParamsCardinality,
   AggParamsCumulativeSum,
-  AggParamsDateHistogram,
-  AggParamsDateRange,
   AggParamsDerivative,
-  AggParamsFilter,
-  AggParamsFilters,
   AggParamsGeoBounds,
   AggParamsGeoCentroid,
-  AggParamsGeoHash,
-  AggParamsGeoTile,
-  AggParamsHistogram,
-  AggParamsIpRange,
   AggParamsMax,
   AggParamsMedian,
   AggParamsSinglePercentile,
@@ -61,42 +80,29 @@ import {
   AggParamsMovingAvg,
   AggParamsPercentileRanks,
   AggParamsPercentiles,
-  AggParamsRange,
   AggParamsSerialDiff,
-  AggParamsSignificantTerms,
   AggParamsStdDeviation,
   AggParamsSum,
-  AggParamsTerms,
   AggParamsTopHit,
   aggPercentileRanks,
   aggPercentiles,
-  aggRange,
   aggSerialDiff,
-  aggSignificantTerms,
   aggStdDeviation,
   aggSum,
-  aggTerms,
   aggTopHit,
-  AggTypesRegistry,
-  AggTypesRegistrySetup,
-  AggTypesRegistryStart,
-  BUCKET_TYPES,
-  CreateAggConfigParams,
-  getCalculateAutoTimeExpression,
   METRIC_TYPES,
-  AggConfig,
   aggFilteredMetric,
   aggSinglePercentile,
-} from './';
+} from './metrics';
 
-export { IAggConfig, AggConfigSerialized } from './agg_config';
-export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
-export { IAggType } from './agg_type';
-export { AggParam, AggParamOption } from './agg_params';
-export { IFieldParamType } from './param_types';
-export { IMetricAggType } from './metrics/metric_agg_type';
-export { IpRangeKey } from './buckets/lib/ip_range';
-export { OptionedValueProp } from './param_types/optioned';
+export type { IAggConfig, AggConfigSerialized } from './agg_config';
+export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
+export type { IAggType } from './agg_type';
+export type { AggParam, AggParamOption } from './agg_params';
+export type { IFieldParamType } from './param_types';
+export type { IMetricAggType } from './metrics/metric_agg_type';
+export type { IpRangeKey } from './buckets/lib/ip_range';
+export type { OptionedValueProp } from './param_types/optioned';
 
 /** @internal */
 export interface AggsCommonSetup {

@@ -15,11 +15,12 @@ import { buildExpressionFunction } from '../../../../../../plugins/expressions/c
 import { IndexPatternExpressionType } from '../../../index_patterns/expressions';
 import { IndexPatternsContract } from '../../../index_patterns/index_patterns';
 
-import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';
+import { AggsStart, AggExpressionType } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 
 import { KibanaContext } from '../kibana_context_type';
 import { handleRequest } from './request_handler';
+import { aggCountFnName } from '../../aggs/metrics/count_fn';
 
 const name = 'esaggs';
 

@@ -44,7 +44,9 @@ export class AggTypesRegistry {
       },
       registerMetric: <
         N extends string,
-        T extends (deps: AggTypesDependencies) => MetricAggType<any>
+        T extends (
+          deps: AggTypesDependencies
+        ) => MetricAggType<any> | (() => Promise<MetricAggType<any>>)
       >(
         name: N,
         type: T

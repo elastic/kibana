@@ -6,16 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import { CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../../../common';
 import { GetConfigFn } from '../../types';
-import {
-  AggConfigs,
-  AggTypesRegistry,
-  getAggTypes,
-  getAggTypesFunctions,
-  getCalculateAutoTimeExpression,
-} from './';
+import { AggConfigs, AggTypesRegistry, getCalculateAutoTimeExpression } from './';
 import { AggsCommonSetup, AggsCommonStart } from './types';
 import { getDatatableColumnUtilities } from './utils/datatable_column_meta';
 
@@ -33,9 +26,8 @@ export const aggsRequiredUiSettings = [
 ];
 
 /** @internal */
-export interface AggsCommonSetupDependencies {
-  registerFunction: ExpressionsServiceSetup['registerFunction'];
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface AggsCommonSetupDependencies {}
 
 /** @internal */
 export interface AggsCommonStartDependencies {
@@ -52,17 +44,8 @@ export interface AggsCommonStartDependencies {
 export class AggsCommonService {
   private readonly aggTypesRegistry = new AggTypesRegistry();
 
-  public setup({ registerFunction }: AggsCommonSetupDependencies): AggsCommonSetup {
+  public setup(): AggsCommonSetup {
     const aggTypesSetup = this.aggTypesRegistry.setup();
-
-    // register each agg type
-    const aggTypes = getAggTypes();
-    aggTypes.buckets.forEach(({ name, fn }) => aggTypesSetup.registerBucket(name, fn));
-    aggTypes.metrics.forEach(({ name, fn }) => aggTypesSetup.registerMetric(name, fn));
-
-    // register expression functions for each agg type
-    const aggFunctions = getAggTypesFunctions();
-    aggFunctions.forEach((fn) => registerFunction(fn));
 
     return {
       types: aggTypesSetup,
