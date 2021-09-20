@@ -218,20 +218,19 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
         references: SavedObjectReference[]
       ) => {
         const { indexRef, boundaryIndexRef, ...otherParams } = params;
-        const indexReference = references.find((ref) => ref.name === indexRef);
-        const boundaryIndexReference = references.find((ref) => ref.name === boundaryIndexRef);
-        if (!indexReference) {
-          throw new Error(`Index reference "${indexRef}" not found in references array`);
+        const { id: indexId = null } = references.find((ref) => ref.name === indexRef) || {};
+        const { id: boundaryIndexId = null } =
+          references.find((ref) => ref.name === boundaryIndexRef) || {};
+        if (!indexId) {
+          throw new Error(`Index "${indexId}" not found in references array`);
         }
-        if (!boundaryIndexReference) {
-          throw new Error(
-            `Boundary index reference "${boundaryIndexReference}" not found in references array`
-          );
+        if (!boundaryIndexId) {
+          throw new Error(`Boundary index "${boundaryIndexId}" not found in references array`);
         }
         return {
           ...otherParams,
-          indexId: indexReference.id,
-          boundaryIndexId: boundaryIndexReference.id,
+          indexId,
+          boundaryIndexId,
         } as GeoContainmentParams;
       },
     },
