@@ -16,34 +16,32 @@ import { RareJobCreator } from './rare_job_creator';
 
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
-export const jobCreatorFactory = (jobType: JOB_TYPE) => (
-  indexPattern: IndexPattern,
-  savedSearch: SavedSearchSavedObject | null,
-  query: object
-) => {
-  let jc;
-  switch (jobType) {
-    case JOB_TYPE.SINGLE_METRIC:
-      jc = SingleMetricJobCreator;
-      break;
-    case JOB_TYPE.MULTI_METRIC:
-      jc = MultiMetricJobCreator;
-      break;
-    case JOB_TYPE.POPULATION:
-      jc = PopulationJobCreator;
-      break;
-    case JOB_TYPE.ADVANCED:
-      jc = AdvancedJobCreator;
-      break;
-    case JOB_TYPE.CATEGORIZATION:
-      jc = CategorizationJobCreator;
-      break;
-    case JOB_TYPE.RARE:
-      jc = RareJobCreator;
-      break;
-    default:
-      jc = SingleMetricJobCreator;
-      break;
-  }
-  return new jc(indexPattern, savedSearch, query);
-};
+export const jobCreatorFactory =
+  (jobType: JOB_TYPE) =>
+  (indexPattern: IndexPattern, savedSearch: SavedSearchSavedObject | null, query: object) => {
+    let jc;
+    switch (jobType) {
+      case JOB_TYPE.SINGLE_METRIC:
+        jc = SingleMetricJobCreator;
+        break;
+      case JOB_TYPE.MULTI_METRIC:
+        jc = MultiMetricJobCreator;
+        break;
+      case JOB_TYPE.POPULATION:
+        jc = PopulationJobCreator;
+        break;
+      case JOB_TYPE.ADVANCED:
+        jc = AdvancedJobCreator;
+        break;
+      case JOB_TYPE.CATEGORIZATION:
+        jc = CategorizationJobCreator;
+        break;
+      case JOB_TYPE.RARE:
+        jc = RareJobCreator;
+        break;
+      default:
+        jc = SingleMetricJobCreator;
+        break;
+    }
+    return new jc(indexPattern, savedSearch, query);
+  };
