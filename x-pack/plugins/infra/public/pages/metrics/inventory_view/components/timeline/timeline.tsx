@@ -81,12 +81,10 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     defaultPaginationOptions: { pageSize: 100 },
   };
 
-  const { metricsHostsAnomalies, getMetricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
-    anomalyParams
-  );
-  const { metricsK8sAnomalies, getMetricsK8sAnomalies } = useMetricsK8sAnomaliesResults(
-    anomalyParams
-  );
+  const { metricsHostsAnomalies, getMetricsHostsAnomalies } =
+    useMetricsHostsAnomaliesResults(anomalyParams);
+  const { metricsK8sAnomalies, getMetricsK8sAnomalies } =
+    useMetricsK8sAnomaliesResults(anomalyParams);
 
   const getAnomalies = useMemo(() => {
     if (nodeType === 'host') {

@@ -11,7 +11,7 @@ import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { QuerySuggestionGetFnArgs, KueryNode } from '../../../../../../../src/plugins/data/public';
 
-const mockKueryNode = (kueryNode: Partial<KueryNode>) => (kueryNode as unknown) as KueryNode;
+const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 
 describe('Kuery value suggestions', () => {
   let getSuggestions: ReturnType<typeof setupGetValueSuggestions>;
@@ -42,9 +42,9 @@ describe('Kuery value suggestions', () => {
       },
     });
     getSuggestions = setupGetValueSuggestions(coreSetup);
-    querySuggestionsArgs = ({
+    querySuggestionsArgs = {
       indexPatterns: [indexPatternResponse],
-    } as unknown) as QuerySuggestionGetFnArgs;
+    } as unknown as QuerySuggestionGetFnArgs;
 
     jest.clearAllMocks();
   });

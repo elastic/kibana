@@ -75,9 +75,10 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
 }) => {
   const { services } = useKibana();
 
-  const [rolesState, getRoles] = useAsyncFn(() => new RolesAPIClient(services.http!).getRoles(), [
-    services.http,
-  ]);
+  const [rolesState, getRoles] = useAsyncFn(
+    () => new RolesAPIClient(services.http!).getRoles(),
+    [services.http]
+  );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getUsersThrottled = useCallback(

@@ -300,5 +300,6 @@ const getVisibleChildren = <Child extends {}>(
   };
 };
 
-const getChildIndexBefore = bisector<[any, Rect], number>(([key, rect]) => rect.top + rect.height)
-  .left;
+const getChildIndexBefore = bisector<[any, Rect], number>(
+  ([key, rect]) => rect.top + rect.height
+).left;

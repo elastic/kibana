@@ -97,7 +97,6 @@ export const EditPackagePolicyForm = memo<{
     inputs: [],
     version: '',
   });
-
   const [originalPackagePolicy, setOriginalPackagePolicy] = useState<
     GetOnePackagePolicyResponse['item']
   >();
