@@ -345,6 +345,9 @@ export class DiscoverPlugin
         await depsStart.data.indexPatterns.clearCache();
 
         const { renderApp } = await import('./application');
+
+        params.element.classList.add('dscAppWrapper');
+
         const unmount = renderApp(params.element);
         return () => {
           unlistenParentHistory();
