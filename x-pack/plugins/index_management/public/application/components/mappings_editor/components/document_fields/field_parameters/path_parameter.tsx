@@ -40,20 +40,20 @@ const getSuggestedFields = (
     }))
     .sort((a, b) => (a.label > b.label ? 1 : a.label < b.label ? -1 : 0));
 
-const getDeserializer = (allFields: NormalizedFields['byId']): SerializerFunc => (
-  value: string | object
-): AliasOption[] => {
-  if (typeof value === 'string' && Boolean(value)) {
-    return [
-      {
-        id: value,
-        label: allFields[value].path.join(' > '),
-      },
-    ];
-  }
+const getDeserializer =
+  (allFields: NormalizedFields['byId']): SerializerFunc =>
+  (value: string | object): AliasOption[] => {
+    if (typeof value === 'string' && Boolean(value)) {
+      return [
+        {
+          id: value,
+          label: allFields[value].path.join(' > '),
+        },
+      ];
+    }
 
-  return [];
-};
+    return [];
+  };
 
 interface Props {
   allFields: NormalizedFields['byId'];
