@@ -2,8 +2,7 @@
 
 exports[`Inspect component renders correctly 1`] = `
 <CodeEditor
-  aria-label="inspect MyIndexPattern* object"
-  height="100%"
+  aria-label="inspect MyIndexPattern*"
   languageId="xjson"
   options={
     Object {
@@ -15,6 +14,7 @@ exports[`Inspect component renders correctly 1`] = `
       },
       "overviewRulerBorder": false,
       "readOnly": true,
+      "renderIndentGuides": false,
       "scrollBeyondLastLine": false,
       "scrollbar": Object {
         "alwaysConsumeMouseWheel": false,
