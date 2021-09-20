@@ -556,7 +556,7 @@ export class RulesClient {
     const dateNow = new Date();
 
     // default duration of monitoring is 7 days
-    const defaultDateStart = new Date(dateNow - 7 * 24 * 60 * 60 * 1000);
+    const defaultDateStart = new Date(dateNow.valueOf() - 7 * 24 * 60 * 60 * 1000);
     const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
 
     const eventLogClient = await this.getEventLogClient();
