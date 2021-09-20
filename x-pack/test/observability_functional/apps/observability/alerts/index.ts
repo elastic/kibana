@@ -199,6 +199,40 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
       });
+
+      describe('Pagination', () => {
+        describe('Page size selector', () => {
+          // less than 10
+          it('Does not render page size selector', async () => {});
+
+          it('Renders page size selector', async () => {});
+
+          it('Page size selector works', async () => {});
+        });
+
+        describe('Pagination controls', () => {
+          // less than 10
+          it('Does not render pagination controls', async () => {});
+
+          it('Renders previous page button', async () => {});
+
+          it('Previous page button works', async () => {});
+
+          it('Previous page button is disabled', async () => {});
+
+          it('Renders next page button', async () => {});
+
+          it('Next page button works', async () => {});
+
+          it('Next page button is disabled', async () => {});
+
+          it('Page button works', async () => {});
+        });
+
+        it('Table scrolls when page size is large', async () => {});
+
+        it('Table does not scroll when page size is small', async () => {});
+      });
     });
   });
 };
