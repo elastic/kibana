@@ -8,7 +8,7 @@
 
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { SearchSource, SearchSourceDependencies } from './search_source';
-import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+import { IndexPatternsContract } from '../..';
 import { SearchSourceFields } from './types';
 
 /**
@@ -28,25 +28,24 @@ import { SearchSourceFields } from './types';
  *
  *
  * @public */
-export const createSearchSource = (
-  indexPatterns: IndexPatternsContract,
-  searchSourceDependencies: SearchSourceDependencies
-) => async (searchSourceFields: SearchSourceFields = {}) => {
-  const fields = { ...searchSourceFields };
+export const createSearchSource =
+  (indexPatterns: IndexPatternsContract, searchSourceDependencies: SearchSourceDependencies) =>
+  async (searchSourceFields: SearchSourceFields = {}) => {
+    const fields = { ...searchSourceFields };
 
-  // hydrating index pattern
-  if (fields.index && typeof fields.index === 'string') {
-    fields.index = await indexPatterns.get(searchSourceFields.index as any);
-  }
+    // hydrating index pattern
+    if (fields.index && typeof fields.index === 'string') {
+      fields.index = await indexPatterns.get(searchSourceFields.index as any);
+    }
 
-  const searchSource = new SearchSource(fields, searchSourceDependencies);
+    const searchSource = new SearchSource(fields, searchSourceDependencies);
 
-  // todo: move to migration script .. create issue
-  const query = searchSource.getOwnField('query');
+    // todo: move to migration script .. create issue
+    const query = searchSource.getOwnField('query');
 
-  if (typeof query !== 'undefined') {
-    searchSource.setField('query', migrateLegacyQuery(query));
-  }
+    if (typeof query !== 'undefined') {
+      searchSource.setField('query', migrateLegacyQuery(query));
+    }
 
-  return searchSource;
-};
+    return searchSource;
+  };

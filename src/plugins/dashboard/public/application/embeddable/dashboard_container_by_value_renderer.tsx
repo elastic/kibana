@@ -17,10 +17,13 @@ interface Props {
   // TODO: add other props as needed
 }
 
-export const createDashboardContainerByValueRenderer = ({
-  factory,
-}: {
-  factory: DashboardContainerFactory;
-}): React.FC<Props> => (props: Props) => (
-  <EmbeddableRenderer input={props.input} onInputUpdated={props.onInputUpdated} factory={factory} />
-);
+export const createDashboardContainerByValueRenderer =
+  ({ factory }: { factory: DashboardContainerFactory }): React.FC<Props> =>
+  (props: Props) =>
+    (
+      <EmbeddableRenderer
+        input={props.input}
+        onInputUpdated={props.onInputUpdated}
+        factory={factory}
+      />
+    );

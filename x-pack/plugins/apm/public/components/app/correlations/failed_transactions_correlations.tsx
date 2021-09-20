@@ -33,7 +33,10 @@ import {
 
 import { asPercent } from '../../../../common/utils/formatters';
 import { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
-import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
+import {
+  APM_SEARCH_STRATEGIES,
+  DEFAULT_PERCENTILE_THRESHOLD,
+} from '../../../../common/search_strategies/constants';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -47,6 +50,11 @@ import { CorrelationsTable } from './correlations_table';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
 import { isErrorMessage } from './utils/is_error_message';
 import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
+import { getOverallHistogram } from './utils/get_overall_histogram';
+import {
+  TransactionDistributionChart,
+  TransactionDistributionChartData,
+} from '../../shared/charts/transaction_distribution_chart';
 import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
@@ -65,14 +73,19 @@ export function FailedTransactionsCorrelations({
   const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
   const { progress, response, startFetch, cancelFetch } = useSearchStrategy(
-    APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS
+    APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS,
+    {
+      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+    }
   );
   const progressNormalized = progress.loaded / progress.total;
+  const { overallHistogram, hasData, status } = getOverallHistogram(
+    response,
+    progress.isRunning
+  );
 
-  const [
-    selectedSignificantTerm,
-    setSelectedSignificantTerm,
-  ] = useState<FailedTransactionsCorrelation | null>(null);
+  const [selectedSignificantTerm, setSelectedSignificantTerm] =
+    useState<FailedTransactionsCorrelation | null>(null);
 
   const selectedTerm =
     selectedSignificantTerm ?? response.failedTransactionsCorrelations?.[0];
@@ -86,6 +99,13 @@ export function FailedTransactionsCorrelations({
       EuiBasicTableColumn<FailedTransactionsCorrelation>
     > = inspectEnabled
       ? [
+          {
+            width: '100px',
+            field: 'pValue',
+            name: 'p-value',
+            render: (pValue: number) => pValue.toPrecision(3),
+            sortable: true,
+          },
           {
             width: '100px',
             field: 'failurePercentage',
@@ -157,6 +177,7 @@ export function FailedTransactionsCorrelations({
       : [];
     return [
       {
+        width: '116px',
         field: 'normalizedScore',
         name: (
           <>
@@ -311,9 +332,8 @@ export function FailedTransactionsCorrelations({
     }
   }, [progress.error, notifications.toasts]);
 
-  const [sortField, setSortField] = useState<
-    keyof FailedTransactionsCorrelation
-  >('normalizedScore');
+  const [sortField, setSortField] =
+    useState<keyof FailedTransactionsCorrelation>('normalizedScore');
   const [sortDirection, setSortDirection] = useState<Direction>('desc');
 
   const onTableChange = useCallback(({ sort }) => {
@@ -350,6 +370,36 @@ export function FailedTransactionsCorrelations({
   const showSummaryBadge =
     inspectEnabled && (progress.isRunning || correlationTerms.length > 0);
 
+  const transactionDistributionChartData: TransactionDistributionChartData[] =
+    [];
+
+  if (Array.isArray(overallHistogram)) {
+    transactionDistributionChartData.push({
+      id: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
+        { defaultMessage: 'All transactions' }
+      ),
+      histogram: overallHistogram,
+    });
+  }
+
+  if (Array.isArray(response.errorHistogram)) {
+    transactionDistributionChartData.push({
+      id: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.allFailedTransactionsLabel',
+        { defaultMessage: 'All failed transactions' }
+      ),
+      histogram: response.errorHistogram,
+    });
+  }
+
+  if (selectedTerm && Array.isArray(selectedTerm.histogram)) {
+    transactionDistributionChartData.push({
+      id: `${selectedTerm.fieldName}:${selectedTerm.fieldValue}`,
+      histogram: selectedTerm.histogram,
+    });
+  }
+
   return (
     <div data-test-subj="apmFailedTransactionsCorrelationsTabContent">
       <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -363,7 +413,7 @@ export function FailedTransactionsCorrelations({
                 {i18n.translate(
                   'xpack.apm.correlations.failedTransactions.panelTitle',
                   {
-                    defaultMessage: 'Failed transactions',
+                    defaultMessage: 'Failed transactions latency distribution',
                   }
                 )}
               </h5>
@@ -399,6 +449,16 @@ export function FailedTransactionsCorrelations({
           <FailedTransactionsCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexItem>
+
+      <EuiSpacer size="s" />
+
+      <TransactionDistributionChart
+        markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
+        markerValue={response.percentileThresholdValue ?? 0}
+        data={transactionDistributionChartData}
+        hasData={hasData}
+        status={status}
+      />
 
       <EuiSpacer size="s" />
 

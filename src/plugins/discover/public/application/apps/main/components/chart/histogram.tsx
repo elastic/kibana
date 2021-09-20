@@ -78,16 +78,17 @@ export function DiscoverHistogram({
   );
 
   const onElementClick = useCallback(
-    (xInterval: number): ElementClickListener => ([elementData]) => {
-      const startRange = (elementData as XYChartElementEvent)[0].x;
+    (xInterval: number): ElementClickListener =>
+      ([elementData]) => {
+        const startRange = (elementData as XYChartElementEvent)[0].x;
 
-      const range = {
-        from: startRange,
-        to: startRange + xInterval,
-      };
+        const range = {
+          from: startRange,
+          to: startRange + xInterval,
+        };
 
-      timefilterUpdateHandler(range);
-    },
+        timefilterUpdateHandler(range);
+      },
     [timefilterUpdateHandler]
   );
 
@@ -159,6 +160,7 @@ export function DiscoverHistogram({
         tooltip={tooltipProps}
         theme={chartTheme}
         baseTheme={chartBaseTheme}
+        allowBrushingLastHistogramBucket={true}
       />
       <Axis
         id="discover-histogram-left-axis"
