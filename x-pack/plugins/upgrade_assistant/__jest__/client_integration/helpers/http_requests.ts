@@ -126,6 +126,17 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadMlUpgradeModeResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/ml_upgrade_mode`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   return {
     setLoadCloudBackupStatusResponse,
     setLoadEsDeprecationsResponse,
@@ -136,6 +147,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setDeleteMlSnapshotResponse,
     setUpgradeMlSnapshotStatusResponse,
     setLoadDeprecationLogsCountResponse,
+    setLoadMlUpgradeModeResponse,
   };
 };
 
