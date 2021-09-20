@@ -85,7 +85,8 @@ type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
-  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>
+{
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
@@ -339,14 +340,6 @@ export class VisualizeEmbeddable
               embeddable: this,
               data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
             };
-          }
-          // do not trigger the filter click event if the filter bar is not visible
-          if (
-            triggerId === VIS_EVENT_TO_TRIGGER.filter &&
-            !this.input.id &&
-            !this.vis.type.options.showFilterBar
-          ) {
-            return;
           }
 
           getUiActions().getTrigger(triggerId).exec(context);

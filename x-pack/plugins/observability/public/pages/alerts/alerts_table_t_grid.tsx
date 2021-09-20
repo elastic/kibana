@@ -168,15 +168,18 @@ function ObservabilityActions({
     application: { capabilities },
   } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
-  const parseObservabilityAlert = useMemo(() => parseAlert(observabilityRuleTypeRegistry), [
-    observabilityRuleTypeRegistry,
-  ]);
-  const alertDataConsumer = useMemo<string>(() => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0], [
-    dataFieldEs,
-  ]);
-  const alertDataProducer = useMemo<string>(() => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0], [
-    dataFieldEs,
-  ]);
+  const parseObservabilityAlert = useMemo(
+    () => parseAlert(observabilityRuleTypeRegistry),
+    [observabilityRuleTypeRegistry]
+  );
+  const alertDataConsumer = useMemo<string>(
+    () => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0],
+    [dataFieldEs]
+  );
+  const alertDataProducer = useMemo<string>(
+    () => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0],
+    [dataFieldEs]
+  );
 
   const alert = parseObservabilityAlert(dataFieldEs);
   const { prepend } = core.http.basePath;
@@ -254,6 +257,7 @@ function ObservabilityActions({
             iconType="expand"
             color="text"
             onClick={() => setFlyoutAlert(alert)}
+            data-test-subj="openFlyoutButton"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -276,6 +280,7 @@ function ObservabilityActions({
                   iconType="boxesHorizontal"
                   aria-label="More"
                   onClick={() => toggleActionsPopover(eventId)}
+                  data-test-subj="alerts-table-row-action-more"
                 />
               }
               isOpen={openActionsPopoverId === eventId}

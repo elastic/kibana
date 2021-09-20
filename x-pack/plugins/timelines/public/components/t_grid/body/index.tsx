@@ -334,10 +334,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       getManageTimeline(state, id)
     );
 
-    const alertCountText = useMemo(() => `${totalItems.toLocaleString()} ${unit(totalItems)}`, [
-      totalItems,
-      unit,
-    ]);
+    const alertCountText = useMemo(
+      () => `${totalItems.toLocaleString()} ${unit(totalItems)}`,
+      [totalItems, unit]
+    );
 
     const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
 

@@ -227,7 +227,7 @@ describe('SourceEnginesLogic', () => {
 
         expect(mockRecursivelyFetchEngines).toHaveBeenCalledWith(
           expect.objectContaining({
-            endpoint: '/api/app_search/engines/some-engine/source_engines',
+            endpoint: '/internal/app_search/engines/some-engine/source_engines',
           })
         );
         expect(SourceEnginesLogic.actions.onSourceEnginesFetch).toHaveBeenCalledWith([
@@ -245,7 +245,7 @@ describe('SourceEnginesLogic', () => {
 
         expect(mockRecursivelyFetchEngines).toHaveBeenCalledWith(
           expect.objectContaining({
-            endpoint: '/api/app_search/engines',
+            endpoint: '/internal/app_search/engines',
             query: { type: 'indexed' },
           })
         );
@@ -283,7 +283,7 @@ describe('SourceEnginesLogic', () => {
           await nextTick();
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/app_search/engines/some-engine/source_engines/bulk_create',
+            '/internal/app_search/engines/some-engine/source_engines/bulk_create',
             {
               body: JSON.stringify({ source_engine_slugs: ['source-engine-3', 'source-engine-4'] }),
             }
@@ -341,7 +341,7 @@ describe('SourceEnginesLogic', () => {
           await nextTick();
 
           expect(http.delete).toHaveBeenCalledWith(
-            '/api/app_search/engines/some-engine/source_engines/source-engine-2'
+            '/internal/app_search/engines/some-engine/source_engines/source-engine-2'
           );
           expect(SourceEnginesLogic.actions.onSourceEngineRemove).toHaveBeenCalledWith(
             'source-engine-2'

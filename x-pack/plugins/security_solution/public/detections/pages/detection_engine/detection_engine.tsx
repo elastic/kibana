@@ -12,6 +12,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiWindowEvent,
   EuiHorizontalRule,
@@ -103,6 +104,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const updatedAt = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
   );
+  const isAlertsLoading = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).isLoading
+  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -128,10 +132,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       hasIndexRead,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
@@ -142,6 +144,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     docLinks,
   } = useKibana().services;
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+
+  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -267,6 +271,17 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [docLinks]
   );
 
+  if (loading) {
+    return (
+      <SecuritySolutionPageWrapper>
+        <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} isLoading={loading} />
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexGroup>
+      </SecuritySolutionPageWrapper>
+    );
+  }
+
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
       <SecuritySolutionPageWrapper>
@@ -329,10 +344,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {timelinesUi.getLastUpdated({
-                    updatedAt: updatedAt || 0,
-                    showUpdating: loading,
-                  })}
+                  {updatedAt &&
+                    timelinesUi.getLastUpdated({
+                      updatedAt: updatedAt || Date.now(),
+                      showUpdating,
+                    })}
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />

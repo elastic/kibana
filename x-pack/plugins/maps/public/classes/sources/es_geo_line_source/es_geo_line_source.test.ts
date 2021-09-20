@@ -20,7 +20,7 @@ describe('getSourceTooltipContent', () => {
     const sourceDataRequest = new DataRequest({
       data: {},
       dataId: 'source',
-      dataMeta: {
+      dataRequestMeta: {
         areResultsTrimmed: false,
         areEntitiesTrimmed: false,
         entityCount: 70,
@@ -28,9 +28,8 @@ describe('getSourceTooltipContent', () => {
         totalEntities: 70,
       },
     });
-    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipContent(
-      sourceDataRequest
-    );
+    const { tooltipContent, areResultsTrimmed } =
+      geoLineSource.getSourceTooltipContent(sourceDataRequest);
     expect(areResultsTrimmed).toBe(false);
     expect(tooltipContent).toBe('Found 70 tracks.');
   });
@@ -39,7 +38,7 @@ describe('getSourceTooltipContent', () => {
     const sourceDataRequest = new DataRequest({
       data: {},
       dataId: 'source',
-      dataMeta: {
+      dataRequestMeta: {
         areResultsTrimmed: true,
         areEntitiesTrimmed: true,
         entityCount: 1000,
@@ -47,9 +46,8 @@ describe('getSourceTooltipContent', () => {
         totalEntities: 5000,
       },
     });
-    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipContent(
-      sourceDataRequest
-    );
+    const { tooltipContent, areResultsTrimmed } =
+      geoLineSource.getSourceTooltipContent(sourceDataRequest);
     expect(areResultsTrimmed).toBe(true);
     expect(tooltipContent).toBe('Results limited to first 1,000 tracks of ~5,000.');
   });
@@ -58,7 +56,7 @@ describe('getSourceTooltipContent', () => {
     const sourceDataRequest = new DataRequest({
       data: {},
       dataId: 'source',
-      dataMeta: {
+      dataRequestMeta: {
         areResultsTrimmed: false,
         areEntitiesTrimmed: false,
         entityCount: 70,
@@ -66,9 +64,8 @@ describe('getSourceTooltipContent', () => {
         totalEntities: 70,
       },
     });
-    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipContent(
-      sourceDataRequest
-    );
+    const { tooltipContent, areResultsTrimmed } =
+      geoLineSource.getSourceTooltipContent(sourceDataRequest);
     expect(areResultsTrimmed).toBe(true);
     expect(tooltipContent).toBe('Found 70 tracks. 10 of 70 tracks are incomplete.');
   });
@@ -77,7 +74,7 @@ describe('getSourceTooltipContent', () => {
     const sourceDataRequest = new DataRequest({
       data: {},
       dataId: 'source',
-      dataMeta: {
+      dataRequestMeta: {
         areResultsTrimmed: true,
         areEntitiesTrimmed: true,
         entityCount: 1000,
@@ -85,9 +82,8 @@ describe('getSourceTooltipContent', () => {
         totalEntities: 5000,
       },
     });
-    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipContent(
-      sourceDataRequest
-    );
+    const { tooltipContent, areResultsTrimmed } =
+      geoLineSource.getSourceTooltipContent(sourceDataRequest);
     expect(areResultsTrimmed).toBe(true);
     expect(tooltipContent).toBe(
       'Results limited to first 1,000 tracks of ~5,000. 10 of 1,000 tracks are incomplete.'

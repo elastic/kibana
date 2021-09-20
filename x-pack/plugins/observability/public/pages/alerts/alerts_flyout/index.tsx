@@ -54,8 +54,10 @@ type AlertsFlyoutProps = {
 } & EuiFlyoutProps;
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
+  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
+  ALERT_EVALUATION_VALUE_NON_TYPED;
 const ALERT_UUID: typeof ALERT_UUID_TYPED = ALERT_UUID_NON_TYPED;
 const ALERT_RULE_CATEGORY: typeof ALERT_RULE_CATEGORY_TYPED = ALERT_RULE_CATEGORY_NON_TYPED;
 const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
@@ -127,9 +129,9 @@ export function AlertsFlyout({
   ];
 
   return (
-    <EuiFlyout onClose={onClose} size="s">
+    <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
       <EuiFlyoutHeader>
-        <EuiTitle size="m">
+        <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
           <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -141,13 +143,27 @@ export function AlertsFlyout({
           compressed={true}
           type="responsiveColumn"
           listItems={overviewListItems}
+          titleProps={
+            {
+              'data-test-subj': 'alertsFlyoutDescriptionListTitle',
+            } as any // NOTE / TODO: This "any" is a temporary workaround: https://github.com/elastic/eui/issues/5148
+          }
+          descriptionProps={
+            {
+              'data-test-subj': 'alertsFlyoutDescriptionListDescription',
+            } as any // NOTE / TODO: This "any" is a temporary workaround: https://github.com/elastic/eui/issues/5148
+          }
         />
       </EuiFlyoutBody>
       {alertData.link && !isInApp && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton href={prepend && prepend(alertData.link)} fill>
+              <EuiButton
+                href={prepend && prepend(alertData.link)}
+                data-test-subj="alertsFlyoutViewInAppButton"
+                fill
+              >
                 View in app
               </EuiButton>
             </EuiFlexItem>
