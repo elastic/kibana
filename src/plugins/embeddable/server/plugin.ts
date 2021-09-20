@@ -45,8 +45,8 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public setup(core: CoreSetup) {
     const commonContract: CommonEmbeddableStartContract = {
-      getEmbeddableFactory: (this
-        .getEmbeddableFactory as unknown) as CommonEmbeddableStartContract['getEmbeddableFactory'],
+      getEmbeddableFactory: this
+        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
       getEnhancement: this.getEnhancement,
     };
 
@@ -68,8 +68,8 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(core: CoreStart) {
     const commonContract: CommonEmbeddableStartContract = {
-      getEmbeddableFactory: (this
-        .getEmbeddableFactory as unknown) as CommonEmbeddableStartContract['getEmbeddableFactory'],
+      getEmbeddableFactory: this
+        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
       getEnhancement: this.getEnhancement,
     };
 
