@@ -88,7 +88,7 @@ jest.mock('../agents');
 jest.mock('../package_policy');
 
 function getAgentPolicyUpdateMock() {
-  return (agentPolicyUpdateEventHandler as unknown) as jest.Mock<
+  return agentPolicyUpdateEventHandler as unknown as jest.Mock<
     typeof agentPolicyUpdateEventHandler
   >;
 }
