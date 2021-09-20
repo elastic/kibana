@@ -91,10 +91,10 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
     });
   }, []);
 
-  const ctx = useMemo(() => ({ registerContent, registerFooter }), [
-    registerFooter,
-    registerContent,
-  ]);
+  const ctx = useMemo(
+    () => ({ registerContent, registerFooter }),
+    [registerFooter, registerContent]
+  );
 
   useLayoutEffect(() => {
     const { removePanel, isFixedWidth } = addPanel({ width });

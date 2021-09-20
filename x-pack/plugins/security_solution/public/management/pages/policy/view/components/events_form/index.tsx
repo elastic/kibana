@@ -24,9 +24,8 @@ interface OperatingSystemToOsMap {
   [OperatingSystem.MAC]: OS.mac;
 }
 
-export type ProtectionField<
-  T extends OperatingSystem
-> = keyof UIPolicyConfig[OperatingSystemToOsMap[T]]['events'];
+export type ProtectionField<T extends OperatingSystem> =
+  keyof UIPolicyConfig[OperatingSystemToOsMap[T]]['events'];
 
 export type EventFormSelection<T extends OperatingSystem> = { [K in ProtectionField<T>]: boolean };
 

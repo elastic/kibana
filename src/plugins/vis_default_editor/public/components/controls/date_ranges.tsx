@@ -74,10 +74,10 @@ function DateRangesParamEditor({
     [setValue]
   );
 
-  const onAddRange = useCallback(() => updateRanges([...ranges, { id: generateId() }]), [
-    ranges,
-    updateRanges,
-  ]);
+  const onAddRange = useCallback(
+    () => updateRanges([...ranges, { id: generateId() }]),
+    [ranges, updateRanges]
+  );
 
   useMount(() => {
     // set up an initial range when there is no default range

@@ -33,9 +33,8 @@ import { SourceEnginesLogic } from '../source_engines_logic';
 
 export const AddSourceEnginesModal: React.FC = () => {
   const { addSourceEngines, closeModal, onAddEnginesSelection } = useActions(SourceEnginesLogic);
-  const { selectableEngineNames, selectedEngineNamesToAdd, modalLoading } = useValues(
-    SourceEnginesLogic
-  );
+  const { selectableEngineNames, selectedEngineNamesToAdd, modalLoading } =
+    useValues(SourceEnginesLogic);
 
   return (
     <EuiModal onClose={closeModal}>

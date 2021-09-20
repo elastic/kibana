@@ -202,9 +202,11 @@ describe('AutocompleteFieldListsComponent', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'some name' }]);
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'some name' }]);
 
     await waitFor(() => {
       expect(mockOnChange).toHaveBeenCalledWith({

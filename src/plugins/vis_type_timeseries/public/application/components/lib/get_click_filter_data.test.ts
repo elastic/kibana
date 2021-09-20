@@ -21,8 +21,7 @@ describe('getClickFilterData', () => {
           datum: [1620032400000, 72],
         },
         {
-          key:
-            'groupId{yaxis_50589930-ad98-11eb-b6f6-59011d7388b7_main_group}spec{61ca57f1-469d-11e7-af02-69e470af7417}yAccessor{1}splitAccessors{}',
+          key: 'groupId{yaxis_50589930-ad98-11eb-b6f6-59011d7388b7_main_group}spec{61ca57f1-469d-11e7-af02-69e470af7417}yAccessor{1}splitAccessors{}',
           specId: '61ca57f1-469d-11e7-af02-69e470af7417',
           yAccessor: 1,
         },
@@ -102,8 +101,7 @@ describe('getClickFilterData', () => {
           datum: [1619481600000, 3],
         },
         {
-          key:
-            'groupId{yaxis_6e0353a0-ad9b-11eb-b112-89cce8e43380_main_group}spec{61ca57f1-469d-11e7-af02-69e470af7417:1}yAccessor{1}splitAccessors{}',
+          key: 'groupId{yaxis_6e0353a0-ad9b-11eb-b112-89cce8e43380_main_group}spec{61ca57f1-469d-11e7-af02-69e470af7417:1}yAccessor{1}splitAccessors{}',
           specId: '61ca57f1-469d-11e7-af02-69e470af7417:1',
         },
       ],
