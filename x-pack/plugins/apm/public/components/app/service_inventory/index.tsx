@@ -159,16 +159,11 @@ function useServicesFetcher() {
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
 
-  const {
-    mainStatisticsData,
-    mainStatisticsStatus,
-    comparisonData,
-  } = useServicesFetcher();
+  const { mainStatisticsData, mainStatisticsStatus, comparisonData } =
+    useServicesFetcher();
 
-  const {
-    anomalyDetectionJobsData,
-    anomalyDetectionJobsStatus,
-  } = useAnomalyDetectionJobsContext();
+  const { anomalyDetectionJobsData, anomalyDetectionJobsStatus } =
+    useAnomalyDetectionJobsContext();
 
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.userHasDismissedServiceInventoryMlCallout',

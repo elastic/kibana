@@ -15,11 +15,11 @@ import { AppState } from '../../../services/discover_state';
 
 function getStateColumnAction(state: {}, setAppState: (state: Partial<AppState>) => void) {
   return getStateColumnActions({
-    capabilities: ({
+    capabilities: {
       discover: {
         save: false,
       },
-    } as unknown) as Capabilities,
+    } as unknown as Capabilities,
     config: configMock,
     indexPattern: indexPatternMock,
     indexPatterns: indexPatternsMock,

@@ -55,10 +55,10 @@ describe('brushEvent', () => {
   beforeEach(() => {
     const dataStart = dataPluginMock.createStartContract();
     setSearchService(dataStart.search);
-    setIndexPatterns(({
+    setIndexPatterns({
       ...dataStart.indexPatterns,
       get: async () => indexPattern,
-    } as unknown) as IndexPatternsContract);
+    } as unknown as IndexPatternsContract);
 
     baseEvent = {
       column: 0,

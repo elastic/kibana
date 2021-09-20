@@ -62,9 +62,13 @@ export const useSavedView = (props: Props) => {
   } = useContext(Source.Context);
   const { viewType, defaultViewState } = props;
   type ViewState = typeof defaultViewState;
-  const { data, loading, find, error: errorOnFind, hasView } = useFindSavedObject<
-    SavedViewSavedObject<ViewState>
-  >(viewType);
+  const {
+    data,
+    loading,
+    find,
+    error: errorOnFind,
+    hasView,
+  } = useFindSavedObject<SavedViewSavedObject<ViewState>>(viewType);
   const [urlState, setUrlState] = useUrlState<SavedViewUrlState>({
     defaultState: DEFAULT_SAVED_VIEW_STATE,
     decodeUrlState,
@@ -75,12 +79,18 @@ export const useSavedView = (props: Props) => {
   const [shouldLoadDefault] = useState(props.shouldLoadDefault);
   const [currentView, setCurrentView] = useState<SavedView<any> | null>(null);
   const [loadingDefaultView, setLoadingDefaultView] = useState<boolean | null>(null);
-  const { create, error: errorOnCreate, data: createdViewData, createdId } = useCreateSavedObject(
-    viewType
-  );
-  const { update, error: errorOnUpdate, data: updatedViewData, updatedId } = useUpdateSavedObject(
-    viewType
-  );
+  const {
+    create,
+    error: errorOnCreate,
+    data: createdViewData,
+    createdId,
+  } = useCreateSavedObject(viewType);
+  const {
+    update,
+    error: errorOnUpdate,
+    data: updatedViewData,
+    updatedId,
+  } = useUpdateSavedObject(viewType);
   const { deleteObject, deletedId } = useDeleteSavedObject(viewType);
   const { getObject, data: currentViewSavedObject } = useGetSavedObject(viewType);
   const [createError, setCreateError] = useState<string | null>(null);

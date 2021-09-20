@@ -12,18 +12,20 @@ import { notificationService } from '../../services/notification';
 import { clearRowStatus } from '../actions';
 
 export const deleteIndicesSuccess = createAction('INDEX_MANAGEMENT_DELETE_INDICES_SUCCESS');
-export const deleteIndices = ({ indexNames }) => async (dispatch) => {
-  try {
-    await request(indexNames);
-  } catch (error) {
-    notificationService.showDangerToast(error.message);
-    return dispatch(clearRowStatus({ indexNames }));
-  }
-  notificationService.showSuccessToast(
-    i18n.translate('xpack.idxMgmt.deleteIndicesAction.successfullyDeletedIndicesMessage', {
-      defaultMessage: 'Successfully deleted: [{indexNames}]',
-      values: { indexNames: indexNames.join(', ') },
-    })
-  );
-  dispatch(deleteIndicesSuccess({ indexNames }));
-};
+export const deleteIndices =
+  ({ indexNames }) =>
+  async (dispatch) => {
+    try {
+      await request(indexNames);
+    } catch (error) {
+      notificationService.showDangerToast(error.message);
+      return dispatch(clearRowStatus({ indexNames }));
+    }
+    notificationService.showSuccessToast(
+      i18n.translate('xpack.idxMgmt.deleteIndicesAction.successfullyDeletedIndicesMessage', {
+        defaultMessage: 'Successfully deleted: [{indexNames}]',
+        values: { indexNames: indexNames.join(', ') },
+      })
+    );
+    dispatch(deleteIndicesSuccess({ indexNames }));
+  };

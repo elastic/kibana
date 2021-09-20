@@ -26,12 +26,8 @@ import { SourceLogic } from './source_logic';
 
 describe('SourceLogic', () => {
   const { http } = mockHttpValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    flashSuccessToast,
-    setErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast, setErrorMessage } =
+    mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount, getListeners } = new LogicMounter(SourceLogic);
 

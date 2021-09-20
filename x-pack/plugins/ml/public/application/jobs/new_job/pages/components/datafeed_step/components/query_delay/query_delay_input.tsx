@@ -13,9 +13,8 @@ import { useStringifiedValue } from '../hooks';
 import { DEFAULT_QUERY_DELAY } from '../../../../../../../../../common/constants/new_job';
 
 export const QueryDelayInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
+    useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.queryDelay);
   const { value: queryDelay, setValue: setQueryDelay } = useStringifiedValue(jobCreator.queryDelay);
 

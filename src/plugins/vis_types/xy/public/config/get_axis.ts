@@ -126,14 +126,16 @@ function getScale<S extends XScaleType | YScaleType>(
   format: Aspect['format'],
   isCategoryAxis: boolean
 ): ScaleConfig<S> {
-  const type = (isCategoryAxis
-    ? getScaleType(
-        scale,
-        format?.id === 'number' || (format?.params?.id === 'number' && format?.id !== 'range'),
-        'date' in params,
-        'interval' in params
-      )
-    : getScaleType(scale, true)) as S;
+  const type = (
+    isCategoryAxis
+      ? getScaleType(
+          scale,
+          format?.id === 'number' || (format?.params?.id === 'number' && format?.id !== 'range'),
+          'date' in params,
+          'interval' in params
+        )
+      : getScaleType(scale, true)
+  ) as S;
 
   return {
     ...scale,

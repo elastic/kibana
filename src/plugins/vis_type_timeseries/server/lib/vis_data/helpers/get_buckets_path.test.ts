@@ -10,7 +10,7 @@ import { getBucketsPath } from './get_buckets_path';
 import type { Metric } from '../../../../common/types';
 
 describe('getBucketsPath', () => {
-  const metrics = ([
+  const metrics = [
     { id: 1, type: 'derivative' },
     { id: 2, type: 'percentile', percentiles: [{ value: '50' }] },
     { id: 3, type: 'percentile', percentiles: [{ value: '20.0' }, { value: '10.0' }] },
@@ -20,7 +20,7 @@ describe('getBucketsPath', () => {
     { id: 7, type: 'sum_of_squares' },
     { id: 8, type: 'variance' },
     { id: 9, type: 'max' },
-  ] as unknown) as Metric[];
+  ] as unknown as Metric[];
 
   test('return path for derivative', () => {
     expect(getBucketsPath('1', metrics)).toEqual('1[normalized_value]');

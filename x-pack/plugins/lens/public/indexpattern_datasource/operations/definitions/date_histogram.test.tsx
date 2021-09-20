@@ -130,7 +130,7 @@ describe('date_histogram', () => {
   });
 
   function layerWithInterval(interval: string) {
-    return ({
+    return {
       ...layer,
       columns: {
         ...layer.columns,
@@ -141,7 +141,7 @@ describe('date_histogram', () => {
           },
         },
       },
-    } as unknown) as IndexPatternLayer;
+    } as unknown as IndexPatternLayer;
   }
 
   describe('buildColumn', () => {

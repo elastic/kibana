@@ -59,7 +59,7 @@ const createAlertInstanceFactoryMock = <
   mock.unscheduleActions.mockReturnValue(mock);
   mock.scheduleActions.mockReturnValue(mock);
 
-  return (mock as unknown) as AlertInstanceMock<InstanceState, InstanceContext>;
+  return mock as unknown as AlertInstanceMock<InstanceState, InstanceContext>;
 };
 
 const createAlertServicesMock = <

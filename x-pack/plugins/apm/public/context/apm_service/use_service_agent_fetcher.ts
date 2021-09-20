@@ -21,7 +21,11 @@ export function useServiceAgentFetcher({
   start: string;
   end: string;
 }) {
-  const { data = INITIAL_STATE, error, status } = useFetcher(
+  const {
+    data = INITIAL_STATE,
+    error,
+    status,
+  } = useFetcher(
     (callApmApi) => {
       if (serviceName) {
         return callApmApi({

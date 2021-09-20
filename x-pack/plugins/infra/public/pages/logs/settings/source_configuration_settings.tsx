@@ -76,10 +76,10 @@ export const LogsSettingsPage = () => {
     sourceConfigurationFormElement.resetValue();
   }, [updateSource, sourceConfigurationFormElement, formState]);
 
-  const isWriteable = useMemo(() => shouldAllowEdit && source && source.origin !== 'internal', [
-    shouldAllowEdit,
-    source,
-  ]);
+  const isWriteable = useMemo(
+    () => shouldAllowEdit && source && source.origin !== 'internal',
+    [shouldAllowEdit, source]
+  );
 
   if ((isLoading || isUninitialized) && !resolvedSourceConfiguration) {
     return <SourceLoadingPage />;

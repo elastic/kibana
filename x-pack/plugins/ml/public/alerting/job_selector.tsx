@@ -63,10 +63,8 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
 
   const fetchOptions = useCallback(async () => {
     try {
-      const {
-        jobIds: jobIdOptions,
-        groupIds: groupIdOptions,
-      } = await adJobsApiService.getAllJobAndGroupIds();
+      const { jobIds: jobIdOptions, groupIds: groupIdOptions } =
+        await adJobsApiService.getAllJobAndGroupIds();
 
       jobIdOptions.forEach((v) => {
         jobIds.add(v);

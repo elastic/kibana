@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         })
         .then((result) =>
-          ((result.body as unknown) as SearchResults).hits.hits.filter((task) =>
+          (result.body as unknown as SearchResults).hits.hits.filter((task) =>
             taskId ? task._source?.taskId === taskId : true
           )
         );

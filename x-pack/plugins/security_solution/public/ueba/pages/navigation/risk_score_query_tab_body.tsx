@@ -25,10 +25,8 @@ export const RiskScoreQueryTabBody = ({
   startDate,
   type,
 }: RiskScoreQueryProps) => {
-  const [
-    loading,
-    { data, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
-  ] = useRiskScore({ docValueFields, endDate, filterQuery, indexNames, skip, startDate, type });
+  const [loading, { data, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch }] =
+    useRiskScore({ docValueFields, endDate, filterQuery, indexNames, skip, startDate, type });
 
   return (
     <RiskScoreTableManage

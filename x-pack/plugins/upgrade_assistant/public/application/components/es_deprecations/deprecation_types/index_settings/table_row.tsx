@@ -35,10 +35,8 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
 
   const { api } = useAppContext();
 
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const closeFlyout = useCallback(() => {
     setShowFlyout(false);

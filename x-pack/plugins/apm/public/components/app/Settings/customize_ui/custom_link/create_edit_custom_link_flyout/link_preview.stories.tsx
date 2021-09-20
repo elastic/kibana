@@ -21,12 +21,12 @@ export function Example({
   label,
   url,
 }: ComponentProps<typeof LinkPreview>) {
-  const coreMock = ({
+  const coreMock = {
     http: {
       get: async () => ({ transaction: { id: '0' } }),
     },
     uiSettings: { get: () => false },
-  } as unknown) as CoreStart;
+  } as unknown as CoreStart;
 
   createCallApmApi(coreMock);
 

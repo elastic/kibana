@@ -195,7 +195,8 @@ export interface DiscoverStartPlugins {
  * Discover provides embeddables for Dashboards
  */
 export class DiscoverPlugin
-  implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
+  implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));

@@ -165,7 +165,7 @@ export class AnonymousAccessService {
    * anonymous service account credentials.
    */
   private createFakeAnonymousRequest({ authenticateRequest }: { authenticateRequest: boolean }) {
-    return KibanaRequest.from(({
+    return KibanaRequest.from({
       headers:
         authenticateRequest && this.httpAuthorizationHeader
           ? { authorization: this.httpAuthorizationHeader.toString() }
@@ -177,6 +177,6 @@ export class AnonymousAccessService {
       route: { settings: {} },
       url: { href: '/' },
       raw: { req: { url: '/' } },
-    } as unknown) as Request);
+    } as unknown as Request);
   }
 }

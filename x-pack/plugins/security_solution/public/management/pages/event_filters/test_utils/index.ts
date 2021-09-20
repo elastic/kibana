@@ -210,8 +210,8 @@ export const esResponseData = () => ({
 /**
  * Mock `core.http` methods used by Event Filters List page
  */
-export const eventFiltersListQueryHttpMock = httpHandlerMockFactory<EventFiltersListQueryHttpMockProviders>(
-  [
+export const eventFiltersListQueryHttpMock =
+  httpHandlerMockFactory<EventFiltersListQueryHttpMockProviders>([
     {
       id: 'eventFiltersCreateList',
       method: 'post',
@@ -228,5 +228,4 @@ export const eventFiltersListQueryHttpMock = httpHandlerMockFactory<EventFilters
         return getFoundExceptionListItemSchemaMock();
       },
     },
-  ]
-);
+  ]);

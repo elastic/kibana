@@ -65,7 +65,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.setCustomLabel('custom label');
       await testSubjects.click('toggleAdvancedSetting');
       // Let's make sure the field preview is visible before testing the snapshot
-      const isFieldPreviewVisible = await PageObjects.indexPatternFieldEditorObjects.isFieldPreviewVisible();
+      const isFieldPreviewVisible =
+        await PageObjects.indexPatternFieldEditorObjects.isFieldPreviewVisible();
       expect(isFieldPreviewVisible).to.be(true);
 
       await a11y.testAppSnapshot();

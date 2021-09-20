@@ -16,10 +16,8 @@ import { EndpointDetails } from './endpoint_details';
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
   const queryParams = useEndpointSelector(uiQueryParams);
-  const {
-    selected_endpoint: selectedEndpoint,
-    ...queryParamsWithoutSelectedEndpoint
-  } = queryParams;
+  const { selected_endpoint: selectedEndpoint, ...queryParamsWithoutSelectedEndpoint } =
+    queryParams;
 
   const handleFlyoutClose = useCallback(() => {
     const { show: _show, ...urlSearchParams } = queryParamsWithoutSelectedEndpoint;

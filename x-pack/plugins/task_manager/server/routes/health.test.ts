@@ -313,7 +313,8 @@ describe('healthRoute', () => {
       summary: 'Task Manager is unhealthy',
     });
     const debugCalls = (logger as jest.Mocked<Logger>).debug.mock.calls as string[][];
-    const warnMessage = /^setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana/;
+    const warnMessage =
+      /^setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana/;
     const found = debugCalls
       .map((arr) => arr[0])
       .find((message) => message.match(warnMessage) != null);
@@ -551,7 +552,7 @@ function mockHealthStats(overrides = {}) {
       },
     },
   };
-  return (merge(stub, overrides) as unknown) as MonitoringStats;
+  return merge(stub, overrides) as unknown as MonitoringStats;
 }
 
 async function getLatest<T>(stream$: Observable<T>) {

@@ -55,10 +55,10 @@ describe('FieldParamEditor component', () => {
       agg: {
         type: {
           params: [
-            ({
+            {
               name: 'field',
               filterFieldTypes: ['bytes'],
-            } as unknown) as AggParam,
+            } as unknown as AggParam,
           ],
         },
       } as IAggConfig,

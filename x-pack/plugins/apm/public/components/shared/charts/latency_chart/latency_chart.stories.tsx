@@ -61,7 +61,7 @@ export default {
       const { alertsResponse, latencyChartResponse } = args as Args;
       const serviceName = 'testService';
 
-      const apmPluginContextMock = ({
+      const apmPluginContextMock = {
         core: {
           notifications: {
             toasts: { addWarning: () => {}, addDanger: () => {} },
@@ -81,7 +81,7 @@ export default {
         },
         plugins: { observability: { isAlertingExperienceEnabled: () => true } },
         observabilityRuleTypeRegistry: { getFormatter: () => undefined },
-      } as unknown) as ApmPluginContextValue;
+      } as unknown as ApmPluginContextValue;
 
       createCallApmApi(apmPluginContextMock.core);
 

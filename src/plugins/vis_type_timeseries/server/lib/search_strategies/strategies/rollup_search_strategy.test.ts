@@ -38,7 +38,7 @@ jest.mock('./abstract_search_strategy', () => {
 describe('Rollup Search Strategy', () => {
   let rollupResolvedData: Promise<any>;
 
-  const requestContext = ({
+  const requestContext = {
     core: {
       elasticsearch: {
         client: {
@@ -50,7 +50,7 @@ describe('Rollup Search Strategy', () => {
         },
       },
     },
-  } as unknown) as VisTypeTimeseriesRequestHandlerContext;
+  } as unknown as VisTypeTimeseriesRequestHandlerContext;
 
   const indexPattern = 'indexPattern';
 
@@ -100,7 +100,7 @@ describe('Rollup Search Strategy', () => {
       const result = await rollupSearchStrategy.checkForViability(
         requestContext,
         {} as VisTypeTimeseriesVisDataRequest,
-        { indexPatternString: (null as unknown) as string, indexPattern: undefined }
+        { indexPatternString: null as unknown as string, indexPattern: undefined }
       );
 
       expect(result).toEqual({

@@ -58,11 +58,11 @@ describe('ConfigPanel', () => {
       datasourceMap: {
         mockindexpattern: mockDatasource,
       },
-      activeVisualization: ({
+      activeVisualization: {
         ...mockVisualization,
         getLayerIds: () => Object.keys(frame.datasourceLayers),
         appendLayer: jest.fn(),
-      } as unknown) as Visualization,
+      } as unknown as Visualization,
       datasourceStates: {
         mockindexpattern: {
           isLoading: false,

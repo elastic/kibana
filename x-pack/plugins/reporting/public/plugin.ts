@@ -90,7 +90,8 @@ export class ReportingPublicPlugin
       ReportingStart,
       ReportingPublicPluginSetupDendencies,
       ReportingPublicPluginStartDendencies
-    > {
+    >
+{
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;
   private readonly stop$ = new Rx.ReplaySubject(1);

@@ -28,15 +28,15 @@ export interface ResponsiveWrapperProps {
  * HOC that wraps a component in either a responsive div or an EuiPanel.
  * @param Component The component to wrap.
  */
-export const withResponsiveWrapper = <P extends {} & ResponsiveWrapperProps>(
-  Component: FC<P>
-): FC<ResponsiveWrapperProps & P> => ({ isResponsive, ...rest }: ResponsiveWrapperProps) =>
-  isResponsive ? (
-    <ResponsiveWrapper data-test-subj="uptimeWithResponsiveWrapper--wrapper">
-      <Component {...(rest as P)} />
-    </ResponsiveWrapper>
-  ) : (
-    <EuiPanel paddingSize="m" hasBorder data-test-subj="uptimeWithResponsiveWrapper--panel">
-      <Component {...(rest as P)} />
-    </EuiPanel>
-  );
+export const withResponsiveWrapper =
+  <P extends {} & ResponsiveWrapperProps>(Component: FC<P>): FC<ResponsiveWrapperProps & P> =>
+  ({ isResponsive, ...rest }: ResponsiveWrapperProps) =>
+    isResponsive ? (
+      <ResponsiveWrapper data-test-subj="uptimeWithResponsiveWrapper--wrapper">
+        <Component {...(rest as P)} />
+      </ResponsiveWrapper>
+    ) : (
+      <EuiPanel paddingSize="m" hasBorder data-test-subj="uptimeWithResponsiveWrapper--panel">
+        <Component {...(rest as P)} />
+      </EuiPanel>
+    );

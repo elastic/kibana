@@ -23,21 +23,21 @@ export interface CollectionActionsProps<T> {
 
 export function handleChange<T, P extends DocType>(props: CollectionActionsProps<T>, doc: P) {
   const { model, name } = props;
-  const collection = ((model[name] as unknown) as DocType[]) || [];
+  const collection = (model[name] as unknown as DocType[]) || [];
   const part = { [name]: collection.map((row) => (row.id === doc.id ? doc : row)) };
   props.onChange({ ...model, ...part });
 }
 
 export function handleDelete<T, P extends DocType>(props: CollectionActionsProps<T>, doc: P) {
   const { model, name } = props;
-  const collection = ((model[name] as unknown) as DocType[]) || [];
+  const collection = (model[name] as unknown as DocType[]) || [];
   const part = { [name]: collection.filter((row) => row.id !== doc.id) };
   props.onChange?.({ ...model, ...part });
 }
 
 export function handleAdd<T>(props: CollectionActionsProps<T>, fn = newFn) {
   const { model, name } = props;
-  const collection = ((model[name] as unknown) as DocType[]) || [];
+  const collection = (model[name] as unknown as DocType[]) || [];
   const part = { [name]: collection.concat([fn()]) };
   props.onChange?.({ ...model, ...part });
 }

@@ -54,9 +54,10 @@ export const AddNote = React.memo<{
 }>(({ associateNote, newNote, onCancelAddNote, updateNewNote, autoFocusDisabled = false }) => {
   const dispatch = useDispatch();
 
-  const updateNote = useCallback((note: Note) => dispatch(appActions.updateNote({ note })), [
-    dispatch,
-  ]);
+  const updateNote = useCallback(
+    (note: Note) => dispatch(appActions.updateNote({ note })),
+    [dispatch]
+  );
 
   const handleClick = useCallback(
     () =>

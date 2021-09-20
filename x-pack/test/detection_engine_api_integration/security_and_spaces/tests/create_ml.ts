@@ -135,8 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
           _meta: { version: SIGNALS_TEMPLATE_VERSION },
           parents: [
             {
-              id:
-                'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
+              id: 'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
               type: 'event',
               index: '.ml-anomalies-custom-linux_anomalous_network_activity_ecs',
               depth: 0,
@@ -144,8 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
           ancestors: [
             {
-              id:
-                'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
+              id: 'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
               type: 'event',
               index: '.ml-anomalies-custom-linux_anomalous_network_activity_ecs',
               depth: 0,
@@ -187,8 +185,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           depth: 1,
           parent: {
-            id:
-              'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
+            id: 'linux_anomalous_network_activity_ecs_record_1586274300000_900_0_-96106189301704594950079884115725560577_5',
             type: 'event',
             index: '.ml-anomalies-custom-linux_anomalous_network_activity_ecs',
             depth: 0,

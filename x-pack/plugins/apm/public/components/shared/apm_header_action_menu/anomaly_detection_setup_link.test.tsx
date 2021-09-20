@@ -36,14 +36,14 @@ async function renderTooltipAnchor({
 
     // wait for tooltip text to be in the DOM
     await waitFor(() => {
-      const toolTipText = baseElement.querySelector('.euiToolTipPopover')
-        ?.textContent;
+      const toolTipText =
+        baseElement.querySelector('.euiToolTipPopover')?.textContent;
       expect(toolTipText).not.toBe(undefined);
     });
   }
 
-  const toolTipText = baseElement.querySelector('.euiToolTipPopover')
-    ?.textContent;
+  const toolTipText =
+    baseElement.querySelector('.euiToolTipPopover')?.textContent;
 
   return { toolTipText, toolTipAnchor };
 }

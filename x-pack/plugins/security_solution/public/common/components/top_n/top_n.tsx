@@ -80,9 +80,10 @@ const TopNComponent: React.FC<Props> = ({
   toggleTopN,
 }) => {
   const [view, setView] = useState<TimelineEventsType>(defaultView);
-  const onViewSelected = useCallback((value: string) => setView(value as TimelineEventsType), [
-    setView,
-  ]);
+  const onViewSelected = useCallback(
+    (value: string) => setView(value as TimelineEventsType),
+    [setView]
+  );
   const indicesSelector = useMemo(getIndicesSelector, []);
   const { all: allIndices, raw: rawIndices } = useSelector<State, IndicesSelector>(
     (state) => indicesSelector(state),

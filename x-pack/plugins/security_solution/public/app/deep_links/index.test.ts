@@ -27,18 +27,18 @@ describe('public search functions', () => {
 
   it('returns case links for basic license with only read_cases capabilities', () => {
     const basicLicense = 'basic';
-    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
+    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       siem: { read_cases: true, crud_cases: false },
-    } as unknown) as Capabilities);
+    } as unknown as Capabilities);
 
     expect(basicLinks.some((l) => l.id === SecurityPageName.case)).toBeTruthy();
   });
 
   it('returns case links with NO deepLinks for basic license with only read_cases capabilities', () => {
     const basicLicense = 'basic';
-    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
+    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       siem: { read_cases: true, crud_cases: false },
-    } as unknown) as Capabilities);
+    } as unknown as Capabilities);
 
     expect(
       basicLinks.find((l) => l.id === SecurityPageName.case)?.deepLinks?.length === 0
@@ -47,9 +47,9 @@ describe('public search functions', () => {
 
   it('returns case links with deepLinks for basic license with crud_cases capabilities', () => {
     const basicLicense = 'basic';
-    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
+    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       siem: { read_cases: true, crud_cases: true },
-    } as unknown) as Capabilities);
+    } as unknown as Capabilities);
 
     expect(
       (basicLinks.find((l) => l.id === SecurityPageName.case)?.deepLinks?.length ?? 0) > 0
@@ -58,9 +58,9 @@ describe('public search functions', () => {
 
   it('returns NO case links for basic license with NO read_cases capabilities', () => {
     const basicLicense = 'basic';
-    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
+    const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       siem: { read_cases: false, crud_cases: false },
-    } as unknown) as Capabilities);
+    } as unknown as Capabilities);
 
     expect(basicLinks.some((l) => l.id === SecurityPageName.case)).toBeFalsy();
   });

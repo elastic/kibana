@@ -78,10 +78,8 @@ export const useNetworkTopCountries = ({
   const queryId = useMemo(() => `${ID}-${flowTarget}`, [flowTarget]);
   const { getTransformChangesIfTheyExist } = useTransforms();
 
-  const [
-    networkTopCountriesRequest,
-    setHostRequest,
-  ] = useState<NetworkTopCountriesRequestOptions | null>(null);
+  const [networkTopCountriesRequest, setHostRequest] =
+    useState<NetworkTopCountriesRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -100,26 +98,24 @@ export const useNetworkTopCountries = ({
   );
   const { addError, addWarning } = useAppToasts();
 
-  const [
-    networkTopCountriesResponse,
-    setNetworkTopCountriesResponse,
-  ] = useState<NetworkTopCountriesArgs>({
-    networkTopCountries: [],
-    id: queryId,
-    inspect: {
-      dsl: [],
-      response: [],
-    },
-    isInspected: false,
-    loadPage: wrappedLoadMore,
-    pageInfo: {
-      activePage: 0,
-      fakeTotalCount: 0,
-      showMorePagesIndicator: false,
-    },
-    refetch: refetch.current,
-    totalCount: -1,
-  });
+  const [networkTopCountriesResponse, setNetworkTopCountriesResponse] =
+    useState<NetworkTopCountriesArgs>({
+      networkTopCountries: [],
+      id: queryId,
+      inspect: {
+        dsl: [],
+        response: [],
+      },
+      isInspected: false,
+      loadPage: wrappedLoadMore,
+      pageInfo: {
+        activePage: 0,
+        fakeTotalCount: 0,
+        showMorePagesIndicator: false,
+      },
+      refetch: refetch.current,
+      totalCount: -1,
+    });
 
   const networkTopCountriesSearch = useCallback(
     (request: NetworkTopCountriesRequestOptions | null) => {

@@ -35,9 +35,9 @@ describe('RangeFilterManager', function () {
         },
       },
     } as IndexPattern;
-    const indexPatternsServiceMock = ({
+    const indexPatternsServiceMock = {
       get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
-    } as unknown) as jest.Mocked<IndexPatternsContract>;
+    } as unknown as jest.Mocked<IndexPatternsContract>;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: RangeFilterManager;
     beforeEach(async () => {

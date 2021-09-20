@@ -76,7 +76,7 @@ export function toElasticsearchQuery(
     return {
       multi_match: {
         type,
-        query: (value as unknown) as string,
+        query: value as unknown as string,
         lenient: true,
       },
     };
@@ -90,7 +90,7 @@ export function toElasticsearchQuery(
   // keep things familiar for now.
   if (fields && fields.length === 0) {
     fields.push({
-      name: (ast.toElasticsearchQuery(fullFieldNameArg) as unknown) as string,
+      name: ast.toElasticsearchQuery(fullFieldNameArg) as unknown as string,
       scripted: false,
       type: '',
     });

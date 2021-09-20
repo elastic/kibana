@@ -330,65 +330,64 @@ interface ECSMappingEditorFormProps {
   onDelete?: (key: string) => void;
 }
 
-const getEcsFieldValidator = (editForm: boolean) => (
-  args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['key']>
-) => {
-  const fieldRequiredError = fieldValidators.emptyField(
-    i18n.translate(
-      'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.ecsFieldRequiredErrorMessage',
-      {
-        defaultMessage: 'ECS field is required.',
-      }
-    )
-  )(args);
+const getEcsFieldValidator =
+  (editForm: boolean) =>
+  (args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['key']>) => {
+    const fieldRequiredError = fieldValidators.emptyField(
+      i18n.translate(
+        'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.ecsFieldRequiredErrorMessage',
+        {
+          defaultMessage: 'ECS field is required.',
+        }
+      )
+    )(args);
 
-  // @ts-expect-error update types
-  if (fieldRequiredError && ((!editForm && args.formData['value.field'].length) || editForm)) {
-    return fieldRequiredError;
-  }
+    // @ts-expect-error update types
+    if (fieldRequiredError && ((!editForm && args.formData['value.field'].length) || editForm)) {
+      return fieldRequiredError;
+    }
 
-  return undefined;
-};
+    return undefined;
+  };
 
-const getOsqueryResultFieldValidator = (
-  osquerySchemaOptions: OsquerySchemaOption[],
-  editForm: boolean
-) => (
-  args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['value']['field']>
-) => {
-  const fieldRequiredError = fieldValidators.emptyField(
-    i18n.translate(
-      'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage',
-      {
-        defaultMessage: 'Osquery result is required.',
-      }
-    )
-  )(args);
+const getOsqueryResultFieldValidator =
+  (osquerySchemaOptions: OsquerySchemaOption[], editForm: boolean) =>
+  (
+    args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['value']['field']>
+  ) => {
+    const fieldRequiredError = fieldValidators.emptyField(
+      i18n.translate(
+        'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage',
+        {
+          defaultMessage: 'Osquery result is required.',
+        }
+      )
+    )(args);
 
-  if (fieldRequiredError && ((!editForm && args.formData.key.length) || editForm)) {
-    return fieldRequiredError;
-  }
+    if (fieldRequiredError && ((!editForm && args.formData.key.length) || editForm)) {
+      return fieldRequiredError;
+    }
 
-  if (!args.value.length) return;
+    if (!args.value.length) return;
 
-  const osqueryColumnExists = find(osquerySchemaOptions, ['label', args.value]);
+    const osqueryColumnExists = find(osquerySchemaOptions, ['label', args.value]);
 
-  return !osqueryColumnExists
-    ? {
-        code: 'ERR_FIELD_FORMAT',
-        path: args.path,
-        message: i18n.translate(
-          'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
-          {
-            defaultMessage: 'The current query does not return a {columnName} field',
-            values: {
-              columnName: args.value,
-            },
-          }
-        ),
-      }
-    : undefined;
-};
+    return !osqueryColumnExists
+      ? {
+          code: 'ERR_FIELD_FORMAT',
+          path: args.path,
+          message: i18n.translate(
+            'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
+            {
+              defaultMessage: 'The current query does not return a {columnName} field',
+              values: {
+                columnName: args.value,
+              },
+            }
+          ),
+        }
+      : undefined;
+  };
 
 const FORM_DEFAULT_VALUE = {
   key: '',

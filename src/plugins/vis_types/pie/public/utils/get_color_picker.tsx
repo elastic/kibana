@@ -48,74 +48,71 @@ function isOnInnerLayer(
   return data.find((d) => firstBucket.id && d[firstBucket.id] === seriesKey);
 }
 
-export const getColorPicker = (
-  legendPosition: Position,
-  setColor: (newColor: string | null, seriesKey: string | number) => void,
-  bucketColumns: Array<Partial<BucketColumns>>,
-  palette: string,
-  data: DatatableRow[],
-  uiState: PersistedState,
-  distinctColors: boolean
-): LegendColorPicker => ({
-  anchor,
-  color,
-  onClose,
-  onChange,
-  seriesIdentifiers: [seriesIdentifier],
-}) => {
-  const seriesName = seriesIdentifier.key;
-  const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {}) ?? {};
-  const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName.toString());
-  let keyDownEventOn = false;
-  const handleChange = (newColor: string | null) => {
-    if (newColor) {
-      onChange(newColor);
-    }
-    setColor(newColor, seriesName);
-    // close the popover if no color is applied or the user has clicked a color
-    if (!newColor || !keyDownEventOn) {
-      onClose();
-    }
-  };
+export const getColorPicker =
+  (
+    legendPosition: Position,
+    setColor: (newColor: string | null, seriesKey: string | number) => void,
+    bucketColumns: Array<Partial<BucketColumns>>,
+    palette: string,
+    data: DatatableRow[],
+    uiState: PersistedState,
+    distinctColors: boolean
+  ): LegendColorPicker =>
+  ({ anchor, color, onClose, onChange, seriesIdentifiers: [seriesIdentifier] }) => {
+    const seriesName = seriesIdentifier.key;
+    const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {}) ?? {};
+    const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName.toString());
+    let keyDownEventOn = false;
+    const handleChange = (newColor: string | null) => {
+      if (newColor) {
+        onChange(newColor);
+      }
+      setColor(newColor, seriesName);
+      // close the popover if no color is applied or the user has clicked a color
+      if (!newColor || !keyDownEventOn) {
+        onClose();
+      }
+    };
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (e.keyCode === KEY_CODE_ENTER) {
+    const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+      if (e.keyCode === KEY_CODE_ENTER) {
+        onClose?.();
+      }
+      keyDownEventOn = true;
+    };
+
+    const handleOutsideClick = useCallback(() => {
       onClose?.();
+    }, [onClose]);
+
+    if (!distinctColors) {
+      const enablePicker =
+        isOnInnerLayer(bucketColumns[0], data, seriesName) || !bucketColumns[0].id;
+      if (!enablePicker) return null;
     }
-    keyDownEventOn = true;
+    const hexColor = new Color(color).hex();
+    return (
+      <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
+        <EuiPopover
+          isOpen
+          ownFocus
+          display="block"
+          button={anchor}
+          anchorPosition={getAnchorPosition(legendPosition)}
+          closePopover={onClose}
+          panelPaddingSize="s"
+        >
+          <ColorPicker
+            color={palette === 'kibana_palette' ? hexColor : hexColor.toLowerCase()}
+            onChange={handleChange}
+            label={seriesName}
+            maxDepth={bucketColumns.length}
+            layerIndex={getLayerIndex(seriesName, data, bucketColumns)}
+            useLegacyColors={palette === 'kibana_palette'}
+            colorIsOverwritten={colorIsOverwritten}
+            onKeyDown={onKeyDown}
+          />
+        </EuiPopover>
+      </EuiOutsideClickDetector>
+    );
   };
-
-  const handleOutsideClick = useCallback(() => {
-    onClose?.();
-  }, [onClose]);
-
-  if (!distinctColors) {
-    const enablePicker = isOnInnerLayer(bucketColumns[0], data, seriesName) || !bucketColumns[0].id;
-    if (!enablePicker) return null;
-  }
-  const hexColor = new Color(color).hex();
-  return (
-    <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
-      <EuiPopover
-        isOpen
-        ownFocus
-        display="block"
-        button={anchor}
-        anchorPosition={getAnchorPosition(legendPosition)}
-        closePopover={onClose}
-        panelPaddingSize="s"
-      >
-        <ColorPicker
-          color={palette === 'kibana_palette' ? hexColor : hexColor.toLowerCase()}
-          onChange={handleChange}
-          label={seriesName}
-          maxDepth={bucketColumns.length}
-          layerIndex={getLayerIndex(seriesName, data, bucketColumns)}
-          useLegacyColors={palette === 'kibana_palette'}
-          colorIsOverwritten={colorIsOverwritten}
-          onKeyDown={onKeyDown}
-        />
-      </EuiPopover>
-    </EuiOutsideClickDetector>
-  );
-};

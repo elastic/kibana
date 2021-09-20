@@ -90,7 +90,8 @@ export interface SpacesPluginStart {
 }
 
 export class SpacesPlugin
-  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart> {
+  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart>
+{
   private readonly config$: Observable<ConfigType>;
 
   private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;

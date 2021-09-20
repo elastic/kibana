@@ -12,14 +12,14 @@ import { getTimerange } from './get_timerange';
 
 describe('getTimerange(req)', () => {
   test('should return a moment object for to and from', () => {
-    const req = ({
+    const req = {
       body: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
         },
       },
-    } as unknown) as VisTypeTimeseriesVisDataRequest;
+    } as unknown as VisTypeTimeseriesVisDataRequest;
     const { from, to } = getTimerange(req);
 
     expect(moment.isMoment(from)).toEqual(true);

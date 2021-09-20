@@ -36,12 +36,10 @@ export const AppRootProvider = memo<{
     children,
   }) => {
     const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
-    const services = useMemo(() => ({ http, notifications, application, data }), [
-      application,
-      data,
-      http,
-      notifications,
-    ]);
+    const services = useMemo(
+      () => ({ http, notifications, application, data }),
+      [application, data, http, notifications]
+    );
     return (
       <Provider store={store}>
         <I18nProvider>

@@ -60,50 +60,52 @@ export function createTopNavDirective() {
   };
 }
 
-export const createTopNavHelper = ({ TopNavMenu }) => (reactDirective) => {
-  return reactDirective(TopNavMenu, [
-    ['config', { watchDepth: 'value' }],
-    ['setMenuMountPoint', { watchDepth: 'reference' }],
-    ['disabledButtons', { watchDepth: 'reference' }],
+export const createTopNavHelper =
+  ({ TopNavMenu }) =>
+  (reactDirective) => {
+    return reactDirective(TopNavMenu, [
+      ['config', { watchDepth: 'value' }],
+      ['setMenuMountPoint', { watchDepth: 'reference' }],
+      ['disabledButtons', { watchDepth: 'reference' }],
 
-    ['query', { watchDepth: 'reference' }],
-    ['savedQuery', { watchDepth: 'reference' }],
-    ['intl', { watchDepth: 'reference' }],
+      ['query', { watchDepth: 'reference' }],
+      ['savedQuery', { watchDepth: 'reference' }],
+      ['intl', { watchDepth: 'reference' }],
 
-    ['onQuerySubmit', { watchDepth: 'reference' }],
-    ['onFiltersUpdated', { watchDepth: 'reference' }],
-    ['onRefreshChange', { watchDepth: 'reference' }],
-    ['onClearSavedQuery', { watchDepth: 'reference' }],
-    ['onSaved', { watchDepth: 'reference' }],
-    ['onSavedQueryUpdated', { watchDepth: 'reference' }],
-    ['onSavedQueryIdChange', { watchDepth: 'reference' }],
+      ['onQuerySubmit', { watchDepth: 'reference' }],
+      ['onFiltersUpdated', { watchDepth: 'reference' }],
+      ['onRefreshChange', { watchDepth: 'reference' }],
+      ['onClearSavedQuery', { watchDepth: 'reference' }],
+      ['onSaved', { watchDepth: 'reference' }],
+      ['onSavedQueryUpdated', { watchDepth: 'reference' }],
+      ['onSavedQueryIdChange', { watchDepth: 'reference' }],
 
-    ['indexPatterns', { watchDepth: 'collection' }],
-    ['filters', { watchDepth: 'collection' }],
+      ['indexPatterns', { watchDepth: 'collection' }],
+      ['filters', { watchDepth: 'collection' }],
 
-    // All modifiers default to true.
-    // Set to false to hide subcomponents.
-    'showSearchBar',
-    'showQueryBar',
-    'showQueryInput',
-    'showSaveQuery',
-    'showDatePicker',
-    'showFilterBar',
+      // All modifiers default to true.
+      // Set to false to hide subcomponents.
+      'showSearchBar',
+      'showQueryBar',
+      'showQueryInput',
+      'showSaveQuery',
+      'showDatePicker',
+      'showFilterBar',
 
-    'appName',
-    'screenTitle',
-    'dateRangeFrom',
-    'dateRangeTo',
-    'savedQueryId',
-    'isRefreshPaused',
-    'refreshInterval',
-    'disableAutoFocus',
-    'showAutoRefreshOnly',
+      'appName',
+      'screenTitle',
+      'dateRangeFrom',
+      'dateRangeTo',
+      'savedQueryId',
+      'isRefreshPaused',
+      'refreshInterval',
+      'disableAutoFocus',
+      'showAutoRefreshOnly',
 
-    // temporary flag to use the stateful components
-    'useDefaultBehaviors',
-  ]);
-};
+      // temporary flag to use the stateful components
+      'useDefaultBehaviors',
+    ]);
+  };
 
 let isLoaded = false;
 

@@ -183,11 +183,11 @@ describe('ManifestManager', () => {
           }
         });
 
-      (manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>).getArtifact.mockImplementation(
-        async (id) => {
-          return ARTIFACTS_BY_ID[id];
-        }
-      );
+      (
+        manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
+      ).getArtifact.mockImplementation(async (id) => {
+        return ARTIFACTS_BY_ID[id];
+      });
 
       const manifest = await manifestManager.getLastComputedManifest();
 
@@ -244,12 +244,12 @@ describe('ManifestManager', () => {
           }
         });
 
-      (manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>).getArtifact.mockImplementation(
-        async (id) => {
-          // report the MACOS Exceptions artifact as not found
-          return id === ARTIFACT_ID_EXCEPTIONS_MACOS ? undefined : ARTIFACTS_BY_ID[id];
-        }
-      );
+      (
+        manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
+      ).getArtifact.mockImplementation(async (id) => {
+        // report the MACOS Exceptions artifact as not found
+        return id === ARTIFACT_ID_EXCEPTIONS_MACOS ? undefined : ARTIFACTS_BY_ID[id];
+      });
 
       const manifest = await manifestManager.getLastComputedManifest();
 

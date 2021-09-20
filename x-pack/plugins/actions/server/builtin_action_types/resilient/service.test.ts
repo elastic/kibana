@@ -299,8 +299,7 @@ describe('IBM Resilient service', () => {
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
-        url:
-          'https://resilient.elastic.co/rest/orgs/201/incidents?text_content_output_format=objects_convert',
+        url: 'https://resilient.elastic.co/rest/orgs/201/incidents?text_content_output_format=objects_convert',
         logger,
         method: 'post',
         configurationUtilities,

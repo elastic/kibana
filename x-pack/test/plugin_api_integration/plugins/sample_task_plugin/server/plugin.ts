@@ -29,7 +29,8 @@ export interface SampleTaskManagerFixtureStartDeps {
 
 export class SampleTaskManagerFixturePlugin
   implements
-    Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps> {
+    Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
+{
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
   taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
     .pipe(first())

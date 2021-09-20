@@ -173,9 +173,9 @@ export async function collectDashboardTelemetry(
       embeddablePersistableStateService: embeddableService,
     });
 
-    const panels = (JSON.parse(
+    const panels = JSON.parse(
       attributes.panelsJSON as string
-    ) as unknown) as SavedDashboardPanel730ToLatest[];
+    ) as unknown as SavedDashboardPanel730ToLatest[];
 
     collectForPanels(panels, collectorData);
     collectEmbeddableData(panels, collectorData, embeddableService);

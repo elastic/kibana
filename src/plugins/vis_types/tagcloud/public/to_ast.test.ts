@@ -38,7 +38,7 @@ describe('tagcloud vis toExpressionAst function', () => {
   let vis: Vis<TagCloudVisParams>;
 
   beforeEach(() => {
-    vis = ({
+    vis = {
       isHierarchical: () => false,
       type: {},
       params: {
@@ -51,7 +51,7 @@ describe('tagcloud vis toExpressionAst function', () => {
           aggs: [],
         },
       },
-    } as unknown) as Vis<TagCloudVisParams>;
+    } as unknown as Vis<TagCloudVisParams>;
   });
 
   it('should match snapshot without params', () => {

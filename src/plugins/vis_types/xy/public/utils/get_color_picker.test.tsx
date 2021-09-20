@@ -26,14 +26,14 @@ jest.mock('@elastic/charts', () => {
 
 describe('getColorPicker', function () {
   const mockState = new Map();
-  const uiState = ({
+  const uiState = {
     get: jest
       .fn()
       .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
     set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
     emit: jest.fn(),
     setSilent: jest.fn(),
-  } as unknown) as PersistedState;
+  } as unknown as PersistedState;
 
   let wrapperProps: LegendColorPickerProps;
   const Component: ComponentType<LegendColorPickerProps> = getColorPicker(
@@ -57,8 +57,7 @@ describe('getColorPicker', function () {
           splitAccessors: {},
           seriesKeys: ['Logstash Airways', 'col-2-1'],
           specId: 'histogram-col-2-1',
-          key:
-            'groupId{__pseudo_stacked_group-ValueAxis-1__}spec{histogram-col-2-1}yAccessor{col-2-1}splitAccessors{col-1-3-Logstash Airways}',
+          key: 'groupId{__pseudo_stacked_group-ValueAxis-1__}spec{histogram-col-2-1}yAccessor{col-2-1}splitAccessors{col-1-3-Logstash Airways}',
         } as XYChartSeriesIdentifier,
       ],
     };

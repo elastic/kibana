@@ -192,8 +192,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
-      data: ({
-        fieldFormats: ({
+      data: {
+        fieldFormats: {
           getType: jest.fn().mockReturnValue({
             id: 'number',
             title: 'Number',
@@ -205,8 +205,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
           deserialize: jest.fn().mockReturnValue({
             convert: () => 'formatted',
           }),
-        } as unknown) as DataPublicPluginStart['fieldFormats'],
-      } as unknown) as DataPublicPluginStart,
+        } as unknown as DataPublicPluginStart['fieldFormats'],
+      } as unknown as DataPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
       groupId: 'a',
@@ -1210,9 +1210,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('[data-test-subj="indexPattern-time-scaling-unit"]')
         .find(EuiSelect)
-        .prop('onChange')!(({
+        .prop('onChange')!({
         target: { value: 'h' },
-      } as unknown) as ChangeEvent<HTMLSelectElement>);
+      } as unknown as ChangeEvent<HTMLSelectElement>);
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1237,9 +1237,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('[data-test-subj="indexPattern-time-scaling-unit"]')
         .find(EuiSelect)
-        .prop('onChange')!(({
+        .prop('onChange')!({
         target: { value: 'h' },
-      } as unknown) as ChangeEvent<HTMLSelectElement>);
+      } as unknown as ChangeEvent<HTMLSelectElement>);
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,

@@ -10,18 +10,13 @@ import { NotificationsStart } from 'kibana/public';
 import { createGetterSetter } from '../../../kibana_utils/public';
 import { ExpressionsService, ExpressionRendererRegistry } from '../../common';
 
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
+export const [getNotifications, setNotifications] =
+  createGetterSetter<NotificationsStart>('Notifications');
 
-export const [
-  getRenderersRegistry,
-  setRenderersRegistry,
-] = createGetterSetter<ExpressionRendererRegistry>('Renderers registry');
+export const [getRenderersRegistry, setRenderersRegistry] =
+  createGetterSetter<ExpressionRendererRegistry>('Renderers registry');
 
-export const [
-  getExpressionsService,
-  setExpressionsService,
-] = createGetterSetter<ExpressionsService>('ExpressionsService');
+export const [getExpressionsService, setExpressionsService] =
+  createGetterSetter<ExpressionsService>('ExpressionsService');
 
 export * from './expressions_services';

@@ -79,9 +79,10 @@ function searchLatency({
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
   }
 
-  const transactionDurationField = getTransactionDurationFieldForAggregatedTransactions(
-    searchAggregatedTransactions
-  );
+  const transactionDurationField =
+    getTransactionDurationFieldForAggregatedTransactions(
+      searchAggregatedTransactions
+    );
 
   const params = {
     apm: {
@@ -219,7 +220,8 @@ export async function getLatencyPeriods({
           ...options,
           start: comparisonStart,
           end: comparisonEnd,
-          latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+          latencyAggregationType:
+            latencyAggregationType as LatencyAggregationType,
         })
       : { latencyTimeseries: [], overallAvgDuration: null };
 

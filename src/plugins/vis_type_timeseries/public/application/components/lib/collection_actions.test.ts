@@ -16,11 +16,11 @@ import {
 describe('collection actions', () => {
   test('handleChange() calls props.onChange() with updated collection', () => {
     const fn = jest.fn();
-    const props = ({
+    const props = {
       model: { test: [{ id: '1', title: 'foo' }] },
       name: 'test',
       onChange: fn,
-    } as unknown) as CollectionActionsProps<any>;
+    } as unknown as CollectionActionsProps<any>;
     handleChange.call(null, props, { id: '1', type: 'bar' });
     expect(fn.mock.calls.length).toEqual(1);
     expect(fn.mock.calls[0][0]).toEqual({
@@ -31,11 +31,11 @@ describe('collection actions', () => {
   test('handleAdd() calls props.onChange() with update collection', () => {
     const newItemFn = jest.fn(() => ({ id: '2', text: 'example' }));
     const fn = jest.fn();
-    const props = ({
+    const props = {
       model: { test: [{ id: '1', text: 'foo' }] },
       name: 'test',
       onChange: fn,
-    } as unknown) as CollectionActionsProps<any>;
+    } as unknown as CollectionActionsProps<any>;
     handleAdd.call(null, props, newItemFn);
     expect(fn.mock.calls.length).toEqual(1);
     expect(newItemFn.mock.calls.length).toEqual(1);
@@ -49,11 +49,11 @@ describe('collection actions', () => {
 
   test('handleDelete() calls props.onChange() with update collection', () => {
     const fn = jest.fn();
-    const props = ({
+    const props = {
       model: { test: [{ id: '1', title: 'foo' }] },
       name: 'test',
       onChange: fn,
-    } as unknown) as CollectionActionsProps<any>;
+    } as unknown as CollectionActionsProps<any>;
     handleDelete.call(null, props, { id: '1' });
     expect(fn.mock.calls.length).toEqual(1);
     expect(fn.mock.calls[0][0]).toEqual({

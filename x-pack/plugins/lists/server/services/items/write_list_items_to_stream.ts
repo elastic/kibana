@@ -117,7 +117,7 @@ export const getResponse = async ({
   listItemIndex,
   size = SIZE,
 }: GetResponseOptions): Promise<estypes.SearchResponse<SearchEsListItemSchema>> => {
-  return ((
+  return (
     await esClient.search<SearchEsListItemSchema>({
       body: {
         query: {
@@ -132,7 +132,7 @@ export const getResponse = async ({
       index: listItemIndex,
       size,
     })
-  ).body as unknown) as estypes.SearchResponse<SearchEsListItemSchema>;
+  ).body as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
 };
 
 export interface WriteResponseHitsToStreamOptions {

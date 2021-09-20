@@ -14,7 +14,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
 
 function getMockIndexPattern() {
-  return ({
+  return {
     id: 'test',
     title: 'Test',
     timeFieldName: 'time',
@@ -41,7 +41,7 @@ function getMockIndexPattern() {
         } as IndexPatternField;
       }
     },
-  } as unknown) as IndexPattern;
+  } as unknown as IndexPattern;
 }
 
 function getMockProps(props = {}) {

@@ -20,9 +20,8 @@ import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const useInfraMLCapabilities = () => {
   const { services } = useKibanaContextForPlugin();
-  const [mlCapabilities, setMlCapabilities] = useState<GetMlCapabilitiesResponsePayload>(
-    initialMlCapabilities
-  );
+  const [mlCapabilities, setMlCapabilities] =
+    useState<GetMlCapabilitiesResponsePayload>(initialMlCapabilities);
 
   const [fetchMlCapabilitiesRequest, fetchMlCapabilities] = useTrackedPromise(
     {
@@ -46,9 +45,10 @@ export const useInfraMLCapabilities = () => {
     fetchMlCapabilities();
   }, [fetchMlCapabilities]);
 
-  const isLoading = useMemo(() => fetchMlCapabilitiesRequest.state === 'pending', [
-    fetchMlCapabilitiesRequest.state,
-  ]);
+  const isLoading = useMemo(
+    () => fetchMlCapabilitiesRequest.state === 'pending',
+    [fetchMlCapabilitiesRequest.state]
+  );
 
   const hasInfraMLSetupCapabilities = mlCapabilities.capabilities.canCreateJob;
   const hasInfraMLReadCapabilities = mlCapabilities.capabilities.canGetJobs;
@@ -63,9 +63,8 @@ export const useInfraMLCapabilities = () => {
   };
 };
 
-export const [InfraMLCapabilitiesProvider, useInfraMLCapabilitiesContext] = createContainer(
-  useInfraMLCapabilities
-);
+export const [InfraMLCapabilitiesProvider, useInfraMLCapabilitiesContext] =
+  createContainer(useInfraMLCapabilities);
 
 const initialMlCapabilities = {
   capabilities: {

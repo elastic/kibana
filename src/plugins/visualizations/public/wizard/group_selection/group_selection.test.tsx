@@ -58,17 +58,17 @@ describe('GroupSelection', () => {
   const visTypesRegistry = (visTypes: BaseVisType[]): TypesStart => {
     return {
       get<T>(id: string): BaseVisType<T> {
-        return (visTypes.find((vis) => vis.name === id) as unknown) as BaseVisType<T>;
+        return visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
       },
       all: () => {
-        return (visTypes as unknown) as BaseVisType[];
+        return visTypes as unknown as BaseVisType[];
       },
       getAliases: () => [],
       unRegisterAlias: () => [],
       getByGroup: (group: VisGroups) => {
-        return (visTypes.filter((type) => {
+        return visTypes.filter((type) => {
           return type.group === group;
-        }) as unknown) as BaseVisType[];
+        }) as unknown as BaseVisType[];
       },
     };
   };

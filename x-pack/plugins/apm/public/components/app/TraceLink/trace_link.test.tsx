@@ -23,13 +23,13 @@ function Wrapper({ children }: { children?: ReactNode }) {
     <MemoryRouter>
       <MockApmPluginContextWrapper
         value={
-          ({
+          {
             ...mockApmPluginContextValue,
             core: {
               ...mockApmPluginContextValue.core,
               http: { ...mockApmPluginContextValue.core.http, get: jest.fn() },
             },
-          } as unknown) as ApmPluginContextValue
+          } as unknown as ApmPluginContextValue
         }
       >
         {children}

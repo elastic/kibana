@@ -168,7 +168,7 @@ describe('alert_form', () => {
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
-      const initialAlert = ({
+      const initialAlert = {
         name: 'test',
         params: {},
         consumer: ALERTS_FEATURE_ID,
@@ -180,7 +180,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Alert;
 
       wrapper = mountWithIntl(
         <AlertForm
@@ -340,7 +340,7 @@ describe('alert_form', () => {
       ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
 
-      const initialAlert = ({
+      const initialAlert = {
         name: 'non alerting consumer test',
         params: {},
         consumer: 'test',
@@ -352,7 +352,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Alert;
 
       wrapper = mountWithIntl(
         <AlertForm
@@ -401,7 +401,7 @@ describe('alert_form', () => {
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
 
-      const initialAlert = ({
+      const initialAlert = {
         name: 'test',
         alertTypeId: alertType.id,
         params: {},
@@ -414,7 +414,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Alert;
 
       wrapper = mountWithIntl(
         <AlertForm

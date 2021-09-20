@@ -36,7 +36,7 @@ export const useNormalizedArtifact = (item: AnyArtifact): ArtifactInfo => {
       updated_at,
       updated_by,
       description,
-      entries: (entries as unknown) as ArtifactInfo['entries'],
+      entries: entries as unknown as ArtifactInfo['entries'],
       os: isTrustedApp(item) ? item.os : getOsFromExceptionItem(item),
       effectScope: isTrustedApp(item) ? item.effectScope : getEffectScopeFromExceptionItem(item),
     };

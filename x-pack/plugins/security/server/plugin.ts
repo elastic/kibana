@@ -121,7 +121,8 @@ export interface PluginStartDependencies {
  * Represents Security Plugin instance that will be managed by the Kibana plugin system.
  */
 export class SecurityPlugin
-  implements Plugin<SecurityPluginSetup, SecurityPluginStart, PluginSetupDependencies> {
+  implements Plugin<SecurityPluginSetup, SecurityPluginStart, PluginSetupDependencies>
+{
   private readonly logger: Logger;
   private authorizationSetup?: AuthorizationServiceSetupInternal;
   private auditSetup?: AuditServiceSetup;
@@ -326,10 +327,10 @@ export class SecurityPlugin
       authz: {
         actions: this.authorizationSetup.actions,
         checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,
-        checkPrivilegesDynamicallyWithRequest: this.authorizationSetup
-          .checkPrivilegesDynamicallyWithRequest,
-        checkSavedObjectsPrivilegesWithRequest: this.authorizationSetup
-          .checkSavedObjectsPrivilegesWithRequest,
+        checkPrivilegesDynamicallyWithRequest:
+          this.authorizationSetup.checkPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivilegesWithRequest:
+          this.authorizationSetup.checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup.mode,
       },
 
@@ -386,10 +387,10 @@ export class SecurityPlugin
       authz: {
         actions: this.authorizationSetup!.actions,
         checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
-        checkPrivilegesDynamicallyWithRequest: this.authorizationSetup!
-          .checkPrivilegesDynamicallyWithRequest,
-        checkSavedObjectsPrivilegesWithRequest: this.authorizationSetup!
-          .checkSavedObjectsPrivilegesWithRequest,
+        checkPrivilegesDynamicallyWithRequest:
+          this.authorizationSetup!.checkPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivilegesWithRequest:
+          this.authorizationSetup!.checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup!.mode,
       },
     });

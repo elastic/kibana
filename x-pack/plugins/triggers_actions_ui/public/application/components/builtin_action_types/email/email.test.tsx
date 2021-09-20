@@ -245,7 +245,7 @@ describe('connector validation', () => {
     };
 
     expect(
-      await actionTypeModel.validateConnector((actionConnector as unknown) as EmailActionConnector)
+      await actionTypeModel.validateConnector(actionConnector as unknown as EmailActionConnector)
     ).toEqual({
       config: {
         errors: {

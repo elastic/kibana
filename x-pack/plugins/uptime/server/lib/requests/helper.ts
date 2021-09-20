@@ -50,7 +50,7 @@ export const setupMockEsCompositeQuery = <K, C, I>(
       },
     };
     esMock.search.mockResolvedValueOnce({
-      body: (mockResponse as unknown) as SearchResponse,
+      body: mockResponse as unknown as SearchResponse,
       statusCode: 200,
       headers: {},
       warnings: [],

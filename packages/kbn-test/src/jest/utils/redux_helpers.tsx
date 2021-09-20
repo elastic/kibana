@@ -9,8 +9,9 @@
 import React, { ComponentType } from 'react';
 import { Provider } from 'react-redux';
 
-export const WithStore = (store: any) => (WrappedComponent: ComponentType) => (props: any) => (
-  <Provider store={store}>
-    <WrappedComponent {...props} />
-  </Provider>
-);
+export const WithStore = (store: any) => (WrappedComponent: ComponentType) => (props: any) =>
+  (
+    <Provider store={store}>
+      <WrappedComponent {...props} />
+    </Provider>
+  );

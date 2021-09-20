@@ -348,11 +348,8 @@ describe('Data Streams tab', () => {
 
   describe('when there are special characters', () => {
     beforeEach(async () => {
-      const {
-        setLoadIndicesResponse,
-        setLoadDataStreamsResponse,
-        setLoadDataStreamResponse,
-      } = httpRequestsMockHelpers;
+      const { setLoadIndicesResponse, setLoadDataStreamsResponse, setLoadDataStreamResponse } =
+        httpRequestsMockHelpers;
 
       setLoadIndicesResponse([
         createDataStreamBackingIndex('data-stream-index', '%dataStream'),

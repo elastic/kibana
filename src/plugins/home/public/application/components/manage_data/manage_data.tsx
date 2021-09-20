@@ -39,10 +39,8 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
     ?.useUrl({ sectionId: '' });
 
   if (features.length) {
-    const {
-      management: isManagementEnabled,
-      dev_tools: isDevToolsEnabled,
-    } = application.capabilities.navLinks;
+    const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
+      application.capabilities.navLinks;
 
     return (
       <>

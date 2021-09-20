@@ -145,8 +145,7 @@ TransactionSpan.args = {
     },
     service: {
       node: {
-        name:
-          '399a87146c0036592f6ee78553324b10c00757e024143913c97993384751e15e',
+        name: '399a87146c0036592f6ee78553324b10c00757e024143913c97993384751e15e',
       },
       environment: 'production',
       framework: {

@@ -187,15 +187,13 @@ const addGeneratedAlerts = async (
       lensEmbeddableFactory,
     });
 
-    const {
-      comment: newComment,
-      commentableCase: updatedCase,
-    } = await commentableCase.createComment({
-      createdDate,
-      user: userDetails,
-      commentReq: query,
-      id: savedObjectID,
-    });
+    const { comment: newComment, commentableCase: updatedCase } =
+      await commentableCase.createComment({
+        createdDate,
+        user: userDetails,
+        commentReq: query,
+        id: savedObjectID,
+      });
 
     if (
       (newComment.attributes.type === CommentType.alert ||

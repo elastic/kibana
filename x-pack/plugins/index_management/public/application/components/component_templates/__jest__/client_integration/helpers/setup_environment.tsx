@@ -33,7 +33,7 @@ const appDependencies = {
 } as any;
 
 export const componentTemplatesDependencies = {
-  httpClient: (mockHttpClient as unknown) as HttpSetup,
+  httpClient: mockHttpClient as unknown as HttpSetup,
   apiBasePath: API_BASE_PATH,
   trackMetric: () => {},
   docLinks: docLinksServiceMock.createStartContract(),
@@ -51,15 +51,16 @@ export const setupEnvironment = () => {
   };
 };
 
-export const WithAppDependencies = (Comp: any) => (props: any) => (
-  <AppContextProvider value={appDependencies}>
-    <MappingsEditorProvider>
-      <ComponentTemplatesProvider value={componentTemplatesDependencies}>
-        <GlobalFlyoutProvider>
-          <Comp {...props} />
-        </GlobalFlyoutProvider>
-      </ComponentTemplatesProvider>
-    </MappingsEditorProvider>
-    /
-  </AppContextProvider>
-);
+export const WithAppDependencies = (Comp: any) => (props: any) =>
+  (
+    <AppContextProvider value={appDependencies}>
+      <MappingsEditorProvider>
+        <ComponentTemplatesProvider value={componentTemplatesDependencies}>
+          <GlobalFlyoutProvider>
+            <Comp {...props} />
+          </GlobalFlyoutProvider>
+        </ComponentTemplatesProvider>
+      </MappingsEditorProvider>
+      /
+    </AppContextProvider>
+  );

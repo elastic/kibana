@@ -41,9 +41,9 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
-  const indexPatternList = ([indexPattern].map((ip) => {
+  const indexPatternList = [indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
-  }) as unknown) as Array<SavedObject<IndexPatternAttributes>>;
+  }) as unknown as Array<SavedObject<IndexPatternAttributes>>;
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -60,23 +60,11 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
     result: Number(esHits.length),
   }) as DataTotalHits$;
 
-  const chartData = ({
+  const chartData = {
     xAxisOrderedValues: [
-      1623880800000,
-      1623967200000,
-      1624053600000,
-      1624140000000,
-      1624226400000,
-      1624312800000,
-      1624399200000,
-      1624485600000,
-      1624572000000,
-      1624658400000,
-      1624744800000,
-      1624831200000,
-      1624917600000,
-      1625004000000,
-      1625090400000,
+      1623880800000, 1623967200000, 1624053600000, 1624140000000, 1624226400000, 1624312800000,
+      1624399200000, 1624485600000, 1624572000000, 1624658400000, 1624744800000, 1624831200000,
+      1624917600000, 1625004000000, 1625090400000,
     ],
     xAxisFormat: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
     xAxisLabel: 'order_date per day',
@@ -109,7 +97,7 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
       { x: 1625004000000, y: 137 },
       { x: 1625090400000, y: 66 },
     ],
-  } as unknown) as Chart;
+  } as unknown as Chart;
 
   const charts$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,

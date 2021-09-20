@@ -48,7 +48,7 @@ jest.mock('../../../../timelines/containers/all', () => {
 
 describe('QueryBarDefineRule', () => {
   beforeEach(() => {
-    ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
+    (useGetAllTimeline as unknown as jest.Mock).mockReturnValue({
       fetchAllTimeline: jest.fn(),
       timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
       loading: false,

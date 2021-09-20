@@ -69,7 +69,8 @@ export type ClientSetup = void;
 export type ClientStart = void;
 
 export class UptimePlugin
-  implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
+  implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
+{
   constructor(_context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {

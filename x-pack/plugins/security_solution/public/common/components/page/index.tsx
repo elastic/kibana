@@ -104,9 +104,9 @@ export const DescriptionListStyled = styled(EuiDescriptionList)`
 
 DescriptionListStyled.displayName = 'DescriptionListStyled';
 
-export const CountBadge = (styled(EuiBadge)`
+export const CountBadge = styled(EuiBadge)`
   margin-left: 5px;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 CountBadge.displayName = 'CountBadge';
 
@@ -116,9 +116,9 @@ export const Spacer = styled.span`
 
 Spacer.displayName = 'Spacer';
 
-export const Badge = (styled(EuiBadge)`
+export const Badge = styled(EuiBadge)`
   vertical-align: top;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 Badge.displayName = 'Badge';
 

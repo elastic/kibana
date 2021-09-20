@@ -217,12 +217,8 @@ export class IndexActionsContextMenu extends Component {
         getUrlForApp,
       });
       if (actionExtensionDefinition) {
-        const {
-          buttonLabel,
-          requestMethod,
-          successMessage,
-          renderConfirmModal,
-        } = actionExtensionDefinition;
+        const { buttonLabel, requestMethod, successMessage, renderConfirmModal } =
+          actionExtensionDefinition;
         if (requestMethod) {
           items.push({
             name: buttonLabel,

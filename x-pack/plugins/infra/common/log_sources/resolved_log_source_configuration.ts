@@ -106,9 +106,9 @@ const resolveKibanaIndexPatternReference = async (
 const resolveRuntimeMappings = (indexPattern: IndexPattern): estypes.MappingRuntimeFields => {
   const { runtimeFields } = indexPattern.getComputedFields();
 
-  const runtimeMappingsFromIndexPattern = (Object.entries(runtimeFields) as ObjectEntries<
-    typeof runtimeFields
-  >).reduce<estypes.MappingRuntimeFields>(
+  const runtimeMappingsFromIndexPattern = (
+    Object.entries(runtimeFields) as ObjectEntries<typeof runtimeFields>
+  ).reduce<estypes.MappingRuntimeFields>(
     (accumulatedMappings, [runtimeFieldName, runtimeFieldSpec]) => ({
       ...accumulatedMappings,
       [runtimeFieldName]: {

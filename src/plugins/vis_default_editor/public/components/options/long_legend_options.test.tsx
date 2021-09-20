@@ -29,11 +29,11 @@ describe('LongLegendOptions', () => {
   it('should call setValue when value is changes in the number input', () => {
     component = mountWithIntl(<LongLegendOptions {...props} />);
     const numberField = component.find(EuiFieldNumber);
-    numberField.props().onChange!(({
+    numberField.props().onChange!({
       target: {
         value: 3,
       },
-    } as unknown) as React.ChangeEvent<HTMLInputElement>);
+    } as unknown as React.ChangeEvent<HTMLInputElement>);
 
     expect(props.setValue).toHaveBeenCalledWith('maxLegendLines', 3);
   });

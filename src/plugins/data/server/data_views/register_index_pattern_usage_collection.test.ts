@@ -26,13 +26,13 @@ const runtimeFieldA = { runtimeField: { script: { source: scriptA } } };
 const runtimeFieldB = { runtimeField: { script: { source: scriptB } } };
 const runtimeFieldC = { runtimeField: { script: { source: scriptC } } };
 
-const indexPatterns = ({
+const indexPatterns = {
   getIds: async () => [1, 2, 3],
   get: jest.fn().mockResolvedValue({
     getScriptedFields: () => [],
     fields: [],
   }),
-} as any) as IndexPatternsCommonService;
+} as any as IndexPatternsCommonService;
 
 describe('index pattern usage collection', () => {
   it('minMaxAvgLoC calculates min, max, and average ', () => {

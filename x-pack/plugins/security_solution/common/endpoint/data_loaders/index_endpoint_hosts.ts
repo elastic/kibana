@@ -212,10 +212,12 @@ export async function indexEndpointHostDocs({
 }
 
 const fetchKibanaVersion = async (kbnClient: KbnClient) => {
-  const version = ((await kbnClient.request({
-    path: '/api/status',
-    method: 'GET',
-  })) as AxiosResponse).data.version.number;
+  const version = (
+    (await kbnClient.request({
+      path: '/api/status',
+      method: 'GET',
+    })) as AxiosResponse
+  ).data.version.number;
 
   if (!version) {
     throw new EndpointDataLoadingError('failed to get kibana version via `/api/status` api');

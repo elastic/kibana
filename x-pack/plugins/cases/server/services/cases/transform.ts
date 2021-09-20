@@ -70,21 +70,15 @@ export function transformUpdateResponseToExternalModel(
   };
 }
 
-export function transformAttributesToESModel(
-  caseAttributes: CaseAttributes
-): {
+export function transformAttributesToESModel(caseAttributes: CaseAttributes): {
   attributes: ESCaseAttributes;
   referenceHandler: ConnectorReferenceHandler;
 };
-export function transformAttributesToESModel(
-  caseAttributes: Partial<CaseAttributes>
-): {
+export function transformAttributesToESModel(caseAttributes: Partial<CaseAttributes>): {
   attributes: Partial<ESCaseAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 };
-export function transformAttributesToESModel(
-  caseAttributes: Partial<CaseAttributes>
-): {
+export function transformAttributesToESModel(caseAttributes: Partial<CaseAttributes>): {
   attributes: Partial<ESCaseAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {

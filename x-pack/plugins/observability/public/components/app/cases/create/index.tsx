@@ -24,10 +24,10 @@ export const Create = React.memo(() => {
     [casesUrl, navigateToUrl]
   );
 
-  const handleSetIsCancel = useCallback(() => navigateToUrl(`${casesUrl}`), [
-    casesUrl,
-    navigateToUrl,
-  ]);
+  const handleSetIsCancel = useCallback(
+    () => navigateToUrl(`${casesUrl}`),
+    [casesUrl, navigateToUrl]
+  );
 
   return (
     <EuiPanel>

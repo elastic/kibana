@@ -92,9 +92,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     'isolateHost'
   );
 
-  const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] = useState(
-    false
-  );
+  const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] =
+    useState(false);
 
   const showAlertDetails = useCallback(() => {
     setIsHostIsolationPanel(false);
@@ -115,9 +114,10 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
-  const alertId = useMemo(() => getFieldValue({ category: '_id', field: '_id' }, detailsData), [
-    detailsData,
-  ]);
+  const alertId = useMemo(
+    () => getFieldValue({ category: '_id', field: '_id' }, detailsData),
+    [detailsData]
+  );
 
   const hostName = useMemo(
     () => getFieldValue({ category: 'host', field: 'host.name' }, detailsData),

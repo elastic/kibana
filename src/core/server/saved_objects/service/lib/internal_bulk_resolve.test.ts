@@ -31,7 +31,7 @@ const UNSUPPORTED_TYPE = 'unsupported-type';
 beforeEach(() => {
   mockGetSavedObjectFromSource.mockReset();
   mockGetSavedObjectFromSource.mockImplementation(
-    (_registry, _type, id) => (`mock-obj-for-${id}` as unknown) as SavedObject
+    (_registry, _type, id) => `mock-obj-for-${id}` as unknown as SavedObject
   );
   mockRawDocExistsInNamespace.mockReset();
   mockRawDocExistsInNamespace.mockReturnValue(true); // return true by default

@@ -148,69 +148,69 @@ const EMPTY_RESULT = {
 
 export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
-  const expectResponseBody = (testCase: ExportTestCase): ExpectResponseBody => async (
-    response: Record<string, any>
-  ) => {
-    const { type, id, successResult = { type, id } as SuccessResult, failure } = testCase;
-    if (failure?.reason === 'unauthorized') {
-      // In export only, the API uses "bulkGet" or "find" depending on the parameters it receives.
-      if (failure.statusCode === 403) {
-        if (id) {
-          // "bulkGet" was unauthorized, which returns a forbidden error
-          await expectSavedObjectForbiddenBulkGet(type)(response);
+  const expectResponseBody =
+    (testCase: ExportTestCase): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      const { type, id, successResult = { type, id } as SuccessResult, failure } = testCase;
+      if (failure?.reason === 'unauthorized') {
+        // In export only, the API uses "bulkGet" or "find" depending on the parameters it receives.
+        if (failure.statusCode === 403) {
+          if (id) {
+            // "bulkGet" was unauthorized, which returns a forbidden error
+            await expectSavedObjectForbiddenBulkGet(type)(response);
+          } else {
+            expect(response.body).to.eql({
+              statusCode: 403,
+              error: 'Forbidden',
+              message: `unauthorized`,
+            });
+          }
+        } else if (failure.statusCode === 200) {
+          // "find" was unauthorized, which returns an empty result
+          expect(response.body).not.to.have.property('error');
+          expect(response.text).to.equal(JSON.stringify(EMPTY_RESULT));
         } else {
-          expect(response.body).to.eql({
-            statusCode: 403,
-            error: 'Forbidden',
-            message: `unauthorized`,
-          });
+          throw new Error(`Unexpected failure status code: ${failure.statusCode}`);
         }
-      } else if (failure.statusCode === 200) {
-        // "find" was unauthorized, which returns an empty result
+      } else if (failure?.reason === 'bad_request') {
+        expect(response.body.error).to.eql('Bad Request');
+        expect(response.body.statusCode).to.eql(failure.statusCode);
+        if (id) {
+          expect(response.body.message).to.eql(
+            `Trying to export object(s) with non-exportable types: ${type}:${id}`
+          );
+        } else {
+          expect(response.body.message).to.eql(`Trying to export non-exportable type(s): ${type}`);
+        }
+      } else if (failure?.reason) {
+        throw new Error(`Unexpected failure reason: ${failure.reason}`);
+      } else {
+        // 2xx
         expect(response.body).not.to.have.property('error');
-        expect(response.text).to.equal(JSON.stringify(EMPTY_RESULT));
-      } else {
-        throw new Error(`Unexpected failure status code: ${failure.statusCode}`);
-      }
-    } else if (failure?.reason === 'bad_request') {
-      expect(response.body.error).to.eql('Bad Request');
-      expect(response.body.statusCode).to.eql(failure.statusCode);
-      if (id) {
-        expect(response.body.message).to.eql(
-          `Trying to export object(s) with non-exportable types: ${type}:${id}`
-        );
-      } else {
-        expect(response.body.message).to.eql(`Trying to export non-exportable type(s): ${type}`);
-      }
-    } else if (failure?.reason) {
-      throw new Error(`Unexpected failure reason: ${failure.reason}`);
-    } else {
-      // 2xx
-      expect(response.body).not.to.have.property('error');
-      const ndjson = response.text.split('\n');
-      const savedObjectsArray = Array.isArray(successResult) ? successResult : [successResult];
-      expect(ndjson.length).to.eql(savedObjectsArray.length + 1);
-      for (let i = 0; i < ndjson.length - 1; i++) {
-        const object = JSON.parse(ndjson[i]);
-        const expected = savedObjectsArray.find((x) => x.id === object.id)!;
-        expect(expected).not.to.be(undefined);
-        expect(object.type).to.eql(expected.type);
-        if (object.originId) {
-          expect(object.originId).to.eql(expected.originId);
+        const ndjson = response.text.split('\n');
+        const savedObjectsArray = Array.isArray(successResult) ? successResult : [successResult];
+        expect(ndjson.length).to.eql(savedObjectsArray.length + 1);
+        for (let i = 0; i < ndjson.length - 1; i++) {
+          const object = JSON.parse(ndjson[i]);
+          const expected = savedObjectsArray.find((x) => x.id === object.id)!;
+          expect(expected).not.to.be(undefined);
+          expect(object.type).to.eql(expected.type);
+          if (object.originId) {
+            expect(object.originId).to.eql(expected.originId);
+          }
+          expect(object.updated_at).to.match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+          // don't test attributes, version, or references
         }
-        expect(object.updated_at).to.match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-        // don't test attributes, version, or references
+        const exportDetails = JSON.parse(ndjson[ndjson.length - 1]);
+        expect(exportDetails).to.eql({
+          exportedCount: ndjson.length - 1,
+          missingRefCount: 0,
+          missingReferences: [],
+          excludedObjectsCount: 0,
+          excludedObjects: [],
+        });
       }
-      const exportDetails = JSON.parse(ndjson[ndjson.length - 1]);
-      expect(exportDetails).to.eql({
-        exportedCount: ndjson.length - 1,
-        missingRefCount: 0,
-        missingReferences: [],
-        excludedObjectsCount: 0,
-        excludedObjects: [],
-      });
-    }
-  };
+    };
   const createTestDefinitions = (
     testCases: ExportTestCase | ExportTestCase[],
     failure: ExportTestCase['failure'] | false,
@@ -231,36 +231,34 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     }));
   };
 
-  const makeExportTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: ExportTestSuite
-  ) => {
-    const { user, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+  const makeExportTest =
+    (describeFn: Mocha.SuiteFunction) => (description: string, definition: ExportTestSuite) => {
+      const { user, spaceId = DEFAULT_SPACE_ID, tests } = definition;
 
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
-            .auth(user?.username, user?.password)
-            .send(test.request)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            await supertest
+              .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
+              .auth(user?.username, user?.password)
+              .send(test.request)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeExportTest(describe);
   // @ts-ignore

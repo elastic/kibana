@@ -58,9 +58,10 @@ export async function getTransactionDurationChartPreview({
     },
   };
 
-  const transactionDurationField = getTransactionDurationFieldForAggregatedTransactions(
-    searchAggregatedTransactions
-  );
+  const transactionDurationField =
+    getTransactionDurationFieldForAggregatedTransactions(
+      searchAggregatedTransactions
+    );
 
   const aggs = {
     timeseries: {

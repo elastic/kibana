@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   describe('Telemetry service', () => {
     const checkCanSendTelemetry = (): Promise<boolean> => {
       return browser.executeAsync<boolean>((cb) => {
-        ((window as unknown) as Record<string, () => Promise<boolean>>)
+        (window as unknown as Record<string, () => Promise<boolean>>)
           ._checkCanSendTelemetry()
           .then(cb);
       });
@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     after(async () => {
       await browser.removeLocalStorageItem(KBN_SCREENSHOT_MODE_ENABLED_KEY);
       await browser.executeAsync<void>((cb) => {
-        ((window as unknown) as Record<string, () => Promise<boolean>>)
+        (window as unknown as Record<string, () => Promise<boolean>>)
           ._resetTelemetry()
           .then(() => cb());
       });

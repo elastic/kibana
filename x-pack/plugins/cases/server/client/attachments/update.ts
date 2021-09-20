@@ -175,14 +175,12 @@ export async function update(
     }
 
     const updatedDate = new Date().toISOString();
-    const {
-      comment: updatedComment,
-      commentableCase: updatedCase,
-    } = await commentableCase.updateComment({
-      updateRequest: queryParams,
-      updatedAt: updatedDate,
-      user,
-    });
+    const { comment: updatedComment, commentableCase: updatedCase } =
+      await commentableCase.updateComment({
+        updateRequest: queryParams,
+        updatedAt: updatedDate,
+        user,
+      });
 
     await userActionService.bulkCreate({
       unsecuredSavedObjectsClient,

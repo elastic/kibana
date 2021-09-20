@@ -16,10 +16,10 @@ describe('createNumberHandler()', () => {
   beforeEach(() => {
     handleChange = jest.fn();
     changeHandler = createNumberHandler(handleChange);
-    event = ({
+    event = {
       preventDefault: jest.fn(),
       target: { value: '1' },
-    } as unknown) as React.ChangeEvent<HTMLInputElement>;
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
     const fn = changeHandler('unit');
     fn(event);
   });

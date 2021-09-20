@@ -24,12 +24,8 @@ describe('GroupLogic', () => {
   const { mount } = new LogicMounter(GroupLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    flashSuccessToast,
-    setQueuedErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast, setQueuedErrorMessage } =
+    mockFlashMessageHelpers;
 
   const group = groups[0];
   const sourceIds = ['123', '124'];

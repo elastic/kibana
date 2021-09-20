@@ -37,7 +37,7 @@ describe('Resolve index pattern tests', () => {
   test('getFallbackIndexPatternId with an indexPatterns array', async () => {
     const list = await indexPatternsMock.getCache();
     const result = await getFallbackIndexPatternId(
-      (list as unknown) as IndexPatternSavedObject[],
+      list as unknown as IndexPatternSavedObject[],
       ''
     );
     expect(result).toBe('the-index-pattern-id');

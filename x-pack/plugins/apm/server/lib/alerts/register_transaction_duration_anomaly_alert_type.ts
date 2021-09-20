@@ -47,8 +47,10 @@ import {
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
+  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
+  ALERT_EVALUATION_VALUE_NON_TYPED;
 const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
@@ -206,10 +208,8 @@ export function registerTransactionDurationAnomalyAlertType({
           },
         };
 
-        const response: ESSearchResponse<
-          unknown,
-          typeof anomalySearchParams
-        > = (await mlAnomalySearch(anomalySearchParams, [])) as any;
+        const response: ESSearchResponse<unknown, typeof anomalySearchParams> =
+          (await mlAnomalySearch(anomalySearchParams, [])) as any;
 
         const anomalies =
           response.aggregations?.anomaly_groups.buckets

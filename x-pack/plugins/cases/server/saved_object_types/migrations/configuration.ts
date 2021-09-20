@@ -34,9 +34,8 @@ export const configureConnectorIdMigration = (
 ): SavedObjectSanitizedDoc<unknown> => {
   // removing the id field since it will be stored in the references instead
   const { connector, ...restAttributes } = doc.attributes;
-  const { transformedConnector, references: connectorReferences } = transformConnectorIdToReference(
-    connector
-  );
+  const { transformedConnector, references: connectorReferences } =
+    transformConnectorIdToReference(connector);
   const { references = [] } = doc;
 
   return {

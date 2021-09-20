@@ -50,16 +50,14 @@ export const useFirstLastSeenHost = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    firstLastSeenHostRequest,
-    setFirstLastSeenHostRequest,
-  ] = useState<HostFirstLastSeenRequestOptions>({
-    defaultIndex: indexNames,
-    docValueFields: docValueFields ?? [],
-    factoryQueryType: HostsQueries.firstOrLastSeen,
-    hostName,
-    order,
-  });
+  const [firstLastSeenHostRequest, setFirstLastSeenHostRequest] =
+    useState<HostFirstLastSeenRequestOptions>({
+      defaultIndex: indexNames,
+      docValueFields: docValueFields ?? [],
+      factoryQueryType: HostsQueries.firstOrLastSeen,
+      hostName,
+      order,
+    });
 
   const [firstLastSeenHostResponse, setFirstLastSeenHostResponse] = useState<FirstLastSeenHostArgs>(
     {

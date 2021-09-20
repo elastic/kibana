@@ -34,7 +34,7 @@ describe('active_cursor_utils', () => {
       test('should extract accessors', () => {
         expect(
           parseSyncOptions({
-            datatables: ([
+            datatables: [
               {
                 columns: [
                   {
@@ -45,7 +45,7 @@ describe('active_cursor_utils', () => {
                   },
                 ],
               },
-            ] as unknown) as Datatable[],
+            ] as unknown as Datatable[],
           }).accessors
         ).toMatchInlineSnapshot(`
           Array [
@@ -57,7 +57,7 @@ describe('active_cursor_utils', () => {
       test('should return isDateHistogram true in case all datatables is time based', () => {
         expect(
           parseSyncOptions({
-            datatables: ([
+            datatables: [
               {
                 columns: [
                   {
@@ -84,7 +84,7 @@ describe('active_cursor_utils', () => {
                   },
                 ],
               },
-            ] as unknown) as Datatable[],
+            ] as unknown as Datatable[],
           })
         ).toMatchInlineSnapshot(`
           Object {
@@ -100,7 +100,7 @@ describe('active_cursor_utils', () => {
       test('should return isDateHistogram false in case of not all datatables is time based', () => {
         expect(
           parseSyncOptions({
-            datatables: ([
+            datatables: [
               {
                 columns: [
                   {
@@ -124,7 +124,7 @@ describe('active_cursor_utils', () => {
                   },
                 ],
               },
-            ] as unknown) as Datatable[],
+            ] as unknown as Datatable[],
           })
         ).toMatchInlineSnapshot(`
           Object {

@@ -151,12 +151,8 @@ const formSerializer = (field: FieldFormInternal): Field => {
 };
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxError }: Props) => {
-  const {
-    links,
-    namesNotAllowed,
-    existingConcreteFields,
-    fieldTypeToProcess,
-  } = useFieldEditorContext();
+  const { links, namesNotAllowed, existingConcreteFields, fieldTypeToProcess } =
+    useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
     panel: { setIsVisible: setIsPanelVisible },

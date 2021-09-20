@@ -20,7 +20,8 @@ export const mockSecurityOssPlugin = {
   },
   createStart: () => {
     return {
-      insecureCluster: mockInsecureClusterService.createStart() as jest.Mocked<InsecureClusterServiceStart>,
+      insecureCluster:
+        mockInsecureClusterService.createStart() as jest.Mocked<InsecureClusterServiceStart>,
       anonymousAccess: {
         getAccessURLParameters: jest.fn().mockResolvedValue(null),
         getCapabilities: jest.fn().mockResolvedValue({}),

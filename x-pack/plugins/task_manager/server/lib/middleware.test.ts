@@ -48,7 +48,7 @@ const getMockConcreteTaskInstance = () => {
     params: { abc: 'def' },
     ownerId: null,
   };
-  return (concrete as unknown) as ConcreteTaskInstance;
+  return concrete as unknown as ConcreteTaskInstance;
 };
 const getMockRunContext = (runTask: ConcreteTaskInstance) => ({
   taskInstance: runTask,

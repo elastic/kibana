@@ -57,31 +57,27 @@ interface Props {
 const os = getClientPlatform();
 
 const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[] =>
-  shortcuts.map(
-    (shortcutKeyMap: ShortcutMap): DescriptionListItem => {
-      const osShortcuts = shortcutKeyMap[os];
-      return {
-        title: shortcutKeyMap.help,
-        description: osShortcuts.reduce((acc: JSX.Element[], shortcut, i): JSX.Element[] => {
-          // replace +'s with spaces so we can display the plus symbol for the plus key
-          shortcut = shortcut.replace(/\+/g, ' ');
-          if (i !== 0) {
-            acc.push(<span key={getId('span')}> {strings.getShortcutSeparator()} </span>);
-          }
-          acc.push(
-            <span key={getId('span')}>
-              {getPrettyShortcut(shortcut)
-                .split(/( )/g)
-                .map((key) =>
-                  key === ' ' ? key : <EuiCode key={getId('shortcut')}>{key}</EuiCode>
-                )}
-            </span>
-          );
-          return acc;
-        }, []),
-      };
-    }
-  );
+  shortcuts.map((shortcutKeyMap: ShortcutMap): DescriptionListItem => {
+    const osShortcuts = shortcutKeyMap[os];
+    return {
+      title: shortcutKeyMap.help,
+      description: osShortcuts.reduce((acc: JSX.Element[], shortcut, i): JSX.Element[] => {
+        // replace +'s with spaces so we can display the plus symbol for the plus key
+        shortcut = shortcut.replace(/\+/g, ' ');
+        if (i !== 0) {
+          acc.push(<span key={getId('span')}> {strings.getShortcutSeparator()} </span>);
+        }
+        acc.push(
+          <span key={getId('span')}>
+            {getPrettyShortcut(shortcut)
+              .split(/( )/g)
+              .map((key) => (key === ' ' ? key : <EuiCode key={getId('shortcut')}>{key}</EuiCode>))}
+          </span>
+        );
+        return acc;
+      }, []),
+    };
+  });
 
 export const KeyboardShortcutsDoc: FunctionComponent<Props> = ({ onClose }) => (
   <EuiFlyout

@@ -23,7 +23,8 @@ export type ExpressionImagePluginSetup = void;
 export type ExpressionImagePluginStart = void;
 
 export class ExpressionImagePlugin
-  implements Plugin<ExpressionImagePluginSetup, ExpressionImagePluginStart, SetupDeps, StartDeps> {
+  implements Plugin<ExpressionImagePluginSetup, ExpressionImagePluginStart, SetupDeps, StartDeps>
+{
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionImagePluginSetup {
     expressions.registerFunction(imageFunction);
     expressions.registerRenderer(imageRenderer);

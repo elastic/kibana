@@ -19,7 +19,7 @@ import { BUCKET_TYPES } from '../buckets/bucket_agg_types';
 export const getNumberHistogramIntervalByDatatableColumn = (column: DatatableColumn) => {
   if (column.meta.source !== 'esaggs') return;
   if (column.meta.sourceParams?.type !== BUCKET_TYPES.HISTOGRAM) return;
-  const params = (column.meta.sourceParams.params as unknown) as AggParamsHistogram;
+  const params = column.meta.sourceParams.params as unknown as AggParamsHistogram;
 
   if (!params.used_interval || typeof params.used_interval === 'string') {
     return undefined;

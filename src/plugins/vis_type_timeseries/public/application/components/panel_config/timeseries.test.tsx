@@ -18,13 +18,13 @@ import { PanelConfigProps } from './types';
 
 describe('TimeseriesPanelConfig', () => {
   it('sets the number input to the given value', () => {
-    const props = ({
+    const props = {
       fields: {},
       model: {
         max_lines_legend: 2,
       },
       onChange: jest.fn(),
-    } as unknown) as PanelConfigProps;
+    } as unknown as PanelConfigProps;
     const wrapper = shallow(<TimeseriesPanelConfig {...props} />);
     wrapper.instance().setState({ selectedTab: 'options' });
     expect(
@@ -33,14 +33,14 @@ describe('TimeseriesPanelConfig', () => {
   });
 
   it('switches on the truncate legend switch if the prop is set to 1 ', () => {
-    const props = ({
+    const props = {
       fields: {},
       model: {
         max_lines_legend: 2,
         truncate_legend: 1,
       },
       onChange: jest.fn(),
-    } as unknown) as PanelConfigProps;
+    } as unknown as PanelConfigProps;
     const wrapper = shallow(<TimeseriesPanelConfig {...props} />);
     wrapper.instance().setState({ selectedTab: 'options' });
     expect(
@@ -49,14 +49,14 @@ describe('TimeseriesPanelConfig', () => {
   });
 
   it('switches off the truncate legend switch if the prop is set to 0', () => {
-    const props = ({
+    const props = {
       fields: {},
       model: {
         max_lines_legend: 2,
         truncate_legend: 0,
       },
       onChange: jest.fn(),
-    } as unknown) as PanelConfigProps;
+    } as unknown as PanelConfigProps;
     const wrapper = shallow(<TimeseriesPanelConfig {...props} />);
     wrapper.instance().setState({ selectedTab: 'options' });
     expect(
@@ -65,14 +65,14 @@ describe('TimeseriesPanelConfig', () => {
   });
 
   it('disables the max lines number input if the truncate legend switch is off', () => {
-    const props = ({
+    const props = {
       fields: {},
       model: {
         max_lines_legend: 2,
         truncate_legend: 0,
       },
       onChange: jest.fn(),
-    } as unknown) as PanelConfigProps;
+    } as unknown as PanelConfigProps;
     const wrapper = shallow(<TimeseriesPanelConfig {...props} />);
     wrapper.instance().setState({ selectedTab: 'options' });
     expect(

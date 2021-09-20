@@ -16,16 +16,16 @@ import { Flyout, FlyoutProps, FlyoutState } from './flyout';
 import { ShallowWrapper } from 'enzyme';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 
-const mockFile = ({
+const mockFile = {
   name: 'foo.ndjson',
   path: '/home/foo.ndjson',
-} as unknown) as File;
+} as unknown as File;
 
 describe('Flyout', () => {
   let defaultProps: FlyoutProps;
 
   const shallowRender = (props: FlyoutProps) => {
-    return (shallowWithI18nProvider(<Flyout {...props} />) as unknown) as ShallowWrapper<
+    return shallowWithI18nProvider(<Flyout {...props} />) as unknown as ShallowWrapper<
       FlyoutProps,
       FlyoutState,
       Flyout

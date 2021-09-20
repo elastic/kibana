@@ -73,13 +73,13 @@ describe('test actions handlers', () => {
 
     const mockRequest = httpServerMock.createKibanaRequest(postNewAgentActionRequest);
 
-    const agentAction = ({
+    const agentAction = {
       type: 'POLICY_CHANGE',
       id: 'action1',
       sent_at: '2020-03-14T19:45:02.620Z',
       timestamp: '2019-01-04T14:32:03.36764-05:00',
       created_at: '2020-03-14T19:45:02.620Z',
-    } as unknown) as AgentAction;
+    } as unknown as AgentAction;
 
     const actionsService: ActionsService = {
       getAgent: jest.fn().mockReturnValueOnce({
@@ -90,7 +90,7 @@ describe('test actions handlers', () => {
 
     const postNewAgentActionHandler = postNewAgentActionHandlerBuilder(actionsService);
     await postNewAgentActionHandler(
-      ({
+      {
         core: {
           savedObjects: {
             client: mockSavedObjectsClient,
@@ -101,13 +101,13 @@ describe('test actions handlers', () => {
             },
           },
         },
-      } as unknown) as RequestHandlerContext,
+      } as unknown as RequestHandlerContext,
       mockRequest,
       mockResponse
     );
 
-    const expectedAgentActionResponse = (mockResponse.ok.mock.calls[0][0]
-      ?.body as unknown) as PostNewAgentActionResponse;
+    const expectedAgentActionResponse = mockResponse.ok.mock.calls[0][0]
+      ?.body as unknown as PostNewAgentActionResponse;
 
     expect(expectedAgentActionResponse.item).toEqual(agentAction);
   });

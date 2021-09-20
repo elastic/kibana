@@ -22,7 +22,8 @@ export type ExpressionErrorPluginSetup = void;
 export type ExpressionErrorPluginStart = void;
 
 export class ExpressionErrorPlugin
-  implements Plugin<ExpressionErrorPluginSetup, ExpressionErrorPluginStart, SetupDeps, StartDeps> {
+  implements Plugin<ExpressionErrorPluginSetup, ExpressionErrorPluginStart, SetupDeps, StartDeps>
+{
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionErrorPluginSetup {
     expressions.registerRenderer(errorRenderer);
     expressions.registerRenderer(debugRenderer);

@@ -24,7 +24,7 @@ import {
   OnChangeProps,
 } from './exception_items_renderer';
 
-const mockHttpService: HttpStart = ({
+const mockHttpService: HttpStart = {
   addLoadingCountSource: (): void => {},
   anonymousPaths: {
     isAnonymous: (): void => {},
@@ -44,8 +44,8 @@ const mockHttpService: HttpStart = ({
   patch: (): void => {},
   post: (): void => {},
   put: (): void => {},
-} as unknown) as HttpStart;
-const mockAutocompleteService = ({
+} as unknown as HttpStart;
+const mockAutocompleteService = {
   getValueSuggestions: () =>
     new Promise((resolve) => {
       setTimeout(() => {
@@ -59,7 +59,7 @@ const mockAutocompleteService = ({
         ]);
       }, 300);
     }),
-} as unknown) as AutocompleteStart;
+} as unknown as AutocompleteStart;
 
 addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>);
 

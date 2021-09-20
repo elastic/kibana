@@ -27,14 +27,14 @@ const mlClusterClientFactory = (response: any): IScopedClusterClient => {
     fieldCaps: () => Promise.resolve({ body: response.fieldCaps }),
     search: () => Promise.resolve({ body: response.search }),
   };
-  return ({
+  return {
     asCurrentUser: callAs,
     asInternalUser: callAs,
-  } as unknown) as IScopedClusterClient;
+  } as unknown as IScopedClusterClient;
 };
 
 function getMinimalValidJob() {
-  return ({
+  return {
     analysis_config: {
       bucket_span: '15m',
       detectors: [],
@@ -44,14 +44,14 @@ function getMinimalValidJob() {
     datafeed_config: {
       indices: [],
     },
-  } as unknown) as CombinedJob;
+  } as unknown as CombinedJob;
 }
 
 describe('ML - isValidTimeField', () => {
   it('called without job config argument triggers Promise rejection', (done) => {
     isValidTimeField(
       mlClusterClientFactory(mockSearchResponse),
-      (undefined as unknown) as CombinedJob
+      undefined as unknown as CombinedJob
     ).then(
       () => done(new Error('Promise should not resolve for this test without job argument.')),
       () => done()
@@ -94,7 +94,7 @@ describe('ML - validateTimeRange', () => {
   it('called without arguments', (done) => {
     validateTimeRange(
       mlClusterClientFactory(mockSearchResponse),
-      (undefined as unknown) as CombinedJob
+      undefined as unknown as CombinedJob
     ).then(
       () => done(new Error('Promise should not resolve for this test without job argument.')),
       () => done()
@@ -102,9 +102,9 @@ describe('ML - validateTimeRange', () => {
   });
 
   it('called with non-valid job argument #2, missing datafeed_config', (done) => {
-    validateTimeRange(mlClusterClientFactory(mockSearchResponse), ({
+    validateTimeRange(mlClusterClientFactory(mockSearchResponse), {
       analysis_config: {},
-    } as unknown) as CombinedJob).then(
+    } as unknown as CombinedJob).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
@@ -114,7 +114,7 @@ describe('ML - validateTimeRange', () => {
     const job = { analysis_config: {}, datafeed_config: {} };
     validateTimeRange(
       mlClusterClientFactory(mockSearchResponse),
-      (job as unknown) as CombinedJob
+      job as unknown as CombinedJob
     ).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
@@ -125,7 +125,7 @@ describe('ML - validateTimeRange', () => {
     const job = { analysis_config: {}, datafeed_config: { indices: [] } };
     validateTimeRange(
       mlClusterClientFactory(mockSearchResponse),
-      (job as unknown) as CombinedJob
+      job as unknown as CombinedJob
     ).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
@@ -136,7 +136,7 @@ describe('ML - validateTimeRange', () => {
     const job = { analysis_config: {}, data_description: {}, datafeed_config: { indices: [] } };
     validateTimeRange(
       mlClusterClientFactory(mockSearchResponse),
-      (job as unknown) as CombinedJob
+      job as unknown as CombinedJob
     ).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()

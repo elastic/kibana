@@ -144,10 +144,8 @@ async function get(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const {
-      filter: authorizationFilter,
-      ensureSavedObjectsAreAuthorized,
-    } = await authorization.getAuthorizationFilter(Operations.findConfigurations);
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.findConfigurations);
 
     const filter = combineAuthorizedAndOwnerFilter(
       queryParams.owner,
@@ -237,13 +235,8 @@ async function update(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const {
-    caseConfigureService,
-    logger,
-    unsecuredSavedObjectsClient,
-    user,
-    authorization,
-  } = clientArgs;
+  const { caseConfigureService, logger, unsecuredSavedObjectsClient, user, authorization } =
+    clientArgs;
 
   try {
     const request = pipe(
@@ -349,27 +342,20 @@ async function create(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const {
-    unsecuredSavedObjectsClient,
-    caseConfigureService,
-    logger,
-    user,
-    authorization,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseConfigureService, logger, user, authorization } =
+    clientArgs;
   try {
     let error = null;
 
-    const {
-      filter: authorizationFilter,
-      ensureSavedObjectsAreAuthorized,
-    } = await authorization.getAuthorizationFilter(
-      /**
-       * The operation is createConfiguration because the procedure is part of
-       * the create route. The user should have all
-       * permissions to delete the results.
-       */
-      Operations.createConfiguration
-    );
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(
+        /**
+         * The operation is createConfiguration because the procedure is part of
+         * the create route. The user should have all
+         * permissions to delete the results.
+         */
+        Operations.createConfiguration
+      );
 
     const filter = combineAuthorizedAndOwnerFilter(
       configuration.owner,

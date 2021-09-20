@@ -32,7 +32,8 @@ import {
  * @public
  */
 export class ScopedHistory<HistoryLocationState = unknown>
-  implements History<HistoryLocationState> {
+  implements History<HistoryLocationState>
+{
   /**
    * Tracks whether or not the user has left this history's scope. All methods throw errors if called after scope has
    * been left.

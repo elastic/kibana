@@ -39,7 +39,7 @@ describe('UptimeDatePicker component', () => {
 
     const component = mountWithRouterRedux(
       <UptimeStartupPluginsContextProvider
-        {...((startPlugins as unknown) as Partial<ClientPluginsStart>)}
+        {...(startPlugins as unknown as Partial<ClientPluginsStart>)}
       >
         <UptimeDatePicker />
       </UptimeStartupPluginsContextProvider>,
@@ -69,7 +69,7 @@ describe('UptimeDatePicker component', () => {
 
     const component = mountWithRouterRedux(
       <UptimeStartupPluginsContextProvider
-        {...((startPlugins as unknown) as Partial<ClientPluginsStart>)}
+        {...(startPlugins as unknown as Partial<ClientPluginsStart>)}
       >
         <UptimeDatePicker />
       </UptimeStartupPluginsContextProvider>,

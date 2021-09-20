@@ -101,7 +101,7 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
 
       {isSaveOpen && lensAttributes && (
         <LensSaveModalComponent
-          initialInput={(lensAttributes as unknown) as LensEmbeddableInput}
+          initialInput={lensAttributes as unknown as LensEmbeddableInput}
           onClose={() => setIsSaveOpen(false)}
           onSave={() => {}}
         />

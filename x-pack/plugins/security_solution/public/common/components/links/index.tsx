@@ -46,9 +46,8 @@ import { getUebaDetailsUrl } from '../link_to/redirect_to_ueba';
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
-export const LinkButton: React.FC<
-  PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>
-> = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
+export const LinkButton: React.FC<PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>> =
+  ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
 
 export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>

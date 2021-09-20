@@ -36,10 +36,10 @@ describe('test find all unenrolled Agent id', () => {
     mockPackagePolicyService.list
       .mockResolvedValueOnce({
         items: [
-          ({
+          {
             id: '1',
             policy_id: 'abc123',
-          } as unknown) as PackagePolicy,
+          } as unknown as PackagePolicy,
         ],
         total: 1,
         perPage: 10,
@@ -55,9 +55,9 @@ describe('test find all unenrolled Agent id', () => {
       .mockImplementationOnce(() =>
         Promise.resolve({
           agents: [
-            ({
+            {
               id: 'id1',
-            } as unknown) as Agent,
+            } as unknown as Agent,
           ],
           total: 2,
           page: 1,
@@ -67,9 +67,9 @@ describe('test find all unenrolled Agent id', () => {
       .mockImplementationOnce(() =>
         Promise.resolve({
           agents: [
-            ({
+            {
               id: 'id2',
-            } as unknown) as Agent,
+            } as unknown as Agent,
           ],
           total: 2,
           page: 1,

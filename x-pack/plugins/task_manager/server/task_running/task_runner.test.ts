@@ -910,7 +910,11 @@ describe('TaskManagerRunner', () => {
       const id = _.random(1, 20).toString();
       const error = new Error('Dangit!');
       const onTaskEvent = jest.fn();
-      const { runner, store, instance: originalInstance } = await readyToRunStageSetup({
+      const {
+        runner,
+        store,
+        instance: originalInstance,
+      } = await readyToRunStageSetup({
         onTaskEvent,
         instance: {
           id,
@@ -1407,7 +1411,11 @@ describe('TaskManagerRunner', () => {
         const id = _.random(1, 20).toString();
         const error = new Error('Dangit!');
         const onTaskEvent = jest.fn();
-        const { runner, store, instance: originalInstance } = await readyToRunStageSetup({
+        const {
+          runner,
+          store,
+          instance: originalInstance,
+        } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
             id,

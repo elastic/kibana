@@ -20,9 +20,9 @@ import { ObservabilityPublicPluginsStart } from '../plugin';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 
-const appMountParameters = ({ setHeaderActionMenu: () => {} } as unknown) as AppMountParameters;
+const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
 
-export const core = ({
+export const core = {
   http: {
     basePath: {
       prepend: jest.fn(),
@@ -32,13 +32,13 @@ export const core = ({
     get: (key: string) => true,
     get$: (key: string) => of(true),
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
 const config = { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } };
 
-const plugins = ({
+const plugins = {
   data: { query: { timefilter: { timefilter: { setTime: jest.fn() } } } },
-} as unknown) as ObservabilityPublicPluginsStart;
+} as unknown as ObservabilityPublicPluginsStart;
 
 const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 

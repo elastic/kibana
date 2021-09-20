@@ -35,54 +35,48 @@ const useKibanaServices = () => {
 
 /** actions common to all cells (e.g. copy to clipboard) */
 const commonCellActions: TGridCellAction[] = [
-  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
-    rowIndex,
-    columnId,
-    Component,
-  }) => {
-    const { timelines } = useKibanaServices();
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    ({ rowIndex, columnId, Component }) => {
+      const { timelines } = useKibanaServices();
 
-    const value = getMappedNonEcsValue({
-      data: data[getPageRowIndex(rowIndex, pageSize)],
-      fieldName: columnId,
-    });
+      const value = getMappedNonEcsValue({
+        data: data[getPageRowIndex(rowIndex, pageSize)],
+        fieldName: columnId,
+      });
 
-    return (
-      <>
-        {timelines.getHoverActions().getCopyButton({
-          Component,
-          field: columnId,
-          isHoverAction: false,
-          ownFocus: false,
-          showTooltip: false,
-          value,
-        })}
-      </>
-    );
-  },
+      return (
+        <>
+          {timelines.getHoverActions().getCopyButton({
+            Component,
+            field: columnId,
+            isHoverAction: false,
+            ownFocus: false,
+            showTooltip: false,
+            value,
+          })}
+        </>
+      );
+    },
 ];
 
 /** actions for adding filters to the search bar */
 const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellAction[] => [
-  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
-    rowIndex,
-    columnId,
-    Component,
-  }) => {
-    const value = getMappedNonEcsValue({
-      data: data[getPageRowIndex(rowIndex, pageSize)],
-      fieldName: columnId,
-    });
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    ({ rowIndex, columnId, Component }) => {
+      const value = getMappedNonEcsValue({
+        data: data[getPageRowIndex(rowIndex, pageSize)],
+        fieldName: columnId,
+      });
 
-    return (
-      <FilterForValueButton
-        Component={Component}
-        field={columnId}
-        value={value}
-        addToQuery={addToQuery}
-      />
-    );
-  },
+      return (
+        <FilterForValueButton
+          Component={Component}
+          field={columnId}
+          value={value}
+          addToQuery={addToQuery}
+        />
+      );
+    },
 ];
 
 /** returns the default actions shown in `EuiDataGrid` cells */

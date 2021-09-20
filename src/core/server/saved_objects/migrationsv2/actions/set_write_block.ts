@@ -31,43 +31,45 @@ export interface SetWriteBlockParams {
  * include `shards_acknowledged: true` but once the block is in place,
  * subsequent calls return `shards_acknowledged: false`
  */
-export const setWriteBlock = ({
-  client,
-  index,
-}: SetWriteBlockParams): TaskEither.TaskEither<
-  IndexNotFound | RetryableEsClientError,
-  'set_write_block_succeeded'
-> => () => {
-  return (
-    client.indices
-      .addBlock<{
-        acknowledged: boolean;
-        shards_acknowledged: boolean;
-      }>(
-        {
-          index,
-          block: 'write',
-        },
-        { maxRetries: 0 /** handle retry ourselves for now */ }
-      )
-      // not typed yet
-      .then((res: any) => {
-        return res.body.acknowledged === true
-          ? Either.right('set_write_block_succeeded' as const)
-          : Either.left({
-              type: 'retryable_es_client_error' as const,
-              message: 'set_write_block_failed',
-            });
-      })
-      .catch((e: ElasticsearchClientError) => {
-        if (e instanceof EsErrors.ResponseError) {
-          if (e.body?.error?.type === 'index_not_found_exception') {
-            return Either.left({ type: 'index_not_found_exception' as const, index });
+export const setWriteBlock =
+  ({
+    client,
+    index,
+  }: SetWriteBlockParams): TaskEither.TaskEither<
+    IndexNotFound | RetryableEsClientError,
+    'set_write_block_succeeded'
+  > =>
+  () => {
+    return (
+      client.indices
+        .addBlock<{
+          acknowledged: boolean;
+          shards_acknowledged: boolean;
+        }>(
+          {
+            index,
+            block: 'write',
+          },
+          { maxRetries: 0 /** handle retry ourselves for now */ }
+        )
+        // not typed yet
+        .then((res: any) => {
+          return res.body.acknowledged === true
+            ? Either.right('set_write_block_succeeded' as const)
+            : Either.left({
+                type: 'retryable_es_client_error' as const,
+                message: 'set_write_block_failed',
+              });
+        })
+        .catch((e: ElasticsearchClientError) => {
+          if (e instanceof EsErrors.ResponseError) {
+            if (e.body?.error?.type === 'index_not_found_exception') {
+              return Either.left({ type: 'index_not_found_exception' as const, index });
+            }
           }
-        }
-        throw e;
-      })
-      .catch(catchRetryableEsClientErrors)
-  );
-};
+          throw e;
+        })
+        .catch(catchRetryableEsClientErrors)
+    );
+  };
 //

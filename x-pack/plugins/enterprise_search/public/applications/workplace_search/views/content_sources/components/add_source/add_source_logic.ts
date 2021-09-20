@@ -62,11 +62,7 @@ export interface OauthParams {
 
 export interface AddSourceActions {
   initializeAddSource: (addSourceProps: AddSourceProps) => { addSourceProps: AddSourceProps };
-  setAddSourceProps: ({
-    addSourceProps,
-  }: {
-    addSourceProps: AddSourceProps;
-  }) => {
+  setAddSourceProps: ({ addSourceProps }: { addSourceProps: AddSourceProps }) => {
     addSourceProps: AddSourceProps;
   };
   setAddSourceStep(addSourceCurrentStep: AddSourceSteps): AddSourceSteps;
@@ -532,13 +528,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
       try {
         const response = await http.get(route, { query });
-        const {
-          serviceName,
-          indexPermissions,
-          serviceType,
-          preContentSourceId,
-          hasConfigureStep,
-        } = response;
+        const { serviceName, indexPermissions, serviceType, preContentSourceId, hasConfigureStep } =
+          response;
 
         // GitHub requires an intermediate configuration step, where we collect the repos to index.
         if (hasConfigureStep && !values.oauthConfigCompleted) {

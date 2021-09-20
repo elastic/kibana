@@ -24,15 +24,8 @@ export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
   const { logger, esClient, query: queryParams } = params;
-  const {
-    index,
-    timeWindowSize,
-    timeWindowUnit,
-    interval,
-    timeField,
-    dateStart,
-    dateEnd,
-  } = queryParams;
+  const { index, timeWindowSize, timeWindowUnit, interval, timeField, dateStart, dateEnd } =
+    queryParams;
 
   const window = `${timeWindowSize}${timeWindowUnit}`;
   const dateRangeInfo = getDateRangeInfo({ dateStart, dateEnd, window, interval });

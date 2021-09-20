@@ -272,9 +272,10 @@ const Contents: FC<{
   heightOffset?: number;
 }> = ({ title, value, editJson, onChange, heightOffset = 0 }) => {
   // the ace editor requires a fixed height
-  const editorHeight = useMemo(() => `${window.innerHeight - 230 - heightOffset}px`, [
-    heightOffset,
-  ]);
+  const editorHeight = useMemo(
+    () => `${window.innerHeight - 230 - heightOffset}px`,
+    [heightOffset]
+  );
   return (
     <EuiFlexItem>
       <EuiTitle size="s">

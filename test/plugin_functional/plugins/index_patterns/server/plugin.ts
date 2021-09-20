@@ -21,7 +21,8 @@ export class IndexPatternsTestPlugin
       IndexPatternsTestPluginStart,
       {},
       IndexPatternsTestStartDeps
-    > {
+    >
+{
   public setup(core: CoreSetup<IndexPatternsTestStartDeps>) {
     const router = core.http.createRouter();
 

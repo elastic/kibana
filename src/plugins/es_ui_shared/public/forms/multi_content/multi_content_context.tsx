@@ -46,12 +46,8 @@ export function useMultiContentContext<T extends object = { [key: string]: any }
 export function useContent<T extends object, K extends keyof T>(contentId: K) {
   const isMounted = useRef(false);
   const defaultValue = useRef<T[K] | undefined>(undefined);
-  const {
-    updateContentAt,
-    saveSnapshotAndRemoveContent,
-    getData,
-    getSingleContentData,
-  } = useMultiContentContext<T>();
+  const { updateContentAt, saveSnapshotAndRemoveContent, getData, getSingleContentData } =
+    useMultiContentContext<T>();
 
   const updateContent = useCallback(
     (content: Content) => {

@@ -31,13 +31,15 @@ const cornerScreenPositions = (transformMatrix, a, b) =>
     mvMultiply(transformMatrix, componentProduct(corner, [a, b, 0, 1]))
   );
 
-export const insideAABB = ({ x, y, a, b }) => (transformMatrix, aa, bb) => {
-  const corners = cornerScreenPositions(transformMatrix, aa, bb);
-  return corners.every(([xx, yy]) => {
-    const result = x - a <= xx && xx <= x + a && y - b <= yy && yy <= y + b;
-    return result;
-  });
-};
+export const insideAABB =
+  ({ x, y, a, b }) =>
+  (transformMatrix, aa, bb) => {
+    const corners = cornerScreenPositions(transformMatrix, aa, bb);
+    return corners.every(([xx, yy]) => {
+      const result = x - a <= xx && xx <= x + a && y - b <= yy && yy <= y + b;
+      return result;
+    });
+  };
 
 /**
  *

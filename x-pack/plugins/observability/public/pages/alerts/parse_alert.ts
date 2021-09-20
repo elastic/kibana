@@ -29,21 +29,21 @@ const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
 const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED = ALERT_RULE_TYPE_ID_NON_TYPED;
 const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
-export const parseAlert = (observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) => (
-  alert: Record<string, unknown>
-): TopAlert => {
-  const parsedFields = parseTechnicalFields(alert);
-  const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
-  const formatted = {
-    link: undefined,
-    reason: parsedFields[ALERT_RULE_NAME] ?? '',
-    ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
-  };
+export const parseAlert =
+  (observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) =>
+  (alert: Record<string, unknown>): TopAlert => {
+    const parsedFields = parseTechnicalFields(alert);
+    const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
+    const formatted = {
+      link: undefined,
+      reason: parsedFields[ALERT_RULE_NAME] ?? '',
+      ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
+    };
 
-  return {
-    ...formatted,
-    fields: parsedFields,
-    active: parsedFields[ALERT_STATUS] === ALERT_STATUS_ACTIVE,
-    start: new Date(parsedFields[ALERT_START] ?? 0).getTime(),
+    return {
+      ...formatted,
+      fields: parsedFields,
+      active: parsedFields[ALERT_STATUS] === ALERT_STATUS_ACTIVE,
+      start: new Date(parsedFields[ALERT_START] ?? 0).getTime(),
+    };
   };
-};

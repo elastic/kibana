@@ -796,9 +796,9 @@ describe('Fields Provider', () => {
     const getFieldsForWildcardMock = jest.fn();
     const esClientSearchMock = jest.fn();
 
-    const deps = ({
+    const deps = {
       esClient: { asCurrentUser: { search: esClientSearchMock } },
-    } as unknown) as SearchStrategyDependencies;
+    } as unknown as SearchStrategyDependencies;
 
     beforeAll(() => {
       getFieldsForWildcardMock.mockResolvedValue([]);

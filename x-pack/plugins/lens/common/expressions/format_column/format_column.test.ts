@@ -10,9 +10,8 @@ import { functionWrapper } from 'src/plugins/expressions/common/expression_funct
 import { FormatColumnArgs, formatColumn } from './index';
 
 describe('format_column', () => {
-  const fn: (input: Datatable, args: FormatColumnArgs) => Promise<Datatable> = functionWrapper(
-    formatColumn
-  );
+  const fn: (input: Datatable, args: FormatColumnArgs) => Promise<Datatable> =
+    functionWrapper(formatColumn);
 
   let datatable: Datatable;
 

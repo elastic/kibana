@@ -627,9 +627,7 @@ describe('AggConfigs', () => {
           },
         },
       };
-      const mergedResponse = ac.postFlightTransform(
-        (response as unknown) as IEsSearchResponse<any>
-      );
+      const mergedResponse = ac.postFlightTransform(response as unknown as IEsSearchResponse<any>);
       expect(mergedResponse.rawResponse).toEqual({
         aggregations: {
           '1': {
@@ -724,9 +722,7 @@ describe('AggConfigs', () => {
           },
         },
       };
-      const mergedResponse = ac.postFlightTransform(
-        (response as unknown) as IEsSearchResponse<any>
-      );
+      const mergedResponse = ac.postFlightTransform(response as unknown as IEsSearchResponse<any>);
       expect(mergedResponse.rawResponse).toEqual({
         aggregations: {
           '1': {

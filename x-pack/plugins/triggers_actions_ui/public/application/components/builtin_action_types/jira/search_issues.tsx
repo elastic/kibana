@@ -52,9 +52,10 @@ const SearchIssuesComponent: React.FC<Props> = ({
     id: selectedValue,
   });
 
-  useEffect(() => setOptions(issues.map((issue) => ({ label: issue.title, value: issue.key }))), [
-    issues,
-  ]);
+  useEffect(
+    () => setOptions(issues.map((issue) => ({ label: issue.title, value: issue.key }))),
+    [issues]
+  );
 
   useEffect(() => {
     if (isLoadingSingleIssue || singleIssue == null) {

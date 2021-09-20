@@ -34,23 +34,11 @@ function getProps(timefield?: string) {
     result: Number(esHits.length),
   }) as DataTotalHits$;
 
-  const chartData = ({
+  const chartData = {
     xAxisOrderedValues: [
-      1623880800000,
-      1623967200000,
-      1624053600000,
-      1624140000000,
-      1624226400000,
-      1624312800000,
-      1624399200000,
-      1624485600000,
-      1624572000000,
-      1624658400000,
-      1624744800000,
-      1624831200000,
-      1624917600000,
-      1625004000000,
-      1625090400000,
+      1623880800000, 1623967200000, 1624053600000, 1624140000000, 1624226400000, 1624312800000,
+      1624399200000, 1624485600000, 1624572000000, 1624658400000, 1624744800000, 1624831200000,
+      1624917600000, 1625004000000, 1625090400000,
     ],
     xAxisFormat: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
     xAxisLabel: 'order_date per day',
@@ -83,7 +71,7 @@ function getProps(timefield?: string) {
       { x: 1625004000000, y: 137 },
       { x: 1625090400000, y: 66 },
     ],
-  } as unknown) as Chart;
+  } as unknown as Chart;
 
   const charts$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,

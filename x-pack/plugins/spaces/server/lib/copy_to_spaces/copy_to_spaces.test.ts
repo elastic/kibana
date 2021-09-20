@@ -143,7 +143,7 @@ describe('copySavedObjectsToSpaces', () => {
       const response: SavedObjectsImportResponse = {
         success: true,
         successCount: expectedObjects.length,
-        successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
+        successResults: ['Some success(es) occurred!' as unknown as SavedObjectsImportSuccess],
         warnings: [],
       };
 

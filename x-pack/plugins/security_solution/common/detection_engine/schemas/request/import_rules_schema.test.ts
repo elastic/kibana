@@ -694,10 +694,8 @@ describe('import rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
 
-    const {
-      max_signals: expectedMaxSignals,
-      ...expectedNoMaxSignals
-    } = getImportRulesSchemaDecodedMock();
+    const { max_signals: expectedMaxSignals, ...expectedNoMaxSignals } =
+      getImportRulesSchemaDecodedMock();
     const expected: ImportRulesSchemaDecoded = {
       ...expectedNoMaxSignals,
       max_signals: 100,

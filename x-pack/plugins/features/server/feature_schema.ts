@@ -152,11 +152,10 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
   ui: listOfCapabilitiesSchema,
 });
 
-const kibanaMutuallyExclusiveSubFeaturePrivilegeSchema = kibanaIndependentSubFeaturePrivilegeSchema.extends(
-  {
+const kibanaMutuallyExclusiveSubFeaturePrivilegeSchema =
+  kibanaIndependentSubFeaturePrivilegeSchema.extends({
     minimumLicense: schema.never(),
-  }
-);
+  });
 
 const kibanaSubFeatureSchema = schema.object({
   name: schema.string(),

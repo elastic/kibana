@@ -16,9 +16,10 @@ import { FORMATS_UI_SETTINGS } from '../../../../../../../src/plugins/field_form
 
 const { NumberFormat: strings } = ArgumentStrings;
 
-const getNumberFormatArgInput = (defaultNumberFormats: ComponentProps['numberFormats']) => (
-  props: Assign<ComponentProps, { numberFormats?: ComponentProps['numberFormats'] }>
-) => <NumberFormatArgInput numberFormats={defaultNumberFormats} {...props} />;
+const getNumberFormatArgInput =
+  (defaultNumberFormats: ComponentProps['numberFormats']) =>
+  (props: Assign<ComponentProps, { numberFormats?: ComponentProps['numberFormats'] }>) =>
+    <NumberFormatArgInput numberFormats={defaultNumberFormats} {...props} />;
 
 export const numberFormatInitializer: SetupInitializer<ArgumentFactory<ComponentProps>> = (
   core,

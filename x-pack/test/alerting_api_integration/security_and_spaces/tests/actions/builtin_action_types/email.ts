@@ -123,8 +123,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
               bcc: null,
               subject: 'email-subject',
               html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Kibana. <a href=\"https://localhost:5601\">Go to Kibana</a>.</p>\n`,
-              text:
-                'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
+              text: 'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
               headers: {},
             },
           });
@@ -324,8 +323,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
               bcc: null,
               subject: 'email-subject',
               html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Kibana. <a href=\"https://localhost:5601\">Go to Kibana</a>.</p>\n`,
-              text:
-                'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
+              text: 'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
               headers: {},
             },
           });

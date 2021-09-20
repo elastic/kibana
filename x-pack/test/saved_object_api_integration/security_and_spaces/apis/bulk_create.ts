@@ -100,11 +100,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const {
-    addTests,
-    createTestDefinitions,
-    expectSavedObjectForbidden,
-  } = bulkCreateTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
+    bulkCreateTestSuiteFactory(esArchiver, supertest);
   const createTests = (overwrite: boolean, spaceId: string, user: TestUser) => {
     const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(
       overwrite,

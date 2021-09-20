@@ -19,7 +19,8 @@ const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
 });
 
 export class AdvancedSettingsPlugin
-  implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
+  implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup>
+{
   public setup(
     core: CoreSetup,
     { management, home, usageCollection }: AdvancedSettingsPluginSetup

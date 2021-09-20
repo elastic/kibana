@@ -91,7 +91,7 @@ describe('register()', () => {
 
   test('throws if AlertType Id isnt a string', () => {
     const alertType: AlertType<never, never, never, never, never, 'default'> = {
-      id: (123 as unknown) as string,
+      id: 123 as unknown as string,
       name: 'Test',
       actionGroups: [
         {
@@ -125,10 +125,10 @@ describe('register()', () => {
          * The type system will ensure you can't use the `recovered` action group
          * but we also want to ensure this at runtime
          */
-        ({
+        {
           id: 'recovered',
           name: 'Recovered',
-        } as unknown) as ActionGroup<'NotReserved'>,
+        } as unknown as ActionGroup<'NotReserved'>,
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',

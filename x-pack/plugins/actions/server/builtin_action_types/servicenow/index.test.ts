@@ -70,13 +70,13 @@ describe('ServiceNow', () => {
 
       test('it pass the correct comment field key', async () => {
         const actionId = 'some-action-id';
-        const executorOptions = ({
+        const executorOptions = {
           actionId,
           config,
           secrets,
           params,
           services,
-        } as unknown) as ServiceNowActionTypeExecutorOptions;
+        } as unknown as ServiceNowActionTypeExecutorOptions;
         await actionType.executor(executorOptions);
         expect((api.pushToService as jest.Mock).mock.calls[0][0].commentFieldKey).toBe(
           'work_notes'
@@ -105,13 +105,13 @@ describe('ServiceNow', () => {
 
       test('it pass the correct comment field key', async () => {
         const actionId = 'some-action-id';
-        const executorOptions = ({
+        const executorOptions = {
           actionId,
           config,
           secrets,
           params,
           services,
-        } as unknown) as ServiceNowActionTypeExecutorOptions;
+        } as unknown as ServiceNowActionTypeExecutorOptions;
         await actionType.executor(executorOptions);
         expect((api.pushToService as jest.Mock).mock.calls[0][0].commentFieldKey).toBe(
           'work_notes'

@@ -289,17 +289,17 @@ describe('IndexPattern', () => {
 
   describe('toSpec', () => {
     test('should match snapshot', () => {
-      const formatter = ({
+      const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
-      } as unknown) as FieldFormat;
+      } as unknown as FieldFormat;
       indexPattern.getFormatterForField = () => formatter;
       expect(indexPattern.toSpec()).toMatchSnapshot();
     });
 
     test('can restore from spec', async () => {
-      const formatter = ({
+      const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
-      } as unknown) as FieldFormat;
+      } as unknown as FieldFormat;
       indexPattern.getFormatterForField = () => formatter;
       const spec = indexPattern.toSpec();
       const restoredPattern = new IndexPattern({

@@ -43,12 +43,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   const { addTests, createTestDefinitions } = exportTestSuiteFactory(esArchiver, supertest);
   const createTests = () => {
-    const {
-      exportableObjects,
-      exportableTypes,
-      nonExportableObjectsAndTypes,
-      allObjectsAndTypes,
-    } = createTestCases();
+    const { exportableObjects, exportableTypes, nonExportableObjectsAndTypes, allObjectsAndTypes } =
+      createTestCases();
     return {
       unauthorized: [
         createTestDefinitions(exportableObjects, { statusCode: 403, reason: 'unauthorized' }),

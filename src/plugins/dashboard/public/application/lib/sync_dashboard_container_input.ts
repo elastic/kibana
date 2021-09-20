@@ -44,12 +44,8 @@ type SyncDashboardContainerProps = SyncDashboardContainerCommon & ApplyContainer
 export const syncDashboardContainerInput = (
   syncDashboardContainerProps: SyncDashboardContainerProps
 ) => {
-  const {
-    history,
-    dashboardContainer,
-    $onDashboardStateChange,
-    $triggerDashboardRefresh,
-  } = syncDashboardContainerProps;
+  const { history, dashboardContainer, $onDashboardStateChange, $triggerDashboardRefresh } =
+    syncDashboardContainerProps;
   const subscriptions = new Subscription();
   subscriptions.add(
     dashboardContainer

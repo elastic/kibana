@@ -33,10 +33,11 @@ export const areValid = (flags: any) => {
   return true;
 };
 
-export const print = (log: ToolingLog) => (msg: string | null = null) => ({
-  xs,
-  count,
-}: ResolvedPayload) => log.write(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);
+export const print =
+  (log: ToolingLog) =>
+  (msg: string | null = null) =>
+  ({ xs, count }: ResolvedPayload) =>
+    log.write(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);
 
 export const expectedFlags = () => ({
   string: ['esUrl'],

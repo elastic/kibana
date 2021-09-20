@@ -22,7 +22,8 @@ export interface SnapshotRestoreLocatorDefinitionDependencies {
 }
 
 export class SnapshotRestoreLocatorDefinition
-  implements LocatorDefinition<SnapshotRestoreLocatorParams> {
+  implements LocatorDefinition<SnapshotRestoreLocatorParams>
+{
   constructor(protected readonly deps: SnapshotRestoreLocatorDefinitionDependencies) {}
 
   public readonly id = SNAPSHOT_RESTORE_LOCATOR_ID;

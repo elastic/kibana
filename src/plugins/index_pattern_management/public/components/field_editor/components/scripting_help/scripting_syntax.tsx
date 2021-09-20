@@ -14,8 +14,8 @@ import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../../types';
 
 export const ScriptingSyntax = () => {
-  const docLinksScriptedFields = useKibana<IndexPatternManagmentContext>().services.docLinks?.links
-    .scriptedFields;
+  const docLinksScriptedFields =
+    useKibana<IndexPatternManagmentContext>().services.docLinks?.links.scriptedFields;
   return (
     <Fragment>
       <EuiSpacer />

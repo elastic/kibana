@@ -38,23 +38,21 @@ jest.mock('../use_timeline_status', () => ({
 // mock for EuiSelectable's virtualization
 jest.mock(
   'react-virtualized-auto-sizer',
-  () => ({
-    children,
-  }: {
-    children: (dimensions: { width: number; height: number }) => ReactElement;
-  }) => children({ width: 100, height: 500 })
+  () =>
+    ({ children }: { children: (dimensions: { width: number; height: number }) => ReactElement }) =>
+      children({ width: 100, height: 500 })
 );
 
 describe('OpenTimelineModal', () => {
   const mockInstallPrepackagedTimelines = jest.fn();
   beforeEach(() => {
-    ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
+    (useGetAllTimeline as unknown as jest.Mock).mockReturnValue({
       fetchAllTimeline: jest.fn(),
       timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
       loading: false,
       totalCount: mockOpenTimelineQueryResults.totalCount,
     });
-    ((useTimelineStatus as unknown) as jest.Mock).mockReturnValue({
+    (useTimelineStatus as unknown as jest.Mock).mockReturnValue({
       timelineStatus: null,
       templateTimelineType: null,
       templateTimelineFilter: <div />,

@@ -288,15 +288,14 @@ export class ContextContainer implements IContextContainer {
 }
 
 /** Sorts context provider pairs by core pairs first. */
-const sortByCoreFirst = (
-  coreId: symbol
-): ((left: [any, { source: symbol }], right: [any, { source: symbol }]) => number) => (
-  [leftName, leftProvider],
-  [rightName, rightProvider]
-) => {
-  if (leftProvider.source === coreId) {
-    return rightProvider.source === coreId ? 0 : -1;
-  } else {
-    return rightProvider.source === coreId ? 1 : 0;
-  }
-};
+const sortByCoreFirst =
+  (
+    coreId: symbol
+  ): ((left: [any, { source: symbol }], right: [any, { source: symbol }]) => number) =>
+  ([leftName, leftProvider], [rightName, rightProvider]) => {
+    if (leftProvider.source === coreId) {
+      return rightProvider.source === coreId ? 0 : -1;
+    } else {
+      return rightProvider.source === coreId ? 1 : 0;
+    }
+  };

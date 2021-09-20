@@ -68,10 +68,8 @@ interface Props {
 }
 
 export const SupportedFieldsMessage: FC<Props> = ({ jobType }) => {
-  const [
-    sourceIndexContainsSupportedFields,
-    setSourceIndexContainsSupportedFields,
-  ] = useState<boolean>(true);
+  const [sourceIndexContainsSupportedFields, setSourceIndexContainsSupportedFields] =
+    useState<boolean>(true);
   const [sourceIndexFieldsCheckFailed, setSourceIndexFieldsCheckFailed] = useState<boolean>(false);
   const { fields } = newJobCapsServiceAnalytics;
 

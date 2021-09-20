@@ -20,22 +20,24 @@ const { optionsToSelectedValue } = multiSelectComponent;
  * of items selected.
  * @param total Minimum number of items
  */
-export const minSelectableSelectionField = ({
-  total = 0,
-  message,
-}: {
-  total: number;
-  message: string | ((err: Partial<ValidationError>) => string);
-}) => (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-  const [{ value }] = args;
+export const minSelectableSelectionField =
+  ({
+    total = 0,
+    message,
+  }: {
+    total: number;
+    message: string | ((err: Partial<ValidationError>) => string);
+  }) =>
+  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    const [{ value }] = args;
 
-  // We need to convert all the options from the multi selectable component, to the
-  // an actual Array of selection _before_ validating the Array length.
-  return hasMinLengthArray(total)(optionsToSelectedValue(value as EuiSelectableOption[]))
-    ? undefined
-    : {
-        code: 'ERR_MIN_SELECTION',
-        total,
-        message: typeof message === 'function' ? message({ length }) : message,
-      };
-};
+    // We need to convert all the options from the multi selectable component, to the
+    // an actual Array of selection _before_ validating the Array length.
+    return hasMinLengthArray(total)(optionsToSelectedValue(value as EuiSelectableOption[]))
+      ? undefined
+      : {
+          code: 'ERR_MIN_SELECTION',
+          total,
+          message: typeof message === 'function' ? message({ length }) : message,
+        };
+  };

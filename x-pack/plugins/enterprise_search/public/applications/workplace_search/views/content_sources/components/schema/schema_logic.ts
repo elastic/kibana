@@ -44,13 +44,10 @@ interface SchemaActions {
   onSchemaSetSuccess(schemaProps: SchemaResponseProps): SchemaResponseProps;
   onSchemaSetFormErrors(errors: string[]): string[];
   updateNewFieldType(newFieldType: SchemaType): SchemaType;
-  onFieldUpdate({
-    schema,
-    formUnchanged,
-  }: {
+  onFieldUpdate({ schema, formUnchanged }: { schema: Schema; formUnchanged: boolean }): {
     schema: Schema;
     formUnchanged: boolean;
-  }): { schema: Schema; formUnchanged: boolean };
+  };
   onIndexingComplete(numDocumentsWithErrors: number): number;
   resetMostRecentIndexJob(emptyReindexJob: IndexJob): IndexJob;
   setFieldName(rawFieldName: string): string;

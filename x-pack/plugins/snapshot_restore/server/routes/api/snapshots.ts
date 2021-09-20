@@ -40,11 +40,10 @@ export function registerSnapshotsRoutes({
       let repositories: string[] = [];
 
       try {
-        const {
-          body: repositoriesByName,
-        } = await clusterClient.asCurrentUser.snapshot.getRepository({
-          repository: '_all',
-        });
+        const { body: repositoriesByName } =
+          await clusterClient.asCurrentUser.snapshot.getRepository({
+            repository: '_all',
+          });
         repositories = Object.keys(repositoriesByName);
 
         if (repositories.length === 0) {

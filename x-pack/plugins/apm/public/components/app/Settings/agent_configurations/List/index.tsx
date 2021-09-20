@@ -28,7 +28,8 @@ import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
-type Config = APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
+type Config =
+  APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
 
 interface Props {
   status: FETCH_STATUS;

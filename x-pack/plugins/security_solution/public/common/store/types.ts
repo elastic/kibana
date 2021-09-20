@@ -148,8 +148,6 @@ export type CreateStructuredSelector = <
   SelectorMap extends { [key: string]: (...args: never[]) => unknown }
 >(
   selectorMap: SelectorMap
-) => (
-  state: SelectorMap[keyof SelectorMap] extends (state: infer S) => unknown ? S : never
-) => {
+) => (state: SelectorMap[keyof SelectorMap] extends (state: infer S) => unknown ? S : never) => {
   [Key in keyof SelectorMap]: ReturnType<SelectorMap[Key]>;
 };

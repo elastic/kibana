@@ -34,10 +34,9 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
 }) => {
   // TODO: remove fakeAngularRootScope and fakeAngularLocation when angular is removed
   const fakeAngularRootScope: Partial<ng.IRootScopeService> = {
-    $on: (
-      name: string,
-      listener: (event: ng.IAngularEvent, ...args: any[]) => any
-    ): (() => void) => () => {},
+    $on:
+      (name: string, listener: (event: ng.IAngularEvent, ...args: any[]) => any): (() => void) =>
+      () => {},
     $applyAsync: () => {},
   };
 

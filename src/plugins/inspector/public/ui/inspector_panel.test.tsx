@@ -18,12 +18,12 @@ import { applicationServiceMock } from '../../../../core/public/mocks';
 describe('InspectorPanel', () => {
   let adapters: Adapters;
   let views: InspectorViewDescription[];
-  const dependencies = ({
+  const dependencies = {
     application: applicationServiceMock.createStartContract(),
     http: {},
     share: {},
     uiSettings: {},
-  } as unknown) as {
+  } as unknown as {
     application: ApplicationStart;
     http: HttpSetup;
     share: SharePluginStart;

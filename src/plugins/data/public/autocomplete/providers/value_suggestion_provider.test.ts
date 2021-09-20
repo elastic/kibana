@@ -24,7 +24,7 @@ describe('FieldSuggestions', () => {
     http = { fetch: jest.fn().mockResolvedValue([]) };
 
     getValueSuggestions = setupValueSuggestionProvider({ http, uiSettings } as CoreSetup, {
-      timefilter: ({
+      timefilter: {
         timefilter: {
           createFilter: () => {
             return {
@@ -38,7 +38,7 @@ describe('FieldSuggestions', () => {
             };
           },
         },
-      } as unknown) as TimefilterSetup,
+      } as unknown as TimefilterSetup,
     });
   });
 

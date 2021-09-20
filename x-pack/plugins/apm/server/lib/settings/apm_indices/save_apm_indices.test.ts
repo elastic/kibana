@@ -10,9 +10,9 @@ import { SavedObjectsClientContract } from '../../../../../../../src/core/server
 
 describe('saveApmIndices', () => {
   it('should trim and strip empty settings', async () => {
-    const savedObjectsClient = ({
+    const savedObjectsClient = {
       create: jest.fn(),
-    } as unknown) as SavedObjectsClientContract;
+    } as unknown as SavedObjectsClientContract;
 
     const apmIndices = {
       settingA: 'aa',

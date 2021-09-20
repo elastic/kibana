@@ -380,9 +380,9 @@ export const formatRule = <T>(
   actionsData: ActionsStepRule,
   rule?: Rule | null
 ): T =>
-  (deepmerge.all([
+  deepmerge.all([
     formatDefineStepData(defineStepData),
     formatAboutStepData(aboutStepData, rule?.exceptions_list),
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
-  ]) as unknown) as T;
+  ]) as unknown as T;

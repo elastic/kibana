@@ -205,9 +205,7 @@ export class AnalyticsManager {
     }
   }
 
-  private getAnalyticsModelElements(
-    analyticsId: string
-  ): {
+  private getAnalyticsModelElements(analyticsId: string): {
     modelElement?: AnalyticsMapNodeElement;
     modelDetails?: any;
     edgeElement?: AnalyticsMapEdgeElement;
@@ -623,9 +621,8 @@ export class AnalyticsManager {
         rootIndexNodeId = `${rootIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
 
         // Fetch inference model for incoming job id and add node and edge
-        const { modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
-          analyticsId
-        );
+        const { modelElement, modelDetails, edgeElement } =
+          this.getAnalyticsModelElements(analyticsId);
         if (isAnalyticsMapNodeElement(modelElement)) {
           result.elements.push(modelElement);
           result.details[modelElement.data.id] = modelDetails;

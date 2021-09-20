@@ -294,7 +294,7 @@ describe.each([
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = ({ data: [{ random: 1 }] } as unknown) as PartialAlert;
+      const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialAlert;
       const output = transform(unsafeCast, undefined, isRuleRegistryEnabled);
       expect(output).toBeNull();
     });
@@ -419,7 +419,7 @@ describe.each([
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
+      const unsafeCast = { name: 'something else' } as unknown as PartialAlert;
       const output = transformOrBulkError(
         'rule-1',
         unsafeCast,
@@ -506,7 +506,7 @@ describe.each([
     });
 
     test('returns 1 error and success of false if the data is not of type siem alert', () => {
-      const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
+      const unsafeCast = { name: 'something else' } as unknown as PartialAlert;
       const output = transformOrImportError(
         'rule-1',
         unsafeCast,

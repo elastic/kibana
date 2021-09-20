@@ -41,12 +41,8 @@ export const persistFavoriteRoute = (
 
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const {
-          timelineId,
-          templateTimelineId,
-          templateTimelineVersion,
-          timelineType,
-        } = request.body;
+        const { timelineId, templateTimelineId, templateTimelineVersion, timelineType } =
+          request.body;
 
         const timeline = await persistFavorite(
           frameworkRequest,

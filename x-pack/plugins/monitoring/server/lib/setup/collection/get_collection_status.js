@@ -522,9 +522,8 @@ export const getCollectionStatus = async (
       productStatus.totalUniqueInternallyCollectedCount = Object.keys(
         internalCollectorsUuidsMap
       ).length;
-      productStatus.totalUniquePartiallyMigratedCount = Object.keys(
-        partiallyMigratedUuidsMap
-      ).length;
+      productStatus.totalUniquePartiallyMigratedCount =
+        Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
         ...productStatus.byUuid,
@@ -620,9 +619,8 @@ export const getCollectionStatus = async (
       productStatus.totalUniqueInternallyCollectedCount = Object.keys(
         internalCollectorsUuidsMap
       ).length;
-      productStatus.totalUniquePartiallyMigratedCount = Object.keys(
-        partiallyMigratedUuidsMap
-      ).length;
+      productStatus.totalUniquePartiallyMigratedCount =
+        Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
         ...productStatus.byUuid,

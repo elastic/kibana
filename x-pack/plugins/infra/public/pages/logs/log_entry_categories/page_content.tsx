@@ -40,9 +40,10 @@ export const LogEntryCategoriesPageContent = () => {
   const { fetchJobStatus, setupStatus, jobStatus } = useLogEntryCategoriesModuleContext();
 
   const { showModuleSetup } = useLogAnalysisSetupFlyoutStateContext();
-  const showCategoriesModuleSetup = useCallback(() => showModuleSetup('logs_ui_categories'), [
-    showModuleSetup,
-  ]);
+  const showCategoriesModuleSetup = useCallback(
+    () => showModuleSetup('logs_ui_categories'),
+    [showModuleSetup]
+  );
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {

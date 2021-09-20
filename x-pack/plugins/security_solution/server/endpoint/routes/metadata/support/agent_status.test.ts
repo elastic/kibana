@@ -49,7 +49,7 @@ describe('test filtering endpoint hosts by agent status', () => {
     mockAgentService.listAgents
       .mockImplementationOnce(() =>
         Promise.resolve({
-          agents: [({ id: 'id1' } as unknown) as Agent, ({ id: 'id2' } as unknown) as Agent],
+          agents: [{ id: 'id1' } as unknown as Agent, { id: 'id2' } as unknown as Agent],
           total: 2,
           page: 1,
           perPage: 2,
@@ -82,7 +82,7 @@ describe('test filtering endpoint hosts by agent status', () => {
     mockAgentService.listAgents
       .mockImplementationOnce(() =>
         Promise.resolve({
-          agents: [({ id: 'A' } as unknown) as Agent, ({ id: 'B' } as unknown) as Agent],
+          agents: [{ id: 'A' } as unknown as Agent, { id: 'B' } as unknown as Agent],
           total: 2,
           page: 1,
           perPage: 2,

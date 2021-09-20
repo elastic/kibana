@@ -47,7 +47,7 @@ const makeProperty = (
     options,
     VECTOR_STYLES.ICON_SIZE,
     field,
-    (new MockLayer(mockStyle) as unknown) as IVectorLayer,
+    new MockLayer(mockStyle) as unknown as IVectorLayer,
     () => {
       return (value: RawValue) => value + '_format';
     },
@@ -80,7 +80,7 @@ describe('syncSize', () => {
       { minSize: 8, maxSize: 32, fieldMetaOptions },
       new MockStyle({ min: 0, max: 100 })
     );
-    const mockMbMap = (new MockMbMap() as unknown) as MbMap;
+    const mockMbMap = new MockMbMap() as unknown as MbMap;
 
     sizeProp.syncCircleRadiusWithMb('foobar', mockMbMap);
 
@@ -116,7 +116,7 @@ describe('syncSize', () => {
       { minSize: 8, maxSize: 32, fieldMetaOptions },
       new MockStyle({ min: 100, max: 100 })
     );
-    const mockMbMap = (new MockMbMap() as unknown) as MbMap;
+    const mockMbMap = new MockMbMap() as unknown as MbMap;
 
     sizeProp.syncCircleRadiusWithMb('foobar', mockMbMap);
 

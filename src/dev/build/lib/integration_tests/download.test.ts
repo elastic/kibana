@@ -42,10 +42,12 @@ const log = new ToolingLog({
 type Handler = (req: IncomingMessage, res: ServerResponse) => void;
 
 const FOO_SHA256 = '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae';
-const createSendHandler = (send: any): Handler => (req, res) => {
-  res.statusCode = 200;
-  res.end(send);
-};
+const createSendHandler =
+  (send: any): Handler =>
+  (req, res) => {
+    res.statusCode = 200;
+    res.end(send);
+  };
 const sendErrorHandler: Handler = (req, res) => {
   res.statusCode = 500;
   res.end();

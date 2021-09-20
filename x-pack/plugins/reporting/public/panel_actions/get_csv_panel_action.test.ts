@@ -43,29 +43,29 @@ describe('GetCsvReportPanelAction', () => {
     jest.spyOn(apiClient, 'createImmediateReport');
 
     mockLicense$ = (state: LicenseResults = 'valid') => {
-      return (Rx.of({
+      return Rx.of({
         check: jest.fn().mockImplementation(() => ({ state })),
-      }) as unknown) as LicensingPluginSetup['license$'];
+      }) as unknown as LicensingPluginSetup['license$'];
     };
 
     mockStartServices$ = new Rx.Subject<[CoreStart, object, unknown]>();
     mockStartServicesPayload = [
-      ({
+      {
         application: { capabilities: { dashboard: { downloadCsv: true } } },
-      } as unknown) as CoreStart,
+      } as unknown as CoreStart,
       {},
       null,
     ];
 
-    mockSearchSource = ({
+    mockSearchSource = {
       createCopy: () => mockSearchSource,
       removeField: jest.fn(),
       setField: jest.fn(),
       getField: jest.fn(),
       getSerializedFields: jest.fn().mockImplementation(() => ({})),
-    } as unknown) as SearchSource;
+    } as unknown as SearchSource;
 
-    context = ({
+    context = {
       embeddable: {
         type: 'search',
         getSavedSearch: () => {
@@ -81,7 +81,7 @@ describe('GetCsvReportPanelAction', () => {
           },
         }),
       },
-    } as unknown) as ActionContext;
+    } as unknown as ActionContext;
   });
 
   it('translates empty embeddable context into job params', async () => {
@@ -108,18 +108,18 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   it('translates embeddable context into job params', async () => {
-    mockSearchSource = ({
+    mockSearchSource = {
       createCopy: () => mockSearchSource,
       removeField: jest.fn(),
       setField: jest.fn(),
       getField: jest.fn(),
       getSerializedFields: jest.fn().mockImplementation(() => ({ testData: 'testDataValue' })),
-    } as unknown) as SearchSource;
+    } as unknown as SearchSource;
     context.embeddable.getSavedSearch = () => {
-      return ({
+      return {
         searchSource: mockSearchSource,
         columns: ['column_a', 'column_b'],
-      } as unknown) as SavedSearch;
+      } as unknown as SavedSearch;
     };
 
     const panel = new ReportingCsvPanelAction({
@@ -237,7 +237,7 @@ describe('GetCsvReportPanelAction', () => {
       });
 
       mockStartServices$.next([
-        ({ application: { capabilities: {} } } as unknown) as CoreStart,
+        { application: { capabilities: {} } } as unknown as CoreStart,
         {},
         null,
       ]);

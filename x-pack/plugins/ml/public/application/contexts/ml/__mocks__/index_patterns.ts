@@ -7,7 +7,7 @@
 
 import { IndexPatternsContract } from '../../../../../../../../src/plugins/data/public';
 
-export const indexPatternsMock = (new (class {
+export const indexPatternsMock = new (class {
   fieldFormats = [];
   config = {};
   savedObjectsClient = {};
@@ -19,4 +19,4 @@ export const indexPatternsMock = (new (class {
   getIds = jest.fn();
   getTitles = jest.fn();
   make = jest.fn();
-})() as unknown) as IndexPatternsContract;
+})() as unknown as IndexPatternsContract;

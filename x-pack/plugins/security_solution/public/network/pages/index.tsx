@@ -24,9 +24,10 @@ const ipDetailsPageBasePath = `${NETWORK_PATH}/ip/:detailName`;
 const NetworkContainerComponent = () => {
   const capabilities = useMlCapabilities();
   const capabilitiesFetched = capabilities.capabilitiesFetched;
-  const userHasMlUserPermissions = useMemo(() => hasMlUserPermissions(capabilities), [
-    capabilities,
-  ]);
+  const userHasMlUserPermissions = useMemo(
+    () => hasMlUserPermissions(capabilities),
+    [capabilities]
+  );
   const networkRoutePath = useMemo(
     () => getNetworkRoutePath(capabilitiesFetched, userHasMlUserPermissions),
     [capabilitiesFetched, userHasMlUserPermissions]

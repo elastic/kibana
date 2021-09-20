@@ -23,11 +23,11 @@ export const createRuleTypeMocks = () => {
     /* eslint-enable @typescript-eslint/naming-convention */
   } as APMConfig);
 
-  const loggerMock = ({
+  const loggerMock = {
     debug: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown) as Logger;
+  } as unknown as Logger;
 
   const alerting = {
     registerType: ({ executor }) => {

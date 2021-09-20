@@ -657,8 +657,7 @@ describe('Jira service', () => {
           logger,
           method: 'get',
           configurationUtilities,
-          url:
-            'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta?projectKeys=CK&expand=projects.issuetypes.fields',
+          url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta?projectKeys=CK&expand=projects.issuetypes.fields',
         });
       });
 
@@ -824,8 +823,7 @@ describe('Jira service', () => {
           logger,
           method: 'get',
           configurationUtilities,
-          url:
-            'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta?projectKeys=CK&issuetypeIds=10006&expand=projects.issuetypes.fields',
+          url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta?projectKeys=CK&issuetypeIds=10006&expand=projects.issuetypes.fields',
         });
       });
 

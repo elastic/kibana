@@ -89,11 +89,8 @@ export const EventDetailsFooter = React.memo(
       refetch: expandedEvent?.refetch,
       timelineId,
     });
-    const {
-      closeAddEventFilterModal,
-      isAddEventFilterModalOpen,
-      onAddEventFilterClick,
-    } = useEventFilterModal();
+    const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
+      useEventFilterModal();
 
     const { alertsEcsData } = useFetchEcsAlertsData({
       alertIds: eventIds,

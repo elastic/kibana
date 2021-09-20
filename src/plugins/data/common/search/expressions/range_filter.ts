@@ -61,7 +61,7 @@ export const rangeFilterFunction: ExpressionFunctionRangeFilter = {
     return {
       type: 'kibana_filter',
       ...buildFilter(
-        ({} as any) as IndexPattern,
+        {} as any as IndexPattern,
         args.field.spec,
         FILTERS.RANGE,
         args.negate || false,

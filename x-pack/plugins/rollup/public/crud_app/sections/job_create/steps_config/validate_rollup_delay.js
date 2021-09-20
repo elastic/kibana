@@ -8,11 +8,8 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { search } from '../../../../../../../../src/plugins/data/public';
-const {
-  InvalidEsIntervalFormatError,
-  InvalidEsCalendarIntervalError,
-  parseEsInterval,
-} = search.aggs;
+const { InvalidEsIntervalFormatError, InvalidEsCalendarIntervalError, parseEsInterval } =
+  search.aggs;
 
 export function validateRollupDelay(rollupDelay) {
   // This field is optional, so if nothing has been provided we can skip validation.

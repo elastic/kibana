@@ -218,10 +218,10 @@ export const DiscoverGrid = ({
    */
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultPageSize });
   const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
-  const pageCount = useMemo(() => Math.ceil(rowCount / pagination.pageSize), [
-    rowCount,
-    pagination,
-  ]);
+  const pageCount = useMemo(
+    () => Math.ceil(rowCount / pagination.pageSize),
+    [rowCount, pagination]
+  );
   const isOnLastPage = pagination.pageIndex === pageCount - 1;
 
   const paginationObj = useMemo(() => {

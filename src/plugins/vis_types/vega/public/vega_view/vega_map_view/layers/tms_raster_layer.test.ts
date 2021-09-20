@@ -21,10 +21,10 @@ describe('vega_map_view/tms_raster_layer', () => {
 
   beforeEach(() => {
     id = 'foo_tms_layer_id';
-    map = ({
+    map = {
       addSource: jest.fn(),
       addLayer: jest.fn(),
-    } as unknown) as MapType;
+    } as unknown as MapType;
     context = {
       tiles: ['http://some.tile.com/map/{z}/{x}/{y}.jpg'],
       maxZoom: 10,

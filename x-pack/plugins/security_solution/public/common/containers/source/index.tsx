@@ -78,7 +78,7 @@ export const getBrowserFields = memoizeOne(
       if (accumulator[field.category].fields == null) {
         accumulator[field.category].fields = {};
       }
-      accumulator[field.category].fields[field.name] = (field as unknown) as BrowserField;
+      accumulator[field.category].fields[field.name] = field as unknown as BrowserField;
       return accumulator;
     }, {});
   },

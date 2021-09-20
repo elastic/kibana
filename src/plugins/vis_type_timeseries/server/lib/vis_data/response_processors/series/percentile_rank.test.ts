@@ -18,7 +18,7 @@ describe('percentile_rank(resp, panel, series, meta, extractFields)', () => {
     panel = {
       time_field: 'timestamp',
     } as Panel;
-    series = ({
+    series = {
       chart_type: 'line',
       stacked: 'stacked',
       line_width: 1,
@@ -36,7 +36,7 @@ describe('percentile_rank(resp, panel, series, meta, extractFields)', () => {
           colors: ['#000028', '#0000FF'],
         },
       ],
-    } as unknown) as Series;
+    } as unknown as Series;
     resp = {
       aggregations: {
         test: {

@@ -13,9 +13,8 @@ import type { PackagePolicy } from '../../../../common';
 export const migratePackagePolicyToV7120: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc
 ) => {
-  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = cloneDeep(
-    packagePolicyDoc
-  );
+  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> =
+    cloneDeep(packagePolicyDoc);
   if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
     const input = updatedPackagePolicyDoc.attributes.inputs[0];
     const ransomware = {

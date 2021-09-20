@@ -26,7 +26,7 @@ describe('PdfMaker', () => {
       pdf.addImage(imageBase64, { title: 'second viz', description: '❄️' }),
     ]).toEqual([undefined, undefined]);
 
-    const { _layout: testLayout, _title: testTitle } = (pdf as unknown) as {
+    const { _layout: testLayout, _title: testTitle } = pdf as unknown as {
       _layout: object;
       _title: string;
     };
@@ -56,7 +56,7 @@ describe('PdfMaker', () => {
     expect(pdf.setTitle('the finest PDF in the world')).toBe(undefined);
     expect(pdf.addImage(imageBase64, { title: 'cool times', description: '☃️' })).toBe(undefined);
 
-    const { _layout: testLayout, _title: testTitle } = (pdf as unknown) as {
+    const { _layout: testLayout, _title: testTitle } = pdf as unknown as {
       _layout: object;
       _title: string;
     };

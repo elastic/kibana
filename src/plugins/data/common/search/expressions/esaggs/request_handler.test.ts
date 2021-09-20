@@ -37,17 +37,17 @@ describe('esaggs expression function - public', () => {
     );
 
     mockParams = {
-      abortSignal: (jest.fn() as unknown) as jest.Mocked<AbortSignal>,
-      aggs: ({
+      abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
+      aggs: {
         aggs: [{ type: { name: 'terms', postFlightRequest: jest.fn().mockResolvedValue({}) } }],
         setTimeRange: jest.fn(),
         toDsl: jest.fn().mockReturnValue({ aggs: {} }),
         onSearchRequestStart: jest.fn(),
         setTimeFields: jest.fn(),
         setForceNow: jest.fn(),
-      } as unknown) as jest.Mocked<IAggConfigs>,
+      } as unknown as jest.Mocked<IAggConfigs>,
       filters: undefined,
-      indexPattern: ({ id: 'logstash-*' } as unknown) as jest.Mocked<IndexPattern>,
+      indexPattern: { id: 'logstash-*' } as unknown as jest.Mocked<IndexPattern>,
       inspectorAdapters: {},
       partialRows: false,
       query: undefined,

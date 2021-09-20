@@ -19,13 +19,13 @@ export class ManagementMenuService extends FtrService {
     const sections = [];
 
     for (const el of sectionsElements) {
-      const sectionId = await (await el.findByClassName('euiSideNavItemButton')).getAttribute(
-        'data-test-subj'
-      );
+      const sectionId = await (
+        await el.findByClassName('euiSideNavItemButton')
+      ).getAttribute('data-test-subj');
       const sectionLinks = await Promise.all(
-        (await el.findAllByCssSelector('.euiSideNavItem > a.euiSideNavItemButton')).map((item) =>
-          item.getAttribute('data-test-subj')
-        )
+        (
+          await el.findAllByCssSelector('.euiSideNavItem > a.euiSideNavItemButton')
+        ).map((item) => item.getAttribute('data-test-subj'))
       );
 
       sections.push({ sectionId, sectionLinks });

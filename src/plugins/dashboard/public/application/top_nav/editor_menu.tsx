@@ -39,13 +39,8 @@ interface FactoryGroup {
 }
 
 export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
-  const {
-    core,
-    embeddable,
-    visualizations,
-    usageCollection,
-    uiSettings,
-  } = useKibana<DashboardAppServices>().services;
+  const { core, embeddable, visualizations, usageCollection, uiSettings } =
+    useKibana<DashboardAppServices>().services;
 
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 

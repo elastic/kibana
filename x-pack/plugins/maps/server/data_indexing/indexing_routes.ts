@@ -192,11 +192,10 @@ export function initIndexingRoutes({
     async (context, request, response) => {
       const { index } = request.query;
       try {
-        const {
-          body: mappingsResp,
-        } = await context.core.elasticsearch.client.asCurrentUser.indices.getMapping({
-          index: request.query.index,
-        });
+        const { body: mappingsResp } =
+          await context.core.elasticsearch.client.asCurrentUser.indices.getMapping({
+            index: request.query.index,
+          });
         const isDrawingIndex =
           mappingsResp[index].mappings?._meta?.created_by === MAPS_NEW_VECTOR_LAYER_META_CREATED_BY;
         return response.ok({

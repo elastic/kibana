@@ -73,17 +73,18 @@ const ExceptionsViewerComponent = ({
   const { services } = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const onDispatchToaster = useCallback(
-    ({ title, color, iconType }) => (): void => {
-      dispatchToaster({
-        type: 'addToaster',
-        toast: {
-          id: uuid.v4(),
-          title,
-          color,
-          iconType,
-        },
-      });
-    },
+    ({ title, color, iconType }) =>
+      (): void => {
+        dispatchToaster({
+          type: 'addToaster',
+          toast: {
+            id: uuid.v4(),
+            title,
+            color,
+            iconType,
+          },
+        });
+      },
     [dispatchToaster]
   );
   const [

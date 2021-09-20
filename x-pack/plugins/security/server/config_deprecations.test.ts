@@ -20,7 +20,9 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
       deprecation,
       path: 'xpack.security',
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,

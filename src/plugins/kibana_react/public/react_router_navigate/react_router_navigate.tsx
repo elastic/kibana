@@ -32,28 +32,26 @@ export const reactRouterNavigate = (
   onClick: reactRouterOnClickHandler(history, toLocationObject(to), onClickCallback),
 });
 
-export const reactRouterOnClickHandler = (
-  history: ScopedHistory | History,
-  to: string | LocationObject,
-  onClickCallback?: Function
-) => (event: any) => {
-  if (onClickCallback) {
-    onClickCallback(event);
-  }
+export const reactRouterOnClickHandler =
+  (history: ScopedHistory | History, to: string | LocationObject, onClickCallback?: Function) =>
+  (event: any) => {
+    if (onClickCallback) {
+      onClickCallback(event);
+    }
 
-  if (event.defaultPrevented) {
-    return;
-  }
+    if (event.defaultPrevented) {
+      return;
+    }
 
-  if (event.target.getAttribute('target')) {
-    return;
-  }
+    if (event.target.getAttribute('target')) {
+      return;
+    }
 
-  if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
-    return;
-  }
+    if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
+      return;
+    }
 
-  // prevents page reload
-  event.preventDefault();
-  history.push(toLocationObject(to));
-};
+    // prevents page reload
+    event.preventDefault();
+    history.push(toLocationObject(to));
+  };

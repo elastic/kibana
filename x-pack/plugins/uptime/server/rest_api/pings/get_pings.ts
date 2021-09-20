@@ -28,17 +28,8 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
     }),
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
-    const {
-      from,
-      to,
-      index,
-      monitorId,
-      status,
-      sort,
-      size,
-      locations,
-      excludedLocations,
-    } = request.query;
+    const { from, to, index, monitorId, status, sort, size, locations, excludedLocations } =
+      request.query;
 
     return await libs.requests.getPings({
       uptimeEsClient,

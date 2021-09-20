@@ -124,11 +124,13 @@ export const epicPersistPinnedEvent = (
     )
   );
 
-export const createTimelinePinnedEventEpic = <State>(): Epic<Action, Action, State> => (action$) =>
-  action$.pipe(
-    filter((action) => timelinePinnedEventActionsType.includes(action.type)),
-    mergeMap((action) => {
-      dispatcherTimelinePersistQueue.next({ action });
-      return empty();
-    })
-  );
+export const createTimelinePinnedEventEpic =
+  <State>(): Epic<Action, Action, State> =>
+  (action$) =>
+    action$.pipe(
+      filter((action) => timelinePinnedEventActionsType.includes(action.type)),
+      mergeMap((action) => {
+        dispatcherTimelinePersistQueue.next({ action });
+        return empty();
+      })
+    );

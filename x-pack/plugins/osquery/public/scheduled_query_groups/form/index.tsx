@@ -280,9 +280,10 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
     };
   }, [agentPoliciesById, policyId]);
 
-  const handleNameChange = useCallback((newName: string) => setFieldValue('name', newName), [
-    setFieldValue,
-  ]);
+  const handleNameChange = useCallback(
+    (newName: string) => setFieldValue('name', newName),
+    [setFieldValue]
+  );
 
   const handleSaveClick = useCallback(() => {
     if (currentPolicy.agentCount) {

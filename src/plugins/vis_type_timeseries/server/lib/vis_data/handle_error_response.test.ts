@@ -10,9 +10,9 @@ import { Panel } from '../../../common/types';
 import { handleErrorResponse, ErrorResponse } from './handle_error_response';
 
 describe('handleErrorResponse', () => {
-  const handleError = handleErrorResponse(({
+  const handleError = handleErrorResponse({
     id: 'test_panel',
-  } as unknown) as Panel);
+  } as unknown as Panel);
 
   test('should only handle errors that contain errBody', () => {
     expect(handleError(new Error('Test Error'))).toMatchInlineSnapshot(`Object {}`);

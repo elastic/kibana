@@ -25,7 +25,7 @@ export function jobSavedObjectsInitializationFactory(
   security: SecurityPluginSetup | undefined,
   spacesEnabled: boolean
 ) {
-  const client = (core.elasticsearch.client as unknown) as IScopedClusterClient;
+  const client = core.elasticsearch.client as unknown as IScopedClusterClient;
 
   /**
    * Check whether ML saved objects exist.

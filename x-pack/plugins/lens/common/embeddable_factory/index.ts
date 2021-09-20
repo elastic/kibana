@@ -18,7 +18,7 @@ export const inject: EmbeddableRegistryDefinition['inject'] = (state, references
   const typedState = state as LensEmbeddablePersistableState;
 
   if ('attributes' in typedState && typedState.attributes !== undefined) {
-    typedState.attributes.references = (references as unknown) as Serializable[];
+    typedState.attributes.references = references as unknown as Serializable[];
   }
 
   return typedState;
@@ -29,7 +29,7 @@ export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
   const typedState = state as LensEmbeddablePersistableState;
 
   if ('attributes' in typedState && typedState.attributes !== undefined) {
-    references = (typedState.attributes.references as unknown) as SavedObjectReference[];
+    references = typedState.attributes.references as unknown as SavedObjectReference[];
   }
 
   return { state, references };

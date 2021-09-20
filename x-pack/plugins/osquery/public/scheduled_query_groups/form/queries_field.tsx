@@ -243,9 +243,10 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
     [handleNameChange, integrationPackageVersion, scheduledQueryGroupId, setValue]
   );
 
-  const tableData = useMemo(() => (field.value.length ? field.value[0].streams : []), [
-    field.value,
-  ]);
+  const tableData = useMemo(
+    () => (field.value.length ? field.value[0].streams : []),
+    [field.value]
+  );
 
   const uniqueQueryIds = useMemo<string[]>(
     () =>

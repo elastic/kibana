@@ -19,8 +19,8 @@ export function useApmRouter() {
     return core.http.basePath.prepend('/app/apm' + router.link(...args));
   };
 
-  return ({
+  return {
     ...router,
     link,
-  } as unknown) as ApmRouter;
+  } as unknown as ApmRouter;
 }

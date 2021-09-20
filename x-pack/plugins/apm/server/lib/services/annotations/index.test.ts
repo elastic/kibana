@@ -95,7 +95,7 @@ describe('getServiceAnnotations', () => {
           }),
         {
           mockResponse: () =>
-            (responses.shift() as unknown) as ESSearchResponse<
+            responses.shift() as unknown as ESSearchResponse<
               unknown,
               ESSearchRequest,
               {

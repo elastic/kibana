@@ -8,10 +8,10 @@
 
 import { getContextUrl } from './get_context_url';
 import { FilterManager } from '../../../../data/public/query/filter_manager';
-const filterManager = ({
+const filterManager = {
   getGlobalFilters: () => [],
   getAppFilters: () => [],
-} as unknown) as FilterManager;
+} as unknown as FilterManager;
 const addBasePath = (path: string) => `/base${path}`;
 
 describe('Get context url', () => {

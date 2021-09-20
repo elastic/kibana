@@ -30,7 +30,8 @@ export class SearchExamplesPlugin
       SearchExamplesPluginStart,
       AppPluginSetupDependencies,
       AppPluginStartDependencies
-    > {
+    >
+{
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     { developerExamples, share }: AppPluginSetupDependencies

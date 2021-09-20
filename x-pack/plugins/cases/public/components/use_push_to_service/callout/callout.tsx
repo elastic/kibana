@@ -31,11 +31,10 @@ const CallOutComponent = ({
   type,
   hasLicenseError,
 }: CallOutProps) => {
-  const handleCallOut = useCallback((e) => handleButtonClick(e, id, type), [
-    handleButtonClick,
-    id,
-    type,
-  ]);
+  const handleCallOut = useCallback(
+    (e) => handleButtonClick(e, id, type),
+    [handleButtonClick, id, type]
+  );
 
   const isCaseClosed = useMemo(
     () => messages.map((m) => m.id).includes(CLOSED_CASE_PUSH_ERROR_ID),

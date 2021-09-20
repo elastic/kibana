@@ -17,7 +17,7 @@ import type { RouteDefinitionParams } from './';
 
 export const routeDefinitionParamsMock = {
   create: (config: Record<string, unknown> = {}) =>
-    (({
+    ({
       router: httpServiceMock.createRouter(),
       basePath: httpServiceMock.createBasePath(),
       csp: httpServiceMock.createSetupContract().csp,
@@ -32,5 +32,5 @@ export const routeDefinitionParamsMock = {
       getFeatureUsageService: jest.fn(),
       getSession: jest.fn().mockReturnValue(sessionMock.create()),
       getAuthenticationService: jest.fn().mockReturnValue(authenticationServiceMock.createStart()),
-    } as unknown) as DeeplyMockedKeys<RouteDefinitionParams>),
+    } as unknown as DeeplyMockedKeys<RouteDefinitionParams>),
 };

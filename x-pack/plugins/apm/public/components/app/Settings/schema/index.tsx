@@ -19,7 +19,8 @@ import {
 } from '../../../../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-type FleetMigrationCheckResponse = APIReturnType<'GET /api/apm/fleet/migration_check'>;
+type FleetMigrationCheckResponse =
+  APIReturnType<'GET /api/apm/fleet/migration_check'>;
 
 const APM_DATA_STREAMS_MIGRATION_STATUS_LS = {
   value: '',
@@ -27,13 +28,11 @@ const APM_DATA_STREAMS_MIGRATION_STATUS_LS = {
 };
 
 export function Schema() {
-  const [
-    apmDataStreamsMigrationStatus,
-    setApmDataStreamsMigrationStatus,
-  ] = useLocalStorage(
-    'apm.dataStreamsMigrationStatus',
-    APM_DATA_STREAMS_MIGRATION_STATUS_LS
-  );
+  const [apmDataStreamsMigrationStatus, setApmDataStreamsMigrationStatus] =
+    useLocalStorage(
+      'apm.dataStreamsMigrationStatus',
+      APM_DATA_STREAMS_MIGRATION_STATUS_LS
+    );
 
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSwitchActive, setIsSwitchActive] = useState(false);

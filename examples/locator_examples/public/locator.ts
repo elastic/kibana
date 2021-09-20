@@ -50,6 +50,6 @@ export class HelloLocatorDefinition implements LocatorDefinition<HelloLocatorPar
   };
 
   public readonly migrations = {
-    '0.0.2': (migrateV1ToV2 as unknown) as MigrateFunction,
+    '0.0.2': migrateV1ToV2 as unknown as MigrateFunction,
   };
 }

@@ -32,11 +32,11 @@ function createPanel(series: string[]) {
   return {
     type: 'table',
     time_field: '',
-    series: (series.map((seriesId) => ({
+    series: series.map((seriesId) => ({
       id: seriesId,
       metrics: [{ id: seriesId, type: 'count' }],
       trend_arrows: 1,
-    })) as unknown) as Series[],
+    })) as unknown as Series[],
   } as Panel;
 }
 

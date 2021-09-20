@@ -32,7 +32,12 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
   euiCodeEditorProps,
   error: propsError,
 }: Props<T>) {
-  const { content, setContent, error: internalError, isControlled } = useJson<T>({
+  const {
+    content,
+    setContent,
+    error: internalError,
+    isControlled,
+  } = useJson<T>({
     defaultValue,
     onUpdate,
     value,

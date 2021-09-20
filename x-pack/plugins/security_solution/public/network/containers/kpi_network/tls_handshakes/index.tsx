@@ -60,25 +60,21 @@ export const useNetworkKpiTlsHandshakes = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    networkKpiTlsHandshakesRequest,
-    setNetworkKpiTlsHandshakesRequest,
-  ] = useState<NetworkKpiTlsHandshakesRequestOptions | null>(null);
+  const [networkKpiTlsHandshakesRequest, setNetworkKpiTlsHandshakesRequest] =
+    useState<NetworkKpiTlsHandshakesRequestOptions | null>(null);
   const { getTransformChangesIfTheyExist } = useTransforms();
 
-  const [
-    networkKpiTlsHandshakesResponse,
-    setNetworkKpiTlsHandshakesResponse,
-  ] = useState<NetworkKpiTlsHandshakesArgs>({
-    tlsHandshakes: 0,
-    id: ID,
-    inspect: {
-      dsl: [],
-      response: [],
-    },
-    isInspected: false,
-    refetch: refetch.current,
-  });
+  const [networkKpiTlsHandshakesResponse, setNetworkKpiTlsHandshakesResponse] =
+    useState<NetworkKpiTlsHandshakesArgs>({
+      tlsHandshakes: 0,
+      id: ID,
+      inspect: {
+        dsl: [],
+        response: [],
+      },
+      isInspected: false,
+      refetch: refetch.current,
+    });
   const { addError, addWarning } = useAppToasts();
 
   const networkKpiTlsHandshakesSearch = useCallback(

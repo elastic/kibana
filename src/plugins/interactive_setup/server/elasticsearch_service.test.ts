@@ -385,7 +385,8 @@ describe('ElasticsearchService', () => {
       it('iterates through all provided hosts until find an accessible one', async () => {
         mockElasticsearchPreboot.createClient.mockClear();
 
-        const mockHostOneEnrollScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockHostOneEnrollScopedClusterClient =
+          elasticsearchServiceMock.createScopedClusterClient();
         mockHostOneEnrollScopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
           new errors.ConnectionError(
             'some-message',
@@ -393,7 +394,8 @@ describe('ElasticsearchService', () => {
           )
         );
 
-        const mockHostTwoEnrollScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockHostTwoEnrollScopedClusterClient =
+          elasticsearchServiceMock.createScopedClusterClient();
         mockHostTwoEnrollScopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
           interactiveSetupMock.createApiResponse({
             statusCode: 200,
@@ -588,7 +590,7 @@ some weird+ca/with
           )
         );
 
-        tlsConnectMock.mockReturnValue(({
+        tlsConnectMock.mockReturnValue({
           once: jest.fn((event, fn) => {
             if (event === 'secureConnect') {
               fn();
@@ -596,7 +598,7 @@ some weird+ca/with
           }),
           getPeerCertificate: jest.fn().mockReturnValue({ raw: Buffer.from('cert') }),
           destroy: jest.fn(),
-        } as unknown) as tls.TLSSocket);
+        } as unknown as tls.TLSSocket);
 
         await expect(setupContract.ping('https://localhost:9200')).resolves.toEqual({
           authRequired: true,
@@ -621,13 +623,13 @@ some weird+ca/with
           )
         );
 
-        tlsConnectMock.mockReturnValue(({
+        tlsConnectMock.mockReturnValue({
           once: jest.fn((event, fn) => {
             if (event === 'error') {
               fn(new Error('some-message'));
             }
           }),
-        } as unknown) as tls.TLSSocket);
+        } as unknown as tls.TLSSocket);
 
         await expect(setupContract.ping('https://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[Error: some-message]`

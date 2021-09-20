@@ -200,16 +200,15 @@ interface Schema {
   validate: (input: any) => { value: any; error?: Error };
 }
 
-export const buildRouteValidation = <T>(schema: Schema): RouteValidationFunction<T> => (
-  payload: T,
-  { ok, badRequest }
-) => {
-  const { value, error } = schema.validate(payload);
-  if (error) {
-    return badRequest(error.message);
-  }
-  return ok(value);
-};
+export const buildRouteValidation =
+  <T>(schema: Schema): RouteValidationFunction<T> =>
+  (payload: T, { ok, badRequest }) => {
+    const { value, error } = schema.validate(payload);
+    if (error) {
+      return badRequest(error.message);
+    }
+    return ok(value);
+  };
 
 const statusToErrorMessage = (statusCode: number) => {
   switch (statusCode) {

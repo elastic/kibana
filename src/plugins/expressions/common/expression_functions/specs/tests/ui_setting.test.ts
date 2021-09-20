@@ -20,12 +20,12 @@ describe('uiSetting', () => {
     let uiSettings: jest.Mocked<IUiSettingsClient>;
 
     beforeEach(() => {
-      uiSettings = ({
+      uiSettings = {
         get: jest.fn(),
-      } as unknown) as jest.Mocked<IUiSettingsClient>;
-      getStartDependencies = (jest.fn(async () => ({
+      } as unknown as jest.Mocked<IUiSettingsClient>;
+      getStartDependencies = jest.fn(async () => ({
         uiSettings,
-      })) as unknown) as typeof getStartDependencies;
+      })) as unknown as typeof getStartDependencies;
 
       uiSetting = getUiSettingFn({ getStartDependencies });
     });

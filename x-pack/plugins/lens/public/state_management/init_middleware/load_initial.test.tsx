@@ -97,7 +97,7 @@ describe('init_middleware', () => {
     await act(async () => {
       await loadInitial(lensStore, storeDeps, {
         redirectCallback: jest.fn(),
-        initialInput: ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput,
+        initialInput: { savedObjectId: defaultSavedObjectId } as unknown as LensEmbeddableInput,
       });
     });
     expect(datasourceMap.testDatasource.initialize).toHaveBeenCalled();
@@ -169,7 +169,7 @@ describe('init_middleware', () => {
     await act(async () => {
       await loadInitial(lensStore, storeDeps, {
         redirectCallback: jest.fn(),
-        initialInput: ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput,
+        initialInput: { savedObjectId: defaultSavedObjectId } as unknown as LensEmbeddableInput,
       });
     });
     expect(datasourceMap.testDatasource.initialize).toHaveBeenCalled();
@@ -264,9 +264,9 @@ describe('init_middleware', () => {
       await act(async () => {
         await loadInitial(lensStore, storeDeps, {
           redirectCallback: jest.fn(),
-          initialInput: ({
+          initialInput: {
             savedObjectId: defaultSavedObjectId,
-          } as unknown) as LensEmbeddableInput,
+          } as unknown as LensEmbeddableInput,
           emptyState,
         });
       });
@@ -297,18 +297,18 @@ describe('init_middleware', () => {
       await act(async () => {
         await loadInitial(lensStore, storeDeps, {
           redirectCallback: jest.fn(),
-          initialInput: ({
+          initialInput: {
             savedObjectId: defaultSavedObjectId,
-          } as unknown) as LensEmbeddableInput,
+          } as unknown as LensEmbeddableInput,
         });
       });
 
       await act(async () => {
         await loadInitial(lensStore, storeDeps, {
           redirectCallback: jest.fn(),
-          initialInput: ({
+          initialInput: {
             savedObjectId: defaultSavedObjectId,
-          } as unknown) as LensEmbeddableInput,
+          } as unknown as LensEmbeddableInput,
         });
       });
 
@@ -317,7 +317,7 @@ describe('init_middleware', () => {
       await act(async () => {
         await loadInitial(lensStore, storeDeps, {
           redirectCallback: jest.fn(),
-          initialInput: ({ savedObjectId: '5678' } as unknown) as LensEmbeddableInput,
+          initialInput: { savedObjectId: '5678' } as unknown as LensEmbeddableInput,
         });
       });
 
@@ -338,9 +338,9 @@ describe('init_middleware', () => {
       await act(async () => {
         await loadInitial(lensStore, storeDeps, {
           redirectCallback,
-          initialInput: ({
+          initialInput: {
             savedObjectId: defaultSavedObjectId,
-          } as unknown) as LensEmbeddableInput,
+          } as unknown as LensEmbeddableInput,
         });
       });
       expect(lensServices.attributeService.unwrapAttributes).toHaveBeenCalledWith({
@@ -366,9 +366,9 @@ describe('init_middleware', () => {
       await act(async () => {
         await loadInitial(lensStore, storeDeps, {
           redirectCallback: jest.fn(),
-          initialInput: ({
+          initialInput: {
             savedObjectId: defaultSavedObjectId,
-          } as unknown) as LensEmbeddableInput,
+          } as unknown as LensEmbeddableInput,
           history: {
             location: {
               search: '?search',
@@ -394,9 +394,9 @@ describe('init_middleware', () => {
       await act(async () => {
         await loadInitial(lensStore, storeDeps, {
           redirectCallback: jest.fn(),
-          initialInput: ({
+          initialInput: {
             savedObjectId: defaultSavedObjectId,
-          } as unknown) as LensEmbeddableInput,
+          } as unknown as LensEmbeddableInput,
         });
       });
 

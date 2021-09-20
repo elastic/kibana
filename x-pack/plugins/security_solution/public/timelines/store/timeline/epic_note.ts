@@ -120,14 +120,16 @@ export const epicPersistNote = (
     )
   );
 
-export const createTimelineNoteEpic = <State>(): Epic<Action, Action, State> => (action$) =>
-  action$.pipe(
-    filter((action) => timelineNoteActionsType.includes(action.type)),
-    switchMap((action) => {
-      dispatcherTimelinePersistQueue.next({ action });
-      return empty();
-    })
-  );
+export const createTimelineNoteEpic =
+  <State>(): Epic<Action, Action, State> =>
+  (action$) =>
+    action$.pipe(
+      filter((action) => timelineNoteActionsType.includes(action.type)),
+      switchMap((action) => {
+        dispatcherTimelinePersistQueue.next({ action });
+        return empty();
+      })
+    );
 
 const getNote = (noteId: string | undefined | null, notes: NotesById): string => {
   if (noteId != null) {

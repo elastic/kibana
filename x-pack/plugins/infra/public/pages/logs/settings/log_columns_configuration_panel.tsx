@@ -141,10 +141,10 @@ const LogColumnConfigurationPanel: React.FunctionComponent<{
   dragHandleProps: DragHandleProps;
   onRemove: (logColumnConfiguration: LogColumnConfiguration) => void;
 }> = ({ logColumnConfiguration, dragHandleProps, onRemove }) => {
-  const removeColumn = useCallback(() => onRemove(logColumnConfiguration), [
-    logColumnConfiguration,
-    onRemove,
-  ]);
+  const removeColumn = useCallback(
+    () => onRemove(logColumnConfiguration),
+    [logColumnConfiguration, onRemove]
+  );
 
   return (
     <>

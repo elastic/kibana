@@ -46,7 +46,11 @@ interface Props {
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) => {
-  const { isLoading, error, data: privilegesData } = useRequest({
+  const {
+    isLoading,
+    error,
+    data: privilegesData,
+  } = useRequest({
     path: privilegesEndpoint,
     method: 'get',
   });

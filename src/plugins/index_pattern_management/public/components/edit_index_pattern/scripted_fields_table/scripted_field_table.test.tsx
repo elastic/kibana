@@ -168,10 +168,10 @@ describe('ScriptedFieldsTable', () => {
     const component = shallow<ScriptedFieldsTable>(
       <ScriptedFieldsTable
         indexPattern={
-          ({
+          {
             ...indexPattern,
             removeScriptedField,
-          } as unknown) as IndexPattern
+          } as unknown as IndexPattern
         }
         helpers={helpers}
         painlessDocLink={'painlessDoc'}

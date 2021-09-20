@@ -119,9 +119,10 @@ export const Expressions: React.FC<Props> = (props) => {
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit>('m');
 
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
-    createDerivedIndexPattern,
-  ]);
+  const derivedIndexPattern = useMemo(
+    () => createDerivedIndexPattern(),
+    [createDerivedIndexPattern]
+  );
 
   const updateParams = useCallback(
     (id, e: InventoryMetricConditions) => {
@@ -436,16 +437,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const [isExpanded, setRowState] = useState(true);
   const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
 
-  const {
-    children,
-    setAlertParams,
-    expression,
-    errors,
-    expressionId,
-    remove,
-    canDelete,
-    fields,
-  } = props;
+  const { children, setAlertParams, expression, errors, expressionId, remove, canDelete, fields } =
+    props;
   const {
     metric,
     comparator = Comparator.GT,

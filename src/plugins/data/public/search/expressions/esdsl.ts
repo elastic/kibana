@@ -34,7 +34,7 @@ export function getEsdsl({
     getStartDependencies: async () => {
       const [core, , { search }] = await getStartServices();
       return {
-        uiSettingsClient: (core.uiSettings as any) as UiSettingsCommon,
+        uiSettingsClient: core.uiSettings as any as UiSettingsCommon,
         search: search.search,
       };
     },

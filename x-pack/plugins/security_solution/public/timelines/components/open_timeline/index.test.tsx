@@ -95,14 +95,14 @@ describe('StatefulOpenTimeline', () => {
     });
     mockHistory = [];
     (useHistory as jest.Mock).mockReturnValue(mockHistory);
-    ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
+    (useGetAllTimeline as unknown as jest.Mock).mockReturnValue({
       fetchAllTimeline: jest.fn(),
       timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
       loading: false,
       totalCount: mockOpenTimelineQueryResults.totalCount,
       refetch: jest.fn(),
     });
-    ((useTimelineStatus as unknown) as jest.Mock).mockReturnValue({
+    (useTimelineStatus as unknown as jest.Mock).mockReturnValue({
       timelineStatus: null,
       templateTimelineType: null,
       templateTimelineFilter: <div />,

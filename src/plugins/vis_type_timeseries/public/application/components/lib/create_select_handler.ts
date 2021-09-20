@@ -10,9 +10,10 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 export type HandleChange = (partialModel: Record<string, any>) => void;
 
-export const createSelectHandler = (handleChange: HandleChange) => (name: string) => (
-  selected: EuiComboBoxOptionOption[] = []
-) =>
-  handleChange?.({
-    [name]: selected[0]?.value ?? null,
-  });
+export const createSelectHandler =
+  (handleChange: HandleChange) =>
+  (name: string) =>
+  (selected: EuiComboBoxOptionOption[] = []) =>
+    handleChange?.({
+      [name]: selected[0]?.value ?? null,
+    });

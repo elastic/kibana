@@ -25,7 +25,7 @@ class MockSearchStrategy extends AbstractSearchStrategy {
 }
 
 describe('SearchStrategyRegister', () => {
-  const requestContext = ({
+  const requestContext = {
     core: {
       uiSettings: {
         client: {
@@ -33,7 +33,7 @@ describe('SearchStrategyRegister', () => {
         },
       },
     },
-  } as unknown) as VisTypeTimeseriesRequestHandlerContext;
+  } as unknown as VisTypeTimeseriesRequestHandlerContext;
   let registry: SearchStrategyRegistry;
 
   beforeAll(() => {

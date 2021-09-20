@@ -11,7 +11,7 @@ import { HostMetadata } from '../../../../../common/endpoint/types';
 export function createV2SearchResponse(
   hostMetadata?: HostMetadata
 ): estypes.SearchResponse<HostMetadata> {
-  return ({
+  return {
     took: 15,
     timed_out: false,
     _shards: {
@@ -40,5 +40,5 @@ export function createV2SearchResponse(
           ]
         : [],
     },
-  } as unknown) as estypes.SearchResponse<HostMetadata>;
+  } as unknown as estypes.SearchResponse<HostMetadata>;
 }

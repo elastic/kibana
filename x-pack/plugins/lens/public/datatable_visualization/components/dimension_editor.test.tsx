@@ -206,10 +206,12 @@ describe('data table dimension editor', () => {
     const instance = mountWithIntl(<TableDimensionEditor {...props} />);
 
     act(() =>
-      (instance
-        .find('[data-test-subj="lnsDatatable_dynamicColoring_trigger"]')
-        .first()
-        .prop('onClick') as () => void)?.()
+      (
+        instance
+          .find('[data-test-subj="lnsDatatable_dynamicColoring_trigger"]')
+          .first()
+          .prop('onClick') as () => void
+      )?.()
     );
 
     expect(instance.find(PalettePanelContainer).exists()).toBe(true);

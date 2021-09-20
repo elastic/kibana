@@ -358,9 +358,9 @@ export class AggConfigs {
   }
 
   getTimeShiftInterval(): moment.Duration | undefined {
-    const splitAgg = (this.getAll().filter(
-      (agg) => agg.type.type === AggGroupNames.Buckets
-    ) as IBucketAggConfig[]).find((agg) => agg.type.splitForTimeShift(agg, this));
+    const splitAgg = (
+      this.getAll().filter((agg) => agg.type.type === AggGroupNames.Buckets) as IBucketAggConfig[]
+    ).find((agg) => agg.type.splitForTimeShift(agg, this));
     return splitAgg?.type.getTimeShiftInterval(splitAgg);
   }
 

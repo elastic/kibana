@@ -16,11 +16,8 @@ import { API_BASE_PATH } from './constants';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const {
-    createComponentTemplate,
-    cleanUpComponentTemplates,
-    deleteComponentTemplate,
-  } = initElasticsearchHelpers(getService);
+  const { createComponentTemplate, cleanUpComponentTemplates, deleteComponentTemplate } =
+    initElasticsearchHelpers(getService);
 
   describe('Component templates', function () {
     after(async () => {
@@ -317,12 +314,9 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         // Create several component templates that can be used to test deletion
         await Promise.all(
-          [
-            componentTemplateA,
-            componentTemplateB,
-            componentTemplateC,
-            componentTemplateD,
-          ].map((template) => createComponentTemplate(template, false))
+          [componentTemplateA, componentTemplateB, componentTemplateC, componentTemplateD].map(
+            (template) => createComponentTemplate(template, false)
+          )
         ).catch((err) => {
           // eslint-disable-next-line no-console
           console.log(`[Setup error] Error creating component templates: ${err.message}`);

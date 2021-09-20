@@ -101,9 +101,11 @@ const fillForm = (wrapper: ReactWrapper) => {
     .simulate('change', { target: { value: sampleData.description } });
 
   act(() => {
-    ((wrapper.find(EuiComboBox).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange(sampleTags.map((tag) => ({ label: tag })));
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange(sampleTags.map((tag) => ({ label: tag })));
   });
 };
 
@@ -416,9 +418,11 @@ describe('Create case', () => {
       });
 
       act(() => {
-        ((wrapper.find(EuiComboBox).at(1).props() as unknown) as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }).onChange([{ value: '19', label: 'Denial of Service' }]);
+        (
+          wrapper.find(EuiComboBox).at(1).props() as unknown as {
+            onChange: (a: EuiComboBoxOptionOption[]) => void;
+          }
+        ).onChange([{ value: '19', label: 'Denial of Service' }]);
       });
 
       wrapper

@@ -31,14 +31,14 @@ const KibanaReactContext = createKibanaReactContext({
       get: () => `/basepath`,
     },
   } as HttpStart,
-  docLinks: ({
+  docLinks: {
     DOC_LINK_VERSION: '0',
     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
     links: {
       apm: {},
       observability: { guide: '' },
     },
-  } as unknown) as DocLinksStart,
+  } as unknown as DocLinksStart,
 } as Partial<CoreStart>);
 
 function Wrapper({ children }: { children?: ReactNode }) {
@@ -53,9 +53,9 @@ function Wrapper({ children }: { children?: ReactNode }) {
 
 describe('Settings', () => {
   it('renders', async () => {
-    const routerProps = ({
+    const routerProps = {
       location,
-    } as unknown) as RouteComponentProps<{}>;
+    } as unknown as RouteComponentProps<{}>;
     expect(() =>
       render(
         <SettingsTemplate selectedTab="agent-configurations" {...routerProps}>

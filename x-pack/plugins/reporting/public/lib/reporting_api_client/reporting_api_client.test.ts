@@ -202,8 +202,7 @@ describe('ReportingAPIClient', () => {
       expect(httpClient.post).toHaveBeenCalledWith(
         expect.stringContaining('/pdf'),
         expect.objectContaining({
-          body:
-            '{"jobParams":"(browserTimezone:UTC,objectType:something,title:\'some title\',version:\'some version\')"}',
+          body: '{"jobParams":"(browserTimezone:UTC,objectType:something,title:\'some title\',version:\'some version\')"}',
         })
       );
     });

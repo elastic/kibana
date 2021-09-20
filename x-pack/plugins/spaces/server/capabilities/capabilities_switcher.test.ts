@@ -15,7 +15,7 @@ import type { PluginsStart } from '../plugin';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 
-const features = ([
+const features = [
   {
     id: 'feature_1',
     name: 'Feature 1',
@@ -79,7 +79,7 @@ const features = ([
       },
     },
   },
-] as unknown) as KibanaFeature[];
+] as unknown as KibanaFeature[];
 
 const buildCapabilities = () =>
   Object.freeze({
@@ -134,7 +134,7 @@ const setup = (space: Space) => {
   const logger = loggingSystemMock.createLogger();
 
   const switcher = setupCapabilitiesSwitcher(
-    (coreSetup as unknown) as CoreSetup<PluginsStart>,
+    coreSetup as unknown as CoreSetup<PluginsStart>,
     () => spacesService,
     logger
   );

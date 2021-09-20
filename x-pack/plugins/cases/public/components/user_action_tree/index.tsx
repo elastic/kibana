@@ -150,7 +150,11 @@ export const UserActionTree = React.memo(
     useFetchAlertData,
     userCanCrud,
   }: UserActionTreeProps) => {
-    const { detailName: caseId, commentId, subCaseId } = useParams<{
+    const {
+      detailName: caseId,
+      commentId,
+      subCaseId,
+    } = useParams<{
       detailName: string;
       commentId?: string;
       subCaseId?: string;
@@ -162,12 +166,8 @@ export const UserActionTree = React.memo(
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
     const commentRefs = useRef<Record<string, any>>({});
-    const {
-      clearDraftComment,
-      draftComment,
-      hasIncomingLensState,
-      openLensModal,
-    } = useLensDraftComment();
+    const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
+      useLensDraftComment();
 
     const [loadingAlertData, manualAlertsData] = useFetchAlertData(
       getManualAlertIdsWithNoRuleId(caseData.comments)

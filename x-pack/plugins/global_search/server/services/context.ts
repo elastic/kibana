@@ -14,20 +14,20 @@ export type GlobalSearchContextFactory = (request: KibanaRequest) => GlobalSearc
 /**
  * {@link GlobalSearchProviderContext | context} factory
  */
-export const getContextFactory = (coreStart: CoreStart) => (
-  request: KibanaRequest
-): GlobalSearchProviderContext => {
-  const soClient = coreStart.savedObjects.getScopedClient(request);
-  return {
-    core: {
-      savedObjects: {
-        client: soClient,
-        typeRegistry: coreStart.savedObjects.getTypeRegistry(),
+export const getContextFactory =
+  (coreStart: CoreStart) =>
+  (request: KibanaRequest): GlobalSearchProviderContext => {
+    const soClient = coreStart.savedObjects.getScopedClient(request);
+    return {
+      core: {
+        savedObjects: {
+          client: soClient,
+          typeRegistry: coreStart.savedObjects.getTypeRegistry(),
+        },
+        uiSettings: {
+          client: coreStart.uiSettings.asScopedToClient(soClient),
+        },
+        capabilities: from(coreStart.capabilities.resolveCapabilities(request)),
       },
-      uiSettings: {
-        client: coreStart.uiSettings.asScopedToClient(soClient),
-      },
-      capabilities: from(coreStart.capabilities.resolveCapabilities(request)),
-    },
+    };
   };
-};

@@ -15,7 +15,7 @@ import { LogstashStatsByClusterUuid } from './get_logstash_stats';
 describe('get_all_stats', () => {
   const timestamp = Date.now();
   const searchMock = sinon.stub();
-  const callCluster = ({ search: searchMock } as unknown) as ElasticsearchClient;
+  const callCluster = { search: searchMock } as unknown as ElasticsearchClient;
   afterEach(() => {
     searchMock.reset();
   });
@@ -194,8 +194,8 @@ describe('get_all_stats', () => {
   describe('handleAllStats', () => {
     it('handles response', () => {
       const clusters = handleAllStats(esClusters as ESClusterStats[], {
-        kibana: (kibanaStats as unknown) as KibanaStats,
-        logstash: (logstashStats as unknown) as LogstashStatsByClusterUuid,
+        kibana: kibanaStats as unknown as KibanaStats,
+        logstash: logstashStats as unknown as LogstashStatsByClusterUuid,
         beats: {},
       });
 

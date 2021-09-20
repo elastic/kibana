@@ -29,7 +29,8 @@ import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
 import * as urlHelpers from '../../../shared/Links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 
-const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED = ALERT_RULE_TYPE_ID_NON_TYPED;
+const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
+  ALERT_RULE_TYPE_ID_NON_TYPED;
 
 interface Props {
   height?: number;
@@ -55,20 +56,14 @@ export function LatencyChart({ height, kuery, environment }: Props) {
   const { latencyAggregationType, comparisonEnabled } = urlParams;
   const license = useLicenseContext();
 
-  const {
-    latencyChartsData,
-    latencyChartsStatus,
-  } = useTransactionLatencyChartsFetcher({
-    kuery,
-    environment,
-  });
+  const { latencyChartsData, latencyChartsStatus } =
+    useTransactionLatencyChartsFetcher({
+      kuery,
+      environment,
+    });
 
-  const {
-    currentPeriod,
-    previousPeriod,
-    anomalyTimeseries,
-    mlJobId,
-  } = latencyChartsData;
+  const { currentPeriod, previousPeriod, anomalyTimeseries, mlJobId } =
+    latencyChartsData;
 
   const { alerts } = useApmServiceContext();
 

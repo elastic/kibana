@@ -84,13 +84,8 @@ const APPEND_FEATURE_IS_DISABLED = (
 );
 
 export const SelectableSpacesControl = (props: Props) => {
-  const {
-    spaces,
-    shareOptions,
-    onChange,
-    enableCreateNewSpaceLink,
-    enableSpaceAgnosticBehavior,
-  } = props;
+  const { spaces, shareOptions, onChange, enableCreateNewSpaceLink, enableSpaceAgnosticBehavior } =
+    props;
   const { services } = useSpaces();
   const { application, docLinks } = services;
   const { selectedSpaceIds, initiallySelectedSpaceIds } = shareOptions;

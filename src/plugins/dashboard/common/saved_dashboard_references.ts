@@ -26,9 +26,7 @@ const isPre730Panel = (panel: Record<string, string>): boolean => {
   return 'version' in panel ? Semver.gt('7.3.0', panel.version) : true;
 };
 
-function dashboardAttributesToState(
-  attributes: SavedObjectAttributes
-): {
+function dashboardAttributesToState(attributes: SavedObjectAttributes): {
   state: DashboardContainerStateWithType;
   panels: SavedDashboardPanel[];
 } {
@@ -85,7 +83,7 @@ export function extractReferences(
     return { attributes, references };
   }
 
-  if (((panels as unknown) as Array<Record<string, string>>).some(isPre730Panel)) {
+  if ((panels as unknown as Array<Record<string, string>>).some(isPre730Panel)) {
     return pre730ExtractReferences({ attributes, references }, deps);
   }
 
@@ -94,10 +92,8 @@ export function extractReferences(
     throw new Error(`"type" attribute is missing from panel "${missingTypeIndex}"`);
   }
 
-  const {
-    state: extractedState,
-    references: extractedReferences,
-  } = deps.embeddablePersistableStateService.extract(state);
+  const { state: extractedState, references: extractedReferences } =
+    deps.embeddablePersistableStateService.extract(state);
 
   const extractedPanels = panelStatesToPanels(
     (extractedState as DashboardContainerStateWithType).panels,

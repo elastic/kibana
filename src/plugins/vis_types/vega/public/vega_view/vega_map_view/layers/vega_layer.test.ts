@@ -22,7 +22,7 @@ describe('vega_map_view/tms_raster_layer', () => {
 
   beforeEach(() => {
     id = 'foo_vega_layer_id';
-    map = ({
+    map = {
       getCanvasContainer: () => document.createElement('div'),
       getCanvas: () => ({
         style: {
@@ -31,11 +31,11 @@ describe('vega_map_view/tms_raster_layer', () => {
         },
       }),
       addLayer: jest.fn(),
-    } as unknown) as MapType;
+    } as unknown as MapType;
     context = {
-      vegaView: ({
+      vegaView: {
         initialize: jest.fn(),
-      } as unknown) as View,
+      } as unknown as View,
       vegaControls: 'element',
       updateVegaView: jest.fn(),
     };

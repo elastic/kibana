@@ -18,11 +18,11 @@ import { PanelConfigProps } from './types';
 
 describe('GaugePanelConfig', () => {
   it('call switch tab onChange={handleChange}', () => {
-    const props = ({
+    const props = {
       fields: {},
       model: {},
       onChange: jest.fn(),
-    } as unknown) as PanelConfigProps;
+    } as unknown as PanelConfigProps;
     const wrapper = shallow(<GaugePanelConfig {...props} />);
 
     wrapper.find('EuiTab').first().simulate('onClick');
@@ -30,11 +30,11 @@ describe('GaugePanelConfig', () => {
   });
 
   it('call onChange={handleChange}', () => {
-    const props = ({
+    const props = {
       fields: {},
       model: {},
       onChange: jest.fn(),
-    } as unknown) as PanelConfigProps;
+    } as unknown as PanelConfigProps;
     const wrapper = shallow(<GaugePanelConfig {...props} />);
 
     wrapper.simulate('onClick');

@@ -18,7 +18,7 @@ describe('get_time', () => {
       const clock = sinon.useFakeTimers(moment.utc([2000, 1, 1, 0, 0, 0, 0]).valueOf());
 
       const filter = getTime(
-        ({
+        {
           id: 'test',
           title: 'test',
           timeFieldName: 'date',
@@ -32,7 +32,7 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as unknown) as IIndexPattern,
+        } as unknown as IIndexPattern,
         { from: 'now-60y', to: 'now' }
       ) as RangeFilter;
       expect(filter.range.date).toEqual({
@@ -47,7 +47,7 @@ describe('get_time', () => {
       const clock = sinon.useFakeTimers(moment.utc([2000, 1, 1, 0, 0, 0, 0]).valueOf());
 
       const filter = getTime(
-        ({
+        {
           id: 'test',
           title: 'test',
           timeFieldName: 'date',
@@ -69,7 +69,7 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as unknown) as IIndexPattern,
+        } as unknown as IIndexPattern,
         { from: 'now-60y', to: 'now' },
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
@@ -84,7 +84,7 @@ describe('get_time', () => {
   describe('getRelativeTime', () => {
     test('do not coerce relative time to absolute time when given flag', () => {
       const filter = getRelativeTime(
-        ({
+        {
           id: 'test',
           title: 'test',
           timeFieldName: 'date',
@@ -106,7 +106,7 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as unknown) as IIndexPattern,
+        } as unknown as IIndexPattern,
         { from: 'now-60y', to: 'now' },
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
@@ -120,7 +120,7 @@ describe('get_time', () => {
     test('do not coerce relative time to absolute time when given flag - with mixed from and to times', () => {
       const clock = sinon.useFakeTimers(moment.utc().valueOf());
       const filter = getRelativeTime(
-        ({
+        {
           id: 'test',
           title: 'test',
           timeFieldName: 'date',
@@ -142,7 +142,7 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as unknown) as IIndexPattern,
+        } as unknown as IIndexPattern,
         {
           from: '2020-09-01T08:30:00.000Z',
           to: 'now',

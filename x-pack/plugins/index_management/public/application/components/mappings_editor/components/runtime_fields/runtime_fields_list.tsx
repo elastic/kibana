@@ -34,10 +34,8 @@ export const RuntimeFieldsList = () => {
 
   const dispatch = useDispatch();
 
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const {
     value: { docLinks },

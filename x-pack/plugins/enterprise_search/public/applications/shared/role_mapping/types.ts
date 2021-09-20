@@ -33,9 +33,9 @@ export interface RoleMappingsBaseActions {
   initializeSingleUserRoleMapping(roleMappingId?: string): { roleMappingId?: string };
   initializeRoleMappings(): void;
   resetState(): void;
-  setElasticsearchUser(
-    elasticsearchUser?: ElasticsearchUser
-  ): { elasticsearchUser: ElasticsearchUser };
+  setElasticsearchUser(elasticsearchUser?: ElasticsearchUser): {
+    elasticsearchUser: ElasticsearchUser;
+  };
   openRoleMappingFlyout(): void;
   openSingleUserRoleMappingFlyout(): void;
   closeUsersAndRolesFlyout(): void;

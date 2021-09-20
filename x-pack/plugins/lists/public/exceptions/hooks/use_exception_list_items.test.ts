@@ -112,9 +112,8 @@ describe('useExceptionListItems', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      const expectedListItemsResult: ExceptionListItemSchema[] = getFoundExceptionListItemSchemaMock().data.map(
-        (item) => transformInput(item)
-      );
+      const expectedListItemsResult: ExceptionListItemSchema[] =
+        getFoundExceptionListItemSchemaMock().data.map((item) => transformInput(item));
       const expectedResult: UseExceptionListItemsSuccess = {
         exceptions: expectedListItemsResult,
         pagination: { page: 1, perPage: 1, total: 1 },

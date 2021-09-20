@@ -86,12 +86,12 @@ describe('IndexPattern Field Item', () => {
     core.http.post.mockClear();
     defaultProps = {
       indexPattern,
-      fieldFormats: ({
+      fieldFormats: {
         ...fieldFormatsServiceMock.createStartContract(),
         getDefaultInstance: jest.fn(() => ({
           convert: jest.fn((s: unknown) => JSON.stringify(s)),
         })),
-      } as unknown) as FieldFormatsStart,
+      } as unknown as FieldFormatsStart,
       core,
       highlight: '',
       dateRange: {

@@ -29,7 +29,7 @@ const renderOptions = {
 };
 
 function getError() {
-  return ({
+  return {
     labels: { someKey: 'labels value' },
     http: { someKey: 'http value' },
     host: { someKey: 'host value' },
@@ -47,7 +47,7 @@ function getError() {
         someKey: 'custom value',
       },
     },
-  } as unknown) as APMError;
+  } as unknown as APMError;
 }
 
 describe('ErrorMetadata', () => {

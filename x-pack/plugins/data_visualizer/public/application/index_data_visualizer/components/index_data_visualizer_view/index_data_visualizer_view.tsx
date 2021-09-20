@@ -103,21 +103,22 @@ function getDefaultPageState(): DataVisualizerPageState {
     documentCountStats: undefined,
   };
 }
-export const getDefaultDataVisualizerListState = (): Required<DataVisualizerIndexBasedAppState> => ({
-  pageIndex: 0,
-  pageSize: 10,
-  sortField: 'fieldName',
-  sortDirection: 'asc',
-  visibleFieldTypes: [],
-  visibleFieldNames: [],
-  samplerShardSize: 5000,
-  searchString: '',
-  searchQuery: defaultSearchQuery,
-  searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
-  showDistributions: true,
-  showAllFields: false,
-  showEmptyFields: false,
-});
+export const getDefaultDataVisualizerListState =
+  (): Required<DataVisualizerIndexBasedAppState> => ({
+    pageIndex: 0,
+    pageSize: 10,
+    sortField: 'fieldName',
+    sortDirection: 'asc',
+    visibleFieldTypes: [],
+    visibleFieldNames: [],
+    samplerShardSize: 5000,
+    searchString: '',
+    searchQuery: defaultSearchQuery,
+    searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+    showDistributions: true,
+    showAllFields: false,
+    showEmptyFields: false,
+  });
 
 export interface IndexDataVisualizerViewProps {
   currentIndexPattern: IndexPattern;
@@ -163,10 +164,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     autoRefreshSelector: true,
   });
 
-  const dataLoader = useMemo(() => new DataLoader(currentIndexPattern, toasts), [
-    currentIndexPattern,
-    toasts,
-  ]);
+  const dataLoader = useMemo(
+    () => new DataLoader(currentIndexPattern, toasts),
+    [currentIndexPattern, toasts]
+  );
 
   useEffect(() => {
     if (globalState?.time !== undefined) {

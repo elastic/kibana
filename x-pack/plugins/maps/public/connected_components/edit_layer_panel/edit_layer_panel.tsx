@@ -121,8 +121,9 @@ export class EditLayerPanel extends Component<Props, State> {
 
     let leftJoinFields: JoinField[] = [];
     try {
-      const leftFieldsInstances = await (this.props
-        .selectedLayer as IVectorLayer).getLeftJoinFields();
+      const leftFieldsInstances = await (
+        this.props.selectedLayer as IVectorLayer
+      ).getLeftJoinFields();
       const leftFieldPromises = leftFieldsInstances.map(async (field: IField) => {
         return {
           name: field.getName(),

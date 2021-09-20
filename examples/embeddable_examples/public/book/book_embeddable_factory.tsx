@@ -52,7 +52,8 @@ export class BookEmbeddableFactoryDefinition
       BookEmbeddableOutput,
       BookEmbeddable,
       BookSavedObjectAttributes
-    > {
+    >
+{
   public readonly type = BOOK_EMBEDDABLE;
   public savedObjectMetaData = {
     name: 'Book',
@@ -116,10 +117,8 @@ export class BookEmbeddableFactoryDefinition
 
   private async unwrapMethod(savedObjectId: string): Promise<BookSavedObjectAttributes> {
     const { savedObjectsClient } = await this.getStartServices();
-    const savedObject: SimpleSavedObject<BookSavedObjectAttributes> = await savedObjectsClient.get<BookSavedObjectAttributes>(
-      this.type,
-      savedObjectId
-    );
+    const savedObject: SimpleSavedObject<BookSavedObjectAttributes> =
+      await savedObjectsClient.get<BookSavedObjectAttributes>(this.type, savedObjectId);
     return { ...savedObject.attributes };
   }
 

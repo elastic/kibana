@@ -129,7 +129,7 @@ describe('test policy response handler', () => {
 
       agentListResult = {
         agents: [
-          ({
+          {
             local_metadata: {
               elastic: {
                 agent: {
@@ -137,8 +137,8 @@ describe('test policy response handler', () => {
                 },
               },
             },
-          } as unknown) as Agent,
-          ({
+          } as unknown as Agent,
+          {
             local_metadata: {
               elastic: {
                 agent: {
@@ -146,8 +146,8 @@ describe('test policy response handler', () => {
                 },
               },
             },
-          } as unknown) as Agent,
-          ({
+          } as unknown as Agent,
+          {
             local_metadata: {
               elastic: {
                 agent: {
@@ -155,7 +155,7 @@ describe('test policy response handler', () => {
                 },
               },
             },
-          } as unknown) as Agent,
+          } as unknown as Agent,
         ],
         total: 2,
         page: 1,
@@ -240,7 +240,7 @@ describe('test policy response handler', () => {
 function createSearchResponse(
   hostPolicyResponse?: HostPolicyResponse
 ): estypes.SearchResponse<HostPolicyResponse> {
-  return ({
+  return {
     took: 15,
     timed_out: false,
     _shards: {
@@ -267,5 +267,5 @@ function createSearchResponse(
           ]
         : [],
     },
-  } as unknown) as estypes.SearchResponse<HostPolicyResponse>;
+  } as unknown as estypes.SearchResponse<HostPolicyResponse>;
 }

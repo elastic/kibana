@@ -22,11 +22,11 @@ describe('CachedIndexPatternFetcher', () => {
   beforeEach(() => {
     mockedIndices = [];
 
-    const indexPatternsService = ({
+    const indexPatternsService = {
       getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
       get: jest.fn(() => Promise.resolve(mockedIndices[0])),
       find: jest.fn(() => Promise.resolve(mockedIndices || [])),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
 
     (fetchIndexPattern as jest.Mock).mockClear();
 

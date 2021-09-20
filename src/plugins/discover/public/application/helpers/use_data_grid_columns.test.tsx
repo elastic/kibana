@@ -16,7 +16,7 @@ import { Capabilities } from '../../../../../core/types';
 
 describe('useDataGridColumns', () => {
   const defaultProps = {
-    capabilities: ({ discover: { save: true } } as unknown) as Capabilities,
+    capabilities: { discover: { save: true } } as unknown as Capabilities,
     config: configMock,
     indexPattern: indexPatternMock,
     indexPatterns: indexPatternsMock,

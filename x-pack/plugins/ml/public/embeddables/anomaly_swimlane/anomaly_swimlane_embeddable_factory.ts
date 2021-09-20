@@ -24,7 +24,8 @@ import {
 } from '..';
 
 export class AnomalySwimlaneEmbeddableFactory
-  implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput>
+{
   public readonly type = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
   public readonly grouping = [

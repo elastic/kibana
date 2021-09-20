@@ -114,16 +114,17 @@ export const SecuritySolutionTabNavigationRedux = compose<
   )
 );
 
-export const SecuritySolutionTabNavigation: React.FC<SecuritySolutionTabNavigationProps> = React.memo(
-  (props) => {
-    const [routeProps] = useRouteSpy();
-    const stateNavReduxProps: RouteSpyState & SecuritySolutionTabNavigationProps = {
-      ...routeProps,
-      ...props,
-    };
+export const SecuritySolutionTabNavigation: React.FC<SecuritySolutionTabNavigationProps> =
+  React.memo(
+    (props) => {
+      const [routeProps] = useRouteSpy();
+      const stateNavReduxProps: RouteSpyState & SecuritySolutionTabNavigationProps = {
+        ...routeProps,
+        ...props,
+      };
 
-    return <SecuritySolutionTabNavigationRedux {...stateNavReduxProps} />;
-  },
-  (prevProps, nextProps) => deepEqual(prevProps.navTabs, nextProps.navTabs)
-);
+      return <SecuritySolutionTabNavigationRedux {...stateNavReduxProps} />;
+    },
+    (prevProps, nextProps) => deepEqual(prevProps.navTabs, nextProps.navTabs)
+  );
 SecuritySolutionTabNavigation.displayName = 'SecuritySolutionTabNavigation';

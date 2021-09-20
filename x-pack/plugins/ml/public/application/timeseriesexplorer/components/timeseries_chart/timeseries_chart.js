@@ -962,13 +962,8 @@ class TimeseriesChartIntl extends Component {
   }
 
   drawContextElements(cxtGroup, cxtWidth, cxtChartHeight, swlHeight) {
-    const {
-      bounds,
-      contextChartData,
-      contextForecastData,
-      modelPlotEnabled,
-      annotationData,
-    } = this.props;
+    const { bounds, contextChartData, contextForecastData, modelPlotEnabled, annotationData } =
+      this.props;
     const data = contextChartData;
 
     const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);

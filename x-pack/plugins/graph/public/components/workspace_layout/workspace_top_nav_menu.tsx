@@ -136,12 +136,12 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
       // since settings button will be disabled only if workspace was set
       const workspace = props.workspace as Workspace;
 
-      const settingsObservable = (asSyncedObservable(() => ({
+      const settingsObservable = asSyncedObservable(() => ({
         blocklistedNodes: workspace.blocklistedNodes,
         unblockNode: workspace.unblockNode,
         unblockAll: workspace.unblockAll,
         canEditDrillDownUrls: props.canEditDrillDownUrls,
-      })) as unknown) as AsObservable<SettingsWorkspaceProps>['observable'];
+      })) as unknown as AsObservable<SettingsWorkspaceProps>['observable'];
 
       props.coreStart.overlays.openFlyout(
         toMountPoint(

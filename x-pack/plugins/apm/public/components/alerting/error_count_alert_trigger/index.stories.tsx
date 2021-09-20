@@ -10,9 +10,9 @@ import { AlertParams, ErrorCountAlertTrigger } from '.';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 
-const KibanaReactContext = createKibanaReactContext(({
+const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: () => {} } },
-} as unknown) as Partial<CoreStart>);
+} as unknown as Partial<CoreStart>);
 
 export default {
   title: 'alerting/ErrorCountAlertTrigger',

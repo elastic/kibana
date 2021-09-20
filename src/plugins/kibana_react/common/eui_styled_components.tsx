@@ -51,6 +51,6 @@ const {
   createGlobalStyle,
   keyframes,
   withTheme,
-} = (styledComponents as unknown) as ThemedStyledComponentsModule<EuiTheme>;
+} = styledComponents as unknown as ThemedStyledComponentsModule<EuiTheme>;
 
 export { css, euiStyled, EuiThemeProvider, createGlobalStyle, keyframes, withTheme };

@@ -172,9 +172,11 @@ describe('Connector', () => {
     });
 
     act(() => {
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ value: '19', label: 'Denial of Service' }]);
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ value: '19', label: 'Denial of Service' }]);
     });
 
     act(() => {

@@ -95,7 +95,8 @@ const TRUSTED_APP: TrustedApp = {
   ],
 };
 
-const packagePolicyClient = createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
+const packagePolicyClient =
+  createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
 
 describe('handlers', () => {
   beforeEach(() => {
@@ -115,29 +116,28 @@ describe('handlers', () => {
     // Ensure that `logFactory.get()` always returns the same instance for the same given prefix
     const instances = new Map<string, ReturnType<typeof context.logFactory.get>>();
     const logFactoryGetMock = context.logFactory.get.getMockImplementation();
-    context.logFactory.get.mockImplementation(
-      (prefix): Logger => {
-        if (!instances.has(prefix)) {
-          instances.set(prefix, logFactoryGetMock!(prefix)!);
-        }
-        return instances.get(prefix)!;
+    context.logFactory.get.mockImplementation((prefix): Logger => {
+      if (!instances.has(prefix)) {
+        instances.set(prefix, logFactoryGetMock!(prefix)!);
       }
-    );
+      return instances.get(prefix)!;
+    });
 
     return context;
   };
 
   let appContextMock: ReturnType<typeof createAppContextMock> = createAppContextMock();
-  let exceptionsListClient: jest.Mocked<ExceptionListClient> = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
+  let exceptionsListClient: jest.Mocked<ExceptionListClient> =
+    listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 
   const createHandlerContextMock = () =>
-    (({
+    ({
       ...xpackMocks.createRequestHandlerContext(),
       lists: {
         getListClient: jest.fn(),
         getExceptionListClient: jest.fn().mockReturnValue(exceptionsListClient),
       },
-    } as unknown) as jest.Mocked<SecuritySolutionRequestHandlerContext>);
+    } as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>);
 
   const assertResponse = <T>(
     response: jest.Mocked<KibanaResponseFactory>,

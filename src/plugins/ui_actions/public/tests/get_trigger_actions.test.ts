@@ -9,16 +9,16 @@
 import { ActionInternal, Action } from '../actions';
 import { uiActionsPluginMock } from '../mocks';
 
-const action1: Action = ({
+const action1: Action = {
   id: 'action1',
   order: 1,
   type: 'type1',
-} as unknown) as Action;
-const action2: Action = ({
+} as unknown as Action;
+const action2: Action = {
   id: 'action2',
   order: 2,
   type: 'type2',
-} as unknown) as Action;
+} as unknown as Action;
 
 test('returns actions set on trigger', () => {
   const { setup, doStart } = uiActionsPluginMock.createPlugin();

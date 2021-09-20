@@ -205,10 +205,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       signalIndexName,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const {
@@ -404,10 +402,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [ruleId, filters, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
-  const alertMergedFilters = useMemo(() => [...alertDefaultFilters, ...filters], [
-    alertDefaultFilters,
-    filters,
-  ]);
+  const alertMergedFilters = useMemo(
+    () => [...alertDefaultFilters, ...filters],
+    [alertDefaultFilters, filters]
+  );
 
   const tabs = useMemo(
     () => (

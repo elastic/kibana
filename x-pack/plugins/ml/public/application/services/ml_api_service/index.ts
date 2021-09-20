@@ -93,7 +93,7 @@ export function basePath() {
  * Temp solution to allow {@link ml} service to use http from
  * the dependency_cache.
  */
-const proxyHttpStart = new Proxy<HttpStart>(({} as unknown) as HttpStart, {
+const proxyHttpStart = new Proxy<HttpStart>({} as unknown as HttpStart, {
   get(obj, prop: keyof HttpStart) {
     try {
       return getHttp()[prop];

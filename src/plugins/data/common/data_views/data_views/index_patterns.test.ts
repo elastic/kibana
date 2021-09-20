@@ -86,11 +86,11 @@ describe('IndexPatterns', () => {
       });
 
     indexPatterns = new DataViewsService({
-      uiSettings: ({
+      uiSettings: {
         get: () => Promise.resolve(false),
         getAll: () => {},
-      } as any) as UiSettingsCommon,
-      savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientCommon,
+      } as any as UiSettingsCommon,
+      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
       apiClient: createFieldsFetcher(),
       fieldFormats,
       onNotification: () => {},
@@ -233,9 +233,9 @@ describe('IndexPatterns', () => {
     const title = 'kibana-*';
 
     indexPatterns.createSavedObject = jest.fn(() =>
-      Promise.resolve(({
+      Promise.resolve({
         id: 'id',
-      } as unknown) as DataView)
+      } as unknown as DataView)
     );
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });

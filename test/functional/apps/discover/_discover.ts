@@ -230,10 +230,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           await PageObjects.discover.loadSavedSearch(expected.title);
-          const {
-            title,
-            description,
-          } = await PageObjects.common.getSharedItemTitleAndDescription();
+          const { title, description } =
+            await PageObjects.common.getSharedItemTitleAndDescription();
           expect(title).to.eql(expected.title);
           expect(description).to.eql(expected.description);
         });

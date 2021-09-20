@@ -13,9 +13,9 @@ import { keys } from '@elastic/eui';
 import { mount } from 'enzyme';
 import type { ChromeStart } from '../../../../core/public';
 
-const MockChrome = ({
+const MockChrome = {
   setIsVisible: () => {},
-} as unknown) as ChromeStart;
+} as unknown as ChromeStart;
 
 test('is rendered', () => {
   const component = mount(

@@ -113,14 +113,8 @@ export default function ({ getService }: FtrProviderContext) {
       };
     }
 
-    const {
-      group1Importable,
-      group1NonImportable,
-      group1All,
-      group2,
-      group3,
-      group4,
-    } = createTestCases(overwrite);
+    const { group1Importable, group1NonImportable, group1All, group2, group3, group4 } =
+      createTestCases(overwrite);
     return {
       unauthorized: [
         createTestDefinitions(group1Importable, true, { overwrite }),

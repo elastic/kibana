@@ -107,7 +107,7 @@ function createMockTimefilter() {
 }
 
 function makeDefaultData(): jest.Mocked<DataPublicPluginStart> {
-  return ({
+  return {
     query: {
       filterManager: createMockFilterManager(),
       timefilter: {
@@ -123,7 +123,7 @@ function makeDefaultData(): jest.Mocked<DataPublicPluginStart> {
     nowProvider: {
       get: jest.fn(),
     },
-  } as unknown) as DataPublicPluginStart;
+  } as unknown as DataPublicPluginStart;
 }
 
 const createMiddleware = (data: DataPublicPluginStart) => {

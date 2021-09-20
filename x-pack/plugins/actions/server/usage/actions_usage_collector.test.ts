@@ -19,10 +19,10 @@ describe('registerActionsUsageCollector', () => {
   let usageCollectionMock: jest.Mocked<UsageCollectionSetup>;
   beforeEach(() => {
     config = configSchema.validate({});
-    usageCollectionMock = ({
+    usageCollectionMock = {
       makeUsageCollector: jest.fn(),
       registerCollector: jest.fn(),
-    } as unknown) as jest.Mocked<UsageCollectionSetup>;
+    } as unknown as jest.Mocked<UsageCollectionSetup>;
   });
 
   it('should call registerCollector', () => {

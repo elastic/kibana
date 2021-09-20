@@ -32,7 +32,11 @@ export function useServiceMetricChartsFetcher({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { agentName, serviceName } = useApmServiceContext();
 
-  const { data = INITIAL_DATA, error, status } = useFetcher(
+  const {
+    data = INITIAL_DATA,
+    error,
+    status,
+  } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && agentName) {
         return callApmApi({

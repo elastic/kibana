@@ -49,7 +49,7 @@ describe('saved_object', () => {
 
     beforeEach(() => {
       mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
-      mockRequest = ({
+      mockRequest = {
         user: {
           username: 'username',
         },
@@ -62,7 +62,7 @@ describe('saved_object', () => {
             },
           },
         },
-      } as unknown) as FrameworkRequest;
+      } as unknown as FrameworkRequest;
     });
 
     afterEach(() => {
@@ -117,7 +117,7 @@ describe('saved_object', () => {
       pageSize: 10,
       pageIndex: 1,
     };
-    let result = (null as unknown) as AllTimelinesResponse;
+    let result = null as unknown as AllTimelinesResponse;
     beforeEach(async () => {
       (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockGetTimelineValue);
       mockFindSavedObject = jest
@@ -127,7 +127,7 @@ describe('saved_object', () => {
         .mockResolvedValueOnce({ saved_objects: [mockSavedObject], total: 1 })
         .mockResolvedValueOnce({ saved_objects: [mockSavedObject], total: 1 })
         .mockResolvedValue({ saved_objects: [], total: 0 });
-      mockRequest = ({
+      mockRequest = {
         user: {
           username: 'username',
         },
@@ -140,7 +140,7 @@ describe('saved_object', () => {
             },
           },
         },
-      } as unknown) as FrameworkRequest;
+      } as unknown as FrameworkRequest;
 
       result = await getAllTimeline(mockRequest, false, pageInfo, null, null, null, null);
     });

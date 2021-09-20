@@ -86,10 +86,10 @@ export const useQueryBar = (): UseQueryBarUtils => {
     [dispatch]
   );
 
-  const setEs = useCallback(() => setEsKueryFilters(esFilters ?? ''), [
-    esFilters,
-    setEsKueryFilters,
-  ]);
+  const setEs = useCallback(
+    () => setEsKueryFilters(esFilters ?? ''),
+    [esFilters, setEsKueryFilters]
+  );
   const [, cancelEsKueryUpdate] = useDebounce(setEs, DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL, [
     esFilters,
     setEsKueryFilters,

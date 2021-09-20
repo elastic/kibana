@@ -58,5 +58,5 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
     }
   }
 
-  return (SavedSearch as unknown) as new (id: string) => SavedObject;
+  return SavedSearch as unknown as new (id: string) => SavedObject;
 }

@@ -74,7 +74,7 @@ describe('HasDataContextProvider', () => {
       absoluteEnd: new Date(relativeEnd).valueOf(),
     }));
     jest.spyOn(pluginContext, 'usePluginContext').mockReturnValue({
-      core: ({ http: { get: jest.fn() } } as unknown) as CoreStart,
+      core: { http: { get: jest.fn() } } as unknown as CoreStart,
     } as PluginContextValue);
   });
 
@@ -515,7 +515,7 @@ describe('HasDataContextProvider', () => {
   describe('with alerts', () => {
     beforeAll(() => {
       jest.spyOn(pluginContext, 'usePluginContext').mockReturnValue({
-        core: ({
+        core: {
           http: {
             get: async () => {
               return {
@@ -526,7 +526,7 @@ describe('HasDataContextProvider', () => {
               };
             },
           },
-        } as unknown) as CoreStart,
+        } as unknown as CoreStart,
       } as PluginContextValue);
     });
 

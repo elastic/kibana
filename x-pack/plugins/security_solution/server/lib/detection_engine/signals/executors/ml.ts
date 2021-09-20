@@ -86,7 +86,7 @@ export const mlExecutor = async ({
     ml,
     // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
     // currently unused by the mlAnomalySearch function.
-    request: ({} as unknown) as KibanaRequest,
+    request: {} as unknown as KibanaRequest,
     savedObjectsClient: services.savedObjectsClient,
     jobIds: ruleParams.machineLearningJobId,
     anomalyThreshold: ruleParams.anomalyThreshold,
@@ -107,28 +107,25 @@ export const mlExecutor = async ({
   if (anomalyCount) {
     logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
   }
-  const {
-    success,
-    errors,
-    bulkCreateDuration,
-    createdItemsCount,
-    createdItems,
-  } = await bulkCreateMlSignals({
-    someResult: filteredAnomalyResults,
-    ruleSO: rule,
-    services,
-    logger,
-    id: rule.id,
-    signalsIndex: ruleParams.outputIndex,
-    buildRuleMessage,
-    bulkCreate,
-    wrapHits,
-  });
+  const { success, errors, bulkCreateDuration, createdItemsCount, createdItems } =
+    await bulkCreateMlSignals({
+      someResult: filteredAnomalyResults,
+      ruleSO: rule,
+      services,
+      logger,
+      id: rule.id,
+      signalsIndex: ruleParams.outputIndex,
+      buildRuleMessage,
+      bulkCreate,
+      wrapHits,
+    });
   // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
   const shardFailures =
-    (filteredAnomalyResults._shards as typeof filteredAnomalyResults._shards & {
-      failures: [];
-    }).failures ?? [];
+    (
+      filteredAnomalyResults._shards as typeof filteredAnomalyResults._shards & {
+        failures: [];
+      }
+    ).failures ?? [];
   const searchErrors = createErrorsFromShard({
     errors: shardFailures,
   });

@@ -294,7 +294,7 @@ describe('SiemLocalStorage', () => {
       };
       timelineStorage.addTimeline(
         TimelineId.hostsPageEvents,
-        (invalidColumnsMockTimelineModel as unknown) as TimelineModel
+        invalidColumnsMockTimelineModel as unknown as TimelineModel
       );
       timelineStorage.addTimeline(TimelineId.hostsPageExternalAlerts, mockTimelineModel);
       const timelines = getTimelinesInStorageByIds(storage, [

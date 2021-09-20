@@ -13,21 +13,21 @@ import { JobSavedObjectService } from '../../saved_objects';
 
 const callAs = () => Promise.resolve({ body: {} });
 
-const mlClusterClient = ({
+const mlClusterClient = {
   asCurrentUser: callAs,
   asInternalUser: callAs,
-} as unknown) as IScopedClusterClient;
+} as unknown as IScopedClusterClient;
 
-const mlClient = (callAs as unknown) as MlClient;
+const mlClient = callAs as unknown as MlClient;
 
 describe('ML - data recognizer', () => {
   const dr = new DataRecognizer(
     mlClusterClient,
     mlClient,
-    ({
+    {
       find: jest.fn(),
       bulkCreate: jest.fn(),
-    } as unknown) as SavedObjectsClientContract,
+    } as unknown as SavedObjectsClientContract,
     {} as JobSavedObjectService,
     { headers: { authorization: '' } } as KibanaRequest
   );
@@ -37,7 +37,7 @@ describe('ML - data recognizer', () => {
       // arrange
       const prefix = 'pre-';
       const testJobId = 'test-job';
-      const moduleConfig = ({
+      const moduleConfig = {
         jobs: [
           {
             id: `${prefix}${testJobId}`,
@@ -54,7 +54,7 @@ describe('ML - data recognizer', () => {
             },
           },
         ],
-      } as unknown) as Module;
+      } as unknown as Module;
       const jobOverrides = [
         {
           analysis_limits: {

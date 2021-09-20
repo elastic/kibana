@@ -63,9 +63,11 @@ const fillForm = (wrapper: ReactWrapper) => {
     .simulate('change', { target: { value: sampleData.description } });
 
   act(() => {
-    ((wrapper.find(EuiComboBox).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange(sampleTags.map((tag) => ({ label: tag })));
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange(sampleTags.map((tag) => ({ label: tag })));
   });
 };
 

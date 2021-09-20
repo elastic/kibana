@@ -34,9 +34,9 @@ describe('authorization', () => {
     beforeEach(() => {
       securityStart = securityMock.createStart();
       featuresStart = featuresPluginMock.createStart();
-      featuresStart.getKibanaFeatures.mockReturnValue(([
+      featuresStart.getKibanaFeatures.mockReturnValue([
         { id: '1', cases: ['a'] },
-      ] as unknown) as KibanaFeature[]);
+      ] as unknown as KibanaFeature[]);
     });
 
     it('creates an Authorization object', async () => {
@@ -91,7 +91,7 @@ describe('authorization', () => {
       );
 
       featuresStart = featuresPluginMock.createStart();
-      featuresStart.getKibanaFeatures.mockReturnValue(([feature] as unknown) as KibanaFeature[]);
+      featuresStart.getKibanaFeatures.mockReturnValue([feature] as unknown as KibanaFeature[]);
 
       auth = await Authorization.create({
         request,
@@ -265,10 +265,10 @@ describe('authorization', () => {
     it('does not throw an error when the user has the privileges needed', async () => {
       expect.assertions(1);
 
-      featuresStart.getKibanaFeatures.mockReturnValue(([
+      featuresStart.getKibanaFeatures.mockReturnValue([
         feature,
         { id: '2', cases: ['other-owner'] },
-      ] as unknown) as KibanaFeature[]);
+      ] as unknown as KibanaFeature[]);
 
       auth = await Authorization.create({
         request,
@@ -293,9 +293,9 @@ describe('authorization', () => {
     it('does not throw an error when the user has the privileges needed with a feature specifying multiple owners', async () => {
       expect.assertions(1);
 
-      featuresStart.getKibanaFeatures.mockReturnValue(([
+      featuresStart.getKibanaFeatures.mockReturnValue([
         { id: '2', cases: ['a', 'other-owner'] },
-      ] as unknown) as KibanaFeature[]);
+      ] as unknown as KibanaFeature[]);
 
       auth = await Authorization.create({
         request,
@@ -320,9 +320,9 @@ describe('authorization', () => {
     it('logs a successful authorization when the user has the privileges needed with a feature specifying multiple owners', async () => {
       expect.assertions(2);
 
-      featuresStart.getKibanaFeatures.mockReturnValue(([
+      featuresStart.getKibanaFeatures.mockReturnValue([
         { id: '2', cases: ['a', 'other-owner'] },
-      ] as unknown) as KibanaFeature[]);
+      ] as unknown as KibanaFeature[]);
 
       auth = await Authorization.create({
         request,
@@ -411,7 +411,7 @@ describe('authorization', () => {
       );
 
       featuresStart = featuresPluginMock.createStart();
-      featuresStart.getKibanaFeatures.mockReturnValue(([feature] as unknown) as KibanaFeature[]);
+      featuresStart.getKibanaFeatures.mockReturnValue([feature] as unknown as KibanaFeature[]);
 
       auth = await Authorization.create({
         request,
@@ -736,15 +736,17 @@ describe('authorization', () => {
           }))
         );
 
-        (securityStart.authz.actions.cases.get as jest.MockedFunction<
-          typeof securityStart.authz.actions.cases.get
-        >).mockImplementation((owner, opName) => {
+        (
+          securityStart.authz.actions.cases.get as jest.MockedFunction<
+            typeof securityStart.authz.actions.cases.get
+          >
+        ).mockImplementation((owner, opName) => {
           return `${owner}:${opName}`;
         });
 
-        featuresStart.getKibanaFeatures.mockReturnValue(([
+        featuresStart.getKibanaFeatures.mockReturnValue([
           { id: 'a', cases: ['a', 'b', 'c'] },
-        ] as unknown) as KibanaFeature[]);
+        ] as unknown as KibanaFeature[]);
 
         auth = await Authorization.create({
           request,

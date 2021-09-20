@@ -9,7 +9,8 @@ import { DeprecationsClient } from 'kibana/server';
 import { DomainDeprecationDetails } from 'src/core/server/types';
 
 export const getKibanaUpgradeStatus = async (deprecationsClient: DeprecationsClient) => {
-  const kibanaDeprecations: DomainDeprecationDetails[] = await deprecationsClient.getAllDeprecations();
+  const kibanaDeprecations: DomainDeprecationDetails[] =
+    await deprecationsClient.getAllDeprecations();
 
   const totalCriticalDeprecations = kibanaDeprecations.filter((d) => d.level === 'critical').length;
 

@@ -42,10 +42,9 @@ export const PAGE_ROUTING_PATHS = {
 
 export const pagePathGetters: {
   [key in StaticPage]: () => string;
-} &
-  {
-    [key in DynamicPage]: (values: DynamicPagePathValues) => string;
-  } = {
+} & {
+  [key in DynamicPage]: (values: DynamicPagePathValues) => string;
+} = {
   base: () => '/',
   overview: () => '/',
   live_queries: () => '/live_queries',

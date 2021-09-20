@@ -36,14 +36,15 @@ export const useTimelineStatus = ({
   installPrepackagedTimelines: () => void;
 } => {
   const [selectedTab, setSelectedTab] = useState<TemplateTimelineTypeLiteralWithNull>(null);
-  const isTemplateFilterEnabled = useMemo(() => timelineType === TimelineType.template, [
-    timelineType,
-  ]);
+  const isTemplateFilterEnabled = useMemo(
+    () => timelineType === TimelineType.template,
+    [timelineType]
+  );
 
-  const templateTimelineType = useMemo(() => (!isTemplateFilterEnabled ? null : selectedTab), [
-    selectedTab,
-    isTemplateFilterEnabled,
-  ]);
+  const templateTimelineType = useMemo(
+    () => (!isTemplateFilterEnabled ? null : selectedTab),
+    [selectedTab, isTemplateFilterEnabled]
+  );
 
   const timelineStatus = useMemo(
     () =>

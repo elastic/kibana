@@ -50,7 +50,8 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
 
 export function extractWarningMessages(warnings: string) {
   // pattern for valid warning header
-  const re = /\d{3} [0-9a-zA-Z!#$%&'*+-.^_`|~]+ \"((?:\t| |!|[\x23-\x5b]|[\x5d-\x7e]|[\x80-\xff]|\\\\|\\")*)\"(?: \"[^"]*\")?/;
+  const re =
+    /\d{3} [0-9a-zA-Z!#$%&'*+-.^_`|~]+ \"((?:\t| |!|[\x23-\x5b]|[\x5d-\x7e]|[\x80-\xff]|\\\\|\\")*)\"(?: \"[^"]*\")?/;
   // split on any comma that is followed by an even number of quotes
   return _.map(splitOnUnquotedCommaSpace(warnings), (warning) => {
     const match = re.exec(warning);

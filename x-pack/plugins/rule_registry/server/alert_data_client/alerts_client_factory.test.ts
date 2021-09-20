@@ -26,10 +26,10 @@ const alertsClientFactoryParams: AlertsClientFactoryProps = {
   getAlertingAuthorization: (_: KibanaRequest) => alertingAuthMock,
   securityPluginSetup,
   esClient: {} as ElasticsearchClient,
-  ruleDataService: (ruleDataPluginServiceMock.create() as unknown) as RuleDataPluginService,
+  ruleDataService: ruleDataPluginServiceMock.create() as unknown as RuleDataPluginService,
 };
 
-const fakeRequest = ({
+const fakeRequest = {
   app: {},
   headers: {},
   getBasePath: () => '',
@@ -43,7 +43,7 @@ const fakeRequest = ({
       url: '/',
     },
   },
-} as unknown) as Request;
+} as unknown as Request;
 
 const auditLogger = {
   log: jest.fn(),

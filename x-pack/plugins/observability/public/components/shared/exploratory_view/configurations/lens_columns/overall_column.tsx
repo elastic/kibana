@@ -83,13 +83,13 @@ export function getDistributionInPercentageColumn({
     isBucketed: false,
     scale: 'ratio',
     params: {
-      tinymathAst: ({
+      tinymathAst: {
         type: 'function',
         name: 'divide',
         args: [`${yAxisColId}X0`, `${yAxisColId}X3`],
         location: { min: 0, max: 30 },
         text: lensFormula,
-      } as unknown) as TinymathAST,
+      } as unknown as TinymathAST,
     },
     references: [`${yAxisColId}X0`, `${yAxisColId}X3`],
     customLabel: true,

@@ -16,16 +16,16 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 
-const mockKueryNode = (kueryNode: Partial<KueryNode>) => (kueryNode as unknown) as KueryNode;
+const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 
 describe('Kuery field suggestions', () => {
   let querySuggestionsArgs: QuerySuggestionGetFnArgs;
   let getSuggestions: ReturnType<typeof setupGetFieldSuggestions>;
 
   beforeEach(() => {
-    querySuggestionsArgs = ({
+    querySuggestionsArgs = {
       indexPatterns: [indexPatternResponse],
-    } as unknown) as QuerySuggestionGetFnArgs;
+    } as unknown as QuerySuggestionGetFnArgs;
 
     getSuggestions = setupGetFieldSuggestions(coreMock.createSetup());
   });

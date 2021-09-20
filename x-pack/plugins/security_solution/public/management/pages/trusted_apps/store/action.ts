@@ -22,7 +22,8 @@ export type TrustedAppsListResourceStateChanged = ResourceStateChanged<
   TrustedAppsListData
 >;
 
-export type TrustedAppDeletionSubmissionResourceStateChanged = ResourceStateChanged<'trustedAppDeletionSubmissionResourceStateChanged'>;
+export type TrustedAppDeletionSubmissionResourceStateChanged =
+  ResourceStateChanged<'trustedAppDeletionSubmissionResourceStateChanged'>;
 
 export type TrustedAppDeletionDialogStarted = Action<'trustedAppDeletionDialogStarted'> & {
   payload: {
@@ -45,16 +46,18 @@ export type TrustedAppCreationDialogStarted = Action<'trustedAppCreationDialogSt
   };
 };
 
-export type TrustedAppCreationDialogFormStateUpdated = Action<'trustedAppCreationDialogFormStateUpdated'> & {
-  payload: {
-    entry: NewTrustedApp;
-    isValid: boolean;
+export type TrustedAppCreationDialogFormStateUpdated =
+  Action<'trustedAppCreationDialogFormStateUpdated'> & {
+    payload: {
+      entry: NewTrustedApp;
+      isValid: boolean;
+    };
   };
-};
 
-export type TrustedAppCreationEditItemStateChanged = Action<'trustedAppCreationEditItemStateChanged'> & {
-  payload: AsyncResourceState<TrustedApp>;
-};
+export type TrustedAppCreationEditItemStateChanged =
+  Action<'trustedAppCreationEditItemStateChanged'> & {
+    payload: AsyncResourceState<TrustedApp>;
+  };
 
 export type TrustedAppCreationDialogConfirmed = Action<'trustedAppCreationDialogConfirmed'>;
 

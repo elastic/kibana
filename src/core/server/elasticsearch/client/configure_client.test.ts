@@ -25,10 +25,10 @@ import { configureClient } from './configure_client';
 const createFakeConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
 ): ElasticsearchClientConfig => {
-  return ({
+  return {
     type: 'fake-config',
     ...parts,
-  } as unknown) as ElasticsearchClientConfig;
+  } as unknown as ElasticsearchClientConfig;
 };
 
 const createFakeClient = () => {

@@ -24,7 +24,7 @@ import { Role } from '../../types';
 import { GroupAssignmentSelector } from './group_assignment_selector';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
-const roleTypes = (['admin', 'user'] as unknown) as Role[];
+const roleTypes = ['admin', 'user'] as unknown as Role[];
 
 export const User: React.FC = () => {
   const {

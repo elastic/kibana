@@ -20,7 +20,7 @@ import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/
 
 import { BuilderEntryItem, EntryItemProps } from './entry_renderer';
 
-const mockAutocompleteService = ({
+const mockAutocompleteService = {
   getValueSuggestions: () =>
     new Promise((resolve) => {
       setTimeout(() => {
@@ -54,7 +54,7 @@ const mockAutocompleteService = ({
         ]);
       }, 300);
     }),
-} as unknown) as AutocompleteStart;
+} as unknown as AutocompleteStart;
 
 export default {
   argTypes: {

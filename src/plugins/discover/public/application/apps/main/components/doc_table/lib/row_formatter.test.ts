@@ -63,11 +63,11 @@ describe('Row formatter', () => {
   beforeEach(() => {
     // @ts-expect-error
     indexPattern.formatHit = formatHitMock;
-    setServices(({
+    setServices({
       uiSettings: {
         get: () => 100,
       },
-    } as unknown) as DiscoverServices);
+    } as unknown as DiscoverServices);
   });
 
   it('formats document properly', () => {
@@ -110,11 +110,11 @@ describe('Row formatter', () => {
   });
 
   it('limits number of rendered items', () => {
-    setServices(({
+    setServices({
       uiSettings: {
         get: () => 1,
       },
-    } as unknown) as DiscoverServices);
+    } as unknown as DiscoverServices);
     expect(formatRow(hit, indexPattern, [])).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={

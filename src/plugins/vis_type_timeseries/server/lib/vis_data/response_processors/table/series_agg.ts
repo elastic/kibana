@@ -16,31 +16,33 @@ import { SeriesAgg } from './_series_agg';
 import type { TableResponseProcessorsFunction } from './types';
 import type { PanelDataArray } from '../../../../../common/types/vis_data';
 
-export const seriesAgg: TableResponseProcessorsFunction = ({ series, meta, extractFields }) => (
-  next
-) => async (results) => {
-  if (series.aggregate_by && series.aggregate_function) {
-    const targetSeries: PanelDataArray[][] = [];
+export const seriesAgg: TableResponseProcessorsFunction =
+  ({ series, meta, extractFields }) =>
+  (next) =>
+  async (results) => {
+    if (series.aggregate_by && series.aggregate_function) {
+      const targetSeries: PanelDataArray[][] = [];
 
-    // Filter out the seires with the matching metric and store them
-    // in targetSeries
-    results = results.filter((s) => {
-      if (s.id && s.id.split(/:/)[0] === series.id) {
-        targetSeries.push(s.data!);
-        return false;
-      }
-      return true;
-    });
+      // Filter out the seires with the matching metric and store them
+      // in targetSeries
+      results = results.filter((s) => {
+        if (s.id && s.id.split(/:/)[0] === series.id) {
+          targetSeries.push(s.data!);
+          return false;
+        }
+        return true;
+      });
 
-    const fn = SeriesAgg[series.aggregate_function];
-    const data = fn(targetSeries);
-    const fieldsForSeries = meta.index ? await extractFields({ id: meta.index }) : [];
+      const fn = SeriesAgg[series.aggregate_function];
+      const data = fn(targetSeries);
+      const fieldsForSeries = meta.index ? await extractFields({ id: meta.index }) : [];
 
-    results.push({
-      id: `${series.id}`,
-      label: series.label || calculateLabel(last(series.metrics)!, series.metrics, fieldsForSeries),
-      data: data[0],
-    });
-  }
-  return next(results);
-};
+      results.push({
+        id: `${series.id}`,
+        label:
+          series.label || calculateLabel(last(series.metrics)!, series.metrics, fieldsForSeries),
+        data: data[0],
+      });
+    }
+    return next(results);
+  };

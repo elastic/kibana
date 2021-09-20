@@ -117,10 +117,12 @@ describe('BucketNestingEditor', () => {
       },
     });
 
-    (component
-      .find('[data-test-subj="indexPattern-nesting-switch"]')
-      .first()
-      .prop('onChange') as () => {})();
+    (
+      component
+        .find('[data-test-subj="indexPattern-nesting-switch"]')
+        .first()
+        .prop('onChange') as () => {}
+    )();
 
     expect(setColumns).toHaveBeenCalledTimes(2);
     expect(setColumns).toHaveBeenLastCalledWith(['b', 'a', 'c']);

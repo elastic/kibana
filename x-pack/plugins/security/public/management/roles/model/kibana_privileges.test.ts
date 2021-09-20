@@ -113,9 +113,8 @@ describe('KibanaPrivileges', () => {
           spaces: ['foo'],
         },
       ];
-      const collection = kibanaPrivileges.createCollectionFromRoleKibanaPrivileges(
-        assignedPrivileges
-      );
+      const collection =
+        kibanaPrivileges.createCollectionFromRoleKibanaPrivileges(assignedPrivileges);
 
       expect(
         collection.grantsPrivilege(

@@ -11,10 +11,8 @@ import { AlertNavigationHandler } from './types';
 
 const DEFAULT_HANDLER = Symbol('*');
 export class AlertNavigationRegistry {
-  private readonly alertNavigations: Map<
-    string,
-    Map<string | symbol, AlertNavigationHandler>
-  > = new Map();
+  private readonly alertNavigations: Map<string, Map<string | symbol, AlertNavigationHandler>> =
+    new Map();
 
   public has(consumer: string, alertType: AlertType) {
     return this.hasTypedHandler(consumer, alertType) || this.hasDefaultHandler(consumer);

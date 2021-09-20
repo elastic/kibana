@@ -42,7 +42,8 @@ export class TelemetryReceiver {
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
-    this.soClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
+    this.soClient =
+      core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
   }
 
   public async fetchFleetAgents() {

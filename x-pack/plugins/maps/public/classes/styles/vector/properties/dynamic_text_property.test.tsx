@@ -54,7 +54,7 @@ const makeProperty = (mockStyle: MockStyle, field: IField | null) => {
     {},
     VECTOR_STYLES.LABEL_TEXT,
     field,
-    (new MockLayer(mockStyle) as unknown) as IVectorLayer,
+    new MockLayer(mockStyle) as unknown as IVectorLayer,
     () => {
       return (value: RawValue) => value + '_format';
     }
@@ -65,7 +65,7 @@ describe('syncTextFieldWithMb', () => {
   describe('with field', () => {
     test('Should set', async () => {
       const dynamicTextProperty = makeProperty(new MockStyle({ min: 0, max: 100 }), mockField);
-      const mockMbMap = (new MockMbMap() as unknown) as MbMap;
+      const mockMbMap = new MockMbMap() as unknown as MbMap;
 
       dynamicTextProperty.syncTextFieldWithMb('foobar', mockMbMap);
 
@@ -79,10 +79,10 @@ describe('syncTextFieldWithMb', () => {
   describe('without field', () => {
     test('Should clear', async () => {
       const dynamicTextProperty = makeProperty(new MockStyle({ min: 0, max: 100 }), null);
-      const mockMbMap = (new MockMbMap([
+      const mockMbMap = new MockMbMap([
         'foobar',
         ['coalesce', ['get', '__kbn__dynamic__foobar__labelText'], ''],
-      ]) as unknown) as MbMap;
+      ]) as unknown as MbMap;
 
       dynamicTextProperty.syncTextFieldWithMb('foobar', mockMbMap);
 
@@ -98,7 +98,7 @@ describe('syncTextFieldWithMb', () => {
       // Do not remove this logic without verifying that mapbox-gl does not re-issue tile-requests for previously requested tiles
 
       const dynamicTextProperty = makeProperty(new MockStyle({ min: 0, max: 100 }), null);
-      const mockMbMap = (new MockMbMap(undefined) as unknown) as MbMap;
+      const mockMbMap = new MockMbMap(undefined) as unknown as MbMap;
 
       dynamicTextProperty.syncTextFieldWithMb('foobar', mockMbMap);
 

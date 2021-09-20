@@ -103,30 +103,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ];
       const yAxisLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
       const expectedAreaChartData = [
-        37,
-        202,
-        740,
-        1437,
-        1371,
-        751,
-        188,
-        31,
-        42,
-        202,
-        683,
-        1361,
-        1415,
-        707,
-        177,
-        27,
-        32,
-        175,
-        707,
-        1408,
-        1355,
-        726,
-        201,
-        29,
+        37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683, 1361, 1415, 707, 177, 27, 32, 175,
+        707, 1408, 1355, 726, 201, 29,
       ];
 
       await retry.try(async function tryingForTime() {

@@ -53,10 +53,11 @@ export async function callApi<T = void>(
     return cacheResponse;
   }
 
-  const { pathname, method = 'get', ...options } = fetchOptionsWithDebug(
-    fetchOptions,
-    inspectableEsQueriesEnabled
-  );
+  const {
+    pathname,
+    method = 'get',
+    ...options
+  } = fetchOptionsWithDebug(fetchOptions, inspectableEsQueriesEnabled);
 
   const lowercaseMethod = method.toLowerCase() as
     | 'get'

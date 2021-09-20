@@ -57,7 +57,7 @@ describe('TableSource', () => {
       });
 
       const propertiesMap = await tableSource.getPropertiesMap(
-        ({} as unknown) as VectorJoinSourceRequestMeta,
+        {} as unknown as VectorJoinSourceRequestMeta,
         'a',
         'b',
         () => {}
@@ -176,7 +176,7 @@ describe('TableSource', () => {
       try {
         await tableSource.getGeoJsonWithMeta(
           'foobar',
-          ({} as unknown) as VectorSourceRequestMeta,
+          {} as unknown as VectorSourceRequestMeta,
           () => {},
           () => {
             return false;

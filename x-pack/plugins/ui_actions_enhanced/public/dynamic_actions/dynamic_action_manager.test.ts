@@ -16,7 +16,7 @@ import { SerializedAction, SerializedEvent } from './types';
 import { licensingMock } from '../../../licensing/public/mocks';
 import { dynamicActionGrouping } from './dynamic_action_grouping';
 
-const actionFactoryDefinition1: ActionFactoryDefinition = ({
+const actionFactoryDefinition1: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
   CollectConfig: {},
   createConfig: () => ({}),
@@ -29,9 +29,9 @@ const actionFactoryDefinition1: ActionFactoryDefinition = ({
   supportedTriggers() {
     return ['VALUE_CLICK_TRIGGER'];
   },
-} as unknown) as ActionFactoryDefinition;
+} as unknown as ActionFactoryDefinition;
 
-const actionFactoryDefinition2: ActionFactoryDefinition = ({
+const actionFactoryDefinition2: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_2',
   CollectConfig: {},
   createConfig: () => ({}),
@@ -44,7 +44,7 @@ const actionFactoryDefinition2: ActionFactoryDefinition = ({
   supportedTriggers() {
     return ['VALUE_CLICK_TRIGGER'];
   },
-} as unknown) as ActionFactoryDefinition;
+} as unknown as ActionFactoryDefinition;
 
 const event1: SerializedEvent = {
   eventId: 'EVENT_ID_1',

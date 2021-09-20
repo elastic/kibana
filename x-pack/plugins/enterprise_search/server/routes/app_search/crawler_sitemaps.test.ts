@@ -58,8 +58,7 @@ describe('crawler sitemap routes', () => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path:
-          '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+        path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
       });
 
       registerCrawlerSitemapRoutes({
@@ -100,8 +99,7 @@ describe('crawler sitemap routes', () => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path:
-          '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+        path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
       });
 
       registerCrawlerSitemapRoutes({

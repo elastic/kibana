@@ -65,7 +65,8 @@ export class DataServerPlugin
       DataPluginStart,
       DataPluginSetupDependencies,
       DataPluginStartDependencies
-    > {
+    >
+{
   private readonly searchService: SearchService;
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;

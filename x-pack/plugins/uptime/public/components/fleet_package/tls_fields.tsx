@@ -37,10 +37,8 @@ export const TLSFields: React.FunctionComponent<{
   tlsRole: TLSRole;
 }> = memo(({ isEnabled, tlsRole }) => {
   const { fields, setFields } = useTLSFieldsContext();
-  const [
-    verificationVersionInputRef,
-    setVerificationVersionInputRef,
-  ] = useState<HTMLInputElement | null>(null);
+  const [verificationVersionInputRef, setVerificationVersionInputRef] =
+    useState<HTMLInputElement | null>(null);
   const [hasVerificationVersionError, setHasVerificationVersionError] = useState<
     string | undefined
   >(undefined);

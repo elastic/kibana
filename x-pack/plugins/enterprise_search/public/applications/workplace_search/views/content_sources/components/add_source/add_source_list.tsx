@@ -46,9 +46,8 @@ import {
 } from './constants';
 
 export const AddSourceList: React.FC = () => {
-  const { contentSources, dataLoading, availableSources, configuredSources } = useValues(
-    SourcesLogic
-  );
+  const { contentSources, dataLoading, availableSources, configuredSources } =
+    useValues(SourcesLogic);
 
   const { initializeSources, resetSourcesState } = useActions(SourcesLogic);
 

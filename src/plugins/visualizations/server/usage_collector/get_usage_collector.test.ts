@@ -85,14 +85,14 @@ const enlargedMockSavedObjects = [
 
 describe('Visualizations usage collector', () => {
   const getMockCallCluster = (savedObjects: unknown[]) =>
-    (({
+    ({
       createPointInTimeFinder: jest.fn().mockResolvedValue({
         close: jest.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: savedObjects };
         },
       }),
-    } as unknown) as SavedObjectsClientContract);
+    } as unknown as SavedObjectsClientContract);
 
   test('Returns undefined when no results found (undefined)', async () => {
     const result = await getStats(getMockCallCluster(undefined as any));

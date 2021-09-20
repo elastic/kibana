@@ -14,42 +14,42 @@ import {
   collectByValueLensInfo,
 } from './dashboard_telemetry';
 
-const visualizationType1ByValue = ({
+const visualizationType1ByValue = {
   embeddableConfig: {
     savedVis: {
       type: 'type1',
     },
   },
   type: 'visualization',
-} as unknown) as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel730ToLatest;
 
-const visualizationType2ByValue = ({
+const visualizationType2ByValue = {
   embeddableConfig: {
     savedVis: {
       type: 'type2',
     },
   },
   type: 'visualization',
-} as unknown) as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel730ToLatest;
 const visualizationType2ByReference = {
   ...visualizationType2ByValue,
   id: '11111',
 };
 
-const lensTypeAByValue = ({
+const lensTypeAByValue = {
   type: 'lens',
   embeddableConfig: {
     attributes: {
       visualizationType: 'a',
     },
   },
-} as unknown) as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel730ToLatest;
 const lensTypeAByReference = {
   ...lensTypeAByValue,
   id: '22222',
 };
 
-const lensXYSeriesA = ({
+const lensXYSeriesA = {
   type: 'lens',
   embeddableConfig: {
     attributes: {
@@ -61,9 +61,9 @@ const lensXYSeriesA = ({
       },
     },
   },
-} as unknown) as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel730ToLatest;
 
-const lensXYSeriesB = ({
+const lensXYSeriesB = {
   type: 'lens',
   embeddableConfig: {
     attributes: {
@@ -91,7 +91,7 @@ const lensXYSeriesB = ({
       },
     },
   },
-} as unknown) as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel730ToLatest;
 
 describe('dashboard telemetry', () => {
   it('collects information about dashboard panels', () => {
@@ -126,10 +126,10 @@ describe('dashboard telemetry', () => {
     });
 
     it('handles misshapen visualization panels without errors', () => {
-      const badVisualizationPanel = ({
+      const badVisualizationPanel = {
         embeddableConfig: {},
         type: 'visualization',
-      } as unknown) as SavedDashboardPanel730ToLatest;
+      } as unknown as SavedDashboardPanel730ToLatest;
 
       const panels = [badVisualizationPanel, visualizationType1ByValue];
 
@@ -164,12 +164,12 @@ describe('dashboard telemetry', () => {
     });
 
     it('handles misshapen lens panels', () => {
-      const badPanel = ({
+      const badPanel = {
         type: 'lens',
         embeddableConfig: {
           oops: 'no visualization type',
         },
-      } as unknown) as SavedDashboardPanel730ToLatest;
+      } as unknown as SavedDashboardPanel730ToLatest;
 
       const panels = [badPanel, lensTypeAByValue];
 

@@ -126,7 +126,7 @@ describe('Lens App', () => {
 
   beforeEach(() => {
     defaultSavedObjectId = '1234';
-    defaultDoc = ({
+    defaultDoc = {
       savedObjectId: defaultSavedObjectId,
       title: 'An extremely cool default document!',
       expression: 'definitely a valid expression',
@@ -135,7 +135,7 @@ describe('Lens App', () => {
         filters: [{ query: { match_phrase: { src: 'test' } } }],
       },
       references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-    } as unknown) as Document;
+    } as unknown as Document;
   });
 
   it('renders the editor frame', async () => {
@@ -145,8 +145,8 @@ describe('Lens App', () => {
 
   it('updates global filters with store state', async () => {
     const services = makeDefaultServices(sessionIdSubject);
-    const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-    const pinnedField = ({ name: 'pinnedField' } as unknown) as FieldSpec;
+    const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+    const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
     const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
     services.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
       return [];
@@ -173,7 +173,7 @@ describe('Lens App', () => {
 
   describe('breadcrumbs', () => {
     const breadcrumbDocSavedObjectId = defaultSavedObjectId;
-    const breadcrumbDoc = ({
+    const breadcrumbDoc = {
       savedObjectId: breadcrumbDocSavedObjectId,
       title: 'Daaaaaaadaumching!',
       state: {
@@ -181,7 +181,7 @@ describe('Lens App', () => {
         filters: [],
       },
       references: [],
-    } as unknown) as Document;
+    } as unknown as Document;
 
     it('sets breadcrumbs when the document title changes', async () => {
       const { instance, services, lensStore } = await mountWith({});
@@ -309,19 +309,19 @@ describe('Lens App', () => {
   describe('persistence', () => {
     it('passes query and indexPatterns to TopNavMenu', async () => {
       const { instance, lensStore, services } = await mountWith({ preloadedState: {} });
-      const document = ({
+      const document = {
         savedObjectId: defaultSavedObjectId,
         state: {
           query: 'fake query',
           filters: [{ query: { match_phrase: { src: 'test' } } }],
         },
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-      } as unknown) as Document;
+      } as unknown as Document;
 
       act(() => {
         lensStore.dispatch(
           setState({
-            query: ('fake query' as unknown) as Query,
+            query: 'fake query' as unknown as Query,
             persistedDoc: document,
           })
         );
@@ -345,11 +345,9 @@ describe('Lens App', () => {
       }
 
       function getButton(inst: ReactWrapper): TopNavMenuData {
-        return (inst
-          .find('[data-test-subj="lnsApp_topNav"]')
-          .prop('config') as TopNavMenuData[]).find(
-          (button) => button.testId === 'lnsApp_saveButton'
-        )!;
+        return (
+          inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
+        ).find((button) => button.testId === 'lnsApp_saveButton')!;
       }
 
       async function testSave(inst: ReactWrapper, saveProps: SaveProps) {
@@ -646,9 +644,9 @@ describe('Lens App', () => {
       });
 
       it('saves app filters and does not save pinned filters', async () => {
-        const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-        const field = ({ name: 'myfield' } as unknown) as FieldSpec;
-        const pinnedField = ({ name: 'pinnedField' } as unknown) as FieldSpec;
+        const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+        const field = { name: 'myfield' } as unknown as FieldSpec;
+        const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
         const unpinned = esFilters.buildExistsFilter(field, indexPattern);
         const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
         await act(async () => {
@@ -685,7 +683,7 @@ describe('Lens App', () => {
           services,
           preloadedState: {
             isSaveable: true,
-            persistedDoc: ({ savedObjectId: '123' } as unknown) as Document,
+            persistedDoc: { savedObjectId: '123' } as unknown as Document,
           },
         });
         await act(async () => {
@@ -722,11 +720,9 @@ describe('Lens App', () => {
 
   describe('download button', () => {
     function getButton(inst: ReactWrapper): TopNavMenuData {
-      return (inst
-        .find('[data-test-subj="lnsApp_topNav"]')
-        .prop('config') as TopNavMenuData[]).find(
-        (button) => button.testId === 'lnsApp_downloadCSVButton'
-      )!;
+      return (
+        inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
+      ).find((button) => button.testId === 'lnsApp_downloadCSVButton')!;
     }
 
     it('should be disabled when no data is available', async () => {
@@ -768,11 +764,9 @@ describe('Lens App', () => {
 
   describe('inspector', () => {
     function getButton(inst: ReactWrapper): TopNavMenuData {
-      return (inst
-        .find('[data-test-subj="lnsApp_topNav"]')
-        .prop('config') as TopNavMenuData[]).find(
-        (button) => button.testId === 'lnsApp_inspectButton'
-      )!;
+      return (
+        inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
+      ).find((button) => button.testId === 'lnsApp_inspectButton')!;
     }
 
     async function runInspect(inst: ReactWrapper) {
@@ -859,8 +853,8 @@ describe('Lens App', () => {
 
     it('updates the filters when the user changes them', async () => {
       const { instance, services, lensStore } = await mountWith({});
-      const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as FieldSpec;
+      const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+      const field = { name: 'myfield' } as unknown as FieldSpec;
       expect(lensStore.getState()).toEqual({
         lens: expect.objectContaining({
           filters: [],
@@ -914,8 +908,8 @@ describe('Lens App', () => {
           searchSessionId: `sessionId-3`,
         }),
       });
-      const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as FieldSpec;
+      const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+      const field = { name: 'myfield' } as unknown as FieldSpec;
       act(() =>
         services.data.query.filterManager.setFilters([
           esFilters.buildExistsFilter(field, indexPattern),
@@ -1049,9 +1043,9 @@ describe('Lens App', () => {
           query: { query: 'new', language: 'lucene' },
         })
       );
-      const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as FieldSpec;
-      const pinnedField = ({ name: 'pinnedField' } as unknown) as FieldSpec;
+      const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+      const field = { name: 'myfield' } as unknown as FieldSpec;
+      const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
       const unpinned = esFilters.buildExistsFilter(field, indexPattern);
       const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
       FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
@@ -1106,9 +1100,9 @@ describe('Lens App', () => {
           query: { query: 'new', language: 'lucene' },
         })
       );
-      const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as FieldSpec;
-      const pinnedField = ({ name: 'pinnedField' } as unknown) as FieldSpec;
+      const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+      const field = { name: 'myfield' } as unknown as FieldSpec;
+      const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
       const unpinned = esFilters.buildExistsFilter(field, indexPattern);
       const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
       FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);

@@ -214,13 +214,13 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
         const actualResult = responseObjects[i];
         if (isLeft(expectedResult)) {
           const { type, id } = expectedResult.value;
-          return ({
+          return {
             type,
             id,
             error: SavedObjectsErrorHelpers.createBadRequestError(
               '"namespaces" can only specify a single space when used with space-isolated types'
             ).output.payload,
-          } as unknown) as SavedObject<T>;
+          } as unknown as SavedObject<T>;
         }
         return actualResult;
       }),

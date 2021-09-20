@@ -132,10 +132,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       hasIndexRead,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);

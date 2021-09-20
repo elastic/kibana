@@ -88,7 +88,7 @@ describe('transformError', () => {
           reason: 'detailed explanation',
         },
       },
-      meta: ({} as unknown) as errors.ResponseError['meta'],
+      meta: {} as unknown as errors.ResponseError['meta'],
       statusCode: 400,
     };
     const transformed = transformError(error);

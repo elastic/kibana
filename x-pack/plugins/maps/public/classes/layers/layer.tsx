@@ -185,7 +185,8 @@ export class AbstractLayer implements ILayer {
             'Cannot clone table-source. Should only be used in MapEmbeddable, not in UX'
           );
         }
-        const termSourceDescriptor: ESTermSourceDescriptor = joinDescriptor.right as ESTermSourceDescriptor;
+        const termSourceDescriptor: ESTermSourceDescriptor =
+          joinDescriptor.right as ESTermSourceDescriptor;
 
         // todo: must tie this to generic thing
         const originalJoinId = joinDescriptor.right.id!;

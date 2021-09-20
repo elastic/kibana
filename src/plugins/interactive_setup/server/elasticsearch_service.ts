@@ -119,9 +119,8 @@ export class ElasticsearchService {
     elasticsearch,
     connectionCheckInterval,
   }: ElasticsearchServiceSetupDeps): ElasticsearchServiceSetup {
-    const connectionStatusClient = (this.connectionStatusClient = elasticsearch.createClient(
-      'connectionStatus'
-    ));
+    const connectionStatusClient = (this.connectionStatusClient =
+      elasticsearch.createClient('connectionStatus'));
 
     return {
       connectionStatus$: timer(0, connectionCheckInterval.asMilliseconds()).pipe(

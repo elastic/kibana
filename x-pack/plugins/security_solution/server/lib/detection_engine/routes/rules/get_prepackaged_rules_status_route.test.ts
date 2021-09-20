@@ -70,12 +70,12 @@ describe.each([
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
 

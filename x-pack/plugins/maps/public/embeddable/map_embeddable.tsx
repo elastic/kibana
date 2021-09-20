@@ -94,7 +94,8 @@ function getIsRestore(searchSessionId?: string) {
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>
+{
   type = MAP_SAVED_OBJECT_TYPE;
   deferEmbeddableLoad = true;
 

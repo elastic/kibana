@@ -36,9 +36,8 @@ export function registerUpgradeStatusRoute({ router }: RouteDependencies) {
             esClient
           );
           // Fetch Kibana upgrade status
-          const {
-            totalCriticalDeprecations: kibanaTotalCriticalDeps,
-          } = await getKibanaUpgradeStatus(deprecationsClient);
+          const { totalCriticalDeprecations: kibanaTotalCriticalDeps } =
+            await getKibanaUpgradeStatus(deprecationsClient);
           const readyForUpgrade = esTotalCriticalDeps === 0 && kibanaTotalCriticalDeps === 0;
 
           const getStatusMessage = () => {

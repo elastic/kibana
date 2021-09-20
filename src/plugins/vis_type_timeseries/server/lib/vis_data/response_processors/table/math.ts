@@ -11,13 +11,10 @@ import { mathAgg } from '../series/math';
 
 import type { TableResponseProcessorsFunction } from './types';
 
-export const math: TableResponseProcessorsFunction = ({
-  bucket,
-  panel,
-  series,
-  meta,
-  extractFields,
-}) => (next) => (results) => {
-  const mathFn = mathAgg({ aggregations: bucket }, panel, series, meta, extractFields);
-  return mathFn(next)(results);
-};
+export const math: TableResponseProcessorsFunction =
+  ({ bucket, panel, series, meta, extractFields }) =>
+  (next) =>
+  (results) => {
+    const mathFn = mathAgg({ aggregations: bucket }, panel, series, meta, extractFields);
+    return mathFn(next)(results);
+  };

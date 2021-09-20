@@ -23,9 +23,10 @@ export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: Inspecto
     [setPagination]
   );
 
-  const onChangePage = useCallback((pageIndex) => setPagination((p) => ({ ...p, pageIndex })), [
-    setPagination,
-  ]);
+  const onChangePage = useCallback(
+    (pageIndex) => setPagination((p) => ({ ...p, pageIndex })),
+    [setPagination]
+  );
 
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);

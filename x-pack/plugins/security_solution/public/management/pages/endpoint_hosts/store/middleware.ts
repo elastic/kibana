@@ -473,15 +473,13 @@ async function endpointDetailsListMiddleware({
     });
 
     try {
-      const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackagePolicies(
-        http,
-        {
+      const policyDataResponse: GetPolicyListResponse =
+        await sendGetEndpointSpecificPackagePolicies(http, {
           query: {
             perPage: 50, // Since this is an oboarding flow, we'll cap at 50 policies.
             page: 1,
           },
-        }
-      );
+        });
 
       dispatch({
         type: 'serverReturnedPoliciesForOnboarding',
@@ -709,9 +707,9 @@ async function endpointDetailsActivityLogPagingMiddleware({
 
     const lastLoadedLogData = getLastLoadedActivityLogData(getState());
     if (lastLoadedLogData !== undefined) {
-      const updatedLogDataItems = ([
-        ...new Set([...lastLoadedLogData.data, ...activityLog.data]),
-      ] as ActivityLog['data']).sort((a, b) =>
+      const updatedLogDataItems = (
+        [...new Set([...lastLoadedLogData.data, ...activityLog.data])] as ActivityLog['data']
+      ).sort((a, b) =>
         new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
       );
 

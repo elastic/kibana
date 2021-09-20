@@ -166,28 +166,26 @@ export class InfraLogEntriesDomain {
         id: doc.id,
         index: doc.index,
         cursor: doc.cursor,
-        columns: columnDefinitions.map(
-          (column): LogColumn => {
-            if ('timestampColumn' in column) {
-              return {
-                columnId: column.timestampColumn.id,
-                timestamp: doc.cursor.time,
-              };
-            } else if ('messageColumn' in column) {
-              return {
-                columnId: column.messageColumn.id,
-                message: messageFormattingRules.format(doc.fields, doc.highlights),
-              };
-            } else {
-              return {
-                columnId: column.fieldColumn.id,
-                field: column.fieldColumn.field,
-                value: doc.fields[column.fieldColumn.field] ?? [],
-                highlights: doc.highlights[column.fieldColumn.field] ?? [],
-              };
-            }
+        columns: columnDefinitions.map((column): LogColumn => {
+          if ('timestampColumn' in column) {
+            return {
+              columnId: column.timestampColumn.id,
+              timestamp: doc.cursor.time,
+            };
+          } else if ('messageColumn' in column) {
+            return {
+              columnId: column.messageColumn.id,
+              message: messageFormattingRules.format(doc.fields, doc.highlights),
+            };
+          } else {
+            return {
+              columnId: column.fieldColumn.id,
+              field: column.fieldColumn.field,
+              value: doc.fields[column.fieldColumn.field] ?? [],
+              highlights: doc.highlights[column.fieldColumn.field] ?? [],
+            };
           }
-        ),
+        }),
         context: getContextFromDoc(doc),
       };
     });

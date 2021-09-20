@@ -61,9 +61,8 @@ class WithKueryAutocompletionComponent extends React.Component<
   ) => {
     const { indexPattern } = this.props;
     const language = 'kuery';
-    const hasQuerySuggestions = this.props.kibana.services.data?.autocomplete.hasQuerySuggestions(
-      language
-    );
+    const hasQuerySuggestions =
+      this.props.kibana.services.data?.autocomplete.hasQuerySuggestions(language);
 
     if (!hasQuerySuggestions) {
       return;

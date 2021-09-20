@@ -21,11 +21,11 @@ describe('getBucketSize', () => {
     },
   } as VisTypeTimeseriesVisDataRequest;
 
-  const capabilities = ({
+  const capabilities = {
     timezone: 'UTC',
     maxBucketsLimit: 200000,
     getValidTimeInterval: jest.fn((v) => v),
-  } as unknown) as SearchCapabilities;
+  } as unknown as SearchCapabilities;
 
   test('returns auto calculated buckets', () => {
     const result = getBucketSize(req, 'auto', capabilities, 100);

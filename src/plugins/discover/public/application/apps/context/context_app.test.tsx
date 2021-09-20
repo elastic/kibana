@@ -42,7 +42,7 @@ describe('ContextApp test', () => {
   };
 
   beforeEach(() => {
-    setServices(({
+    setServices({
       data: {
         search: {
           searchSource: {
@@ -65,7 +65,7 @@ describe('ContextApp test', () => {
       history: () => {},
       filterManager: mockFilterManager,
       uiSettings: uiSettingsMock,
-    } as unknown) as DiscoverServices);
+    } as unknown as DiscoverServices);
   });
 
   it('renders correctly', async () => {

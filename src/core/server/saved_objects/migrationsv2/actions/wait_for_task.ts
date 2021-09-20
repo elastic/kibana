@@ -65,30 +65,32 @@ export interface WaitForTaskParams {
  *
  * TODO: delete completed tasks
  */
-export const waitForTask = ({
-  client,
-  taskId,
-  timeout,
-}: WaitForTaskParams): TaskEither.TaskEither<
-  RetryableEsClientError | WaitForTaskCompletionTimeout,
-  WaitForTaskResponse
-> => () => {
-  return client.tasks
-    .get({
-      task_id: taskId,
-      wait_for_completion: true,
-      timeout,
-    })
-    .then((res) => {
-      const body = res.body;
-      const failures = body.response?.failures ?? [];
-      return Either.right({
-        completed: body.completed,
-        error: Option.fromNullable(body.error),
-        failures: failures.length > 0 ? Option.some(failures) : Option.none,
-        description: body.task.description,
-      });
-    })
-    .catch(catchWaitForTaskCompletionTimeout)
-    .catch(catchRetryableEsClientErrors);
-};
+export const waitForTask =
+  ({
+    client,
+    taskId,
+    timeout,
+  }: WaitForTaskParams): TaskEither.TaskEither<
+    RetryableEsClientError | WaitForTaskCompletionTimeout,
+    WaitForTaskResponse
+  > =>
+  () => {
+    return client.tasks
+      .get({
+        task_id: taskId,
+        wait_for_completion: true,
+        timeout,
+      })
+      .then((res) => {
+        const body = res.body;
+        const failures = body.response?.failures ?? [];
+        return Either.right({
+          completed: body.completed,
+          error: Option.fromNullable(body.error),
+          failures: failures.length > 0 ? Option.some(failures) : Option.none,
+          description: body.task.description,
+        });
+      })
+      .catch(catchWaitForTaskCompletionTimeout)
+      .catch(catchRetryableEsClientErrors);
+  };

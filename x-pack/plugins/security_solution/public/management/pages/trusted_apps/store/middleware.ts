@@ -479,6 +479,5 @@ export const createTrustedAppsPageMiddleware = (
   };
 };
 
-export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<TrustedAppsListPageState> = (
-  coreStart
-) => createTrustedAppsPageMiddleware(new TrustedAppsHttpService(coreStart.http));
+export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<TrustedAppsListPageState> =
+  (coreStart) => createTrustedAppsPageMiddleware(new TrustedAppsHttpService(coreStart.http));

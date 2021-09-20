@@ -48,34 +48,36 @@ export interface IndexPatternsServiceStartDeps {
   logger: Logger;
 }
 
-export const indexPatternsServiceFactory = ({
-  logger,
-  uiSettings,
-  fieldFormats,
-}: {
-  logger: Logger;
-  uiSettings: UiSettingsServiceStart;
-  fieldFormats: FieldFormatsStart;
-}) => async (
-  savedObjectsClient: SavedObjectsClientContract,
-  elasticsearchClient: ElasticsearchClient
-) => {
-  const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-  const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
+export const indexPatternsServiceFactory =
+  ({
+    logger,
+    uiSettings,
+    fieldFormats,
+  }: {
+    logger: Logger;
+    uiSettings: UiSettingsServiceStart;
+    fieldFormats: FieldFormatsStart;
+  }) =>
+  async (
+    savedObjectsClient: SavedObjectsClientContract,
+    elasticsearchClient: ElasticsearchClient
+  ) => {
+    const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+    const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
-  return new IndexPatternsCommonService({
-    uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
-    savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
-    apiClient: new IndexPatternsApiServer(elasticsearchClient, savedObjectsClient),
-    fieldFormats: formats,
-    onError: (error) => {
-      logger.error(error);
-    },
-    onNotification: ({ title, text }) => {
-      logger.warn(`${title}${text ? ` : ${text}` : ''}`);
-    },
-  });
-};
+    return new IndexPatternsCommonService({
+      uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
+      savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
+      apiClient: new IndexPatternsApiServer(elasticsearchClient, savedObjectsClient),
+      fieldFormats: formats,
+      onError: (error) => {
+        logger.error(error);
+      },
+      onNotification: ({ title, text }) => {
+        logger.warn(`${title}${text ? ` : ${text}` : ''}`);
+      },
+    });
+  };
 
 export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> {
   public setup(

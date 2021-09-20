@@ -40,8 +40,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: (authorization as unknown) as AlertingAuthorization,
-  actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
+  authorization: authorization as unknown as AlertingAuthorization,
+  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
@@ -61,9 +61,7 @@ beforeEach(() => {
 
 setGlobalDate();
 
-function getMockData(
-  overwrites: Record<string, unknown> = {}
-): CreateOptions<{
+function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions<{
   bar: boolean;
 }>['data'] {
   return {

@@ -15,7 +15,7 @@ import { getChartAggConfigs } from './get_chart_agg_configs';
 test('getDimensions', () => {
   const indexPattern = indexPatternWithTimefieldMock;
   const setField = jest.fn();
-  const searchSource = ({
+  const searchSource = {
     setField,
     removeField: jest.fn(),
     getField: (name: string) => {
@@ -23,7 +23,7 @@ test('getDimensions', () => {
         return indexPattern;
       }
     },
-  } as unknown) as SearchSource;
+  } as unknown as SearchSource;
 
   const dataMock = dataPluginMock.createStartContract();
   dataMock.query.timefilter.timefilter.getTime = () => {

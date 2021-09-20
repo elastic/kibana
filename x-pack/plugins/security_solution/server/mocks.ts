@@ -9,9 +9,9 @@ import { AppClient } from './types';
 
 type AppClientMock = jest.Mocked<AppClient>;
 const createAppClientMock = (): AppClientMock =>
-  (({
+  ({
     getSignalsIndex: jest.fn(),
-  } as unknown) as AppClientMock);
+  } as unknown as AppClientMock);
 
 export const siemMock = {
   createClient: createAppClientMock,

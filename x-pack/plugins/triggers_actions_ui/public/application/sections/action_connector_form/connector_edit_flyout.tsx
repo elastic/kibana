@@ -121,9 +121,8 @@ const ConnectorEditFlyout = ({
   const [testExecutionActionParams, setTestExecutionActionParams] = useState<
     Record<string, unknown>
   >({});
-  const [testExecutionResult, setTestExecutionResult] = useState<
-    Option<ActionTypeExecutorResult<unknown>>
-  >(none);
+  const [testExecutionResult, setTestExecutionResult] =
+    useState<Option<ActionTypeExecutorResult<unknown>>>(none);
   const [isExecutingAction, setIsExecutinAction] = useState<boolean>(false);
   const handleSetTab = useCallback(
     () =>

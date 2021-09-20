@@ -118,7 +118,7 @@ describe('alert_form', () => {
 
       const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
 
-      const initialAlert = ({
+      const initialAlert = {
         name: 'test',
         alertTypeId: alertType.id,
         params: {},
@@ -131,7 +131,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Alert;
 
       wrapper = mountWithIntl(
         <I18nProvider>
@@ -201,7 +201,7 @@ describe('alert_form', () => {
         actionTypeRegistry.has.mockReturnValue(true);
         actionTypeRegistry.get.mockReturnValue(actionType);
 
-        const initialAlert = ({
+        const initialAlert = {
           name: 'test',
           alertTypeId: alertType.id,
           params: {},
@@ -223,7 +223,7 @@ describe('alert_form', () => {
           muteAll: false,
           enabled: false,
           mutedInstanceIds: [],
-        } as unknown) as Alert;
+        } as unknown as Alert;
 
         const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
 

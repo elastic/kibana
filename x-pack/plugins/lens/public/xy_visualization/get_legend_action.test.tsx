@@ -180,11 +180,11 @@ describe('getLegendAction', function () {
     wrapperProps = {
       color: 'rgb(109, 204, 177)',
       label: "Women's Accessories",
-      series: ([
+      series: [
         {
           seriesKeys: ["Women's Accessories", 'test'],
         },
-      ] as unknown) as SeriesIdentifier[],
+      ] as unknown as SeriesIdentifier[],
     };
   });
 
@@ -197,11 +197,11 @@ describe('getLegendAction', function () {
   it('is rendered if row does not exist', () => {
     const newProps = {
       ...wrapperProps,
-      series: ([
+      series: [
         {
           seriesKeys: ['test', 'b'],
         },
-      ] as unknown) as SeriesIdentifier[],
+      ] as unknown as SeriesIdentifier[],
     };
     wrapper = mountWithIntl(<Component {...newProps} />);
     expect(wrapper).toEqual({});
@@ -211,11 +211,11 @@ describe('getLegendAction', function () {
   it('is rendered if layer is detected', () => {
     const newProps = {
       ...wrapperProps,
-      series: ([
+      series: [
         {
           seriesKeys: ["Women's Accessories", 'b'],
         },
-      ] as unknown) as SeriesIdentifier[],
+      ] as unknown as SeriesIdentifier[],
     };
     wrapper = mountWithIntl(<Component {...newProps} />);
     expect(wrapper.find(EuiPopover).length).toBe(1);

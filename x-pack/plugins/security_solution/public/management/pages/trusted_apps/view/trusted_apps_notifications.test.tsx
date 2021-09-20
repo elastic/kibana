@@ -91,8 +91,7 @@ describe('TrustedAppsNotifications', () => {
 
     expect(notifications.toasts.addSuccess).not.toBeCalled();
     expect(notifications.toasts.addDanger).toBeCalledWith({
-      text:
-        'Unable to remove "trusted app 3" from the Trusted Applications list. Reason: Not Found',
+      text: 'Unable to remove "trusted app 3" from the Trusted Applications list. Reason: Not Found',
       title: 'Removal failure',
     });
   });

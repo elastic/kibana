@@ -51,7 +51,7 @@ function Wrapper({
   hasCloudPolicyWithApmIntegration,
   isFleetEnabled,
 }: Args) {
-  const http = ({
+  const http = {
     get: () => ({
       fleetAgents: [
         ...(hasFleetPoliciesWithApmIntegration ? fleetAgents : []),
@@ -65,7 +65,7 @@ function Wrapper({
         secretToken: 'foo',
       },
     }),
-  } as unknown) as HttpStart;
+  } as unknown as HttpStart;
   return (
     <TutorialConfigAgent
       http={http}

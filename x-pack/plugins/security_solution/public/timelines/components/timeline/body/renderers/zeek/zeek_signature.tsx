@@ -22,9 +22,9 @@ import { IS_OPERATOR, QueryOperator } from '../../../data_providers/data_provide
 
 import * as i18n from './translations';
 
-const Badge = (styled(EuiBadge)`
+const Badge = styled(EuiBadge)`
   vertical-align: top;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 Badge.displayName = 'Badge';
 

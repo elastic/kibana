@@ -21,9 +21,10 @@ import { ResolverWithoutProviders } from './resolver_without_providers';
  */
 export const Resolver = React.memo((props: ResolverProps) => {
   const context = useKibana<StartServices>();
-  const dataAccessLayer: DataAccessLayer = useMemo(() => dataAccessLayerFactory(context), [
-    context,
-  ]);
+  const dataAccessLayer: DataAccessLayer = useMemo(
+    () => dataAccessLayerFactory(context),
+    [context]
+  );
 
   const store = useMemo(() => resolverStoreFactory(dataAccessLayer), [dataAccessLayer]);
 

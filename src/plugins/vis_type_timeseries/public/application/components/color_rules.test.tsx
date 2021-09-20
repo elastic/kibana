@@ -34,37 +34,37 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
     onChange: jest.fn(),
   });
 
-  const defaultProps = (getColorRulesProps([
+  const defaultProps = getColorRulesProps([
     {
       gauge: null,
       value: 0,
       id: 'unique value',
     },
-  ]) as unknown) as ColorRulesProps;
+  ]) as unknown as ColorRulesProps;
 
-  const emptyColorRuleProps = (getColorRulesProps([
+  const emptyColorRuleProps = getColorRulesProps([
     {
       operator: emptyRule?.method,
       value: emptyRule?.value,
       id: 'unique value',
     },
-  ]) as unknown) as ColorRulesProps;
+  ]) as unknown as ColorRulesProps;
 
-  const notEmptyColorRuleProps = (getColorRulesProps([
+  const notEmptyColorRuleProps = getColorRulesProps([
     {
       operator: notEmptyRule?.method,
       value: notEmptyRule?.value,
       id: 'unique value',
     },
-  ]) as unknown) as ColorRulesProps;
+  ]) as unknown as ColorRulesProps;
 
   describe('ColorRules', () => {
     it('should render empty <div/> node', () => {
-      const emptyProps = ({
+      const emptyProps = {
         name: 'gauge_color_rules',
         model: {},
         onChange: jest.fn(),
-      } as unknown) as ColorRulesProps;
+      } as unknown as ColorRulesProps;
       const wrapper = mountWithIntl(<ColorRules {...emptyProps} />);
       const isNode = wrapper.find('div').children().exists();
       expect(isNode).toBeFalsy();

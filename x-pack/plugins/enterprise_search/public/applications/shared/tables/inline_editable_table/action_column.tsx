@@ -41,12 +41,10 @@ export const ActionColumn = <Item extends ItemWithAnID>({
   lastItemWarning,
   uneditableItems,
 }: ActionColumnProps<Item>) => {
-  const { doesEditingItemValueContainEmptyProperty, formErrors, isEditingUnsavedItem } = useValues(
-    InlineEditableTableLogic
-  );
-  const { editExistingItem, deleteItem, doneEditing, saveExistingItem, saveNewItem } = useActions(
-    InlineEditableTableLogic
-  );
+  const { doesEditingItemValueContainEmptyProperty, formErrors, isEditingUnsavedItem } =
+    useValues(InlineEditableTableLogic);
+  const { editExistingItem, deleteItem, doneEditing, saveExistingItem, saveNewItem } =
+    useActions(InlineEditableTableLogic);
 
   if (uneditableItems?.includes(item)) {
     return null;

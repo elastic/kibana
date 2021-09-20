@@ -19,7 +19,7 @@ describe('PalettePicker', function () {
   let component: ReactWrapper<PieOptionsProps>;
 
   beforeAll(() => {
-    props = ({
+    props = {
       palettes: chartPluginMock.createSetupContract().palettes,
       showElasticChartsOptions: true,
       vis: {
@@ -56,7 +56,7 @@ describe('PalettePicker', function () {
         },
       },
       setValue: jest.fn(),
-    } as unknown) as PieOptionsProps;
+    } as unknown as PieOptionsProps;
   });
 
   it('renders the nested legend switch for the elastic charts implementation', async () => {

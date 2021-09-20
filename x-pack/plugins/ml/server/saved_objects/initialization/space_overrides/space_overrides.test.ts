@@ -59,9 +59,9 @@ const callAs = {
   },
 };
 
-const mlClusterClient = ({
+const mlClusterClient = {
   asInternalUser: callAs,
-} as unknown) as IScopedClusterClient;
+} as unknown as IScopedClusterClient;
 
 describe('ML - job initialization', () => {
   describe('createJobSpaceOverrides', () => {

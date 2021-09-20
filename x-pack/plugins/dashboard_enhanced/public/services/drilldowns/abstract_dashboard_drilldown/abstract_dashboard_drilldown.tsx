@@ -32,7 +32,8 @@ export interface Params {
 }
 
 export abstract class AbstractDashboardDrilldown<Context extends object = object>
-  implements Drilldown<Config, Context> {
+  implements Drilldown<Config, Context>
+{
   constructor(protected readonly params: Params) {}
 
   public abstract readonly id: string;

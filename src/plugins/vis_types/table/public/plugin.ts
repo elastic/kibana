@@ -29,7 +29,8 @@ export interface TablePluginStartDependencies {
 
 /** @internal */
 export class TableVisPlugin
-  implements Plugin<void, void, TablePluginSetupDependencies, TablePluginStartDependencies> {
+  implements Plugin<void, void, TablePluginSetupDependencies, TablePluginStartDependencies>
+{
   public setup(core: CoreSetup<TablePluginStartDependencies>, deps: TablePluginSetupDependencies) {
     registerTableVis(core, deps);
   }

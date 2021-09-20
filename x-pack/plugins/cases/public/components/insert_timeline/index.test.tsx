@@ -37,7 +37,7 @@ describe('InsertTimeline ', () => {
     mount(
       <TestProviders>
         <CasesTimelineIntegrationProvider>
-          <Form form={(formHookMock as unknown) as FormHook}>
+          <Form form={formHookMock as unknown as FormHook}>
             <InsertTimeline fieldName="comment" />
           </Form>
         </CasesTimelineIntegrationProvider>
@@ -59,7 +59,7 @@ describe('InsertTimeline ', () => {
     mount(
       <TestProviders>
         <CasesTimelineIntegrationProvider timelineIntegration={mockTimelineIntegration}>
-          <Form form={(formHookMock as unknown) as FormHook}>
+          <Form form={formHookMock as unknown as FormHook}>
             <InsertTimeline fieldName="comment" />
           </Form>
         </CasesTimelineIntegrationProvider>

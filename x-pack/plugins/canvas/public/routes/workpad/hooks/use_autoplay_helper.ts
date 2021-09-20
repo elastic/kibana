@@ -8,9 +8,8 @@ import { useContext, useEffect, useRef } from 'react';
 import { WorkpadRoutingContext } from '../workpad_routing_context';
 
 export const useAutoplayHelper = () => {
-  const { nextPage, isFullscreen, autoplayInterval, isAutoplayPaused } = useContext(
-    WorkpadRoutingContext
-  );
+  const { nextPage, isFullscreen, autoplayInterval, isAutoplayPaused } =
+    useContext(WorkpadRoutingContext);
   const timer = useRef<number | undefined>(undefined);
 
   useEffect(() => {

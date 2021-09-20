@@ -22,7 +22,8 @@ import { escapeSearchQueryPhrase } from '../saved_object';
 
 import { invalidateAPIKeys } from './security';
 
-const uuidRegex = /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
+const uuidRegex =
+  /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
 
 export async function listEnrollmentApiKeys(
   esClient: ElasticsearchClient,

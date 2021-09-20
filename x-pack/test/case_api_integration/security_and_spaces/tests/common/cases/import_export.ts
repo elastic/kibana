@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send()
         .expect(200);
 
-      const comment = (commentsResponse.comments[0] as unknown) as AttributesTypeUser;
+      const comment = commentsResponse.comments[0] as unknown as AttributesTypeUser;
       expect(comment.comment).to.eql('A comment for my case');
 
       const userActions = await getCaseUserActions({

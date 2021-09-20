@@ -47,12 +47,12 @@ describe('ES search strategy', () => {
       return mockedApiCaller;
     });
 
-    return ({
+    return {
       uiSettingsClient: {
         get: () => {},
       },
       esClient: { asCurrentUser: { search: mockApiCaller } },
-    } as unknown) as SearchStrategyDependencies;
+    } as unknown as SearchStrategyDependencies;
   }
 
   const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;

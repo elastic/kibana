@@ -315,16 +315,8 @@ export const callGetMetricsK8sAnomaliesAPI = async (
   requestArgs: RequestArgs,
   fetch: HttpHandler
 ) => {
-  const {
-    sourceId,
-    anomalyThreshold,
-    startTime,
-    endTime,
-    metric,
-    query,
-    sort,
-    pagination,
-  } = requestArgs;
+  const { sourceId, anomalyThreshold, startTime, endTime, metric, query, sort, pagination } =
+    requestArgs;
   const response = await fetch(INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH, {
     method: 'POST',
     body: JSON.stringify(

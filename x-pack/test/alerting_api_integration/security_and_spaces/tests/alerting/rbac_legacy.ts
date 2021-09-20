@@ -130,9 +130,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
               // attempt to update alert as user with no Alerts privileges - as it is no longer a legacy alert
               // this should fail, as the user doesn't have the `updateApiKey` privilege for Alerts
-              const failedUpdateKeyDueToAlertsPrivilegesResponse = await alertUtils.getUpdateApiKeyRequest(
-                migratedAlertId
-              );
+              const failedUpdateKeyDueToAlertsPrivilegesResponse =
+                await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
 
               expect(failedUpdateKeyDueToAlertsPrivilegesResponse.statusCode).to.eql(403);
               expect(failedUpdateKeyDueToAlertsPrivilegesResponse.body).to.eql({
@@ -154,9 +153,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
               // attempt to update alert as user with no Actions privileges - as it is no longer a legacy alert
               // this should fail, as the user doesn't have the `execute` privilege for Actions
-              const failedUpdateKeyDueToActionsPrivilegesResponse = await alertUtils.getUpdateApiKeyRequest(
-                migratedAlertId
-              );
+              const failedUpdateKeyDueToActionsPrivilegesResponse =
+                await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
 
               expect(failedUpdateKeyDueToActionsPrivilegesResponse.statusCode).to.eql(403);
               expect(failedUpdateKeyDueToActionsPrivilegesResponse.body).to.eql({

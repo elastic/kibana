@@ -16,7 +16,8 @@ import {
 } from '../../../../../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 
-type Config = APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
+type Config =
+  APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
 
 interface Props {
   config: Config;

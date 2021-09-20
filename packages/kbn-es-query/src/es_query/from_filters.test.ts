@@ -60,7 +60,7 @@ describe('build query', () => {
     });
 
     test('should remove falsy filters', () => {
-      const filters = ([null, undefined] as unknown) as Filter[];
+      const filters = [null, undefined] as unknown as Filter[];
       const result = buildQueryFromFilters(filters, indexPattern, false);
 
       expect(result.must_not).toEqual([]);

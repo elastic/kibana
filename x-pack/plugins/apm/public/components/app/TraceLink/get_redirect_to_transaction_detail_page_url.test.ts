@@ -9,7 +9,7 @@ import { getRedirectToTransactionDetailPageUrl } from './get_redirect_to_transac
 import { parse } from 'url';
 
 describe('getRedirectToTransactionDetailPageUrl', () => {
-  const transaction = ({
+  const transaction = {
     '@timestamp': '2020-01-01T00:01:00.000Z',
     service: { name: 'opbeans-node' },
     trace: { id: 'trace_id' },
@@ -19,7 +19,7 @@ describe('getRedirectToTransactionDetailPageUrl', () => {
       type: 'request',
       duration: { us: 5000 },
     },
-  } as unknown) as any;
+  } as unknown as any;
 
   const url = getRedirectToTransactionDetailPageUrl({ transaction });
 

@@ -99,11 +99,13 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     path = setStateToKbnUrl('_a', appState, { useHash }, path);
 
     if (initialLayers && initialLayers.length) {
-      const risonEncodedInitialLayers = ((rison as unknown) as {
-        encode_array: (
-          initialLayers: (LayerDescriptor[] & SerializableRecord) | undefined
-        ) => string;
-      }).encode_array(initialLayers);
+      const risonEncodedInitialLayers = (
+        rison as unknown as {
+          encode_array: (
+            initialLayers: (LayerDescriptor[] & SerializableRecord) | undefined
+          ) => string;
+        }
+      ).encode_array(initialLayers);
       path = `${path}&${INITIAL_LAYERS_KEY}=${encodeURIComponent(risonEncodedInitialLayers)}`;
     }
 
@@ -138,7 +140,8 @@ export interface MapsAppTileMapLocatorDependencies {
 }
 
 export class MapsAppTileMapLocatorDefinition
-  implements LocatorDefinition<MapsAppTileMapLocatorParams> {
+  implements LocatorDefinition<MapsAppTileMapLocatorParams>
+{
   public readonly id = MAPS_APP_TILE_MAP_LOCATOR;
 
   constructor(protected readonly deps: MapsAppTileMapLocatorDependencies) {}
@@ -158,7 +161,7 @@ export class MapsAppTileMapLocatorDefinition
       hash = true,
     } = params;
     const mapModules = await lazyLoadMapModules();
-    const initialLayers = ([] as unknown) as LayerDescriptor[] & SerializableRecord;
+    const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
     const tileMapLayerDescriptor = mapModules.createTileMapLayerDescriptor({
       label,
       mapType,
@@ -209,7 +212,8 @@ export interface MapsAppRegionMapLocatorDependencies {
 }
 
 export class MapsAppRegionMapLocatorDefinition
-  implements LocatorDefinition<MapsAppRegionMapLocatorParams> {
+  implements LocatorDefinition<MapsAppRegionMapLocatorParams>
+{
   public readonly id = MAPS_APP_REGION_MAP_LOCATOR;
 
   constructor(protected readonly deps: MapsAppRegionMapLocatorDependencies) {}
@@ -232,7 +236,7 @@ export class MapsAppRegionMapLocatorDefinition
       hash = true,
     } = params;
     const mapModules = await lazyLoadMapModules();
-    const initialLayers = ([] as unknown) as LayerDescriptor[] & SerializableRecord;
+    const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
     const regionMapLayerDescriptor = mapModules.createRegionMapLayerDescriptor({
       label,
       emsLayerId,

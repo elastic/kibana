@@ -37,9 +37,9 @@ interface PerformanceMetrics {
 }
 
 function normalizeMetrics({ metrics }: Metrics) {
-  return (Object.fromEntries(
+  return Object.fromEntries(
     metrics.map(({ name, value }) => [name, value])
-  ) as unknown) as NormalizedMetrics;
+  ) as unknown as NormalizedMetrics;
 }
 
 function getCpuUsage(start: NormalizedMetrics, end: NormalizedMetrics) {

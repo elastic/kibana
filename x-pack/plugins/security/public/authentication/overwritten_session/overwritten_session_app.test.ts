@@ -58,8 +58,9 @@ describe('overwrittenSessionApp', () => {
       history: scopedHistoryMock.create(),
     });
 
-    const mockRenderApp = jest.requireMock('./overwritten_session_page')
-      .renderOverwrittenSessionPage;
+    const mockRenderApp = jest.requireMock(
+      './overwritten_session_page'
+    ).renderOverwrittenSessionPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(coreStartMock.i18n, containerMock, {
       authc: authcMock,

@@ -556,9 +556,8 @@ describe('migrations v2 model', () => {
         legacyIndex: '',
       };
       test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_REINDEX', () => {
-        const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> = Either.right(
-          'create_index_succeeded'
-        );
+        const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> =
+          Either.right('create_index_succeeded');
         const newState = model(legacyCreateReindexTargetState, res);
         expect(newState.controlState).toEqual('LEGACY_REINDEX');
         expect(newState.retryCount).toEqual(0);
@@ -1143,9 +1142,8 @@ describe('migrations v2 model', () => {
         progress: createInitialProgress(),
       };
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.right(
-          'bulk_index_succeeded'
-        );
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> =
+          Either.right('bulk_index_succeeded');
         const newState = model(reindexSourceToTempIndexBulkState, res);
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
         expect(newState.retryCount).toEqual(0);
@@ -1563,9 +1561,8 @@ describe('migrations v2 model', () => {
       };
 
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> TRANSFORMED_DOCUMENTS_BULK_INDEX and increments currentBatch if more batches are left', () => {
-        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.right(
-          'bulk_index_succeeded'
-        );
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> =
+          Either.right('bulk_index_succeeded');
         const newState = model(
           transformedDocumentsBulkIndexState,
           res
@@ -1575,9 +1572,8 @@ describe('migrations v2 model', () => {
       });
 
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> OUTDATED_DOCUMENTS_SEARCH_READ if all batches were written', () => {
-        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.right(
-          'bulk_index_succeeded'
-        );
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> =
+          Either.right('bulk_index_succeeded');
         const newState = model(
           { ...transformedDocumentsBulkIndexState, ...{ currentBatch: 1 } },
           res

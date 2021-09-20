@@ -92,7 +92,7 @@ const createInternalClientMock = (
 export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
 
 const createClientMock = (res?: MockedTransportRequestPromise<unknown>): ElasticsearchClientMock =>
-  (createInternalClientMock(res) as unknown) as ElasticsearchClientMock;
+  createInternalClientMock(res) as unknown as ElasticsearchClientMock;
 
 export interface ScopedClusterClientMock {
   asInternalUser: ElasticsearchClientMock;

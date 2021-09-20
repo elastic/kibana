@@ -129,14 +129,14 @@ describe('chart_switch', () => {
       datasourceLayers: layers.reduce(
         (acc, layerId) => ({
           ...acc,
-          [layerId]: ({
+          [layerId]: {
             getTableSpec: jest.fn(() => {
               return [{ columnId: 2 }];
             }),
             getOperationForColumnId() {
               return {};
             },
-          } as unknown) as DatasourcePublicAPI,
+          } as unknown as DatasourcePublicAPI,
         }),
         {} as Record<string, unknown>
       ),

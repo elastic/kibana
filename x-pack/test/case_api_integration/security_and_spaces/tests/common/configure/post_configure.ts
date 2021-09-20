@@ -313,7 +313,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('rbac', () => {
       it('returns a 403 when attempting to create a configuration with an owner that was from a disabled feature in the space', async () => {
-        const configuration = ((await createConfiguration(
+        const configuration = (await createConfiguration(
           supertestWithoutAuth,
           getConfigurationRequest({ overrides: { owner: 'testDisabledFixture' } }),
           403,
@@ -321,7 +321,7 @@ export default ({ getService }: FtrProviderContext): void => {
             user: testDisabled,
             space: 'space1',
           }
-        )) as unknown) as { message: string };
+        )) as unknown as { message: string };
 
         expect(configuration.message).to.eql(
           'Unauthorized to create case configuration with owners: "testDisabledFixture"'

@@ -7,19 +7,21 @@
 
 import { TSVBMetricModelCreator, TSVBMetricModel, TSVBSeries, InventoryMetric } from './types';
 
-export const createTSVBModel = (
-  id: InventoryMetric,
-  requires: string[],
-  series: TSVBSeries[],
-  interval = '>=300s',
-  dropLastBucket = true
-): TSVBMetricModelCreator => (timeField, indexPattern): TSVBMetricModel => ({
-  id,
-  requires,
-  drop_last_bucket: dropLastBucket,
-  index_pattern: indexPattern,
-  interval,
-  time_field: timeField,
-  type: 'timeseries',
-  series,
-});
+export const createTSVBModel =
+  (
+    id: InventoryMetric,
+    requires: string[],
+    series: TSVBSeries[],
+    interval = '>=300s',
+    dropLastBucket = true
+  ): TSVBMetricModelCreator =>
+  (timeField, indexPattern): TSVBMetricModel => ({
+    id,
+    requires,
+    drop_last_bucket: dropLastBucket,
+    index_pattern: indexPattern,
+    interval,
+    time_field: timeField,
+    type: 'timeseries',
+    series,
+  });

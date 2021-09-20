@@ -75,17 +75,13 @@ export function getServiceMapServiceNodeInfo({
       setup,
     };
 
-    const [
-      errorStats,
-      transactionStats,
-      cpuStats,
-      memoryStats,
-    ] = await Promise.all([
-      getErrorStats(taskParams),
-      getTransactionStats(taskParams),
-      getCpuStats(taskParams),
-      getMemoryStats(taskParams),
-    ]);
+    const [errorStats, transactionStats, cpuStats, memoryStats] =
+      await Promise.all([
+        getErrorStats(taskParams),
+        getTransactionStats(taskParams),
+        getCpuStats(taskParams),
+        getMemoryStats(taskParams),
+      ]);
     return {
       ...errorStats,
       transactionStats,

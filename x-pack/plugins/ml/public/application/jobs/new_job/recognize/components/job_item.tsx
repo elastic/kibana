@@ -173,10 +173,10 @@ export const JobItem: FC<JobItemProps> = memo(
   }
 );
 
-function getDatafeedStartedIcon({
-  awaitingMlNodeAllocation,
-  success,
-}: DatafeedResponse): { type: string; color: string } {
+function getDatafeedStartedIcon({ awaitingMlNodeAllocation, success }: DatafeedResponse): {
+  type: string;
+  color: string;
+} {
   if (awaitingMlNodeAllocation === true) {
     return { type: 'alert', color: 'warning' };
   }

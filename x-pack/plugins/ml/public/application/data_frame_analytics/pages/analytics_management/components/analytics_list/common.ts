@@ -71,9 +71,11 @@ export function getDataFrameAnalyticsProgress(stats: DataFrameAnalyticsStats) {
   return undefined;
 }
 
-export function getDataFrameAnalyticsProgressPhase(
-  stats: DataFrameAnalyticsStats
-): { currentPhase: number; progress: number; totalPhases: number } {
+export function getDataFrameAnalyticsProgressPhase(stats: DataFrameAnalyticsStats): {
+  currentPhase: number;
+  progress: number;
+  totalPhases: number;
+} {
   let phase = 0;
   let progress = 0;
 

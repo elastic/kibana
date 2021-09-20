@@ -53,9 +53,13 @@ export const EndpointActivityLog = memo(
     const activityLogSize = activityLogData.length;
     const activityLogError = useEndpointSelector(getActivityLogError);
     const dispatch = useDispatch<(action: EndpointAction) => void>();
-    const { page, pageSize, startDate, endDate, disabled: isPagingDisabled } = useEndpointSelector(
-      getActivityLogDataPaging
-    );
+    const {
+      page,
+      pageSize,
+      startDate,
+      endDate,
+      disabled: isPagingDisabled,
+    } = useEndpointSelector(getActivityLogDataPaging);
 
     const hasActiveDateRange = useMemo(() => !!startDate || !!endDate, [startDate, endDate]);
     const showEmptyState = useMemo(

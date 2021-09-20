@@ -103,7 +103,7 @@ export class TaskRunnerFactory {
 
         // Since we're using API keys and accessing elasticsearch can only be done
         // via a request, we're faking one with the proper authorization headers.
-        const fakeRequest = KibanaRequest.from(({
+        const fakeRequest = KibanaRequest.from({
           headers: requestHeaders,
           path: '/',
           route: { settings: {} },
@@ -115,7 +115,7 @@ export class TaskRunnerFactory {
               url: '/',
             },
           },
-        } as unknown) as Request);
+        } as unknown as Request);
 
         basePathService.set(fakeRequest, path);
 
@@ -205,21 +205,20 @@ async function getActionTaskParams(
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
   if (isPersistedActionTask(executorParams)) {
-    const actionTask = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
-      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-      executorParams.actionTaskParamsId,
-      { namespace }
-    );
+    const actionTask =
+      await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        executorParams.actionTaskParamsId,
+        { namespace }
+      );
 
     const {
       attributes: { relatedSavedObjects },
       references,
     } = actionTask;
 
-    const {
-      actionId,
-      relatedSavedObjects: injectedRelatedSavedObjects,
-    } = injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
+    const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
+      injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
 
     return {
       ...actionTask,

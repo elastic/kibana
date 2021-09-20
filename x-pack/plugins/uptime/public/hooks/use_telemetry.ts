@@ -21,12 +21,8 @@ export enum UptimePage {
 }
 
 export const useUptimeTelemetry = (page?: UptimePage) => {
-  const {
-    dateRangeStart,
-    dateRangeEnd,
-    autorefreshInterval,
-    autorefreshIsPaused,
-  } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, autorefreshInterval, autorefreshIsPaused } =
+    useGetUrlParams();
 
   useEffect(() => {
     if (!apiService.http) throw new Error('Core http services are not defined');

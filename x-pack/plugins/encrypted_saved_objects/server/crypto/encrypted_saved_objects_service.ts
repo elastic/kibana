@@ -122,10 +122,8 @@ export class EncryptedSavedObjectsService {
    * Map of all registered saved object types where the `key` is saved object type and the `value`
    * is the definition (names of attributes that need to be encrypted etc.).
    */
-  private readonly typeDefinitions: Map<
-    string,
-    EncryptedSavedObjectAttributesDefinition
-  > = new Map();
+  private readonly typeDefinitions: Map<string, EncryptedSavedObjectAttributesDefinition> =
+    new Map();
 
   constructor(private readonly options: EncryptedSavedObjectsServiceOptions) {}
 

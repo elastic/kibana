@@ -40,13 +40,8 @@ function getPercentLabel(docCount: number, topValuesSampleSize: number): string 
 
 export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed }) => {
   if (stats === undefined) return null;
-  const {
-    topValues,
-    topValuesSampleSize,
-    topValuesSamplerShardSize,
-    count,
-    isTopValuesSampled,
-  } = stats;
+  const { topValues, topValuesSampleSize, topValuesSamplerShardSize, count, isTopValuesSampled } =
+    stats;
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
   return (
     <EuiFlexItem data-test-subj={'dataVisualizerFieldDataTopValues'}>

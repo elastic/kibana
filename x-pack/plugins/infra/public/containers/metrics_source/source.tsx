@@ -121,9 +121,10 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     ]
   );
 
-  const isUninitialized = useMemo(() => loadSourceRequest.state === 'uninitialized', [
-    loadSourceRequest.state,
-  ]);
+  const isUninitialized = useMemo(
+    () => loadSourceRequest.state === 'uninitialized',
+    [loadSourceRequest.state]
+  );
 
   const sourceExists = useMemo(() => (source ? !!source.version : undefined), [source]);
 

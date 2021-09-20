@@ -22,8 +22,7 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 const token: EnrollmentToken = {
   ver: '8.0.0',
   adr: ['localhost:9200'],
-  fgr:
-    'AA:C8:2C:2E:09:58:F4:FE:A1:D2:AB:7F:13:70:C2:7D:EB:FD:A2:23:88:13:E4:DA:3A:D0:59:D0:09:00:07:36',
+  fgr: 'AA:C8:2C:2E:09:58:F4:FE:A1:D2:AB:7F:13:70:C2:7D:EB:FD:A2:23:88:13:E4:DA:3A:D0:59:D0:09:00:07:36',
   key: 'JH-36HoBo4EYIoVhHh2F:uEo4dksARMq_BSHaAHUr8Q',
 };
 
@@ -84,8 +83,7 @@ describe('decodeEnrollmentToken', () => {
   it('should decode a valid token', () => {
     expect(decodeEnrollmentToken(btoa(JSON.stringify(token)))).toEqual({
       adr: ['https://localhost:9200'],
-      fgr:
-        'AA:C8:2C:2E:09:58:F4:FE:A1:D2:AB:7F:13:70:C2:7D:EB:FD:A2:23:88:13:E4:DA:3A:D0:59:D0:09:00:07:36',
+      fgr: 'AA:C8:2C:2E:09:58:F4:FE:A1:D2:AB:7F:13:70:C2:7D:EB:FD:A2:23:88:13:E4:DA:3A:D0:59:D0:09:00:07:36',
       key: 'SkgtMzZIb0JvNEVZSW9WaEhoMkY6dUVvNGRrc0FSTXFfQlNIYUFIVXI4UQ==',
       ver: '8.0.0',
     });

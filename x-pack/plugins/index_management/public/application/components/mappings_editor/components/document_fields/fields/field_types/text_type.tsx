@@ -74,13 +74,12 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 };
 
 export const TextType = React.memo(({ field }: Props) => {
-  const onIndexPrefixesChanage = (minField: FieldHook, maxField: FieldHook) => ([
-    min,
-    max,
-  ]: any) => {
-    minField.setValue(min);
-    maxField.setValue(max);
-  };
+  const onIndexPrefixesChanage =
+    (minField: FieldHook, maxField: FieldHook) =>
+    ([min, max]: any) => {
+      minField.setValue(min);
+      maxField.setValue(max);
+    };
 
   return (
     <>

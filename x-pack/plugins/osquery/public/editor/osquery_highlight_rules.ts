@@ -105,7 +105,7 @@ const dataTypes = [
 ].join('|');
 
 // This is gross, but the types exported by brace are lagging and incorrect: https://github.com/thlorenz/brace/issues/182
-((ace as unknown) as AceInterface).define(
+(ace as unknown as AceInterface).define(
   'ace/mode/osquery_highlight_rules',
   ['require', 'exports', 'ace/mode/sql_highlight_rules'],
   function (acequire, exports) {

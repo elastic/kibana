@@ -12,7 +12,8 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 
-type ErrorGroupsMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
+type ErrorGroupsMainStatistics =
+  APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');

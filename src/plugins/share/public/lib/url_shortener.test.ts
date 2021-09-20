@@ -96,8 +96,7 @@ describe('Url shortener', () => {
       });
       expect(shortUrl).toBe(`http://localhost${basePath}/goto/${shareId}`);
       expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body:
-          '{"url":"/app/discover#/?_g=(refreshInterval:(pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))&_a=(columns:!(_source),index:%27logstash-*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query:%27*%27)),sort:!(%27@timestamp%27,desc))"}',
+        body: '{"url":"/app/discover#/?_g=(refreshInterval:(pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))&_a=(columns:!(_source),index:%27logstash-*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query:%27*%27)),sort:!(%27@timestamp%27,desc))"}',
       });
     });
   });

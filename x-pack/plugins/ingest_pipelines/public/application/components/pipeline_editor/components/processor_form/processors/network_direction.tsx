@@ -86,9 +86,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-const getInternalNetworkConfig: (
-  toggleCustom: () => void
-) => Record<
+const getInternalNetworkConfig: (toggleCustom: () => void) => Record<
   keyof InternalNetworkFields,
   {
     path: string;

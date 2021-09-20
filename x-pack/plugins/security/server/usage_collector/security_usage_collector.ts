@@ -132,12 +132,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       },
     },
     fetch: () => {
-      const {
-        allowRbac,
-        allowAccessAgreement,
-        allowAuditLogging,
-        allowLegacyAuditLogging,
-      } = license.getFeatures();
+      const { allowRbac, allowAccessAgreement, allowAuditLogging, allowLegacyAuditLogging } =
+        license.getFeatures();
       if (!allowRbac) {
         return {
           auditLoggingEnabled: false,

@@ -11,10 +11,10 @@ import { IndicesList } from '../indices_list';
 import { shallow } from 'enzyme';
 import { MatchedItem } from '../../../types';
 
-const indices = ([
+const indices = [
   { name: 'kibana', tags: [] },
   { name: 'es', tags: [] },
-] as unknown) as MatchedItem[];
+] as unknown as MatchedItem[];
 
 describe('IndicesList', () => {
   it('should render normally', () => {

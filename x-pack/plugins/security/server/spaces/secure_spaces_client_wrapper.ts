@@ -356,9 +356,8 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     const ensureAuthorizedDependencies: EnsureAuthorizedDependencies = {
       actions: this.authorization.actions,
       errors: this.errors,
-      checkSavedObjectsPrivilegesAsCurrentUser: this.authorization.checkSavedObjectsPrivilegesWithRequest(
-        this.request
-      ),
+      checkSavedObjectsPrivilegesAsCurrentUser:
+        this.authorization.checkSavedObjectsPrivilegesWithRequest(this.request),
     };
     return ensureAuthorized(ensureAuthorizedDependencies, types, actions, namespaces, options);
   }

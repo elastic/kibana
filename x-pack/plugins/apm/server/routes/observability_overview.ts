@@ -60,6 +60,7 @@ const observabilityOverviewRoute = createApmServerRoute({
   },
 });
 
-export const observabilityOverviewRouteRepository = createApmServerRouteRepository()
-  .add(observabilityOverviewRoute)
-  .add(observabilityOverviewHasDataRoute);
+export const observabilityOverviewRouteRepository =
+  createApmServerRouteRepository()
+    .add(observabilityOverviewRoute)
+    .add(observabilityOverviewHasDataRoute);

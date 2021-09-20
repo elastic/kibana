@@ -97,10 +97,8 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 }) => {
   const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
-  const [
-    timeSeriesExplorerUrlState,
-    setTimeSeriesExplorerUrlState,
-  ] = useTimeSeriesExplorerUrlState();
+  const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =
+    useTimeSeriesExplorerUrlState();
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
   const previousRefresh = usePrevious(lastRefresh);

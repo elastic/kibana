@@ -1094,10 +1094,9 @@ export const tasks: TelemetryTask[] = [
             geo: {
               country_iso_code: {
                 rum: {
-                  '1d':
-                    rumAgentCardinalityResponse.aggregations?.[
-                      CLIENT_GEO_COUNTRY_ISO_CODE
-                    ].value,
+                  '1d': rumAgentCardinalityResponse.aggregations?.[
+                    CLIENT_GEO_COUNTRY_ISO_CODE
+                  ].value,
                 },
               },
             },
@@ -1105,30 +1104,28 @@ export const tasks: TelemetryTask[] = [
           transaction: {
             name: {
               all_agents: {
-                '1d':
-                  allAgentsCardinalityResponse.aggregations?.[TRANSACTION_NAME]
-                    .value,
+                '1d': allAgentsCardinalityResponse.aggregations?.[
+                  TRANSACTION_NAME
+                ].value,
               },
               rum: {
-                '1d':
-                  rumAgentCardinalityResponse.aggregations?.[TRANSACTION_NAME]
-                    .value,
+                '1d': rumAgentCardinalityResponse.aggregations?.[
+                  TRANSACTION_NAME
+                ].value,
               },
             },
           },
           user_agent: {
             original: {
               all_agents: {
-                '1d':
-                  allAgentsCardinalityResponse.aggregations?.[
-                    USER_AGENT_ORIGINAL
-                  ].value,
+                '1d': allAgentsCardinalityResponse.aggregations?.[
+                  USER_AGENT_ORIGINAL
+                ].value,
               },
               rum: {
-                '1d':
-                  rumAgentCardinalityResponse.aggregations?.[
-                    USER_AGENT_ORIGINAL
-                  ].value,
+                '1d': rumAgentCardinalityResponse.aggregations?.[
+                  USER_AGENT_ORIGINAL
+                ].value,
               },
             },
           },

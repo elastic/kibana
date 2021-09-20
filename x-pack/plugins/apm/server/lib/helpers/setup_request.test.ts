@@ -41,7 +41,7 @@ function getMockResources() {
     },
   };
 
-  const mockResources = ({
+  const mockResources = {
     config: new Proxy(
       {},
       {
@@ -81,7 +81,7 @@ function getMockResources() {
         },
       },
     },
-  } as unknown) as APMRouteHandlerResources & {
+  } as unknown as APMRouteHandlerResources & {
     context: {
       core: {
         elasticsearch: {

@@ -81,7 +81,8 @@ export class VisualizePlugin
       void,
       VisualizePluginSetupDependencies,
       VisualizePluginStartDependencies
-    > {
+    >
+{
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;

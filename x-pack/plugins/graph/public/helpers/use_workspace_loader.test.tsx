@@ -33,13 +33,13 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-const mockSavedObjectsClient = ({
+const mockSavedObjectsClient = {
   resolve: jest.fn().mockResolvedValue({
     saved_object: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
     outcome: 'exactMatch',
   }),
   find: jest.fn().mockResolvedValue({ title: 'test' }),
-} as unknown) as SavedObjectsClientCommon;
+} as unknown as SavedObjectsClientCommon;
 
 async function setup(props: UseWorkspaceLoaderProps) {
   const returnVal = {};
@@ -66,7 +66,7 @@ describe('use_workspace_loader', () => {
 
   it('should not redirect if outcome is exactMatch', async () => {
     await act(async () => {
-      await setup((defaultProps as unknown) as UseWorkspaceLoaderProps);
+      await setup(defaultProps as unknown as UseWorkspaceLoaderProps);
     });
     expect(defaultProps.spaces.ui.redirectLegacyUrl).not.toHaveBeenCalled();
     expect(defaultProps.store.dispatch).toHaveBeenCalled();
@@ -85,7 +85,7 @@ describe('use_workspace_loader', () => {
       },
     };
     await act(async () => {
-      await setup((props as unknown) as UseWorkspaceLoaderProps);
+      await setup(props as unknown as UseWorkspaceLoaderProps);
     });
     expect(props.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
       '#/workspace/aliasTargetId?query={}',

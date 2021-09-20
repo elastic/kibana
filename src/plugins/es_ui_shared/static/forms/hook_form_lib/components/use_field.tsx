@@ -106,7 +106,7 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
       <ComponentToRender
         type={field.type}
         onChange={field.onChange}
-        value={(field.value as unknown) as string}
+        value={field.value as unknown as string}
         {...propsToForward}
       />
     );

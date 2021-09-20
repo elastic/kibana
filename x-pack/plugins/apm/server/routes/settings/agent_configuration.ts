@@ -301,12 +301,13 @@ const agentConfigurationAgentNameRoute = createApmServerRoute({
   },
 });
 
-export const agentConfigurationRouteRepository = createApmServerRouteRepository()
-  .add(agentConfigurationRoute)
-  .add(getSingleAgentConfigurationRoute)
-  .add(deleteAgentConfigurationRoute)
-  .add(createOrUpdateAgentConfigurationRoute)
-  .add(agentConfigurationSearchRoute)
-  .add(listAgentConfigurationServicesRoute)
-  .add(listAgentConfigurationEnvironmentsRoute)
-  .add(agentConfigurationAgentNameRoute);
+export const agentConfigurationRouteRepository =
+  createApmServerRouteRepository()
+    .add(agentConfigurationRoute)
+    .add(getSingleAgentConfigurationRoute)
+    .add(deleteAgentConfigurationRoute)
+    .add(createOrUpdateAgentConfigurationRoute)
+    .add(agentConfigurationSearchRoute)
+    .add(listAgentConfigurationServicesRoute)
+    .add(listAgentConfigurationEnvironmentsRoute)
+    .add(agentConfigurationAgentNameRoute);

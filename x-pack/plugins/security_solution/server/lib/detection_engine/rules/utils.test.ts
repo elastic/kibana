@@ -295,22 +295,22 @@ describe('utils', () => {
 
     test('returns "NOTIFICATION_THROTTLE_NO_ACTIONS" if actions is an empty array and we do not have a throttle', () => {
       expect(
-        transformFromAlertThrottle(({
+        transformFromAlertThrottle({
           muteAll: false,
           notifyWhen: 'onActiveAlert',
           actions: [],
-        } as unknown) as SanitizedAlert<RuleParams>)
+        } as unknown as SanitizedAlert<RuleParams>)
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
     });
 
     test('returns "NOTIFICATION_THROTTLE_NO_ACTIONS" if actions is an empty array and we have a throttle', () => {
       expect(
-        transformFromAlertThrottle(({
+        transformFromAlertThrottle({
           muteAll: false,
           notifyWhen: 'onThrottleInterval',
           actions: [],
           throttle: '1d',
-        } as unknown) as SanitizedAlert<RuleParams>)
+        } as unknown as SanitizedAlert<RuleParams>)
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
     });
 

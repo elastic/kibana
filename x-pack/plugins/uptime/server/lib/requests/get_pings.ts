@@ -88,7 +88,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
     },
     sort: [{ '@timestamp': { order: (sort ?? 'desc') as 'asc' | 'desc' } }],
     ...((locations ?? []).length > 0
-      ? { post_filter: { terms: { 'observer.geo.name': (locations as unknown) as string[] } } }
+      ? { post_filter: { terms: { 'observer.geo.name': locations as unknown as string[] } } }
       : {}),
   };
 

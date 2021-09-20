@@ -22,14 +22,14 @@ export type UseRequestHook = <T = any, E = Error>(
 ) => UseRequestResponse<T, E>;
 export type SendRequestHook = (config: SendRequestConfig) => Promise<SendRequestResponse>;
 
-export const getUseRequest = (httpClient: HttpSetup): UseRequestHook => <T = any, E = Error>(
-  config: UseRequestConfig
-) => {
-  return _useRequest<T, E>(httpClient, config);
-};
+export const getUseRequest =
+  (httpClient: HttpSetup): UseRequestHook =>
+  <T = any, E = Error>(config: UseRequestConfig) => {
+    return _useRequest<T, E>(httpClient, config);
+  };
 
-export const getSendRequest = (httpClient: HttpSetup): SendRequestHook => <T = any>(
-  config: SendRequestConfig
-) => {
-  return _sendRequest<T>(httpClient, config);
-};
+export const getSendRequest =
+  (httpClient: HttpSetup): SendRequestHook =>
+  <T = any>(config: SendRequestConfig) => {
+    return _sendRequest<T>(httpClient, config);
+  };

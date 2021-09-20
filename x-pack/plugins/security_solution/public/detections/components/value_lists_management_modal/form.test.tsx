@@ -16,10 +16,10 @@ import { useImportList } from '@kbn/securitysolution-list-hooks';
 jest.mock('@kbn/securitysolution-list-hooks');
 const mockUseImportList = useImportList as jest.Mock;
 
-const mockFile = ({
+const mockFile = {
   name: 'foo.csv',
   type: 'text/csv',
-} as unknown) as File;
+} as unknown as File;
 
 const mockSelectFile: <P>(container: ReactWrapper<P>, file: File) => Promise<void> = async (
   container,
@@ -28,7 +28,7 @@ const mockSelectFile: <P>(container: ReactWrapper<P>, file: File) => Promise<voi
   const fileChange = container.find('EuiFilePicker').prop('onChange');
   await waitFor(() => {
     if (fileChange) {
-      fileChange(({ item: () => file } as unknown) as FormEvent);
+      fileChange({ item: () => file } as unknown as FormEvent);
     }
   });
 };
@@ -86,10 +86,10 @@ describe('ValueListsForm', () => {
   });
 
   it('disables upload and displays an error if file has invalid extension', async () => {
-    const badMockFile = ({
+    const badMockFile = {
       name: 'foo.pdf',
       type: 'application/pdf',
-    } as unknown) as File;
+    } as unknown as File;
 
     const container = mount(
       <TestProviders>

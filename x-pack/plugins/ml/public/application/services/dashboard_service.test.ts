@@ -23,9 +23,9 @@ jest.mock('@elastic/eui', () => {
 
 describe('DashboardService', () => {
   const mockSavedObjectClient = savedObjectsServiceMock.createStartContract().client;
-  const dashboardUrlGenerator = ({
+  const dashboardUrlGenerator = {
     createUrl: jest.fn(),
-  } as unknown) as DashboardUrlGenerator;
+  } as unknown as DashboardUrlGenerator;
   const dashboardService = dashboardServiceProvider(
     mockSavedObjectClient,
     '8.0.0',
@@ -48,7 +48,7 @@ describe('DashboardService', () => {
     // act
     dashboardService.attachPanels(
       'test-dashboard',
-      ({
+      {
         title: 'ML Test',
         hits: 0,
         description: '',
@@ -92,7 +92,7 @@ describe('DashboardService', () => {
         kibanaSavedObjectMeta: {
           searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
         },
-      } as unknown) as DashboardSavedObject,
+      } as unknown as DashboardSavedObject,
       [{ title: 'Test title', type: 'test-panel', embeddableConfig: { testConfig: '' } }]
     );
     // assert

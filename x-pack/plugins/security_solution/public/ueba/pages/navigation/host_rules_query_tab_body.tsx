@@ -27,19 +27,17 @@ export const HostRulesQueryTabBody = ({
   startDate,
   type,
 }: HostQueryProps) => {
-  const [
-    loading,
-    { data, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
-  ] = useHostRules({
-    docValueFields,
-    endDate,
-    filterQuery,
-    hostName,
-    indexNames,
-    skip,
-    startDate,
-    type,
-  });
+  const [loading, { data, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch }] =
+    useHostRules({
+      docValueFields,
+      endDate,
+      filterQuery,
+      hostName,
+      indexNames,
+      skip,
+      startDate,
+      type,
+    });
 
   return (
     <HostRulesTableManage

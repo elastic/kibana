@@ -63,10 +63,10 @@ describe('ESSearchSource', () => {
         const mockSearchService = {
           searchSource: {
             async create() {
-              return (mockSearchSource as unknown) as SearchSource;
+              return mockSearchSource as unknown as SearchSource;
             },
             createEmpty() {
-              return (mockSearchSource as unknown) as SearchSource;
+              return mockSearchSource as unknown as SearchSource;
             },
           },
         };

@@ -49,9 +49,8 @@ function getItemIdToExpandedRowMap(
 export const FieldsStatsGrid: FC<Props> = ({ results }) => {
   const restorableDefaults = getDefaultDataVisualizerListState();
 
-  const [dataVisualizerListState, setDataVisualizerListState] = useState<DataVisualizerTableState>(
-    restorableDefaults
-  );
+  const [dataVisualizerListState, setDataVisualizerListState] =
+    useState<DataVisualizerTableState>(restorableDefaults);
 
   const visibleFieldTypes =
     dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;
