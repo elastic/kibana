@@ -55,9 +55,8 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 const AddContexts = (props) => {
-  const { isFullscreen, setFullscreen, undo, redo, autoplayInterval } = useContext(
-    WorkpadRoutingContext
-  );
+  const { isFullscreen, setFullscreen, undo, redo, autoplayInterval } =
+    useContext(WorkpadRoutingContext);
 
   const platformService = usePlatformService();
 
@@ -131,7 +130,10 @@ export const Workpad = compose(
     },
   }),
   withHandlers({
-    onTransitionEnd: ({ setTransition }) => () => setTransition(null),
+    onTransitionEnd:
+      ({ setTransition }) =>
+      () =>
+        setTransition(null),
     nextPage: (props) => () => {
       const pageNumber = Math.min(props.selectedPageNumber + 1, props.pages.length);
       props.onPageChange(pageNumber);
