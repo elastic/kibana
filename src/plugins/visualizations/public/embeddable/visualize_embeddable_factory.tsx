@@ -40,7 +40,11 @@ import {
   getSavedVisualizationsLoader,
 } from '../services';
 import { showNewVisModal } from '../wizard';
-import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
+import {
+  convertToSerializedVis,
+  getSavedVisualization,
+  saveVisualization,
+} from '../utils/saved_visualize_utils';
 import {
   extractControlsReferences,
   extractTimeSeriesReferences,
@@ -59,7 +63,7 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 
 export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
-    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'savedObjectsClient'>
+    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'savedObjectsClient' | 'data'>
   >;
 }
 
@@ -70,8 +74,7 @@ export class VisualizeEmbeddableFactory
       VisualizeOutput | EmbeddableOutput,
       VisualizeEmbeddable | DisabledLabEmbeddable,
       VisualizationAttributes
-    >
-{
+    > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
   private attributeService?: AttributeService<
@@ -148,9 +151,13 @@ export class VisualizeEmbeddableFactory
     parent?: IContainer
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const savedVisualizations = getSavedVisualizationsLoader();
+    const { savedObjectsClient, data } = await this.deps.start().plugins;
 
     try {
-      const savedObject = await savedVisualizations.get(savedObjectId);
+      const savedObject = await getSavedVisualization(
+        { savedObjectsClient, search: data.search, dataViews: data.dataViews },
+        savedObjectId
+      );
       const visState = convertToSerializedVis(savedObject);
       const vis = await createVisAsync(savedObject.visState.type, visState);
 
@@ -206,7 +213,7 @@ export class VisualizeEmbeddableFactory
       savedVis.copyOnSave = false;
       savedVis.description = '';
       savedVis.searchSourceFields = visObj?.data.searchSource?.getSerializedFields();
-      const serializedVis = (visObj as unknown as Vis).serialize();
+      const serializedVis = ((visObj as unknown) as Vis).serialize();
       const { params, data } = serializedVis;
       savedVis.visState = {
         title,
@@ -217,7 +224,10 @@ export class VisualizeEmbeddableFactory
       if (visObj) {
         savedVis.uiStateJSON = visObj?.uiState.toString();
       }
-      const id = await savedVis.save(saveOptions);
+      const { savedObjectsClient } = await this.deps.start().plugins;
+      const id = await saveVisualization(savedVis, saveOptions, {
+        savedObjectsClient,
+      });
       if (!id || id === '') {
         throw new Error(
           i18n.translate('visualizations.savingVisualizationFailed.errorMsg', {
@@ -252,7 +262,7 @@ export class VisualizeEmbeddableFactory
   }
 
   public inject(_state: EmbeddableStateWithType, references: SavedObjectReference[]) {
-    const state = _state as unknown as VisualizeInput;
+    const state = (_state as unknown) as VisualizeInput;
 
     const { type, params } = state.savedVis ?? {};
 
@@ -265,7 +275,7 @@ export class VisualizeEmbeddableFactory
   }
 
   public extract(_state: EmbeddableStateWithType) {
-    const state = _state as unknown as VisualizeInput;
+    const state = (_state as unknown) as VisualizeInput;
     const references = [];
 
     if (state.savedVis?.data.searchSource) {

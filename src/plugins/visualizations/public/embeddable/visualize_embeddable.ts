@@ -40,6 +40,7 @@ import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { SavedObjectAttributes } from '../../../../core/types';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
+import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
 
@@ -451,7 +452,11 @@ export class VisualizeEmbeddable
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const savedVis = await this.savedVisualizationsLoader?.get({});
+    const { savedObjectsClient, data } = await this.deps.start().plugins;
+    const savedVis = await getSavedVisualization(
+      { savedObjectsClient, search: data.search, dataViews: data.dataViews },
+      {}
+    );
     if (!savedVis) {
       throw new Error('Error creating a saved vis object');
     }

@@ -21,12 +21,14 @@ import {
 } from '../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import {
-  getSavedVisualizationsLoader,
   getUISettings,
   getHttp,
   getTimeFilter,
   getCapabilities,
 } from '../services';
+import {
+  urlFor
+} from '../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
@@ -46,15 +48,13 @@ export const createVisEmbeddableFromObject =
     >,
     parent?: IContainer
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
-    const savedVisualizations = getSavedVisualizationsLoader();
-
     try {
       const visId = vis.id as string;
 
-      const editPath = visId ? savedVisualizations.urlFor(visId) : '#/edit_by_value';
+      const editPath = visId ? urlFor(visId) : '#/edit_by_value';
 
       const editUrl = visId
-        ? getHttp().basePath.prepend(`/app/visualize${savedVisualizations.urlFor(visId)}`)
+        ? getHttp().basePath.prepend(`/app/visualize${urlFor(visId)}`)
         : '';
       const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
 
