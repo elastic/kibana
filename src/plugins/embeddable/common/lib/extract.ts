@@ -21,7 +21,7 @@ export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) =
 
     if (factory) {
       const factoryResponse = factory.extract(state);
-      updatedInput = factoryResponse.state;
+      updatedInput = factoryResponse.state as EmbeddableStateWithType;
       refs.push(...factoryResponse.references);
     }
 
