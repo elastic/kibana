@@ -13,6 +13,7 @@ import { ILicenseState } from '../lib';
 import { FindOptions, FindResult } from '../rules_client';
 import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
 import { AlertTypeParams, AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
 // query definition
 const querySchema = schema.object({
@@ -121,6 +122,13 @@ export const findRulesRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = context.alerting.getRulesClient();
+
+        trackLegacyTerminology(
+          [req.query.search, req.query.search_fields, req.query.sort_field].filter(
+            Boolean
+          ) as string[],
+          usageCounter
+        );
 
         const options = rewriteQueryReq({
           ...req.query,
