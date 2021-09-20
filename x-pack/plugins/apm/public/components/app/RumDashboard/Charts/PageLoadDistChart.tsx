@@ -21,6 +21,7 @@ import {
   LIGHT_THEME,
   Fit,
   Position,
+  XYBrushEvent,
 } from '@elastic/charts';
 import {
   EUI_CHARTS_THEME_DARK,
@@ -64,7 +65,7 @@ export function PageLoadDistChart({
   percentileRange,
 }: Props) {
   const [breakdownLoading, setBreakdownLoading] = useState(false);
-  const onBrushEnd: BrushEndListener = ({ x }) => {
+  const onBrushEnd = ({ x }: XYBrushEvent) => {
     if (!x) {
       return;
     }
@@ -100,7 +101,7 @@ export function PageLoadDistChart({
           <Settings
             baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
             theme={euiChartTheme.theme}
-            onBrushEnd={onBrushEnd}
+            onBrushEnd={onBrushEnd as BrushEndListener}
             tooltip={tooltipProps}
             showLegend
           />
