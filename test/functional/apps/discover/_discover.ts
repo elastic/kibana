@@ -92,15 +92,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickHistogramBar();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
-        expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
+        expect(time.start).to.be('Sep 21, 2015 @ 12:00:00.000');
+        expect(time.end).to.be('Sep 21, 2015 @ 15:00:00.000');
         await retry.waitForWithTimeout(
           'doc table to contain the right search result',
           1000,
           async () => {
             const rowData = await PageObjects.discover.getDocTableField(1);
             log.debug(`The first timestamp value in doc table: ${rowData}`);
-            return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
+            return rowData.includes('Sep 21, 2015 @ 14:59:08.840');
           }
         );
       });
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return actualCount === expectedCount;
         });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(26);
+        expect(Math.round(newDurationHours)).to.be(25);
 
         await retry.waitFor('doc table containing the documents of the brushed range', async () => {
           const rowData = await PageObjects.discover.getDocTableField(1);
@@ -149,13 +149,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const expectedInterval = 'Auto';
         expect(actualInterval).to.be(expectedInterval);
-      });
-
-      it('should show Auto chart interval', async function () {
-        const expectedChartInterval = 'Auto';
-
-        const actualInterval = await PageObjects.discover.getChartInterval();
-        expect(actualInterval).to.be(expectedChartInterval);
       });
 
       it('should not show "no results"', async () => {

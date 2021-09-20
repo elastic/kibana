@@ -149,12 +149,12 @@ function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
 describe('Discover component', () => {
   test('selected index pattern without time field displays no chart toggle', () => {
     const component = mountWithIntl(<DiscoverLayout {...getProps(indexPatternMock)} />);
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
   test('selected index pattern with time field displays chart toggle', () => {
     const component = mountWithIntl(
       <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
     );
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });
 });
