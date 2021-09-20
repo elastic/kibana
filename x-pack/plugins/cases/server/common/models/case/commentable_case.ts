@@ -14,7 +14,7 @@ import {
   SavedObjectsUpdateResponse,
   Logger,
 } from 'src/core/server';
-import { LensServerPluginSetup } from '../../../../lens/server';
+import { LensServerPluginSetup } from '../../../../../lens/server';
 import {
   AssociationType,
   CASE_SAVED_OBJECT,
@@ -31,14 +31,14 @@ import {
   SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
   User,
-  CommentRequestUserType,
   CaseAttributes,
-} from '../../../common';
-import { flattenCommentSavedObjects, flattenSubCaseSavedObject, transformNewComment } from '..';
-import { AttachmentService, CasesService } from '../../services';
-import { createCaseError } from '../error';
-import { countAlertsForID } from '../index';
-import { getOrUpdateLensReferences } from '../utils';
+} from '../../../../common';
+import { flattenCommentSavedObjects, flattenSubCaseSavedObject, transformNewComment } from '../..';
+import { AttachmentService, CasesService } from '../../../services';
+import { createCaseError } from '../../error';
+import { countAlertsForID } from '../../index';
+import { getOrUpdateLensReferences } from './utils';
+import { isCommentRequestTypeUser, isCommentSavedObjectTypeUser } from '../../utils';
 
 interface UpdateCommentResp {
   comment: SavedObjectsUpdateResponse<CommentAttributes>;
@@ -128,19 +128,76 @@ export class CommentableCase {
     return this.collection.attributes.owner;
   }
 
-  private buildRefsToCase(): SavedObjectReference[] {
-    const subCaseSOType = SUB_CASE_SAVED_OBJECT;
-    const caseSOType = CASE_SAVED_OBJECT;
-    return [
-      {
-        type: caseSOType,
-        name: `associated-${caseSOType}`,
-        id: this.collection.id,
-      },
-      ...(this.subCase
-        ? [{ type: subCaseSOType, name: `associated-${subCaseSOType}`, id: this.subCase.id }]
-        : []),
-    ];
+  /**
+   * Update a comment and update the corresponding case's update_at and updated_by fields.
+   */
+  public async updateComment({
+    updateRequest,
+    updatedAt,
+    user,
+  }: {
+    updateRequest: CommentPatchRequest;
+    updatedAt: string;
+    user: User;
+  }): Promise<UpdateCommentResp> {
+    try {
+      const { id, version, ...queryRestAttributes } = updateRequest;
+      const options: SavedObjectsUpdateOptions<CommentAttributes> = {
+        version,
+      };
+
+      options.references = await this.getExistingCommentReferences(id, queryRestAttributes);
+
+      const [comment, commentableCase] = await Promise.all([
+        this.attachmentService.update({
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+          attachmentId: id,
+          updatedAttributes: {
+            ...queryRestAttributes,
+            updated_at: updatedAt,
+            updated_by: user,
+          },
+          options,
+        }),
+        this.update({ date: updatedAt, user }),
+      ]);
+      return {
+        comment,
+        commentableCase,
+      };
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to update comment in commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  private async getExistingCommentReferences(
+    attachmentId: string,
+    request: CommentRequest
+  ): Promise<SavedObjectReference[] | undefined> {
+    if (!isCommentRequestTypeUser(request)) {
+      return;
+    }
+
+    const currentComment = await this.attachmentService.get({
+      unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+      attachmentId,
+    });
+
+    if (!isCommentSavedObjectTypeUser(currentComment)) {
+      throw new Error('update request of type user comment does not match stored comment type');
+    }
+
+    const updatedReferences = getOrUpdateLensReferences(
+      this.lensEmbeddableFactory,
+      request.comment,
+      currentComment
+    );
+
+    return updatedReferences;
   }
 
   private async update({ date, user }: { date: string; user: User }): Promise<CommentableCase> {
@@ -208,64 +265,6 @@ export class CommentableCase {
   }
 
   /**
-   * Update a comment and update the corresponding case's update_at and updated_by fields.
-   */
-  public async updateComment({
-    updateRequest,
-    updatedAt,
-    user,
-  }: {
-    updateRequest: CommentPatchRequest;
-    updatedAt: string;
-    user: User;
-  }): Promise<UpdateCommentResp> {
-    try {
-      const { id, version, ...queryRestAttributes } = updateRequest;
-      const options: SavedObjectsUpdateOptions<CommentAttributes> = {
-        version,
-      };
-
-      if (queryRestAttributes.type === CommentType.user && queryRestAttributes?.comment) {
-        const currentComment = (await this.attachmentService.get({
-          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
-          attachmentId: id,
-        })) as SavedObject<CommentRequestUserType>;
-
-        const updatedReferences = getOrUpdateLensReferences(
-          this.lensEmbeddableFactory,
-          queryRestAttributes.comment,
-          currentComment
-        );
-        options.references = updatedReferences;
-      }
-
-      const [comment, commentableCase] = await Promise.all([
-        this.attachmentService.update({
-          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
-          attachmentId: id,
-          updatedAttributes: {
-            ...queryRestAttributes,
-            updated_at: updatedAt,
-            updated_by: user,
-          },
-          options,
-        }),
-        this.update({ date: updatedAt, user }),
-      ]);
-      return {
-        comment,
-        commentableCase,
-      };
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to update comment in commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
-        error,
-        logger: this.logger,
-      });
-    }
-  }
-
-  /**
    * Create a new comment on the appropriate case. This updates the case's updated_at and updated_by fields.
    */
   public async createComment({
@@ -294,15 +293,9 @@ export class CommentableCase {
         throw Boom.badRequest('The owner field of the comment must match the case');
       }
 
-      let references = this.buildRefsToCase();
+      const references = this.buildRefsToCase();
 
-      if (commentReq.type === CommentType.user && commentReq?.comment) {
-        const commentStringReferences = getOrUpdateLensReferences(
-          this.lensEmbeddableFactory,
-          commentReq.comment
-        );
-        references = [...references, ...commentStringReferences];
-      }
+      const commentReferences = this.getUserCommentReferences(commentReq);
 
       const [comment, commentableCase] = await Promise.all([
         this.attachmentService.create({
@@ -313,7 +306,7 @@ export class CommentableCase {
             ...commentReq,
             ...user,
           }),
-          references,
+          references: [...references, ...commentReferences],
           id,
         }),
         this.update({ date: createdDate, user }),
@@ -329,6 +322,34 @@ export class CommentableCase {
         logger: this.logger,
       });
     }
+  }
+
+  private buildRefsToCase(): SavedObjectReference[] {
+    const subCaseSOType = SUB_CASE_SAVED_OBJECT;
+    const caseSOType = CASE_SAVED_OBJECT;
+    return [
+      {
+        type: caseSOType,
+        name: `associated-${caseSOType}`,
+        id: this.collection.id,
+      },
+      ...(this.subCase
+        ? [{ type: subCaseSOType, name: `associated-${subCaseSOType}`, id: this.subCase.id }]
+        : []),
+    ];
+  }
+
+  private getUserCommentReferences(request: CommentRequest): SavedObjectReference[] {
+    if (!isCommentRequestTypeUser(request)) {
+      return [];
+    }
+
+    const commentStringReferences = getOrUpdateLensReferences(
+      this.lensEmbeddableFactory,
+      request.comment
+    );
+
+    return commentStringReferences;
   }
 
   private formatCollectionForEncoding(totalComment: number) {
