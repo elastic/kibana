@@ -39,7 +39,7 @@ beforeEach(async () => {
 
   const contactCardFactory = new ContactCardEmbeddableFactory(
     uiActions.executeTriggerActions,
-    ({} as unknown) as OverlayStart
+    {} as unknown as OverlayStart
   );
   setup.registerEmbeddableFactory(contactCardFactory.type, contactCardFactory);
 

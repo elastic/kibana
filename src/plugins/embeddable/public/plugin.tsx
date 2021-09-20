@@ -173,8 +173,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         );
 
     const commonContract: CommonEmbeddableStartContract = {
-      getEmbeddableFactory: (this
-        .getEmbeddableFactory as unknown) as CommonEmbeddableStartContract['getEmbeddableFactory'],
+      getEmbeddableFactory: this
+        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
       getEnhancement: this.getEnhancement,
     };
 
