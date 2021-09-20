@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
 import { get, uniq } from 'lodash';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
@@ -41,7 +40,7 @@ const getRecentMonitoringDocuments = async (
   const start = get(req.payload, 'timeRange.min') || `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`;
   const end = get(req.payload, 'timeRange.max') || 'now';
 
-  const filters: Filter[] = [
+  const filters: any[] = [
     {
       range: {
         timestamp: {
@@ -56,7 +55,7 @@ const getRecentMonitoringDocuments = async (
     filters.push({ term: { cluster_uuid: clusterUuid } });
   }
 
-  const nodesClause: Filter = {};
+  const nodesClause: Record<string, any> = {};
   if (nodeUuid) {
     nodesClause.must = [
       {
@@ -373,9 +372,7 @@ async function getLiveKibanaInstance(usageCollection?: UsageCollectionSetup) {
     return null;
   }
   return usageCollection.toApiFieldNames(
-    (await kibanaStatsCollector!.fetch(
-      (undefined as unknown) as CollectorFetchContext
-    )) as unknown[]
+    (await kibanaStatsCollector!.fetch(undefined as unknown as CollectorFetchContext)) as unknown[]
   );
 }
 
@@ -544,9 +541,8 @@ export const getCollectionStatus = async (
       productStatus.totalUniqueInternallyCollectedCount = Object.keys(
         internalCollectorsUuidsMap
       ).length;
-      productStatus.totalUniquePartiallyMigratedCount = Object.keys(
-        partiallyMigratedUuidsMap
-      ).length;
+      productStatus.totalUniquePartiallyMigratedCount =
+        Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
         ...productStatus.byUuid,
@@ -642,9 +638,8 @@ export const getCollectionStatus = async (
       productStatus.totalUniqueInternallyCollectedCount = Object.keys(
         internalCollectorsUuidsMap
       ).length;
-      productStatus.totalUniquePartiallyMigratedCount = Object.keys(
-        partiallyMigratedUuidsMap
-      ).length;
+      productStatus.totalUniquePartiallyMigratedCount =
+        Object.keys(partiallyMigratedUuidsMap).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
         ...productStatus.byUuid,
