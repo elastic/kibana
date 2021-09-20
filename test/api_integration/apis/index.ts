@@ -22,7 +22,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./scripts'));
     loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./short_url'));
-    loadTestFile(require.resolve('./shorten'));
     loadTestFile(require.resolve('./suggestions'));
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./stats'));
