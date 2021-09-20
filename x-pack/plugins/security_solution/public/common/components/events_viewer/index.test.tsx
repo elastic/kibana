@@ -63,7 +63,7 @@ describe('StatefulEventsViewer', () => {
       wrapper.update();
 
       expect(wrapper.text()).toMatchInlineSnapshot(
-        `"Showing: 12 events1 fields sorted@timestamp1event.severityevent.categoryevent.actionhost.namesource.ipdestination.ipdestination.bytesuser.name_idmessage0 of 12 events123"`
+        `"Showing: 12 events1 fields sorted@timestamp1event.severityevent.categoryevent.actionhost.namesource.ipdestination.ipdestination.bytesuser.name_idmessage0 of 12 123"`
       );
     });
   });

@@ -28,6 +28,15 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const getExpectedColumns = (model: TimelineModel) =>
   model.columns.map(migrateColumnWidthToInitialWidth).map(migrateColumnLabelToDisplayAsText);
 
+const {
+  documentType,
+  filterManager,
+  isLoading,
+  queryFields,
+  selectAll,
+  ...timelineToStore
+} = mockTimelineModel;
+
 describe('SiemLocalStorage', () => {
   const { localStorage, storage } = createSecuritySolutionStorageMock();
 
@@ -41,7 +50,7 @@ describe('SiemLocalStorage', () => {
       const timelineStorage = useTimelinesStorage();
       timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        [TimelineId.hostsPageEvents]: mockTimelineModel,
+        [TimelineId.hostsPageEvents]: timelineToStore,
       });
     });
 
@@ -50,8 +59,8 @@ describe('SiemLocalStorage', () => {
       timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
       timelineStorage.addTimeline(TimelineId.hostsPageExternalAlerts, mockTimelineModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        [TimelineId.hostsPageEvents]: mockTimelineModel,
-        [TimelineId.hostsPageExternalAlerts]: mockTimelineModel,
+        [TimelineId.hostsPageEvents]: timelineToStore,
+        [TimelineId.hostsPageExternalAlerts]: timelineToStore,
       });
     });
   });
@@ -63,8 +72,8 @@ describe('SiemLocalStorage', () => {
       timelineStorage.addTimeline(TimelineId.hostsPageExternalAlerts, mockTimelineModel);
       const timelines = timelineStorage.getAllTimelines();
       expect(timelines).toEqual({
-        [TimelineId.hostsPageEvents]: mockTimelineModel,
-        [TimelineId.hostsPageExternalAlerts]: mockTimelineModel,
+        [TimelineId.hostsPageEvents]: timelineToStore,
+        [TimelineId.hostsPageExternalAlerts]: timelineToStore,
       });
     });
 
@@ -80,7 +89,7 @@ describe('SiemLocalStorage', () => {
       const timelineStorage = useTimelinesStorage();
       timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
       const timeline = timelineStorage.getTimelineById(TimelineId.hostsPageEvents);
-      expect(timeline).toEqual(mockTimelineModel);
+      expect(timeline).toEqual(timelineToStore);
     });
   });
 
@@ -94,8 +103,8 @@ describe('SiemLocalStorage', () => {
         TimelineId.hostsPageExternalAlerts,
       ]);
       expect(timelines).toEqual({
-        [TimelineId.hostsPageEvents]: mockTimelineModel,
-        [TimelineId.hostsPageExternalAlerts]: mockTimelineModel,
+        [TimelineId.hostsPageEvents]: timelineToStore,
+        [TimelineId.hostsPageExternalAlerts]: timelineToStore,
       });
     });
 
@@ -126,7 +135,7 @@ describe('SiemLocalStorage', () => {
         TimelineId.hostsPageExternalAlerts,
       ]);
       expect(timelines).toEqual({
-        [TimelineId.hostsPageEvents]: mockTimelineModel,
+        [TimelineId.hostsPageEvents]: timelineToStore,
       });
     });
 
@@ -152,8 +161,8 @@ describe('SiemLocalStorage', () => {
       // all legacy `width` values are migrated to `initialWidth`:
       expect(timelines).toStrictEqual({
         [TimelineId.hostsPageEvents]: {
-          ...mockTimelineModel,
-          columns: mockTimelineModel.columns.map((c) => ({
+          ...timelineToStore,
+          columns: timelineToStore.columns.map((c) => ({
             ...c,
             displayAsText: undefined,
             initialWidth: 98765,
@@ -161,7 +170,7 @@ describe('SiemLocalStorage', () => {
           })),
         },
         [TimelineId.hostsPageExternalAlerts]: {
-          ...mockTimelineModel,
+          ...timelineToStore,
           columns: getExpectedColumns(mockTimelineModel),
         },
       });
@@ -187,8 +196,8 @@ describe('SiemLocalStorage', () => {
 
       expect(timelines).toStrictEqual({
         [TimelineId.hostsPageEvents]: {
-          ...mockTimelineModel,
-          columns: mockTimelineModel.columns.map((c) => ({
+          ...timelineToStore,
+          columns: timelineToStore.columns.map((c) => ({
             ...c,
             displayAsText: undefined,
             initialWidth: c.initialWidth, // initialWidth is unchanged
@@ -196,7 +205,7 @@ describe('SiemLocalStorage', () => {
           })),
         },
         [TimelineId.hostsPageExternalAlerts]: {
-          ...mockTimelineModel,
+          ...timelineToStore,
           columns: getExpectedColumns(mockTimelineModel),
         },
       });
@@ -223,15 +232,15 @@ describe('SiemLocalStorage', () => {
       // all legacy `label` values are migrated to `displayAsText`:
       expect(timelines).toStrictEqual({
         [TimelineId.hostsPageEvents]: {
-          ...mockTimelineModel,
-          columns: mockTimelineModel.columns.map((c, i) => ({
+          ...timelineToStore,
+          columns: timelineToStore.columns.map((c, i) => ({
             ...c,
             displayAsText: `A legacy label ${i}`,
             label: `A legacy label ${i}`,
           })),
         },
         [TimelineId.hostsPageExternalAlerts]: {
-          ...mockTimelineModel,
+          ...timelineToStore,
           columns: getExpectedColumns(mockTimelineModel),
         },
       });
@@ -259,8 +268,8 @@ describe('SiemLocalStorage', () => {
 
       expect(timelines).toStrictEqual({
         [TimelineId.hostsPageEvents]: {
-          ...mockTimelineModel,
-          columns: mockTimelineModel.columns.map((c, i) => ({
+          ...timelineToStore,
+          columns: timelineToStore.columns.map((c, i) => ({
             ...c,
             displayAsText:
               'Label will NOT be migrated to displayAsText, because displayAsText already has a value',
@@ -268,7 +277,7 @@ describe('SiemLocalStorage', () => {
           })),
         },
         [TimelineId.hostsPageExternalAlerts]: {
-          ...mockTimelineModel,
+          ...timelineToStore,
           columns: getExpectedColumns(mockTimelineModel),
         },
       });
@@ -293,11 +302,11 @@ describe('SiemLocalStorage', () => {
 
       expect(timelines).toStrictEqual({
         [TimelineId.hostsPageEvents]: {
-          ...mockTimelineModel,
+          ...timelineToStore,
           columns: 'this is NOT an array',
         },
         [TimelineId.hostsPageExternalAlerts]: {
-          ...mockTimelineModel,
+          ...timelineToStore,
           columns: getExpectedColumns(mockTimelineModel),
         },
       });
@@ -311,8 +320,8 @@ describe('SiemLocalStorage', () => {
       timelineStorage.addTimeline(TimelineId.hostsPageExternalAlerts, mockTimelineModel);
       const timelines = getAllTimelinesInStorage(storage);
       expect(timelines).toEqual({
-        [TimelineId.hostsPageEvents]: mockTimelineModel,
-        [TimelineId.hostsPageExternalAlerts]: mockTimelineModel,
+        [TimelineId.hostsPageEvents]: timelineToStore,
+        [TimelineId.hostsPageExternalAlerts]: timelineToStore,
       });
     });
 
@@ -326,7 +335,7 @@ describe('SiemLocalStorage', () => {
     it('adds a timeline when storage is empty', () => {
       addTimelineInStorage(storage, TimelineId.hostsPageEvents, mockTimelineModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        [TimelineId.hostsPageEvents]: mockTimelineModel,
+        [TimelineId.hostsPageEvents]: timelineToStore,
       });
     });
 
@@ -334,8 +343,8 @@ describe('SiemLocalStorage', () => {
       addTimelineInStorage(storage, TimelineId.hostsPageEvents, mockTimelineModel);
       addTimelineInStorage(storage, TimelineId.hostsPageExternalAlerts, mockTimelineModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        [TimelineId.hostsPageEvents]: mockTimelineModel,
-        [TimelineId.hostsPageExternalAlerts]: mockTimelineModel,
+        [TimelineId.hostsPageEvents]: timelineToStore,
+        [TimelineId.hostsPageExternalAlerts]: timelineToStore,
       });
     });
   });
