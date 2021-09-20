@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FailedShard } from './types';
+import type { FailedShard, Reason } from './types';
 import { KibanaServerError } from '../../../../kibana_utils/common';
 
 export function getFailedShards(err: KibanaServerError<any>): FailedShard | undefined {
@@ -15,6 +15,15 @@ export function getFailedShards(err: KibanaServerError<any>): FailedShard | unde
   return failedShards ? failedShards[0] : undefined;
 }
 
+function getNestedCause(err: KibanaServerError<any>): { reason: Reason } {
+  const { reason, caused_by: causedBy } = err.attributes || err;
+  if (causedBy) {
+    return getNestedCause(causedBy);
+  }
+  return { reason };
+}
+
 export function getRootCause(err: KibanaServerError) {
-  return getFailedShards(err)?.reason;
+  // Give shard failures priority, then try to get the error navigating nested objects
+  return getFailedShards(err)?.reason || getNestedCause(err);
 }
