@@ -52,25 +52,26 @@ export function initRoutes(
       const { tasksToSpawn, durationInSeconds, trackExecutionTimeline } = req.body;
       const startAt = millisecondsFromNow(5000).getTime();
       await chunk(range(tasksToSpawn), 200)
-        .map((chunkOfTasksToSpawn) => () =>
-          Promise.all(
-            chunkOfTasksToSpawn.map(async (taskIndex) =>
-              taskManager.schedule(
-                {
-                  taskType: 'performanceTestTask',
-                  params: {
-                    startAt,
-                    taskIndex,
-                    trackExecutionTimeline,
-                    runUntil: millisecondsFromNow(durationInSeconds * 1000).getTime(),
+        .map(
+          (chunkOfTasksToSpawn) => () =>
+            Promise.all(
+              chunkOfTasksToSpawn.map(async (taskIndex) =>
+                taskManager.schedule(
+                  {
+                    taskType: 'performanceTestTask',
+                    params: {
+                      startAt,
+                      taskIndex,
+                      trackExecutionTimeline,
+                      runUntil: millisecondsFromNow(durationInSeconds * 1000).getTime(),
+                    },
+                    state: {},
+                    scope: [scope],
                   },
-                  state: {},
-                  scope: [scope],
-                },
-                { request: req }
+                  { request: req }
+                )
               )
             )
-          )
         )
         .reduce((chain, nextExecutor) => {
           return chain.then(() => nextExecutor());

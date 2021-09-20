@@ -84,7 +84,8 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
 }
 
 export class Executor<Context extends Record<string, unknown> = Record<string, unknown>>
-  implements PersistableStateService<ExpressionAstExpression> {
+  implements PersistableStateService<ExpressionAstExpression>
+{
   static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
     state?: ExecutorState<Ctx>
   ): Executor<Ctx> {
@@ -204,7 +205,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
         // if any of arguments are expressions we should migrate those first
         link.arguments = mapValues(fnArgs, (asts, argName) => {
           return asts.map((arg) => {
-            if (typeof arg === 'object') {
+            if (arg && typeof arg === 'object') {
               return this.walkAst(arg, action);
             }
             return arg;

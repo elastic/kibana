@@ -46,10 +46,10 @@ const ServiceNowParamsFields: React.FunctionComponent<
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
-      (({
+      ({
         incident: {},
         comments: [],
-      } as unknown) as ServiceNowITSMActionParams['subActionParams']),
+      } as unknown as ServiceNowITSMActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
 

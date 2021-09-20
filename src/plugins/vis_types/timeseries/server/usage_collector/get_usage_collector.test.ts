@@ -91,7 +91,7 @@ const getMockCollectorFetchContext = (
 ) => {
   const fetchParamsMock = createCollectorFetchContextMock();
 
-  fetchParamsMock.soClient = ({
+  fetchParamsMock.soClient = {
     find: jest.fn().mockResolvedValue({
       saved_objects: savedObjectsByValue,
     }),
@@ -101,14 +101,14 @@ const getMockCollectorFetchContext = (
         yield savedObjects;
       },
     }),
-  } as unknown) as SavedObjectsClientContract;
+  } as unknown as SavedObjectsClientContract;
   return fetchParamsMock;
 };
 
 describe('Timeseries visualization usage collector', () => {
   test('Returns undefined when no results found (undefined)', async () => {
     const mockCollectorFetchContext = getMockCollectorFetchContext(
-      ({ saved_objects: [] } as unknown) as SavedObjectsFindResponse,
+      { saved_objects: [] } as unknown as SavedObjectsFindResponse,
       []
     );
     const result = await getStats(mockCollectorFetchContext.soClient);

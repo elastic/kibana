@@ -60,11 +60,11 @@ describe('fetchIndexPattern', () => {
   beforeEach(() => {
     mockedIndices = [];
 
-    indexPatternsService = ({
+    indexPatternsService = {
       getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
       get: jest.fn(() => Promise.resolve(mockedIndices[0])),
       find: jest.fn(() => Promise.resolve(mockedIndices || [])),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
   });
 
   test('should return default index on no input value', async () => {

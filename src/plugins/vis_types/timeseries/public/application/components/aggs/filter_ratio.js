@@ -40,14 +40,15 @@ const isFieldHistogram = (fields, indexPattern, field) => {
 export const FilterRatioAgg = (props) => {
   const { series, fields, panel } = props;
 
-  const handleChange = useMemo(() => createChangeHandler(props.onChange, props.model), [
-    props.model,
-    props.onChange,
-  ]);
+  const handleChange = useMemo(
+    () => createChangeHandler(props.onChange, props.model),
+    [props.model, props.onChange]
+  );
   const handleSelectChange = createSelectHandler(handleChange);
-  const handleNumeratorQueryChange = useCallback((query) => handleChange({ numerator: query }), [
-    handleChange,
-  ]);
+  const handleNumeratorQueryChange = useCallback(
+    (query) => handleChange({ numerator: query }),
+    [handleChange]
+  );
   const handleDenominatorQueryChange = useCallback(
     (query) => handleChange({ denominator: query }),
     [handleChange]

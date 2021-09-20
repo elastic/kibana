@@ -12,17 +12,17 @@ import { setFieldFormats } from '../../../services';
 import { FORMATS_UI_SETTINGS } from 'src/plugins/field_formats/common';
 import type { CoreSetup } from 'kibana/public';
 
-const mockUiSettings = ({
+const mockUiSettings = {
   get: jest.fn((item: keyof typeof mockUiSettings) => mockUiSettings[item]),
   [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
   [FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: '0,0.[000]',
-} as unknown) as CoreSetup['uiSettings'];
+} as unknown as CoreSetup['uiSettings'];
 
 describe('createFieldFormatter(fieldName, fieldFormatMap?, contextType?, hasColorRules)', () => {
   setFieldFormats(
-    getFieldFormatsRegistry(({
+    getFieldFormatsRegistry({
       uiSettings: mockUiSettings,
-    } as unknown) as CoreSetup)
+    } as unknown as CoreSetup)
   );
   const value = 1234567890;
   const stringValue = 'some string';

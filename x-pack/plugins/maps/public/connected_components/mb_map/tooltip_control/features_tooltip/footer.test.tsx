@@ -13,14 +13,14 @@ import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 const defaultProps = {
   isLocked: false,
   findLayerById: (id: string) => {
-    return ({
+    return {
       async getDisplayName() {
         return `display + ${id}`;
       },
       getId() {
         return id;
       },
-    } as unknown) as IVectorLayer;
+    } as unknown as IVectorLayer;
   },
   setCurrentFeature: () => {},
 };

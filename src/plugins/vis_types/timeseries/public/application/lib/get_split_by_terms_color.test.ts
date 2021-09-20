@@ -9,7 +9,7 @@ import { chartPluginMock } from '../../../../../charts/public/mocks';
 import { getSplitByTermsColor, SplitByTermsColorProps } from './get_split_by_terms_color';
 
 const chartsRegistry = chartPluginMock.createPaletteRegistry();
-const props = ({
+const props = {
   seriesById: [
     {
       id: '61ca57f1-469d-11e7-af02-69e470af7417',
@@ -54,11 +54,11 @@ const props = ({
   },
   palettesRegistry: chartsRegistry,
   syncColors: false,
-} as unknown) as SplitByTermsColorProps;
+} as unknown as SplitByTermsColorProps;
 
 describe('getSplitByTermsColor Function', () => {
   it('Should return null if no palette given', () => {
-    const newProps = ({ ...props, seriesPalette: null } as unknown) as SplitByTermsColorProps;
+    const newProps = { ...props, seriesPalette: null } as unknown as SplitByTermsColorProps;
     const color = getSplitByTermsColor(newProps);
     expect(color).toEqual(null);
   });
@@ -83,10 +83,10 @@ describe('getSplitByTermsColor Function', () => {
         gradient: true,
       },
     };
-    const newProps = ({
+    const newProps = {
       ...props,
       seriesPalette: gradientPalette,
-    } as unknown) as SplitByTermsColorProps;
+    } as unknown as SplitByTermsColorProps;
     getSplitByTermsColor(newProps);
     expect(spy).toHaveBeenCalledWith('custom');
   });
