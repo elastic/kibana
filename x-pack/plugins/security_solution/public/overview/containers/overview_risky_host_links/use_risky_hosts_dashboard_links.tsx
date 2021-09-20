@@ -47,7 +47,7 @@ export const useRiskyHostsDashboardLinks = (
           setListItemsWithLinks(
             listItems.map((item, i) => ({
               ...item,
-              path: (dashboardUrls[i] as unknown) as string,
+              path: dashboardUrls[i] as unknown as string,
             }))
           );
         }

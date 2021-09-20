@@ -97,11 +97,10 @@ const LinkPanelComponent = ({
     }
   };
 
-  const chunkedItems = useMemo(() => sortAndChunkItems(listItems, sortField, sortDirection), [
-    listItems,
-    sortField,
-    sortDirection,
-  ]);
+  const chunkedItems = useMemo(
+    () => sortAndChunkItems(listItems, sortField, sortDirection),
+    [listItems, sortDirection, sortField]
+  );
 
   const pagination = useMemo(
     () => ({

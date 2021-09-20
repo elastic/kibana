@@ -15,6 +15,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { inputsActions } from '../../../common/store/actions';
 import { LinkPanelListItem } from '../../components/link_panel';
 import { RISKY_HOSTS_INDEX } from '../../../../common/constants';
+import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 
 export const QUERY_ID = 'risky_hosts';
 const noop = () => {};
@@ -27,10 +28,12 @@ export interface RiskyHost {
   risk: string;
 }
 
-/* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
-const isRiskyHostHit = (item: any): item is RiskyHost =>
-  item &&
-  item.host &&
+const isRecord = (item: unknown): item is Record<string, unknown> =>
+  typeof item === 'object' && !!item;
+
+const isRiskyHostHit = (item: unknown): item is RiskyHost =>
+  isRecord(item) &&
+  isRecord(item.host) &&
   typeof item.host.name === 'string' &&
   typeof item.risk_score === 'number' &&
   typeof item.risk === 'string';
@@ -79,10 +82,7 @@ export const useRiskyHostLinks = ({ to, from }: { to: string; from: string }) =>
 
   useEffect(() => {
     if (error) {
-      if (
-        (error as { attributes?: { caused_by?: { type?: string } } }).attributes?.caused_by
-          ?.type === 'index_not_found_exception'
-      ) {
+      if (isIndexNotFoundError(error)) {
         setIsModuleEnabled(false);
       } else {
         addError(error, {
