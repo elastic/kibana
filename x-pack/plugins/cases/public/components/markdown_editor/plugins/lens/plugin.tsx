@@ -125,16 +125,18 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     [handleClose, markdownContext]
   );
 
-  const originatingPath = useMemo(() => `${location.pathname}${location.search}`, [
-    location.pathname,
-    location.search,
-  ]);
+  const originatingPath = useMemo(
+    () => `${location.pathname}${location.search}`,
+    [location.pathname, location.search]
+  );
 
   const handleCreateInLensClick = useCallback(() => {
     storage.set(DRAFT_COMMENT_STORAGE_ID, {
       commentId: commentEditorContext?.editorId,
       comment: commentEditorContext?.value,
       position: node?.position,
+      caseTitle: commentEditorContext?.caseTitle,
+      caseTags: commentEditorContext?.caseTags,
     });
 
     lens?.navigateToPrefilledEditor(undefined, {
@@ -145,10 +147,12 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     storage,
     commentEditorContext?.editorId,
     commentEditorContext?.value,
+    commentEditorContext?.caseTitle,
+    commentEditorContext?.caseTags,
     node?.position,
+    lens,
     currentAppId,
     originatingPath,
-    lens,
   ]);
 
   const handleEditInLensClick = useCallback(
@@ -157,6 +161,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         commentId: commentEditorContext?.editorId,
         comment: commentEditorContext?.value,
         position: node?.position,
+        caseTitle: commentEditorContext?.caseTitle,
+        caseTags: commentEditorContext?.caseTags,
       });
 
       lens?.navigateToPrefilledEditor(
@@ -177,11 +183,13 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       storage,
       commentEditorContext?.editorId,
       commentEditorContext?.value,
+      commentEditorContext?.caseTitle,
+      commentEditorContext?.caseTags,
       node?.position,
+      node?.attributes,
+      lens,
       currentAppId,
       originatingPath,
-      lens,
-      node?.attributes,
     ]
   );
 

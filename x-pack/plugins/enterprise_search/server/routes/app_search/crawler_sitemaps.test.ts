@@ -10,14 +10,14 @@ import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks_
 import { registerCrawlerSitemapRoutes } from './crawler_sitemaps';
 
 describe('crawler sitemap routes', () => {
-  describe('POST /api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps', () => {
+  describe('POST /internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps',
+        path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps',
       });
 
       registerCrawlerSitemapRoutes({
@@ -51,15 +51,14 @@ describe('crawler sitemap routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}', () => {
+  describe('PUT /internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path:
-          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+        path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
       });
 
       registerCrawlerSitemapRoutes({
@@ -93,15 +92,14 @@ describe('crawler sitemap routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}', () => {
+  describe('DELETE /internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path:
-          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+        path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
       });
 
       registerCrawlerSitemapRoutes({

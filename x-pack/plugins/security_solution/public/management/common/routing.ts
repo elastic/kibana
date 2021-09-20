@@ -17,7 +17,8 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
-  MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from './constants';
 import { AdministrationSubTab } from '../types';
@@ -37,7 +38,7 @@ type Exact<T, Shape> = T extends Shape ? ExactKeys<T, Shape> : never;
  */
 const querystringStringify = <ExpectedType, ArgType>(
   params: Exact<ExpectedType, ArgType>
-): string => querystring.stringify((params as unknown) as querystring.ParsedUrlQueryInput);
+): string => querystring.stringify(params as unknown as querystring.ParsedUrlQueryInput);
 
 /** Make `selected_endpoint` required */
 type EndpointDetailsUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint'> &
@@ -115,7 +116,14 @@ export const getPoliciesPath = (search?: string) => {
 };
 
 export const getPolicyDetailPath = (policyId: string, search?: string) => {
-  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  })}${appendSearch(search)}`;
+};
+
+export const getPolicyTrustedAppsPath = (policyId: string, search?: string) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.policies,
     policyId,
   })}${appendSearch(search)}`;

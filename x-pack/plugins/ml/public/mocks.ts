@@ -6,35 +6,17 @@
  */
 
 import { MlPluginSetup, MlPluginStart } from './plugin';
+import { sharePluginMock } from '../../../../src/plugins/share/public/mocks';
+
 const createSetupContract = (): jest.Mocked<MlPluginSetup> => {
   return {
-    locator: {
-      id: 'TEST_LOCATOR',
-      getLocation: jest.fn(),
-      getUrl: jest.fn(),
-      useUrl: jest.fn(),
-      navigate: jest.fn(),
-      extract: jest.fn(),
-      inject: jest.fn(),
-      telemetry: jest.fn(),
-      migrations: {},
-    },
+    locator: sharePluginMock.createLocator(),
   };
 };
 
 const createStartContract = (): jest.Mocked<MlPluginStart> => {
   return {
-    locator: {
-      id: 'TEST_LOCATOR',
-      getLocation: jest.fn(),
-      getUrl: jest.fn(),
-      useUrl: jest.fn(),
-      navigate: jest.fn(),
-      extract: jest.fn(),
-      inject: jest.fn(),
-      telemetry: jest.fn(),
-      migrations: {},
-    },
+    locator: sharePluginMock.createLocator(),
   };
 };
 

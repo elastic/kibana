@@ -200,16 +200,15 @@ interface Schema {
   validate: (input: any) => { value: any; error?: Error };
 }
 
-export const buildRouteValidation = <T>(schema: Schema): RouteValidationFunction<T> => (
-  payload: T,
-  { ok, badRequest }
-) => {
-  const { value, error } = schema.validate(payload);
-  if (error) {
-    return badRequest(error.message);
-  }
-  return ok(value);
-};
+export const buildRouteValidation =
+  <T>(schema: Schema): RouteValidationFunction<T> =>
+  (payload: T, { ok, badRequest }) => {
+    const { value, error } = schema.validate(payload);
+    if (error) {
+      return badRequest(error.message);
+    }
+    return ok(value);
+  };
 
 const statusToErrorMessage = (statusCode: number) => {
   switch (statusCode) {
@@ -328,6 +327,6 @@ export const getFailingRules = async (
     if (Boom.isBoom(exc)) {
       throw exc;
     }
-    throw new Error(`Failed to get executionStatus with RulesClient: ${exc.message}`);
+    throw new Error(`Failed to get executionStatus with RulesClient: ${(exc as Error).message}`);
   }
 };

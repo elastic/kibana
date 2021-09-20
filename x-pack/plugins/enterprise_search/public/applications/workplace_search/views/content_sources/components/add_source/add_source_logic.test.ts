@@ -23,7 +23,7 @@ import { AppLogic } from '../../../../app_logic';
 import {
   ADD_GITHUB_PATH,
   SOURCES_PATH,
-  PERSONAL_SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
   getSourcesPath,
 } from '../../../../routes';
 import { CustomSource } from '../../../../types';
@@ -308,7 +308,7 @@ describe('AddSourceLogic', () => {
         const { serviceName, indexPermissions, serviceType } = response;
         http.get.mockReturnValue(Promise.resolve(response));
         AddSourceLogic.actions.saveSourceParams(queryString, params, true);
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/sources/create', {
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/sources/create', {
           query: {
             ...params,
             kibana_host: '',
@@ -321,7 +321,7 @@ describe('AddSourceLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith(getSourcesPath(SOURCES_PATH, true));
       });
 
-      it('redirects to private dashboard when account context', async () => {
+      it('redirects to personal dashboard when account context', async () => {
         const accountQueryString =
           '?state=%7B%22action%22:%22create%22,%22context%22:%22account%22,%22service_type%22:%22gmail%22,%22csrf_token%22:%22token%3D%3D%22,%22index_permissions%22:false%7D&code=code';
 
@@ -347,7 +347,7 @@ describe('AddSourceLogic', () => {
           })
         );
         AddSourceLogic.actions.saveSourceParams(queryString, params, true);
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/sources/create', {
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/sources/create', {
           query: {
             ...params,
             kibana_host: '',
@@ -379,7 +379,7 @@ describe('AddSourceLogic', () => {
           const githubQueryString = getGithubQueryString('account');
           AddSourceLogic.actions.saveSourceParams(githubQueryString, errorParams, false);
 
-          expect(navigateToUrl).toHaveBeenCalledWith(PERSONAL_SOURCES_PATH);
+          expect(navigateToUrl).toHaveBeenCalledWith(PRIVATE_SOURCES_PATH);
           expect(setErrorMessage).toHaveBeenCalledWith(
             PERSONAL_DASHBOARD_SOURCE_ERROR(GITHUB_ERROR)
           );
@@ -407,7 +407,7 @@ describe('AddSourceLogic', () => {
 
           AddSourceLogic.actions.getSourceConfigData('github');
           expect(http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/settings/connectors/github'
+            '/internal/workplace_search/org/settings/connectors/github'
           );
           await nextTick();
           expect(setSourceConfigDataSpy).toHaveBeenCalledWith(sourceConfigData);
@@ -444,8 +444,10 @@ describe('AddSourceLogic', () => {
           expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
           expect(http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/github/prepare',
-            { query }
+            '/internal/workplace_search/org/sources/github/prepare',
+            {
+              query,
+            }
           );
           await nextTick();
           expect(setSourceConnectDataSpy).toHaveBeenCalledWith(sourceConnectData);
@@ -465,8 +467,10 @@ describe('AddSourceLogic', () => {
           };
 
           expect(http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/github/prepare',
-            { query }
+            '/internal/workplace_search/org/sources/github/prepare',
+            {
+              query,
+            }
           );
         });
 
@@ -491,7 +495,7 @@ describe('AddSourceLogic', () => {
           AddSourceLogic.actions.getSourceReConnectData('github');
 
           expect(http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/github/reauth_prepare',
+            '/internal/workplace_search/org/sources/github/reauth_prepare',
             {
               query: {
                 kibana_host: '',
@@ -523,7 +527,7 @@ describe('AddSourceLogic', () => {
 
           AddSourceLogic.actions.getPreContentSourceConfigData();
 
-          expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/pre_sources/123');
+          expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/pre_sources/123');
           await nextTick();
           expect(setPreContentSourceConfigDataSpy).toHaveBeenCalledWith(config);
         });
@@ -565,10 +569,8 @@ describe('AddSourceLogic', () => {
 
           expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
-          expect(
-            http.put
-          ).toHaveBeenCalledWith(
-            `/api/workplace_search/org/settings/connectors/${sourceConfigData.serviceType}`,
+          expect(http.put).toHaveBeenCalledWith(
+            `/internal/workplace_search/org/settings/connectors/${sourceConfigData.serviceType}`,
             { body: JSON.stringify(params) }
           );
 
@@ -591,9 +593,12 @@ describe('AddSourceLogic', () => {
             consumer_key: sourceConfigData.configuredFields?.consumerKey,
           };
 
-          expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/settings/connectors', {
-            body: JSON.stringify(createParams),
-          });
+          expect(http.post).toHaveBeenCalledWith(
+            '/internal/workplace_search/org/settings/connectors',
+            {
+              body: JSON.stringify(createParams),
+            }
+          );
         });
 
         it('handles error', async () => {
@@ -644,7 +649,7 @@ describe('AddSourceLogic', () => {
 
           expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
-          expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/create_source', {
+          expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/org/create_source', {
             body: JSON.stringify({ ...params }),
           });
           await nextTick();
@@ -677,16 +682,19 @@ describe('AddSourceLogic', () => {
 
         AddSourceLogic.actions.getSourceConnectData('github', jest.fn());
 
-        expect(
-          http.get
-        ).toHaveBeenCalledWith('/api/workplace_search/account/sources/github/prepare', { query });
+        expect(http.get).toHaveBeenCalledWith(
+          '/internal/workplace_search/account/sources/github/prepare',
+          {
+            query,
+          }
+        );
       });
 
       it('getSourceReConnectData', () => {
         AddSourceLogic.actions.getSourceReConnectData('123');
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/reauth_prepare',
+          '/internal/workplace_search/account/sources/123/reauth_prepare',
           {
             query: {
               kibana_host: '',
@@ -699,13 +707,13 @@ describe('AddSourceLogic', () => {
         mount({ preContentSourceId: '123' });
         AddSourceLogic.actions.getPreContentSourceConfigData();
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/pre_sources/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/account/pre_sources/123');
       });
 
       it('createContentSource', () => {
         AddSourceLogic.actions.createContentSource('github', jest.fn());
 
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/account/create_source', {
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/account/create_source', {
           body: JSON.stringify({ service_type: 'github' }),
         });
       });

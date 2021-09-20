@@ -180,6 +180,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const updatedAt = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
   );
+  const isAlertsLoading = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).isLoading
+  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -202,10 +205,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       signalIndexName,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const {
@@ -284,6 +285,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       setRuleDetailTab(RuleDetailTabs.alerts);
     }
   }, [hasIndexRead]);
+
+  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
 
   const title = useMemo(
     () => (
@@ -399,10 +402,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [ruleId, filters, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
-  const alertMergedFilters = useMemo(() => [...alertDefaultFilters, ...filters], [
-    alertDefaultFilters,
-    filters,
-  ]);
+  const alertMergedFilters = useMemo(
+    () => [...alertDefaultFilters, ...filters],
+    [alertDefaultFilters, filters]
+  );
 
   const tabs = useMemo(
     () => (
@@ -772,10 +775,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    {timelinesUi.getLastUpdated({
-                      updatedAt: updatedAt || 0,
-                      showUpdating: loading,
-                    })}
+                    {updatedAt &&
+                      timelinesUi.getLastUpdated({
+                        updatedAt: updatedAt || Date.now(),
+                        showUpdating,
+                      })}
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="l" />

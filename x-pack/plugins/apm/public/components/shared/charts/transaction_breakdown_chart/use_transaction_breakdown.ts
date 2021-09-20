@@ -24,13 +24,17 @@ export function useTransactionBreakdown({
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { transactionType, serviceName } = useApmServiceContext();
 
-  const { data = { timeseries: undefined }, error, status } = useFetcher(
+  const {
+    data = { timeseries: undefined },
+    error,
+    status,
+  } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
         return callApmApi({

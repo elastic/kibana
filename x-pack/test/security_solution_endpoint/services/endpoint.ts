@@ -45,12 +45,14 @@ export class EndpointTestResources extends FtrService {
     if (endpointPackageVersion) {
       await this.transform.api.waitForTransformToExist(transformId);
 
-      transform = ((
-        await this.transform.api
-          .getTransform(transformId)
-          .catch(catchAndWrapError)
-          .then((response: { body: GetTransformsResponseSchema }) => response)
-      ).body as GetTransformsResponseSchema).transforms[0];
+      transform = (
+        (
+          await this.transform.api
+            .getTransform(transformId)
+            .catch(catchAndWrapError)
+            .then((response: { body: GetTransformsResponseSchema }) => response)
+        ).body as GetTransformsResponseSchema
+      ).transforms[0];
     } else {
       transform = (
         await this.transform.api.getTransformList(100).catch(catchAndWrapError)
@@ -189,7 +191,9 @@ export class EndpointTestResources extends FtrService {
    * installs (or upgrades) the Endpoint Fleet package
    * (NOTE: ensure that fleet is setup first before calling this function)
    */
-  async installOrUpgradeEndpointFleetPackage(): Promise<void> {
+  async installOrUpgradeEndpointFleetPackage(): ReturnType<
+    typeof installOrUpgradeEndpointFleetPackage
+  > {
     return installOrUpgradeEndpointFleetPackage(this.kbnClient);
   }
 }

@@ -8,9 +8,10 @@
 
 import moment from 'moment';
 import { get, last } from 'lodash';
+import { SortDirection } from 'src/plugins/data/common';
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
 import { fetchContextProvider, SurrDocType } from './context';
-import { setServices, SortDirection } from '../../../../kibana_services';
+import { setServices } from '../../../../kibana_services';
 import { Query } from '../../../../../../data/public';
 import { DiscoverServices } from '../../../../build_services';
 import { EsHitRecord, EsHitRecordList } from '../../../types';
@@ -45,7 +46,7 @@ describe('context predecessors', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
-      setServices(({
+      setServices({
         data: {
           search: {
             searchSource: {
@@ -53,7 +54,7 @@ describe('context predecessors', function () {
             },
           },
         },
-      } as unknown) as DiscoverServices);
+      } as unknown as DiscoverServices);
 
       fetchPredecessors = (
         indexPatternId,
@@ -237,7 +238,7 @@ describe('context predecessors', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
-      setServices(({
+      setServices({
         data: {
           search: {
             searchSource: {
@@ -245,7 +246,7 @@ describe('context predecessors', function () {
             },
           },
         },
-      } as unknown) as DiscoverServices);
+      } as unknown as DiscoverServices);
 
       fetchPredecessors = (
         indexPatternId,

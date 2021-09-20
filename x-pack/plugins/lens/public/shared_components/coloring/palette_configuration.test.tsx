@@ -14,6 +14,7 @@ import { ReactWrapper } from 'enzyme';
 import type { CustomPaletteParams } from '../../../common';
 import { applyPaletteParams } from './utils';
 import { CustomizablePalette } from './palette_configuration';
+import { CUSTOM_PALETTE } from './constants';
 import { act } from 'react-dom/test-utils';
 
 // mocking random id generator function
@@ -84,10 +85,12 @@ describe('palette panel', () => {
     });
 
     function changePaletteIn(instance: ReactWrapper, newPaletteName: string) {
-      return ((instance
-        .find('[data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"]')
-        .at(1)
-        .prop('onChange') as unknown) as (value: string) => void)?.(newPaletteName);
+      return (
+        instance
+          .find('[data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"]')
+          .at(1)
+          .prop('onChange') as unknown as (value: string) => void
+      )?.(newPaletteName);
     }
 
     it('should show only dynamic coloring enabled palette + custom option', () => {
@@ -125,6 +128,21 @@ describe('palette panel', () => {
             { color: 'yellow', stop: 100 },
           ],
           name: 'custom',
+        }),
+      });
+    });
+
+    it('should restore the reverse initial state on transitioning', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      changePaletteIn(instance, 'negative');
+
+      expect(props.setPalette).toHaveBeenCalledWith({
+        type: 'palette',
+        name: 'negative',
+        params: expect.objectContaining({
+          name: 'negative',
+          reverse: false,
         }),
       });
     });
@@ -171,6 +189,20 @@ describe('palette panel', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             reverse: true,
+          }),
+        })
+      );
+    });
+
+    it('should transition a predefined palette to a custom one on reverse click', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      toggleReverse(instance, true);
+
+      expect(props.setPalette).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            name: CUSTOM_PALETTE,
           }),
         })
       );
