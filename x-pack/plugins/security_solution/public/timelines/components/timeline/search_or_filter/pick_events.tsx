@@ -150,7 +150,13 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const { patternList, selectablePatterns } = useMemo(() => {
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
     return theDataView != null
-      ? { patternList: theDataView.title.split(','), selectablePatterns: theDataView.patternList }
+      ? {
+          patternList: theDataView.title
+            .split(',')
+            // remove duplicates patterns from selector
+            .filter((pattern, i, self) => self.indexOf(pattern) === i),
+          selectablePatterns: theDataView.patternList,
+        }
       : { patternList: [], selectablePatterns: [] };
   }, [kibanaDataViews, dataViewId]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
@@ -160,13 +166,15 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     }))
   );
   const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
-  const selectableOptions = useMemo(() => {
-    return patternList.map((indexName) => ({
-      label: indexName,
-      value: indexName,
-      disabled: !selectablePatterns.includes(indexName),
-    }));
-  }, [selectablePatterns, patternList]);
+  const selectableOptions = useMemo(
+    () =>
+      patternList.map((indexName) => ({
+        label: indexName,
+        value: indexName,
+        disabled: !selectablePatterns.includes(indexName),
+      })),
+    [selectablePatterns, patternList]
+  );
 
   const onChangeFilter = useCallback(
     (filter) => {
@@ -406,6 +414,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             {filter}
             <EuiSpacer size="m" />
             <EuiAccordion
+              data-test-subj="sourcerer-accordion"
               id="accordion1"
               forceState={showAdvanceSettings ? 'open' : 'closed'}
               buttonContent={ButtonContent}

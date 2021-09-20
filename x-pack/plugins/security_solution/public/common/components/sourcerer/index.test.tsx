@@ -35,6 +35,7 @@ const defaultProps = {
 describe('Sourcerer component', () => {
   const state: State = mockGlobalState;
   const { id, patternList, title } = state.sourcerer.defaultDataView;
+  const patternListNoSignals = patternList.filter((p) => state.sourcerer.signalIndexName !== p);
   const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => ({
     availableOptionCount: wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).length,
     optionsSelected: patterns.every((pattern) =>
@@ -44,11 +45,6 @@ describe('Sourcerer component', () => {
         .exists()
     ),
   });
-
-  const mockOptions = patternList.map((p) => ({
-    label: p,
-    value: p,
-  }));
 
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
@@ -68,7 +64,12 @@ describe('Sourcerer component', () => {
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     expect(
       wrapper.find(`[data-test-subj="sourcerer-combo-box"]`).first().prop('selectedOptions')
-    ).toEqual(mockOptions);
+    ).toEqual(
+      patternListNoSignals.map((p) => ({
+        label: p,
+        value: p,
+      }))
+    );
   });
   it('Removes duplicate options from title', () => {
     store = createStore(
@@ -267,8 +268,8 @@ describe('Sourcerer component', () => {
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
 
-    expect(checkOptionsAndSelections(wrapper, patternList)).toEqual({
-      availableOptionCount: title.split(',').length - patternList.length, // 1,
+    expect(checkOptionsAndSelections(wrapper, patternListNoSignals)).toEqual({
+      availableOptionCount: title.split(',').length - patternListNoSignals.length, // 1,
       optionsSelected: true,
     });
 
@@ -278,14 +279,16 @@ describe('Sourcerer component', () => {
       )
       .first()
       .simulate('click');
-    expect(checkOptionsAndSelections(wrapper, patternList.slice(1, patternList.length))).toEqual({
-      availableOptionCount: title.split(',').length - (patternList.length - 1), // 2,
+    expect(
+      checkOptionsAndSelections(wrapper, patternListNoSignals.slice(1, patternListNoSignals.length))
+    ).toEqual({
+      availableOptionCount: title.split(',').length - (patternListNoSignals.length - 1), // 2,
       optionsSelected: true,
     });
 
     wrapper.find(`[data-test-subj="sourcerer-reset"]`).first().simulate('click');
-    expect(checkOptionsAndSelections(wrapper, patternList)).toEqual({
-      availableOptionCount: title.split(',').length - patternList.length, // 1,
+    expect(checkOptionsAndSelections(wrapper, patternListNoSignals)).toEqual({
+      availableOptionCount: title.split(',').length - patternListNoSignals.length, // 1,
       optionsSelected: true,
     });
   });

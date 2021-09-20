@@ -184,7 +184,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [sort]
   );
 
-
   const [isQueryLoading, { events, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
       docValueFields,
@@ -200,7 +199,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       sort: timelineQuerySortField,
       timerangeKind: undefined,
     });
-
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.pinned, timelineId });

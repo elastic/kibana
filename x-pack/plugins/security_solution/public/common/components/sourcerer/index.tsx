@@ -229,10 +229,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     );
   }, [selectedPatterns]);
 
-  const tooltipContent = useMemo(() => (isPopoverOpen ? null : selectedPatterns.join(', ')), [
-    selectedPatterns,
-    isPopoverOpen,
-  ]);
+  const tooltipContent = useMemo(
+    () => (isPopoverOpen ? null : selectedPatterns.join(', ')),
+    [selectedPatterns, isPopoverOpen]
+  );
 
   return (
     <EuiToolTip position="top" content={tooltipContent}>

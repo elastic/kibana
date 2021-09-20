@@ -26,38 +26,39 @@ import { queryTimelineById } from '../../../timelines/components/open_timeline/h
 import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
 import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 
-export const dispatchSetInitialStateFromUrl = (
-  dispatch: Dispatch
-): DispatchSetInitialStateFromUrl => ({
-  filterManager,
-  indexPattern,
-  pageName,
-  savedQueries,
-  updateTimeline,
-  updateTimelineIsLoading,
-  urlStateToUpdate,
-}: SetInitialStateFromUrl<unknown>): (() => void) => () => {
-  urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
-    if (urlKey === CONSTANTS.timerange) {
-      updateTimerange(newUrlStateString, dispatch);
-    }
-    if (urlKey === CONSTANTS.sourcerer) {
-      const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
-      if (sourcererState != null) {
-        const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
-          (key) => !(key === SourcererScopeName.default && isDetectionsPages(pageName))
-        ) as SourcererScopeName[];
-        activeScopes.forEach((scope) => {
-          dispatch(
-            sourcererActions.setSelectedDataView({
-              id: scope,
-              selectedDataViewId: sourcererState[scope]?.id ?? DEFAULT_DATA_VIEW_ID,
-              selectedPatterns: sourcererState[scope]?.selectedPatterns,
-            })
-          );
-        });
+export const dispatchSetInitialStateFromUrl =
+  (dispatch: Dispatch): DispatchSetInitialStateFromUrl =>
+  ({
+    filterManager,
+    indexPattern,
+    pageName,
+    savedQueries,
+    updateTimeline,
+    updateTimelineIsLoading,
+    urlStateToUpdate,
+  }: SetInitialStateFromUrl<unknown>): (() => void) =>
+  () => {
+    urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
+      if (urlKey === CONSTANTS.timerange) {
+        updateTimerange(newUrlStateString, dispatch);
       }
-    }
+      if (urlKey === CONSTANTS.sourcerer) {
+        const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
+        if (sourcererState != null) {
+          const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
+            (key) => !(key === SourcererScopeName.default && isDetectionsPages(pageName))
+          ) as SourcererScopeName[];
+          activeScopes.forEach((scope) => {
+            dispatch(
+              sourcererActions.setSelectedDataView({
+                id: scope,
+                selectedDataViewId: sourcererState[scope]?.id ?? DEFAULT_DATA_VIEW_ID,
+                selectedPatterns: sourcererState[scope]?.selectedPatterns,
+              })
+            );
+          });
+        }
+      }
 
       if (urlKey === CONSTANTS.appQuery && indexPattern != null) {
         const appQuery = decodeRisonUrlState<Query>(newUrlStateString);
