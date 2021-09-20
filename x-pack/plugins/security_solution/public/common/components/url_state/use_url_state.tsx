@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { difference, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -26,11 +26,11 @@ import {
   UrlStateContainerPropTypes,
   ReplaceStateInLocation,
   PreviousLocationUrlState,
-  URL_STATE_KEYS,
   KeyUrlState,
   ALL_URL_STATE_KEYS,
   UrlStateToRedux,
   UrlState,
+  isAdministration,
 } from './types';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 
@@ -78,73 +78,77 @@ export const useUrlStateHooks = ({
     let mySearch = search;
     let urlStateToUpdate: UrlStateToRedux[] = [];
     const statesToUpdate: ReplaceStateInLocation[] = [];
-    URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
-      const newUrlStateString = getParamFromQueryString(
-        getQueryStringFromLocation(mySearch),
-        urlKey
-      );
-      if (newUrlStateString) {
-        mySearch = updateUrlStateString({
-          history,
-          isInitializing,
-          newUrlStateString,
-          pathName,
-          search: mySearch,
-          updateTimerange: (needUpdate ?? false) || isInitializing,
-          urlKey,
+
+    if (isAdministration(type)) {
+      ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
+        statesToUpdate.push({
+          urlStateToReplace: '',
+          urlStateKey: urlKey,
         });
-        if (isInitializing || needUpdate) {
-          const updatedUrlStateString =
-            getParamFromQueryString(getQueryStringFromLocation(mySearch), urlKey) ??
-            newUrlStateString;
-          if (isInitializing || !deepEqual(updatedUrlStateString, newUrlStateString)) {
-            if (updateTimelineAtinitialization(urlKey, newUrlStateString, urlState)) {
-              urlStateToUpdate = [
-                ...urlStateToUpdate,
-                {
-                  urlKey,
-                  newUrlStateString: updatedUrlStateString,
-                },
-              ];
+      });
+    } else {
+      ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
+        const newUrlStateString = getParamFromQueryString(
+          getQueryStringFromLocation(mySearch),
+          urlKey
+        );
+        if (newUrlStateString) {
+          mySearch = updateUrlStateString({
+            history,
+            isInitializing,
+            newUrlStateString,
+            pathName,
+            search: mySearch,
+            updateTimerange: (needUpdate ?? false) || isInitializing,
+            urlKey,
+          });
+          if (isInitializing || needUpdate) {
+            const updatedUrlStateString =
+              getParamFromQueryString(getQueryStringFromLocation(mySearch), urlKey) ??
+              newUrlStateString;
+            if (isInitializing || !deepEqual(updatedUrlStateString, newUrlStateString)) {
+              if (updateTimelineAtinitialization(urlKey, newUrlStateString, urlState)) {
+                urlStateToUpdate = [
+                  ...urlStateToUpdate,
+                  {
+                    urlKey,
+                    newUrlStateString: updatedUrlStateString,
+                  },
+                ];
+              }
             }
           }
+        } else if (
+          urlKey === CONSTANTS.appQuery &&
+          urlState[urlKey] != null &&
+          urlState[urlKey]?.query === ''
+        ) {
+          statesToUpdate.push({
+            urlStateToReplace: '',
+            urlStateKey: urlKey,
+          });
+        } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
+          statesToUpdate.push({
+            urlStateToReplace: '',
+            urlStateKey: urlKey,
+          });
+        } else if (
+          urlKey === CONSTANTS.timeline &&
+          urlState[urlKey] != null &&
+          urlState[urlKey].id === ''
+        ) {
+          statesToUpdate.push({
+            urlStateToReplace: '',
+            urlStateKey: urlKey,
+          });
+        } else {
+          statesToUpdate.push({
+            urlStateToReplace: urlState[urlKey] || '',
+            urlStateKey: urlKey,
+          });
         }
-      } else if (
-        urlKey === CONSTANTS.appQuery &&
-        urlState[urlKey] != null &&
-        urlState[urlKey]?.query === ''
-      ) {
-        statesToUpdate.push({
-          urlStateToReplace: '',
-          urlStateKey: urlKey,
-        });
-      } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
-        statesToUpdate.push({
-          urlStateToReplace: '',
-          urlStateKey: urlKey,
-        });
-      } else if (
-        urlKey === CONSTANTS.timeline &&
-        urlState[urlKey] != null &&
-        urlState[urlKey].id === ''
-      ) {
-        statesToUpdate.push({
-          urlStateToReplace: '',
-          urlStateKey: urlKey,
-        });
-      } else {
-        statesToUpdate.push({
-          urlStateToReplace: urlState[urlKey] || '',
-          urlStateKey: urlKey,
-        });
-      }
-    });
-    difference(ALL_URL_STATE_KEYS, URL_STATE_KEYS[type]).forEach((urlKey: KeyUrlState) => {
-      statesToUpdate.push({
-        urlStateToReplace: '',
-        urlStateKey: urlKey,
       });
-    });
+    }
 
     replaceStatesInLocation(statesToUpdate, pathName, mySearch, history);
 
@@ -172,9 +176,14 @@ export const useUrlStateHooks = ({
     if (isInitializing && pageName != null && pageName !== '') {
       handleInitialize(type);
       setIsInitializing(false);
-    } else if (!deepEqual(urlState, prevProps.urlState) && !isInitializing) {
+    } else if (
+      !deepEqual(urlState, prevProps.urlState) &&
+      !isInitializing &&
+      !isAdministration(type)
+    ) {
       const statesToUpdate: ReplaceStateInLocation[] = [];
-      URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
+
+      ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
         if (
           urlKey === CONSTANTS.appQuery &&
           urlState[urlKey] != null &&
