@@ -726,7 +726,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
         >
           <FormattedMessage
             id="xpack.fleet.upgradePackagePolicy.statusCallout.errorContent"
-            defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform upgrade. You may reference your {previousConfigurationLink} for comparison."
+            defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform the upgrade. You may reference your {previousConfigurationLink} for comparison."
             values={{
               currentVersion: currentPackagePolicy?.package?.version,
               upgradeVersion: proposedUpgradePackagePolicy?.package?.version,

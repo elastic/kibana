@@ -96,6 +96,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
           });
           history.push(settingsPath);
         }
+
         notifications.toasts.addSuccess({
           title: toMountPoint(
             <FormattedMessage

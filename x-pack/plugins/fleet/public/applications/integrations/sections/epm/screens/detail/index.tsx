@@ -305,7 +305,7 @@ export function Detail() {
                   <EuiFlexGroup gutterSize="s">
                     <EuiFlexItem>{packageInfo.version}</EuiFlexItem>
                     {updateAvailable ? (
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={false}>
                         <UpdateIcon />
                       </EuiFlexItem>
                     ) : null}

@@ -117,7 +117,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
               disabled={!hasWriteCapabilities}
               icon="trash"
               onClick={() => {
-                deletePackagePoliciesPrompt([packagePolicy.id], refreshAgentPolicy);
+                deletePackagePoliciesPrompt([packagePolicy.id], () => {
+                  setIsActionsMenuOpen(false);
+                  refreshAgentPolicy();
+                });
               }}
             >
               <FormattedMessage
