@@ -95,7 +95,7 @@ export const getTableColumns = (
   kbnUrlStateStorage: IKbnUrlStateStorage,
   taggingApi?: SavedObjectsTaggingApi
 ) =>
-  ([
+  [
     {
       field: 'title',
       name: i18n.translate('visualize.listing.table.titleColumnName', {
@@ -149,7 +149,7 @@ export const getTableColumns = (
       render: (field: string, record: VisualizationListItem) => <span>{record.description}</span>,
     },
     ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
-  ] as unknown) as Array<EuiBasicTableColumn<Record<string, unknown>>>;
+  ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 
 export const getNoItemsMessage = (createItem: () => void) => (
   <EuiEmptyPrompt

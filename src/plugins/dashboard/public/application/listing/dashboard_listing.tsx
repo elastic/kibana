@@ -204,7 +204,7 @@ const getTableColumns = (
   useHash: boolean,
   savedObjectsTagging?: SavedObjectsTaggingApi
 ) => {
-  return ([
+  return [
     {
       field: 'title',
       name: dashboardListingTable.getTitleColumnName(),
@@ -231,7 +231,7 @@ const getTableColumns = (
       sortable: true,
     },
     ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
-  ] as unknown) as Array<EuiBasicTableColumn<Record<string, unknown>>>;
+  ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 };
 
 const getNoItemsMessage = (

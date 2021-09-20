@@ -136,7 +136,7 @@ export const CodeEditor: React.FC<Props> = ({
     const isMockedComponent =
       typeof ReactMonacoEditor === 'function' && ReactMonacoEditor.name === 'JestMockEditor';
     return isMockedComponent
-      ? ((ReactMonacoEditor as unknown) as () => typeof ReactMonacoEditor)()
+      ? (ReactMonacoEditor as unknown as () => typeof ReactMonacoEditor)()
       : ReactMonacoEditor;
   }, []);
 

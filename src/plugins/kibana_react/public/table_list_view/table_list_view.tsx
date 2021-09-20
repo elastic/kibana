@@ -426,7 +426,7 @@ class TableListView<V extends {}> extends React.Component<
         ),
         icon: 'pencil',
         type: 'icon',
-        enabled: (v) => !((v as unknown) as { error: string })?.error,
+        enabled: (v) => !(v as unknown as { error: string })?.error,
         onClick: this.props.editItem,
       },
     ];
