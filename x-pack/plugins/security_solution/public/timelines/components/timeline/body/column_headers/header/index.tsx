@@ -8,7 +8,7 @@
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { getDataViewFieldSubtypeNested } from '@kbn/es-query';
+import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 
 import { ColumnHeaderOptions } from '../../../../../../../common';
 import {
@@ -87,8 +87,7 @@ export const HeaderComponent: React.FC<Props> = ({
   const { isLoading } = useDeepEqualSelector(
     (state) => getManageTimeline(state, timelineId) || { isLoading: false }
   );
-  const subTypeNested = getDataViewFieldSubtypeNested(header);
-  const showSortingCapability = !isEqlOn && !subTypeNested?.nested;
+  const showSortingCapability = !isEqlOn && !isDataViewFieldSubtypeNested(header);
 
   return (
     <>
