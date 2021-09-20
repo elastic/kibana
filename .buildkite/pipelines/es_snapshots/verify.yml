@@ -29,6 +29,7 @@ steps:
     agents:
       queue: ci-group-6
     depends_on: build
+    timeout_in_minutes: 150
     key: default-cigroup
     retry:
       automatic:
@@ -40,6 +41,7 @@ steps:
     agents:
       queue: ci-group-6
     depends_on: build
+    timeout_in_minutes: 120
     key: default-cigroup-docker
     retry:
       automatic:
@@ -52,6 +54,7 @@ steps:
     agents:
       queue: ci-group-4d
     depends_on: build
+    timeout_in_minutes: 120
     key: oss-cigroup
     retry:
       automatic:
@@ -62,6 +65,7 @@ steps:
     label: 'Jest Integration Tests'
     agents:
       queue: jest
+    timeout_in_minutes: 120
     key: jest-integration
     retry:
       automatic:
@@ -72,6 +76,7 @@ steps:
     label: 'API Integration Tests'
     agents:
       queue: jest
+    timeout_in_minutes: 120
     key: api-integration
 
   - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
