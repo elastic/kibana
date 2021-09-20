@@ -32,8 +32,7 @@ export function logstashPipelineRoute(server) {
    */
   server.route({
     method: 'POST',
-    path:
-      '/api/monitoring/v1/clusters/{clusterUuid}/logstash/pipeline/{pipelineId}/{pipelineHash?}',
+    path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/pipeline/{pipelineId}/{pipelineHash?}',
     config: {
       validate: {
         params: schema.object({
@@ -61,7 +60,13 @@ export function logstashPipelineRoute(server) {
       // Figure out which version of the pipeline we want to show
       let versions;
       try {
-        versions = await getPipelineVersions(req, config, lsIndexPattern, clusterUuid, pipelineId);
+        versions = await getPipelineVersions({
+          req,
+          config,
+          lsIndexPattern,
+          clusterUuid,
+          pipelineId,
+        });
       } catch (err) {
         return handleError(err, req);
       }

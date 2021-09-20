@@ -193,8 +193,9 @@ export class EditJobFlyoutUI extends Component {
     let { jobModelMemoryLimitValidationError, jobGroupsValidationError } = this.state;
 
     if (jobDetails.jobModelMemoryLimit !== undefined) {
-      jobModelMemoryLimitValidationError = validateModelMemoryLimit(jobDetails.jobModelMemoryLimit)
-        .message;
+      jobModelMemoryLimitValidationError = validateModelMemoryLimit(
+        jobDetails.jobModelMemoryLimit
+      ).message;
     }
 
     if (jobDetails.jobGroups !== undefined) {

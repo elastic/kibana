@@ -48,7 +48,7 @@ const defaultProps = {
 
 test('Should render join editor', () => {
   const component = shallow(
-    <JoinEditor {...defaultProps} layer={(new MockLayer(null) as unknown) as ILayer} />
+    <JoinEditor {...defaultProps} layer={new MockLayer(null) as unknown as ILayer} />
   );
   expect(component).toMatchSnapshot();
 });
@@ -57,7 +57,7 @@ test('Should render callout when joins are disabled', () => {
   const component = shallow(
     <JoinEditor
       {...defaultProps}
-      layer={(new MockLayer('Simulated disabled reason') as unknown) as ILayer}
+      layer={new MockLayer('Simulated disabled reason') as unknown as ILayer}
     />
   );
   expect(component).toMatchSnapshot();

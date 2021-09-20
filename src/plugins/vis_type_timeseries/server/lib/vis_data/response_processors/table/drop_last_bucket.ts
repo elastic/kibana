@@ -13,16 +13,17 @@ import { dropLastBucket } from '../series/drop_last_bucket';
 
 import type { TableResponseProcessorsFunction } from './types';
 
-export const dropLastBucketFn: TableResponseProcessorsFunction = ({ bucket, panel, series }) => (
-  next
-) => (results) => {
-  const shouldDropLastBucket = isLastValueTimerangeMode(panel);
+export const dropLastBucketFn: TableResponseProcessorsFunction =
+  ({ bucket, panel, series }) =>
+  (next) =>
+  (results) => {
+    const shouldDropLastBucket = isLastValueTimerangeMode(panel);
 
-  if (shouldDropLastBucket) {
-    const fn = dropLastBucket({ aggregations: bucket }, panel, series);
+    if (shouldDropLastBucket) {
+      const fn = dropLastBucket({ aggregations: bucket }, panel, series);
 
-    return fn(next)(results);
-  }
+      return fn(next)(results);
+    }
 
-  return next(results);
-};
+    return next(results);
+  };

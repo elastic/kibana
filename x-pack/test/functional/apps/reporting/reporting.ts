@@ -11,17 +11,22 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['dashboard', 'common', 'reporting']);
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+
   const retry = getService('retry');
 
   describe('Reporting', function () {
     this.tags(['smoke', 'ciGroup2']);
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/packaging');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/packaging'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/packaging');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/packaging'
+      );
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
