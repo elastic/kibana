@@ -5,21 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { FocusEventHandler } from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { get } from 'lodash';
+
+export interface ESIndexSelectProps {
+  loading: boolean;
+  value: string;
+  indices: string[];
+  onChange: (index: string) => void;
+  onBlur: FocusEventHandler<HTMLDivElement> | undefined;
+  onFocus: FocusEventHandler<HTMLDivElement> | undefined;
+}
 
 const defaultIndex = '_all';
 
-export const ESIndexSelect = ({ value, loading, indices, onChange, onFocus, onBlur }) => {
+export const ESIndexSelect: React.FunctionComponent<ESIndexSelectProps> = ({
+  value = defaultIndex,
+  loading,
+  indices,
+  onChange,
+  onFocus,
+  onBlur,
+}) => {
   const selectedOption = value !== defaultIndex ? [{ label: value }] : [];
   const options = indices.map((index) => ({ label: index }));
 
   return (
     <EuiComboBox
       selectedOptions={selectedOption}
-      onChange={([index]) => onChange(get(index, 'label', defaultIndex))}
+      onChange={([index]) => onChange(index?.label ?? defaultIndex)}
       onSearchChange={(searchValue) => {
         // resets input when user starts typing
         if (searchValue) {
@@ -28,7 +42,7 @@ export const ESIndexSelect = ({ value, loading, indices, onChange, onFocus, onBl
       }}
       onBlur={onBlur}
       onFocus={onFocus}
-      disabled={loading}
+      isDisabled={loading}
       options={options}
       singleSelection={{ asPlainText: true }}
       isClearable={false}
@@ -36,17 +50,4 @@ export const ESIndexSelect = ({ value, loading, indices, onChange, onFocus, onBl
       compressed
     />
   );
-};
-
-ESIndexSelect.propTypes = {
-  value: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-  onFocus: PropTypes.func,
-  onBlur: PropTypes.func,
-  indices: PropTypes.array.isRequired,
-  loading: PropTypes.bool.isRequired,
-};
-
-ESIndexSelect.defaultProps = {
-  value: defaultIndex,
 };

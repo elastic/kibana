@@ -74,10 +74,10 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     fetchTags();
   });
 
-  const createModalOpener = useMemo(() => getCreateModalOpener({ overlays, tagClient }), [
-    overlays,
-    tagClient,
-  ]);
+  const createModalOpener = useMemo(
+    () => getCreateModalOpener({ overlays, tagClient }),
+    [overlays, tagClient]
+  );
 
   const tableActions = useMemo(() => {
     return getTableActions({

@@ -184,10 +184,8 @@ function useRole(
             privileges: [],
           };
 
-          const {
-            allowRoleDocumentLevelSecurity,
-            allowRoleFieldLevelSecurity,
-          } = license.getFeatures();
+          const { allowRoleDocumentLevelSecurity, allowRoleFieldLevelSecurity } =
+            license.getFeatures();
 
           if (allowRoleFieldLevelSecurity) {
             emptyOption.field_security = {
