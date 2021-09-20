@@ -13,6 +13,7 @@
 
 Review important information about the {kib} 7.14.x releases.
 
+* <<release-notes-7.14.2>>
 * <<release-notes-7.14.1>>
 * <<release-notes-7.14.0>>
 //* <<release-notes-7.13.2>>
@@ -59,6 +60,65 @@ Review important information about the {kib} 7.14.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.14.2]]
+== {kib} 7.14.2
+
+coming::[7.14.2]
+
+Review the following information about the 7.14.2 release.
+
+[float]
+[[breaking-changes-v7.14.2]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.14.2, review the <<breaking-changes-7.14.0,7.14.0 breaking changes>>.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | {kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | {kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] |
+{kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | {kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] |
+{kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2]
+| {kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[enhancement-v7.14.2]]
+=== Enhancements
+Platform::
+* Provide better diagnostics when task manager performance is degraded {kibana-pull}109741[#109741]
+
+[float]
+[[fixes-v7.14.2]]
+=== Bug Fixes
+Canvas::
+* Fixes several minor workpad layout and interaction bugs {kibana-pull}110385[#110385]
+* Fixes element stats {kibana-pull}109770[#109770]
+* Fixes image argument form issues {kibana-pull}109767[#109767]
+* Handle Timelion errors gracefully {kibana-pull}109761[#109761]
+Dashboard::
+* Retain Tags on Quicksave {kibana-pull}111015[#111015]
+* Read App State from URL on Soft Refresh {kibana-pull}109354[#109354]
+Discover::
+* Fixes opening the same saved search {kibana-pull}111127[#111127]
+* Fixes export that does not contain relative time filter {kibana-pull}110459[#110459]
+* Fixes cleaning error state in 7.14 {kibana-pull}110036[#110036]
+* Fixes performance regression in sidebar {kibana-pull}109999[#109999]
+Elastic Security::
+For the Elastic Security 7.14.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes config migration from ingestManager to support both xpack.ingestManager and xpack.fleet {kibana-pull}111612[#111612]
+Lens & Visualizations::
+* Adds migration script for 'drop_last_bucket' value in *TSVB* {kibana-pull}110782[#110782]
+Machine Learning::
+* Fixes Anomaly Explorer data points not showing up when index pattern has multiple indices {kibana-pull}110899[#110899]
+Maps::
+* Ensure draw tools updates by index name, not index pattern title {kibana-pull}108394[#108394]
+Platform::
+* Catch errors from individual providers {kibana-pull}111093[#111093]
+Security::
+* Respect `auth_provider_hint` if session is not authenticated {kibana-pull}111521[#111521]
+Uptime::
+* Removes blurring on URL filter selections {kibana-pull}110314[#110314]
+
 [[release-notes-7.14.1]]
 == {kib} 7.14.1
 
