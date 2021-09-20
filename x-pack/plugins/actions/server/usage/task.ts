@@ -110,7 +110,7 @@ export function telemetryTaskRunner(
                 count_active_by_type: totalInUse.countByType,
                 count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
               },
-              runAt: new Date(),
+              runAt: getNextMidnight(),
             };
           })
           .catch((errMsg) => {
