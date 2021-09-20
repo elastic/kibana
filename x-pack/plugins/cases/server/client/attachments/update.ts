@@ -17,6 +17,7 @@ import {
   SUB_CASE_SAVED_OBJECT,
   CaseResponse,
   CommentPatchRequest,
+  CommentRequest,
 } from '../../../common';
 import { AttachmentService, CasesService } from '../../services';
 import { CasesClientArgs } from '..';
@@ -175,14 +176,12 @@ export async function update(
     }
 
     const updatedDate = new Date().toISOString();
-    const {
-      comment: updatedComment,
-      commentableCase: updatedCase,
-    } = await commentableCase.updateComment({
-      updateRequest: queryParams,
-      updatedAt: updatedDate,
-      user,
-    });
+    const { comment: updatedComment, commentableCase: updatedCase } =
+      await commentableCase.updateComment({
+        updateRequest: queryParams,
+        updatedAt: updatedDate,
+        user,
+      });
 
     await userActionService.bulkCreate({
       unsecuredSavedObjectsClient,
@@ -195,12 +194,12 @@ export async function update(
           subCaseId: subCaseID,
           commentId: updatedComment.id,
           fields: ['comment'],
-          newValue: JSON.stringify(queryRestAttributes),
-          oldValue: JSON.stringify(
+          // casting because typescript is complaining that it's not a Record<string, unknown> even though it is
+          newValue: queryRestAttributes as CommentRequest,
+          oldValue:
             // We are interested only in ContextBasicRt attributes
             // myComment.attribute contains also CommentAttributesBasicRt attributes
-            pick(Object.keys(queryRestAttributes), myComment.attributes)
-          ),
+            pick(Object.keys(queryRestAttributes), myComment.attributes),
           owner: myComment.attributes.owner,
         }),
       ],

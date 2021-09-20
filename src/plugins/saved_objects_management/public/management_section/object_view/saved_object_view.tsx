@@ -86,14 +86,8 @@ export class SavedObjectEdition extends Component<
   }
 
   render() {
-    const {
-      capabilities,
-      notFoundType,
-      serviceRegistry,
-      http,
-      serviceName,
-      savedObjectsClient,
-    } = this.props;
+    const { capabilities, notFoundType, serviceRegistry, http, serviceName, savedObjectsClient } =
+      this.props;
     const { type } = this.state;
     const { object } = this.state;
     const { edit: canEdit, delete: canDelete } = capabilities.savedObjectsManagement as Record<

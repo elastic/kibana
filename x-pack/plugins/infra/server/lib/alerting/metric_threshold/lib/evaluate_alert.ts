@@ -13,7 +13,6 @@ import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../../common/alerting/metrics';
 import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
-import { roundTimestamp } from '../../../../utils/round_timestamp';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
@@ -22,6 +21,7 @@ import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
 import { MetricExpressionParams, Comparator, Aggregators } from '../types';
 import { getElasticsearchMetricQuery } from './metric_query';
+import { createTimerange } from './create_timerange';
 
 interface AggregationWithoutIntervals {
   aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
@@ -135,23 +135,12 @@ const getMetric: (
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMS = intervalAsSeconds * 1000;
-
-  const to = moment(timeframe ? timeframe.end : Date.now()).valueOf();
-
-  // Rate aggregations need 5 buckets worth of data
-  const minimumBuckets = aggType === Aggregators.RATE ? 5 : 1;
-
-  const minimumFrom = to - intervalAsMS * minimumBuckets;
-
-  const from = roundTimestamp(
-    timeframe && timeframe.start && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
-    timeUnit
-  );
+  const calculatedTimerange = createTimerange(intervalAsMS, aggType, timeframe);
 
   const searchBody = getElasticsearchMetricQuery(
     params,
     timefield,
-    { start: from, end: to },
+    calculatedTimerange,
     hasGroupBy ? groupBy : undefined,
     filterQuery
   );
@@ -160,8 +149,8 @@ const getMetric: (
     // Rate aggs always drop partial buckets; guard against this boolean being passed as false
     shouldDropPartialBuckets || aggType === Aggregators.RATE
       ? {
-          from,
-          to,
+          from: calculatedTimerange.start,
+          to: calculatedTimerange.end,
           bucketSizeInMillis: intervalAsMS,
         }
       : null;
@@ -191,10 +180,7 @@ const getMetric: (
             bucket,
             aggType,
             dropPartialBucketsOptions,
-            {
-              start: from,
-              end: to,
-            },
+            calculatedTimerange,
             bucket.doc_count
           ),
         }),
@@ -209,10 +195,10 @@ const getMetric: (
 
     return {
       [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(
-        (result.aggregations! as unknown) as Aggregation,
+        result.aggregations! as unknown as Aggregation,
         aggType,
         dropPartialBucketsOptions,
-        { start: from, end: to },
+        calculatedTimerange,
         isNumber(result.hits.total) ? result.hits.total : result.hits.total.value
       ),
     };
@@ -239,16 +225,18 @@ interface DropPartialBucketOptions {
   bucketSizeInMillis: number;
 }
 
-const dropPartialBuckets = ({ from, to, bucketSizeInMillis }: DropPartialBucketOptions) => (
-  row: {
-    key: string;
-    value: number | null;
-  } | null
-) => {
-  if (row == null) return null;
-  const timestamp = new Date(row.key).valueOf();
-  return timestamp >= from && timestamp + bucketSizeInMillis <= to;
-};
+const dropPartialBuckets =
+  ({ from, to, bucketSizeInMillis }: DropPartialBucketOptions) =>
+  (
+    row: {
+      key: string;
+      value: number | null;
+    } | null
+  ) => {
+    if (row == null) return null;
+    const timestamp = new Date(row.key).valueOf();
+    return timestamp >= from && timestamp + bucketSizeInMillis <= to;
+  };
 
 const getValuesFromAggregations = (
   aggregations: Aggregation | undefined,
