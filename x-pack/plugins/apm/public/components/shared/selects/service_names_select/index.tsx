@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
-interface SericeNamesSelectProps {
+interface ServiceNamesSelectProps {
   compressed?: boolean;
   defaultValue?: string;
   onChange: (value: string) => void;
@@ -20,8 +20,10 @@ interface SericeNamesSelectProps {
 }
 
 const allOption: EuiComboBoxOptionOption<string> = {
-  label: ENVIRONMENT_ALL.text,
-  value: ENVIRONMENT_ALL.value,
+  label: i18n.translate('xpack.apm.serviceNamesSelectAllDropDownOptionLabel', {
+    defaultMessage: 'All',
+  }),
+  value: undefined,
 };
 
 export function ServiceNamesSelect({
@@ -30,7 +32,7 @@ export function ServiceNamesSelect({
   onChange,
   environment,
   transactionType,
-}: ServiceNamesSelect) {
+}: ServiceNamesSelectProps) {
   const defaultOption =
     !defaultValue || defaultValue === ENVIRONMENT_ALL.value
       ? allOption
