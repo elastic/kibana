@@ -38,10 +38,10 @@ describe('Field', function () {
     scripted: true,
     subType: { multi: { parent: 'parent' }, nested: { path: 'path' } },
     displayName: 'displayName',
-    indexPattern: ({
+    indexPattern: {
       fieldFormatMap: { name: {}, _source: {}, _score: {}, _id: {} },
-    } as unknown) as IndexPattern,
-    $$spec: ({} as unknown) as FieldSpec,
+    } as unknown as IndexPattern,
+    $$spec: {} as unknown as FieldSpec,
     conflictDescriptions: { a: ['b', 'c'], d: ['e'] },
     runtimeField: {
       type: 'keyword' as RuntimeField['type'],
@@ -153,14 +153,14 @@ describe('Field', function () {
   it('spec snapshot', () => {
     const field = new IndexPatternField(fieldValues);
     const getFormatterForField = () =>
-      (({
+      ({
         toJSON: () => ({
           id: 'number',
           params: {
             pattern: '$0,0.[00]',
           },
         }),
-      } as unknown) as FieldFormat);
+      } as unknown as FieldFormat);
     expect(field.toSpec({ getFormatterForField })).toMatchSnapshot();
   });
 });

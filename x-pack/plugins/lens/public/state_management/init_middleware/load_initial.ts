@@ -36,10 +36,10 @@ export const getPersisted = async ({
     const result = await attributeService.unwrapAttributes(initialInput);
     if (!result) {
       return {
-        doc: ({
+        doc: {
           ...initialInput,
           type: LENS_EMBEDDABLE_TYPE,
-        } as unknown) as Document,
+        } as unknown as Document,
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
         },
