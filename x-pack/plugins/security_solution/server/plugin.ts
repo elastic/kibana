@@ -160,7 +160,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.context = context;
     this.logger = context.logger.get();
     this.config = createConfig(context);
-    console.log('SERVER PLUGIN config: ', { config: this.config, context });
     this.appClientFactory = new AppClientFactory();
     // Cache up to three artifacts with a max retention of 5 mins each
     this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
