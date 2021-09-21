@@ -6,18 +6,12 @@
  * Side Public License, v 1.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  ScopedHistory,
-} from 'src/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { History } from 'history';
 import { setVersion } from './set_version';
 
 export interface KibanaUtilsSetup {
-  setVersion: (history: ScopedHistory) => void;
+  setVersion: (history: Pick<History, 'location' | 'replace'>) => void;
 }
 
 export type KibanaUtilsStart = undefined;
