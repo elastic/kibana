@@ -281,11 +281,6 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       fillOpacity: args.fillOpacity,
       fittingFunction: args.fittingFunction,
       enableHistogramMode: args.enableHistogramMode,
-      // @TODO: This part of `VisParams` has special details of esaggs query, but it seems to me,
-      // as a chart, it should know nothing from such information in the purpose of the reusability
-      // with other functions.
-      // For example, if we would like to use `essql`, `esdocs`, or even `demodata` functions,
-      // this chart vis would not fully support rendering of that data with flexibility.
       dimensions: {
         x: args.xDimension,
         y: args.yDimension,
@@ -296,9 +291,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         splitColumn: args.splitColumnDimension,
       },
       xDomain: args.xDomain,
-      // ------------------------------------------------------------------------------------------------------------------
-    } as VisTypeXyConfig; /* @TODO: rewrite this `as VisParams` to real `VisParams` via changing accessor 
-                      to vis_dimension accessor (accepting string, not only number) */
+    } as VisParams;
 
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [
