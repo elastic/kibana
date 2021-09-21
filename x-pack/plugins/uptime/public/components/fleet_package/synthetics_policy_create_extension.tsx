@@ -55,6 +55,7 @@ export const defaultConfig: PolicyConfig = {
   [DataStream.BROWSER]: {
     ...defaultBrowserSimpleFields,
     ...defaultBrowserAdvancedFields,
+    ...defaultTLSFields,
   },
 };
 
@@ -94,6 +95,7 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
       [DataStream.BROWSER]: {
         ...browserSimpleFields,
         ...browserAdvancedFields,
+        ...tlsFields,
         [ConfigKeys.NAME]: newPolicy.name,
       } as BrowserFields,
     };
