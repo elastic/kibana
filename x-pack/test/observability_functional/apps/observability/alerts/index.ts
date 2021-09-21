@@ -19,6 +19,7 @@ const RECOVERED_ALERTS_CELL_COUNT = 24;
 const TOTAL_ALERTS_CELL_COUNT = 72;
 
 const ROWS_COUNT_TO_HIDE_PAGE_SELECTOR = 10;
+const DEFAULT_ROWS_PER_PAGE = 50;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -239,7 +240,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               await observability.alerts.getPageSizeSelectorOrFail();
             });
 
-            it('Default rows per page selector is 50', async () => {});
+            it('Default rows per page selector is 50', async () => {
+              await retry.try(async () => {
+                const defaultAlertsPerPage = await (
+                  await observability.alerts.getPageSizeSelector()
+                ).getVisibleText();
+                expect(defaultAlertsPerPage).to.contain(DEFAULT_ROWS_PER_PAGE);
+              });
+            });
 
             it('Page size selector works', async () => {});
           });
