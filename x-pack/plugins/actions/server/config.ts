@@ -59,13 +59,15 @@ export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   /**
-   * @deprecated in favor of `allowedHosts`
+   * @deprecated in favor of `allowedHostsj`
    **/
-  whitelistedHosts: schema.arrayOf(
-    schema.oneOf([schema.string({ hostname: true }), schema.literal(AllowedHosts.Any)]),
-    {
-      defaultValue: [AllowedHosts.Any],
-    }
+  whitelistedHosts: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([schema.string({ hostname: true }), schema.literal(AllowedHosts.Any)]),
+      {
+        defaultValue: [AllowedHosts.Any],
+      }
+    )
   ),
   allowedHosts: schema.arrayOf(
     schema.oneOf([schema.string({ hostname: true }), schema.literal(AllowedHosts.Any)]),
