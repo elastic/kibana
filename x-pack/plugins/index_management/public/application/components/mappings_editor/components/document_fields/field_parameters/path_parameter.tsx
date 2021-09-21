@@ -86,7 +86,7 @@ export const PathParameter = ({ field, allFields }: Props) => {
               'xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldDescription',
               {
                 defaultMessage:
-                  'Select the field you want your alias to point to. You will then be able to use the alias instead of the target field in search requests, and selected other APIs like field capabilities.',
+                  'Select the field you want your alias to point to. You will then be able to use the alias instead of the target field in search requests and select other APIs like field capabilities.',
               }
             )}
             withToggle={false}
