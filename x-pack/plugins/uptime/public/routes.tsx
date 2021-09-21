@@ -32,7 +32,6 @@ import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
 import { SyntheticsCallout } from './components/overview/synthetics_callout';
 import { APP_WRAPPER_CLASS } from '../../../../src/core/public';
-import { indexStatusSelector } from './state/selectors';
 import {
   StepDetailPageChildren,
   StepDetailPageHeader,
