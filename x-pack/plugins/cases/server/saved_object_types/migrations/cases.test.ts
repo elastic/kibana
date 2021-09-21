@@ -30,324 +30,322 @@ const create_7_14_0_case = ({
   },
 });
 
-describe('case migrations', () => {
-  describe('7.15.0 connector ID migration', () => {
-    it('does not create a reference when the connector.id is none', () => {
-      const caseSavedObject = create_7_14_0_case({ connector: getNoneCaseConnector() });
+describe('7.15.0 connector ID migration', () => {
+  it('does not create a reference when the connector.id is none', () => {
+    const caseSavedObject = create_7_14_0_case({ connector: getNoneCaseConnector() });
 
-      const migratedConnector = caseConnectorIdMigration(
-        caseSavedObject
-      ) as SavedObjectSanitizedDoc<CaseAttributes>;
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
 
-      expect(migratedConnector.references.length).toBe(0);
-      expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
-      expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
-        Object {
-          "fields": null,
-          "name": "none",
-          "type": ".none",
-        }
-      `);
+    expect(migratedConnector.references.length).toBe(0);
+    expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
+    expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
+      Object {
+        "fields": null,
+        "name": "none",
+        "type": ".none",
+      }
+    `);
+  });
+
+  it('does not create a reference when the connector is undefined', () => {
+    const caseSavedObject = create_7_14_0_case();
+
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
+
+    expect(migratedConnector.references.length).toBe(0);
+    expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
+    expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
+      Object {
+        "fields": null,
+        "name": "none",
+        "type": ".none",
+      }
+    `);
+  });
+
+  it('sets the connector to the default none connector if the connector.id is undefined', () => {
+    const caseSavedObject = create_7_14_0_case({
+      connector: {
+        fields: null,
+        name: ConnectorTypes.jira,
+        type: ConnectorTypes.jira,
+      } as ESCaseConnectorWithId,
     });
 
-    it('does not create a reference when the connector is undefined', () => {
-      const caseSavedObject = create_7_14_0_case();
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
 
-      const migratedConnector = caseConnectorIdMigration(
-        caseSavedObject
-      ) as SavedObjectSanitizedDoc<CaseAttributes>;
+    expect(migratedConnector.references.length).toBe(0);
+    expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
+    expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
+      Object {
+        "fields": null,
+        "name": "none",
+        "type": ".none",
+      }
+    `);
+  });
 
-      expect(migratedConnector.references.length).toBe(0);
-      expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
-      expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
-        Object {
-          "fields": null,
-          "name": "none",
-          "type": ".none",
-        }
-      `);
+  it('does not create a reference when the external_service is null', () => {
+    const caseSavedObject = create_7_14_0_case({ externalService: null });
+
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
+
+    expect(migratedConnector.references.length).toBe(0);
+    expect(migratedConnector.attributes.external_service).toBeNull();
+  });
+
+  it('does not create a reference when the external_service is undefined and sets external_service to null', () => {
+    const caseSavedObject = create_7_14_0_case();
+
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
+
+    expect(migratedConnector.references.length).toBe(0);
+    expect(migratedConnector.attributes.external_service).toBeNull();
+  });
+
+  it('does not create a reference when the external_service.connector_id is none', () => {
+    const caseSavedObject = create_7_14_0_case({
+      externalService: createExternalService({ connector_id: noneConnectorId }),
     });
 
-    it('sets the connector to the default none connector if the connector.id is undefined', () => {
-      const caseSavedObject = create_7_14_0_case({
-        connector: {
-          fields: null,
-          name: ConnectorTypes.jira,
-          type: ConnectorTypes.jira,
-        } as ESCaseConnectorWithId,
-      });
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
 
-      const migratedConnector = caseConnectorIdMigration(
-        caseSavedObject
-      ) as SavedObjectSanitizedDoc<CaseAttributes>;
-
-      expect(migratedConnector.references.length).toBe(0);
-      expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
-      expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
-        Object {
-          "fields": null,
-          "name": "none",
-          "type": ".none",
-        }
-      `);
-    });
-
-    it('does not create a reference when the external_service is null', () => {
-      const caseSavedObject = create_7_14_0_case({ externalService: null });
-
-      const migratedConnector = caseConnectorIdMigration(
-        caseSavedObject
-      ) as SavedObjectSanitizedDoc<CaseAttributes>;
-
-      expect(migratedConnector.references.length).toBe(0);
-      expect(migratedConnector.attributes.external_service).toBeNull();
-    });
-
-    it('does not create a reference when the external_service is undefined and sets external_service to null', () => {
-      const caseSavedObject = create_7_14_0_case();
-
-      const migratedConnector = caseConnectorIdMigration(
-        caseSavedObject
-      ) as SavedObjectSanitizedDoc<CaseAttributes>;
-
-      expect(migratedConnector.references.length).toBe(0);
-      expect(migratedConnector.attributes.external_service).toBeNull();
-    });
-
-    it('does not create a reference when the external_service.connector_id is none', () => {
-      const caseSavedObject = create_7_14_0_case({
-        externalService: createExternalService({ connector_id: noneConnectorId }),
-      });
-
-      const migratedConnector = caseConnectorIdMigration(
-        caseSavedObject
-      ) as SavedObjectSanitizedDoc<CaseAttributes>;
-
-      expect(migratedConnector.references.length).toBe(0);
-      expect(migratedConnector.attributes.external_service).toMatchInlineSnapshot(`
-        Object {
-          "connector_name": ".jira",
-          "external_id": "100",
-          "external_title": "awesome",
-          "external_url": "http://www.google.com",
-          "pushed_at": "2019-11-25T21:54:48.952Z",
-          "pushed_by": Object {
-            "email": "testemail@elastic.co",
-            "full_name": "elastic",
-            "username": "elastic",
-          },
-        }
-      `);
-    });
-
-    it('preserves the existing references when migrating', () => {
-      const caseSavedObject = {
-        ...create_7_14_0_case(),
-        references: [{ id: '1', name: 'awesome', type: 'hello' }],
-      };
-
-      const migratedConnector = caseConnectorIdMigration(
-        caseSavedObject
-      ) as SavedObjectSanitizedDoc<CaseAttributes>;
-
-      expect(migratedConnector.references.length).toBe(1);
-      expect(migratedConnector.references).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "id": "1",
-            "name": "awesome",
-            "type": "hello",
-          },
-        ]
-      `);
-    });
-
-    it('creates a connector reference and removes the connector.id field', () => {
-      const caseSavedObject = create_7_14_0_case({
-        connector: {
-          id: '123',
-          fields: null,
-          name: 'connector',
-          type: ConnectorTypes.jira,
+    expect(migratedConnector.references.length).toBe(0);
+    expect(migratedConnector.attributes.external_service).toMatchInlineSnapshot(`
+      Object {
+        "connector_name": ".jira",
+        "external_id": "100",
+        "external_title": "awesome",
+        "external_url": "http://www.google.com",
+        "pushed_at": "2019-11-25T21:54:48.952Z",
+        "pushed_by": Object {
+          "email": "testemail@elastic.co",
+          "full_name": "elastic",
+          "username": "elastic",
         },
-      });
+      }
+    `);
+  });
 
-      const migratedConnector = caseConnectorIdMigration(
-        caseSavedObject
-      ) as SavedObjectSanitizedDoc<CaseAttributes>;
+  it('preserves the existing references when migrating', () => {
+    const caseSavedObject = {
+      ...create_7_14_0_case(),
+      references: [{ id: '1', name: 'awesome', type: 'hello' }],
+    };
 
-      expect(migratedConnector.references.length).toBe(1);
-      expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
-      expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
+
+    expect(migratedConnector.references.length).toBe(1);
+    expect(migratedConnector.references).toMatchInlineSnapshot(`
+      Array [
         Object {
-          "fields": null,
-          "name": "connector",
-          "type": ".jira",
-        }
-      `);
-      expect(migratedConnector.references).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "id": "123",
-            "name": "connectorId",
-            "type": "action",
-          },
-        ]
-      `);
+          "id": "1",
+          "name": "awesome",
+          "type": "hello",
+        },
+      ]
+    `);
+  });
+
+  it('creates a connector reference and removes the connector.id field', () => {
+    const caseSavedObject = create_7_14_0_case({
+      connector: {
+        id: '123',
+        fields: null,
+        name: 'connector',
+        type: ConnectorTypes.jira,
+      },
     });
 
-    it('creates a push connector reference and removes the connector_id field', () => {
-      const caseSavedObject = create_7_14_0_case({
-        externalService: {
-          connector_id: '100',
-          connector_name: '.jira',
-          external_id: '100',
-          external_title: 'awesome',
-          external_url: 'http://www.google.com',
-          pushed_at: '2019-11-25T21:54:48.952Z',
-          pushed_by: {
-            full_name: 'elastic',
-            email: 'testemail@elastic.co',
-            username: 'elastic',
-          },
-        },
-      });
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
 
-      const migratedConnector = caseConnectorIdMigration(
-        caseSavedObject
-      ) as SavedObjectSanitizedDoc<CaseAttributes>;
-
-      expect(migratedConnector.references.length).toBe(1);
-      expect(migratedConnector.attributes.external_service).not.toHaveProperty('connector_id');
-      expect(migratedConnector.attributes.external_service).toMatchInlineSnapshot(`
+    expect(migratedConnector.references.length).toBe(1);
+    expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
+    expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
+      Object {
+        "fields": null,
+        "name": "connector",
+        "type": ".jira",
+      }
+    `);
+    expect(migratedConnector.references).toMatchInlineSnapshot(`
+      Array [
         Object {
-          "connector_name": ".jira",
-          "external_id": "100",
-          "external_title": "awesome",
-          "external_url": "http://www.google.com",
-          "pushed_at": "2019-11-25T21:54:48.952Z",
-          "pushed_by": Object {
-            "email": "testemail@elastic.co",
-            "full_name": "elastic",
-            "username": "elastic",
-          },
-        }
-      `);
-      expect(migratedConnector.references).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "id": "100",
-            "name": "pushConnectorId",
-            "type": "action",
-          },
-        ]
-      `);
+          "id": "123",
+          "name": "connectorId",
+          "type": "action",
+        },
+      ]
+    `);
+  });
+
+  it('creates a push connector reference and removes the connector_id field', () => {
+    const caseSavedObject = create_7_14_0_case({
+      externalService: {
+        connector_id: '100',
+        connector_name: '.jira',
+        external_id: '100',
+        external_title: 'awesome',
+        external_url: 'http://www.google.com',
+        pushed_at: '2019-11-25T21:54:48.952Z',
+        pushed_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+      },
     });
 
-    it('does not create a reference and preserves the existing external_service fields when connector_id is null', () => {
-      const caseSavedObject = create_7_14_0_case({
-        externalService: {
-          connector_id: null,
-          connector_name: '.jira',
-          external_id: '100',
-          external_title: 'awesome',
-          external_url: 'http://www.google.com',
-          pushed_at: '2019-11-25T21:54:48.952Z',
-          pushed_by: {
-            full_name: 'elastic',
-            email: 'testemail@elastic.co',
-            username: 'elastic',
-          },
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
+
+    expect(migratedConnector.references.length).toBe(1);
+    expect(migratedConnector.attributes.external_service).not.toHaveProperty('connector_id');
+    expect(migratedConnector.attributes.external_service).toMatchInlineSnapshot(`
+      Object {
+        "connector_name": ".jira",
+        "external_id": "100",
+        "external_title": "awesome",
+        "external_url": "http://www.google.com",
+        "pushed_at": "2019-11-25T21:54:48.952Z",
+        "pushed_by": Object {
+          "email": "testemail@elastic.co",
+          "full_name": "elastic",
+          "username": "elastic",
         },
-      });
-
-      const migratedConnector = caseConnectorIdMigration(
-        caseSavedObject
-      ) as SavedObjectSanitizedDoc<CaseAttributes>;
-
-      expect(migratedConnector.references.length).toBe(0);
-      expect(migratedConnector.attributes.external_service).not.toHaveProperty('connector_id');
-      expect(migratedConnector.attributes.external_service).toMatchInlineSnapshot(`
+      }
+    `);
+    expect(migratedConnector.references).toMatchInlineSnapshot(`
+      Array [
         Object {
-          "connector_name": ".jira",
-          "external_id": "100",
-          "external_title": "awesome",
-          "external_url": "http://www.google.com",
-          "pushed_at": "2019-11-25T21:54:48.952Z",
-          "pushed_by": Object {
-            "email": "testemail@elastic.co",
-            "full_name": "elastic",
-            "username": "elastic",
-          },
-        }
-      `);
+          "id": "100",
+          "name": "pushConnectorId",
+          "type": "action",
+        },
+      ]
+    `);
+  });
+
+  it('does not create a reference and preserves the existing external_service fields when connector_id is null', () => {
+    const caseSavedObject = create_7_14_0_case({
+      externalService: {
+        connector_id: null,
+        connector_name: '.jira',
+        external_id: '100',
+        external_title: 'awesome',
+        external_url: 'http://www.google.com',
+        pushed_at: '2019-11-25T21:54:48.952Z',
+        pushed_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+      },
     });
 
-    it('migrates both connector and external_service when provided', () => {
-      const caseSavedObject = create_7_14_0_case({
-        externalService: {
-          connector_id: '100',
-          connector_name: '.jira',
-          external_id: '100',
-          external_title: 'awesome',
-          external_url: 'http://www.google.com',
-          pushed_at: '2019-11-25T21:54:48.952Z',
-          pushed_by: {
-            full_name: 'elastic',
-            email: 'testemail@elastic.co',
-            username: 'elastic',
-          },
-        },
-        connector: {
-          id: '123',
-          fields: null,
-          name: 'connector',
-          type: ConnectorTypes.jira,
-        },
-      });
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
 
-      const migratedConnector = caseConnectorIdMigration(
-        caseSavedObject
-      ) as SavedObjectSanitizedDoc<CaseAttributes>;
+    expect(migratedConnector.references.length).toBe(0);
+    expect(migratedConnector.attributes.external_service).not.toHaveProperty('connector_id');
+    expect(migratedConnector.attributes.external_service).toMatchInlineSnapshot(`
+      Object {
+        "connector_name": ".jira",
+        "external_id": "100",
+        "external_title": "awesome",
+        "external_url": "http://www.google.com",
+        "pushed_at": "2019-11-25T21:54:48.952Z",
+        "pushed_by": Object {
+          "email": "testemail@elastic.co",
+          "full_name": "elastic",
+          "username": "elastic",
+        },
+      }
+    `);
+  });
 
-      expect(migratedConnector.references.length).toBe(2);
-      expect(migratedConnector.attributes.external_service).not.toHaveProperty('connector_id');
-      expect(migratedConnector.attributes.external_service).toMatchInlineSnapshot(`
-        Object {
-          "connector_name": ".jira",
-          "external_id": "100",
-          "external_title": "awesome",
-          "external_url": "http://www.google.com",
-          "pushed_at": "2019-11-25T21:54:48.952Z",
-          "pushed_by": Object {
-            "email": "testemail@elastic.co",
-            "full_name": "elastic",
-            "username": "elastic",
-          },
-        }
-      `);
-      expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
-      expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
-        Object {
-          "fields": null,
-          "name": "connector",
-          "type": ".jira",
-        }
-      `);
-      expect(migratedConnector.references).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "id": "123",
-            "name": "connectorId",
-            "type": "action",
-          },
-          Object {
-            "id": "100",
-            "name": "pushConnectorId",
-            "type": "action",
-          },
-        ]
-      `);
+  it('migrates both connector and external_service when provided', () => {
+    const caseSavedObject = create_7_14_0_case({
+      externalService: {
+        connector_id: '100',
+        connector_name: '.jira',
+        external_id: '100',
+        external_title: 'awesome',
+        external_url: 'http://www.google.com',
+        pushed_at: '2019-11-25T21:54:48.952Z',
+        pushed_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+      },
+      connector: {
+        id: '123',
+        fields: null,
+        name: 'connector',
+        type: ConnectorTypes.jira,
+      },
     });
+
+    const migratedConnector = caseConnectorIdMigration(
+      caseSavedObject
+    ) as SavedObjectSanitizedDoc<CaseAttributes>;
+
+    expect(migratedConnector.references.length).toBe(2);
+    expect(migratedConnector.attributes.external_service).not.toHaveProperty('connector_id');
+    expect(migratedConnector.attributes.external_service).toMatchInlineSnapshot(`
+      Object {
+        "connector_name": ".jira",
+        "external_id": "100",
+        "external_title": "awesome",
+        "external_url": "http://www.google.com",
+        "pushed_at": "2019-11-25T21:54:48.952Z",
+        "pushed_by": Object {
+          "email": "testemail@elastic.co",
+          "full_name": "elastic",
+          "username": "elastic",
+        },
+      }
+    `);
+    expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
+    expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
+      Object {
+        "fields": null,
+        "name": "connector",
+        "type": ".jira",
+      }
+    `);
+    expect(migratedConnector.references).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "123",
+          "name": "connectorId",
+          "type": "action",
+        },
+        Object {
+          "id": "100",
+          "name": "pushConnectorId",
+          "type": "action",
+        },
+      ]
+    `);
   });
 });
