@@ -501,7 +501,11 @@ export class JobsListView extends Component {
 
           <NodeAvailableWarning />
           <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
-          <SavedObjectsWarning jobType="anomaly-detector" />
+          <SavedObjectsWarning
+            jobType="anomaly-detector"
+            onSyncSuccess={this.onRefreshClick}
+            forceRefresh={loading || isRefreshing}
+          />
 
           <UpgradeWarning />
 

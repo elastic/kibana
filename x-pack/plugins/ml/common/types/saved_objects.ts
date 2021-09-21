@@ -10,7 +10,7 @@ export const ML_SAVED_OBJECT_TYPE = 'ml-job';
 export const ML_MODULE_SAVED_OBJECT_TYPE = 'ml-module';
 
 export interface SavedObjectResult {
-  [jobId: string]: { success: boolean; error?: any };
+  [jobId: string]: { success: boolean; type: JobType; error?: any };
 }
 
 export interface SyncSavedObjectResponse {
@@ -33,6 +33,7 @@ export type JobsSpacesResponse = {
 
 export interface InitializeSavedObjectResponse {
   jobs: Array<{ id: string; type: JobType }>;
+  datafeeds: Array<{ id: string; type: JobType }>;
   success: boolean;
   error?: any;
 }

@@ -5,47 +5,67 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
-
+import React, { FC, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JobType } from '../../../../common/types/saved_objects';
-import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
+import { useMlApiContext } from '../../contexts/kibana';
+import { JobSpacesSyncFlyout } from '../../components/job_spaces_sync';
+import { checkPermission } from '../../capabilities/check_capabilities';
 
 interface Props {
   jobType?: JobType;
+  onSyncSuccess?: () => void;
+  forceRefresh?: boolean;
 }
 
-export const SavedObjectsWarning: FC<Props> = ({ jobType }) => {
+export const SavedObjectsWarning: FC<Props> = ({ jobType, onSyncSuccess, forceRefresh }) => {
   const {
     savedObjects: { initSavedObjects },
   } = useMlApiContext();
-  const {
-    services: {
-      http: { basePath },
-    },
-  } = useMlKibana();
 
+  const mounted = useRef(false);
   const [showWarning, setShowWarning] = useState(false);
+  const [showSyncFlyout, setShowSyncFlyout] = useState(false);
+  const canCreateJob = useMemo(() => checkPermission('canCreateJob'), []);
 
-  useEffect(() => {
-    let unmounted = false;
+  const checkStatus = useCallback(() => {
     initSavedObjects(true)
-      .then(({ jobs }) => {
-        if (unmounted === true) {
+      .then(({ jobs, datafeeds }) => {
+        if (mounted.current === false) {
           return;
         }
 
         const missingJobs =
           jobs.length > 0 && (jobType === undefined || jobs.some(({ type }) => type === jobType));
-        setShowWarning(missingJobs);
+
+        const missingDatafeeds = datafeeds.length > 0 && jobType === 'anomaly-detector';
+
+        setShowWarning(missingJobs || missingDatafeeds);
       })
       .catch(() => {
         console.log('Saved object synchronization check could not be performed.'); // eslint-disable-line no-console
       });
+  }, []);
+
+  useEffect(() => {
+    mounted.current = true;
+    if (forceRefresh === undefined || forceRefresh === true) {
+      checkStatus();
+    }
     return () => {
-      unmounted = true;
+      mounted.current = false;
     };
+  }, [forceRefresh]);
+
+  const onClose = useCallback(() => {
+    if (forceRefresh === undefined) {
+      checkStatus();
+    }
+    setShowSyncFlyout(false);
+    if (typeof onSyncSuccess === 'function') {
+      onSyncSuccess();
+    }
   }, []);
 
   return showWarning === false ? null : (
@@ -61,22 +81,34 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType }) => {
         iconType="alert"
         data-test-subj="mlJobSyncRequiredWarning"
       >
-        <div>
+        <>
           <FormattedMessage
             id="xpack.ml.jobsList.missingSavedObjectWarning.description"
-            defaultMessage="Some jobs are missing their saved object and require synchronization in {link}."
-            values={{
-              link: (
-                <EuiLink href={`${basePath.get()}/app/management/insightsAndAlerting/jobsListLink`}>
-                  <FormattedMessage
-                    id="xpack.ml.jobsList.missingSavedObjectWarning.linkToManagement.link"
-                    defaultMessage="Stack Management"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Some jobs are missing or have incomplete saved objects."
           />
-        </div>
+          {canCreateJob ? (
+            <FormattedMessage
+              id="xpack.ml.jobsList.missingSavedObjectWarning.description"
+              defaultMessage=" {link}"
+              values={{
+                link: (
+                  <EuiLink onClick={() => setShowSyncFlyout(true)}>
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.missingSavedObjectWarning.linkToManagement.link"
+                      defaultMessage="Synchronize your jobs."
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.jobsList.missingSavedObjectWarning.description"
+              defaultMessage="Go to Stack Management to synchronize your jobs."
+            />
+          )}
+          {showSyncFlyout && <JobSpacesSyncFlyout onClose={onClose} />}
+        </>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>
