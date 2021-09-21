@@ -45,7 +45,7 @@ export function DashboardApp({
   } = useKibana<DashboardAppServices>().services;
 
   useEffect(() => {
-    kibanaUtils.setVersion(history as any);
+    kibanaUtils.setVersion(history);
   }, [kibanaUtils, history]);
 
   const kbnUrlStateStorage = useMemo(
