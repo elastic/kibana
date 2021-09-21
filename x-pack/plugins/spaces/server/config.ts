@@ -26,7 +26,7 @@ export function createConfig$(context: PluginInitializerContext) {
 }
 
 const disabledDeprecation: ConfigDeprecation = (config, fromPath, addDeprecation) => {
-  if ('enabled' in (settings?.xpack?.spaces || {})) {
+  if ('enabled' in (config?.xpack?.spaces || {})) {
     addDeprecation({
       title: i18n.translate('xpack.spaces.deprecations.enabledTitle', {
         defaultMessage: 'Setting "xpack.spaces.enabled" is deprecated',
