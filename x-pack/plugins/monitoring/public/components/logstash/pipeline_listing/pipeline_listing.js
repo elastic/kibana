@@ -127,15 +127,8 @@ export class PipelineListing extends Component {
   }
 
   render() {
-    const {
-      data,
-      sorting,
-      pagination,
-      onTableChange,
-      fetchMoreData,
-      upgradeMessage,
-      className,
-    } = this.props;
+    const { data, sorting, pagination, onTableChange, fetchMoreData, upgradeMessage, className } =
+      this.props;
 
     const sortingOptions = sorting || { field: 'id', direction: 'asc' };
     if (sortingOptions.field === 'name') {

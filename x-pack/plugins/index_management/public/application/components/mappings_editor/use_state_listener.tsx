@@ -42,9 +42,10 @@ export const useMappingsStateListener = ({ onChange, value, mappingsType }: Args
   const { fields: mappedFields, runtime: runtimeFields } = value ?? {};
 
   const parsedFieldsDefaultValue = useMemo(() => normalize(mappedFields), [mappedFields]);
-  const parsedRuntimeFieldsDefaultValue = useMemo(() => normalizeRuntimeFields(runtimeFields), [
-    runtimeFields,
-  ]);
+  const parsedRuntimeFieldsDefaultValue = useMemo(
+    () => normalizeRuntimeFields(runtimeFields),
+    [runtimeFields]
+  );
 
   useEffect(() => {
     // If we are creating a new field, but haven't entered any name

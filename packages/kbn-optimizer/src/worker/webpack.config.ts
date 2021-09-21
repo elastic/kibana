@@ -15,7 +15,8 @@ import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
-import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
@@ -63,7 +64,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       },
     },
 
-    externals: [UiSharedDeps.externals],
+    externals: [UiSharedDepsSrc.externals],
 
     plugins: [
       new CleanWebpackPlugin(),
@@ -88,7 +89,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           include: [ENTRY_CREATOR],
           use: [
             {
-              loader: UiSharedDeps.publicPathLoader,
+              loader: UiSharedDepsNpm.publicPathLoader,
               options: {
                 key: bundle.id,
               },
@@ -255,6 +256,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         filename: '[path].gz',
         test: /\.(js|css)$/,
         cache: false,
+      }),
+      new webpack.DllReferencePlugin({
+        context: worker.repoRoot,
+        manifest: require(UiSharedDepsNpm.dllManifestPath),
       }),
     ],
 

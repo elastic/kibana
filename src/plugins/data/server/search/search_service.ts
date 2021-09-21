@@ -35,8 +35,8 @@ import type {
 import { AggsService } from './aggs';
 
 import { FieldFormatsStart } from '../../../field_formats/server';
-import { IndexPatternsServiceStart } from '../index_patterns';
 import { registerMsearchRoute, registerSearchRoute } from './routes';
+import { IndexPatternsServiceStart } from '../data_views';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';

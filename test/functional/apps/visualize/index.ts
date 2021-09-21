@@ -87,8 +87,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_region_map'));
     });
 
-    describe('visualize ciGroup12', function () {
-      this.tags('ciGroup12');
+    describe('visualize ciGroup11', function () {
+      this.tags('ciGroup11');
 
       loadTestFile(require.resolve('./_tag_cloud'));
       loadTestFile(require.resolve('./_tsvb_chart'));

@@ -21,21 +21,20 @@ interface InvalidAggProps {
   onDelete: () => void;
 }
 
-export const getInvalidAggComponent = (message: JSX.Element | string) => (
-  props: InvalidAggProps
-) => {
-  return (
-    <AggRow
-      disableDelete={props.disableDelete}
-      model={props.model}
-      onAdd={props.onAdd}
-      onDelete={props.onDelete}
-      siblings={props.siblings}
-      dragHandleProps={props.dragHandleProps}
-    >
-      <EuiTitle className="tvbAggRow__unavailable" size="xxxs" data-test-subj="invalid_agg">
-        <span>{message}</span>
-      </EuiTitle>
-    </AggRow>
-  );
-};
+export const getInvalidAggComponent =
+  (message: JSX.Element | string) => (props: InvalidAggProps) => {
+    return (
+      <AggRow
+        disableDelete={props.disableDelete}
+        model={props.model}
+        onAdd={props.onAdd}
+        onDelete={props.onDelete}
+        siblings={props.siblings}
+        dragHandleProps={props.dragHandleProps}
+      >
+        <EuiTitle className="tvbAggRow__unavailable" size="xxxs" data-test-subj="invalid_agg">
+          <span>{message}</span>
+        </EuiTitle>
+      </AggRow>
+    );
+  };

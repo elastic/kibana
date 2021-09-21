@@ -78,20 +78,18 @@ export const thresholdExecutor = async ({
     index: ruleParams.index,
   });
 
-  const {
-    thresholdSignalHistory,
-    searchErrors: previousSearchErrors,
-  } = await getThresholdSignalHistory({
-    indexPattern: [ruleParams.outputIndex],
-    from: tuple.from.toISOString(),
-    to: tuple.to.toISOString(),
-    services,
-    logger,
-    ruleId: ruleParams.ruleId,
-    bucketByFields: ruleParams.threshold.field,
-    timestampOverride: ruleParams.timestampOverride,
-    buildRuleMessage,
-  });
+  const { thresholdSignalHistory, searchErrors: previousSearchErrors } =
+    await getThresholdSignalHistory({
+      indexPattern: [ruleParams.outputIndex],
+      from: tuple.from.toISOString(),
+      to: tuple.to.toISOString(),
+      services,
+      logger,
+      ruleId: ruleParams.ruleId,
+      bucketByFields: ruleParams.threshold.field,
+      timestampOverride: ruleParams.timestampOverride,
+      buildRuleMessage,
+    });
 
   const bucketFilters = await getThresholdBucketFilters({
     thresholdSignalHistory,
@@ -125,26 +123,21 @@ export const thresholdExecutor = async ({
     buildRuleMessage,
   });
 
-  const {
-    success,
-    bulkCreateDuration,
-    createdItemsCount,
-    createdItems,
-    errors,
-  } = await bulkCreateThresholdSignals({
-    someResult: thresholdResults,
-    ruleSO: rule,
-    filter: esFilter,
-    services,
-    logger,
-    inputIndexPattern: inputIndex,
-    signalsIndex: ruleParams.outputIndex,
-    startedAt,
-    from: tuple.from.toDate(),
-    thresholdSignalHistory,
-    bulkCreate,
-    wrapHits,
-  });
+  const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
+    await bulkCreateThresholdSignals({
+      someResult: thresholdResults,
+      ruleSO: rule,
+      filter: esFilter,
+      services,
+      logger,
+      inputIndexPattern: inputIndex,
+      signalsIndex: ruleParams.outputIndex,
+      startedAt,
+      from: tuple.from.toDate(),
+      thresholdSignalHistory,
+      bulkCreate,
+      wrapHits,
+    });
 
   result = mergeReturns([
     result,

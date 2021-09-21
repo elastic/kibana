@@ -27,33 +27,35 @@ export const useLogAnalysisModuleConfiguration = <JobType extends string>({
   };
 };
 
-export const isJobConfigurationOutdated = <JobType extends string>(
-  { bucketSpan }: ModuleDescriptor<JobType>,
-  currentSourceConfiguration: ModuleSourceConfiguration
-) => (jobSummary: JobSummary): boolean => {
-  if (
-    !jobSummary.fullJob ||
-    !jobSummary.fullJob.custom_settings ||
-    !jobSummary.fullJob.datafeed_config
-  ) {
-    return false;
-  }
+export const isJobConfigurationOutdated =
+  <JobType extends string>(
+    { bucketSpan }: ModuleDescriptor<JobType>,
+    currentSourceConfiguration: ModuleSourceConfiguration
+  ) =>
+  (jobSummary: JobSummary): boolean => {
+    if (
+      !jobSummary.fullJob ||
+      !jobSummary.fullJob.custom_settings ||
+      !jobSummary.fullJob.datafeed_config
+    ) {
+      return false;
+    }
 
-  const jobConfiguration = jobSummary.fullJob.custom_settings.logs_source_config;
-  const datafeedRuntimeMappings = jobSummary.fullJob.datafeed_config.runtime_mappings ?? {};
+    const jobConfiguration = jobSummary.fullJob.custom_settings.logs_source_config;
+    const datafeedRuntimeMappings = jobSummary.fullJob.datafeed_config.runtime_mappings ?? {};
 
-  return !(
-    jobConfiguration &&
-    jobConfiguration.bucketSpan === bucketSpan &&
-    jobConfiguration.indexPattern &&
-    isSubset(
-      new Set(jobConfiguration.indexPattern.split(',')),
-      new Set(currentSourceConfiguration.indices)
-    ) &&
-    jobConfiguration.timestampField === currentSourceConfiguration.timestampField &&
-    equal(datafeedRuntimeMappings, currentSourceConfiguration.runtimeMappings)
-  );
-};
+    return !(
+      jobConfiguration &&
+      jobConfiguration.bucketSpan === bucketSpan &&
+      jobConfiguration.indexPattern &&
+      isSubset(
+        new Set(jobConfiguration.indexPattern.split(',')),
+        new Set(currentSourceConfiguration.indices)
+      ) &&
+      jobConfiguration.timestampField === currentSourceConfiguration.timestampField &&
+      equal(datafeedRuntimeMappings, currentSourceConfiguration.runtimeMappings)
+    );
+  };
 
 const isSubset = <T>(subset: Set<T>, superset: Set<T>) => {
   return Array.from(subset).every((subsetElement) => superset.has(subsetElement));
