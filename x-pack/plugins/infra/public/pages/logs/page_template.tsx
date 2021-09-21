@@ -9,15 +9,19 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public';
-import { useLogSourceContext } from '../../containers/logs/log_source';
 import {
   KibanaPageTemplateProps,
   useKibana,
 } from '../../../../../../src/plugins/kibana_react/public';
 
-export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
-  pageTemplateProps
-) => {
+interface LogsPageTemplateProps extends LazyObservabilityPageTemplateProps {
+  hasData?: boolean;
+}
+
+export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
+  hasData = true,
+  ...pageTemplateProps
+}) => {
   const {
     services: {
       observability: {
@@ -30,28 +34,26 @@ export const LogsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
   const { http } = useKibana().services;
   const basePath = http!.basePath.get();
 
-  const { sourceStatus } = useLogSourceContext();
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] =
-    sourceStatus?.logIndexStatus !== 'missing'
-      ? undefined
-      : {
-          solution: i18n.translate('xpack.infra.logs.noDataConfig.solutionName', {
-            defaultMessage: 'Observability',
-          }),
-          actions: {
-            beats: {
-              title: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.title', {
-                defaultMessage: 'Add logs with Beats',
-              }),
-              description: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.description', {
-                defaultMessage:
-                  'Use Beats to send logs to Elasticsearch. We make it easy with modules for many popular systems and apps.',
-              }),
-              href: basePath + `/app/home#/tutorial_directory/logging`,
-            },
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = hasData
+    ? undefined
+    : {
+        solution: i18n.translate('xpack.infra.logs.noDataConfig.solutionName', {
+          defaultMessage: 'Observability',
+        }),
+        actions: {
+          beats: {
+            title: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.title', {
+              defaultMessage: 'Add logs with Beats',
+            }),
+            description: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.description', {
+              defaultMessage:
+                'Use Beats to send logs to Elasticsearch. We make it easy with modules for many popular systems and apps.',
+            }),
+            href: basePath + `/app/home#/tutorial_directory/logging`,
           },
-          docsLink: docLinks.links.observability.guide,
-        };
+        },
+        docsLink: docLinks.links.observability.guide,
+      };
 
   return <PageTemplate noDataConfig={noDataConfig} {...pageTemplateProps} />;
 };
