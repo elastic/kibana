@@ -6,7 +6,6 @@
  */
 
 import React, { FunctionComponent, useEffect, useState } from 'react';
-import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DomainDeprecationDetails } from 'kibana/public';
 
@@ -17,7 +16,7 @@ interface Props {
   setIsFixed: (isFixed: boolean) => void;
 }
 
-export const KibanaDeprecationStats: FunctionComponent<Props> = ({ setIsFixed }) => {
+export const KibanaDeprecationIssuesPanel: FunctionComponent<Props> = ({ setIsFixed }) => {
   const {
     services: {
       core: { deprecations },
@@ -53,20 +52,11 @@ export const KibanaDeprecationStats: FunctionComponent<Props> = ({ setIsFixed })
   const warningDeprecationsCount =
     kibanaDeprecations?.filter((deprecation) => deprecation.level === 'warning')?.length ?? 0;
 
-  const errorMessage = error && (
-    <EuiIconTip
-      type="alert"
-      color="danger"
-      size="m"
-      content={i18n.translate('xpack.upgradeAssistant.deprecationStats.loadingErrorMessage', {
-        defaultMessage: 'An error occurred while retrieving Kibana deprecations.',
-      })}
-      anchorClassName="upgWarningIcon"
-      iconProps={{
-        'data-test-subj': 'kibanaRequestErrorIconTip',
-      }}
-    />
-  );
+  const errorMessage =
+    error &&
+    i18n.translate('xpack.upgradeAssistant.deprecationStats.loadingErrorMessage', {
+      defaultMessage: 'Could not retrieve Kibana deprecation issues.',
+    });
 
   return (
     <DeprecationIssuesPanel
