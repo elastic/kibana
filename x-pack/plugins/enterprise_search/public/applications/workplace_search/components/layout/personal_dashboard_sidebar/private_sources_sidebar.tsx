@@ -24,13 +24,13 @@ import { ViewContentHeader } from '../../shared/view_content_header';
 
 export const PrivateSourcesSidebar = () => {
   const {
-    account: { canCreatePersonalSources },
+    account: { canCreatePrivateSources },
   } = useValues(AppLogic);
 
-  const PAGE_TITLE = canCreatePersonalSources
+  const PAGE_TITLE = canCreatePrivateSources
     ? PRIVATE_CAN_CREATE_PAGE_TITLE
     : PRIVATE_VIEW_ONLY_PAGE_TITLE;
-  const PAGE_DESCRIPTION = canCreatePersonalSources
+  const PAGE_DESCRIPTION = canCreatePrivateSources
     ? PRIVATE_CAN_CREATE_PAGE_DESCRIPTION
     : PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION;
 

@@ -551,9 +551,10 @@ export const superUserSpace1Auth = getAuthWithSuperUser();
  * Returns an auth object with the specified space and user set as super user. The result can be passed to other utility
  * functions.
  */
-export function getAuthWithSuperUser(
-  space: string | null = 'space1'
-): { user: User; space: string | null } {
+export function getAuthWithSuperUser(space: string | null = 'space1'): {
+  user: User;
+  space: string | null;
+} {
   return { user: superUser, space };
 }
 
@@ -589,20 +590,19 @@ interface ConnectorMappingsSavedObject {
  * Returns connector mappings saved objects from Elasticsearch directly.
  */
 export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) => {
-  const mappings: ApiResponse<
-    estypes.SearchResponse<ConnectorMappingsSavedObject>
-  > = await es.search({
-    index: '.kibana',
-    body: {
-      query: {
-        term: {
-          type: {
-            value: 'cases-connector-mappings',
+  const mappings: ApiResponse<estypes.SearchResponse<ConnectorMappingsSavedObject>> =
+    await es.search({
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases-connector-mappings',
+            },
           },
         },
       },
-    },
-  });
+    });
 
   return mappings;
 };
@@ -632,20 +632,19 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: KibanaClient 
 };
 
 export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
-  const configure: ApiResponse<
-    estypes.SearchResponse<{ cases: ESCaseAttributes }>
-  > = await es.search({
-    index: '.kibana',
-    body: {
-      query: {
-        term: {
-          type: {
-            value: 'cases',
+  const configure: ApiResponse<estypes.SearchResponse<{ cases: ESCaseAttributes }>> =
+    await es.search({
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases',
+            },
           },
         },
       },
-    },
-  });
+    });
 
   return configure;
 };

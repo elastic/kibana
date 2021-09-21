@@ -102,7 +102,7 @@ export const createCasesClientMock = (): CasesClientMock => {
     configure: createConfigureSubClientMock(),
     stats: createStatsSubClientMock(),
   };
-  return (client as unknown) as CasesClientMock;
+  return client as unknown as CasesClientMock;
 };
 
 export type CasesClientFactoryMock = jest.Mocked<CasesClientFactory>;
@@ -113,5 +113,5 @@ export const createCasesClientFactory = (): CasesClientFactoryMock => {
     create: jest.fn(),
   };
 
-  return (factory as unknown) as CasesClientFactoryMock;
+  return factory as unknown as CasesClientFactoryMock;
 };

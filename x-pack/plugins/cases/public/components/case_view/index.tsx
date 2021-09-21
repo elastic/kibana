@@ -271,7 +271,11 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       [updateCase, fetchCaseUserActions, caseId, subCaseId]
     );
 
-    const { loading: isLoadingConnectors, connectors, permissionsError } = useConnectors({
+    const {
+      loading: isLoadingConnectors,
+      connectors,
+      permissionsError,
+    } = useConnectors({
       toastPermissionsErrors: false,
     });
 
@@ -305,9 +309,10 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       [onUpdateField, connectors]
     );
 
-    const onSubmitTags = useCallback((newTags) => onUpdateField({ key: 'tags', value: newTags }), [
-      onUpdateField,
-    ]);
+    const onSubmitTags = useCallback(
+      (newTags) => onUpdateField({ key: 'tags', value: newTags }),
+      [onUpdateField]
+    );
 
     const onSubmitTitle = useCallback(
       (newTitle) => onUpdateField({ key: 'title', value: newTitle }),
