@@ -21,7 +21,7 @@ import { getTableData } from './vis_data/get_table_data';
 import { getEsQueryConfig } from './vis_data/helpers/get_es_query_uisettings';
 import { getCachedIndexPatternFetcher } from './search_strategies/lib/cached_index_pattern_fetcher';
 import { getIntervalAndTimefield } from './vis_data/get_interval_and_timefield';
-import { UI_SETTINGS } from '../../../data/common';
+import { UI_SETTINGS } from '../../common/constants';
 
 export async function getVisData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,

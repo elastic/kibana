@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { UiSettingsParams } from 'kibana/server';
-import { UI_SETTINGS } from '../../data/common';
+import { UI_SETTINGS } from '../common/constants';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   [UI_SETTINGS.MAX_BUCKETS_SETTING]: {

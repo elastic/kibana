@@ -15,7 +15,7 @@ import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequest,
 } from '../../../types';
-import { UI_SETTINGS } from '../../../../../data/common';
+import { UI_SETTINGS } from '../../../../common/constants';
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
   async checkForViability(

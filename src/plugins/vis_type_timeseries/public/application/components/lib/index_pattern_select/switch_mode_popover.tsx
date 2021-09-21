@@ -17,12 +17,12 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
 
 import type { PopoverProps } from './types';
-import { getUISettings } from '../../../../services';
-import { UI_SETTINGS } from '../../../../../../data/common';
+import { getCoreStart, getUISettings } from '../../../../services';
+import { UI_SETTINGS } from '../../../../../common/constants';
 
 export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -32,6 +32,14 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
   const switchMode = useCallback(() => {
     onModeChange(!useKibanaIndices);
   }, [onModeChange, useKibanaIndices]);
+
+  const handleAllowStringIndicesLinkClick = useCallback(
+    () =>
+      getCoreStart().application.navigateToApp('management', {
+        path: `/kibana/settings?query=${UI_SETTINGS.ALLOW_STRING_INDICES}`,
+      }),
+    []
+  );
 
   const stringIndicesAllowed = getUISettings().get(UI_SETTINGS.ALLOW_STRING_INDICES);
   const isSwitchDisabled = useKibanaIndices && !stringIndicesAllowed;
@@ -54,6 +62,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       style={{ height: 'auto' }}
+      initialFocus={false}
     >
       <div
         style={{ width: '360px' }}
@@ -68,38 +77,32 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
           <FormattedMessage
             id="visTypeTimeseries.indexPatternSelect.switchModePopover.text"
             defaultMessage="An index pattern identifies one or more Elasticsearch indices that you want to explore.
-            You can use Elasticsearch indices or Kibana index patterns (recommended)."
+            Kibana index patterns are used by default. To search by Elasticsearch indices enable {allowStringIndices} setting."
+            values={{
+              allowStringIndices: (
+                <EuiLink color="accent" onClick={handleAllowStringIndicesLinkClick}>
+                  <FormattedMessage
+                    id="visTypeTimeseries.indexPatternSelect.switchModePopover.allowStringIndices"
+                    defaultMessage="Allow string indices in TSVB"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
         </EuiText>
         <EuiSpacer />
-        <EuiToolTip
-          content={
-            isSwitchDisabled && (
-              <FormattedMessage
-                id="visTypeTimeseries.indexPatternSelect.switchModePopover.tooltip"
-                defaultMessage="Using Elasticsearch indices is not recommended.
-      To use index patterns, go to {advancedSettings}, then enable {allowStringIndices}."
-                values={{
-                  advancedSettings: <strong>Advanced Settings</strong>,
-                  allowStringIndices: <strong>Allow string indices in TSVB</strong>,
-                }}
-              />
-            )
-          }
-        >
-          <EuiSwitch
-            checked={useKibanaIndices}
-            label={i18n.translate(
-              'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
-              {
-                defaultMessage: 'Use only index patterns',
-              }
-            )}
-            onChange={switchMode}
-            disabled={isSwitchDisabled}
-            data-test-subj="switchIndexPatternSelectionMode"
-          />
-        </EuiToolTip>
+        <EuiSwitch
+          checked={useKibanaIndices}
+          label={i18n.translate(
+            'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
+            {
+              defaultMessage: 'Use only index patterns',
+            }
+          )}
+          onChange={switchMode}
+          disabled={isSwitchDisabled}
+          data-test-subj="switchIndexPatternSelectionMode"
+        />
       </div>
     </EuiPopover>
   );

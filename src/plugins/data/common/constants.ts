@@ -43,6 +43,4 @@ export const UI_SETTINGS = {
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
   AUTOCOMPLETE_USE_TIMERANGE: 'autocomplete:useTimeRange',
   AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: 'autocomplete:valueSuggestionMethod',
-  MAX_BUCKETS_SETTING: 'metrics:max_buckets',
-  ALLOW_STRING_INDICES: 'metrics:allowStringIndices',
 } as const;
