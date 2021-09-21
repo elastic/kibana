@@ -8,7 +8,7 @@
 
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { SearchSource, SearchSourceDependencies } from './search_source';
-import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+import { IndexPatternsContract } from '../..';
 import { SearchSourceFields } from './types';
 
 /**
