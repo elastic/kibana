@@ -121,8 +121,6 @@ export const NoDataPage = () => {
     if (catchReason) {
       updateModel({ reason: catchReason });
     } else {
-      // TODO not sure if we can add this conditional, but might be required for smooth internal collection enablement
-      // if (!this.isCollectionEnabledUpdating && !this.isCollectionIntervalUpdating) {
       await startChecks(clusterCheckers, services.http, updateModel);
     }
   }, [services, updateModel]);
