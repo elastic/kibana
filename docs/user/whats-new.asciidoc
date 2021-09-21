@@ -151,7 +151,6 @@ data, and errors in job messages.
 [role="screenshot"]
 image:images/whats-new_op-alert-ad-job.png[Anomaly detection job health alert create rule editor]
 
-
 [float]
 [[import-export-ml-jobs]]
 ==== Importing and exporting {ml} jobs
