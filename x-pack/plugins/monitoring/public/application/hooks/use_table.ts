@@ -96,7 +96,7 @@ export function useTable(storageKey: string) {
     return sort;
   };
 
-  const [queryText, setQueryText] = useState('');
+  const [query, setQuery] = useState('');
 
   const onTableChange = () => {
     // we are already updating the state in fetchMoreData. We would need to check in react
@@ -115,9 +115,9 @@ export function useTable(storageKey: string) {
         index: pagination.pageIndex,
       },
       ...sorting,
-      queryText,
+      queryText: query,
     };
-  }, [pagination, queryText, sorting]);
+  }, [pagination, query, sorting]);
 
   const getPaginationTableProps = () => {
     return {
@@ -127,11 +127,11 @@ export function useTable(storageKey: string) {
       fetchMoreData: async ({
         page,
         sort,
-        query,
+        queryText,
       }: {
         page: Page;
         sort: Sorting;
-        query: string;
+        queryText: string;
       }) => {
         setPagination({
           ...pagination,
@@ -144,7 +144,7 @@ export function useTable(storageKey: string) {
           },
         });
         setSorting(cleanSortingData(sort));
-        setQueryText(query);
+        setQuery(queryText);
 
         setLocalStorageData(storage, {
           page,
