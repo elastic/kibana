@@ -224,10 +224,10 @@ export const useSavedSearch = ({
     useNewFieldsApi,
   ]);
 
-  const reset = useCallback(() => sendResetMsg(dataSubjects, initialFetchStatus), [
-    dataSubjects,
-    initialFetchStatus,
-  ]);
+  const reset = useCallback(
+    () => sendResetMsg(dataSubjects, initialFetchStatus),
+    [dataSubjects, initialFetchStatus]
+  );
 
   return {
     refetch$,

@@ -83,7 +83,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
         setSavedSearch(loadedSavedSearch);
         if (savedSearchId) {
           chrome.recentlyAccessed.add(
-            ((loadedSavedSearch as unknown) as SavedObjectDeprecated).getFullPath(),
+            (loadedSavedSearch as unknown as SavedObjectDeprecated).getFullPath(),
             loadedSavedSearch.title,
             loadedSavedSearch.id
           );

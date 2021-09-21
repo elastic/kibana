@@ -24,9 +24,7 @@ export const context = createContext<KibanaReactContextValue<KibanaServices>>(de
 export const useKibana = <Extra extends object = {}>(): KibanaReactContextValue<
   KibanaServices & Extra
 > =>
-  useContext(
-    (context as unknown) as React.Context<KibanaReactContextValue<KibanaServices & Extra>>
-  );
+  useContext(context as unknown as React.Context<KibanaReactContextValue<KibanaServices & Extra>>);
 
 export const withKibana = <Props extends { kibana: KibanaReactContextValue<any> }>(
   type: React.ComponentType<Props>
@@ -69,7 +67,7 @@ export const createKibanaReactContext = <Services extends KibanaServices>(
   return {
     value,
     Provider,
-    Consumer: (context.Consumer as unknown) as React.Consumer<KibanaReactContextValue<Services>>,
+    Consumer: context.Consumer as unknown as React.Consumer<KibanaReactContextValue<Services>>,
   };
 };
 
