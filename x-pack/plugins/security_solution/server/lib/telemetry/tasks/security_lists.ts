@@ -29,7 +29,7 @@ import { TelemetryReceiver } from '../receiver';
 export const TelemetrySecuityListsTaskConstants = {
   TIMEOUT: '3m',
   TYPE: 'security:telemetry-lists',
-  INTERVAL: '1m',
+  INTERVAL: '24h',
   VERSION: '1.0.0',
 };
 

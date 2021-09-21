@@ -102,7 +102,7 @@ export function isPackagePolicyList(
 export const trustedApplicationToTelemetryEntry = (trustedApplication: TrustedApp) => {
   return {
     id: trustedApplication.id,
-    version: trustedApplication.version,
+    version: trustedApplication.version || '',
     name: trustedApplication.name,
     description: trustedApplication.description,
     created_at: trustedApplication.created_at,
