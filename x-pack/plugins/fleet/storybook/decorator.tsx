@@ -29,7 +29,7 @@ export const contextDecorator: DecoratorFn = (story: Function) => {
   const memoryHistory = createMemoryHistory({ initialEntries: [basepath] });
   const history = new ScopedHistory(memoryHistory, basepath);
 
-  const startServices = ({
+  const startServices = {
     application: {
       currentAppId$: of('home'),
       navigateToUrl: (url: string) => action(`Navigate to: ${url}`),
@@ -55,15 +55,15 @@ export const contextDecorator: DecoratorFn = (story: Function) => {
     i18n: {
       Context: I18nProvider,
     },
-  } as unknown) as FleetStartServices;
+  } as unknown as FleetStartServices;
 
-  const config = ({
+  const config = {
     enabled: true,
     agents: {
       enabled: true,
       elasticsearch: {},
     },
-  } as unknown) as FleetConfigType;
+  } as unknown as FleetConfigType;
 
   const extensions = {};
 
