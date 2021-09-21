@@ -6,3 +6,5 @@
  */
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
+
+export const PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES = ['auto_configure', 'create_doc'];
