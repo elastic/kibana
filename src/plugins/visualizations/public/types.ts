@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../../plugins/saved_objects/public';
 import {
   IAggConfigs,
   SearchSourceFields,

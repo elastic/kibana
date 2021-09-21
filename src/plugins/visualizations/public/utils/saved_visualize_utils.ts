@@ -19,7 +19,11 @@ import {
   injectSearchSourceReferences,
   parseSearchSourceJSON,
 } from '../../../../plugins/data/public';
-import { checkForDuplicateTitle } from '../../../../plugins/saved_objects/public';
+import {
+  checkForDuplicateTitle,
+  saveWithConfirmation,
+  isErrorNonFatal,
+} from '../../../../plugins/saved_objects/public';
 import { getTypes } from '../services';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type { ISavedVis, SerializedVis } from '../types';
@@ -188,6 +192,8 @@ export async function getSavedVisualization(
   const id = (opts.id as string) || '';
   const savedObject = {
     id,
+    copyOnSave: false,
+    migrationVersion: opts.migrationVersion,
     displayName: SAVED_VIS_TYPE,
     getEsType: () => SAVED_VIS_TYPE,
     getDisplayName: () => SAVED_VIS_TYPE,
@@ -201,7 +207,11 @@ export async function getSavedVisualization(
     return Promise.resolve(savedObject);
   }
 
-  const resp = await services.savedObjectsClient.get<Record<string, unknown>>(SAVED_VIS_TYPE, id);
+  const {
+    saved_object: resp,
+    outcome,
+    alias_target_id: aliasTargetId,
+  } = await services.savedObjectsClient.resolve<SavedObjectAttributes>(SAVED_VIS_TYPE, id);
 
   if (!resp._version) {
     throw new SavedObjectNotFound(SAVED_VIS_TYPE, id || '');
@@ -219,6 +229,19 @@ export async function getSavedVisualization(
   assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
+  savedObject.sharingSavedObjectProps = {
+    aliasTargetId,
+    outcome,
+    errorJSON:
+      outcome === 'conflict'
+        ? JSON.stringify({
+            targetType: SAVED_VIS_TYPE,
+            sourceId: id,
+            targetSpace: '',
+          })
+        : undefined,
+  };
+
   const meta = savedObject._source.kibanaSavedObjectMeta || {};
 
   if (meta.searchSourceJSON) {
@@ -235,19 +258,6 @@ export async function getSavedVisualization(
         savedObject.searchSourceFields = searchSourceValues;
       }
     } catch (error: any) {
-      if (
-        error.constructor.name === 'SavedObjectNotFound' &&
-        error.savedObjectType === 'index-pattern'
-      ) {
-        // if parsing the search source fails because the index pattern wasn't found,
-        // remember the reference - this is required for error handling on legacy imports
-        savedObject.unresolvedIndexPatternReference = {
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-          id: JSON.parse(meta.searchSourceJSON).index,
-          type: 'index-pattern',
-        };
-      }
-
       throw error;
     }
   }
@@ -270,6 +280,7 @@ export async function saveVisualization(
   services: {
     savedObjectsClient: SavedObjectsClientContract;
     chrome: any;
+    overlays: any;
   }
 ) {
   // Save the original id in case the save fails.
@@ -336,14 +347,12 @@ export async function saveVisualization(
       migrationVersion: savedObject.migrationVersion,
       references: extractedRefs.references,
     };
-    const resp = await services.savedObjectsClient.create(
-      SAVED_VIS_TYPE,
-      extractedRefs.attributes,
-      {
-        ...createOpt,
-        overwrite: true,
-      }
-    );
+    const resp = confirmOverwrite
+      ? await saveWithConfirmation(attributes, savedObject, createOpt, services)
+      : await services.savedObjectsClient.create(SAVED_VIS_TYPE, extractedRefs.attributes, {
+          ...createOpt,
+          overwrite: true,
+        });
 
     services.chrome.recentlyAccessed.add(getFullPath(resp.id), savedObject.title, String(resp.id));
 
@@ -354,9 +363,9 @@ export async function saveVisualization(
   } catch (err) {
     savedObject.isSaving = false;
     savedObject.id = originalId;
-    // if (isErrorNonFatal(err)) {
-    //   return '';
-    // }
+    if (isErrorNonFatal(err)) {
+      return '';
+    }
     return Promise.reject(err);
   }
 }

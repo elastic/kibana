@@ -37,7 +37,6 @@ import {
   getCapabilities,
   getTypes,
   getUISettings,
-  getSavedVisualizationsLoader,
 } from '../services';
 import { showNewVisModal } from '../wizard';
 import {
@@ -227,6 +226,7 @@ export class VisualizeEmbeddableFactory
       const id = await saveVisualization(savedVis, saveOptions, {
         savedObjectsClient,
         chrome: core.chrome,
+        overlays: core.overlays,
       });
       if (!id || id === '') {
         throw new Error(

@@ -91,6 +91,7 @@ export const getTopNavConfig = (
     data,
     application,
     chrome,
+    overlays,
     history,
     share,
     setActiveUrl,
@@ -136,7 +137,8 @@ export const getTopNavConfig = (
     try {
       const id = await saveVisualization(savedVis, saveOptions, {
         savedObjectsClient: savedObjects.client,
-        chrome
+        chrome,
+        overlays,
       });
 
       if (id) {
