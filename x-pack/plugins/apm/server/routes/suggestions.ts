@@ -9,11 +9,12 @@ import * as t from 'io-ts';
 import { getEnvironmentSuggestions } from '../lib/environments/get_environment_suggestions';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getServiceNames } from '../lib/settings/agent_configuration/get_service_names';
+import { getServiceNameSuggestions } from '../lib/services/get_service_name_suggestions';
+import { getTransactionTypeSuggestions } from '../lib/transactions/get_transaction_type_suggestions';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
-const environmentsSuggestionsRoute = createApmServerRoute({
+const environmentSuggestionsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/suggestions/environments',
   params: t.partial({
     query: t.type({ string: t.string }),
@@ -39,32 +40,59 @@ const environmentsSuggestionsRoute = createApmServerRoute({
   },
 });
 
-const serviceNamesSuggestionsRoute = createApmServerRoute({
+const serviceNameSuggestionsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/suggestions/service_names',
   params: t.partial({
-    query: t.partial({ environment: t.string, transactionType: t.string }),
+    query: t.type({ string: t.string }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const { params } = resources;
-    const { environment, transactionType } = params.query;
     const setup = await setupRequest(resources);
+    const { params } = resources;
+    const { string } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',
     });
-    const serviceNames = await getServiceNames({
-      environment,
-      setup,
+
+    const serviceNames = await getServiceNameSuggestions({
       searchAggregatedTransactions,
-      transactionType,
+      setup,
+      string,
     });
 
-    return { serviceNames };
+    return serviceNames;
+  },
+});
+
+const transactionTypeSuggestionsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/suggestions/transaction_types',
+  params: t.partial({
+    query: t.type({ string: t.string }),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+    const { string } = params.query;
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      kuery: '',
+    });
+
+    const transactionTypes = await getTransactionTypeSuggestions({
+      searchAggregatedTransactions,
+      setup,
+      string,
+    });
+
+    return transactionTypes;
   },
 });
 
 export const suggestionsRouteRepository = createApmServerRouteRepository()
-  .add(environmentsSuggestionsRoute)
-  .add(serviceNamesSuggestionsRoute);
+  .add(environmentSuggestionsRoute)
+  .add(serviceNameSuggestionsRoute)
+  .add(transactionTypeSuggestionsRoute);

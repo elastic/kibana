@@ -12,7 +12,6 @@ import { CoreStart } from '../../../../../../../src/core/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
-import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import {
   EnvironmentField,
@@ -55,12 +54,6 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     createCallApmApi(services as CoreStart);
   }, [services]);
 
-  const transactionTypes = useServiceTransactionTypesFetcher({
-    serviceName: metadata?.serviceName,
-    start: metadata?.start,
-    end: metadata?.end,
-  });
-
   const params = defaults(
     {
       ...omit(metadata, ['start', 'end']),
@@ -75,16 +68,17 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   );
 
   const fields = [
-    <ServiceField value={params.serviceName} />,
+    <ServiceField
+      currentValue={params.serviceName}
+      onChange={(value) => setAlertParams('serviceName', value)}
+    />,
     <TransactionTypeField
       currentValue={params.transactionType}
-      options={transactionTypes.map((key) => ({ text: key, value: key }))}
-      onChange={(e) => setAlertParams('transactionType', e.target.value)}
+      onChange={(value) => setAlertParams('transactionType', value)}
     />,
     <EnvironmentField
       currentValue={params.environment}
       onChange={(value) => setAlertParams('environment', value)}
-      serviceName={params.serviceName}
     />,
     <PopoverExpression
       value={<AnomalySeverity type={params.anomalySeverityType} />}

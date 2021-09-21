@@ -12,47 +12,43 @@ export default function serviceNameSuggestionTests({ getService }: FtrProviderCo
   const archiveName = 'apm_8.0.0';
 
   registry.when(
-    'service name suggestions when data is loaded',
+    'transaction type suggestions when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
       describe('with an empty string parameter', () => {
-        it('returns all services', async () => {
+        it('returns all transaction types', async () => {
           const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /api/apm/suggestions/service_names',
+            endpoint: 'GET /api/apm/suggestions/transaction_types',
             params: { query: { string: '' } },
           });
 
           expectSnapshot(body).toMatchInline(`
-          Object {
-            "serviceNames": Array [
-              "auditbeat",
-              "opbeans-dotnet",
-              "opbeans-go",
-              "opbeans-java",
-              "opbeans-node",
-              "opbeans-python",
-              "opbeans-ruby",
-              "opbeans-rum",
-            ],
-          }
-        `);
+            Object {
+              "transactionTypes": Array [
+                "Worker",
+                "celery",
+                "page-load",
+                "request",
+              ],
+            }
+          `);
         });
       });
 
       describe('with a string parameter', () => {
-        it('returns items matching the string parameter', async () => {
+        it.only('returns items matching the string parameter', async () => {
           const { body } = await apmApiClient.readUser({
-            endpoint: 'GET /api/apm/suggestions/service_names',
-            params: { query: { string: 'aud' } },
+            endpoint: 'GET /api/apm/suggestions/transaction_types',
+            params: { query: { string: 'w' } },
           });
 
           expectSnapshot(body).toMatchInline(`
-          Object {
-            "serviceNames": Array [
-              "auditbeat",
-            ],
-          }
-        `);
+            Object {
+              "transactionTypes": Array [
+                "Worker",
+              ],
+            }
+          `);
         });
       });
     }

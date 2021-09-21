@@ -10,37 +10,26 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
-interface ServiceNamesSelectProps {
-  allowAll?: boolean;
+interface TransactionTypesSelectProps {
   compressed?: boolean;
   defaultValue?: string;
-  onChange: (value?: string) => void;
+  onChange: (value: string) => void;
 }
 
-const allOption: EuiComboBoxOptionOption<string> = {
-  label: i18n.translate('xpack.apm.serviceNamesSelectAllDropDownOptionLabel', {
-    defaultMessage: 'All',
-  }),
-  value: undefined,
-};
-
-export function ServiceNamesSelect({
-  allowAll = true,
+export function TransactionTypesSelect({
   compressed,
   defaultValue,
   onChange,
-}: ServiceNamesSelectProps) {
-  const defaultOption =
-    !defaultValue && allowAll
-      ? allOption
-      : { label: defaultValue, value: defaultValue };
-  const [selectedOptions, setSelectedOptions] = useState([defaultOption]);
+}: TransactionTypesSelectProps) {
+  const [selectedOptions, setSelectedOptions] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >(defaultValue ? [{ label: defaultValue, value: defaultValue }] : []);
   const [searchValue, setSearchValue] = useState('');
 
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        endpoint: 'GET /api/apm/suggestions/service_names',
+        endpoint: 'GET /api/apm/suggestions/transaction_types',
         params: {
           query: { string: searchValue },
         },
@@ -50,11 +39,10 @@ export function ServiceNamesSelect({
     { preservePreviousData: false }
   );
 
-  const serviceNames = data?.serviceNames ?? [];
+  const transactionTypes = data?.transactionTypes ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
-    ...(allowAll ? [allOption] : []),
-    ...serviceNames.map((name) => {
+    ...transactionTypes.map((name) => {
       return { label: name, value: name };
     }),
   ];
@@ -63,7 +51,7 @@ export function ServiceNamesSelect({
     changedOptions: Array<EuiComboBoxOptionOption<string>>
   ) => void = (changedOptions) => {
     setSelectedOptions(changedOptions);
-    if (changedOptions.length === 1) {
+    if (changedOptions.length === 1 && changedOptions[0].value) {
       onChange(changedOptions[0].value);
     }
   };
@@ -76,8 +64,8 @@ export function ServiceNamesSelect({
       onChange={handleChange}
       onSearchChange={setSearchValue}
       options={options}
-      placeholder={i18n.translate('xpack.apm.serviceNamesSelectPlaceholder', {
-        defaultMessage: 'Select service name',
+      placeholder={i18n.translate('xpack.apm.environmentsSelectPlaceholder', {
+        defaultMessage: 'Select environment',
       })}
       selectedOptions={selectedOptions}
       singleSelection={{ asPlainText: true }}

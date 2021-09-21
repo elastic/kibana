@@ -12,7 +12,6 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
-import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
@@ -48,12 +47,6 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   useEffect(() => {
     createCallApmApi(services as CoreStart);
   }, [services]);
-
-  const transactionTypes = useServiceTransactionTypesFetcher({
-    serviceName: metadata?.serviceName,
-    start: metadata?.start,
-    end: metadata?.end,
-  });
 
   const params = defaults(
     { ...omit(metadata, ['start', 'end']), ...alertParams },
@@ -99,16 +92,17 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   );
 
   const fields = [
-    <ServiceField value={params.serviceName} />,
+    <ServiceField
+      currentValue={params.serviceName}
+      onChange={(value) => setAlertParams('serviceName', value)}
+    />,
     <TransactionTypeField
       currentValue={params.transactionType}
-      options={transactionTypes.map((key) => ({ text: key, value: key }))}
-      onChange={(e) => setAlertParams('transactionType', e.target.value)}
+      onChange={(value) => setAlertParams('transactionType', value)}
     />,
     <EnvironmentField
       currentValue={params.environment}
       onChange={(value) => setAlertParams('environment', value)}
-      serviceName={params.serviceName}
     />,
     <IsAboveField
       value={params.threshold}

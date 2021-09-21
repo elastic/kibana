@@ -160,6 +160,9 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     describe('suggestions/service_names', function () {
       loadTestFile(require.resolve('./suggestions/service_names'));
     });
+    describe('suggestions/transaction_types', function () {
+      loadTestFile(require.resolve('./suggestions/transaction_types'));
+    });
 
     // traces
     describe('traces/top_traces', function () {
