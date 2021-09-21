@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ComponentProps } from '../../route_init';
 import { BeatsTemplate } from './beats_template';
@@ -13,6 +13,7 @@ import { GlobalStateContext } from '../../global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { BeatsOverview } from '../../../components/beats/overview';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -20,6 +21,7 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
   });
@@ -32,6 +34,12 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const pageTitle = i18n.translate('xpack.monitoring.beats.overview.pageTitle', {
     defaultMessage: 'Beats overview',
   });
+
+  useEffect(() => {
+    if (clusters && clusters.length) {
+      generateBreadcrumbs(clusters[0].cluster_name);
+    }
+  }, [clusters, generateBreadcrumbs]);
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
