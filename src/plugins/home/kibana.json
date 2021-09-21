@@ -7,7 +7,7 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "share", "urlForwarding", "customIntegrations"],
+  "requiredPlugins": ["data", "share", "urlForwarding"],
   "optionalPlugins": ["usageCollection", "telemetry"],
   "requiredBundles": ["kibanaReact"]
 }
