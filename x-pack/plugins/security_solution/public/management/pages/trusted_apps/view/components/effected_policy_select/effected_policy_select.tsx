@@ -173,7 +173,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         </EuiText>
         <EuiSpacer size="xs" />
         <EuiFlexGroup>
-          <EuiFlexItem grow={true}>
+          <EuiFlexItem grow={2}>
             <EuiText size="s">
               <p>
                 {i18n.translate('xpack.securitySolution.trustedApps.assignmentSectionDescription', {
@@ -183,7 +183,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               </p>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={1}>
             <EuiFormRow fullWidth>
               <EuiButtonGroup
                 legend="Global Policy Toggle"
