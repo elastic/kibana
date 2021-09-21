@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { useLocation } from 'react-router-dom';
+
+import { useSetInitialStateFromUrl } from './initialize_redux_by_url';
+
 import { useKibana } from '../../lib/kibana';
 import { CONSTANTS, UrlStateType } from './constants';
 import {
@@ -18,9 +20,11 @@ import {
   getUrlType,
   getTitle,
   replaceStatesInLocation,
-  updateUrlStateString,
   decodeRisonUrlState,
   isDetectionsPages,
+  encodeRisonUrlState,
+  isQueryStateEmpty,
+  updateTimerangeUrl,
 } from './helpers';
 import {
   UrlStateContainerPropTypes,
@@ -31,8 +35,10 @@ import {
   UrlStateToRedux,
   UrlState,
   isAdministration,
+  ValueUrlState,
 } from './types';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
+import { UrlInputsModel } from '../../store/inputs/model';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
@@ -43,125 +49,114 @@ function usePrevious(value: PreviousLocationUrlState) {
 }
 
 const updateTimelineAtinitialization = (
-  urlKey: CONSTANTS,
+  urlKey: KeyUrlState,
   newUrlStateString: string,
   urlState: UrlState
 ) => {
-  let updateUrlState = true;
   if (urlKey === CONSTANTS.timeline) {
     const timeline = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
     if (timeline != null && urlState.timeline.id === timeline.id) {
-      updateUrlState = false;
+      return false;
     }
   }
-  return updateUrlState;
+  return true;
 };
 
 export const useUrlStateHooks = ({
   indexPattern,
   navTabs,
   pageName,
-  setInitialStateFromUrl,
-  updateTimeline,
-  updateTimelineIsLoading,
   urlState,
   search,
   pathName,
   history,
 }: UrlStateContainerPropTypes) => {
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
   const { filterManager, savedQueries } = useKibana().services.data.query;
   const { pathname: browserPathName } = useLocation();
   const prevProps = usePrevious({ pathName, pageName, urlState });
 
-  const handleInitialize = (type: UrlStateType, needUpdate?: boolean) => {
-    let mySearch = search;
-    let urlStateToUpdate: UrlStateToRedux[] = [];
-    const statesToUpdate: ReplaceStateInLocation[] = [];
+  const setInitialStateFromUrl = useSetInitialStateFromUrl();
 
-    if (isAdministration(type)) {
-      ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
-        statesToUpdate.push({
-          urlStateToReplace: '',
-          urlStateKey: urlKey,
-        });
-      });
-    } else {
-      ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
-        const newUrlStateString = getParamFromQueryString(
-          getQueryStringFromLocation(mySearch),
-          urlKey
-        );
-        if (newUrlStateString) {
-          mySearch = updateUrlStateString({
-            history,
-            isInitializing,
-            newUrlStateString,
-            pathName,
-            search: mySearch,
-            updateTimerange: (needUpdate ?? false) || isInitializing,
-            urlKey,
+  const handleInitialize = useCallback(
+    (type: UrlStateType) => {
+      const urlStateToUpdate: UrlStateToRedux[] = [];
+      const statesToUpdate: ReplaceStateInLocation[] = [];
+
+      // Delete all query strings from URL when the page is security/administration (Manage menu group)
+      if (isAdministration(type)) {
+        ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
+          statesToUpdate.push({
+            urlStateToReplace: '',
+            urlStateKey: urlKey,
           });
-          if (isInitializing || needUpdate) {
-            const updatedUrlStateString =
-              getParamFromQueryString(getQueryStringFromLocation(mySearch), urlKey) ??
-              newUrlStateString;
-            if (isInitializing || !deepEqual(updatedUrlStateString, newUrlStateString)) {
+        });
+      } else {
+        ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
+          const newUrlStateString = getQueryStringKeyValue({ urlKey, search });
+
+          if (!newUrlStateString) {
+            statesToUpdate.push({
+              urlStateToReplace: getUrlStateKeyValue(urlState, urlKey),
+              urlStateKey: urlKey,
+            });
+          } else {
+            // Updates the new URL query string.
+            const stateToUpdate = getFormatUrlStateString({
+              isFirstPageLoad,
+              newUrlStateString,
+              updateTimerange: isDetectionsPages(pageName) || isFirstPageLoad,
+              urlKey,
+            });
+
+            const updatedUrlStateString = stateToUpdate
+              ? encodeRisonUrlState(stateToUpdate.urlStateToReplace)
+              : newUrlStateString;
+
+            if (stateToUpdate) {
+              statesToUpdate.push(stateToUpdate);
+            }
+
+            if (
+              // Update redux store with query string data on the first page load
+              isFirstPageLoad ||
+              // Update Redux store with data from the URL query string when navigating from a page to a detection page
+              (isDetectionsPages(pageName) && updatedUrlStateString !== newUrlStateString)
+            ) {
               if (updateTimelineAtinitialization(urlKey, newUrlStateString, urlState)) {
-                urlStateToUpdate = [
-                  ...urlStateToUpdate,
-                  {
-                    urlKey,
-                    newUrlStateString: updatedUrlStateString,
-                  },
-                ];
+                urlStateToUpdate.push({
+                  urlKey,
+                  newUrlStateString: updatedUrlStateString,
+                });
               }
             }
           }
-        } else if (
-          urlKey === CONSTANTS.appQuery &&
-          urlState[urlKey] != null &&
-          urlState[urlKey]?.query === ''
-        ) {
-          statesToUpdate.push({
-            urlStateToReplace: '',
-            urlStateKey: urlKey,
-          });
-        } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
-          statesToUpdate.push({
-            urlStateToReplace: '',
-            urlStateKey: urlKey,
-          });
-        } else if (
-          urlKey === CONSTANTS.timeline &&
-          urlState[urlKey] != null &&
-          urlState[urlKey].id === ''
-        ) {
-          statesToUpdate.push({
-            urlStateToReplace: '',
-            urlStateKey: urlKey,
-          });
-        } else {
-          statesToUpdate.push({
-            urlStateToReplace: urlState[urlKey] || '',
-            urlStateKey: urlKey,
-          });
-        }
+        });
+      }
+
+      replaceStatesInLocation(statesToUpdate, pathName, search, history);
+
+      setInitialStateFromUrl({
+        filterManager,
+        indexPattern,
+        pageName,
+        savedQueries,
+        urlStateToUpdate,
       });
-    }
-
-    replaceStatesInLocation(statesToUpdate, pathName, mySearch, history);
-
-    setInitialStateFromUrl({
+    },
+    [
       filterManager,
+      history,
       indexPattern,
       pageName,
+      pathName,
       savedQueries,
-      updateTimeline,
-      updateTimelineIsLoading,
-      urlStateToUpdate,
-    })();
-  };
+      search,
+      setInitialStateFromUrl,
+      urlState,
+      isFirstPageLoad,
+    ]
+  );
 
   useEffect(() => {
     // When browser location and store location are out of sync, skip the execution.
@@ -173,59 +168,72 @@ export const useUrlStateHooks = ({
     if (browserPathName !== pathName) return;
 
     const type: UrlStateType = getUrlType(pageName);
-    if (isInitializing && pageName != null && pageName !== '') {
-      handleInitialize(type);
-      setIsInitializing(false);
-    } else if (
-      !deepEqual(urlState, prevProps.urlState) &&
-      !isInitializing &&
-      !isAdministration(type)
-    ) {
-      const statesToUpdate: ReplaceStateInLocation[] = [];
 
-      ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
-        if (
-          urlKey === CONSTANTS.appQuery &&
-          urlState[urlKey] != null &&
-          urlState[urlKey]?.query === ''
-        ) {
-          statesToUpdate.push({
-            urlStateToReplace: '',
-            urlStateKey: urlKey,
-          });
-        } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
-          statesToUpdate.push({
-            urlStateToReplace: '',
-            urlStateKey: urlKey,
-          });
-        } else if (
-          urlKey === CONSTANTS.timeline &&
-          urlState[urlKey] != null &&
-          urlState[urlKey].id === ''
-        ) {
-          statesToUpdate.push({
-            urlStateToReplace: '',
-            urlStateKey: urlKey,
-          });
-        } else {
-          statesToUpdate.push({
-            urlStateToReplace: urlState[urlKey] || '',
-            urlStateKey: urlKey,
-          });
-        }
-      });
+    if (!deepEqual(urlState, prevProps.urlState) && !isFirstPageLoad && !isAdministration(type)) {
+      const statesToUpdate: ReplaceStateInLocation[] = ALL_URL_STATE_KEYS.map(
+        (urlKey: KeyUrlState) => ({
+          urlStateToReplace: getUrlStateKeyValue(urlState, urlKey),
+          urlStateKey: urlKey,
+        })
+      );
 
       replaceStatesInLocation(statesToUpdate, pathName, search, history);
-    } else if (pathName !== prevProps.pathName) {
-      handleInitialize(type, isDetectionsPages(pageName));
+    } else if (
+      (isFirstPageLoad && pageName != null && pageName !== '') ||
+      pathName !== prevProps.pathName
+    ) {
+      handleInitialize(type);
+      setIsFirstPageLoad(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInitializing, history, pathName, pageName, prevProps, urlState, browserPathName]);
+  }, [
+    isFirstPageLoad,
+    history,
+    pathName,
+    pageName,
+    prevProps,
+    urlState,
+    browserPathName,
+    handleInitialize,
+    search,
+  ]);
 
   useEffect(() => {
     document.title = `${getTitle(pageName, navTabs)} - Kibana`;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageName]);
+  }, [pageName, navTabs]);
 
   return null;
+};
+
+const getUrlStateKeyValue = (urlState: UrlState, urlKey: KeyUrlState) =>
+  isQueryStateEmpty(urlState[urlKey], urlKey) ? '' : urlState[urlKey];
+
+const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
+  getParamFromQueryString(getQueryStringFromLocation(search), urlKey);
+
+export const getFormatUrlStateString = ({
+  isFirstPageLoad,
+  newUrlStateString,
+  updateTimerange,
+  urlKey,
+}: {
+  isFirstPageLoad: boolean;
+  newUrlStateString: string;
+  updateTimerange: boolean;
+  urlKey: KeyUrlState;
+}): ReplaceStateInLocation | undefined => {
+  if (isQueryStateEmpty(decodeRisonUrlState<ValueUrlState>(newUrlStateString), urlKey)) {
+    return {
+      urlStateToReplace: '',
+      urlStateKey: urlKey,
+    };
+  } else if (urlKey === CONSTANTS.timerange && updateTimerange) {
+    const queryState = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
+    if (queryState != null && queryState.global != null) {
+      return {
+        urlStateToReplace: updateTimerangeUrl(queryState, isFirstPageLoad),
+        urlStateKey: urlKey,
+      };
+    }
+  }
+  return undefined;
 };

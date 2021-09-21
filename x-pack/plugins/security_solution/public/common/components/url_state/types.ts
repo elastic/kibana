@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import * as H from 'history';
-import { ActionCreator } from 'typescript-fsa';
 import {
   Filter,
   FilterManager,
@@ -18,7 +16,6 @@ import {
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { RouteSpyState } from '../../utils/route/types';
-import { DispatchUpdateTimeline } from '../../../timelines/components/open_timeline/types';
 import { SecurityNav } from '../navigation/types';
 
 import { CONSTANTS, UrlStateType } from './constants';
@@ -57,6 +54,8 @@ export interface UrlState {
 }
 export type KeyUrlState = keyof UrlState;
 
+export type ValueUrlState = UrlState[keyof UrlState];
+
 export interface UrlStateProps {
   navTabs: SecurityNav;
   indexPattern?: IIndexPattern;
@@ -64,6 +63,8 @@ export interface UrlStateProps {
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
   onInitialize?: (urlState: UrlState) => void;
 }
+
+export type UrlStateContainerPropTypes = RouteSpyState & UrlStateStateToPropsType & UrlStateProps;
 
 export interface UrlStateStateToPropsType {
   urlState: UrlState;
@@ -73,17 +74,6 @@ export interface UpdateTimelineIsLoading {
   id: string;
   isLoading: boolean;
 }
-
-export interface UrlStateDispatchToPropsType {
-  setInitialStateFromUrl: DispatchSetInitialStateFromUrl;
-  updateTimeline: DispatchUpdateTimeline;
-  updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
-}
-
-export type UrlStateContainerPropTypes = RouteSpyState &
-  UrlStateStateToPropsType &
-  UrlStateDispatchToPropsType &
-  UrlStateProps;
 
 export interface PreviousLocationUrlState {
   pathName: string | undefined;
@@ -96,35 +86,15 @@ export interface UrlStateToRedux {
   newUrlStateString: string;
 }
 
-export interface SetInitialStateFromUrl<TCache> {
+export interface SetInitialStateFromUrl {
   filterManager: FilterManager;
   indexPattern: IIndexPattern | undefined;
   pageName: string;
   savedQueries: SavedQueryService;
-  updateTimeline: DispatchUpdateTimeline;
-  updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
   urlStateToUpdate: UrlStateToRedux[];
 }
-
-export type DispatchSetInitialStateFromUrl = <TCache>({
-  indexPattern,
-  pageName,
-  updateTimeline,
-  updateTimelineIsLoading,
-  urlStateToUpdate,
-}: SetInitialStateFromUrl<TCache>) => () => void;
 
 export interface ReplaceStateInLocation {
   urlStateToReplace: unknown;
   urlStateKey: string;
-}
-
-export interface UpdateUrlStateString {
-  isInitializing: boolean;
-  history?: H.History;
-  newUrlStateString: string;
-  pathName: string;
-  search: string;
-  updateTimerange: boolean;
-  urlKey: KeyUrlState;
 }

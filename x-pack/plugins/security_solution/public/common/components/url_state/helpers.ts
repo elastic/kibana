@@ -22,7 +22,7 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
-import { ReplaceStateInLocation, UpdateUrlStateString } from './types';
+import { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
 import { sourcererSelectors } from '../../store/sourcerer';
 import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
 
@@ -184,13 +184,13 @@ export const makeMapStateToProps = () => {
 
 export const updateTimerangeUrl = (
   timeRange: UrlInputsModel,
-  isInitializing: boolean
+  isFirstPageLoad: boolean
 ): UrlInputsModel => {
   if (timeRange.global.timerange.kind === 'relative') {
     timeRange.global.timerange.from = formatDate(timeRange.global.timerange.fromStr);
     timeRange.global.timerange.to = formatDate(timeRange.global.timerange.toStr, { roundUp: true });
   }
-  if (timeRange.timeline.timerange.kind === 'relative' && isInitializing) {
+  if (timeRange.timeline.timerange.kind === 'relative' && isFirstPageLoad) {
     timeRange.timeline.timerange.from = formatDate(timeRange.timeline.timerange.fromStr);
     timeRange.timeline.timerange.to = formatDate(timeRange.timeline.timerange.toStr, {
       roundUp: true,
@@ -199,93 +199,11 @@ export const updateTimerangeUrl = (
   return timeRange;
 };
 
-export const updateUrlStateString = ({
-  isInitializing,
-  history,
-  newUrlStateString,
-  pathName,
-  search,
-  updateTimerange,
-  urlKey,
-}: UpdateUrlStateString): string => {
-  if (urlKey === CONSTANTS.appQuery) {
-    const queryState = decodeRisonUrlState<Query>(newUrlStateString);
-    if (queryState != null && queryState.query === '') {
-      return replaceStatesInLocation(
-        [
-          {
-            urlStateToReplace: '',
-            urlStateKey: urlKey,
-          },
-        ],
-        pathName,
-        search,
-        history
-      );
-    }
-  } else if (urlKey === CONSTANTS.timerange && updateTimerange) {
-    const queryState = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
-    if (queryState != null && queryState.global != null) {
-      return replaceStatesInLocation(
-        [
-          {
-            urlStateToReplace: updateTimerangeUrl(queryState, isInitializing),
-            urlStateKey: urlKey,
-          },
-        ],
-        pathName,
-        search,
-        history
-      );
-    }
-  } else if (urlKey === CONSTANTS.sourcerer) {
-    const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
-    if (sourcererState != null && Object.keys(sourcererState).length > 0) {
-      return replaceStatesInLocation(
-        [
-          {
-            urlStateToReplace: sourcererState,
-            urlStateKey: urlKey,
-          },
-        ],
-        pathName,
-        search,
-        history
-      );
-    }
-  } else if (urlKey === CONSTANTS.filters) {
-    const queryState = decodeRisonUrlState<Filter[]>(newUrlStateString);
-    if (isEmpty(queryState)) {
-      return replaceStatesInLocation(
-        [
-          {
-            urlStateToReplace: '',
-            urlStateKey: urlKey,
-          },
-        ],
-        pathName,
-        search,
-        history
-      );
-    }
-  } else if (urlKey === CONSTANTS.timeline) {
-    const queryState = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
-    if (queryState != null && queryState.id === '') {
-      return replaceStatesInLocation(
-        [
-          {
-            urlStateToReplace: '',
-            urlStateKey: urlKey,
-          },
-        ],
-        pathName,
-        search,
-        history
-      );
-    }
-  }
-  return search;
-};
+export const isQueryStateEmpty = (queryState: ValueUrlState | null, urlKey: KeyUrlState) =>
+  queryState === null ||
+  (urlKey === CONSTANTS.appQuery && (queryState as Query).query === '') ||
+  (urlKey === CONSTANTS.filters && isEmpty(queryState)) ||
+  (urlKey === CONSTANTS.timeline && (queryState as TimelineUrl).id === '');
 
 export const replaceStatesInLocation = (
   states: ReplaceStateInLocation[],
