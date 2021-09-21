@@ -164,13 +164,7 @@ interface GetMockPropsObj {
   detailName: string | undefined;
 }
 
-export const getMockPropsObj = ({
-  page,
-  examplePath,
-  namespaceLower,
-  pageName,
-  detailName,
-}: GetMockPropsObj) => ({
+export const getMockPropsObj = ({ page, examplePath, pageName, detailName }: GetMockPropsObj) => ({
   noSearch: {
     undefinedQuery: getMockProps(
       {
