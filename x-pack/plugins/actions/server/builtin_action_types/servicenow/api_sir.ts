@@ -75,7 +75,10 @@ const pushToServiceHandler = async ({
   ];
 
   const observables = obsWithType.map(([obs, type]) => formatObservables(obs, type)).flat();
-  await sirExternalService.bulkAddObservableToIncident(observables, res.id);
+  if (observables.length > 0) {
+    await sirExternalService.bulkAddObservableToIncident(observables, res.id);
+  }
+
   return res;
 };
 
