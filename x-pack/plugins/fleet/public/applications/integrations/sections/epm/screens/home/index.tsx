@@ -91,7 +91,7 @@ function mapToCard(
   return {
     id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}-${item.id}`,
     description: item.description,
-    icons: item.icons || [],
+    icons: !item.icons || !item.icons.length ? [] : item.icons,
     integration: 'integration' in item ? item.integration || '' : '',
     name: item.name,
     title: item.title,
@@ -227,7 +227,10 @@ const InstalledPackages: React.FC = memo(() => {
     />
   );
 
-  const cards = (selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages).map((item) => {
+  const cards = (selectedCategory === 'updates_available'
+    ? updatablePackages
+    : allInstalledPackages
+  ).map((item) => {
     return mapToCard(getAbsolutePath, getHref, item);
   });
 
