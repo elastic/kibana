@@ -188,6 +188,14 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     return await testSubjects.find(ALERTS_ROWS_PER_PAGE_SELECTOR);
   };
 
+  const getPageSizeSelectorOrFail = async () => {
+    return await testSubjects.existOrFail(ALERTS_ROWS_PER_PAGE_SELECTOR);
+  };
+
+  const missingPageSizeSelectorOrFail = async () => {
+    return await testSubjects.missingOrFail(ALERTS_ROWS_PER_PAGE_SELECTOR);
+  };
+
   return {
     getQueryBar,
     clearQueryBar,
@@ -213,5 +221,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     submitQuery,
     typeInQueryBar,
     getPageSizeSelector,
+    getPageSizeSelectorOrFail,
+    missingPageSizeSelectorOrFail,
   };
 }

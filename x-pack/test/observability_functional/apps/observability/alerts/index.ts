@@ -18,7 +18,7 @@ const ACTIVE_ALERTS_CELL_COUNT = 48;
 const RECOVERED_ALERTS_CELL_COUNT = 24;
 const TOTAL_ALERTS_CELL_COUNT = 72;
 
-const OPEN_ALERTS_ROWS_COUNT = 12;
+const ROWS_COUNT_TO_HIDE_PAGE_SELECTOR = 10;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -204,21 +204,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Pagination', () => {
         describe('Page size selector', () => {
-          // less than 10
-          it('Does not render page size selector', async () => {
+          it('Does not render page size selector when there are less than 10 alerts', async () => {
+            // archiver has 3 closed alerts, so filter for the closed ones
             await observability.alerts.setWorkflowStatusFilter('closed');
-
-            await retry.try(async () => {
-              const pageSizeSelector = await observability.alerts.getPageSizeSelector();
-              expect(pageSizeSelector).to.be.empty();
-            });
+            const visibleAlerts = await observability.alerts.getTableCellsInRows();
+            expect(visibleAlerts.length).to.be.lessThan(ROWS_COUNT_TO_HIDE_PAGE_SELECTOR);
+            await observability.alerts.missingPageSizeSelectorOrFail();
           });
 
-          it('Renders page size selector', async () => {
-            await retry.try(async () => {
-              const pageSizeSelector = await observability.alerts.getPageSizeSelector();
-              expect(pageSizeSelector).to.not.be.empty();
-            });
+          it('Renders page size selector when there are more than 10 alerts', async () => {
+            await observability.alerts.setWorkflowStatusFilter('open');
+            const visibleAlerts = await observability.alerts.getTableCellsInRows();
+            expect(visibleAlerts.length).to.be.greaterThan(ROWS_COUNT_TO_HIDE_PAGE_SELECTOR);
+            await observability.alerts.getPageSizeSelectorOrFail();
           });
 
           it('Default rows per page selector is 50', async () => {});
