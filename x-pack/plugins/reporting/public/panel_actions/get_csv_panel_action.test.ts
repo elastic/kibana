@@ -10,7 +10,7 @@ import { first } from 'rxjs/operators';
 import { CoreStart } from 'src/core/public';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import type { ILicense, LicensingPluginSetup } from '../../../licensing/public';
+import type { LicensingPluginSetup } from '../../../licensing/public';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';
 import { ReportingCsvPanelAction } from './get_csv_panel_action';
