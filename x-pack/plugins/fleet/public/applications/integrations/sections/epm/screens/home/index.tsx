@@ -38,6 +38,7 @@ import type { IntegrationCardItem } from '../../../../../../../common/types/mode
 
 import { mergeAndReplaceCategoryCounts } from './util';
 import { CategoryFacets } from './category_facets';
+import type { ALL_CATEGORY } from './category_facets';
 
 export interface CategoryParams {
   category?: string;
@@ -225,7 +226,7 @@ const InstalledPackages: React.FC = memo(() => {
     <CategoryFacets
       categories={categories}
       selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
+      onCategoryChange={({ id }: CategorySummaryItem | ALL_CATEGORY) => setSelectedCategory(id)}
     />
   );
 

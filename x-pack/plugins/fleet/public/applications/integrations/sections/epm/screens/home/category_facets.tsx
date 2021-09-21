@@ -14,6 +14,11 @@ import { Loading } from '../../../../components';
 import type { CategoryCount } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 import { CATEGORY_DISPLAY } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
+export interface ALL_CATEGORY {
+  id: '';
+  count: number;
+}
+
 export function CategoryFacets({
   isLoading,
   categories,
@@ -21,9 +26,9 @@ export function CategoryFacets({
   onCategoryChange,
 }: {
   isLoading?: boolean;
-  categories: CategoryCount[];
+  categories: Array<CategoryCount | ALL_CATEGORY>;
   selectedCategory: string;
-  onCategoryChange: (category: CategoryCount) => unknown;
+  onCategoryChange: (category: CategoryCount | ALL_CATEGORY) => unknown;
 }) {
   const controls = (
     <EuiFacetGroup>
