@@ -78,7 +78,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
       name: i18n.translate('xpack.snapshotRestore.snapshotList.table.snapshotColumnTitle', {
         defaultMessage: 'Snapshot',
       }),
-      truncateText: true,
+      truncateText: false,
       sortable: true,
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
         <EuiLink
@@ -98,7 +98,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
       name: i18n.translate('xpack.snapshotRestore.snapshotList.table.repositoryColumnTitle', {
         defaultMessage: 'Repository',
       }),
-      truncateText: true,
+      truncateText: false,
       sortable: true,
       render: (repositoryName: string) => (
         <EuiLink
@@ -144,7 +144,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
       name: i18n.translate('xpack.snapshotRestore.snapshotList.table.startTimeColumnTitle', {
         defaultMessage: 'Date created',
       }),
-      truncateText: true,
+      truncateText: false,
       sortable: true,
       render: (startTimeInMillis: number) => (
         <DataPlaceholder data={startTimeInMillis}>
