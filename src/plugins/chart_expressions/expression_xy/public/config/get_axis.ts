@@ -50,7 +50,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
         show: valueAxis === axis.id,
       };
 
-  const tickFormatter = (v: any) =>
+  const tickFormatter: TickFormatter = (v) =>
     isSimpleField(format) || shouldApplyFormatter ? formatter?.(v) ?? v : v;
 
   const ticks: TickOptions = {
