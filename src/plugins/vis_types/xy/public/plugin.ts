@@ -32,7 +32,8 @@ type VisTypeXyCoreSetup = CoreSetup<{}, VisTypeXyPluginStart>;
 
 /** @internal */
 export class VisTypeXyPlugin
-  implements Plugin<VisTypeXyPluginSetup, VisTypeXyPluginStart, VisTypeXyPluginSetupDependencies> {
+  implements Plugin<VisTypeXyPluginSetup, VisTypeXyPluginStart, VisTypeXyPluginSetupDependencies>
+{
   public setup(
     core: VisTypeXyCoreSetup,
     { visualizations, charts, usageCollection }: VisTypeXyPluginSetupDependencies

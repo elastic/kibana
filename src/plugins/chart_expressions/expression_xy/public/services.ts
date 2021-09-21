@@ -12,26 +12,20 @@ import { DataPublicPluginStart } from '../../../data/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../charts/public';
 import { FieldFormatsStart } from '../../../field_formats/public';
 
-export const [getUISettings, setUISettings] = createGetterSetter<CoreSetup['uiSettings']>(
-  'xy core.uiSettings'
-);
+export const [getUISettings, setUISettings] =
+  createGetterSetter<CoreSetup['uiSettings']>('xy core.uiSettings');
 
-export const [getDataActions, setDataActions] = createGetterSetter<
-  DataPublicPluginStart['actions']
->('xy data.actions');
+export const [getDataActions, setDataActions] =
+  createGetterSetter<DataPublicPluginStart['actions']>('xy data.actions');
 
-export const [getFormatService, setFormatService] = createGetterSetter<FieldFormatsStart>(
-  'xy data.fieldFormats'
-);
+export const [getFormatService, setFormatService] =
+  createGetterSetter<FieldFormatsStart>('xy data.fieldFormats');
 
-export const [getThemeService, setThemeService] = createGetterSetter<ChartsPluginSetup['theme']>(
-  'xy charts.theme'
-);
+export const [getThemeService, setThemeService] =
+  createGetterSetter<ChartsPluginSetup['theme']>('xy charts.theme');
 
-export const [getActiveCursor, setActiveCursor] = createGetterSetter<
-  ChartsPluginStart['activeCursor']
->('xy charts.activeCursor');
+export const [getActiveCursor, setActiveCursor] =
+  createGetterSetter<ChartsPluginStart['activeCursor']>('xy charts.activeCursor');
 
-export const [getPalettesService, setPalettesService] = createGetterSetter<
-  ChartsPluginSetup['palettes']
->('xy charts.palette');
+export const [getPalettesService, setPalettesService] =
+  createGetterSetter<ChartsPluginSetup['palettes']>('xy charts.palette');
