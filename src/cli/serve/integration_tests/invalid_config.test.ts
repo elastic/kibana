@@ -28,16 +28,15 @@ describe('cli invalid config support', function () {
 
       let fatalLogLines;
       try {
-        fatalLogLines = stdout
-          .toString('utf8')
-          .split('\n')
-          .filter(Boolean)
-          .filter((line) => line.includes('[FATAL]'));
+        fatalLogLines = stdout.toString('utf8').split('\n').filter(Boolean);
+        // .filter((line) => line.includes('[FATAL]'));
       } catch (e) {
         throw new Error(
           `error parsing log output:\n\n${e.stack}\n\nstdout: \n${stdout}\n\nstderr:\n${stderr}`
         );
       }
+
+      expect(fatalLogLines).toEqual([]);
 
       expect(error).toBe(undefined);
       expect(fatalLogLines).toHaveLength(1);
