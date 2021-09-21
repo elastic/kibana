@@ -8,7 +8,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { dataVisualizerRefresh$, Refresh } from '../../services/timefilter_refresh_service';
 
@@ -31,7 +31,8 @@ export function DataVisualizerIndexPatternManagement(
   } = useDataVisualizerKibana();
 
   const { useNewFieldsApi, currentIndexPattern } = props;
-  const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const indexPatternFieldEditPermission =
+    indexPatternFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
 

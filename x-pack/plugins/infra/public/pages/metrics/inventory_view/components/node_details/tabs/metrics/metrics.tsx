@@ -72,9 +72,10 @@ const TabComponent = (props: TabProps) => {
   const { sourceId, createDerivedIndexPattern } = useSourceContext();
   const { nodeType, accountId, region, customMetrics } = useWaffleOptionsContext();
   const { currentTime, options, node } = props;
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
-    createDerivedIndexPattern,
-  ]);
+  const derivedIndexPattern = useMemo(
+    () => createDerivedIndexPattern('metrics'),
+    [createDerivedIndexPattern]
+  );
   let filter = options.fields
     ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
     : '';

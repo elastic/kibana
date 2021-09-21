@@ -81,9 +81,7 @@ describe('VegaVisualizations', () => {
       mockWidth.mockRestore();
       mockHeight.mockRestore();
     });
-
-    // SKIP: https://github.com/elastic/kibana/issues/83385
-    test.skip('should show vegalite graph and update on resize (may fail in dev env)', async () => {
+    test('should show vegalite graph and update on resize (may fail in dev env)', async () => {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, jest.fn());
@@ -105,7 +103,7 @@ describe('VegaVisualizations', () => {
         expect(domNode.innerHTML).toMatchSnapshot();
 
         mockedWidthValue = 256;
-        mockedHeightValue = 256;
+        mockedHeightValue = 250;
 
         await vegaVis.vegaView.resize();
 
@@ -115,8 +113,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    // SKIP: https://github.com/elastic/kibana/issues/83385
-    test.skip('should show vega graph (may fail in dev env)', async () => {
+    test('should show vega graph (may fail in dev env)', async () => {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, jest.fn());

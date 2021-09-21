@@ -106,8 +106,7 @@ storiesOf('CodeEditor', module)
     ),
     {
       info: {
-        text:
-          'Custom language example. Language definition taken from [here](https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-custom-languages)',
+        text: 'Custom language example. Language definition taken from [here](https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-custom-languages)',
       },
     }
   )
