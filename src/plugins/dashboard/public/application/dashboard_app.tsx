@@ -34,15 +34,8 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const {
-    core,
-    chrome,
-    embeddable,
-    onAppLeave,
-    uiSettings,
-    data,
-    kibanaUtils,
-  } = useKibana<DashboardAppServices>().services;
+  const { core, chrome, embeddable, onAppLeave, uiSettings, data, kibanaUtils } =
+    useKibana<DashboardAppServices>().services;
 
   useEffect(() => {
     kibanaUtils.setVersion(history);
