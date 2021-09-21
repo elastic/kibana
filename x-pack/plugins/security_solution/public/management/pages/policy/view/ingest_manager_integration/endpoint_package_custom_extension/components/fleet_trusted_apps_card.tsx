@@ -73,7 +73,7 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
     );
 
     return (
-      <EuiPanel paddingSize="l" data-test-subj="fleetTrustedAppsCard">
+      <EuiPanel hasShadow={false} paddingSize="l" hasBorder data-test-subj="fleetTrustedAppsCard">
         <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center" cardSize={cardSize}>
           <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
             <EuiText>

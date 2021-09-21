@@ -88,7 +88,7 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
   }, [getAppUrl, pkgkey]);
 
   return (
-    <EuiPanel paddingSize="l" data-test-subj="fleedEventFiltersCard">
+    <EuiPanel hasShadow={false} paddingSize="l" hasBorder data-test-subj="fleedEventFiltersCard">
       <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center">
         <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
           <EuiText>
