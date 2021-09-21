@@ -196,6 +196,26 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     return await testSubjects.missingOrFail(ALERTS_ROWS_PER_PAGE_SELECTOR);
   };
 
+  const getPrevPaginationButton = async () => {
+    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_PREVIOUS);
+  };
+
+  const getPrevPaginationButtonOrFail = async () => {
+    return await testSubjects.existOrFail(ALERTS_PAGINATION_BUTTON_PREVIOUS);
+  };
+
+  const missingPrevPaginationButtonOrFail = async () => {
+    return await testSubjects.missingOrFail(ALERTS_ROWS_PER_PAGE_SELECTOR);
+  };
+
+  const getNextPaginationButton = async () => {
+    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_NEXT);
+  };
+
+  const getNextPaginationButtonOrFail = async () => {
+    return await testSubjects.existOrFail(ALERTS_PAGINATION_BUTTON_NEXT);
+  };
+
   return {
     getQueryBar,
     clearQueryBar,
@@ -223,5 +243,10 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     getPageSizeSelector,
     getPageSizeSelectorOrFail,
     missingPageSizeSelectorOrFail,
+    getPrevPaginationButton,
+    getPrevPaginationButtonOrFail,
+    missingPrevPaginationButtonOrFail,
+    getNextPaginationButton,
+    getNextPaginationButtonOrFail,
   };
 }

@@ -203,49 +203,70 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Pagination', () => {
-        describe('Page size selector', () => {
-          it('Does not render page size selector when there are less than 10 alerts', async () => {
-            // archiver has 3 closed alerts, so filter for the closed ones
+        describe(`When less than ${ROWS_COUNT_TO_HIDE_PAGE_SELECTOR} alerts are visible in the screen`, () => {
+          before(async () => {
+            // current archiver has 3 closed alerts
             await observability.alerts.setWorkflowStatusFilter('closed');
             const visibleAlerts = await observability.alerts.getTableCellsInRows();
+            // make sure visible alerts are less than 10
             expect(visibleAlerts.length).to.be.lessThan(ROWS_COUNT_TO_HIDE_PAGE_SELECTOR);
+          });
+
+          after(async () => {
+            await observability.alerts.setWorkflowStatusFilter('open');
+          });
+
+          it('Does not render page size selector', async () => {
             await observability.alerts.missingPageSizeSelectorOrFail();
           });
 
-          it('Renders page size selector when there are more than 10 alerts', async () => {
+          it('Does not render pagination controls', async () => {
+            await observability.alerts.missingPrevPaginationButtonOrFail();
+          });
+        });
+
+        describe(`When more than ${ROWS_COUNT_TO_HIDE_PAGE_SELECTOR} alerts are visible in the screen`, () => {
+          before(async () => {
+            // current archiver has 12 open alerts
             await observability.alerts.setWorkflowStatusFilter('open');
             const visibleAlerts = await observability.alerts.getTableCellsInRows();
+            // make sure visible alerts are more than 10
             expect(visibleAlerts.length).to.be.greaterThan(ROWS_COUNT_TO_HIDE_PAGE_SELECTOR);
-            await observability.alerts.getPageSizeSelectorOrFail();
           });
 
-          it('Default rows per page selector is 50', async () => {});
+          describe('Page size selector', () => {
+            it('Renders page size selector', async () => {
+              await observability.alerts.getPageSizeSelectorOrFail();
+            });
 
-          it('Page size selector works', async () => {});
+            it('Default rows per page selector is 50', async () => {});
+
+            it('Page size selector works', async () => {});
+          });
+
+          describe('Pagination controls', () => {
+            it('Renders previous page button', async () => {
+              await observability.alerts.getPrevPaginationButtonOrFail();
+            });
+
+            it('Previous page button works', async () => {});
+
+            it('Previous page button is disabled', async () => {});
+
+            it('Renders next page button', async () => {
+              await observability.alerts.getNextPaginationButtonOrFail();
+            });
+
+            it('Next page button works', async () => {});
+
+            it('Next page button is disabled', async () => {});
+
+            it('Page button works', async () => {});
+          });
+
+          it('Table scrolls when page size is large', async () => {});
+          it('Table does not scroll when page size is small', async () => {});
         });
-
-        describe('Pagination controls', () => {
-          // less than 10
-          it('Does not render pagination controls', async () => {});
-
-          it('Renders previous page button', async () => {});
-
-          it('Previous page button works', async () => {});
-
-          it('Previous page button is disabled', async () => {});
-
-          it('Renders next page button', async () => {});
-
-          it('Next page button works', async () => {});
-
-          it('Next page button is disabled', async () => {});
-
-          it('Page button works', async () => {});
-        });
-
-        it('Table scrolls when page size is large', async () => {});
-
-        it('Table does not scroll when page size is small', async () => {});
       });
     });
   });
