@@ -507,9 +507,12 @@ export const SAVE_SETTINGS_BUTTON = i18n.translate(
   }
 );
 
-export const SYNC_BUTTON = i18n.translate('xpack.enterpriseSearch.workplaceSearch.syncButtonLabel', {
-  defaultMessage: 'Sync',
-});
+export const SYNC_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.syncButtonLabel',
+  {
+    defaultMessage: 'Sync',
+  }
+);
 
 export const KEEP_EDITING_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.keepEditing.button',
