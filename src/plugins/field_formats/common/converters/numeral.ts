@@ -17,7 +17,7 @@ import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 
 const numeralInst = numeral();
 
-numeralLanguages.forEach((numeralLanguage: Record<string, any>) => {
+numeralLanguages.forEach((numeralLanguage: Record<string, { id: string; lang: string }>) => {
   numeral.language(numeralLanguage.id, numeralLanguage.lang);
 });
 
@@ -31,7 +31,7 @@ export abstract class NumeralFormat extends FieldFormat {
     pattern: this.getConfig!(`format:${this.id}:defaultPattern`),
   });
 
-  protected getConvertedValue(val: any): string {
+  protected getConvertedValue(val: number | string): string {
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
     if (typeof val !== 'number') {

@@ -21,11 +21,10 @@ export const getSectionsWithRows = (
   return sections
     .map((section) => {
       const sectionData: Record<string, unknown> = get(apmDoc, section.key);
-      const filteredData:
-        | Record<string, unknown>
-        | undefined = section.properties
-        ? pick(sectionData, section.properties)
-        : sectionData;
+      const filteredData: Record<string, unknown> | undefined =
+        section.properties
+          ? pick(sectionData, section.properties)
+          : sectionData;
 
       const rows: KeyValuePair[] = flattenObject(filteredData, section.key);
       return { ...section, rows };

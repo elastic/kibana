@@ -132,7 +132,7 @@ describe('CoreApp', () => {
       const [[, handler]] = prebootHTTPResourcesRegistrar.register.mock.calls;
       const mockResponseFactory = httpResourcesMock.createResponseFactory();
       handler(
-        ({} as unknown) as RequestHandlerContext,
+        {} as unknown as RequestHandlerContext,
         httpServerMock.createKibanaRequest(),
         mockResponseFactory
       );

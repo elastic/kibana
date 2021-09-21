@@ -32,22 +32,21 @@ export type ResponseProvidersInterface<
   I extends Record<string, ResponseProviderCallback> = Record<string, ResponseProviderCallback>
 > = I;
 
-type SingleResponseProvider<
-  F extends ResponseProviderCallback = ResponseProviderCallback
-> = jest.MockedFunction<F> & {
-  /**
-   * Delay responding to the HTTP call until this promise is resolved. Use it to introduce
-   * elongated delays in order to test intermediate UI states.
-   *
-   * @example
-   * apiMocks.responseProvider.someProvider.mockDelay
-   *    // Delay this response by 1/2 second
-   *    .mockImplementation(
-   *      () => new Promise(r => setTimeout(r, 500))
-   *    )
-   */
-  mockDelay: jest.MockedFunction<() => Promise<void>>;
-};
+type SingleResponseProvider<F extends ResponseProviderCallback = ResponseProviderCallback> =
+  jest.MockedFunction<F> & {
+    /**
+     * Delay responding to the HTTP call until this promise is resolved. Use it to introduce
+     * elongated delays in order to test intermediate UI states.
+     *
+     * @example
+     * apiMocks.responseProvider.someProvider.mockDelay
+     *    // Delay this response by 1/2 second
+     *    .mockImplementation(
+     *      () => new Promise(r => setTimeout(r, 500))
+     *    )
+     */
+    mockDelay: jest.MockedFunction<() => Promise<void>>;
+  };
 
 /**
  * The interface for a `core.http` set of mocked API responses.
@@ -67,11 +66,9 @@ interface MockedApi<R extends ResponseProvidersInterface = ResponseProvidersInte
    * available - `mockDelay()` - which can be used to delay the given response being returned by the
    * associated HTTP method.
    */
-  responseProvider: Readonly<
-    {
-      [K in keyof R]: SingleResponseProvider<R[K]>;
-    }
-  >;
+  responseProvider: Readonly<{
+    [K in keyof R]: SingleResponseProvider<R[K]>;
+  }>;
 }
 
 type HttpMethods = keyof Pick<

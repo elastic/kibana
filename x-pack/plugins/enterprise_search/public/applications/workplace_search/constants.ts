@@ -587,8 +587,8 @@ export const NON_PLATINUM_OAUTH_DESCRIPTION = i18n.translate(
   }
 );
 
-export const NON_PLATINUM_OAUTH_LINK = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.nonPlatinumOauthLinkLabel',
+export const EXPLORE_PLATINUM_FEATURES_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.explorePlatinumFeatures.link',
   {
     defaultMessage: 'Explore Platinum features',
   }
@@ -736,6 +736,10 @@ export const URL_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.
 
 export const FIELD_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.field.label', {
   defaultMessage: 'Field',
+});
+
+export const LABEL_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.label.label', {
+  defaultMessage: 'Label',
 });
 
 export const DESCRIPTION_LABEL = i18n.translate(
