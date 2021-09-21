@@ -35,11 +35,15 @@ interface SettingsChecker {
 
 const clusterCheckers: SettingsChecker[] = [
   {
-    message: 'Checking cluster settings API on production cluster',
+    message: i18n.translate('pack.monitoring.noData.checker.clusterSettings', {
+      defaultMessage: 'Checking cluster settings API on production cluster',
+    }),
     api: '../api/monitoring/v1/elasticsearch_settings/check/cluster',
   },
   {
-    message: 'Checking nodes settings API on production cluster',
+    message: i18n.translate('pack.monitoring.noData.checker.nodesSettings', {
+      defaultMessage: 'Checking nodes settings API on production cluster',
+    }),
     api: '../api/monitoring/v1/elasticsearch_settings/check/nodes',
   },
 ];
