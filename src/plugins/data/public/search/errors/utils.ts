@@ -15,12 +15,12 @@ export function getFailedShards(err: KibanaServerError<any>): FailedShard | unde
   return failedShards ? failedShards[0] : undefined;
 }
 
-function getNestedCause(err: KibanaServerError<any>): { reason: Reason } {
-  const { reason, caused_by: causedBy } = err.attributes || err;
+function getNestedCause(err: KibanaServerError<any>): Reason {
+  const { type, reason, caused_by: causedBy } = err.attributes || err;
   if (causedBy) {
     return getNestedCause(causedBy);
   }
-  return { reason };
+  return { type, reason };
 }
 
 export function getRootCause(err: KibanaServerError) {
