@@ -2074,16 +2074,7 @@
     "@hapi/hoek" "9.x.x"
     "@hapi/nigel" "4.x.x"
 
-"@hapi/podium@4.x.x", "@hapi/podium@^4.1.1":
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/@hapi/podium/-/podium-4.1.1.tgz#106e5849f2cb19b8767cc16007e0107f27c3c791"
-  integrity sha512-jh7a6+5Z4FUWzx8fgmxjaAa1DTBu+Qfg+NbVdo0f++rE5DgsVidUYrLDp3db65+QjDLleA2MfKQXkpT8ylBDXA==
-  dependencies:
-    "@hapi/hoek" "9.x.x"
-    "@hapi/teamwork" "5.x.x"
-    "@hapi/validate" "1.x.x"
-
-"@hapi/podium@^4.1.3":
+"@hapi/podium@4.x.x", "@hapi/podium@^4.1.1", "@hapi/podium@^4.1.3":
   version "4.1.3"
   resolved "https://registry.yarnpkg.com/@hapi/podium/-/podium-4.1.3.tgz#91e20838fc2b5437f511d664aabebbb393578a26"
   integrity sha512-ljsKGQzLkFqnQxE7qeanvgGj4dejnciErYd30dbrYzUOF/FyS/DOF97qcrT3bhoVwCYmxa6PEMhxfCPlnUcD2g==
