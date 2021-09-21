@@ -136,6 +136,35 @@ image:images/whats-new_Maps_layer-indicator.png[Indicator for when the layer dat
 image:images/whats-new_discover-no-results.png[No results message in Discover]
 
 [float]
+[[machine-learning-7-15]]
+=== Machine Learning
+
+[float]
+[[operational-alerts-anomaly-jobs]]
+==== Operational alerts for {anomaly-jobs}
+
+The new {anomaly-job} alert monitors the job health and notifies when an 
+operational issue is detected. Four types of checks can be enabled: datafeed is 
+not started, model memory limit has been hit, the job is experiencing delayed 
+data, and errors in job messages.
+
+[role="screenshot"]
+image:images/whats-new_op-alert-ad-job.png[Anomaly detection job health alert create rule editor]
+
+
+[float]
+[[import-export-ml-jobs]]
+==== Importing and exporting {ml} jobs
+
+To copy jobs more easily across clusters, you can now import and export jobs in 
+**{stack-manage-app} > {ml-app} Jobs**. The exported file contains configuration 
+details for {dfanalytics} jobs or {anomaly-jobs} and {dfeeds}. For more 
+information, refer to {ml-docs}/move-jobs.html[Export and import {ml} jobs].
+
+[role="screenshot"]
+image:images/whats-new_export-jobs.png[Export ml job editor]
+
+[float]
 [[stack-management-7-15]]
 === Stack management
 
