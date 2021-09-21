@@ -58,6 +58,9 @@ export interface DiscoverServices {
   toastNotifications: ToastsStart;
   getSavedSearchById: (id?: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
+  findSavedSearches: (
+    size: number
+  ) => Promise<{ total: number; hits: Array<Record<string, unknown>> }>;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
@@ -87,6 +90,7 @@ export function buildServices(
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id?: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
+    findSavedSearches: async (size: number) => savedObjectService.find('', size),
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
     inspector: plugins.inspector,

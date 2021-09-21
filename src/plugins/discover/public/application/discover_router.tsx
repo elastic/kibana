@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '../../../kibana_react/public';
 import { ContextAppRoute } from './apps/context';
 import { SingleDocRoute } from './apps/doc';
 import { DiscoverMainRoute } from './apps/main';
+import { DiscoverHomeRoute } from './apps/home';
 import { NotFoundRoute } from './apps/not_found';
 import { DiscoverServices } from '../build_services';
 import { DiscoverMainProps } from './apps/main/discover_main_route';
@@ -43,7 +44,7 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
             children={<SingleDocRoute services={services} />}
           />
           <Route path="/view/:id" children={<DiscoverMainRoute {...mainRouteProps} />} />
-          <Route path="/" exact children={<DiscoverMainRoute {...mainRouteProps} />} />
+          <Route path="/" exact children={<DiscoverHomeRoute {...mainRouteProps} />} />
           <NotFoundRoute services={services} />
         </Switch>
       </Router>
