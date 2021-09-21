@@ -47,15 +47,13 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
         const type: DataStream = vars?.[ConfigKeys.MONITOR_TYPE].value as DataStream;
 
         const configKeys: ConfigKeys[] = Object.values(ConfigKeys) || ([] as ConfigKeys[]);
-        const formattedDefaultConfigForMonitorType: ICustomFields = configKeys.reduce<ICustomFields>(
-          (acc: ICustomFields, key: ConfigKeys) => {
+        const formattedDefaultConfigForMonitorType: ICustomFields =
+          configKeys.reduce<ICustomFields>((acc: ICustomFields, key: ConfigKeys) => {
             return {
               ...acc,
               [key]: normalizers[key]?.(vars),
             };
-          },
-          {} as ICustomFields
-        );
+          }, {} as ICustomFields);
 
         const tlsConfig: ITLSFields = {
           [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]:

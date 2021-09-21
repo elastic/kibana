@@ -534,14 +534,9 @@ function updateStyleProperties(layerId: string, previousFields: IField[]) {
     }
 
     const nextFields = await (targetLayer as IVectorLayer).getFields(); // take into account all fields, since labels can be driven by any field (source or join)
-    const {
-      hasChanges,
-      nextStyleDescriptor,
-    } = await (style as IVectorStyle).getDescriptorWithUpdatedStyleProps(
-      nextFields,
-      previousFields,
-      getMapColors(getState())
-    );
+    const { hasChanges, nextStyleDescriptor } = await (
+      style as IVectorStyle
+    ).getDescriptorWithUpdatedStyleProps(nextFields, previousFields, getMapColors(getState()));
     if (hasChanges && nextStyleDescriptor) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
     }

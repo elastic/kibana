@@ -371,7 +371,7 @@ describe('kuery AST API', () => {
         indexPattern
       );
 
-      expect(toElasticsearchQuery((null as unknown) as KueryNode, undefined)).toEqual(expected);
+      expect(toElasticsearchQuery(null as unknown as KueryNode, undefined)).toEqual(expected);
 
       const noTypeNode = nodeTypes.function.buildNode('exists', 'foo');
 

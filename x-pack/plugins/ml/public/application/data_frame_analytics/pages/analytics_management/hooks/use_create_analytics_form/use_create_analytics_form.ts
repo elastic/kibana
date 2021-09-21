@@ -84,9 +84,9 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const createAnalyticsJob = async () => {
     resetRequestMessages();
 
-    const analyticsJobConfig = (isAdvancedEditorEnabled
-      ? jobConfig
-      : getJobConfigFromFormState(form)) as DataFrameAnalyticsConfig;
+    const analyticsJobConfig = (
+      isAdvancedEditorEnabled ? jobConfig : getJobConfigFromFormState(form)
+    ) as DataFrameAnalyticsConfig;
 
     if (isAdvancedEditorEnabled) {
       destinationIndex = analyticsJobConfig.dest.index;

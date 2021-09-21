@@ -145,8 +145,9 @@ export async function getAlertActionErrors(
   return await Promise.all(
     alert.actions.map(
       async (alertAction: AlertAction) =>
-        (await actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params))
-          .errors
+        (
+          await actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
+        ).errors
     )
   );
 }
