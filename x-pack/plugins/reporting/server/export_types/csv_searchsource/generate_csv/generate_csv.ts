@@ -346,6 +346,13 @@ export class CsvGenerator {
         }
 
         // TODO check for shard failures, log them and add a warning if found
+        {
+          const {
+            hits: { hits, ...hitsMeta },
+            ...header
+          } = results;
+          this.logger.debug('Results metadata: ' + JSON.stringify({ header, hitsMeta }));
+        }
 
         let table: Datatable | undefined;
         try {
