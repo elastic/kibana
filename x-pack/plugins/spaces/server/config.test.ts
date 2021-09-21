@@ -19,9 +19,7 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
       deprecation,
       path: '',
     })),
-    () =>
-      ({ message }) =>
-        deprecationMessages.push(message)
+    () => ({ message }) => deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,
@@ -54,12 +52,16 @@ describe('spaces config', () => {
         expect(migrated).toEqual(originalConfig);
       });
 
-      it('does not log a warning if xpack.spaces.enabled is set to true', () => {
+      it('logs a warning if xpack.spaces.enabled is set to true', () => {
         const originalConfig = deepFreeze({ xpack: { spaces: { enabled: true } } });
 
         const { messages, migrated } = applyConfigDeprecations({ ...originalConfig });
 
-        expect(messages).toMatchInlineSnapshot(`Array []`);
+        expect(messages).toMatchInlineSnapshot(`
+          Array [
+            "In 8.0.0 and later, using \\"xpack.spaces.enabled\\" is unsupported, and the Spaces plugin is always enabled.",
+          ]
+        `);
         expect(migrated).toEqual(originalConfig);
       });
     });
