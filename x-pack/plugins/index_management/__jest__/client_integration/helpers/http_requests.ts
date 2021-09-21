@@ -28,6 +28,13 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setCloseIndexResponse = () => {
+    server.respondWith('POST', `${API_BASE_PATH}/indices/close`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      200,
+    ]);
+  };
   const setLoadDataStreamsResponse = (response: HttpResponse = []) => {
     server.respondWith('GET', `${API_BASE_PATH}/data_streams`, [
       200,
@@ -127,6 +134,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setUpdateTemplateResponse,
     setSimulateTemplateResponse,
     setLoadComponentTemplatesResponse,
+    setCloseIndexResponse,
   };
 };
 

@@ -260,13 +260,14 @@ describe('<IndexManagementHome />', () => {
         .find('button[data-test-subj="indexTableContextMenuButton_closeindex"]');
 
       await act(async () => {
+        closeIndexButton.simulate('click');
         nextTick();
       });
       component.update();
-      // const latestRequest = server.requests[server.requests.length - 2];
-      // console.log(latestRequest);
 
-      // expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+      // Request is second to last request because indices are reloaded after the close call.
+      const latestRequest = server.requests[server.requests.length - 2];
+      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/close`);
     });
   });
 });

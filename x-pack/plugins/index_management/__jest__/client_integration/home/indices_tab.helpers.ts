@@ -50,7 +50,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
     find('indexTableIncludeHiddenIndicesToggle').simulate('click');
   };
 
-  const clickManageContextMenuButton = () => {
+  const clickManageContextMenuButton = async () => {
     const { find } = testBed;
     find('indexActionsContextMenuButton').simulate('click');
   };
