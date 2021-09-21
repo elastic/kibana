@@ -100,7 +100,7 @@ export const xyDimension = (): ExpressionFunctionDefinition<
     id: {
       types: ['string', 'number'],
       help: i18n.translate('visualizations.function.xyDimension.id.help', {
-        defaultMessage: 'ID', // @TODO: add description
+        defaultMessage: 'ID',
       }),
     },
   },
