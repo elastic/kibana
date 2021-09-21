@@ -7,15 +7,16 @@
 
 import moment from 'moment';
 import { get } from 'lodash';
+import { LegacyRequest } from '../../types';
 import { standaloneClusterFilter } from './';
 
-export async function hasStandaloneClusters(req, indexPatterns) {
+export async function hasStandaloneClusters(req: LegacyRequest, indexPatterns: string[]) {
   const indexPatternList = indexPatterns.reduce((list, patterns) => {
     list.push(...patterns.split(','));
     return list;
-  }, []);
+  }, [] as string[]);
 
-  const filters = [
+  const filters: any[] = [
     standaloneClusterFilter,
     {
       bool: {
@@ -39,7 +40,7 @@ export async function hasStandaloneClusters(req, indexPatterns) {
     const start = req.payload.timeRange.min;
     const end = req.payload.timeRange.max;
 
-    const timeRangeFilter = {
+    const timeRangeFilter: { range: { timestamp: Record<string, any> } } = {
       range: {
         timestamp: {
           format: 'epoch_millis',
