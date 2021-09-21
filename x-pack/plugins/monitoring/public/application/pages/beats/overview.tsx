@@ -65,8 +65,6 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
     if (overviewData === null) {
       return null;
     }
-    const { clusterStatus, metrics } = overviewData || {};
-
     return <BeatsOverview {...data} onBrush={onBrush} zoomInfo={zoomInfo} />;
   };
 
