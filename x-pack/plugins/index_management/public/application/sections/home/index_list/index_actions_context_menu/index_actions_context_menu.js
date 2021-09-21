@@ -244,7 +244,9 @@ export class IndexActionsContextMenu extends Component {
       }
     });
     items.forEach((item) => {
-      item['data-test-subj'] = 'indexTableContextMenuButton';
+      item['data-test-subj'] = `indexTableContextMenuButton_${item.name
+        .replace(/\s/g, '')
+        .toLowerCase()}`;
     });
     const panelTree = {
       id: 0,
@@ -736,7 +738,11 @@ export class IndexActionsContextMenu extends Component {
                 anchorPosition={anchorPosition}
                 repositionOnScroll
               >
-                <EuiContextMenu initialPanelId={0} panels={panels} />
+                <EuiContextMenu
+                  data-test-subj="indexContextMenu"
+                  initialPanelId={0}
+                  panels={panels}
+                />
               </EuiPopover>
             </div>
           );
