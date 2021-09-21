@@ -7,9 +7,10 @@
  */
 
 import type { Capabilities } from 'kibana/public';
-import type { IndexPattern, ISearchSource } from 'src/plugins/data/common';
+import type { IUiSettingsClient } from 'src/core/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { ISearchSource } from 'src/plugins/data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
-import type { DiscoverServices } from '../../../../build_services';
 import type { SavedSearch, SortOrder } from '../../../../saved_searches/types';
 import { getSortForSearchSource } from '../components/doc_table';
 import { AppState } from '../services/discover_state';
@@ -20,8 +21,7 @@ import { AppState } from '../services/discover_state';
 export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: AppState | SavedSearch,
-  indexPattern: IndexPattern,
-  services: DiscoverServices
+  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart }
 ) {
   const { uiSettings: config, data } = services;
   const searchSource = currentSearchSource.createCopy();
@@ -32,10 +32,7 @@ export async function getSharingData(
     getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))
   );
   // When sharing externally we preserve relative time values
-  searchSource.setField(
-    'filter',
-    data.query.timefilter.timefilter.createRelativeFilter(indexPattern)
-  );
+  searchSource.setField('filter', data.query.timefilter.timefilter.createRelativeFilter(index));
   searchSource.removeField('highlight');
   searchSource.removeField('highlightAll');
   searchSource.removeField('aggs');
