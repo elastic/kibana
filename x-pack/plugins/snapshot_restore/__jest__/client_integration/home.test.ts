@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
 import { SNAPSHOT_STATE } from '../../public/application/constants';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH } from '../../common';
 import {
   setupEnvironment,
   pageHelpers,
@@ -431,6 +431,7 @@ describe('<SnapshotRestoreHome />', () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots: [],
           repositories: ['my-repo'],
+          total: 0,
         });
 
         testBed = await setup();
@@ -469,6 +470,7 @@ describe('<SnapshotRestoreHome />', () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
           repositories: [REPOSITORY_NAME],
+          total: 2,
         });
 
         testBed = await setup();
@@ -501,18 +503,10 @@ describe('<SnapshotRestoreHome />', () => {
         });
       });
 
-      test('should show a warning if the number of snapshots exceeded the limit', () => {
-        // We have mocked the SNAPSHOT_LIST_MAX_SIZE to 2, so the warning should display
-        const { find, exists } = testBed;
-        expect(exists('maxSnapshotsWarning')).toBe(true);
-        expect(find('maxSnapshotsWarning').text()).toContain(
-          'Cannot show the full list of snapshots'
-        );
-      });
-
       test('should show a warning if one repository contains errors', async () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
+          total: 2,
           repositories: [REPOSITORY_NAME],
           errors: {
             repository_with_errors: {

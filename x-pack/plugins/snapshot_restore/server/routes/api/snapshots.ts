@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { SnapshotDetailsEs } from '../../../common/types';
-import { deserializeSnapshotDetails, convertSortFieldToES } from '../../../common/lib';
+import { deserializeSnapshotDetails } from '../../../common/lib';
 import type { RouteDependencies } from '../../types';
 import { getManagedRepositoryName } from '../../lib';
 import { addBasePath } from '../helpers';
@@ -25,7 +25,32 @@ const querySchema = schema.object({
   sortDirection: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
   pageIndex: schema.number(),
   pageSize: schema.number(),
+  searchField: schema.maybe(
+    schema.oneOf([
+      schema.literal('snapshot'),
+      schema.literal('repository'),
+      schema.literal('policyName'),
+    ])
+  ),
+  searchValue: schema.maybe(schema.string()),
+  searchMatch: schema.maybe(schema.oneOf([schema.literal('must'), schema.literal('must_not')])),
+  searchOperator: schema.maybe(schema.oneOf([schema.literal('eq'), schema.literal('exact')])),
 });
+
+const sortFieldToESParams = {
+  snapshot: 'name',
+  repository: 'repository',
+  indices: 'index_count',
+  startTimeInMillis: 'start_time',
+  durationInMillis: 'duration',
+  'shards.total': 'shard_count',
+  'shards.failed': 'failed_shard_count',
+};
+
+const convertSearchToWildcard = (value: string, match?: string, operator?: string) => {
+  const wildcard = operator === 'exact' ? '' : '*';
+  return match === 'must_not' ? `*,-${value}${wildcard}` : `${value}${wildcard}`;
+};
 
 export function registerSnapshotsRoutes({
   router,
@@ -37,10 +62,14 @@ export function registerSnapshotsRoutes({
     { path: addBasePath('snapshots'), validate: { query: querySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const sortField = convertSortFieldToES((req.query as TypeOf<typeof querySchema>).sortField);
+      const sortField = sortFieldToESParams[(req.query as TypeOf<typeof querySchema>).sortField];
       const sortDirection = (req.query as TypeOf<typeof querySchema>).sortDirection;
       const pageIndex = (req.query as TypeOf<typeof querySchema>).pageIndex;
       const pageSize = (req.query as TypeOf<typeof querySchema>).pageSize;
+      const searchField = (req.query as TypeOf<typeof querySchema>).searchField;
+      const searchValue = (req.query as TypeOf<typeof querySchema>).searchValue;
+      const searchMatch = (req.query as TypeOf<typeof querySchema>).searchMatch;
+      const searchOperator = (req.query as TypeOf<typeof querySchema>).searchOperator;
 
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
@@ -77,10 +106,20 @@ export function registerSnapshotsRoutes({
       try {
         // If any of these repositories 504 they will cost the request significant time.
         const { body: fetchedSnapshots } = await clusterClient.asCurrentUser.snapshot.get({
-          repository: '_all',
-          snapshot: '_all',
+          repository:
+            searchField === 'repository'
+              ? convertSearchToWildcard(searchValue!, searchMatch, searchOperator)
+              : '_all',
           ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
-          // @ts-expect-error @elastic/elasticsearch "desc" is a new param
+          snapshot:
+            searchField === 'snapshot'
+              ? convertSearchToWildcard(searchValue!, searchMatch, searchOperator)
+              : '_all',
+          // @ts-expect-error @elastic/elasticsearch new API params
+          slm_policy_filter:
+            searchField === 'policyName'
+              ? convertSearchToWildcard(searchValue!, searchMatch, searchOperator)
+              : '*,_none',
           order: sortDirection,
           sort: sortField,
           size: pageSize,
