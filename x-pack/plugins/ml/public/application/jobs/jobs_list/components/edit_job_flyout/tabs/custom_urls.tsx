@@ -37,7 +37,7 @@ import { loadSavedDashboards, loadIndexPatterns } from '../edit_utils';
 import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
 import { Job } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { UrlConfig } from '../../../../../../../common/types/custom_urls';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common';
 import { MlKibanaReactContextValue } from '../../../../../contexts/kibana';
 
 const MAX_NUMBER_DASHBOARDS = 1000;

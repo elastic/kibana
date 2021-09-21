@@ -6865,6 +6865,12 @@
               }
             }
           }
+        },
+        "task_type_exclusion": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         }
       }
     },

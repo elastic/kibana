@@ -382,7 +382,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                                   'xpack.lens.chartSwitch.dataLossDescription',
                                   {
                                     defaultMessage:
-                                      'Selecting this visualization type will result in a partial loss of currently applied configuration selections.',
+                                      'Selecting this visualization type will remove incompatible configuration options and multiple layers, if present',
                                   }
                                 )}
                                 iconProps={{
