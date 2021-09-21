@@ -33,7 +33,11 @@ const DEFAULTS_SETTINGS = {
     port: 0,
     xsrf: { disableProtection: true },
   },
-  logging: { silent: true },
+  logging: {
+    root: {
+      level: 'off',
+    },
+  },
   plugins: {},
   migrations: { skip: false },
 };
@@ -46,7 +50,6 @@ export function createRootWithSettings(
     configs: [],
     cliArgs: {
       dev: false,
-      silent: false,
       watch: false,
       basePath: false,
       runExamples: false,
