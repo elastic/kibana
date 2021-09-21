@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexItem, EuiFormControlLayout, EuiFormLabel, EuiIcon } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFormControlLayout,
+  EuiFormLabel,
+  EuiIcon,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import React, { forwardRef, HTMLAttributes } from 'react';
 import classNames from 'classnames';
 
@@ -131,21 +137,25 @@ export const ControlClone = ({
   container: ControlGroupContainer;
 }) => {
   const embeddable = useChildEmbeddable({ embeddableId, container });
+  console.log(embeddable, 'embedabble');
+  console.log(container.getInput().controlStyle, 'container');
 
   return (
     <EuiFlexItem className={'controlFrame--cloneWrapper'}>
-      <EuiFormControlLayout
-        className={'controlFrame--formControlLayout'}
-        fullWidth
-        prepend={
-          <>
-            <button className="controlFrame--dragHandle">
-              <EuiIcon type="grabHorizontal" />
-            </button>
-            <EuiFormLabel htmlFor={embeddableId}>{embeddable?.getInput().title}</EuiFormLabel>
-          </>
-        }
-      />
+      {container.getInput().controlStyle === 'twoLine' ? (
+        <EuiFormLabel>{embeddable?.getInput().title}</EuiFormLabel>
+      ) : undefined}
+      {/* <EuiFlexGroup className={'controlFrame--formControlLayout'}> */}
+      <EuiFlexGroup gutterSize="none" className={'draggableButton'}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="grabHorizontal" className="controlFrame--dragHandle" />
+        </EuiFlexItem>
+        {container.getInput().controlStyle === 'oneLine' ? (
+          // <EuiFormLabel>{embeddable?.getInput().title}</EuiFormLabel>
+          <EuiFlexItem>{embeddable?.getInput().title}</EuiFlexItem>
+        ) : undefined}
+        {/* <EuiFlexItem>{embeddable?.getInput().title}</EuiFlexItem> */}
+      </EuiFlexGroup>
     </EuiFlexItem>
   );
 };

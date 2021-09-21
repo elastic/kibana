@@ -6,11 +6,24 @@
 .controlFrame--cloneWrapper {
   width: max-content;
 
-  .euiFormLabel {
+  .euiFormLabel, div {
     cursor: grabbing !important; // prevents cursor flickering while dragging the clone
   }
 
-  .controlFrame--formControlLayout {
+  .draggableButton {
+    cursor: grabbing;
+    height: $euiButtonHeight;
+    align-items: center;
+    padding-right: 4px;
+    border-radius: 6px;
+    @include euiFontSizeS;
+    @include euiFormControlDefaultShadow;
+    font-weight: $euiFontWeightSemiBold;
+    background-color: $euiFormInputGroupLabelBackground;
+    min-width: 200px;
+  }
+
+  .controlFrame--formControlLayout, .draggableButton {
     &-clone {
       box-shadow: 0 0 0 1px $euiShadowColor,
         0 1px 6px 0 $euiShadowColor;
@@ -126,6 +139,7 @@
     .controlFrame--formControlLayout {
       background-color: $euiColorEmptyShade !important;
       color: transparent !important;
+      box-shadow: none;
 
       .euiFormLabel {
         opacity: 0;
