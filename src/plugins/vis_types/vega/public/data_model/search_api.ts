@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { combineLatest, from } from 'rxjs';
-import { map, tap, switchMap } from 'rxjs/operators';
+import { combineLatest, from, throwError } from 'rxjs';
+import { map, tap, switchMap, catchError } from 'rxjs/operators';
 import type { CoreStart, IUiSettingsClient, KibanaExecutionContext } from 'kibana/public';
 import {
   getSearchParamsFromRequest,
@@ -95,6 +95,17 @@ export class SearchAPI {
                 }
               )
               .pipe(
+                catchError((err) => {
+                  // catch the error and log it into the inspector
+                  this.inspectSearchResult(
+                    {
+                      rawResponse: 'err' in err ? err.err : undefined,
+                    },
+                    requestResponders[requestId]
+                  );
+                  // now throw it again as the Vega parser will catch it and carry on with its flow
+                  return throwError(err);
+                }),
                 tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
                 map((data) => ({
                   name: requestId,
