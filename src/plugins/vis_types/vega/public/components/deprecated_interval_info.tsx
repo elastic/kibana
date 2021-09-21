@@ -44,8 +44,10 @@ export const shouldShowDeprecatedHistogramIntervalInfo = (spec: VegaSpec) => {
 
   return data.some((dataItem) => {
     const aggs = dataItem.url?.body?.aggs ?? {};
-    return Object.keys(aggs).some(
-      (key) => 'interval' in (aggs[key]?.[BUCKET_TYPES.DATE_HISTOGRAM] || {})
-    );
+
+    return Object.keys(aggs).some((key) => {
+      const dateHistogram = aggs[key]?.[BUCKET_TYPES.DATE_HISTOGRAM] || {};
+      return 'interval' in dateHistogram && typeof dateHistogram.interval !== 'object';
+    });
   });
 };

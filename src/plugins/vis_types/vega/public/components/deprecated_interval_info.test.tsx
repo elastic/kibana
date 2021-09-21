@@ -70,6 +70,24 @@ describe('shouldShowDeprecatedHistogramIntervalInfo', () => {
             body: {
               aggs: {
                 test: {
+                  date_histogram: {
+                    interval: { '%autointerval%': true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+    ).toBeFalsy();
+
+    expect(
+      shouldShowDeprecatedHistogramIntervalInfo({
+        data: {
+          url: {
+            body: {
+              aggs: {
+                test: {
                   auto_date_histogram: {
                     field: 'bytes',
                   },
