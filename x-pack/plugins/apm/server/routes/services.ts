@@ -475,12 +475,14 @@ const serviceThroughputRoute = createApmServerRoute({
     });
 
     const { start, end } = setup;
-    const { intervalString, bucketSize } =
-      getBucketSizeForAggregatedTransactions({
-        start,
-        end,
-        searchAggregatedTransactions,
-      });
+    const {
+      intervalString,
+      bucketSize,
+    } = getBucketSizeForAggregatedTransactions({
+      start,
+      end,
+      searchAggregatedTransactions,
+    });
 
     const throughputUnit = getThroughputUnit(bucketSize);
 
