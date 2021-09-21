@@ -87,6 +87,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       input = await find.activeElement();
       await input.type(`Men\'s Clothing`);
 
+      await PageObjects.common.sleep(100);
+
       await PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing')`);
     });
 

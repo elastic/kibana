@@ -39,7 +39,7 @@ export interface RouteOptions {
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, encryptedSavedObjects } = opts;
+  const { router, licenseState, encryptedSavedObjects, usageCounter } = opts;
 
   defineLegacyRoutes(opts);
   createRuleRoute(opts);
@@ -50,7 +50,7 @@ export function defineRoutes(opts: RouteOptions) {
   aggregateRulesRoute(router, licenseState);
   disableRuleRoute(router, licenseState);
   enableRuleRoute(router, licenseState);
-  findRulesRoute(router, licenseState);
+  findRulesRoute(router, licenseState, usageCounter);
   getRuleAlertSummaryRoute(router, licenseState);
   getRuleStateRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);

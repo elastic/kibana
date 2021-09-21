@@ -86,8 +86,8 @@ export interface EmbeddableFactory<
   canCreateNew(): boolean;
 
   /**
-   * Can be used to get any default input, to be passed in to during the creation process. Default
-   * input will not be stored in a parent container, so any inherited input from a container will trump
+   * Can be used to get the default input, to be passed in to during the creation process. Default
+   * input will not be stored in a parent container, so all inherited input from a container will trump
    * default input parameters.
    * @param partial
    */
@@ -95,7 +95,7 @@ export interface EmbeddableFactory<
 
   /**
    * Can be used to request explicit input from the user, to be passed in to `EmbeddableFactory:create`.
-   * Explicit input is stored on the parent container for this embeddable. It overrides any inherited
+   * Explicit input is stored on the parent container for this embeddable. It overrides all inherited
    * input passed down from the parent container.
    */
   getExplicitInput(): Promise<Partial<TEmbeddableInput>>;
