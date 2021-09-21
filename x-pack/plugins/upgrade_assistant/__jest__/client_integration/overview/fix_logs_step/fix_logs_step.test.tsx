@@ -374,7 +374,7 @@ describe('Overview - Fix deprecation logs step', () => {
       });
     });
   });
-  
+
   describe('Step 4 - API compatibility header', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
@@ -392,7 +392,7 @@ describe('Overview - Fix deprecation logs step', () => {
       expect(exists('apiCompatibilityNoteTitle')).toBe(true);
     });
   });
-  
+
   describe('Privileges check', () => {
     test(`permissions warning callout is hidden if user has the right privileges`, async () => {
       const { exists } = testBed;
