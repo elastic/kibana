@@ -6,3 +6,4 @@
  */
 
 export { timelinesMigrations } from './timelines';
+export { notesMigrations } from './notes';

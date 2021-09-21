@@ -10,20 +10,20 @@ import { ValidationFunc, ValidationError } from '../../hook_form_lib';
 import { isUrl } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 
-export const urlField = (message: string) => (
-  ...args: Parameters<ValidationFunc>
-): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-  const [{ value }] = args;
+export const urlField =
+  (message: string) =>
+  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    const [{ value }] = args;
 
-  const error: ValidationError<ERROR_CODE> = {
-    code: 'ERR_FIELD_FORMAT',
-    formatType: 'URL',
-    message,
+    const error: ValidationError<ERROR_CODE> = {
+      code: 'ERR_FIELD_FORMAT',
+      formatType: 'URL',
+      message,
+    };
+
+    if (typeof value !== 'string') {
+      return error;
+    }
+
+    return isUrl(value) ? undefined : error;
   };
-
-  if (typeof value !== 'string') {
-    return error;
-  }
-
-  return isUrl(value) ? undefined : error;
-};
