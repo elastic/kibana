@@ -190,9 +190,7 @@ export class ConfigService {
           ],
         },
       };
-      this.addDeprecationProvider(namespace, () => [
-        (settings, fromPath, addDeprecation) => addDeprecation(deprecatedConfigDetails),
-      ]);
+      this.deprecationLog.warn(deprecatedConfigDetails.message);
       this.markDeprecatedConfigAsHandled(namespace, deprecatedConfigDetails);
     }
 
