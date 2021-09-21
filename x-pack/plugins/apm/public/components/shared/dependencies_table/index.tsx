@@ -26,7 +26,6 @@ import { ImpactBar } from '../ImpactBar';
 import { ListMetric } from '../list_metric';
 import { ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
-import { TableFetchWrapper } from '../table_fetch_wrapper';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 
 export type DependenciesItem = Omit<
@@ -197,25 +196,24 @@ export function DependenciesTable(props: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <TableFetchWrapper status={status}>
-          <OverviewTableContainer
-            fixedHeight={fixedHeight}
-            isEmptyAndNotInitiated={
-              items.length === 0 && status === FETCH_STATUS.NOT_INITIATED
-            }
-          >
-            <ManagedTable
-              isLoading={status === FETCH_STATUS.LOADING}
-              columns={columns}
-              items={items}
-              noItemsMessage={noItemsMessage}
-              initialSortField="impactValue"
-              initialSortDirection="desc"
-              initialPageSize={5}
-              pagination={true}
-            />
-          </OverviewTableContainer>
-        </TableFetchWrapper>
+        <OverviewTableContainer
+          fixedHeight={fixedHeight}
+          isEmptyAndNotInitiated={
+            items.length === 0 && status === FETCH_STATUS.NOT_INITIATED
+          }
+        >
+          <ManagedTable
+            isLoading={status === FETCH_STATUS.LOADING}
+            error={status === FETCH_STATUS.FAILURE}
+            columns={columns}
+            items={items}
+            noItemsMessage={noItemsMessage}
+            initialSortField="impactValue"
+            initialSortDirection="desc"
+            initialPageSize={5}
+            pagination={true}
+          />
+        </OverviewTableContainer>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

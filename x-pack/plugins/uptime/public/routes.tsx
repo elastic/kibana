@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -28,10 +27,8 @@ import {
   SyntheticsCheckStepsPageHeader,
   SyntheticsCheckStepsPageRightSideItem,
 } from './pages/synthetics/synthetics_checks';
-import { ClientPluginsStart } from './apps/plugin';
 import { MonitorPageTitle, MonitorPageTitleContent } from './components/monitor/monitor_title';
 import { UptimeDatePicker } from './components/common/uptime_date_picker';
-import { useKibana } from '../../../../src/plugins/kibana_react/public';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
 import { SyntheticsCallout } from './components/overview/synthetics_callout';
@@ -41,6 +38,7 @@ import {
   StepDetailPageHeader,
   StepDetailPageRightSideItem,
 } from './pages/synthetics/step_detail_page';
+import { UptimePageTemplateComponent } from './apps/uptime_page_template';
 
 interface RouteProps {
   path: string;
@@ -180,17 +178,6 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 };
 
 export const PageRouter: FC = () => {
-  const {
-    services: { observability },
-  } = useKibana<ClientPluginsStart>();
-  const PageTemplateComponent = observability.navigation.PageTemplate;
-
-  const StyledPageTemplateComponent = styled(PageTemplateComponent)`
-    .euiPageHeaderContent > .euiFlexGroup {
-      flex-wrap: wrap;
-    }
-  `;
-
   return (
     <Switch>
       {Routes.map(
@@ -199,9 +186,9 @@ export const PageRouter: FC = () => {
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              <StyledPageTemplateComponent pageHeader={pageHeader}>
+              <UptimePageTemplateComponent path={path} pageHeader={pageHeader}>
                 <RouteComponent />
-              </StyledPageTemplateComponent>
+              </UptimePageTemplateComponent>
             </div>
           </Route>
         )

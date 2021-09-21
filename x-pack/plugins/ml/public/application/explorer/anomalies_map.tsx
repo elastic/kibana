@@ -16,13 +16,13 @@ import {
   EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { VectorLayerDescriptor } from '../../../../maps/common/descriptor_types';
 import {
   FIELD_ORIGIN,
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
-} from '../../../../maps/common/constants';
+  VectorLayerDescriptor,
+} from '../../../../maps/common';
 import { useMlKibana } from '../contexts/kibana';
 import { isDefined } from '../../../common/types/guards';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
@@ -32,10 +32,8 @@ import { AnomaliesTableRecord } from '../../../common/types/anomalies';
 const MAX_ENTITY_VALUES = 3;
 
 function getAnomalyRows(anomalies: AnomaliesTableRecord[], jobId: string) {
-  const anomalyRows: Record<
-    string,
-    { count: number; entityValue: string; max_severity: number }
-  > = {};
+  const anomalyRows: Record<string, { count: number; entityValue: string; max_severity: number }> =
+    {};
   for (let i = 0; i < anomalies.length; i++) {
     const anomaly = anomalies[i];
     const location = anomaly.entityValue;

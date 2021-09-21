@@ -19,6 +19,7 @@ import {
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
+  MatrixHistogramTypeToAggName,
 } from '../../../../common/search_strategy/security_solution';
 import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
@@ -88,21 +89,19 @@ export const useMatrixHistogram = ({
     },
   });
 
-  const [
-    matrixHistogramRequest,
-    setMatrixHistogramRequest,
-  ] = useState<MatrixHistogramRequestOptions>({
-    defaultIndex: initialIndexName,
-    factoryQueryType: initialFactoryQueryType,
-    filterQuery: createFilter(filterQuery),
-    histogramType: initialHistogramType ?? histogramType,
-    timerange: initialTimerange,
-    stackByField,
-    threshold,
-    ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
-    ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
-    ...(includeMissingData != null ? { includeMissingData } : {}),
-  });
+  const [matrixHistogramRequest, setMatrixHistogramRequest] =
+    useState<MatrixHistogramRequestOptions>({
+      defaultIndex: initialIndexName,
+      factoryQueryType: initialFactoryQueryType,
+      filterQuery: createFilter(filterQuery),
+      histogramType: initialHistogramType ?? histogramType,
+      timerange: initialTimerange,
+      stackByField,
+      threshold,
+      ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
+      ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
+      ...(includeMissingData != null ? { includeMissingData } : {}),
+    });
   const { addError, addWarning } = useAppToasts();
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
@@ -132,8 +131,8 @@ export const useMatrixHistogram = ({
               if (isCompleteResponse(response)) {
                 const histogramBuckets: Buckets = getOr(
                   bucketEmpty,
-                  'rawResponse.aggregations.eventActionGroup.buckets',
-                  response
+                  MatrixHistogramTypeToAggName[histogramType],
+                  response.rawResponse
                 );
                 setLoading(false);
                 setMatrixHistogramResponse((prevResponse) => ({
@@ -165,7 +164,7 @@ export const useMatrixHistogram = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, errorMessage, addError, addWarning]
+    [data.search, errorMessage, addError, addWarning, histogramType]
   );
 
   useEffect(() => {
@@ -256,19 +255,20 @@ export const useMatrixHistogramCombined = (
     includeMissingData: true,
   });
 
-  const skipMissingData = useMemo(() => !matrixHistogramQueryProps.stackByField.endsWith('.ip'), [
-    matrixHistogramQueryProps.stackByField,
-  ]);
+  const skipMissingData = useMemo(
+    () => !matrixHistogramQueryProps.stackByField.endsWith('.ip'),
+    [matrixHistogramQueryProps.stackByField]
+  );
   const [missingDataLoading, missingDataResponse] = useMatrixHistogram({
     ...matrixHistogramQueryProps,
     includeMissingData: false,
     skip: skipMissingData || matrixHistogramQueryProps.filterQuery === undefined,
   });
 
-  const combinedLoading = useMemo<boolean>(() => mainLoading || missingDataLoading, [
-    mainLoading,
-    missingDataLoading,
-  ]);
+  const combinedLoading = useMemo<boolean>(
+    () => mainLoading || missingDataLoading,
+    [mainLoading, missingDataLoading]
+  );
 
   const combinedResponse = useMemo<UseMatrixHistogramArgs>(() => {
     if (skipMissingData) return mainResponse;

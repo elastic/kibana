@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../../common';
+import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../../common/constants';
 
 jest.mock('../classes/layers/tiled_vector_layer/tiled_vector_layer', () => {});
 jest.mock('../classes/layers/blended_vector_layer/blended_vector_layer', () => {});
@@ -147,7 +147,7 @@ describe('areLayersLoaded', () => {
     isVisible?: boolean;
     showAtZoomLevel?: boolean;
   }) {
-    return ({
+    return {
       hasErrors: () => {
         return hasErrors;
       },
@@ -160,12 +160,12 @@ describe('areLayersLoaded', () => {
       showAtZoomLevel: () => {
         return showAtZoomLevel;
       },
-    } as unknown) as ILayer;
+    } as unknown as ILayer;
   }
 
   test('layers waiting for map to load should not be counted loaded', () => {
     const layerList: ILayer[] = [];
-    const waitingForMapReadyLayerList: LayerDescriptor[] = [({} as unknown) as LayerDescriptor];
+    const waitingForMapReadyLayerList: LayerDescriptor[] = [{} as unknown as LayerDescriptor];
     const zoom = 4;
     expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(false);
   });
@@ -216,14 +216,14 @@ describe('getQueryableUniqueIndexPatternIds', () => {
     isVisible?: boolean;
     indexPatterns?: string[];
   }) {
-    return ({
+    return {
       isVisible: () => {
         return isVisible;
       },
       getQueryableIndexPatternIds: () => {
         return indexPatterns;
       },
-    } as unknown) as ILayer;
+    } as unknown as ILayer;
   }
 
   function createWaitLayerDescriptorMock({
@@ -255,7 +255,8 @@ describe('getQueryableUniqueIndexPatternIds', () => {
       createLayerMock({ indexPatterns: ['foobar'], isVisible: false }),
       createLayerMock({ indexPatterns: ['bar'] }),
     ];
-    const waitingForMapReadyLayerList: VectorLayerDescriptor[] = ([] as unknown) as VectorLayerDescriptor[];
+    const waitingForMapReadyLayerList: VectorLayerDescriptor[] =
+      [] as unknown as VectorLayerDescriptor[];
     expect(
       getQueryableUniqueIndexPatternIds.resultFunc(layerList, waitingForMapReadyLayerList)
     ).toEqual(['foo', 'bar']);
@@ -269,12 +270,12 @@ describe('getQueryableUniqueIndexPatternIds', () => {
       createLayerMock({ indexPatterns: ['foobar'], isVisible: false }),
       createLayerMock({ indexPatterns: ['bar'] }),
     ];
-    const waitingForMapReadyLayerList: VectorLayerDescriptor[] = ([
+    const waitingForMapReadyLayerList: VectorLayerDescriptor[] = [
       createWaitLayerDescriptorMock({ indexPatternId: 'foo' }),
       createWaitLayerDescriptorMock({ indexPatternId: 'barfoo', visible: false }),
       createWaitLayerDescriptorMock({ indexPatternId: 'fbr' }),
       createWaitLayerDescriptorMock({ indexPatternId: 'foo' }),
-    ] as unknown) as VectorLayerDescriptor[];
+    ] as unknown as VectorLayerDescriptor[];
     expect(
       getQueryableUniqueIndexPatternIds.resultFunc(layerList, waitingForMapReadyLayerList)
     ).toEqual(['foo', 'fbr']);
