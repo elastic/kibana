@@ -8,7 +8,7 @@
 import { LicenseService } from './license';
 
 export const createLicenseServiceMock = (): jest.Mocked<LicenseService> => {
-  return ({
+  return {
     start: jest.fn(),
     stop: jest.fn(),
     getLicenseInformation: jest.fn(),
@@ -17,5 +17,5 @@ export const createLicenseServiceMock = (): jest.Mocked<LicenseService> => {
     isGoldPlus: jest.fn().mockReturnValue(true),
     isPlatinumPlus: jest.fn().mockReturnValue(true),
     isEnterprise: jest.fn().mockReturnValue(true),
-  } as unknown) as jest.Mocked<LicenseService>;
+  } as unknown as jest.Mocked<LicenseService>;
 };

@@ -114,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  // test skipped until https://github.com/elastic/elasticsearch/pull/77109 is fixed
+  // Failing: See https://github.com/elastic/kibana/issues/112194
   describe.skip('job on data set with date_nanos time field', function () {
     this.tags(['mlqa']);
     before(async () => {

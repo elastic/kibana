@@ -28,9 +28,12 @@ type VoidFunc = () => void;
 const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const dispatch = useDispatch();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { activeTab, show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
-    getTimelineShowStatus(state, timelineId)
-  );
+  const {
+    activeTab,
+    show,
+    status: timelineStatus,
+    updated,
+  } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
 
   const [focusOwnership, setFocusOwnership] = useState(true);
   const [triggerOnBlur, setTriggerOnBlur] = useState(true);

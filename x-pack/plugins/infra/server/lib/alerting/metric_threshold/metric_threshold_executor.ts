@@ -227,14 +227,8 @@ const formatAlertResult = <AlertResult>(
   } & AlertResult,
   useWarningThreshold?: boolean
 ) => {
-  const {
-    metric,
-    currentValue,
-    threshold,
-    comparator,
-    warningThreshold,
-    warningComparator,
-  } = alertResult;
+  const { metric, currentValue, threshold, comparator, warningThreshold, warningComparator } =
+    alertResult;
   const noDataValue = i18n.translate(
     'xpack.infra.metrics.alerting.threshold.noDataFormattedValue',
     {
