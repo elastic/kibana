@@ -345,6 +345,8 @@ export class CsvGenerator {
           break;
         }
 
+        // TODO check for shard failures, log them and add a warning if found
+
         let table: Datatable | undefined;
         try {
           table = tabifyDocs(results, index, { shallow: true, meta: true });
@@ -404,6 +406,14 @@ export class CsvGenerator {
     }
 
     this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
+
+    // FIXME: https://github.com/elastic/kibana/issues/112186 -- find root cause
+    if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
+      this.logger.warning(
+        `ES scroll returned fewer total hits than expected! ` +
+          `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}.`
+      );
+    }
 
     return {
       content_type: CONTENT_TYPE_CSV,
