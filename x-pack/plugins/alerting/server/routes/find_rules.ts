@@ -136,6 +136,14 @@ export const findRulesRoute = (
           search_fields: searchFieldsAsArray(req.query.search_fields),
         });
 
+        if (req.query.fields) {
+          usageCounter?.incrementCounter({
+            counterName: `alertingFieldsUsage`,
+            counterType: 'alertingFieldsUsage',
+            incrementBy: 1,
+          });
+        }
+
         const findResult = await rulesClient.find({ options });
         return res.ok({
           body: rewriteBodyRes(findResult),
