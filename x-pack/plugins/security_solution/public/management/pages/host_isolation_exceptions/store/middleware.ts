@@ -11,10 +11,13 @@ import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { ImmutableMiddleware, ImmutableMiddlewareAPI } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../common/constants';
+import { parseQueryFilterToKQL } from '../../../common/utils';
 import { createLoadedResourceState } from '../../../state/async_resource_builders';
 import { getHostIsolationExceptionsList } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
 import { getCurrentLocation } from './selector';
+
+export const SEARCHABLE_FIELDS: Readonly<string[]> = [`name`, `description`, `entries.value`];
 
 export function hostIsolationExceptionsMiddlewareFactory(coreStart: CoreStart) {
   return createHostIsolationExceptionsPageMiddleware(coreStart);
@@ -41,17 +44,14 @@ async function loadHostIsolationExceptionsList(
     const {
       page_size: pageSize,
       page_index: pageIndex,
-      // filter,
+      filter,
     } = getCurrentLocation(store.getState());
     const query = {
       http,
       page: pageIndex + 1,
       perPage: pageSize,
-      /* sortField: 'created_at',
-      sortOrder: 'desc', */
-      // filter,
+      filter: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
     };
-    console.log('the query', query);
     const entries = await getHostIsolationExceptionsList(query);
 
     // @TODO loading state - return previous state instead of UninitialisedResourceState
