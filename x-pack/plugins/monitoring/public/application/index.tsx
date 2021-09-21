@@ -18,6 +18,8 @@ import { GlobalStateProvider } from './global_state_context';
 import { ExternalConfigContext, ExternalConfig } from './external_config_context';
 import { createPreserveQueryHistory } from './preserve_query_history';
 import { RouteInit } from './route_init';
+import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
+import { CODE_PATH_ELASTICSEARCH } from '../../common/constants';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 
@@ -70,6 +72,14 @@ const MonitoringApp: React.FC<{
                     path="/overview"
                     component={ClusterOverview}
                     codePaths={['all']}
+                    fetchAllClusters={false}
+                  />
+
+                  {/* ElasticSearch Views */}
+                  <RouteInit
+                    path="/elasticsearch"
+                    component={ElasticsearchOverviewPage}
+                    codePaths={[CODE_PATH_ELASTICSEARCH]}
                     fetchAllClusters={false}
                   />
                   <Redirect

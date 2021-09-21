@@ -36,11 +36,10 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     indexPattern: string
   ) {
     try {
-      const {
-        body,
-      } = await requestContext.core.elasticsearch.client.asCurrentUser.rollup.getRollupIndexCaps({
-        index: indexPattern,
-      });
+      const { body } =
+        await requestContext.core.elasticsearch.client.asCurrentUser.rollup.getRollupIndexCaps({
+          index: indexPattern,
+        });
 
       return body;
     } catch (e) {
@@ -74,6 +73,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
         capabilities = new RollupSearchCapabilities(
           {
             maxBucketsLimit: await uiSettings.get(MAX_BUCKETS_SETTING),
+            panel: req.body.panels ? req.body.panels[0] : null,
           },
           fieldsCapabilities,
           rollupIndex

@@ -13,9 +13,8 @@ import { DataPublicPluginStart } from '../../data/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
-export const [getFieldFormats, setFieldFormats] = createGetterSetter<
-  DataPublicPluginStart['fieldFormats']
->('FieldFormats');
+export const [getFieldFormats, setFieldFormats] =
+  createGetterSetter<DataPublicPluginStart['fieldFormats']>('FieldFormats');
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
