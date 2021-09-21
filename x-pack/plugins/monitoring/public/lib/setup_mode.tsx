@@ -159,6 +159,8 @@ export const disableElasticsearchInternalCollection = async () => {
 };
 
 export const toggleSetupMode = (inSetupMode: boolean) => {
+  if (isReactMigrationEnabled()) return setupModeReact.toggleSetupMode(inSetupMode);
+
   checkAngularState();
 
   const globalState = angularState.injector.get('globalState');

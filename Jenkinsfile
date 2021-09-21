@@ -1,5 +1,10 @@
 #!/bin/groovy
 
+if (!env.ghprbPullId) {
+  print "Non-PR builds are now in Buildkite."
+  return
+}
+
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
