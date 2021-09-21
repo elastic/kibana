@@ -453,7 +453,7 @@ Elastic Security::
 For the Elastic Security 7.15.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Fleet::
 * Fixes Fleet settings and HostInput error handling {kibana-pull}109418[#109418]
-* Agent policy search, support simple text filter {kibana-pull}107306[#107306]
+* Fixes Agent policy search to support simple text filters {kibana-pull}107306[#107306]
 Kibana Home & Add Data::
 * Fixes `tabindex` and collapsible functionality {kibana-pull}107462[#107462]
 Lens & Visualizations::
