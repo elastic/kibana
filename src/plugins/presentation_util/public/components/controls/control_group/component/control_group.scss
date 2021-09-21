@@ -6,6 +6,8 @@ $controlMinWidth: $euiSize * 14;
 .controlGroup {
   margin-left: $euiSizeXS;
   overflow-x: clip; // sometimes when using auto width, removing a control can cause a horizontal scrollbar to appear.
+  min-height: $euiSize * 4;
+  padding: $euiSize 0;
 }
 
 .controlFrame--cloneWrapper {
@@ -104,7 +106,7 @@ $controlMinWidth: $euiSize * 14;
     .controlFrame--formControlLayout:after {
       content: '';
       position: absolute;
-      background-color: transparentize($euiColorSecondary, .5);
+      background-color: transparentize($euiColorPrimary, .5);
       border-radius: $euiBorderRadius;
       top: 0;
       bottom: 0;

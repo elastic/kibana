@@ -23,7 +23,7 @@ const panelStyle = {
 
 const kqlBarStyle = { background: bar, padding: 16, minHeight, fontStyle: 'italic' };
 
-const inputBarStyle = { background: '#fff', padding: 4, minHeight };
+const inputBarStyle = { background: '#fff', padding: 4 };
 
 const layout = (OptionStory: Story) => (
   <EuiFlexGroup style={{ background }} direction="column">
