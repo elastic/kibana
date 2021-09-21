@@ -119,21 +119,27 @@ export const ThresholdPanel = (
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
 
-  const setYConfig = (yConfig: Partial<YConfig>) => {
-    const newYConfigs = [...(layer.yConfig || [])];
-    const existingIndex = newYConfigs.findIndex(
-      (yAxisConfig) => yAxisConfig.forAccessor === accessor
-    );
-    if (existingIndex !== -1) {
-      newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], ...yConfig };
-    } else {
-      newYConfigs.push({
-        forAccessor: accessor,
-        ...yConfig,
+  const setYConfig = useCallback(
+    (yConfig: Partial<YConfig> | undefined) => {
+      if (yConfig == null) {
+        return;
+      }
+      setState((currState) => {
+        const currLayer = currState.layers[index];
+        const newYConfigs = [...(currLayer.yConfig || [])];
+        const existingIndex = newYConfigs.findIndex(
+          (yAxisConfig) => yAxisConfig.forAccessor === accessor
+        );
+        if (existingIndex !== -1) {
+          newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], ...yConfig };
+        } else {
+          newYConfigs.push({ forAccessor: accessor, ...yConfig });
+        }
+        return updateLayer(currState, { ...currLayer, yConfig: newYConfigs }, index);
       });
-    }
-    setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
-  };
+    },
+    [accessor, index, setState]
+  );
 
   const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
 
@@ -187,7 +193,7 @@ export const ThresholdPanel = (
           idSelected={`${idPrefix}${currentYConfig?.lineStyle || 'solid'}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as LineStyle;
-            setYConfig({ lineStyle: newMode });
+            setYConfig({ forAccessor: accessor, lineStyle: newMode });
           }}
         />
       </EuiFormRow>
@@ -201,7 +207,7 @@ export const ThresholdPanel = (
         <LineThicknessSlider
           value={currentYConfig?.lineWidth || 1}
           onChange={(value) => {
-            setYConfig({ lineWidth: value });
+            setYConfig({ forAccessor: accessor, lineWidth: value });
           }}
         />
       </EuiFormRow>
@@ -246,7 +252,7 @@ export const ThresholdPanel = (
           idSelected={`${idPrefix}${currentYConfig?.fill || 'none'}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as FillStyle;
-            setYConfig({ fill: newMode });
+            setYConfig({ forAccessor: accessor, fill: newMode });
           }}
         />
       </EuiFormRow>
@@ -260,7 +266,7 @@ export const ThresholdPanel = (
         <IconSelect
           value={currentYConfig?.icon}
           onChange={(newIcon) => {
-            setYConfig({ icon: newIcon });
+            setYConfig({ forAccessor: accessor, icon: newIcon });
           }}
         />
       </EuiFormRow>

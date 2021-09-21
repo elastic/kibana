@@ -443,7 +443,7 @@ export interface VisualizationToolbarProps<T = unknown> {
 export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
   groupId: string;
   accessor: string;
-  setState: (newState: T) => void;
+  setState(newState: T | ((currState: T) => T)): void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
