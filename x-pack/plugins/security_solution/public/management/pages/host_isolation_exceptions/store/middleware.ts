@@ -58,7 +58,6 @@ async function loadHostIsolationExceptionsList(
     };
     const entries = await getHostIsolationExceptionsList(query);
 
-    // @TODO loading state - return previous state instead of UninitialisedResourceState
     dispatch({
       type: 'hostIsolationExceptionsPageDataChanged',
       payload: {
