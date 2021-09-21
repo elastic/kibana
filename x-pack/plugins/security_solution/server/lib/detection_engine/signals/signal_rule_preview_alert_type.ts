@@ -38,10 +38,7 @@ import {
   isMachineLearningParams,
   createPreviewReturnType,
 } from './utils';
-import {
-  scheduleNotificationActions,
-  NotificationRuleTypeParams,
-} from '../notifications/schedule_notification_actions';
+import { NotificationRuleTypeParams } from '../notifications/schedule_notification_actions';
 import { buildRuleMessageFactory } from './rule_messages';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { eqlExecutor } from './executors/eql';
@@ -59,16 +56,14 @@ import {
   RuleParams,
   savedQueryRuleParams,
 } from '../schemas/rule_schemas';
-import { bulkCreateFactory } from './bulk_create_factory';
-import { wrapHitsFactory } from './wrap_hits_factory';
-import { wrapSequencesFactory } from './wrap_sequences_factory';
 import {
   allowedExperimentalValues,
   ExperimentalFeatures,
 } from '../../../../common/experimental_features';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
-import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 import { ListClient } from '../../../../../lists/server';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from '../rule_types/factories';
 
 export const previewRuleAlert = ({ logger, ml }: { logger: Logger; ml: SetupPlugins['ml'] }) => {
   const experimentalFeatures: ExperimentalFeatures = allowedExperimentalValues;
@@ -105,7 +100,7 @@ export const previewRuleAlert = ({ logger, ml }: { logger: Logger; ml: SetupPlug
         name,
         schedule: { interval },
       } = savedObject.attributes;
-      const refresh = actions.length ? 'wait_for' : false;
+      const refresh = false;
       const buildRuleMessage = buildRuleMessageFactory({
         id: alertId,
         ruleId,
@@ -124,9 +119,9 @@ export const previewRuleAlert = ({ logger, ml }: { logger: Logger; ml: SetupPlug
         if (!isMachineLearningParams(params)) {
           const index = params.index;
           const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
-          const ruleStatusClient = ({
+          const ruleStatusClient = {
             logStatusChange: async () => undefined,
-          } as unknown) as IRuleExecutionLogClient;
+          } as unknown as IRuleExecutionLogClient;
           const inputIndices = await getInputIndex({
             services,
             version,
@@ -203,9 +198,8 @@ export const previewRuleAlert = ({ logger, ml }: { logger: Logger; ml: SetupPlug
         hasError = true;
       }
       try {
-        const listClient = ({ searchListItemByValues: async () => [] } as unknown) as ListClient;
+        const listClient = { searchListItemByValues: async () => [] } as unknown as ListClient;
 
-        // TODO: these three factory methods either need to be mocked or deleted and further refactoring needs to be made in the executors to account for potential undefined
         const bulkCreate = bulkCreateFactory(
           logger,
           services.scopedClusterClient.asCurrentUser,
@@ -214,10 +208,23 @@ export const previewRuleAlert = ({ logger, ml }: { logger: Logger; ml: SetupPlug
         );
 
         const wrapHits = wrapHitsFactory({
-          ruleSO: savedObject,
-          signalsIndex: params.outputIndex,
-          mergeStrategy,
+          logger,
           ignoreFields,
+          mergeStrategy,
+          spaceId: 'default',
+          ruleSO: {
+            id: 'PLACEHOLDER_id',
+            type,
+            references: [],
+            attributes: {
+              ...internalRule,
+              createdBy: 'PLACEHOLDER_createdBy',
+              updatedBy: 'PLACEHOLDER_updatedBy',
+              createdAt: '',
+              actions: [] as RuleAlertAction[],
+              throttle: '',
+            },
+          },
         });
 
         const wrapSequences = wrapSequencesFactory({
@@ -344,30 +351,6 @@ export const previewRuleAlert = ({ logger, ml }: { logger: Logger; ml: SetupPlug
             logger.info(
               buildRuleMessage(`Found ${result.createdSignalsCount} signals for notification.`)
             );
-
-            if (savedObject.attributes.throttle != null) {
-              await scheduleThrottledNotificationActions({
-                alertInstance: services.alertInstanceFactory(alertId),
-                throttle: savedObject.attributes.throttle,
-                startedAt,
-                id: savedObject.id,
-                kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
-                  ?.kibana_siem_app_url,
-                outputIndex,
-                ruleId,
-                esClient: services.scopedClusterClient.asCurrentUser,
-                notificationRuleParams,
-              });
-            } else if (result.createdSignalsCount) {
-              const alertInstance = services.alertInstanceFactory(alertId);
-              scheduleNotificationActions({
-                alertInstance,
-                signalsCount: result.createdSignalsCount,
-                signals: result.createdSignals,
-                resultsLink,
-                ruleParams: notificationRuleParams,
-              });
-            }
           }
 
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));

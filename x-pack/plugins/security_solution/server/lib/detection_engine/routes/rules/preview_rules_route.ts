@@ -55,10 +55,9 @@ export const previewRulesRoute = (
 
         const internalRule = convertPreviewAPIToInternalSchema(request.body, siemClient);
         // TODO: where to get the state?
-        const state = 'placeholderState';
+        const runState = 'PLACEHOLDER_state';
 
-        const runState = state;
-        const { from, maxSignals, meta, ruleId, timestampOverride, to } = internalRule.params;
+        const { maxSignals } = internalRule.params;
         const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
         const mlAuthz = buildMlAuthz({
@@ -72,26 +71,6 @@ export const previewRulesRoute = (
         await context.lists?.getExceptionListClient().createEndpointList();
 
         const { logger, ignoreFields, mergeStrategy } = previewRuleOptions;
-
-        const wrapHits = wrapHitsFactory({
-          logger,
-          ignoreFields,
-          mergeStrategy,
-          spaceId: 'default',
-          ruleSO: {
-            id: 'preview-rule-id',
-            type: 'preview-rule-type',
-            references: [],
-            attributes: {
-              ...internalRule,
-              createdBy: 'preview-creator',
-              updatedBy: 'preview-updater',
-              createdAt: '',
-              actions: [] as RuleAlertAction[],
-              throttle: '',
-            },
-          },
-        });
 
         const [previewData, errors] = await previewRuleAlert({
           logger,
