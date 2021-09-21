@@ -46,7 +46,7 @@ export interface ExpressionRenderDefinition<Config = unknown, Variables = unknow
   ) => void | Promise<void>;
 }
 
-export type AnyExpressionRenderDefinition = ExpressionRenderDefinition<any>;
+export type AnyExpressionRenderDefinition = ExpressionRenderDefinition<any, any>;
 
 /**
  * Mode of the expression render environment.
