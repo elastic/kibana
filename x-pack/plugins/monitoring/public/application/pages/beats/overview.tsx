@@ -12,7 +12,7 @@ import { BeatsTemplate } from './beats_template';
 import { GlobalStateContext } from '../../global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-// import { ElasticsearchOverview } from '../../../components/beats';
+import { BeatsOverview } from '../../../components/beats/overview';
 
 export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -57,21 +57,7 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
     }
     const { clusterStatus, metrics } = overviewData || {};
 
-    return (
-      <div>Still finding it</div>
-      // <BeatsOverview
-      //   clusterStatus={clusterStatus}
-      //   metrics={metrics}
-      //   logs={logs}
-      //   cluster={cluster}
-      //   shardActivity={shardActivityData}
-      //   onBrush={onBrush}
-      //   showShardActivityHistory={showShardActivityHistory}
-      //   toggleShardActivityHistory={toggleShardActivityHistory}
-      //   zoomInfo={zoomInfo}
-      //   data-test-subj="elasticsearchOverviewPage"
-      // />
-    );
+    return <BeatsOverview {...data} onBrush={onBrush} zoomInfo={zoomInfo} />;
   };
 
   return (
