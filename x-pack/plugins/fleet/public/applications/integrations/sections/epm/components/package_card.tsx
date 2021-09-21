@@ -9,16 +9,20 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiCard } from '@elastic/eui';
 
-import type { PackageListItem } from '../../../types';
 import { CardIcon } from '../../../../../components/package_icon';
+import type { PackageSpecIcon } from '../../../../../../common/types/models';
 
-type PackageCardProps = PackageListItem & {
-  type?: string;
-  uiInternalPath?: string;
+interface PackageCardProps {
   uiInternalPathUrl: string;
   betaBadgeLabel?: string;
   betaBadgeLabelTooltipContent?: string;
-};
+  description: string;
+  name: string;
+  title: string;
+  version: string;
+  icons: PackageSpecIcon[];
+  integration: string;
+}
 
 // adding the `href` causes EuiCard to use a `a` instead of a `button`
 // `a` tags use `euiLinkColor` which results in blueish Badge text
@@ -32,33 +36,26 @@ export function PackageCard(props: PackageCardProps) {
     name,
     title,
     version,
-    release,
-    status,
     icons,
     integration,
-    type,
-    uiInternalPath,
     uiInternalPathUrl,
     betaBadgeLabel,
     betaBadgeLabelTooltipContent,
-    ...restProps
   } = props;
-
-  const icon = (
-    <CardIcon
-      icons={icons}
-      packageName={name}
-      integrationName={integration}
-      version={version}
-      size="xl"
-    />
-  );
 
   return (
     <Card
       title={title || ''}
       description={description}
-      icon={icon}
+      icon={
+        <CardIcon
+          icons={icons}
+          packageName={name}
+          integrationName={integration}
+          version={version}
+          size="xl"
+        />
+      }
       href={uiInternalPathUrl}
       betaBadgeLabel={betaBadgeLabel}
       betaBadgeTooltipContent={betaBadgeLabelTooltipContent}

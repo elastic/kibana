@@ -23,7 +23,6 @@ export interface UsePackageIconType {
   version: Package['version'];
   icons?: Package['icons'];
   tryApi?: boolean; // should it call API to try to find missing icons?
-  type: 'eui' | undefined;
 }
 
 const CACHED_ICONS = new Map<string, string>();
