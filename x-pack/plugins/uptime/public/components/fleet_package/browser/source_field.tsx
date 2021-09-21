@@ -35,11 +35,11 @@ interface SourceConfig {
 
 interface Props {
   onChange: (sourceConfig: SourceConfig) => void;
-  defaultConfig: SourceConfig;
+  defaultConfig?: SourceConfig;
   setIsInlineScript: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const defaultValues = {
+export const defaultValues = {
   zipUrl: '',
   folder: '',
   username: '',
