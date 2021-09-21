@@ -51,7 +51,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   const navigateToApp = useKibana().services.application?.navigateToApp;
 
-  const { sourceId } = useLogSourceContext();
+  const { sourceId, sourceStatus } = useLogSourceContext();
 
   const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
 
@@ -195,6 +195,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   return (
     <LogsPageTemplate
+      hasData={sourceStatus?.logIndexStatus !== 'missing'}
       pageHeader={{
         pageTitle,
         rightSideItems: [<ManageJobsButton onClick={showModuleList} size="s" />],

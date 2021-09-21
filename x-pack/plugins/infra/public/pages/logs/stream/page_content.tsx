@@ -26,6 +26,7 @@ export const StreamPageContent: React.FunctionComponent = () => {
     isUninitialized,
     loadSource,
     latestLoadSourceFailures,
+    sourceStatus,
   } = useLogSourceContext();
 
   if (isLoading || isUninitialized) {
@@ -36,6 +37,7 @@ export const StreamPageContent: React.FunctionComponent = () => {
     return (
       <LogStreamPageWrapper className={APP_WRAPPER_CLASS}>
         <LogsPageTemplate
+          hasData={sourceStatus?.logIndexStatus !== 'missing'}
           pageHeader={{
             pageTitle: streamTitle,
           }}
