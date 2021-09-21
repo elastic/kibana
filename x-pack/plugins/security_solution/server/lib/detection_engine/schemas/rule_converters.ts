@@ -48,7 +48,7 @@ import { ruleTypeMappings } from '../signals/utils';
 // the legacy API behavior
 export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecificRuleParams => {
   switch (params.type) {
-    case 'eql': {
+    case 'eql':
       return {
         type: params.type,
         language: params.language,
@@ -57,8 +57,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         filters: params.filters,
         eventCategoryOverride: params.event_category_override,
       };
-    }
-    case 'threat_match': {
+    case 'threat_match':
       return {
         type: params.type,
         language: params.language ?? 'kuery',
@@ -75,7 +74,6 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         concurrentSearches: params.concurrent_searches,
         itemsPerSearch: params.items_per_search,
       };
-    }
     case 'query': {
       return {
         type: params.type,
@@ -169,7 +167,6 @@ export const convertCreateAPIToInternalSchema = (
   };
 };
 
-// TODO: what can be removed here?
 export const convertPreviewAPIToInternalSchema = (
   input: CreateRulesSchema,
   siemClient: AppClient

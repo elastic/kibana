@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { ISavedObjectsRepository, SavedObject } from 'kibana/server';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import {
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
@@ -19,10 +20,32 @@ import { buildSiemResponse } from '../utils';
 import { previewRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertPreviewAPIToInternalSchema } from '../../schemas/rule_converters';
-import { previewRuleAlert } from '../../signals/signal_rule_preview_alert_type';
-import { wrapHitsFactory } from '../../rule_types/factories';
 import { PreviewRuleOptions } from '../../rule_types/types';
+import { AlertAttributes } from '../../signals/types';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import {
+  Alert,
+  AlertInstanceContext,
+  AlertTypeParams,
+  AlertTypeState,
+} from '../../../../../../alerting/common';
+import {
+  EqlRuleParams,
+  InternalRuleCreate,
+  MachineLearningRuleParams,
+  QueryRuleParams,
+  RuleParams,
+  ThreatRuleParams,
+  ThresholdRuleParams,
+} from '../../schemas/rule_schemas';
+import {
+  createEqlAlertType,
+  createIndicatorMatchAlertType,
+  createMlAlertType,
+  createQueryAlertType,
+  createThresholdAlertType,
+} from '../../rule_types';
+import { AlertTypeExecutor, PersistenceServices } from '../../../../../../rule_registry/server';
 
 export const previewRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -54,8 +77,7 @@ export const previewRulesRoute = (
         }
 
         const internalRule = convertPreviewAPIToInternalSchema(request.body, siemClient);
-        // TODO: where to get the state?
-        const runState = 'PLACEHOLDER_state';
+        const runState = {};
 
         const { maxSignals } = internalRule.params;
         const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
@@ -70,12 +92,67 @@ export const previewRulesRoute = (
 
         await context.lists?.getExceptionListClient().createEndpointList();
 
+        const mockRuleSO: SavedObject<
+          Pick<Alert<RuleParams>, 'createdBy' | 'createdAt' | 'updatedBy'>
+        > = {
+          id: 'preview_rule_so_id',
+          references: [],
+          type: 'rule',
+          attributes: {
+            createdBy: 'elastic_preview',
+            createdAt: new Date(),
+            updatedBy: 'elastic_preview',
+            ...internalRule,
+          },
+        };
+
+        const mockSavedObjectsClient = {
+          get: (ruleId: string) => mockRuleSO,
+        } as unknown as ISavedObjectsRepository;
+
         const { logger, ignoreFields, mergeStrategy } = previewRuleOptions;
 
-        const [previewData, errors] = await previewRuleAlert({
-          logger,
-          ml,
-        }).executor({ params: internalRule, state: null, services: null, spaceId: null });
+        const previewRuleParams = internalRule.params;
+
+        const runExecutors = <X extends RuleParams>(
+          executor: AlertTypeExecutor<{}, X, {}, {}>,
+          params: X
+        ) => {};
+
+        switch (previewRuleParams.type) {
+          case 'threat_match':
+            runExecutors<ThreatRuleParams>(
+              createIndicatorMatchAlertType(previewRuleOptions).executor,
+              previewRuleParams
+            );
+            break;
+          case 'eql':
+            runExecutors<EqlRuleParams>(
+              createEqlAlertType(previewRuleOptions).executor,
+              previewRuleParams
+            );
+            break;
+          case 'query':
+            runExecutors<QueryRuleParams>(
+              createQueryAlertType(previewRuleOptions).executor,
+              previewRuleParams
+            );
+            break;
+          case 'threshold':
+            runExecutors<ThresholdRuleParams>(
+              createThresholdAlertType(previewRuleOptions).executor,
+              previewRuleParams
+            );
+            break;
+          case 'machine_learning':
+            runExecutors<MachineLearningRuleParams>(
+              createMlAlertType(previewRuleOptions).executor,
+              previewRuleParams
+            );
+            break;
+          default:
+            executor = null;
+        }
 
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
