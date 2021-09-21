@@ -73,24 +73,27 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
 
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const toggleGlobal: EuiButtonGroupOptionProps[] = [
-      {
-        id: 'globalPolicy',
-        label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.global', {
-          defaultMessage: 'Global',
-        }),
-        iconType: isGlobal ? 'checkInCircleFilled' : '',
-        'data-test-subj': getTestId('global'),
-      },
-      {
-        id: 'perPolicy',
-        label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.perPolicy', {
-          defaultMessage: 'Per Policy',
-        }),
-        iconType: !isGlobal ? 'checkInCircleFilled' : '',
-        'data-test-subj': getTestId('perPolicy'),
-      },
-    ];
+    const toggleGlobal: EuiButtonGroupOptionProps[] = useMemo(
+      () => [
+        {
+          id: 'globalPolicy',
+          label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.global', {
+            defaultMessage: 'Global',
+          }),
+          iconType: isGlobal ? 'checkInCircleFilled' : '',
+          'data-test-subj': getTestId('global'),
+        },
+        {
+          id: 'perPolicy',
+          label: i18n.translate('xpack.securitySolution.endpoint.trustedAppsByPolicy.perPolicy', {
+            defaultMessage: 'Per Policy',
+          }),
+          iconType: !isGlobal ? 'checkInCircleFilled' : '',
+          'data-test-subj': getTestId('perPolicy'),
+        },
+      ],
+      [getTestId, isGlobal]
+    );
 
     const selectableOptions: EffectedPolicyOption[] = useMemo(() => {
       const isPolicySelected = new Set<string>(selected.map((policy) => policy.id));
@@ -170,7 +173,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         </EuiText>
         <EuiSpacer size="xs" />
         <EuiFlexGroup>
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={true}>
             <EuiText size="s">
               <p>
                 {i18n.translate('xpack.securitySolution.trustedApps.assignmentSectionDescription', {
@@ -180,7 +183,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               </p>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem grow={false}>
             <EuiFormRow fullWidth>
               <EuiButtonGroup
                 legend="Global Policy Toggle"

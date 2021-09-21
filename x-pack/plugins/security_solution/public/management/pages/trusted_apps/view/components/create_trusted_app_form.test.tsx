@@ -179,9 +179,9 @@ describe('When using the Trusted App Form', () => {
 
     it('should show an initial condition entry with labels', () => {
       const defaultCondition = getCondition();
-      const labels = Array.from(defaultCondition.querySelectorAll('.euiFormRow__labelWrapper')).map(
-        (label) => (label.textContent || '').trim()
-      );
+      const labels = Array.from(
+        defaultCondition.querySelectorAll('.euiFormRow__labelWrapper')
+      ).map((label) => (label.textContent || '').trim());
       expect(labels).toEqual(['Field', 'Operator', 'Value', '']);
     });
 
@@ -257,13 +257,11 @@ describe('When using the Trusted App Form', () => {
 
     it('should have `global` switch on if effective scope is global and policy options hidden', () => {
       render();
-      const getGlobalButton = (dataTestSub: string = dataTestSubjForForm): HTMLButtonElement => {
-        return renderResult.getByTestId(
-          `${dataTestSub}-effectedPolicies-global`
-        ) as HTMLButtonElement;
-      };
+      const globalButton = renderResult.getByTestId(
+        `${dataTestSubjForForm}-effectedPolicies-global`
+      ) as HTMLButtonElement;
 
-      expect(getGlobalButton().classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+      expect(globalButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
       expect(renderResult.queryByTestId('policy-123')).toBeNull();
     });
 
@@ -273,14 +271,11 @@ describe('When using the Trusted App Form', () => {
         policies: ['123'],
       };
       render();
-      const getPerPolicyButton = (dataTestSub: string = dataTestSubjForForm): HTMLButtonElement => {
-        return renderResult.getByTestId(
-          `${dataTestSub}-effectedPolicies-perPolicy`
-        ) as HTMLButtonElement;
-      };
-      expect(getPerPolicyButton().classList.contains('euiButtonGroupButton-isSelected')).toEqual(
-        true
-      );
+      const perPolicyButton = renderResult.getByTestId(
+        `${dataTestSubjForForm}-effectedPolicies-perPolicy`
+      ) as HTMLButtonElement;
+
+      expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
       expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual('false');
       expect(renderResult.getByTestId('policy-123').getAttribute('aria-selected')).toEqual('true');
     });

@@ -30,6 +30,7 @@ import {
 } from '../../../../../../fleet/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
+import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
@@ -95,7 +96,7 @@ describe('When on the Trusted Apps Page', () => {
     const currentGetHandler = http.get.getMockImplementation();
 
     http.get.mockImplementation(async (...args) => {
-      const path = args[0] as unknown as string;
+      const path = (args[0] as unknown) as string;
       // @ts-ignore
       const httpOptions = args[1] as HttpFetchOptions;
 
@@ -236,7 +237,7 @@ describe('When on the Trusted Apps Page', () => {
 
             expect(coreStart.http.put).toHaveBeenCalledTimes(1);
 
-            const lastCallToPut = coreStart.http.put.mock.calls[0] as unknown as [
+            const lastCallToPut = (coreStart.http.put.mock.calls[0] as unknown) as [
               string,
               HttpFetchOptions
             ];
@@ -318,11 +319,9 @@ describe('When on the Trusted Apps Page', () => {
           expect(coreStart.http.get).toHaveBeenCalledWith(TRUSTED_APP_GET_URI);
 
           expect(
-            (
-              renderResult.getByTestId(
-                'addTrustedAppFlyout-createForm-nameTextField'
-              ) as HTMLInputElement
-            ).value
+            (renderResult.getByTestId(
+              'addTrustedAppFlyout-createForm-nameTextField'
+            ) as HTMLInputElement).value
           ).toEqual('one app for edit');
         });
 
@@ -424,6 +423,17 @@ describe('When on the Trusted Apps Page', () => {
     it('should display create form', async () => {
       const { queryByTestId } = await renderAndClickAddButton();
       expect(queryByTestId('addTrustedAppFlyout-createForm')).not.toBeNull();
+    });
+
+    it('should have list of policies populated', async () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+      const resetEnv = forceHTMLElementOffsetWidth();
+      const renderResult = await renderAndClickAddButton();
+      act(() => {
+        fireEvent.click(renderResult.getByTestId('perPolicy'));
+      });
+      expect(renderResult.getByTestId('policy-abc123'));
+      resetEnv();
     });
 
     it('should initially have the flyout Add button disabled', async () => {
@@ -671,24 +681,26 @@ describe('When on the Trusted Apps Page', () => {
   });
 
   describe('and there are no trusted apps', () => {
-    const releaseExistsResponse: jest.MockedFunction<() => Promise<GetTrustedListAppsResponse>> =
-      jest.fn(async () => {
-        return {
-          data: [],
-          total: 0,
-          page: 1,
-          per_page: 1,
-        };
-      });
-    const releaseListResponse: jest.MockedFunction<() => Promise<GetTrustedListAppsResponse>> =
-      jest.fn(async () => {
-        return {
-          data: [],
-          total: 0,
-          page: 1,
-          per_page: 20,
-        };
-      });
+    const releaseExistsResponse: jest.MockedFunction<
+      () => Promise<GetTrustedListAppsResponse>
+    > = jest.fn(async () => {
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        per_page: 1,
+      };
+    });
+    const releaseListResponse: jest.MockedFunction<
+      () => Promise<GetTrustedListAppsResponse>
+    > = jest.fn(async () => {
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      };
+    });
 
     beforeEach(() => {
       const priorMockImplementation = coreStart.http.get.getMockImplementation();
