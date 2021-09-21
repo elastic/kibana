@@ -32,12 +32,6 @@ In the *Add data* section, we’ve reduced and simplified the available actions 
 image:images/whats-new_home-page.png[Home page]
 
 [float]
-[[alerting-7-15]]
-=== Alerting
-
-TBD
-
-[float]
 [[visualizations-7-15]]
 === Dashboard and visualizations&mdash;Heatmap color options, flexible legend options, and more
 
@@ -142,30 +136,6 @@ image:images/whats-new_Maps_layer-indicator.png[Indicator for when the layer dat
 image:images/whats-new_discover-no-results.png[No results message in Discover]
 
 [float]
-[[canvas-7-15]]
-=== Canvas
-
-TBD
-
-[float]
-[[saved-objects-7-15]]
-=== Saved objects
-
-TBD
-
-[float]
-[[security-7-15]]
-=== Security
-
-TBD
-
-[float]
-[[machine-learning-7-15]]
-=== Machine Learning
-
-TBD
-
-[float]
 [[stack-management-7-15]]
 === Stack management
 
@@ -207,6 +177,5 @@ When defining scheduled queries, you can now map query results to ECS fields to 
 [[scheduled-query-status-at-a-glance]]
 ==== Scheduled query status at a glance
 Scheduled query groups now show the status of individual queries within a group, enabling you to understand at a glance if there are results to review or issues to address. Surfacing this information can also help you tune the queries you’re running. For example, you can identify queries that run too frequently or errors you need to resolve.
-
 
 // end::notable-highlights[]
