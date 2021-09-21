@@ -92,7 +92,7 @@ describe('when rendering the endpoint list `AdminSearchBar`', () => {
   ])(
     'should update the url and exclude the `admin_query` param when %s was entered',
     async (_, value) => {
-      await render();
+      await render({ admin_query: "(language:kuery,query:'foo')" });
       await submitQuery(value);
 
       expect(getQueryParamsFromStore().admin_query).toBe(undefined);
