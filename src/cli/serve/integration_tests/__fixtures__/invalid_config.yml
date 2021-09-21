@@ -1,3 +1,13 @@
+logging:
+  root:
+    level: fatal
+    appenders: [default]
+  appenders:
+    default:
+      type: console
+      layout:
+        type: json
+
 unknown:
   key: 1
 
