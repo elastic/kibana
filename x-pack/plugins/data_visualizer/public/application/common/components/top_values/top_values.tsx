@@ -41,7 +41,6 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
     <ExpandedRowPanel
       dataTestSubj={'dataVisualizerFieldDataTopValues'}
       className={classNames('dataVisualizerPanelWrapper', compressed ? 'compressed' : undefined)}
-      grow={true}
     >
       <ExpandedRowFieldHeader>
         <FormattedMessage

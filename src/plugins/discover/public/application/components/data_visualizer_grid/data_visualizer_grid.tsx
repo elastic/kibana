@@ -39,7 +39,7 @@ export interface DiscoverDataVisualizerGridProps {
    */
   columns: string[];
   /**
-   * The used index pattern
+   * The used data view
    */
   indexPattern: DataView;
   /**
@@ -57,7 +57,7 @@ export interface DiscoverDataVisualizerGridProps {
   savedSearch?: SavedSearch;
   query?: Query;
   filters?: Filter[];
-  stateContainer: GetStateReturn;
+  stateContainer?: GetStateReturn;
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -76,13 +76,14 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   const showPreviewByDefault = useMemo(
-    () => !stateContainer.appStateContainer.getState().hideAggregatedPreview,
-    [stateContainer.appStateContainer]
+    () =>
+      stateContainer ? !stateContainer.appStateContainer.getState().hideAggregatedPreview : true,
+    [stateContainer]
   );
 
   useEffect(() => {
     embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
-      if (output.showDistributions !== undefined) {
+      if (output.showDistributions !== undefined && stateContainer) {
         stateContainer.setAppState({ hideAggregatedPreview: !output.showDistributions });
       }
     });

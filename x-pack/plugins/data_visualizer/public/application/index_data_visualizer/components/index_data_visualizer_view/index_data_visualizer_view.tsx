@@ -24,11 +24,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
 import {
-  IndexPatternField,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
   Query,
-  IndexPattern,
 } from '../../../../../../../../src/plugins/data/public';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
@@ -69,6 +67,7 @@ import { extractSearchData } from '../../utils/saved_search_utils';
 import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 import { ResultLink } from '../../../common/components/results_links';
 import { extractErrorProperties } from '../../utils/error_utils';
+import { DataViewField, DataView } from '../../../../../../../../src/plugins/data/common';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -123,7 +122,7 @@ export const getDefaultDataVisualizerListState = (
 });
 
 export interface IndexDataVisualizerViewProps {
-  currentIndexPattern: IndexPattern;
+  currentIndexPattern: DataView;
   currentSavedSearch: SavedSearchSavedObject | null;
   additionalLinks?: ResultLink[];
 }
@@ -210,7 +209,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     }
   }, [currentIndexPattern, toasts]);
 
-  const indexPatternFields: IndexPatternField[] = currentIndexPattern.fields;
+  const indexPatternFields: DataViewField[] = currentIndexPattern.fields;
 
   const fieldTypes = useMemo(() => {
     // Obtain the list of non metric field types which appear in the index pattern.
@@ -864,8 +863,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       />
                     </EuiFlexItem>
                   )}
-                  <EuiSpacer size={'m'} />
-
                   <SearchPanel
                     indexPattern={currentIndexPattern}
                     searchString={searchString}

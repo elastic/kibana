@@ -79,6 +79,7 @@ $panelWidthL:     #{'max(40%, 450px)'};
     height: fit-content;
     &.compressed {
       width: $panelWidthS;
+      min-width: fit-content;
     }
   }
 
