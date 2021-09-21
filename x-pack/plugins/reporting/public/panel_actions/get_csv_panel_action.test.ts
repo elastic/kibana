@@ -8,14 +8,11 @@
 import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
 import { CoreStart } from 'src/core/public';
-import type { SearchSource } from 'src/plugins/data/common';
-import type { SavedSearch } from 'src/plugins/discover/public';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import type { ILicense, LicensingPluginSetup } from '../../../licensing/public';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';
-import type { ActionContext } from './get_csv_panel_action';
 import { ReportingCsvPanelAction } from './get_csv_panel_action';
 
 type LicenseResults = 'valid' | 'invalid' | 'unavailable' | 'expired';
@@ -24,9 +21,9 @@ const core = coreMock.createSetup();
 let apiClient: ReportingAPIClient;
 
 describe('GetCsvReportPanelAction', () => {
-  let context: ActionContext;
-  let mockLicense$: (state?: LicenseResults) => Rx.Observable<ILicense>;
-  let mockSearchSource: SearchSource;
+  let context: any;
+  let mockLicense$: any;
+  let mockSearchSource: any;
   let mockStartServicesPayload: [CoreStart, ReportingPublicPluginStartDendencies, unknown];
   let mockStartServices$: Rx.Observable<typeof mockStartServicesPayload>;
 
@@ -62,15 +59,15 @@ describe('GetCsvReportPanelAction', () => {
     ];
     mockStartServices$ = Rx.from(Promise.resolve(mockStartServicesPayload));
 
-    mockSearchSource = ({
+    mockSearchSource = {
       createCopy: () => mockSearchSource,
       removeField: jest.fn(),
       setField: jest.fn(),
       getField: jest.fn(),
       getSerializedFields: jest.fn().mockImplementation(() => ({})),
-    } as unknown) as SearchSource;
+    };
 
-    context = ({
+    context = {
       embeddable: {
         type: 'search',
         getSavedSearch: () => {
@@ -86,7 +83,7 @@ describe('GetCsvReportPanelAction', () => {
           },
         }),
       },
-    } as unknown) as ActionContext;
+    } as any;
   });
 
   it('translates empty embeddable context into job params', async () => {
@@ -113,18 +110,18 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   it('translates embeddable context into job params', async () => {
-    mockSearchSource = ({
+    mockSearchSource = {
       createCopy: () => mockSearchSource,
       removeField: jest.fn(),
       setField: jest.fn(),
       getField: jest.fn(),
       getSerializedFields: jest.fn().mockImplementation(() => ({ testData: 'testDataValue' })),
-    } as unknown) as SearchSource;
+    };
     context.embeddable.getSavedSearch = () => {
-      return ({
+      return {
         searchSource: mockSearchSource,
         columns: ['column_a', 'column_b'],
-      } as unknown) as SavedSearch;
+      };
     };
 
     const panel = new ReportingCsvPanelAction({
@@ -210,6 +207,7 @@ describe('GetCsvReportPanelAction', () => {
     });
 
     await mockStartServices$.pipe(first()).toPromise();
+
     await licenseMock$.pipe(first()).toPromise();
 
     expect(await plugin.isCompatible(context)).toEqual(false);

@@ -31,7 +31,7 @@ function isSavedSearchEmbeddable(
   return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
 }
 
-export interface ActionContext {
+interface ActionContext {
   embeddable: ISearchEmbeddable;
 }
 
