@@ -120,7 +120,7 @@ export class ReportingPublicPlugin
     core: CoreSetup<ReportingPublicPluginStartDendencies>,
     setupDeps: ReportingPublicPluginSetupDendencies
   ) {
-    const { getStartServices, http, uiSettings } = core;
+    const { getStartServices, uiSettings } = core;
     const {
       home,
       management,
@@ -132,7 +132,7 @@ export class ReportingPublicPlugin
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
 
-    const apiClient = new ReportingAPIClient(http);
+    const apiClient = new ReportingAPIClient(core.http);
 
     home.featureCatalogue.register({
       id: 'reporting',
@@ -180,7 +180,7 @@ export class ReportingPublicPlugin
 
     uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      new ReportingCsvPanelAction({ core, apiClient, startServices$, license$, usesUiCapabilities })
+      new ReportingCsvPanelAction({ core, startServices$, license$, usesUiCapabilities })
     );
 
     const reportingStart = this.getContract(core);
