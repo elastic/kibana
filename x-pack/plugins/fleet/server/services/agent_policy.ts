@@ -445,6 +445,38 @@ class AgentPolicyService {
     return res;
   }
 
+  public async bumpAllAgentPoliciesForOutput(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    outputId: string,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      fields: ['revision', 'data_output_id', 'monitoring_output_id'],
+      searchFields: ['data_output_id', 'monitoring_output_id'],
+      search: escapeSearchQueryPhrase(outputId),
+    });
+    const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
+      policy.attributes = {
+        ...policy.attributes,
+        revision: policy.attributes.revision + 1,
+        updated_at: new Date().toISOString(),
+        updated_by: options?.user ? options.user.username : 'system',
+      };
+      return policy;
+    });
+    const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+
+    await Promise.all(
+      currentPolicies.saved_objects.map((policy) =>
+        this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', policy.id)
+      )
+    );
+
+    return res;
+  }
+
   public async bumpAllAgentPolicies(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,

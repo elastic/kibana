@@ -63,6 +63,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
 
 export async function ensurePreconfiguredOutputs(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
   if (outputs.length === 0) {
@@ -94,9 +95,15 @@ export async function ensurePreconfiguredOutputs(
       }
 
       if (!existingOutput) {
-        return outputService.create(soClient, data, { id, overwrite: true });
+        await outputService.create(soClient, data, { id, overwrite: true });
       } else if (isPreconfiguredOutputDifferentFromCurrent(existingOutput, data)) {
-        return outputService.update(soClient, id, data);
+        await outputService.update(soClient, id, data);
+        // Bump revision of all policies using that output
+        if (outputData.is_default) {
+          await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+        } else {
+          await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
+        }
       }
     })
   );

@@ -59,7 +59,7 @@ async function createSetupSideEffects(
   let packages = packagesOrUndefined ?? [];
 
   await Promise.all([
-    ensurePreconfiguredOutputs(soClient, outputsOrUndefined ?? []),
+    ensurePreconfiguredOutputs(soClient, esClient, outputsOrUndefined ?? []),
     settingsService.settingsSetup(soClient),
   ]);
 

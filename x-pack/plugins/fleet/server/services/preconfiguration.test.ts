@@ -162,12 +162,17 @@ jest.mock('./app_context', () => ({
 }));
 
 const spyAgentPolicyServiceUpdate = jest.spyOn(agentPolicy.agentPolicyService, 'update');
+const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
+  agentPolicy.agentPolicyService,
+  'bumpAllAgentPoliciesForOutput'
+);
 
 describe('policy preconfiguration', () => {
   beforeEach(() => {
     mockInstalledPackages.clear();
     mockConfiguredPolicies.clear();
     spyAgentPolicyServiceUpdate.mockClear();
+    spyAgentPolicyServicBumpAllAgentPoliciesForOutput.mockClear();
   });
 
   it('should perform a no-op when passed no policies or packages', async () => {
@@ -509,7 +514,8 @@ describe('output preconfiguration', () => {
 
   it('should create preconfigured output that does not exists', async () => {
     const soClient = savedObjectsClientMock.create();
-    await ensurePreconfiguredOutputs(soClient, [
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await ensurePreconfiguredOutputs(soClient, esClient, [
       {
         id: 'non-existing-output-1',
         name: 'Output 1',
@@ -521,11 +527,13 @@ describe('output preconfiguration', () => {
 
     expect(mockedOutputService.create).toBeCalled();
     expect(mockedOutputService.update).not.toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
   });
 
   it('should set default hosts if hosts is not set output that does not exists', async () => {
     const soClient = savedObjectsClientMock.create();
-    await ensurePreconfiguredOutputs(soClient, [
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await ensurePreconfiguredOutputs(soClient, esClient, [
       {
         id: 'non-existing-output-1',
         name: 'Output 1',
@@ -540,7 +548,9 @@ describe('output preconfiguration', () => {
 
   it('should update output if preconfigured output exists and changed', async () => {
     const soClient = savedObjectsClientMock.create();
-    await ensurePreconfiguredOutputs(soClient, [
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
+    await ensurePreconfiguredOutputs(soClient, esClient, [
       {
         id: 'existing-output-1',
         is_default: false,
@@ -552,6 +562,7 @@ describe('output preconfiguration', () => {
 
     expect(mockedOutputService.create).not.toBeCalled();
     expect(mockedOutputService.update).toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
   });
 
   const SCENARIOS: Array<{ name: string; data: PreconfiguredOutput }> = [
@@ -580,7 +591,8 @@ describe('output preconfiguration', () => {
     const { data, name } = scenario;
     it(`should do nothing if preconfigured output exists and did not changed (${name})`, async () => {
       const soClient = savedObjectsClientMock.create();
-      await ensurePreconfiguredOutputs(soClient, [data]);
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await ensurePreconfiguredOutputs(soClient, esClient, [data]);
 
       expect(mockedOutputService.create).not.toBeCalled();
       expect(mockedOutputService.update).not.toBeCalled();
