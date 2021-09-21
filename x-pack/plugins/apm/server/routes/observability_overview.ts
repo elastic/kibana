@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { jsonRt } from '@kbn/io-ts-utils';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceCount } from '../lib/observability_overview/get_service_count';
 import { getTransactionsPerMinute } from '../lib/observability_overview/get_transactions_per_minute';
@@ -28,12 +29,15 @@ const observabilityOverviewHasDataRoute = createApmServerRoute({
 const observabilityOverviewRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/observability_overview',
   params: t.type({
-    query: t.intersection([rangeRt, t.type({ bucketSize: t.string })]),
+    query: t.intersection([
+      rangeRt,
+      t.type({ bucketSize: jsonRt.pipe(t.number), intervalString: t.string }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { bucketSize } = resources.params.query;
+    const { bucketSize, intervalString } = resources.params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
@@ -52,6 +56,7 @@ const observabilityOverviewRoute = createApmServerRoute({
         getTransactionsPerMinute({
           setup,
           bucketSize,
+          intervalString,
           searchAggregatedTransactions,
         }),
       ]);

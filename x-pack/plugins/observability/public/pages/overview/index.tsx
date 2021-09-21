@@ -31,6 +31,7 @@ interface Props {
   routeParams: RouteParams<'/overview'>;
 }
 
+export type BucketSize = ReturnType<typeof calculateBucketSize>;
 function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
   if (start && end) {
     return getBucketSize({ start, end, minInterval: '60s' });
@@ -90,7 +91,7 @@ export function OverviewPage({ routeParams }: Props) {
       <EuiFlexGroup>
         <EuiFlexItem grow={6}>
           {/* Data sections */}
-          {hasAnyData && <DataSections bucketSize={bucketSize?.intervalString!} />}
+          {hasAnyData && <DataSections bucketSize={bucketSize} />}
           <EmptySections />
           <EuiSpacer size="l" />
           <EuiFlexGroup>

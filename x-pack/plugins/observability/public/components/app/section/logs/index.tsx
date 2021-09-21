@@ -19,6 +19,7 @@ import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { BucketSize } from '../../../../pages/overview';
 import { LogsFetchDataResponse } from '../../../../typings';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { ChartContainer } from '../../chart_container';
@@ -26,7 +27,7 @@ import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
 
 interface Props {
-  bucketSize?: string;
+  bucketSize: BucketSize;
 }
 
 function getColorPerItem(series?: LogsFetchDataResponse['series']) {
@@ -56,7 +57,7 @@ export function LogsSection({ bucketSize }: Props) {
         return getDataHandler('infra_logs')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
-          bucketSize,
+          ...bucketSize,
         });
       }
     },

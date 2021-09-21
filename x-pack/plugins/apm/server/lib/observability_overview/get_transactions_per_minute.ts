@@ -16,15 +16,20 @@ import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { calculateThroughputWithRange } from '../helpers/calculate_throughput';
+import {
+  calculateThroughputWithInterval,
+  calculateThroughputWithRange,
+} from '../helpers/calculate_throughput';
 
 export async function getTransactionsPerMinute({
   setup,
   bucketSize,
+  intervalString,
   searchAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange;
-  bucketSize: string;
+  bucketSize: number;
+  intervalString: string;
   searchAggregatedTransactions: boolean;
 }) {
   const { apmEventClient, start, end } = setup;
@@ -60,7 +65,7 @@ export async function getTransactionsPerMinute({
               timeseries: {
                 date_histogram: {
                   field: '@timestamp',
-                  fixed_interval: bucketSize,
+                  fixed_interval: intervalString,
                   min_doc_count: 0,
                 },
               },
@@ -91,9 +96,8 @@ export async function getTransactionsPerMinute({
     timeseries:
       topTransactionTypeBucket?.timeseries.buckets.map((bucket) => ({
         x: bucket.key,
-        y: calculateThroughputWithRange({
-          start,
-          end,
+        y: calculateThroughputWithInterval({
+          durationAsSeconds: bucketSize,
           value: bucket.doc_count,
         }),
       })) || [],

@@ -26,7 +26,8 @@ export interface Series {
 export interface FetchDataParams {
   absoluteTime: { start: number; end: number };
   relativeTime: { start: string; end: string };
-  bucketSize: string;
+  bucketSize: number;
+  intervalString: string;
   serviceName?: string;
 }
 
