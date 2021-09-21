@@ -16,11 +16,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FlexGridColumns } from '@elastic/eui/src/components/flex/flex_grid';
+import { ChromeRecentlyAccessedHistoryItem } from 'kibana/public';
 import { DiscoverServices } from '../../../build_services';
 import { SectionTitle } from './section_title';
 import { SavedSearch } from '../../../saved_searches';
 import { DiscoverView } from './discover_view';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
+import { LastRecentlyAccessedView } from './last_recently_view';
 
 export interface DiscoverMainProps {
   /**
@@ -37,8 +39,9 @@ const DISPLAY_NUMBER_OF_SAVED_SEARCHES = 3;
 
 export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
   const button = <></>;
-
+  const { core } = services;
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
+  const [recentlyAccessed, setRecentlyAccessed] = useState<SavedSearch[]>([]);
 
   useEffect(() => {
     async function loadSavedSearches() {
@@ -61,7 +64,13 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
       const indexPattern = searchSource.getField('index');
       savedSearchesDisplay.push(
         <EuiFlexItem>
-          <DiscoverView id={id} title={title} isTimeBased={!!indexPattern?.isTimeBased()} application={services.core.application} />
+          <DiscoverView
+            id={id}
+            title={title}
+            isTimeBased={!!indexPattern?.isTimeBased()}
+            application={core.application}
+            savedObjectsClient={core.savedObjects.client}
+          />
         </EuiFlexItem>
       );
     });
@@ -71,6 +80,42 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
     return (
       <EuiFlexGrid columns={savedSearchesDisplay.length as FlexGridColumns}>
         {savedSearchesDisplay}
+      </EuiFlexGrid>
+    );
+  };
+
+  useEffect(() => {
+    const lastRecentlyAccessedItems = core.chrome.recentlyAccessed.get();
+    const recentlyAccessedSavedSearches = [] as SavedSearch[];
+    lastRecentlyAccessedItems.forEach(async (item) => {
+      try {
+        const savedSearch = await services.getSavedSearchById(item.id);
+        recentlyAccessedSavedSearches.push(savedSearch);
+      } catch (e) {
+        // nothing to do
+      }
+    });
+    setRecentlyAccessed(recentlyAccessedSavedSearches);
+  }, [core, services]);
+
+  const lastRecentlyAccessedSection = () => {
+    const recentlyAccessedDisplay: JSX.Element[] = [];
+    recentlyAccessed.forEach((savedSearch) => {
+      const { title, searchSource, id } = savedSearch;
+      const indexPattern = searchSource.getField('index');
+      recentlyAccessedDisplay.push(
+        <EuiFlexItem>
+          <LastRecentlyAccessedView
+            id={id}
+            title={title}
+            indexPattern={indexPattern?.title || ''}
+          />
+        </EuiFlexItem>
+      );
+    });
+    return (
+      <EuiFlexGrid columns={recentlyAccessedDisplay.length as FlexGridColumns}>
+        {recentlyAccessedDisplay}
       </EuiFlexGrid>
     );
   };
@@ -89,17 +134,7 @@ export function DiscoverHomeRoute({ services }: DiscoverMainProps) {
       <EuiFlexGrid columns={1}>
         <EuiFlexItem>
           <SectionTitle text="Last Recently" />
-          <EuiFlexGrid columns={3}>
-            <EuiFlexItem>
-              <EuiPanel style={{ height: 200 }} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel style={{ height: 200 }} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel style={{ height: 200 }} />
-            </EuiFlexItem>
-          </EuiFlexGrid>
+          {lastRecentlyAccessedSection()}
         </EuiFlexItem>
         <EuiFlexItem>
           <SectionTitle text="Discover View" />
