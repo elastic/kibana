@@ -129,11 +129,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     timelineId,
   });
 
-  const {
-    closeAddEventFilterModal,
-    isAddEventFilterModalOpen,
-    onAddEventFilterClick,
-  } = useEventFilterModal();
+  const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
+    useEventFilterModal();
 
   const { actionItems: statusActionItems } = useAlertsActions({
     alertStatus,

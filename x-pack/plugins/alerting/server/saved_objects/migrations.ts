@@ -306,25 +306,17 @@ function restructureConnectorsThatSupportIncident(
           },
         ] as RawAlertAction[];
       } else if (action.actionTypeId === '.jira') {
-        const {
-          title,
-          comments,
-          description,
-          issueType,
-          priority,
-          labels,
-          parent,
-          summary,
-        } = action.params.subActionParams as {
-          title: string;
-          description: string;
-          issueType: string;
-          priority?: string;
-          labels?: string[];
-          parent?: string;
-          comments?: unknown[];
-          summary?: string;
-        };
+        const { title, comments, description, issueType, priority, labels, parent, summary } =
+          action.params.subActionParams as {
+            title: string;
+            description: string;
+            issueType: string;
+            priority?: string;
+            labels?: string[];
+            parent?: string;
+            comments?: unknown[];
+            summary?: string;
+          };
         return [
           ...acc,
           {

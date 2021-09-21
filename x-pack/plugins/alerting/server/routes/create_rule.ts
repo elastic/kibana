@@ -127,15 +127,14 @@ export const createRuleRoute = ({ router, licenseState, logger, usageCounter }: 
           });
 
           try {
-            const createdRule: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(
-              {
+            const createdRule: SanitizedAlert<AlertTypeParams> =
+              await rulesClient.create<AlertTypeParams>({
                 data: rewriteBodyReq({
                   ...rule,
                   notify_when: rule.notify_when as AlertNotifyWhenType,
                 }),
                 options: { id: params?.id },
-              }
-            );
+              });
             return res.ok({
               body: rewriteBodyRes(createdRule),
               ...(shouldWarnId

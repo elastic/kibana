@@ -22,7 +22,7 @@ export function registerThemeSwitcherAddon() {
       ) as HTMLLinkElement | null;
 
       if (stylesheet) {
-        stylesheet.href = `kbn-ui-shared-deps.${globals.euiTheme}.css`;
+        stylesheet.href = `kbn-ui-shared-deps-npm.${globals.euiTheme}.css`;
       }
     });
 
