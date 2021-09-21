@@ -7,25 +7,24 @@
 
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
-import { ILicense } from '../../../../../../../licensing/common/types';
-import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../common/license/policy_config';
-import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../../types';
+import { ILicense } from '../../../../../../../../licensing/common/types';
+import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
+import { PolicyDetailsState } from '../../../types';
 import {
   Immutable,
   NewPolicyData,
   PolicyConfig,
   PolicyData,
   UIPolicyConfig,
-} from '../../../../../../common/endpoint/types';
-import { policyFactory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
+} from '../../../../../../../common/endpoint/types';
+import { policyFactory as policyConfigFactory } from '../../../../../../../common/endpoint/models/policy_config';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
-} from '../../../../common/constants';
-import { ManagementRoutePolicyDetailsParams } from '../../../../types';
-import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
-import { isLoadedResourceState, isLoadingResourceState } from '../../../../state';
-import { TrustedAppsListData } from '../../../trusted_apps/state';
+} from '../../../../../common/constants';
+import { ManagementRoutePolicyDetailsParams } from '../../../../../types';
+import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
+import { isOnPolicyTrustedAppsPage } from './trusted_apps';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
@@ -82,44 +81,11 @@ export const needsToRefresh = (state: Immutable<PolicyDetailsState>): boolean =>
   return !state.policyItem && !state.apiError;
 };
 
-/**
- * Returns current artifacts location
- */
-export const getCurrentArtifactsLocation = (
-  state: Immutable<PolicyDetailsState>
-): Immutable<PolicyDetailsArtifactsPageLocation> => state.artifacts.location;
-
-/**
- * Returns current available artifacts list
- */
-export const getAvailableArtifactsList = (
-  state: Immutable<PolicyDetailsState>
-): Immutable<TrustedAppsListData | undefined> =>
-  isLoadedResourceState(state.artifacts.availableList)
-    ? state.artifacts.availableList.data
-    : undefined;
-
-/**
- * Returns if available list is loading
- */
-export const getAvailableArtifactsListIsLoading = (state: Immutable<PolicyDetailsState>): boolean =>
-  isLoadingResourceState(state.artifacts.availableList);
-
 /** Returns a boolean of whether the user is on the policy form page or not */
 export const isOnPolicyFormPage = (state: Immutable<PolicyDetailsState>) => {
   return (
     matchPath(state.location?.pathname ?? '', {
       path: MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
-      exact: true,
-    }) !== null
-  );
-};
-
-/** Returns a boolean of whether the user is on the policy details page or not */
-export const isOnPolicyTrustedAppsPage = (state: Immutable<PolicyDetailsState>) => {
-  return (
-    matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
       exact: true,
     }) !== null
   );

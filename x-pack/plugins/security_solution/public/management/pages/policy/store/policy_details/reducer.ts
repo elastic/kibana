@@ -63,6 +63,7 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
       filter: '',
     },
     availableList: createUninitialisedResourceState(),
+    trustedAppsToUpdate: createUninitialisedResourceState(),
   },
 });
 
@@ -118,6 +119,16 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
       artifacts: {
         ...state.artifacts,
         availableList: action.payload,
+      },
+    };
+  }
+
+  if (action.type === 'policyArtifactsUpdateTrustedAppsChanged') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        trustedAppsToUpdate: action.payload,
       },
     };
   }

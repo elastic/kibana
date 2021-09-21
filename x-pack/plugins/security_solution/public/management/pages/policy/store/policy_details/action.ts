@@ -7,7 +7,11 @@
 
 import { ILicense } from '../../../../../../../licensing/common/types';
 import { GetAgentStatusResponse } from '../../../../../../../fleet/common/types/rest_spec';
-import { PolicyData, UIPolicyConfig } from '../../../../../../common/endpoint/types';
+import {
+  PolicyData,
+  PostTrustedAppCreateResponse,
+  UIPolicyConfig,
+} from '../../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../../common/types';
 import { PolicyDetailsState } from '../../types';
 import { AsyncResourceState } from '../../../../state';
@@ -76,6 +80,18 @@ export interface PolicyArtifactsAvailableListPageDataChanged {
   payload: AsyncResourceState<TrustedAppsListData>;
 }
 
+export interface PolicyArtifactsUpdateTrustedApps {
+  type: 'policyArtifactsUpdateTrustedApps';
+  payload: {
+    trustedAppIds: string[];
+  };
+}
+
+export interface PolicyArtifactsUpdateTrustedAppsChanged {
+  type: 'policyArtifactsUpdateTrustedAppsChanged';
+  payload: AsyncResourceState<PostTrustedAppCreateResponse[]>;
+}
+
 export type PolicyDetailsAction =
   | ServerReturnedPolicyDetailsData
   | UserClickedPolicyDetailsSaveButton
@@ -86,4 +102,6 @@ export type PolicyDetailsAction =
   | UserChangedPolicyConfig
   | UserChangedAntivirusRegistration
   | LicenseChanged
-  | PolicyArtifactsAvailableListPageDataChanged;
+  | PolicyArtifactsAvailableListPageDataChanged
+  | PolicyArtifactsUpdateTrustedApps
+  | PolicyArtifactsUpdateTrustedAppsChanged;

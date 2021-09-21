@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -23,25 +24,36 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiCallOut,
 } from '@elastic/eui';
 import {
   policyDetails,
   getCurrentArtifactsLocation,
   getAvailableArtifactsList,
   getAvailableArtifactsListIsLoading,
+  getUpdateArtifactsIsLoading,
+  getUpdateArtifactsLoaded,
 } from '../../../store/policy_details/selectors';
-import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
+import {
+  usePolicyDetailsNavigateCallback,
+  usePolicyDetailsSelector,
+  usePolicyTrustedAppsNotification,
+} from '../../policy_hooks';
 import { PolicyArtifactsList } from '../../artifacts/list';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
-  const [_, setSelectedArtifactIds] = useState<string[]>([]);
+  usePolicyTrustedAppsNotification();
+  const dispatch = useDispatch();
+  const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const availableArtifactsList = usePolicyDetailsSelector(getAvailableArtifactsList);
   const isAvailableArtifactsListLoading = usePolicyDetailsSelector(
     getAvailableArtifactsListIsLoading
   );
+  const isUpdateArtifactsLoading = usePolicyDetailsSelector(getUpdateArtifactsIsLoading);
+  const isUpdateArtifactsLoaded = usePolicyDetailsSelector(getUpdateArtifactsLoaded);
 
   const policyName = policyItem?.name ?? '';
   const showListFlyout = location.show === 'list';
@@ -53,6 +65,13 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
   const handleListFlyoutOpen = usePolicyDetailsNavigateCallback(() => ({
     show: 'list',
   }));
+
+  useEffect(() => {
+    if (isUpdateArtifactsLoaded) {
+      handleListFlyoutClose();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isUpdateArtifactsLoaded]);
 
   const assignTrustedAppButton = useMemo(
     () => (
@@ -68,10 +87,43 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
     [handleListFlyoutOpen]
   );
 
-  const handleOnConfirmAction = useCallback(() => {}, []);
+  const handleOnConfirmAction = useCallback(() => {
+    dispatch({
+      type: 'policyArtifactsUpdateTrustedApps',
+      payload: { trustedAppIds: selectedArtifactIds },
+    });
+  }, [dispatch, selectedArtifactIds]);
   const handleOnSearch = usePolicyDetailsNavigateCallback((filter) => ({
     filter,
   }));
+
+  const searchWarningMessage = useMemo(
+    () => (
+      <>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          color="warning"
+          size="m"
+          heading="h4"
+          title={i18n.translate(
+            'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.searchWarning.title',
+            {
+              defaultMessage: 'Limited search results',
+            }
+          )}
+        >
+          {i18n.translate(
+            'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.searchWarning.text',
+            {
+              defaultMessage:
+                'Only the first 100 trusted applications are displayed. Please use the search bar to refine the results.',
+            }
+          )}
+        </EuiCallOut>
+      </>
+    ),
+    []
+  );
 
   const addArtifactsFlyout = useMemo(
     () => (
@@ -103,6 +155,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
               }
             )}
           />
+          {(availableArtifactsList?.totalItemsCount || 0) > 100 ? searchWarningMessage : null}
           <EuiSpacer size="m" />
           <PolicyArtifactsList
             artifacts={availableArtifactsList}
@@ -129,12 +182,16 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
                 data-test-subj="confirmPolicyTrustedAppsFlyout"
                 fill
                 onClick={handleOnConfirmAction}
-                isLoading={false}
+                isLoading={isUpdateArtifactsLoading}
               >
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.confirm"
                   defaultMessage="Assing to {policyName}"
-                  values={{ policyName }}
+                  values={{
+                    policyName: `${policyName.substring(0, 20)}${
+                      policyName.length > 30 ? '...' : ''
+                    }`,
+                  }}
                 />
               </EuiButton>
             </EuiFlexItem>
@@ -150,6 +207,8 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
       availableArtifactsList,
       isAvailableArtifactsListLoading,
       handleOnConfirmAction,
+      isUpdateArtifactsLoading,
+      searchWarningMessage,
     ]
   );
 

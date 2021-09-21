@@ -12,6 +12,7 @@ import {
   ProtectionFields,
   PolicyData,
   UIPolicyConfig,
+  PostTrustedAppCreateResponse,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
@@ -84,6 +85,8 @@ export interface PolicyArtifactsState {
   location: PolicyDetailsArtifactsPageLocation;
   /** A list of artifacts can be linked to the policy  */
   availableList: AsyncResourceState<TrustedAppsListData>;
+  /** A list of trusted apps going to be updated  */
+  trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
 }
 
 export enum OS {
