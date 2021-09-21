@@ -17,7 +17,7 @@ export class EsError extends KbnError {
   readonly attributes: IEsError['attributes'];
 
   constructor(protected readonly err: IEsError) {
-    super(`EsError: ${getRootCause(err)?.reason || err.attributes?.reason || 'unknown'}`);
+    super(`EsError: ${getRootCause(err)?.reason || 'unknown'}`);
     this.attributes = err.attributes;
   }
 
