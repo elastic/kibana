@@ -24,11 +24,9 @@ import type { PopoverProps } from './types';
 import { getCoreStart, getUISettings } from '../../../../services';
 import { UI_SETTINGS } from '../../../../../common/constants';
 
-const allowStringIndicesMessage = (
-  <FormattedMessage
-    id="visTypeTimeseries.indexPatternSelect.switchModePopover.allowStringIndices"
-    defaultMessage="Allow string indices in TSVB"
-  />
+const allowStringIndicesMessage = i18n.translate(
+  'visTypeTimeseries.indexPatternSelect.switchModePopover.allowStringIndices',
+  { defaultMessage: 'Allow string indices in TSVB' }
 );
 
 export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverProps) => {
@@ -53,6 +51,25 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
 
   const stringIndicesAllowed = getUISettings().get(UI_SETTINGS.ALLOW_STRING_INDICES);
   const isSwitchDisabled = useKibanaIndices && !stringIndicesAllowed;
+
+  let allowStringIndicesLabel;
+  if (!stringIndicesAllowed) {
+    allowStringIndicesLabel = (
+      <FormattedMessage
+        id="visTypeTimeseries.indexPatternSelect.switchModePopover.enableAllowStringIndices"
+        defaultMessage="To search by Elasticsearch indices enable {allowStringIndices} setting."
+        values={{
+          allowStringIndices: canEditAdvancedSettings ? (
+            <EuiLink color="accent" onClick={handleAllowStringIndicesLinkClick}>
+              {allowStringIndicesMessage}
+            </EuiLink>
+          ) : (
+            <strong>{allowStringIndicesMessage}</strong>
+          ),
+        }}
+      />
+    );
+  }
 
   return (
     <EuiPopover
@@ -87,15 +104,9 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
           <FormattedMessage
             id="visTypeTimeseries.indexPatternSelect.switchModePopover.text"
             defaultMessage="An index pattern identifies one or more Elasticsearch indices that you want to explore.
-            Kibana index patterns are used by default. To search by Elasticsearch indices enable {allowStringIndices} setting."
+            Kibana index patterns are used by default. {allowStringIndicesLabel}"
             values={{
-              allowStringIndices: canEditAdvancedSettings ? (
-                <EuiLink color="accent" onClick={handleAllowStringIndicesLinkClick}>
-                  {allowStringIndicesMessage}
-                </EuiLink>
-              ) : (
-                <strong>{allowStringIndicesMessage}</strong>
-              ),
+              allowStringIndicesLabel,
             }}
           />
         </EuiText>
