@@ -249,7 +249,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               });
             });
 
-            it('Page size selector works', async () => {});
+            it('Page size selector works', async () => {
+              await retry.try(async () => {
+                await (await observability.alerts.getPageSizeSelector()).click();
+                await (await observability.alerts.getTenRowsPageSelector()).click();
+                const tableRows = await observability.alerts.getTableCellsInRows();
+                expect(tableRows.length).to.be(10);
+              });
+            });
           });
 
           describe('Pagination controls', () => {

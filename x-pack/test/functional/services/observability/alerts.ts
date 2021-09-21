@@ -22,6 +22,9 @@ const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const ALERTS_ROWS_PER_PAGE_SELECTOR = 'tablePaginationPopoverButton';
 const ALERTS_PAGINATION_BUTTON_PREVIOUS = 'pagination-button-previous';
 const ALERTS_PAGINATION_BUTTON_NEXT = 'pagination-button-next';
+const ALERTS_PAGINATION_TEN_ROWS = 'tablePagination-10-rows';
+const ALERTS_PAGINATION_TWENTY_FIVE_ROWS = 'tablePagination-25-rows';
+const ALERTS_PAGINATION_FIFTY_ROWS = 'tablePagination-50-rows';
 const ALERTS_PAGINATION_BUTTON_ONE = 'pagination-button-0';
 const ALERTS_PAGINATION_BUTTON_TWO = 'pagination-button-1';
 
@@ -196,6 +199,18 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     return await testSubjects.missingOrFail(ALERTS_ROWS_PER_PAGE_SELECTOR);
   };
 
+  const getTenRowsPageSelector = async () => {
+    return await testSubjects.find(ALERTS_PAGINATION_TEN_ROWS);
+  };
+
+  const getTwentyFiveRowsPageSelector = async () => {
+    return await testSubjects.find(ALERTS_PAGINATION_TWENTY_FIVE_ROWS);
+  };
+
+  const getFiftyRowsPageSelector = async () => {
+    return await testSubjects.find(ALERTS_PAGINATION_FIFTY_ROWS);
+  };
+
   const getPrevPaginationButton = async () => {
     return await testSubjects.find(ALERTS_PAGINATION_BUTTON_PREVIOUS);
   };
@@ -243,6 +258,9 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     getPageSizeSelector,
     getPageSizeSelectorOrFail,
     missingPageSizeSelectorOrFail,
+    getTenRowsPageSelector,
+    getTwentyFiveRowsPageSelector,
+    getFiftyRowsPageSelector,
     getPrevPaginationButton,
     getPrevPaginationButtonOrFail,
     missingPrevPaginationButtonOrFail,
