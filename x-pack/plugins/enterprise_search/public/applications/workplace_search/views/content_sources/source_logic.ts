@@ -19,7 +19,7 @@ import {
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { AppLogic } from '../../app_logic';
-import { PERSONAL_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
+import { PRIVATE_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
 import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';
 
 export interface SourceActions {
@@ -169,7 +169,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         }
       } catch (e) {
         if (e?.response?.status === 404) {
-          const redirect = isOrganization ? SOURCES_PATH : PERSONAL_SOURCES_PATH;
+          const redirect = isOrganization ? SOURCES_PATH : PRIVATE_SOURCES_PATH;
           KibanaLogic.values.navigateToUrl(redirect);
           setErrorMessage(
             i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.notFoundErrorMessage', {

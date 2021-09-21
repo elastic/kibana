@@ -198,7 +198,8 @@
 /packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
-/packages/kbn-ui-shared-deps/ @elastic/kibana-operations
+/packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
+/packages/kbn-ui-shared-deps-src/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations

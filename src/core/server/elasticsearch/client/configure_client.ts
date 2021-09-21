@@ -102,9 +102,12 @@ function getResponseMessage(event: RequestEvent): string {
  * Returns stringified debug information from an Elasticsearch request event
  * useful for logging in case of an unexpected failure.
  */
-export function getRequestDebugMeta(
-  event: RequestEvent
-): { url: string; body: string; statusCode: number | null; method: string } {
+export function getRequestDebugMeta(event: RequestEvent): {
+  url: string;
+  body: string;
+  statusCode: number | null;
+  method: string;
+} {
   const params = event.meta.request.params;
   // definition is wrong, `params.querystring` can be either a string or an object
   const querystring = convertQueryString(params.querystring);

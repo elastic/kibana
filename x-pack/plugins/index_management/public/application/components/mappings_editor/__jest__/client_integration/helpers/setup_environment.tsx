@@ -78,12 +78,13 @@ const defaultProps = {
   docLinks: docLinksServiceMock.createStartContract(),
 };
 
-export const WithAppDependencies = (Comp: any) => (props: any) => (
-  <KibanaReactContextProvider>
-    <MappingsEditorProvider>
-      <GlobalFlyoutProvider>
-        <Comp {...defaultProps} {...props} />
-      </GlobalFlyoutProvider>
-    </MappingsEditorProvider>
-  </KibanaReactContextProvider>
-);
+export const WithAppDependencies = (Comp: any) => (props: any) =>
+  (
+    <KibanaReactContextProvider>
+      <MappingsEditorProvider>
+        <GlobalFlyoutProvider>
+          <Comp {...defaultProps} {...props} />
+        </GlobalFlyoutProvider>
+      </MappingsEditorProvider>
+    </KibanaReactContextProvider>
+  );
