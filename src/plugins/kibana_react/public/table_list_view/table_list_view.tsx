@@ -26,17 +26,13 @@ import React from 'react';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
 
-interface Item {
-  id?: string;
-}
-
-export interface TableListViewProps {
+export interface TableListViewProps<V> {
   createItem?(): void;
-  deleteItems?(items: object[]): Promise<void>;
-  editItem?(item: object): void;
+  deleteItems?(items: V[]): Promise<void>;
+  editItem?(item: V): void;
   entityName: string;
   entityNamePlural: string;
-  findItems(query: string): Promise<{ total: number; hits: object[] }>;
+  findItems(query: string): Promise<{ total: number; hits: V[] }>;
   listingLimit: number;
   initialFilter: string;
   initialPageSize: number;
@@ -44,7 +40,7 @@ export interface TableListViewProps {
    * Should be an EuiEmptyPrompt (but TS doesn't support this typing)
    */
   emptyPrompt?: JSX.Element;
-  tableColumns: Array<EuiBasicTableColumn<any>>;
+  tableColumns: Array<EuiBasicTableColumn<V>>;
   tableListTitle: string;
   toastNotifications: ToastsStart;
   /**
@@ -63,8 +59,8 @@ export interface TableListViewProps {
   searchFilters?: SearchFilterConfig[];
 }
 
-export interface TableListViewState {
-  items: object[];
+export interface TableListViewState<V> {
+  items: V[];
   hasInitialFetchReturned: boolean;
   isFetchingItems: boolean;
   isDeletingItems: boolean;
@@ -81,11 +77,14 @@ export interface TableListViewState {
 // and not supporting server-side paging.
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
-class TableListView extends React.Component<TableListViewProps, TableListViewState> {
+class TableListView<V extends {}> extends React.Component<
+  TableListViewProps<V>,
+  TableListViewState<V>
+> {
   private pagination = {};
   private _isMounted = false;
 
-  constructor(props: TableListViewProps) {
+  constructor(props: TableListViewProps<V>) {
     super(props);
 
     this.pagination = {
@@ -134,7 +133,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         this.setState({
           hasInitialFetchReturned: true,
           isFetchingItems: false,
-          items: !filter ? sortBy(response.hits, 'title') : response.hits,
+          items: !filter ? sortBy<V>(response.hits, 'title') : response.hits,
           totalItems: response.total,
           showLimitError: response.total > this.props.listingLimit,
         });
@@ -404,17 +403,17 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 
     const selection = this.props.deleteItems
       ? {
-          onSelectionChange: (obj: Item[]) => {
+          onSelectionChange: (obj: V[]) => {
             this.setState({
               selectedIds: obj
-                .map((item) => item.id)
-                .filter((id: undefined | string): id is string => Boolean(id)),
+                .map((item) => (item as Record<string, undefined | string>)?.id)
+                .filter((id): id is string => Boolean(id)),
             });
           },
         }
       : undefined;
 
-    const actions: EuiTableActionsColumnType<any>['actions'] = [
+    const actions: EuiTableActionsColumnType<V>['actions'] = [
       {
         name: i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
           defaultMessage: 'Edit',
@@ -427,7 +426,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         ),
         icon: 'pencil',
         type: 'icon',
-        enabled: ({ error }: { error: string }) => !error,
+        enabled: (v) => !(v as unknown as { error: string })?.error,
         onClick: this.props.editItem,
       },
     ];
