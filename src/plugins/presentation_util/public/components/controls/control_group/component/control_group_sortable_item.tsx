@@ -132,16 +132,23 @@ const SortableControlInner = forwardRef<
 export const ControlClone = ({
   embeddableId,
   container,
+  width,
 }: {
   embeddableId: string;
   container: ControlGroupContainer;
+  width: ControlWidth;
 }) => {
   const embeddable = useChildEmbeddable({ embeddableId, container });
-  console.log(embeddable, 'embedabble');
-  console.log(container.getInput().controlStyle, 'container');
 
   return (
-    <EuiFlexItem className={'controlFrame--cloneWrapper'}>
+    <EuiFlexItem
+      className={classNames('controlFrame--cloneWrapper', {
+        'controlFrame--cloneWrapper-small': width === 'small',
+        'controlFrame--cloneWrapper-medium': width === 'medium',
+        'controlFrame--cloneWrapper-large': width === 'large',
+      })}
+      // className={'controlFrame--cloneWrapper'}
+    >
       {container.getInput().controlStyle === 'twoLine' ? (
         <EuiFormLabel>{embeddable?.getInput().title}</EuiFormLabel>
       ) : undefined}

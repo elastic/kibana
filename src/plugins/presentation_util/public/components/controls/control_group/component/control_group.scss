@@ -1,3 +1,8 @@
+$smallControl: $euiSize * 14;
+$mediumControl: $euiSize * 25;
+$largeControl: $euiSize * 50;
+$controlMinWidth: $euiSize * 14;
+
 .controlGroup {
   margin-left: $euiSizeXS;
   overflow-x: clip; // sometimes when using auto width, removing a control can cause a horizontal scrollbar to appear.
@@ -5,6 +10,18 @@
 
 .controlFrame--cloneWrapper {
   width: max-content;
+
+  &-small {
+    width: $smallControl;
+  }
+
+  &-medium {
+    width: $mediumControl;
+  }
+
+  &-large {
+    width: $largeControl;
+  }
 
   .euiFormLabel, div {
     cursor: grabbing !important; // prevents cursor flickering while dragging the clone
@@ -20,7 +37,7 @@
     @include euiFormControlDefaultShadow;
     font-weight: $euiFontWeightSemiBold;
     background-color: $euiFormInputGroupLabelBackground;
-    min-width: 200px;
+    min-width: $controlMinWidth;
   }
 
   .controlFrame--formControlLayout, .draggableButton {
@@ -43,8 +60,13 @@
 
   .controlFrame--formControlLayout {
     width: 100%;
-    min-width: $euiSize * 14;
+    min-width: $controlMinWidth;
     transition:background-color .1s, color .1s;
+
+    &__label {
+      @include euiTextTruncate;
+      max-width: 50%;
+    }
 
     &:not(.controlFrame--formControlLayout-clone) {
       .controlFrame--dragHandle {
@@ -62,16 +84,18 @@
     }
   }
 
+
+
   &-small {
-    width: $euiSize * 14;
+    width: $smallControl;
   }
 
   &-medium {
-    width: $euiSize * 25;
+    width: $mediumControl;
   }
 
   &-large {
-    width: $euiSize * 50;
+    width: $largeControl;
   }
 
   &-insertBefore,
