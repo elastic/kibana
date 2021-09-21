@@ -7,18 +7,17 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiCard, EuiIcon } from '@elastic/eui';
+import { EuiCard } from '@elastic/eui';
 
 import type { PackageListItem } from '../../../types';
-import { useLink } from '../../../hooks';
 import { CardIcon } from '../../../../../components/package_icon';
-
-import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from './release_badge';
 
 type PackageCardProps = PackageListItem & {
   type?: string;
   uiInternalPath?: string;
-  uiInteralPathUrl: string;
+  uiInternalPathUrl: string;
+  betaBadgeLabel?: string;
+  betaBadgeLabelTooltipContent?: string;
 };
 
 // adding the `href` causes EuiCard to use a `a` instead of a `button`
@@ -27,25 +26,23 @@ const Card = styled(EuiCard)`
   color: inherit;
 `;
 
-export function PackageCard({
-  description,
-  name,
-  title,
-  version,
-  release,
-  status,
-  icons,
-  integration,
-  type,
-  uiInternalPath,
-  ...restProps
-}: PackageCardProps) {
-  const { getHref, getAbsolutePath } = useLink();
-  let urlVersion = version;
-  // if this is an installed package, link to the version installed
-  if ('savedObject' in restProps) {
-    urlVersion = restProps.savedObject.attributes.version || version;
-  }
+export function PackageCard(props: PackageCardProps) {
+  const {
+    description,
+    name,
+    title,
+    version,
+    release,
+    status,
+    icons,
+    integration,
+    type,
+    uiInternalPath,
+    uiInternalPathUrl,
+    betaBadgeLabel,
+    betaBadgeLabelTooltipContent,
+    ...restProps
+  } = props;
 
   const icon = (
     <CardIcon
@@ -57,29 +54,14 @@ export function PackageCard({
     />
   );
 
-  const href =
-    type === 'ui_link'
-      ? getAbsolutePath(uiInternalPath)
-      : getHref('integration_details_overview', {
-          pkgkey: `${name}-${urlVersion}`,
-          ...(integration ? { integration } : {}),
-        });
-
-  const betaBadgeLabel =
-    type === 'ui_link' && release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined;
-  const betaBadgeTooltipContent =
-    type === 'ui_link' && release && release !== 'ga'
-      ? RELEASE_BADGE_DESCRIPTION[release]
-      : undefined;
-
   return (
     <Card
       title={title || ''}
       description={description}
       icon={icon}
-      href={href}
+      href={uiInternalPathUrl}
       betaBadgeLabel={betaBadgeLabel}
-      betaBadgeTooltipContent={betaBadgeTooltipContent}
+      betaBadgeTooltipContent={betaBadgeLabelTooltipContent}
     />
   );
 }

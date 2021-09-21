@@ -32,6 +32,8 @@ import type { CustomIntegration } from '../../../../../../../../../../src/plugin
 
 import type { PackageListItem } from '../../../../types';
 
+import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
+
 import { CategoryFacets } from './category_facets';
 import { mergeAndReplaceCategoryCounts } from './util';
 
@@ -49,6 +51,39 @@ function getParams(params: CategoryParams, search: string) {
 
 function categoryExists(category: string, categories: CategorySummaryItem[]) {
   return categories.some((c) => c.id === category);
+}
+
+function mapToCard(getAbsolutePath, getHref, item: CustomIntegration | PackageListItem) {
+  let uiInternalPathUrl;
+  if (item.type === 'ui_link') {
+    uiInternalPathUrl = getAbsolutePath(item.uiInternalPath);
+  } else {
+    let urlVersion = item.version;
+    if ('savedObject' in item) {
+      urlVersion = item.savedObject.attributes.version || item.version;
+    }
+    const url = getHref('integration_details_overview', {
+      pkgkey: `${item.name}-${urlVersion}`,
+      ...(item.integration ? { integration: item.integration } : {}),
+    });
+    uiInternalPathUrl = url;
+  }
+
+  const betaBadgeLabel =
+    item.type !== 'ui_link' && item.release && item.release !== 'ga'
+      ? RELEASE_BADGE_LABEL[item.release]
+      : undefined;
+  const betaBadgeTooltipContent =
+    item.type !== 'ui_link' && item.release && item.release !== 'ga'
+      ? RELEASE_BADGE_DESCRIPTION[item.release]
+      : undefined;
+
+  return {
+    uiInternalPathUrl,
+    betaBadgeLabel,
+    betaBadgeTooltipContent,
+    ...item,
+  };
 }
 
 export const EPMHomePage: React.FC = memo(() => {
@@ -100,6 +135,7 @@ const InstalledPackages: React.FC = memo(() => {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
     experimental: true,
   });
+  const { getHref, getAbsolutePath } = useLink();
 
   const { selectedCategory, searchParam } = getParams(
     useParams<CategoryParams>(),
@@ -181,6 +217,13 @@ const InstalledPackages: React.FC = memo(() => {
     />
   );
 
+  const cards = (selectedCategory === 'updates_available'
+    ? updatablePackages
+    : allInstalledPackages
+  ).map((item) => {
+    return mapToCard(getAbsolutePath, getHref, item);
+  });
+
   return (
     <PackageListGrid
       isLoading={isLoadingPackages}
@@ -189,7 +232,7 @@ const InstalledPackages: React.FC = memo(() => {
       onSearchChange={setSearchTerm}
       initialSearch={searchParam}
       title={title}
-      list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
+      list={cards}
     />
   );
 });
@@ -301,19 +344,8 @@ const AvailablePackages: React.FC = memo(() => {
     />
   ) : null;
 
-  const cards = eprAndCustomPackages.map((item: CustomIntegration | PackageListItem) => {
-    const uiInternalPathUrl =
-      item.type === 'ui_link'
-        ? getAbsolutePath(item.uiInternalPath)
-        : getHref('integration_details_overview', {
-            pkgkey: `${name}-${item.urlVersion}`,
-            ...(item.integration ? { integration: item.integration } : {}),
-          });
-
-    return {
-      uiInternalPathUrl,
-      ...item,
-    };
+  const cards = eprAndCustomPackages.map((item) => {
+    return mapToCard(getAbsolutePath, getHref, item);
   });
 
   return (
