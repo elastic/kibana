@@ -48,6 +48,7 @@ describe('connector validation', () => {
       secrets: {
         user: 'user',
         password: 'pass',
+        clientSecret: null,
       },
       id: 'test',
       actionTypeId: '.email',
@@ -86,6 +87,7 @@ describe('connector validation', () => {
       secrets: {
         user: null,
         password: null,
+        clientSecret: null,
       },
       id: 'test',
       actionTypeId: '.email',
@@ -156,6 +158,7 @@ describe('connector validation', () => {
       secrets: {
         user: 'user',
         password: null,
+        clientSecret: null,
       },
       id: 'test',
       actionTypeId: '.email',
@@ -193,6 +196,7 @@ describe('connector validation', () => {
       secrets: {
         user: null,
         password: 'password',
+        clientSecret: null,
       },
       id: 'test',
       actionTypeId: '.email',
@@ -245,7 +249,7 @@ describe('connector validation', () => {
     };
 
     expect(
-      await actionTypeModel.validateConnector(actionConnector as unknown as EmailActionConnector)
+      await actionTypeModel.validateConnector((actionConnector as unknown) as EmailActionConnector)
     ).toEqual({
       config: {
         errors: {
@@ -258,6 +262,43 @@ describe('connector validation', () => {
       secrets: {
         errors: {
           user: [],
+          password: [],
+        },
+      },
+    });
+  });
+  test('connector validation fails when for exchange service selected, but clientId, tenantId and clientSecrets were not defined', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+        clientSecret: null,
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      isPreconfigured: false,
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+        service: 'exchange_server',
+      },
+    } as EmailActionConnector;
+
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
+      config: {
+        errors: {
+          from: [],
+          port: [],
+          host: [],
+          service: [],
+          clientId: [],
+          tenantId: [],
+        },
+      },
+      secrets: {
+        errors: {
+          clientSecret: [],
           password: [],
         },
       },
