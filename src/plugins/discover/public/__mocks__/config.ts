@@ -9,7 +9,7 @@
 import { IUiSettingsClient } from 'kibana/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../common';
 
-export const configMock = ({
+export const configMock = {
   get: (key: string) => {
     if (key === 'defaultIndex') {
       return 'the-index-pattern-id';
@@ -19,4 +19,4 @@ export const configMock = ({
 
     return '';
   },
-} as unknown) as IUiSettingsClient;
+} as unknown as IUiSettingsClient;

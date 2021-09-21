@@ -14,10 +14,10 @@ export const incrementIndexName = (oldIndex: string) => {
   return baseIndexString + String(newIndexNumber).padStart(6, '0');
 };
 
-export const joinWith = <T>(separator: string) => (
-  ...items: Array<T | null | undefined>
-): string => {
-  return items.filter(Boolean).map(String).join(separator);
-};
+export const joinWith =
+  <T>(separator: string) =>
+  (...items: Array<T | null | undefined>): string => {
+    return items.filter(Boolean).map(String).join(separator);
+  };
 
 export const joinWithDash = joinWith<string>('-');

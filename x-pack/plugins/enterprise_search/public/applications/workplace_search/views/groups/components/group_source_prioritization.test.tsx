@@ -18,7 +18,7 @@ import { GroupSourcePrioritization } from './group_source_prioritization';
 
 const updatePriority = jest.fn();
 const saveGroupSourcePrioritization = jest.fn();
-const showSharedSourcesModal = jest.fn();
+const showOrgSourcesModal = jest.fn();
 
 const mockValues = {
   group: groups[0],
@@ -36,7 +36,7 @@ describe('GroupSourcePrioritization', () => {
     setMockActions({
       updatePriority,
       saveGroupSourcePrioritization,
-      showSharedSourcesModal,
+      showOrgSourcesModal,
     });
 
     setMockValues(mockValues);

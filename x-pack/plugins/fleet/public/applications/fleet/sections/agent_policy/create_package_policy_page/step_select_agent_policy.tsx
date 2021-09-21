@@ -65,9 +65,8 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   // Create new agent policy flyout state
   const hasWriteCapabilites = useCapabilities().write;
-  const [isCreateAgentPolicyFlyoutOpen, setIsCreateAgentPolicyFlyoutOpen] = useState<boolean>(
-    false
-  );
+  const [isCreateAgentPolicyFlyoutOpen, setIsCreateAgentPolicyFlyoutOpen] =
+    useState<boolean>(false);
 
   // Fetch package info
   const {

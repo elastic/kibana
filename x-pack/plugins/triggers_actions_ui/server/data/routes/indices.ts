@@ -105,7 +105,7 @@ async function getIndicesFromPattern(
     return [];
   }
 
-  return ((response.aggregations as unknown) as IndiciesAggregation).indices.buckets.map(
+  return (response.aggregations as unknown as IndiciesAggregation).indices.buckets.map(
     (bucket) => bucket.key
   );
 }

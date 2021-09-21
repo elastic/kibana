@@ -25,22 +25,22 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-export const WithAppDependencies = (Comp: any, overrides: Record<string, unknown> = {}) => (
-  props: Record<string, unknown>
-) => {
-  apiService.setup((mockHttpClient as unknown) as HttpSetup);
-  breadcrumbService.setup(() => '');
+export const WithAppDependencies =
+  (Comp: any, overrides: Record<string, unknown> = {}) =>
+  (props: Record<string, unknown>) => {
+    apiService.setup(mockHttpClient as unknown as HttpSetup);
+    breadcrumbService.setup(() => '');
 
-  const appContextMock = (getAppContextMock() as unknown) as AppDependencies;
+    const appContextMock = getAppContextMock() as unknown as AppDependencies;
 
-  return (
-    <AppContextProvider value={merge(appContextMock, overrides)}>
-      <GlobalFlyoutProvider>
-        <Comp {...props} />
-      </GlobalFlyoutProvider>
-    </AppContextProvider>
-  );
-};
+    return (
+      <AppContextProvider value={merge(appContextMock, overrides)}>
+        <GlobalFlyoutProvider>
+          <Comp {...props} />
+        </GlobalFlyoutProvider>
+      </AppContextProvider>
+    );
+  };
 
 export const setupEnvironment = () => {
   const { server, setServerAsync, httpRequestsMockHelpers } = initHttpRequests();
