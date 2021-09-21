@@ -5,12 +5,32 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-nodejs-modules
+import { parse } from 'querystring';
+import { matchPath } from 'react-router-dom';
 import { ImmutableReducer } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
+import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
+import { extractHostIsolationExceptionsPageLocation } from '../../../common/routing';
 import { HostIsolationExceptionsPageState } from '../types';
 import { initialHostIsolationExceptionsPageState } from './builders';
+import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../common/constants';
+import { UserChangedUrl } from '../../../../common/store/routing/action';
 
 type StateReducer = ImmutableReducer<HostIsolationExceptionsPageState, AppAction>;
+type CaseReducer<T extends AppAction> = (
+  state: Immutable<HostIsolationExceptionsPageState>,
+  action: Immutable<T>
+) => Immutable<HostIsolationExceptionsPageState>;
+
+const isHostIsolationExceptionsPageLocation = (location: Immutable<AppLocation>) => {
+  return (
+    matchPath(location.pathname ?? '', {
+      path: MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
+      exact: true,
+    }) !== null
+  );
+};
 
 export const hostIsolationExceptionsPageReducer: StateReducer = (
   state = initialHostIsolationExceptionsPageState(),
@@ -23,6 +43,22 @@ export const hostIsolationExceptionsPageReducer: StateReducer = (
         entries: action.payload,
       };
     }
+    case 'userChangedUrl':
+      return userChangedUrl(state, action);
+  }
+  return state;
+};
+
+const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
+  if (isHostIsolationExceptionsPageLocation(action.payload)) {
+    const location = extractHostIsolationExceptionsPageLocation(
+      parse(action.payload.search.slice(1))
+    );
+    console.log('changed location', location);
+    return {
+      ...state,
+      location,
+    };
   }
   return state;
 };

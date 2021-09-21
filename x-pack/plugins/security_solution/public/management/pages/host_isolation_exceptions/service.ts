@@ -14,6 +14,8 @@ import { HttpStart } from 'kibana/public';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../event_filters/constants';
 import { HOST_ISOLATION_EXCEPTIONS_LIST } from './constants';
 
+let listExists = false;
+
 async function createHostIsolationExceptionList(http: HttpStart) {
   try {
     await http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
@@ -25,26 +27,42 @@ async function createHostIsolationExceptionList(http: HttpStart) {
       throw err;
     }
   }
+  listExists = true;
 }
 
-export async function getHostIsolationExceptionsList(
-  http: HttpStart
-): Promise<FoundExceptionListItemSchema> {
-  try {
-    const entries = (await http.get(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
-      query: {
-        list_id: [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID],
-        namespace_type: ['agnostic'],
-        // filter,
-      },
-    })) as FoundExceptionListItemSchema;
-    return entries;
-  } catch (e) {
-    // 404 if the list has not been created yet
-    if (e.response?.status === 404) {
-      await createHostIsolationExceptionList(http);
-      return getHostIsolationExceptionsList(http);
-    }
-    throw e;
+async function ensureHostIsolationExceptionsListExists(http: HttpStart) {
+  if (listExists) {
+    return;
   }
+  return createHostIsolationExceptionList(http);
+}
+
+export async function getHostIsolationExceptionsList({
+  http,
+  perPage,
+  page,
+  sortField,
+  sortOrder,
+  filter,
+}: {
+  http: HttpStart;
+  page?: number;
+  perPage?: number;
+  sortField?: keyof ExceptionListItemSchema;
+  sortOrder?: 'asc' | 'desc';
+  filter?: string;
+}): Promise<FoundExceptionListItemSchema> {
+  await ensureHostIsolationExceptionsListExists(http);
+  const entries = (await http.get(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+    query: {
+      list_id: [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID],
+      namespace_type: ['agnostic'],
+      page,
+      per_page: perPage,
+      sort_field: sortField,
+      sort_order: sortOrder,
+      filter,
+    },
+  })) as FoundExceptionListItemSchema;
+  return entries;
 }

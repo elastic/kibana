@@ -6,17 +6,18 @@
  */
 
 // import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
+import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 import { createUninitialisedResourceState } from '../../../state';
 import { HostIsolationExceptionsPageState } from '../types';
 
 // @ts-ignore
 export const initialHostIsolationExceptionsPageState = (): HostIsolationExceptionsPageState => ({
   entries: createUninitialisedResourceState(),
-  // location: {
-  // page_index: MANAGEMENT_DEFAULT_PAGE,
-  // page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
-  // filter: '',
-  // },
+  location: {
+    page_index: MANAGEMENT_DEFAULT_PAGE,
+    page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
+    filter: '',
+  },
   // listPage: {
   // active: false,
   // forceRefresh: false,

@@ -8,8 +8,18 @@
 import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { AsyncResourceState } from '../../state/async_resource_state';
 
+export interface HostIsolationExceptionsPageLocation {
+  page_index: number;
+  page_size: number;
+  show?: 'create' | 'edit';
+  /** Used for editing. The ID of the selected event filter */
+  id?: string;
+  filter: string;
+}
+
 export interface HostIsolationExceptionsPageState {
   entries: AsyncResourceState<FoundExceptionListItemSchema>;
+  location: HostIsolationExceptionsPageLocation;
   // [>* State for the Event Filters List page <]
   // listPage: {
   // active: boolean;

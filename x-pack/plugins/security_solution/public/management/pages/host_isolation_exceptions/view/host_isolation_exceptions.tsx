@@ -19,7 +19,10 @@ import {
   getListItems,
   getListPagination,
 } from '../store/selector';
-import { useHostIsolationExceptionsSelector } from './hooks';
+import {
+  useHostIsolationExceptionsNavigateCallback,
+  useHostIsolationExceptionsSelector,
+} from './hooks';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { AdministrationListPage } from '../../../components/administration_list_page';
@@ -34,6 +37,8 @@ export const HostIsolationExceptions = () => {
   const pagination = useHostIsolationExceptionsSelector(getListPagination);
   const isLoading = useHostIsolationExceptionsSelector(getListIsLoading);
   const fetchError = useHostIsolationExceptionsSelector(getListFetchError);
+
+  const navigateCallback = useHostIsolationExceptionsNavigateCallback();
 
   const handleItemEdit = useCallback(() => {}, []);
   const handleItemDelete = useCallback(() => {}, []);
@@ -54,9 +59,15 @@ export const HostIsolationExceptions = () => {
     );
 
   const handlePaginatedContentChange: HostIsolationExceptionPaginatedContent['onChange'] =
-    useCallback(({ pageIndex, pageSize }) => {
-      console.log('callback');
-    }, []);
+    useCallback(
+      ({ pageIndex, pageSize }) => {
+        navigateCallback({
+          page_index: pageIndex,
+          page_size: pageSize,
+        });
+      },
+      [navigateCallback]
+    );
 
   const handleAddButtonClick = () => {
     console.log('add host isolation exception');

@@ -69,3 +69,7 @@ export const getListFetchError: HostIsolationExceptionsSelector<
 > = createSelector(getCurrentListPageDataState, (listPageDataState) => {
   return (isFailedResourceState(listPageDataState) && listPageDataState.error) || undefined;
 });
+
+export const getCurrentLocation: HostIsolationExceptionsSelector<StoreState['location']> = (
+  state
+) => state.location;

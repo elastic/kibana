@@ -14,6 +14,7 @@ import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../comm
 import { createLoadedResourceState } from '../../../state/async_resource_builders';
 import { getHostIsolationExceptionsList } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
+import { getCurrentLocation } from './selector';
 
 export function hostIsolationExceptionsMiddlewareFactory(coreStart: CoreStart) {
   return createHostIsolationExceptionsPageMiddleware(coreStart);
@@ -37,7 +38,21 @@ async function loadHostIsolationExceptionsList(
 ) {
   const { dispatch } = store;
   try {
-    const entries = await getHostIsolationExceptionsList(http);
+    const {
+      page_size: pageSize,
+      page_index: pageIndex,
+      // filter,
+    } = getCurrentLocation(store.getState());
+    const query = {
+      http,
+      page: pageIndex + 1,
+      perPage: pageSize,
+      /* sortField: 'created_at',
+      sortOrder: 'desc', */
+      // filter,
+    };
+    console.log('the query', query);
+    const entries = await getHostIsolationExceptionsList(query);
 
     // @TODO loading state - return previous state instead of UninitialisedResourceState
     dispatch({
