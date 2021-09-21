@@ -21,5 +21,5 @@ export enum ExceptionListTypeEnum {
   DETECTION = 'detection',
   ENDPOINT = 'endpoint',
   ENDPOINT_EVENTS = 'endpoint_events',
-  HOST_ISOLATION_EXCEPTIONS = 'endpoint_host_isolation_exceptions',
+  ENDPOINT_HOST_ISOLATION_EXCEPTIONS = 'endpoint_host_isolation_exceptions',
 }
