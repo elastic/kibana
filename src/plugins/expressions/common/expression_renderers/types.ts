@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export interface ExpressionRenderDefinition<Config = unknown, Variables = unknown> {
+export interface ExpressionRenderDefinition<Config = unknown, Variables = any> {
   /**
    * Technical name of the renderer, used as ID to identify renderer in
    * expression renderer registry. This must match the name of the expression
