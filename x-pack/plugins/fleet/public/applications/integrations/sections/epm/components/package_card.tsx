@@ -12,7 +12,7 @@ import { EuiCard } from '@elastic/eui';
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
 
-type PackageCardProps = IntegrationCardItem;
+export type PackageCardProps = IntegrationCardItem;
 
 // adding the `href` causes EuiCard to use a `a` instead of a `button`
 // `a` tags use `euiLinkColor` which results in blueish Badge text

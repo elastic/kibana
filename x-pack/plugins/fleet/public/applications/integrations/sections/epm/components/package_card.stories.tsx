@@ -26,6 +26,7 @@ const args: Args = {
   title: 'Title',
   description: 'Description',
   name: 'beats',
+  // @ts-expect-error
   release: 'ga',
   id: 'id',
   version: '1.0.0',
@@ -44,6 +45,8 @@ const argTypes = {
 
 export const NotInstalled = ({ width, ...props }: Args) => (
   <div style={{ width }}>
+    {/*
+ // @ts-ignore */}
     <PackageCard {...props} status="not_installed" />
   </div>
 );
@@ -51,6 +54,7 @@ export const NotInstalled = ({ width, ...props }: Args) => (
 export const Installed = ({ width, ...props }: Args) => {
   const savedObject: SavedObject<Installation> = {
     id: props.id,
+    // @ts-expect-error
     type: props.type || '',
     attributes: {
       name: props.name,
@@ -68,6 +72,8 @@ export const Installed = ({ width, ...props }: Args) => {
 
   return (
     <div style={{ width }}>
+      {/*
+ // @ts-ignore */}
       <PackageCard {...props} status="installed" savedObject={savedObject} />
     </div>
   );

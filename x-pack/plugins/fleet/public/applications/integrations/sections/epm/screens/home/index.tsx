@@ -11,6 +11,7 @@ import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
 
 import { installationStatuses } from '../../../../../../../common/constants';
+import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import {
   INTEGRATIONS_ROUTING_PATHS,
   INTEGRATIONS_SEARCH_QUERYPARAM,
@@ -25,7 +26,7 @@ import {
 } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
 import { DefaultLayout } from '../../../../layouts';
-import type { CategorySummaryItem, PackageList } from '../../../../types';
+import type { PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
@@ -36,9 +37,11 @@ import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components
 
 import type { IntegrationCardItem } from '../../../../../../../common/types/models';
 
+import type { Category } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+
 import { mergeAndReplaceCategoryCounts } from './util';
 import { CategoryFacets } from './category_facets';
-import type { ALL_CATEGORY } from './category_facets';
+import type { CategoryFacet } from './category_facets';
 
 export interface CategoryParams {
   category?: string;
@@ -52,13 +55,13 @@ function getParams(params: CategoryParams, search: string) {
   return { selectedCategory, searchParam };
 }
 
-function categoryExists(category: string, categories: CategorySummaryItem[]) {
+function categoryExists(category: string, categories: CategoryFacet[]) {
   return categories.some((c) => c.id === category);
 }
 
 function mapToCard(
   getAbsolutePath: (p: string) => string,
-  getHref: (p: string, o: Record<string, string>) => string,
+  getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string,
   item: CustomIntegration | PackageListItem
 ): IntegrationCardItem {
   let uiInternalPathUrl;
@@ -89,10 +92,10 @@ function mapToCard(
     id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}-${item.id}`,
     description: item.description,
     icons: item.icons || [],
-    integration: item.integration || '',
+    integration: 'integration' in item ? item.integration || '' : '',
     name: item.name,
     title: item.title,
-    version: item.version || '',
+    version: 'version' in item ? item.version || '' : '',
     uiInternalPathUrl,
     betaBadgeLabel,
     betaBadgeLabelTooltipContent,
@@ -195,20 +198,14 @@ const InstalledPackages: React.FC = memo(() => {
     []
   );
 
-  const categories = useMemo(
+  const categories: CategoryFacet[] = useMemo(
     () => [
       {
         id: '',
-        title: i18n.translate('xpack.fleet.epmList.allFilterLinkText', {
-          defaultMessage: 'All',
-        }),
         count: allInstalledPackages.length,
       },
       {
         id: 'updates_available',
-        title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
-          defaultMessage: 'Updates available',
-        }),
         count: updatablePackages.length,
       },
     ],
@@ -226,14 +223,11 @@ const InstalledPackages: React.FC = memo(() => {
     <CategoryFacets
       categories={categories}
       selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategorySummaryItem | ALL_CATEGORY) => setSelectedCategory(id)}
+      onCategoryChange={({ id }: CategoryFacet) => setSelectedCategory(id)}
     />
   );
 
-  const cards = (selectedCategory === 'updates_available'
-    ? updatablePackages
-    : allInstalledPackages
-  ).map((item) => {
+  const cards = (selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages).map((item) => {
     return mapToCard(getAbsolutePath, getHref, item);
   });
 
@@ -297,11 +291,11 @@ const AvailablePackages: React.FC = memo(() => {
     value: addableCustomIntegrations,
   } = useGetAddableCustomIntegrations();
   const filteredAddableIntegrations = addableCustomIntegrations
-    ? addableCustomIntegrations.filter((integration) => {
+    ? addableCustomIntegrations.filter((integration: CustomIntegration) => {
         if (!selectedCategory) {
           return true;
         }
-        return integration.categories.indexOf(selectedCategory) >= 0;
+        return integration.categories.indexOf(selectedCategory as Category) >= 0;
       })
     : [];
 
@@ -313,26 +307,32 @@ const AvailablePackages: React.FC = memo(() => {
     []
   );
 
-  const eprAndCustomPackages = eprPackages.concat(filteredAddableIntegrations);
+  const eprAndCustomPackages: Array<CustomIntegration | PackageListItem> = [
+    ...eprPackages,
+    ...filteredAddableIntegrations,
+  ];
   eprAndCustomPackages.sort((a, b) => {
     return a.name.localeCompare(b.name);
   });
 
   const categories = useMemo(() => {
-    const eprAndCustomCategories =
+    const eprAndCustomCategories: CategoryFacet[] =
       isLoadingCategories ||
       isLoadingAddableCustomIntegrations ||
       !addableCustomIntegrations ||
       !categoriesRes
         ? []
-        : mergeAndReplaceCategoryCounts(categoriesRes.response, addableCustomIntegrations);
+        : mergeAndReplaceCategoryCounts(
+            categoriesRes.response as CategoryFacet[],
+            addableCustomIntegrations
+          );
     return [
       {
         id: '',
         count: (allEprPackages?.length || 0) + (addableCustomIntegrations?.length || 0),
       },
       ...(eprAndCustomCategories ? eprAndCustomCategories : []),
-    ];
+    ] as CategoryFacet[];
   }, [
     allEprPackages?.length,
     addableCustomIntegrations,
@@ -351,7 +351,7 @@ const AvailablePackages: React.FC = memo(() => {
       isLoading={isLoadingCategories || isLoadingAllPackages || isLoadingAddableCustomIntegrations}
       categories={categories}
       selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategorySummaryItem) => {
+      onCategoryChange={({ id }: CategoryFacet) => {
         setSelectedCategory(id);
       }}
     />

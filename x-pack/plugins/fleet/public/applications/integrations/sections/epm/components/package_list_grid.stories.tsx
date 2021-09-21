@@ -13,6 +13,8 @@ import type { SavedObject } from 'src/core/public';
 
 import type { Installation } from '../../../../../../common';
 
+import type { IntegrationCardItem } from '../../../../../../common';
+
 import type { ListProps } from './package_list_grid';
 import { PackageListGrid } from './package_list_grid';
 
@@ -57,77 +59,79 @@ export const EmptyList = (props: Args) => (
 
 export const List = (props: Args) => (
   <PackageListGrid
-    list={[
-      {
-        title: 'Package One',
-        description: 'Not Installed Description',
-        name: 'beats',
-        release: 'ga',
-        id: 'id',
-        version: '1.0.0',
-        download: '/',
-        path: 'path',
-        status: 'not_installed',
-      },
-      {
-        title: 'Package Two',
-        description: 'Not Installed Description',
-        name: 'aws',
-        release: 'beta',
-        id: 'id',
-        version: '1.0.0',
-        download: '/',
-        path: 'path',
-        status: 'not_installed',
-      },
-      {
-        title: 'Package Three',
-        description: 'Not Installed Description',
-        name: 'azure',
-        release: 'experimental',
-        id: 'id',
-        version: '1.0.0',
-        download: '/',
-        path: 'path',
-        status: 'not_installed',
-      },
-      {
-        title: 'Package Four',
-        description: 'Installed Description',
-        name: 'elastic',
-        release: 'ga',
-        id: 'id',
-        version: '1.0.0',
-        download: '/',
-        path: 'path',
-        status: 'installed',
-        savedObject,
-      },
-      {
-        title: 'Package Five',
-        description: 'Installed Description',
-        name: 'unknown',
-        release: 'beta',
-        id: 'id',
-        version: '1.0.0',
-        download: '/',
-        path: 'path',
-        status: 'installed',
-        savedObject,
-      },
-      {
-        title: 'Package Six',
-        description: 'Installed Description',
-        name: 'kibana',
-        release: 'experimental',
-        id: 'id',
-        version: '1.0.0',
-        download: '/',
-        path: 'path',
-        status: 'installed',
-        savedObject,
-      },
-    ]}
+    list={
+      ([
+        {
+          title: 'Package One',
+          description: 'Not Installed Description',
+          name: 'beats',
+          release: 'ga',
+          id: 'id',
+          version: '1.0.0',
+          download: '/',
+          path: 'path',
+          status: 'not_installed',
+        },
+        {
+          title: 'Package Two',
+          description: 'Not Installed Description',
+          name: 'aws',
+          release: 'beta',
+          id: 'id',
+          version: '1.0.0',
+          download: '/',
+          path: 'path',
+          status: 'not_installed',
+        },
+        {
+          title: 'Package Three',
+          description: 'Not Installed Description',
+          name: 'azure',
+          release: 'experimental',
+          id: 'id',
+          version: '1.0.0',
+          download: '/',
+          path: 'path',
+          status: 'not_installed',
+        },
+        {
+          title: 'Package Four',
+          description: 'Installed Description',
+          name: 'elastic',
+          release: 'ga',
+          id: 'id',
+          version: '1.0.0',
+          download: '/',
+          path: 'path',
+          status: 'installed',
+          savedObject,
+        },
+        {
+          title: 'Package Five',
+          description: 'Installed Description',
+          name: 'unknown',
+          release: 'beta',
+          id: 'id',
+          version: '1.0.0',
+          download: '/',
+          path: 'path',
+          status: 'installed',
+          savedObject,
+        },
+        {
+          title: 'Package Six',
+          description: 'Installed Description',
+          name: 'kibana',
+          release: 'experimental',
+          id: 'id',
+          version: '1.0.0',
+          download: '/',
+          path: 'path',
+          status: 'installed',
+          savedObject,
+        },
+      ] as unknown) as IntegrationCardItem[]
+    }
     onSearchChange={action('onSearchChange')}
     setSelectedCategory={action('setSelectedCategory')}
     {...props}

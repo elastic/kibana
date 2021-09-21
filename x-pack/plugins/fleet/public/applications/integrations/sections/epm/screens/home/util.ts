@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { CategoryCount } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
+import type { CategoryFacet } from './category_facets';
+
 export function mergeAndReplaceCategoryCounts(
-  eprCounts: CategoryCount[],
+  eprCounts: CategoryFacet[],
   addableIntegrations: CustomIntegration[]
-) {
+): CategoryFacet[] {
   addableIntegrations.forEach((integration) => {
     integration.categories.forEach((cat) => {
       const match = eprCounts.find((c) => {
