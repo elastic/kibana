@@ -11,6 +11,7 @@ import { ILicense } from '../../../../../../../licensing/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../common/license/policy_config';
 import { PolicyDetailsState } from '../../types';
 import {
+  GetTrustedAppsListResponse,
   Immutable,
   NewPolicyData,
   PolicyConfig,
@@ -23,7 +24,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
 } from '../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../types';
-import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
+import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
@@ -138,9 +139,8 @@ export const fullPolicy: (s: Immutable<PolicyDetailsState>) => PolicyConfig = cr
   }
 );
 
-const fullWindowsPolicySettings: (
-  s: PolicyDetailsState
-) => PolicyConfig['windows'] = createSelector(fullPolicy, (policy) => policy?.windows);
+const fullWindowsPolicySettings: (s: PolicyDetailsState) => PolicyConfig['windows'] =
+  createSelector(fullPolicy, (policy) => policy?.windows);
 
 const fullMacPolicySettings: (s: PolicyDetailsState) => PolicyConfig['mac'] = createSelector(
   fullPolicy,
@@ -262,3 +262,34 @@ export const agentStatusSummary = (state: PolicyDetailsState) => state.agentStat
 
 /** Status for an update to the policy */
 export const updateStatus = (state: PolicyDetailsState) => state.updateStatus;
+
+// --------------------------------
+// Trusted app tab view
+// --------------------------------
+
+export const isOnTrustedAppsArtifactsView = (state: PolicyDetailsState): boolean => {
+  return true;
+};
+
+export const doesPolicyHaveTrustedApps = (
+  state: PolicyDetailsState
+): { loading: boolean; hasTrustedApps: boolean } => {
+  // TODO: implement empty state (task #1645)
+  return {
+    loading: false,
+    hasTrustedApps: true,
+  };
+};
+
+export const isPolicyTrustedAppListLoading = (): boolean => {
+  return false;
+};
+
+export const getPolicyTrustedAppList = (): GetTrustedAppsListResponse => {
+  return {
+    data: [],
+    page: 1,
+    total: 100,
+    per_page: 20,
+  };
+};

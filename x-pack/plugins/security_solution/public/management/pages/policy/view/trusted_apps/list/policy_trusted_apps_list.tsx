@@ -44,7 +44,7 @@ export const PolicyTrustedAppsList = memo(() => {
   if (hasTrustedApps.loading) {
     return (
       <div>
-        <EuiLoadingSpinner size="l" />
+        <EuiLoadingSpinner className="essentialAnimation" size="xl" />
       </div>
     );
   }
