@@ -448,7 +448,7 @@ Specifying the color for a single data point, such as a single bar or line, is u
 .*How do I inspect {es} queries in visualizations?*
 [%collapsible]
 ====
-You can inspect the requests sent by the visualization to Elasticsearch by using the Inspector. It can be accessed within the editor or in the dashboard.
+You can inspect the requests sent by the visualization to {es} using the Inspector. It can be accessed within the editor or in the dashboard.
 ====
 
 [discrete]
