@@ -37,7 +37,9 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
 
   useEffect(() => {
     if (clusters && clusters.length) {
-      generateBreadcrumbs(clusters[0].cluster_name);
+      generateBreadcrumbs(clusters[0].cluster_name, {
+        inBeats: true,
+      });
     }
   }, [clusters, generateBreadcrumbs]);
 
