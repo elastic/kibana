@@ -28,7 +28,7 @@ import { useLocalSearch, searchIdField } from '../../../hooks';
 
 import { PackageCard } from './package_card';
 
-interface ListProps {
+export interface ListProps {
   isLoading?: boolean;
   controls?: ReactNode;
   title: string;

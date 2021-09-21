@@ -13,6 +13,7 @@ const STORYBOOKS = [
   'dashboard_enhanced',
   'data_enhanced',
   'embeddable',
+  'fleet',
   'infra',
   'security_solution',
   'ui_actions_enhanced',
