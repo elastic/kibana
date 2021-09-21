@@ -168,6 +168,20 @@ describe('agent policy', () => {
     });
   });
 
+  describe('bumpAllAgentPoliciesForOutput', () => {
+    it('should call agentPolicyUpdateEventHandler with updated event once', async () => {
+      const soClient = getSavedObjectMock({
+        revision: 1,
+        monitoring_enabled: ['metrics'],
+      });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, 'output-id-123');
+
+      expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('update', () => {
     it('should update is_managed property, if given', async () => {
       // ignore unrelated unique name constraint
