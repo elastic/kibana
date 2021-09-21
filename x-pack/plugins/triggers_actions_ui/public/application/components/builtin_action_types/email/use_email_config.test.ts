@@ -17,7 +17,7 @@ const editActionConfig = jest.fn();
 
 const renderUseEmailConfigHook = (currentService?: string) =>
   renderHook(() =>
-    useEmailConfig((http as unknown) as HttpSetup, currentService, editActionConfig)
+    useEmailConfig(http as unknown as HttpSetup, currentService, editActionConfig)
   );
 
 describe('useEmailConfig', () => {

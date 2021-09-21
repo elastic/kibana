@@ -65,12 +65,12 @@ describe('ExchangeFormFields renders', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="emailClientSecret"]').length > 0).toBeTruthy();
-    expect(wrapper.find('select[data-test-subj="emailClientSecret"]').prop('value')).toEqual('');
+    expect(wrapper.find('input[data-test-subj="emailClientSecret"]').prop('value')).toEqual('');
 
     expect(wrapper.find('[data-test-subj="emailClientId"]').length > 0).toBeTruthy();
-    expect(wrapper.find('select[data-test-subj="emailClientId"]').prop('value')).toEqual('');
+    expect(wrapper.find('input[data-test-subj="emailClientId"]').prop('value')).toEqual('');
 
     expect(wrapper.find('[data-test-subj="emailTenantId"]').length > 0).toBeTruthy();
-    expect(wrapper.find('select[data-test-subj="emailTenantId"]').prop('value')).toEqual('');
+    expect(wrapper.find('input[data-test-subj="emailTenantId"]').prop('value')).toEqual('');
   });
 });
