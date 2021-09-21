@@ -12,9 +12,8 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
 export const ScrollSizeInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
+    useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.scrollSize);
   const [scrollSizeString, setScrollSize] = useState(
     jobCreator.scrollSize === null ? '' : `${jobCreator.scrollSize}`

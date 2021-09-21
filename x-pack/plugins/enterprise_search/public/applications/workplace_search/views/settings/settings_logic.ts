@@ -84,7 +84,7 @@ interface SettingsValues {
   iconButtonLoading: boolean;
 }
 
-const imageRoute = '/api/workplace_search/org/settings/upload_images';
+const imageRoute = '/internal/workplace_search/org/settings/upload_images';
 
 export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>({
   actions: {
@@ -197,7 +197,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
   listeners: ({ actions, values }) => ({
     initializeSettings: async () => {
       const { http } = HttpLogic.values;
-      const route = '/api/workplace_search/org/settings';
+      const route = '/internal/workplace_search/org/settings';
 
       try {
         const response = await http.get(route);
@@ -208,7 +208,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     },
     initializeConnectors: async () => {
       const { http } = HttpLogic.values;
-      const route = '/api/workplace_search/org/settings/connectors';
+      const route = '/internal/workplace_search/org/settings/connectors';
 
       try {
         const response = await http.get(route);
@@ -220,7 +220,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     updateOrgName: async () => {
       clearFlashMessages();
       const { http } = HttpLogic.values;
-      const route = '/api/workplace_search/org/settings/customize';
+      const route = '/internal/workplace_search/org/settings/customize';
       const { orgNameInputValue: name } = values;
       const body = JSON.stringify({ name });
 
@@ -265,7 +265,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     },
     updateOauthApplication: async () => {
       const { http } = HttpLogic.values;
-      const route = '/api/workplace_search/org/settings/oauth_application';
+      const route = '/internal/workplace_search/org/settings/oauth_application';
       const oauthApplication = values.oauthApplication || ({} as IOauthApplication);
       const { name, redirectUri, confidential } = oauthApplication;
       const body = JSON.stringify({
@@ -284,7 +284,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     },
     deleteSourceConfig: async ({ serviceType, name }) => {
       const { http } = HttpLogic.values;
-      const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
+      const route = `/internal/workplace_search/org/settings/connectors/${serviceType}`;
 
       try {
         await http.delete(route);

@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsBulkUpdateObject } from 'kibana/public';
+import { SavedObjectsClientContract } from 'kibana/public';
 import { SavedObjectIndexStore } from './saved_object_store';
 
 describe('LensStore', () => {
   function testStore(testId?: string) {
     const client = {
       create: jest.fn(() => Promise.resolve({ id: testId || 'testid' })),
-      bulkUpdate: jest.fn(([{ id }]: SavedObjectsBulkUpdateObject[]) =>
-        Promise.resolve({ savedObjects: [{ id }, { id }] })
-      ),
       resolve: jest.fn(),
     };
 
     return {
       client,
-      store: new SavedObjectIndexStore((client as unknown) as SavedObjectsClientContract),
+      store: new SavedObjectIndexStore(client as unknown as SavedObjectsClientContract),
     };
   }
 
@@ -81,7 +78,7 @@ describe('LensStore', () => {
     });
 
     test('updates and returns a visualization document', async () => {
-      const { client, store } = testStore();
+      const { client, store } = testStore('Gandalf');
       const doc = await store.save({
         savedObjectId: 'Gandalf',
         title: 'Even the very wise cannot see all ends.',
@@ -108,23 +105,11 @@ describe('LensStore', () => {
         },
       });
 
-      expect(client.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(client.bulkUpdate).toHaveBeenCalledWith([
-        {
-          type: 'lens',
-          id: 'Gandalf',
-          references: [],
-          attributes: {
-            title: null,
-            visualizationType: null,
-            state: null,
-          },
-        },
-        {
-          type: 'lens',
-          id: 'Gandalf',
-          references: [],
-          attributes: {
+      expect(client.create).toHaveBeenCalledTimes(1);
+      expect(client.create.mock.calls).toEqual([
+        [
+          'lens',
+          {
             title: 'Even the very wise cannot see all ends.',
             visualizationType: 'line',
             state: {
@@ -134,7 +119,8 @@ describe('LensStore', () => {
               filters: [],
             },
           },
-        },
+          { references: [], id: 'Gandalf', overwrite: true },
+        ],
       ]);
     });
   });

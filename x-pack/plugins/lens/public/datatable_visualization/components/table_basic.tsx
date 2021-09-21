@@ -116,10 +116,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [dispatchEvent]
   );
 
-  const handleFilterClick = useMemo(() => createGridFilterHandler(firstTableRef, onClickValue), [
-    firstTableRef,
-    onClickValue,
-  ]);
+  const handleFilterClick = useMemo(
+    () => createGridFilterHandler(firstTableRef, onClickValue),
+    [firstTableRef, onClickValue]
+  );
 
   const handleTransposedColumnClick = useMemo(
     () => createTransposeColumnFilterHandler(onClickValue, untransposedDataRef),

@@ -21,7 +21,9 @@ const applyReportingDeprecations = (settings: Record<string, any> = {}) => {
       deprecation,
       path: CONFIG_PATH,
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message }) =>
+        deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,

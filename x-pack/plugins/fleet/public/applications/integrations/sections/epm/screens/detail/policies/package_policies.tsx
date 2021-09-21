@@ -45,16 +45,25 @@ import {
   PackagePolicyActionsMenu,
 } from '../../../../../components';
 
-import type { PackagePolicyAndAgentPolicy } from './use_package_policies_with_agent_policy';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
+
+interface PackagePoliciesPanelProps {
+  name: string;
+  version: string;
+}
+
+interface InMemoryPackagePolicyAndAgentPolicy {
+  packagePolicy: InMemoryPackagePolicy;
+  agentPolicy: GetAgentPoliciesResponseItem;
+}
 
 const AddAgentButton = styled(EuiButtonIcon)`
   margin-left: ${(props) => props.theme.eui.euiSizeS};
 `;
 
 const IntegrationDetailsLink = memo<{
-  packagePolicy: PackagePolicyAndAgentPolicy['packagePolicy'];
+  packagePolicy: InMemoryPackagePolicyAndAgentPolicy['packagePolicy'];
 }>(({ packagePolicy }) => {
   const { getHref } = useLink();
   return (
@@ -71,17 +80,14 @@ const IntegrationDetailsLink = memo<{
   );
 });
 
-interface PackagePoliciesPanelProps {
-  name: string;
-  version: string;
-}
 export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps) => {
   const { search } = useLocation();
   const history = useHistory();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const agentPolicyIdFromParams = useMemo(() => queryParams.get('addAgentToPolicyId'), [
-    queryParams,
-  ]);
+  const agentPolicyIdFromParams = useMemo(
+    () => queryParams.get('addAgentToPolicyId'),
+    [queryParams]
+  );
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string | null>(
     agentPolicyIdFromParams
   );
@@ -89,7 +95,11 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
-  const { data, isLoading, resendRequest: refreshPolicies } = usePackagePoliciesWithAgentPolicy({
+  const {
+    data,
+    isLoading,
+    resendRequest: refreshPolicies,
+  } = usePackagePoliciesWithAgentPolicy({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
@@ -109,12 +119,12 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       const updatableIntegrationRecord = updatableIntegrations.get(
         packagePolicy.package?.name ?? ''
       );
-
       const hasUpgrade =
         !!updatableIntegrationRecord &&
         updatableIntegrationRecord.policiesToUpgrade.some(
-          ({ id }) => id === packagePolicy.policy_id
+          ({ pkgPolicyId }) => pkgPolicyId === packagePolicy.id
         );
+
       return {
         agentPolicy,
         packagePolicy: {
@@ -143,7 +153,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   }, [history]);
 
   const handleTableOnChange = useCallback(
-    ({ page }: CriteriaWithPagination<PackagePolicyAndAgentPolicy>) => {
+    ({ page }: CriteriaWithPagination<InMemoryPackagePolicyAndAgentPolicy>) => {
       setPagination({
         currentPage: page.index + 1,
         pageSize: page.size,
@@ -196,7 +206,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     };
   }, [name, version, getHref, agentEnrollmentFlyoutExtension]);
 
-  const columns: Array<EuiTableFieldDataColumnType<PackagePolicyAndAgentPolicy>> = useMemo(
+  const columns: Array<EuiTableFieldDataColumnType<InMemoryPackagePolicyAndAgentPolicy>> = useMemo(
     () => [
       {
         field: 'packagePolicy.name',
@@ -213,16 +223,6 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           defaultMessage: 'Version',
         }),
         render(_version, { agentPolicy, packagePolicy }) {
-          const updatableIntegrationRecord = updatableIntegrations.get(
-            packagePolicy.package?.name ?? ''
-          );
-
-          const hasUpgrade =
-            !!updatableIntegrationRecord &&
-            updatableIntegrationRecord.policiesToUpgrade.some(
-              ({ pkgPolicyId }) => pkgPolicyId === packagePolicy.id
-            );
-
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -235,7 +235,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
                 </EuiText>
               </EuiFlexItem>
 
-              {hasUpgrade && (
+              {packagePolicy.hasUpgrade && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"
@@ -274,7 +274,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         truncateText: true,
         align: 'left',
         width: '8ch',
-        render({ packagePolicy, agentPolicy }: PackagePolicyAndAgentPolicy) {
+        render({ packagePolicy, agentPolicy }: InMemoryPackagePolicyAndAgentPolicy) {
           const count = agentPolicy?.agents ?? 0;
 
           return (
@@ -327,7 +327,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           defaultMessage: 'Last Updated',
         }),
         truncateText: true,
-        render(updatedAt: PackagePolicyAndAgentPolicy['packagePolicy']['updated_at']) {
+        render(updatedAt: InMemoryPackagePolicyAndAgentPolicy['packagePolicy']['updated_at']) {
           return (
             <span className="eui-textTruncate" title={updatedAt}>
               <FormattedRelative value={updatedAt} />
@@ -358,7 +358,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
     ],
-    [getHref, updatableIntegrations, viewDataStep]
+    [getHref, viewDataStep]
   );
 
   const noItemsMessage = useMemo(() => {

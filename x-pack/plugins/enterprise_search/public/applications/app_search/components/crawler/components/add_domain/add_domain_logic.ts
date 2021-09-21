@@ -57,9 +57,9 @@ export interface AddDomainLogicActions {
     checks: string[];
   };
   setAddDomainFormInputValue(newValue: string): string;
-  setDomainValidationResult(
-    change: CrawlerDomainValidationResultChange
-  ): { change: CrawlerDomainValidationResultChange };
+  setDomainValidationResult(change: CrawlerDomainValidationResultChange): {
+    change: CrawlerDomainValidationResultChange;
+  };
   startDomainValidation(): void;
   submitNewDomain(): void;
   validateDomainInitialVerification(
@@ -204,7 +204,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       const { http } = HttpLogic.values;
       const failureResultChange = domainValidationFailureResultChange(stepName);
 
-      const route = '/api/app_search/crawler/validate_url';
+      const route = '/internal/app_search/crawler/validate_url';
 
       try {
         const data = await http.post(route, {
@@ -254,12 +254,15 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       });
 
       try {
-        const response = await http.post(`/api/app_search/engines/${engineName}/crawler/domains`, {
-          query: {
-            respond_with: 'crawler_details',
-          },
-          body: requestBody,
-        });
+        const response = await http.post(
+          `/internal/app_search/engines/${engineName}/crawler/domains`,
+          {
+            query: {
+              respond_with: 'crawler_details',
+            },
+            body: requestBody,
+          }
+        );
 
         const crawlerData = crawlerDataServerToClient(response as CrawlerDataFromServer);
         CrawlerLogic.actions.onReceiveCrawlerData(crawlerData);

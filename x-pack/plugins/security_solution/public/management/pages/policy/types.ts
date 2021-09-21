@@ -21,6 +21,8 @@ import {
   GetPackagesResponse,
   UpdatePackagePolicyResponse,
 } from '../../../../../fleet/common';
+import { AsyncResourceState } from '../../state';
+import { TrustedAppsListData } from '../trusted_apps/state';
 
 /**
  * Policy list store state
@@ -61,6 +63,8 @@ export interface PolicyDetailsState {
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<AppLocation>;
+  /** artifacts namespace inside policy details page */
+  artifacts: PolicyArtifactsState;
   /** A summary of stats for the agents associated with a given Fleet Agent Policy */
   agentStatusSummary?: Omit<GetAgentStatusResponse['results'], 'updating'>;
   /** Status of an update to the policy  */
@@ -73,17 +77,26 @@ export interface PolicyDetailsState {
 }
 
 /**
- * The URL search params that are supported by the Policy List page view
+ * Policy artifacts store state
  */
-export interface PolicyListUrlSearchParams {
-  page_index: number;
-  page_size: number;
+export interface PolicyArtifactsState {
+  /** artifacts location params  */
+  location: PolicyDetailsArtifactsPageLocation;
+  /** A list of artifacts can be linked to the policy  */
+  availableList: AsyncResourceState<TrustedAppsListData>;
 }
 
 export enum OS {
   windows = 'windows',
   mac = 'mac',
   linux = 'linux',
+}
+
+export interface PolicyDetailsArtifactsPageLocation {
+  page_index: number;
+  page_size: number;
+  show?: 'list';
+  filter: string;
 }
 
 /**

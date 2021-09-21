@@ -35,7 +35,7 @@ describe('AnomalyChartsEmbeddableFactory', () => {
     } as AnomalyChartsEmbeddableInput);
 
     // assert
-    const mockCalls = ((AnomalyChartsEmbeddable as unknown) as jest.Mock<AnomalyChartsEmbeddable>)
+    const mockCalls = (AnomalyChartsEmbeddable as unknown as jest.Mock<AnomalyChartsEmbeddable>)
       .mock.calls[0];
     const input = mockCalls[0];
     const createServices = mockCalls[1];

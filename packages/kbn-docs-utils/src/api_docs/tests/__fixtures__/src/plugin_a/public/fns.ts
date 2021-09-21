@@ -56,19 +56,19 @@ export const arrowFn = (
  * this is how destructured arguements should be commented.
  *
  * @param obj A very crazy parameter that is destructured when passing in.
- * @param objWithFn Im an object with a function. Destructed!
- * @param objWithFn.fn A fn.
- * @param objWithStr Im an object with a string. Destructed!
- * @param objWithStr.str A str.
  *
  * @returns I have no idea.
  *
  */
-export const crazyFunction = (
-  obj: { hi: string },
-  { fn }: { fn: (foo: { param: string }) => number },
-  { str }: { str: string }
-) => () => () => fn({ param: str });
+export const crazyFunction =
+  (
+    obj: { hi: string },
+    { fn1, fn2 }: { fn1: (foo: { param: string }) => number; fn2: () => void },
+    { str }: { str: string }
+  ) =>
+  () =>
+  () =>
+    fn1({ param: str });
 
 export const fnWithNonExportedRef = (a: ImNotExportedFromIndex) => a;
 
