@@ -259,13 +259,12 @@ export const getFilterFromSeriesFn =
 /**
  * Helper function to transform `@elastic/charts` brush event into brush action event
  */
-export const getBrushFromChartBrushEventFn = (
-  table: Datatable,
-  xAccessor: Accessor | AccessorFn
-) => ({ x: selectedRange }: XYBrushEvent): BrushTriggerEvent => {
-  const [start, end] = selectedRange ?? [0, 0];
-  const range: [number, number] = [start, end];
-  const column = table.columns.findIndex(({ id }) => validateAccessorId(id, xAccessor));
+export const getBrushFromChartBrushEventFn =
+  (table: Datatable, xAccessor: Accessor | AccessorFn) =>
+  ({ x: selectedRange }: XYBrushEvent): BrushTriggerEvent => {
+    const [start, end] = selectedRange ?? [0, 0];
+    const range: [number, number] = [start, end];
+    const column = table.columns.findIndex(({ id }) => validateAccessorId(id, xAccessor));
 
     return {
       data: {

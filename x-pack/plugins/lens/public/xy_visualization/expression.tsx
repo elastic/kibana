@@ -28,15 +28,14 @@ import {
   CurveType,
   LegendPositionConfig,
   LabelOverflowConstraint,
+  XYBrushEvent,
 } from '@elastic/charts';
-import { I18nProvider } from '@kbn/i18n/react';
 import type {
   ExpressionRenderDefinition,
   Datatable,
   DatatableRow,
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
@@ -59,6 +58,8 @@ import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axe
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
+import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/target_types/react';
 
 declare global {
   interface Window {
@@ -455,7 +456,7 @@ export function XYChart({
     onClickValue(context);
   };
 
-  const brushHandler: BrushEndListener = ({ x }) => {
+  const brushHandler = ({ x }: XYBrushEvent) => {
     if (!x) {
       return;
     }
@@ -519,7 +520,7 @@ export function XYChart({
         allowBrushingLastHistogramBucket={Boolean(isTimeViz)}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
-        onBrushEnd={interactive ? brushHandler : undefined}
+        onBrushEnd={interactive ? brushHandler as BrushEndListener: undefined }
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={getLegendAction(
           filteredLayers,

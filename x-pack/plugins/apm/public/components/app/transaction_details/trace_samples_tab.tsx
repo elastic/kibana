@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { TransactionDistribution } from './distribution';
 import type { TabContentProps } from './types';
+import { BrushEndListener } from '@elastic/charts';
 
 function TraceSamplesTab({
   selectSampleFromChartSelection,
@@ -21,7 +22,7 @@ function TraceSamplesTab({
 }: TabContentProps) {
   return (
     <TransactionDistribution
-      onChartSelection={selectSampleFromChartSelection}
+      onChartSelection={selectSampleFromChartSelection as BrushEndListener}
       onClearSelection={clearChartSelection}
       selection={
         sampleRangeFrom !== undefined && sampleRangeTo !== undefined

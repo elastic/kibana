@@ -19,6 +19,7 @@ import {
   ScaleType,
   AccessorFn,
   Accessor,
+  XYBrushEvent,
 } from '@elastic/charts';
 
 import { compact } from 'lodash';
@@ -130,8 +131,8 @@ const VisComponent = (props: VisComponentProps) => {
       isInterval: boolean
     ): BrushEndListener | undefined => {
       if (xAccessor !== null && isInterval) {
-        return (brushArea) => {
-          const event = getBrushFromChartBrushEventFn(visData, xAccessor)(brushArea);
+        return (brushEvent) => {
+          const event = getBrushFromChartBrushEventFn(visData, xAccessor)(brushEvent as XYBrushEvent);
           props.fireEvent(event);
         };
       }
@@ -367,7 +368,7 @@ const VisComponent = (props: VisComponentProps) => {
             splitSeriesAccessors,
             splitChartColumnAccessor ?? splitChartRowAccessor
           )}
-          onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params)}
+          onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params) as BrushEndListener}
           onRenderChange={onRenderChange}
           legendAction={
             config.aspects.series && (config.aspects.series?.length ?? 0) > 0
