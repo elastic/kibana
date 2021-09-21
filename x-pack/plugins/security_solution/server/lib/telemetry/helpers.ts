@@ -9,8 +9,13 @@ import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { TrustedApp } from '../../../common/endpoint/types';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
-import { EndpointExceptionListItem, ListTemplate } from './types';
-import { LIST_ENDPOINT_EXCEPTION, LIST_ENDPOINT_EVENT_FILTER } from './constants';
+import { copyAllowlistedFields, exceptionListEventFields } from './filters';
+import { EndpointExceptionListItem, ListTemplate, TelemetryEvent } from './types';
+import {
+  LIST_ENDPOINT_EXCEPTION,
+  LIST_ENDPOINT_EVENT_FILTER,
+  LIST_TRUSTED_APPLICATION,
+} from './constants';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -110,33 +115,14 @@ export const exceptionListItemToEndpointEntry = (exceptionListItem: ExceptionLis
 };
 
 /**
- * Constructs the lists telemetry schema from a collection of Trusted Apps
- *
- * @param listData
- * @returns lists telemetry schema
- */
-export const templateTrustedApps = (listData: TrustedApp[]) => {
-  return listData.map((item) => {
-    const template: ListTemplate = {
-      trusted_application: [],
-      endpoint_exception: [],
-      endpoint_event_filter: [],
-    };
-
-    template.trusted_application.push(item);
-    return template;
-  });
-};
-
-/**
  * Consructs the list telemetry schema from a collection of endpoint exceptions
  *
  * @param listData
  * @param listType
  * @returns lists telemetry schema
  */
-export const templateEndpointExceptions = (
-  listData: EndpointExceptionListItem[],
+export const templateExceptionList = (
+  listData: EndpointExceptionListItem[] | TrustedApp[],
   listType: string
 ) => {
   return listData.map((item) => {
@@ -146,13 +132,24 @@ export const templateEndpointExceptions = (
       endpoint_event_filter: [],
     };
 
+    // cast exception list type to a TelemetryEvent for allowlist filtering
+    const filteredListItem = copyAllowlistedFields(
+      exceptionListEventFields,
+      item as unknown as TelemetryEvent
+    );
+
+    if (listType === LIST_TRUSTED_APPLICATION) {
+      template.trusted_application.push(filteredListItem);
+      return template;
+    }
+
     if (listType === LIST_ENDPOINT_EXCEPTION) {
-      template.endpoint_exception.push(item);
+      template.endpoint_exception.push(filteredListItem);
       return template;
     }
 
     if (listType === LIST_ENDPOINT_EVENT_FILTER) {
-      template.endpoint_event_filter.push(item);
+      template.endpoint_event_filter.push(filteredListItem);
       return template;
     }
 

@@ -6,7 +6,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { TrustedApp } from '../../../common/endpoint/types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -230,7 +229,7 @@ export interface EndpointExceptionListItem {
 }
 
 export interface ListTemplate {
-  trusted_application: TrustedApp[];
-  endpoint_exception: EndpointExceptionListItem[];
-  endpoint_event_filter: EndpointExceptionListItem[];
+  trusted_application: TelemetryEvent[];
+  endpoint_exception: TelemetryEvent[];
+  endpoint_event_filter: TelemetryEvent[];
 }
