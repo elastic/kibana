@@ -30,7 +30,7 @@
 /src/plugins/vis_types/table/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/tagcloud/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/timelion/ @elastic/kibana-vis-editors
-/src/plugins/vis_type_timeseries/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/timeseries/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/vega/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/vislib/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/xy/ @elastic/kibana-vis-editors
@@ -198,7 +198,8 @@
 /packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
-/packages/kbn-ui-shared-deps/ @elastic/kibana-operations
+/packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
+/packages/kbn-ui-shared-deps-src/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations

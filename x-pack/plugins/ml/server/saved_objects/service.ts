@@ -244,7 +244,7 @@ export function jobSavedObjectServiceFactory(
       return [];
     }
     const jobIds = await getIds(jobType, key);
-    return list.filter((j) => jobIds.includes((j[field] as unknown) as string));
+    return list.filter((j) => jobIds.includes(j[field] as unknown as string));
   }
 
   async function filterJobsForSpace<T>(jobType: JobType, list: T[], field: keyof T): Promise<T[]> {

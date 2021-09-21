@@ -49,16 +49,15 @@ export function createEphemeralTaskAggregator(
         isOk<number, never>(taskEvent.event)
     ),
     map<TaskLifecycleEvent, number>((taskEvent: TaskLifecycleEvent) => {
-      return ((taskEvent.event as unknown) as Ok<number>).value;
+      return (taskEvent.event as unknown as Ok<number>).value;
     }),
     // as we consume this stream twice below (in the buffer, and the zip)
     // we want to use share, otherwise ther'll be 2 subscribers and both will emit event
     share()
   );
 
-  const ephemeralQueueExecutionsPerCycleQueue = createRunningAveragedStat<number>(
-    runningAverageWindowSize
-  );
+  const ephemeralQueueExecutionsPerCycleQueue =
+    createRunningAveragedStat<number>(runningAverageWindowSize);
   const ephemeralQueuedTasksQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const ephemeralTaskLoadQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const ephemeralPollingCycleBasedStats$ = zip(
@@ -89,7 +88,7 @@ export function createEphemeralTaskAggregator(
         isOk<number, never>(taskEvent.event)
     ),
     map<TaskLifecycleEvent, number[]>((taskEvent: TaskLifecycleEvent) => {
-      return ephemeralTaskDelayQueue(((taskEvent.event as unknown) as Ok<number>).value);
+      return ephemeralTaskDelayQueue((taskEvent.event as unknown as Ok<number>).value);
     }),
     startWith([])
   );

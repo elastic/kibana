@@ -91,10 +91,11 @@ async function getForceOverwrite({
 }) {
   if (!overwrite) {
     try {
-      const existingDataView = await savedObjectsClient.get<ApmDataViewAttributes>(
-        'index-pattern',
-        APM_STATIC_INDEX_PATTERN_ID
-      );
+      const existingDataView =
+        await savedObjectsClient.get<ApmDataViewAttributes>(
+          'index-pattern',
+          APM_STATIC_INDEX_PATTERN_ID
+        );
 
       // if the existing data view does not matches the new one, force an update
       return existingDataView.attributes.title !== apmDataViewTitle;
