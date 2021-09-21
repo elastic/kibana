@@ -111,8 +111,6 @@ export class ExpressionLoader {
 
   update(expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams): void {
     this.setParams(params);
-    this.renderHandler = this.createHandlersLoader(this.renderHandler.getElement(), params ?? {});
-
     this.loadingSubject.next(true);
     if (expression) {
       this.loadData(expression, this.params);
@@ -163,7 +161,10 @@ export class ExpressionLoader {
   };
 
   private render(data: Data): void {
-    this.renderHandler.render(data, this.params.uiState);
+    this.renderHandler.render(data, {
+      uiState: this.params.uiState,
+      variables: this.params.variables,
+    });
   }
 
   private setParams(params?: IExpressionLoaderParams) {

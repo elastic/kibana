@@ -117,7 +117,13 @@ export class ExpressionRenderHandler {
     };
   }
 
-  render = async (value: any, uiState?: any) => {
+  render = async (
+    value: any,
+    {
+      uiState,
+      variables,
+    }: { uiState?: any; variables?: ExpressionRenderHandlerParams['variables'] }
+  ) => {
     if (!value || typeof value !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
@@ -143,6 +149,7 @@ export class ExpressionRenderHandler {
         .render(this.element, value.value, {
           ...this.handlers,
           uiState,
+          variables,
         } as any);
     } catch (e: any) {
       return this.handleRenderError(e);
@@ -173,6 +180,6 @@ export function render(
   options?: ExpressionRenderHandlerParams
 ): ExpressionRenderHandler {
   const handler = new ExpressionRenderHandler(element, options);
-  handler.render(data);
+  handler.render(data, { variables: options?.variables });
   return handler;
 }

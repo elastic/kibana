@@ -63,6 +63,8 @@ export interface VisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   syncColors: boolean;
+  updateVariables: IInterpreterRenderHandlers['updateVariables'];
+  variables: IInterpreterRenderHandlers['variables'];
 }
 
 export type VisComponentType = typeof VisComponent;

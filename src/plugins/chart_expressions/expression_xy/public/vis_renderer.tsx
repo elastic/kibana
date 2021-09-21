@@ -47,6 +47,8 @@ export const xyVisRenderer: ExpressionRenderDefinition<VisTypeXyRenderConfig> = 
             fireEvent={handlers.event}
             uiState={handlers.uiState as PersistedState}
             syncColors={syncColors}
+            updateVariables={handlers.updateVariables}
+            variables={handlers.variables}
           />
         </VisualizationContainer>
       </I18nProvider>,
