@@ -37,7 +37,7 @@ describe('spaces config', () => {
 
         expect(messages).toMatchInlineSnapshot(`
           Array [
-            "In 8.0.0 and later, using \\"xpack.spaces.enabled\\" to disable the Spaces plugin is unsupported.",
+            "In 8.0.0 and later, using \\"xpack.spaces.enabled\\" is unsupported, and the Spaces plugin is always enabled.",
           ]
         `);
         expect(migrated).toEqual(originalConfig);
