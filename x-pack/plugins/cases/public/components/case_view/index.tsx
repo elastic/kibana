@@ -537,23 +537,23 @@ export const CaseView = React.memo(
     }, [data, onCaseDataSuccess]);
 
     useEffect(() => {
-      if (spacesApi && resolveOutcome === 'aliasMatch') {
+      if (spacesApi && resolveOutcome === 'aliasMatch' && resolveAliasId != null) {
         // CAUTION: the path /cases/:detailName is working in both Observability (/app/observability/cases/:detailName) and
         // Security Solutions (/app/security/cases/:detailName) plugins. This will need to be changed if this component is loaded
         // under any another path, passing a path builder function by props from every parent plugin.
         const newPath = http.basePath.prepend(
-          `cases/${resolveAliasId!}${window.location.search}${window.location.hash}`
+          `cases/${resolveAliasId}${window.location.search}${window.location.hash}`
         );
-        spacesApi!.ui.redirectLegacyUrl(newPath, i18n.CASE);
+        spacesApi.ui.redirectLegacyUrl(newPath, i18n.CASE);
       }
     }, [resolveOutcome, resolveAliasId, spacesApi, http]);
 
     const getLegacyUrlConflictCallout = useCallback(() => {
       // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
-      if (data && spacesApi && resolveOutcome === 'conflict') {
+      if (data && spacesApi && resolveOutcome === 'conflict' && resolveAliasId != null) {
         // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
         // callout with a warning for the user, and provide a way for them to navigate to the other object.
-        const otherObjectId = resolveAliasId!; // This is always defined if outcome === 'conflict'
+        const otherObjectId = resolveAliasId; // This is always defined if outcome === 'conflict'
         // CAUTION: the path /cases/:detailName is working in both Observability (/app/observability/cases/:detailName) and
         // Security Solutions (/app/security/cases/:detailName) plugins. This will need to be changed if this component is loaded
         // under any another path, passing a path builder function by props from every parent plugin.
