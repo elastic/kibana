@@ -44,7 +44,8 @@ import type { AuthorizationServiceSetup, AuthorizationServiceSetupInternal } fro
 import { AuthorizationService } from './authorization';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
-import { registerPrivilegeDeprecations } from './deprecations';
+import type { PrivilegeDeprecationsServices } from './deprecations';
+import { getPrivilegeDeprecationsServices } from './deprecations';
 import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
 import { SecurityFeatureUsageService } from './feature_usage';
@@ -86,6 +87,10 @@ export interface SecurityPluginSetup {
    * Exposes services for audit logging.
    */
   audit: AuditServiceSetup;
+  /**
+   * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
+   */
+  privilegeDeprecationServices: PrivilegeDeprecationsServices;
 }
 
 /**
@@ -287,12 +292,6 @@ export class SecurityPlugin
       getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
     });
 
-    registerPrivilegeDeprecations({
-      deprecationsService: core.deprecations,
-      authz: this.authorizationSetup,
-      license,
-    });
-
     setupSpacesClient({
       spaces,
       audit: this.auditSetup,
@@ -327,9 +326,7 @@ export class SecurityPlugin
         asScoped: this.auditSetup.asScoped,
         getLogger: this.auditSetup.getLogger,
       },
-
       authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
-
       authz: {
         actions: this.authorizationSetup.actions,
         checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,
@@ -339,8 +336,11 @@ export class SecurityPlugin
           .checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup.mode,
       },
-
       license,
+      privilegeDeprecationServices: getPrivilegeDeprecationsServices(
+        this.authorizationSetup,
+        license
+      ),
     });
   }
 
