@@ -154,7 +154,7 @@ export function registerRoutes(
         }),
       },
     },
-    async (context: RequestHandlerContext, request: any, response: any) => {
+    async (context, request, response) => {
       const { asCurrentUser } = context.core.elasticsearch.client;
       const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
