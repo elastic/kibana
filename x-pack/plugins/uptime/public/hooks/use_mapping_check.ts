@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useHistory } from 'react-router';
+import { useHistory } from 'react-router-dom';
 import { MAPPING_ERROR_ROUTE } from '../../common/constants';
 
 interface EsBadRequestError {
