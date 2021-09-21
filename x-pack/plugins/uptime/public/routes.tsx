@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useContext } from 'react';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
+import React, { FC, useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -28,10 +26,8 @@ import {
   SyntheticsCheckStepsPageHeader,
   SyntheticsCheckStepsPageRightSideItem,
 } from './pages/synthetics/synthetics_checks';
-import { ClientPluginsStart } from './apps/plugin';
 import { MonitorPageTitle, MonitorPageTitleContent } from './components/monitor/monitor_title';
 import { UptimeDatePicker } from './components/common/uptime_date_picker';
-import { useKibana } from '../../../../src/plugins/kibana_react/public';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
 import { SyntheticsCallout } from './components/overview/synthetics_callout';
@@ -42,7 +38,7 @@ import {
   StepDetailPageHeader,
   StepDetailPageRightSideItem,
 } from './pages/synthetics/step_detail_page';
-import { UptimeSettingsContext } from './contexts';
+import { UptimePageTemplateComponent } from './apps/uptime_page_template';
 
 interface RouteProps {
   path: string;
@@ -162,40 +158,6 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 };
 
 export const PageRouter: FC = () => {
-  const {
-    services: { observability, docLinks },
-  } = useKibana<ClientPluginsStart>();
-  const PageTemplateComponent = observability.navigation.PageTemplate;
-
-  const StyledPageTemplateComponent = styled(PageTemplateComponent)`
-    .euiPageHeaderContent > .euiFlexGroup {
-      flex-wrap: wrap;
-    }
-  `;
-
-  const { basePath } = useContext(UptimeSettingsContext);
-  const { data } = useSelector(indexStatusSelector);
-  const noDataInfo = !data || data?.docCount === 0 || data?.indexExists === false;
-  const noDataConfig = noDataInfo
-    ? {
-        solution: i18n.translate('xpack.uptime.noDataConfig.solutionName', {
-          defaultMessage: 'Observability',
-        }),
-        actions: {
-          beats: {
-            title: i18n.translate('xpack.uptime.noDataConfig.beatsCard.title', {
-              defaultMessage: 'Add monitors with Heartbeat',
-            }),
-            description: i18n.translate('xpack.uptime.noDataConfig.beatsCard.description', {
-              defaultMessage: 'Use Heartbeat to create uptime monitors.',
-            }),
-            href: basePath + `/app/home#/tutorial/uptimeMonitors`,
-          },
-        },
-        docsLink: docLinks!.links.observability.guide,
-      }
-    : undefined;
-
   return (
     <Switch>
       {Routes.map(
@@ -204,9 +166,9 @@ export const PageRouter: FC = () => {
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              <StyledPageTemplateComponent pageHeader={pageHeader} noDataConfig={noDataConfig}>
+              <UptimePageTemplateComponent path={path} pageHeader={pageHeader}>
                 <RouteComponent />
-              </StyledPageTemplateComponent>
+              </UptimePageTemplateComponent>
             </div>
           </Route>
         )
