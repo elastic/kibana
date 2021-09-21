@@ -25,7 +25,7 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: number; seri
   };
 
   const color =
-    series.color ?? ((theme.eui as unknown) as Record<string, string>)[`euiColorVis${seriesId}`];
+    series.color ?? (theme.eui as unknown as Record<string, string>)[`euiColorVis${seriesId}`];
 
   const button = (
     <EuiToolTip content={EDIT_SERIES_COLOR_LABEL}>
