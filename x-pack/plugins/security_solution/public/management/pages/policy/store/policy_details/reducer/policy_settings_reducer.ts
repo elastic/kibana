@@ -7,22 +7,18 @@
 
 // eslint-disable-next-line import/no-nodejs-modules
 import { parse } from 'querystring';
-import { fullPolicy, isOnPolicyDetailsPage, license } from './selectors';
+import { fullPolicy, isOnPolicyDetailsPage, license } from '../selectors/policy_settings_selectors';
 import {
   Immutable,
   PolicyConfig,
-  UIPolicyConfig,
   PolicyData,
-} from '../../../../../../common/endpoint/types';
-import { ImmutableReducer } from '../../../../../common/store';
-import { AppAction } from '../../../../../common/store/actions';
-import { PolicyDetailsState } from '../../types';
-import {
-  MANAGEMENT_DEFAULT_PAGE,
-  MANAGEMENT_DEFAULT_PAGE_SIZE,
-} from '../../../../common/constants';
-import { extractPolicyDetailsArtifactsListPageLocation } from '../../../../common/routing';
-import { createUninitialisedResourceState } from '../../../../state';
+  UIPolicyConfig,
+} from '../../../../../../../common/endpoint/types';
+import { ImmutableReducer } from '../../../../../../common/store';
+import { AppAction } from '../../../../../../common/store/actions';
+import { PolicyDetailsState } from '../../../types';
+import { extractPolicyDetailsArtifactsListPageLocation } from '../../../../../common/routing';
+import { initialPolicyDetailsState } from './initial_policy_details_state';
 
 const updatePolicyConfigInPolicyData = (
   policyData: Immutable<PolicyData>,
@@ -41,32 +37,7 @@ const updatePolicyConfigInPolicyData = (
   })),
 });
 
-/**
- * Return a fresh copy of initial state, since we mutate state in the reducer.
- */
-export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = () => ({
-  policyItem: undefined,
-  isLoading: false,
-  agentStatusSummary: {
-    error: 0,
-    events: 0,
-    offline: 0,
-    online: 0,
-    total: 0,
-    other: 0,
-  },
-  artifacts: {
-    location: {
-      page_index: MANAGEMENT_DEFAULT_PAGE,
-      page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
-      show: undefined,
-      filter: '',
-    },
-    availableList: createUninitialisedResourceState(),
-  },
-});
-
-export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppAction> = (
+export const policySettingsReducer: ImmutableReducer<PolicyDetailsState, AppAction> = (
   state = initialPolicyDetailsState(),
   action
 ) => {
