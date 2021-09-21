@@ -11,7 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../../components';
-import type { CategorySummaryItem, CategorySummaryList } from '../../../../types';
+import type { CategoryCount } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 import { CATEGORY_DISPLAY } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 export function CategoryFacets({
@@ -21,9 +21,9 @@ export function CategoryFacets({
   onCategoryChange,
 }: {
   isLoading?: boolean;
-  categories: CategorySummaryList;
+  categories: CategoryCount[];
   selectedCategory: string;
-  onCategoryChange: (category: CategorySummaryItem) => unknown;
+  onCategoryChange: (category: CategoryCount) => unknown;
 }) {
   const controls = (
     <EuiFacetGroup>

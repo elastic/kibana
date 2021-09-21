@@ -14,6 +14,7 @@ export interface CategoryCount {
   id: Category;
 }
 
+// todo internationalize
 export const CATEGORY_DISPLAY = {
   aws: 'AWS',
   azure: 'Azure',
@@ -40,6 +41,8 @@ export const CATEGORY_DISPLAY = {
   version_control: 'Version control',
   web: 'Web',
   upload_file: 'Upload a file',
+
+  updates_available: 'Updates available',
 };
 
 export type Category = keyof typeof CATEGORY_DISPLAY;

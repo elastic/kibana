@@ -39,12 +39,14 @@ function registerTutorialWithCustomIntegrations(
     type: 'ui_link',
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
     description: tutorial.shortDescription,
-    icons: [
-      {
-        type: 'eui',
-        src: tutorial.euiIconType,
-      },
-    ],
+    icons: tutorial.euiIconType
+      ? [
+          {
+            type: 'eui',
+            src: tutorial.euiIconType,
+          },
+        ]
+      : [],
     eprPackageOverlap: tutorial.eprPackageOverlap,
     shipper: 'tutorial',
     isBeta: false,

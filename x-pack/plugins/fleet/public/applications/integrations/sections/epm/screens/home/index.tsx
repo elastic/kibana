@@ -21,11 +21,16 @@ import {
   useGetPackages,
   useBreadcrumbs,
   useGetAddableCustomIntegrations,
+  useLink,
 } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
 import { DefaultLayout } from '../../../../layouts';
 import type { CategorySummaryItem, PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
+
+import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+
+import type { PackageListItem } from '../../../../types';
 
 import { CategoryFacets } from './category_facets';
 import { mergeAndReplaceCategoryCounts } from './util';
@@ -109,7 +114,7 @@ const InstalledPackages: React.FC = memo(() => {
     history.push(url);
   }
   function setSearchTerm(search: string) {
-    // Use .replace so the browser's back button is tied to single keystroke
+    // Use .replace so the browser's back button is not tied to single keystroke
     history.replace(
       pagePathGetters.integrations_installed({
         category: selectedCategory,
@@ -196,6 +201,8 @@ const AvailablePackages: React.FC = memo(() => {
     useLocation().search
   );
   const history = useHistory();
+  const { getHref, getAbsolutePath } = useLink();
+
   function setSelectedCategory(categoryId: string) {
     const url = pagePathGetters.integrations_all({
       category: categoryId,
@@ -204,7 +211,7 @@ const AvailablePackages: React.FC = memo(() => {
     history.push(url);
   }
   function setSearchTerm(search: string) {
-    // Use .replace so the browser's back button is tied to single keystroke
+    // Use .replace so the browser's back button is not tied to single keystroke
     history.replace(
       pagePathGetters.integrations_all({ category: selectedCategory, searchTerm: search })[1]
     );
@@ -294,13 +301,28 @@ const AvailablePackages: React.FC = memo(() => {
     />
   ) : null;
 
+  const cards = eprAndCustomPackages.map((item: CustomIntegration | PackageListItem) => {
+    const uiInternalPathUrl =
+      item.type === 'ui_link'
+        ? getAbsolutePath(item.uiInternalPath)
+        : getHref('integration_details_overview', {
+            pkgkey: `${name}-${item.urlVersion}`,
+            ...(item.integration ? { integration: item.integration } : {}),
+          });
+
+    return {
+      uiInternalPathUrl,
+      ...item,
+    };
+  });
+
   return (
     <PackageListGrid
       isLoading={isLoadingCategoryPackages}
       title={title}
       controls={controls}
       initialSearch={searchParam}
-      list={eprAndCustomPackages}
+      list={cards}
       setSelectedCategory={setSelectedCategory}
       onSearchChange={setSearchTerm}
       showMissingIntegrationMessage

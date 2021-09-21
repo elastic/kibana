@@ -11,13 +11,14 @@ import { EuiCard, EuiIcon } from '@elastic/eui';
 
 import type { PackageListItem } from '../../../types';
 import { useLink } from '../../../hooks';
-import { PackageIcon } from '../../../components';
+import { CardIcon } from '../../../../../components/package_icon';
 
 import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from './release_badge';
 
 type PackageCardProps = PackageListItem & {
   type?: string;
   uiInternalPath?: string;
+  uiInteralPathUrl: string;
 };
 
 // adding the `href` causes EuiCard to use a `a` instead of a `button`
@@ -46,18 +47,15 @@ export function PackageCard({
     urlVersion = restProps.savedObject.attributes.version || version;
   }
 
-  const icon =
-    type === 'ui_link' && icons && icons.length ? (
-      <EuiIcon size={'xl'} type={icons[0].src} />
-    ) : (
-      <PackageIcon
-        icons={icons}
-        packageName={name}
-        integrationName={integration}
-        version={version}
-        size="xl"
-      />
-    );
+  const icon = (
+    <CardIcon
+      icons={icons}
+      packageName={name}
+      integrationName={integration}
+      version={version}
+      size="xl"
+    />
+  );
 
   const href =
     type === 'ui_link'
