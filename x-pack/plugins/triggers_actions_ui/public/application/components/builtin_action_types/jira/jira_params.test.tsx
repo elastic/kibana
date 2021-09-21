@@ -337,17 +337,21 @@ describe('JiraParamsFields renders', () => {
       const wrapper = mount(<JiraParamsFields {...newProps} />);
       const parent = wrapper.find('[data-test-subj="parent-search"]');
 
-      ((parent.props() as unknown) as {
-        onChange: (val: string) => void;
-      }).onChange('Cool');
+      (
+        parent.props() as unknown as {
+          onChange: (val: string) => void;
+        }
+      ).onChange('Cool');
       expect(editAction.mock.calls[1][1].incident.parent).toEqual('Cool');
     });
     test('Label update triggers editAction', () => {
       const wrapper = mount(<JiraParamsFields {...defaultProps} />);
       const labels = wrapper.find('[data-test-subj="labelsComboBox"]');
-      ((labels.at(0).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ label: 'Cool' }]);
+      (
+        labels.at(0).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: 'Cool' }]);
       expect(editAction.mock.calls[1][1].incident.labels).toEqual(['Cool']);
     });
     test('Label undefined update triggers editAction', () => {
@@ -367,18 +371,22 @@ describe('JiraParamsFields renders', () => {
       const wrapper = mount(<JiraParamsFields {...newProps} />);
       const labels = wrapper.find('[data-test-subj="labelsComboBox"]');
 
-      ((labels.at(0).props() as unknown) as {
-        onBlur: () => void;
-      }).onBlur();
+      (
+        labels.at(0).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
       expect(editAction.mock.calls[1][1].incident.labels).toEqual([]);
     });
     test('New label creation triggers editAction', () => {
       const wrapper = mount(<JiraParamsFields {...defaultProps} />);
       const labels = wrapper.find('[data-test-subj="labelsComboBox"]');
       const searchValue = 'neato';
-      ((labels.at(0).props() as unknown) as {
-        onCreateOption: (searchValue: string) => void;
-      }).onCreateOption(searchValue);
+      (
+        labels.at(0).props() as unknown as {
+          onCreateOption: (searchValue: string) => void;
+        }
+      ).onCreateOption(searchValue);
       expect(editAction.mock.calls[1][1].incident.labels).toEqual(['kibana', searchValue]);
     });
     test('A comment triggers editAction', () => {

@@ -84,14 +84,8 @@ export class SavedObjectsSerializer {
 
     const { namespaceTreatment = 'strict' } = options;
     const { _id, _source, _seq_no, _primary_term } = doc;
-    const {
-      type,
-      namespaces,
-      originId,
-      migrationVersion,
-      references,
-      coreMigrationVersion,
-    } = _source;
+    const { type, namespaces, originId, migrationVersion, references, coreMigrationVersion } =
+      _source;
 
     const version =
       _seq_no != null || _primary_term != null
