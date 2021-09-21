@@ -76,6 +76,9 @@ const mockLayer = {
   hasErrors: () => {
     return false;
   },
+  supportsFitToBounds: () => {
+    return true;
+  },
 } as unknown as ILayer;
 
 const defaultProps = {
