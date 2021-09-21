@@ -123,7 +123,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
     } else if (changedQuery) {
       setError(null);
       setQuery(changedQuery);
-      if (query.ast.clauses.length > 1) {
+      if (changedQuery.ast.clauses.length > 1) {
         setError({ name: moreThanOneSearchClauseError, message: moreThanOneSearchClauseError });
       } else {
         setListParams(getListParams(listParams, changedQuery));
