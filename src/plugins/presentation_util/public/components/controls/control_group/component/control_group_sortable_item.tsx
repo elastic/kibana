@@ -13,8 +13,8 @@ import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
 
 import { ControlWidth } from '../../types';
+import { ControlGroupContainer } from '../control_group_container';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
-import { ControlGroupContainer } from '../embeddable/control_group_container';
 import { ControlFrame, ControlFrameProps } from '../../control_frame/control_frame_component';
 
 interface DragInfo {

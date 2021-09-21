@@ -9,26 +9,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { cloneDeep } from 'lodash';
+
 import {
   Container,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
-} from '../../../../../../embeddable/public';
-import { ControlGroup } from '../component/control_group_component';
-import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_WIDTH } from '../control_group_constants';
+} from '../../../../../embeddable/public';
 import {
-  ControlGroupInput,
   InputControlEmbeddable,
   InputControlInput,
   InputControlOutput,
-  ControlPanelState,
   IEditableControlFactory,
   ControlWidth,
-} from '../../types';
-import { ControlsService } from '../../controls_service';
-import { PresentationOverlaysService } from '../../../../services/overlays';
-import { toMountPoint } from '../../../../../../kibana_react/public';
-import { ManageControlComponent } from '../control_group_editor/manage_control';
+} from '../types';
+import { ControlsService } from '../controls_service';
+import { ControlGroupInput, ControlPanelState } from './types';
+import { ManageControlComponent } from './editor/manage_control';
+import { toMountPoint } from '../../../../../kibana_react/public';
+import { ControlGroup } from './component/control_group_component';
+import { PresentationOverlaysService } from '../../../services/overlays';
+import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_WIDTH } from './control_group_constants';
 
 export class ControlGroupContainer extends Container<InputControlInput, ControlGroupInput> {
   public readonly type = CONTROL_GROUP_TYPE;

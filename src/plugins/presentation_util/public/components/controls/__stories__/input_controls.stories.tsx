@@ -12,7 +12,7 @@ import uuid from 'uuid';
 import { decorators } from './decorators';
 import { providers } from '../../../services/storybook';
 import { getControlsServiceStub } from './controls_service_stub';
-import { ControlGroupContainerFactory } from '../control_group/embeddable/control_group_container_factory';
+import { ControlGroupContainerFactory } from '../control_group/control_group_container_factory';
 
 export default {
   title: 'Controls',

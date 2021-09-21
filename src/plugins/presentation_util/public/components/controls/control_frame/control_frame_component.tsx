@@ -15,7 +15,7 @@ import {
   EuiFormRow,
   EuiToolTip,
 } from '@elastic/eui';
-import { ControlGroupContainer } from '../control_group/embeddable/control_group_container';
+import { ControlGroupContainer } from '../control_group/control_group_container';
 import { ControlGroupStrings } from '../control_group/control_group_strings';
 import { useChildEmbeddable } from '../hooks/use_child_embeddable';
 import { ControlStyle } from '../types';

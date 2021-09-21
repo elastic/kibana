@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
+import '../control_group.scss';
+
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
+import classNames from 'classnames';
+import { cloneDeep } from 'lodash';
 import {
   arrayMove,
   SortableContext,
@@ -25,17 +30,12 @@ import {
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
 
-import './control_group.scss';
-import classNames from 'classnames';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-
-import { cloneDeep } from 'lodash';
-import { OPTIONS_LIST_CONTROL } from '../../control_types/options_list/options_list_embeddable';
-import { ControlClone, SortableControl } from './control_group_sortable_item';
-import { ControlGroupContainer } from '../embeddable/control_group_container';
-import { PresentationOverlaysService } from '../../../../services/overlays';
-import { ManageControlGroupComponent } from '../control_group_editor/manage_control_group_component';
 import { ControlGroupStrings } from '../control_group_strings';
+import { ControlGroupContainer } from '../control_group_container';
+import { PresentationOverlaysService } from '../../../../services/overlays';
+import { ControlClone, SortableControl } from './control_group_sortable_item';
+import { ManageControlGroupComponent } from '../editor/manage_control_group_component';
+import { OPTIONS_LIST_CONTROL } from '../../control_types/options_list/options_list_embeddable';
 
 interface ControlGroupProps {
   openFlyout: PresentationOverlaysService['openFlyout'];

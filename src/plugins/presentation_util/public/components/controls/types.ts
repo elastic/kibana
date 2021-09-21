@@ -13,9 +13,14 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
-  PanelState,
 } from '../../../../embeddable/public';
 
+export type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
+export type ControlStyle = 'twoLine' | 'oneLine';
+
+/**
+ * Control embeddable types
+ */
 export type InputControlFactory = EmbeddableFactory<
   InputControlInput,
   InputControlOutput,
@@ -27,8 +32,8 @@ export interface ControlTypeRegistry {
 }
 
 export type InputControlInput = EmbeddableInput & {
-  filters?: Filter[];
   query?: Query;
+  filters?: Filter[];
   timeRange?: TimeRange;
   twoLineLayout?: boolean;
 };
@@ -42,46 +47,23 @@ export type InputControlEmbeddable<
   TInputControlEmbeddableOutput extends InputControlOutput = InputControlOutput
 > = IEmbeddable<TInputControlEmbeddableInput, TInputControlEmbeddableOutput>;
 
+/**
+ * Control embeddable editor types
+ */
+export interface IEditableControlFactory<T extends InputControlInput = InputControlInput> {
+  getControlEditor?: GetControlEditorComponent<T>;
+}
+
+export type GetControlEditorComponent<T extends InputControlInput = InputControlInput> = (
+  props: GetControlEditorComponentProps<T>
+) => ControlEditorComponent;
 export interface GetControlEditorComponentProps<T extends InputControlInput = InputControlInput> {
   onChange: (partial: Partial<T>) => void;
   initialInput?: Partial<T>;
 }
 
-export interface ControlEditorProps {
-  setValidState: (valid: boolean) => void;
-}
-
 export type ControlEditorComponent = (props: ControlEditorProps) => JSX.Element;
 
-export type GetControlEditorComponent<T extends InputControlInput = InputControlInput> = (
-  props: GetControlEditorComponentProps<T>
-) => ControlEditorComponent;
-
-export interface IEditableControlFactory<T extends InputControlInput = InputControlInput> {
-  getControlEditor?: GetControlEditorComponent<T>;
-}
-
-export interface ControlPanelState<TEmbeddableInput extends InputControlInput = InputControlInput>
-  extends PanelState<TEmbeddableInput> {
-  order: number;
-  width: ControlWidth;
-}
-
-export interface ControlsPanels {
-  [panelId: string]: ControlPanelState;
-}
-
-export type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
-export type ControlStyle = 'twoLine' | 'oneLine';
-
-export interface ControlGroupInput
-  extends EmbeddableInput,
-    Omit<InputControlInput, 'twoLineLayout'> {
-  inheritParentState: {
-    useFilters: boolean;
-    useQuery: boolean;
-    useTimerange: boolean;
-  };
-  controlStyle: ControlStyle;
-  panels: ControlsPanels;
+export interface ControlEditorProps {
+  setValidState: (valid: boolean) => void;
 }

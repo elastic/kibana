@@ -22,10 +22,11 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
+import { ControlsPanels } from '../types';
+import { ControlStyle, ControlWidth } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlsPanels, ControlStyle, ControlWidth } from '../../types';
-import { PresentationOverlaysService } from '../../../../services/overlays';
 import { toMountPoint } from '../../../../../../kibana_react/public';
+import { PresentationOverlaysService } from '../../../../services/overlays';
 import { CONTROL_LAYOUT_OPTIONS, CONTROL_WIDTH_OPTIONS } from '../control_group_constants';
 
 interface ManageControlGroupProps {

@@ -31,9 +31,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { CONTROL_WIDTH_OPTIONS } from '../control_group_constants';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlEditorComponent, ControlWidth } from '../../types';
+import { CONTROL_WIDTH_OPTIONS } from '../control_group_constants';
 
 interface ManageControlProps {
   title?: string;

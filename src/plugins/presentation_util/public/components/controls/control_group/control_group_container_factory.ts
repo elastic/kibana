@@ -20,13 +20,13 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   ErrorEmbeddable,
-} from '../../../../../../embeddable/public';
-import { CONTROL_GROUP_TYPE } from '../control_group_constants';
-import { ControlGroupInput } from '../../types';
+} from '../../../../../embeddable/public';
+import { ControlGroupInput } from './types';
+import { ControlsService } from '../controls_service';
+import { ControlGroupStrings } from './control_group_strings';
+import { CONTROL_GROUP_TYPE } from './control_group_constants';
 import { ControlGroupContainer } from './control_group_container';
-import { ControlsService } from '../../controls_service';
-import { PresentationOverlaysService } from '../../../../services/overlays';
-import { ControlGroupStrings } from '../control_group_strings';
+import { PresentationOverlaysService } from '../../../services/overlays';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   ControlGroupInput,
