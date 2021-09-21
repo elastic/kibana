@@ -7,7 +7,6 @@
  */
 
 import { IndexPatternField } from 'src/plugins/data/public';
-import { IFieldSubTypeMulti } from '@kbn/es-query';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
 
 interface GroupedFields {
@@ -55,8 +54,7 @@ export function groupFields(
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
       continue;
     }
-    const subTypeMulti = field?.spec?.subType as IFieldSubTypeMulti;
-    const isSubfield = useNewFieldsApi && subTypeMulti?.multi?.parent;
+    const isSubfield = useNewFieldsApi && field.isSubtypeMulti();
     if (columns.includes(field.name)) {
       result.selected.push(field);
     } else if (popular.includes(field.name) && field.type !== '_source') {

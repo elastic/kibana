@@ -10,7 +10,6 @@ import './discover_sidebar.scss';
 import { throttle } from 'lodash';
 import React, { useCallback, useEffect, useState, useMemo, useRef, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { IFieldSubTypeMulti } from '@kbn/es-query';
 import {
   EuiAccordion,
   EuiFlexItem,
