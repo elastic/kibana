@@ -37,14 +37,7 @@ export function buildSearchBody(
         },
       },
       stored_fields: computedFields.storedFields,
-      script_fields: Object.keys(computedFields.scriptFields).reduce((collector, key) => {
-        collector[key] = {
-          script: {
-            source: computedFields.scriptFields[key].script.source,
-          },
-        };
-        return collector;
-      }, {} as Record<string, estypes.ScriptField>),
+      script_fields: computedFields.scriptFields as Record<string, estypes.ScriptField>,
       version: true,
     },
   };
