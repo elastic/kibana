@@ -12,7 +12,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 
 export const HOST_ISOLATION_EXCEPTIONS_LIST_TYPE: ExceptionListType =
-  ExceptionListTypeEnum.HOST_ISOLATION_EXCEPTIONS;
+  ExceptionListTypeEnum.ENDPOINT_HOST_ISOLATION_EXCEPTIONS;
 
 export const HOST_ISOLATION_EXCEPTIONS_LIST = {
   name: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME,
