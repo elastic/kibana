@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './duplicate_index_pattern';
-export * from './data_view_saved_object_conflict';
+export class DataViewSavedObjectConflictError extends Error {
+  constructor(savedObjectId: string) {
+    super(`Conflict loading DataView saved object, id: ${savedObjectId}`);
+    this.name = 'DataViewSavedObjectConflictError';
+  }
+}
