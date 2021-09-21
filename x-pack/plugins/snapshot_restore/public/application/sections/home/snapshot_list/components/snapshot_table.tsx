@@ -322,6 +322,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
           const { page: { index, size } = {}, sort: { field, direction } = {} } = criteria;
 
           setListParams({
+            ...listParams,
             sortField: (field as SortField) ?? listParams.sortField,
             sortDirection: (direction as SortDirection) ?? listParams.sortDirection,
             pageIndex: index ?? listParams.pageIndex,
