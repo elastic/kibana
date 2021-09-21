@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isString } from 'lodash';
+
 import {
   ExecutorSubActionPushParamsSIR,
   ExternalServiceAPI,
@@ -16,14 +18,29 @@ import {
 
 import { api } from './api';
 
+const SPLIT_REGEX = /[ ,|\r\n\t]+/;
+
 const formatObservables = (observables: string | string[], type: ObservableTypes) => {
   /**
    * ServiceNow accepted formats are: comma, new line, tab, or pipe separators.
    * Before the application the observables were being sent to ServiceNow as a concatenated string with
    * delimiter. With the application the format changed to an array of observables.
    */
-  const obsAsArray = Array.isArray(observables) ? observables : observables.split(/[ ,|\r\n\t]+/);
-  return obsAsArray.map((obs) => ({ value: obs, type }));
+  const obsAsArray = Array.isArray(observables) ? observables : observables.split(SPLIT_REGEX);
+  const uniqueObservables = new Set(obsAsArray);
+  return [...uniqueObservables].map((obs) => ({ value: obs, type }));
+};
+
+const combineObservables = (a: string | string[], b: string | string[]): string | string[] => {
+  if (isString(a) && Array.isArray(b)) {
+    return [...b, ...a.split(SPLIT_REGEX)];
+  }
+
+  if (isString(b) && Array.isArray(a)) {
+    return [...a, ...b.split(SPLIT_REGEX)];
+  }
+
+  return Array.isArray(a) && Array.isArray(b) ? [...a, ...b] : `${a},${b}`;
 };
 
 const pushToServiceHandler = async ({
@@ -52,8 +69,7 @@ const pushToServiceHandler = async ({
   const sirExternalService = externalService as ExternalServiceSIR;
 
   const obsWithType: Array<[string | string[], ObservableTypes]> = [
-    [destIP ?? [], ObservableTypes.ip4],
-    [sourceIP ?? [], ObservableTypes.ip4],
+    [combineObservables(destIP ?? [], sourceIP ?? []), ObservableTypes.ip4],
     [malwareHash ?? [], ObservableTypes.sha256],
     [malwareUrl ?? [], ObservableTypes.url],
   ];
