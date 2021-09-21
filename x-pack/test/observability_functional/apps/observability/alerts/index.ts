@@ -269,23 +269,66 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           describe('Pagination controls', () => {
+            before(async () => {
+              await (await observability.alerts.getPageSizeSelector()).click();
+              await (await observability.alerts.getTenRowsPageSelector()).click();
+            });
+            beforeEach(async () => {
+              // write a helper to move to first page
+              await (await observability.alerts.getPaginationButtonOne()).click();
+            });
+
             it('Renders previous page button', async () => {
               await observability.alerts.getPrevPaginationButtonOrFail();
             });
-
-            it('Previous page button works', async () => {});
-
-            it('Previous page button is disabled', async () => {});
 
             it('Renders next page button', async () => {
               await observability.alerts.getNextPaginationButtonOrFail();
             });
 
-            it('Next page button works', async () => {});
+            it('Previous page button is disabled', async () => {
+              const prevButtonDisabledValue = await (
+                await observability.alerts.getPrevPaginationButton()
+              ).getAttribute('disabled');
+              expect(prevButtonDisabledValue).to.be('true');
+            });
 
-            it('Next page button is disabled', async () => {});
+            // While running the test I inspected the elements on the page
+            // and although the disabled attribute was not there at all for some reason getAttribute('disabled') = 'true'
+            // timing issue?
+            it.skip('Next page button is enabled', async () => {
+              // TODO create a function goToSecondPage
+              await (await observability.alerts.getPageSizeSelector()).click();
+              await (await observability.alerts.getTenRowsPageSelector()).click();
+              const nextButtonDisabledValue = await (
+                await observability.alerts.getPrevPaginationButton()
+              ).getAttribute('disabled');
+              expect(nextButtonDisabledValue).to.be(null);
+            });
 
-            it('Page button works', async () => {});
+            it('Next page button works', async () => {
+              await (await observability.alerts.getNextPaginationButton()).click();
+              const tableRows = await observability.alerts.getTableCellsInRows();
+              expect(tableRows.length).to.be(2); // don't hardcode this value, calculate open alerts/perRow
+            });
+
+            it('Previous page button works', async () => {
+              await (await observability.alerts.getPaginationButtonTwo()).click();
+              await (await observability.alerts.getPrevPaginationButton()).click();
+              const tableRows = await observability.alerts.getTableCellsInRows();
+
+              expect(tableRows.length).to.be(10); // don't hardcode this value, calculate open alerts/perRow
+            });
+
+            it('Next page button is disabled', async () => {
+              // TODO: write a helper to move to last page
+              await (await observability.alerts.getPaginationButtonTwo()).click();
+              // TODO: write a helper isButtonDisabled
+              const nextButtonDisabledValue = await (
+                await observability.alerts.getNextPaginationButton()
+              ).getAttribute('disabled');
+              expect(nextButtonDisabledValue).to.be('true');
+            });
           });
 
           it('Table scrolls when page size is large', async () => {});

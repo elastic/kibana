@@ -224,11 +224,19 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
   };
 
   const getNextPaginationButton = async () => {
-    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_NEXT);
+    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_NEXT, 20000);
   };
 
   const getNextPaginationButtonOrFail = async () => {
     return await testSubjects.existOrFail(ALERTS_PAGINATION_BUTTON_NEXT);
+  };
+
+  const getPaginationButtonOne = async () => {
+    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_ONE);
+  };
+
+  const getPaginationButtonTwo = async () => {
+    return await testSubjects.find(ALERTS_PAGINATION_BUTTON_TWO);
   };
 
   return {
@@ -266,5 +274,7 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     missingPrevPaginationButtonOrFail,
     getNextPaginationButton,
     getNextPaginationButtonOrFail,
+    getPaginationButtonOne,
+    getPaginationButtonTwo,
   };
 }
