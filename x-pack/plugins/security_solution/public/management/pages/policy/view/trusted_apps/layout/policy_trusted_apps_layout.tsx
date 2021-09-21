@@ -15,7 +15,7 @@ import {
   EuiPageHeaderSection,
   EuiPageContent,
 } from '@elastic/eui';
-import { ArtifactCardGrid } from '../../../../../components/artifact_card_grid';
+import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const onClickAssignTrustedAppButton = useCallback(() => {
@@ -56,20 +56,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         color="transparent"
         borderRadius="none"
       >
-        <div style={{ padding: '5em 0' }}>
-          <hr />
-        </div>
-
-        <ArtifactCardGrid
-          items={[]}
-          onPageChange={() => {}}
-          onExpandCollapse={() => {}}
-          cardComponentProps={() => {
-            return {
-              actions: [{ children: 'one' }, { children: 'two' }],
-            };
-          }}
-        />
+        <PolicyTrustedAppsList />
       </EuiPageContent>
     </div>
   );
