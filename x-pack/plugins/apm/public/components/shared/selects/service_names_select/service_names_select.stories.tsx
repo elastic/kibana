@@ -23,7 +23,7 @@ const stories: Meta<Args> = {
     (StoryComponent, { args }) => {
       const { serviceNames } = args;
 
-      const coreMock = ({
+      const coreMock = {
         http: {
           get: () => {
             return { serviceNames };
@@ -31,7 +31,7 @@ const stories: Meta<Args> = {
         },
         notifications: { toasts: { add: () => {} } },
         uiSettings: { get: () => true },
-      } as unknown) as CoreStart;
+      } as unknown as CoreStart;
 
       const KibanaReactContext = createKibanaReactContext(coreMock);
 

@@ -46,7 +46,7 @@ export function EnvironmentsSelect({
         },
       });
     },
-    [serviceName],
+    [serviceName, transactionType],
     { preservePreviousData: false }
   );
 

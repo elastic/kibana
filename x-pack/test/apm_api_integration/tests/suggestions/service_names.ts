@@ -37,7 +37,7 @@ export default function serviceNameSuggestionTests({ getService }: FtrProviderCo
         `);
       });
 
-      it.only('filters by environment and transaction type', async () => {
+      it('filters by environment and transaction type', async () => {
         const { body } = await apmApiClient.readUser({
           endpoint: 'GET /api/apm/suggestions/service_names',
           params: { query: { environment: 'production', transactionType: 'request' } },

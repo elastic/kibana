@@ -13,9 +13,9 @@ import { createKibanaReactContext } from '../../../../../../../src/plugins/kiban
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { AlertMetadata } from '../helper';
 
-const KibanaReactContext = createKibanaReactContext(({
+const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: () => {} } },
-} as unknown) as Partial<CoreStart>);
+} as unknown as Partial<CoreStart>);
 
 interface Args {
   alertParams: AlertParams;
