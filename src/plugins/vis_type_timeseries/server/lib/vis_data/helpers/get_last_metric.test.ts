@@ -11,23 +11,23 @@ import type { Series } from '../../../../common/types';
 
 describe('getLastMetric(series)', () => {
   test('returns the last metric', () => {
-    const series = ({
+    const series = {
       metrics: [
         { id: 1, type: 'avg' },
         { id: 2, type: 'moving_average' },
       ],
-    } as unknown) as Series;
+    } as unknown as Series;
 
     expect(getLastMetric(series)).toEqual({ id: 2, type: 'moving_average' });
   });
 
   test('returns the last metric that not a series_agg', () => {
-    const series = ({
+    const series = {
       metrics: [
         { id: 1, type: 'avg' },
         { id: 2, type: 'series_agg' },
       ],
-    } as unknown) as Series;
+    } as unknown as Series;
 
     expect(getLastMetric(series)).toEqual({ id: 1, type: 'avg' });
   });

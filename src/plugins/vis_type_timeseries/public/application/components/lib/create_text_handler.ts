@@ -12,7 +12,7 @@ import { TimeseriesVisParams } from '../../../types';
 export const createTextHandler = (
   handleChange: (partialModel: Partial<TimeseriesVisParams>) => void
 ) => {
-  return (name: keyof TimeseriesVisParams, defaultValue?: string) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => handleChange({ [name]: e.target.value ?? defaultValue });
+  return (name: keyof TimeseriesVisParams, defaultValue?: string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      handleChange({ [name]: e.target.value ?? defaultValue });
 };
