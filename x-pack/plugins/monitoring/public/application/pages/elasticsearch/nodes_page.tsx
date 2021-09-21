@@ -27,7 +27,9 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
   const globalState = useContext(GlobalStateContext);
   const { showCgroupMetricsElasticsearch } = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();
-  const { getPaginationRouteOptions, getPaginationTableProps } = useTable('elasticsearch.nodes');
+  const { getPaginationRouteOptions, updateTotalItemCount, getPaginationTableProps } = useTable(
+    'elasticsearch.nodes'
+  );
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
@@ -59,12 +61,14 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     });
 
     setData(response);
+    updateTotalItemCount(response.totalNodeCount);
   }, [
     ccs,
     clusterUuid,
     services.data?.query.timefilter.timefilter,
     services.http,
     getPaginationRouteOptions,
+    updateTotalItemCount,
   ]);
 
   return (
@@ -88,7 +92,6 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
                 alerts={{}}
                 showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
                 {...getPaginationTableProps()}
-                totalItemCount={data.totalNodeCount}
               />
               {bottomBarComponent}
             </SetupModeContext.Provider>

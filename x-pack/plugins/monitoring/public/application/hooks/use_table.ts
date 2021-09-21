@@ -16,6 +16,7 @@ interface Pagination {
   pageIndex: number;
   initialPageIndex: number;
   pageSizeOptions: number[];
+  totalItemCount: number;
 }
 
 interface Page {
@@ -38,22 +39,21 @@ const DEFAULT_PAGINATION = {
   pageIndex: 0,
   initialPageIndex: 0,
   pageSizeOptions: PAGE_SIZE_OPTIONS,
+  totalItemCount: 0,
 };
 
 const getPaginationInitialState = (page: Page | undefined) => {
-  if (!page) {
-    return DEFAULT_PAGINATION;
-  }
+  const pagination = DEFAULT_PAGINATION;
 
-  if (!PAGE_SIZE_OPTIONS.includes(page.size)) {
-    page.size = 20;
+  if (page) {
+    pagination.initialPageSize = page.size;
+    pagination.pageSize = page.size;
+    pagination.initialPageIndex = page.index;
+    pagination.pageIndex = page.index;
   }
 
   return {
-    initialPageSize: page.size,
-    pageSize: page.size,
-    initialPageIndex: page.index,
-    pageIndex: page.index,
+    ...pagination,
     pageSizeOptions: PAGE_SIZE_OPTIONS,
   };
 };
@@ -67,6 +67,18 @@ export function useTable(storageKey: string) {
   // get initial state from localstorage
   const [pagination, setPagination] = useState<Pagination>(
     getPaginationInitialState(storageData.page)
+  );
+
+  const updateTotalItemCount = useCallback(
+    (num) => {
+      // only update pagination state if different
+      if (num === pagination.totalItemCount) return;
+      setPagination({
+        ...pagination,
+        totalItemCount: num,
+      });
+    },
+    [setPagination, pagination]
   );
 
   // get initial state from localStorage
@@ -122,11 +134,14 @@ export function useTable(storageKey: string) {
         query: string;
       }) => {
         setPagination({
-          initialPageSize: page.size,
-          pageSize: page.size,
-          initialPageIndex: page.index,
-          pageIndex: page.index,
-          pageSizeOptions: PAGE_SIZE_OPTIONS,
+          ...pagination,
+          ...{
+            initialPageSize: page.size,
+            pageSize: page.size,
+            initialPageIndex: page.index,
+            pageIndex: page.index,
+            pageSizeOptions: PAGE_SIZE_OPTIONS,
+          },
         });
         setSorting(cleanSortingData(sort));
         setQueryText(query);
@@ -142,5 +157,6 @@ export function useTable(storageKey: string) {
   return {
     getPaginationRouteOptions,
     getPaginationTableProps,
+    updateTotalItemCount,
   };
 }
