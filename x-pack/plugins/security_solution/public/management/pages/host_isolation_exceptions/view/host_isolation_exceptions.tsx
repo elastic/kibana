@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-// TODO remove this, do not merge with this
-/* eslint-disable no-console */
-
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
 import {

@@ -54,7 +54,6 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
     const location = extractHostIsolationExceptionsPageLocation(
       parse(action.payload.search.slice(1))
     );
-    console.log('changed location', location);
     return {
       ...state,
       location,

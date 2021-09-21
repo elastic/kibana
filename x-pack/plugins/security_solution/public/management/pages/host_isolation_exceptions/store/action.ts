@@ -8,8 +8,9 @@
 import { Action } from 'redux';
 import { HostIsolationExceptionsPageState } from '../types';
 
-export type HostIsolationExceptionsPageDataChanged = Action<'hostIsolationExceptionsPageDataChanged'> & {
-  payload: HostIsolationExceptionsPageState['entries'];
-};
+export type HostIsolationExceptionsPageDataChanged =
+  Action<'hostIsolationExceptionsPageDataChanged'> & {
+    payload: HostIsolationExceptionsPageState['entries'];
+  };
 
 export type HostIsolationExceptionsPageAction = HostIsolationExceptionsPageDataChanged;

@@ -18,14 +18,4 @@ export const initialHostIsolationExceptionsPageState = (): HostIsolationExceptio
     page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     filter: '',
   },
-  // listPage: {
-  // active: false,
-  // forceRefresh: false,
-  // data: createUninitialisedResourceState(),
-  // dataExist: createUninitialisedResourceState(),
-  // deletion: {
-  // item: undefined,
-  // status: createUninitialisedResourceState(),
-  // },
-  // },
 });
