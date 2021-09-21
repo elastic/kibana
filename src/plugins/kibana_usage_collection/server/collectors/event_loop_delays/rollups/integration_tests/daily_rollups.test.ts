@@ -85,10 +85,8 @@ describe('daily rollups integration test', () => {
 
   it('deletes documents older that 3 days from the saved objects repository', async () => {
     await rollDailyData(logger, internalRepository);
-    const {
-      total,
-      saved_objects: savedObjects,
-    } = await internalRepository.find<EventLoopDelaysDaily>({ type: SAVED_OBJECTS_DAILY_TYPE });
+    const { total, saved_objects: savedObjects } =
+      await internalRepository.find<EventLoopDelaysDaily>({ type: SAVED_OBJECTS_DAILY_TYPE });
     expect(total).toBe(rawEventLoopDelaysDaily.length);
     expect(savedObjects.map(({ id, type, attributes }) => ({ id, type, attributes }))).toEqual(
       rawEventLoopDelaysDaily

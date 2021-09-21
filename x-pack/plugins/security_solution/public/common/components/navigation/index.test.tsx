@@ -10,7 +10,6 @@ import React from 'react';
 
 import { CONSTANTS } from '../url_state/constants';
 import { TabNavigationComponent } from './';
-import { setBreadcrumbs } from './breadcrumbs';
 import { navTabs } from '../../../app/home/home_navigations';
 import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from '../../utils/route/types';
@@ -28,8 +27,10 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+const mockSetBreadcrumbs = jest.fn();
+
 jest.mock('./breadcrumbs', () => ({
-  setBreadcrumbs: jest.fn(),
+  useSetBreadcrumbs: () => mockSetBreadcrumbs,
 }));
 const mockGetUrlForApp = jest.fn();
 const mockNavigateToUrl = jest.fn();
@@ -102,7 +103,7 @@ describe('SIEM Navigation', () => {
   };
   const wrapper = mount(<TabNavigationComponent {...mockProps} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(
+    expect(mockSetBreadcrumbs).toHaveBeenNthCalledWith(
       1,
       {
         detailName: undefined,
@@ -158,7 +159,7 @@ describe('SIEM Navigation', () => {
       tabName: 'authentications',
     });
     wrapper.update();
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(
+    expect(mockSetBreadcrumbs).toHaveBeenNthCalledWith(
       2,
       {
         detailName: undefined,
