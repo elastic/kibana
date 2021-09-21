@@ -11,7 +11,7 @@ import { Requirements as Component } from './requirements';
 
 export default {
   component: Component,
-  title: 'Sections/EPM',
+  title: 'Sections/EPM/Requirements',
 };
 
 interface Args {

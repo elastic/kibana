@@ -11,7 +11,7 @@ import { AssetsFacetGroup as Component } from './assets_facet_group';
 
 export default {
   component: Component,
-  title: 'Sections/EPM',
+  title: 'Sections/EPM/Assets Facet Group',
 };
 
 interface Args {

@@ -18,7 +18,7 @@ import { PackageListGrid } from './package_list_grid';
 
 export default {
   component: PackageListGrid,
-  title: 'Sections/EPM/PackageListGrid',
+  title: 'Sections/EPM/Package List Grid',
 };
 
 type Args = Pick<ListProps, 'title' | 'isLoading' | 'showMissingIntegrationMessage'>;
