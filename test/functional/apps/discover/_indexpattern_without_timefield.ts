@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const retry = getService('retry');
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -16,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/107057
-  describe.skip('indexpattern without timefield', () => {
+  describe('indexpattern without timefield', () => {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'kibana_timefield']);
       await esArchiver.loadIfNeeded(
@@ -71,8 +71,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       if (!(await PageObjects.timePicker.timePickerExists())) {
         throw new Error('Expected timepicker to exist');
       }
-      // Navigating back to discover
+      // Navigating back
       await browser.goBack();
+      await retry.waitFor(
+        'index pattern to have been switched',
+        async () => (await textSubjects.getVisibleText('indexPattern-switcher')) === 'without-timefield'
+      );
+
       if (await PageObjects.timePicker.timePickerExists()) {
         throw new Error('Expected timepicker not to exist');
       }
