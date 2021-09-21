@@ -137,6 +137,7 @@ export async function getPackageInfo(options: {
     assets: Registry.groupPathsByService(paths || []),
     removable: !isUnremovablePackage(pkgName),
     notice: Registry.getNoticePath(paths || []),
+    keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
   const updated = { ...packageInfo, ...additions };
 

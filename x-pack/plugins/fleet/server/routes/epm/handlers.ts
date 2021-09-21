@@ -22,6 +22,7 @@ import type {
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
+  UpdatePackageResponse,
 } from '../../../common';
 import type {
   GetCategoriesRequestSchema,
@@ -33,6 +34,7 @@ import type {
   DeletePackageRequestSchema,
   BulkUpgradePackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
+  UpdatePackageRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -53,6 +55,7 @@ import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
+import { updatePackage } from '../../services/epm/packages/update';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -195,6 +198,28 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
     const body: GetInfoResponse = {
       response: res,
     };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const updatePackageHandler: RequestHandler<
+  TypeOf<typeof UpdatePackageRequestSchema.params>,
+  unknown,
+  TypeOf<typeof UpdatePackageRequestSchema.body>
+> = async (context, request, response) => {
+  try {
+    const { pkgkey } = request.params;
+    const savedObjectsClient = context.core.savedObjects.client;
+
+    const { pkgName } = splitPkgKey(pkgkey);
+
+    const res = await updatePackage({ savedObjectsClient, pkgName, ...request.body });
+    const body: UpdatePackageResponse = {
+      response: res,
+    };
+
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

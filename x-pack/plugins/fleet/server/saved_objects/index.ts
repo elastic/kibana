@@ -294,6 +294,7 @@ const getSavedObjectTypes = (
         version: { type: 'keyword' },
         internal: { type: 'boolean' },
         removable: { type: 'boolean' },
+        keep_policies_up_to_date: { type: 'boolean' },
         es_index_patterns: {
           enabled: false,
           type: 'object',

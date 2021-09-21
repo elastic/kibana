@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import semverLt from 'semver/functions/lt';
@@ -18,6 +18,8 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
+  EuiSwitch,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -29,8 +31,12 @@ import {
   useGetPackageInstallStatus,
   useLink,
   sendUpgradePackagePolicyDryRun,
+  sendUpdatePackage,
+  useStartServices,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
+
+import { toMountPoint } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 
 import { InstallButton } from './install_button';
 import { UpdateButton } from './update_button';
@@ -85,7 +91,7 @@ interface Props {
 }
 
 export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
-  const { name, title, removable, latestVersion, version } = packageInfo;
+  const { name, title, removable, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse | null>();
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const getPackageInstallStatus = useGetPackageInstallStatus();
@@ -94,6 +100,67 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
     page: 1,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${name}`,
   });
+
+  const { notifications } = useStartServices();
+
+  const [keepPoliciesUpToDateSwitchValue, setKeepPoliciesUpToDateSwitchValue] = useState<boolean>(
+    keepPoliciesUpToDate ?? false
+  );
+
+  const handleKeepPoliciesUpToDateSwitchChange = useCallback(() => {
+    const saveKeepPoliciesUpToDate = async () => {
+      try {
+        setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
+
+        await sendUpdatePackage(`${packageInfo.name}-${packageInfo.version}`, {
+          keepPoliciesUpToDate: !keepPoliciesUpToDateSwitchValue,
+        });
+
+        notifications.toasts.addSuccess({
+          title: toMountPoint(
+            !keepPoliciesUpToDateSwitchValue ? (
+              <FormattedMessage
+                id="xpack.fleet.integrations.keepPoliciesUpToDateEnabledSuccess"
+                defaultMessage="Fleet will automatically keep policies up to date for {title}"
+                values={{ title }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.integrations.keepPoliciesUpToDateDisabledSuccess"
+                defaultMessage="Fleet will not automatically keep policies up to date for {title}"
+                values={{ title }}
+              />
+            )
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.fleet.integrations.packageUpdateSuccessDescription"
+              defaultMessage="Successfully updated {title} and upgraded policies"
+              values={{ title }}
+            />
+          ),
+        });
+      } catch (error) {
+        notifications.toasts.addError(error, {
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.fleet.integrations.keepPoliciesUpToDateError"
+              defaultMessage="Error saving integration settings for {title}"
+              values={{ title }}
+            />
+          ),
+        });
+      }
+    };
+
+    saveKeepPoliciesUpToDate();
+  }, [
+    keepPoliciesUpToDateSwitchValue,
+    notifications.toasts,
+    packageInfo.name,
+    packageInfo.version,
+    title,
+  ]);
 
   const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
   const packageHasUsages = !!packagePoliciesData?.total;
@@ -199,6 +266,31 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   </tr>
                 </tbody>
               </table>
+
+              <EuiSwitch
+                label={i18n.translate(
+                  'xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateLabel',
+                  { defaultMessage: 'Keep integration policies up to date automatically' }
+                )}
+                checked={keepPoliciesUpToDateSwitchValue}
+                onChange={handleKeepPoliciesUpToDateSwitchChange}
+              />
+              <EuiSpacer size="s" />
+              <EuiText color="subdued" size="xs">
+                <EuiFlexGroup alignItems="center" gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="iInCircle" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateDescription"
+                      defaultMessage="When enabled, Fleet will attempt to upgrade and deploy integration policies automatically"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiText>
+              <EuiSpacer size="l" />
+
               {(updateAvailable || isUpgradingPackagePolicies) && (
                 <>
                   <UpdatesAvailableMsg latestVersion={latestVersion} />
