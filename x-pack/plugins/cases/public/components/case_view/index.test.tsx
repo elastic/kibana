@@ -183,7 +183,7 @@ describe('CaseView ', () => {
       actionTypeTitle: '.servicenow',
       iconClass: 'logoSecurity',
     });
-    useKibanaMock().services.spaces = ({ ui: spacesUiApiMock } as unknown) as SpacesApi;
+    useKibanaMock().services.spaces = { ui: spacesUiApiMock } as unknown as SpacesApi;
   });
 
   it('should render CaseComponent', async () => {
