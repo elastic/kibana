@@ -18,7 +18,6 @@ import {
 import { TimelineEventsType } from '../../../../../common';
 import { createStore } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 
 describe('Pick Events/Timeline Sourcerer', () => {
   const defaultProps = {
@@ -81,7 +80,6 @@ describe('Pick Events/Timeline Sourcerer', () => {
     );
     fireEvent.click(wrapper.getByTestId(`sourcerer-timeline-trigger`));
     fireEvent.click(wrapper.getByTestId(`comboBoxToggleListButton`));
-    // console.log('!@#$%^', wrapper.getByTestId('sourcerer-accordion').children);
     expect(wrapper.getByTestId('sourcerer-accordion').textContent).toEqual(
       mockSourcererState.defaultDataView.patternList.sort().join('')
     );

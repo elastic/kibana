@@ -30,7 +30,7 @@ export const getScopePatternListSelection = (
     if (sourcererScope === SourcererScopeName.default) {
       patternList = patternList.filter((index) => index !== signalIndexName).sort();
     } else if (sourcererScope === SourcererScopeName.detections) {
-      patternList = patternList.filter((index) => index === signalIndexName);
+      patternList = signalIndexName != null ? [signalIndexName] : []; // set to signalIndexName whether or not it exists yet in the patternList // patternList.filter((index) => index === signalIndexName);
     }
   }
   return patternList.sort();

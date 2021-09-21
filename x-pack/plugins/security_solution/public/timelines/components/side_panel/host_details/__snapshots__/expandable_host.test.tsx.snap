@@ -105,7 +105,6 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
       id="hostsDetailsQuery"
       indexNames={
         Array [
-          ".siem-signals",
           "apm-*-transaction*",
           "auditbeat-*",
           "endgame-*",

@@ -14,7 +14,7 @@ import {
   setSignalIndexName,
   setSource,
 } from './actions';
-import { initialSourcererState, SourcererModel } from './model';
+import { initialSourcererState, SourcererModel, SourcererScopeName } from './model';
 import { validateSelectedPatterns } from './helpers';
 
 export type SourcererState = SourcererModel;
@@ -24,6 +24,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     ...state,
     signalIndexName,
   }))
+  // TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted
   .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => ({
     ...state,
     defaultDataView,
@@ -33,10 +34,27 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     ...state,
     sourcererScopes: {
       ...state.sourcererScopes,
-      [id]: {
-        ...state.sourcererScopes[id],
-        loading,
-      },
+      ...(id != null
+        ? {
+            [id]: {
+              ...state.sourcererScopes[id],
+              loading,
+            },
+          }
+        : {
+            [SourcererScopeName.default]: {
+              ...state.sourcererScopes[SourcererScopeName.default],
+              loading,
+            },
+            [SourcererScopeName.detections]: {
+              ...state.sourcererScopes[SourcererScopeName.detections],
+              loading,
+            },
+            [SourcererScopeName.timeline]: {
+              ...state.sourcererScopes[SourcererScopeName.timeline],
+              loading,
+            },
+          }),
     },
   }))
   .case(setSelectedDataView, (state, payload) => ({
@@ -46,17 +64,14 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       ...validateSelectedPatterns(state, payload),
     },
   }))
-  .case(setSource, (state, { id, payload }) => {
-    console.log('setSource', { state, payload });
-    return {
-      ...state,
-      sourcererScopes: {
-        ...state.sourcererScopes,
-        [id]: {
-          ...state.sourcererScopes[id],
-          ...payload,
-        },
+  .case(setSource, (state, { id, payload }) => ({
+    ...state,
+    sourcererScopes: {
+      ...state.sourcererScopes,
+      [id]: {
+        ...state.sourcererScopes[id],
+        ...payload,
       },
-    };
-  })
+    },
+  }))
   .build();

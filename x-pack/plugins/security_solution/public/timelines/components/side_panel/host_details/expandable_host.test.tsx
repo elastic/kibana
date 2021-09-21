@@ -54,7 +54,7 @@ describe('Expandable Host Component', () => {
       );
 
       expect(wrapper.find('HostOverview').prop('indexNames')).toStrictEqual(
-        mockGlobalState.sourcerer.defaultDataView.patternList
+        mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns
       );
     });
   });

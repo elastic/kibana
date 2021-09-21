@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
@@ -26,7 +26,6 @@ export const useInitSourcerer = (
 ) => {
   const dispatch = useDispatch();
   const abortCtrl = useRef(new AbortController());
-  const [isLoading, setLoading] = useState(false);
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
@@ -69,19 +68,24 @@ export const useInitSourcerer = (
     (newSignalsIndex: string) => {
       const asyncSearch = async (newPatternList: string[]) => {
         abortCtrl.current = new AbortController();
-        setLoading(true);
+        dispatch(sourcererActions.setSourcererScopeLoading({ loading: true }));
         try {
-          console.log('postSourcererDataView', newPatternList);
           const response = await postSourcererDataView({
             body: { patternList: newPatternList, forceSignalsIndex: newSignalsIndex },
             signal: abortCtrl.current.signal,
           });
-          console.log('response', response);
-          setLoading(false);
-          sourcererActions.setSourcererDataViews(response);
+          dispatch(sourcererActions.setSourcererDataViews(response));
+          dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
         } catch (err) {
-          console.log('ERROR GO HERE STEPH', err);
-          setLoading(false);
+          addError(err, {
+            title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
+              defaultMessage: 'Error updating Security Data View',
+            }),
+            toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
+              defaultMessage: 'Refresh the page',
+            }),
+          });
+          dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
         }
       };
       if (defaultDataView.title.indexOf(newSignalsIndex) === -1) {
@@ -89,26 +93,26 @@ export const useInitSourcerer = (
         asyncSearch([...defaultDataView.title.split(','), newSignalsIndex]);
       }
     },
-    [defaultDataView.title]
+    [addError, dispatch, defaultDataView.title]
   );
 
   useIndexFields(scopeId);
   useIndexFields(SourcererScopeName.timeline);
 
   useEffect(() => {
-    console.log('things', {
-      loadingSignalIndex,
-      signalIndexName,
-      signalIndexNameSelector,
-      condition: !loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null,
-    });
     if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {
+      // TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted
       // update signal name also updates sourcerer
       updateSourcererDataView(signalIndexName);
-      console.log('dispatch setSignalIndexName', signalIndexName);
       dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
     }
-  }, [dispatch, loadingSignalIndex, signalIndexName, signalIndexNameSelector]);
+  }, [
+    dispatch,
+    loadingSignalIndex,
+    signalIndexName,
+    signalIndexNameSelector,
+    updateSourcererDataView,
+  ]);
 
   // Related to timeline
   useEffect(() => {

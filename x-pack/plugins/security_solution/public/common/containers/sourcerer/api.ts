@@ -21,13 +21,8 @@ interface SourcererDataView {
   defaultDataView: KibanaDataView;
   kibanaDataViews: KibanaDataView[];
 }
-/**
- * Creates a single transform given a configuration
- * @param bodies The body for the REST interface that is going to it.
- * @param signal AbortSignal for cancelling request
- * @returns SourcererDataView
- * @throws An error if response is not OK
- */
+
+// TODO: Steph/sourcerer remove this when ruleRegistry feature flag is lifted
 export const postSourcererDataView = async ({
   body,
   signal,

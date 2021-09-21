@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { keyBy, pick, isEmpty, isEqual, isUndefined } from 'lodash/fp';
+import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -14,13 +14,13 @@ import { Subscription } from 'rxjs';
 
 import { useKibana } from '../../lib/kibana';
 import {
-  IndexField,
-  IndexFieldsStrategyResponse,
-  IndexFieldsStrategyRequest,
   BrowserField,
   BrowserFields,
+  IndexField,
+  IndexFieldsStrategyRequest,
+  IndexFieldsStrategyResponse,
 } from '../../../../common/search_strategy/index_fields';
-import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
@@ -233,7 +233,11 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
     },
     [dispatch, sourcererScopeName]
   );
-
+  const getSignalIndexNameSelector = useMemo(
+    () => sourcererSelectors.signalIndexNameSelector(),
+    []
+  );
+  const signalIndexNameSelector = useDeepEqualSelector(getSignalIndexNameSelector);
   const indexFieldsSearch = useCallback(
     (selectedDataViewId: string) => {
       const asyncSearch = async () => {
@@ -259,7 +263,6 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                   patternList.includes(pattern)
                 );
                 const patternString = newSelectedPatterns.sort().join();
-                console.log('response', { patternList, newSelectedPatterns, response });
                 dispatch(
                   sourcererActions.setSource({
                     id: sourcererScopeName,
@@ -271,7 +274,12 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                       errorMessage: null,
                       id: sourcererScopeName,
                       indexPattern: getIndexFields(patternString, response.indexFields),
-                      indicesExist: response.indicesExist.length > 0,
+                      indicesExist:
+                        // TODO: Steph/sourcerer needs test
+                        sourcererScopeName === SourcererScopeName.detections
+                          ? signalIndexNameSelector != null &&
+                            response.indicesExist.includes(signalIndexNameSelector)
+                          : response.indicesExist.length > 0,
                       loading: false,
                       runtimeMappings: response.runtimeMappings,
                     },
@@ -305,6 +313,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       patternList,
       selectedPatterns,
       setLoading,
+      signalIndexNameSelector,
       sourcererScopeName,
     ]
   );

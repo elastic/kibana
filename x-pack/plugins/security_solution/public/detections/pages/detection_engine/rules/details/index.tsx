@@ -577,6 +577,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   );
 
   const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
+  useEffect(() => {
+    // recheck if the indices have data yet
+    if (!indicesExist) {
+      // TODO: Steph/sourcerer
+      // if details page loads and signal index does not exist, recheck
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const exceptionLists = useMemo((): {
     lists: ExceptionListIdentifiers[];

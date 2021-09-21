@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { mockGlobalState, mockSourcererState } from '../../mock';
+import { mockGlobalState } from '../../mock';
 import { SourcererScopeName } from './model';
 import { getSourcererScopeSelector } from './selectors';
 
@@ -15,7 +15,10 @@ describe('Sourcerer selectors', () => {
     it('Should exclude elastic cloud alias when selected patterns include "logs-*" as an alias', () => {
       const mapStateToProps = getSourcererScopeSelector();
       expect(mapStateToProps(mockGlobalState, SourcererScopeName.default).selectedPatterns).toEqual(
-        [...mockSourcererState.defaultDataView.patternList, '-*elastic-cloud-logs-*']
+        [
+          ...mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns,
+          '-*elastic-cloud-logs-*',
+        ]
       );
     });
 
