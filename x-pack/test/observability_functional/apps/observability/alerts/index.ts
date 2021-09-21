@@ -249,12 +249,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               });
             });
 
-            it('Page size selector works', async () => {
+            it('10 rows per page selector works', async () => {
               await retry.try(async () => {
                 await (await observability.alerts.getPageSizeSelector()).click();
                 await (await observability.alerts.getTenRowsPageSelector()).click();
                 const tableRows = await observability.alerts.getTableCellsInRows();
-                expect(tableRows.length).to.be(10);
+                expect(tableRows.length).to.not.be.greaterThan(10); // with current archiver data it is going to be 10. Shall we check against equality to.be(10) instead?
+              });
+            });
+
+            it('25 rows per page selector works', async () => {
+              await retry.try(async () => {
+                await (await observability.alerts.getPageSizeSelector()).click();
+                await (await observability.alerts.getTwentyFiveRowsPageSelector()).click();
+                const tableRows = await observability.alerts.getTableCellsInRows();
+                expect(tableRows.length).to.not.be.greaterThan(25);
               });
             });
           });
