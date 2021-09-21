@@ -147,21 +147,17 @@ export const ControlClone = ({
         'controlFrame--cloneWrapper-medium': width === 'medium',
         'controlFrame--cloneWrapper-large': width === 'large',
       })}
-      // className={'controlFrame--cloneWrapper'}
     >
       {container.getInput().controlStyle === 'twoLine' ? (
         <EuiFormLabel>{embeddable?.getInput().title}</EuiFormLabel>
       ) : undefined}
-      {/* <EuiFlexGroup className={'controlFrame--formControlLayout'}> */}
-      <EuiFlexGroup gutterSize="none" className={'draggableButton'}>
+      <EuiFlexGroup gutterSize="none" className={'controlFrame--draggable'}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="grabHorizontal" className="controlFrame--dragHandle" />
         </EuiFlexItem>
         {container.getInput().controlStyle === 'oneLine' ? (
-          // <EuiFormLabel>{embeddable?.getInput().title}</EuiFormLabel>
           <EuiFlexItem>{embeddable?.getInput().title}</EuiFlexItem>
         ) : undefined}
-        {/* <EuiFlexItem>{embeddable?.getInput().title}</EuiFlexItem> */}
       </EuiFlexGroup>
     </EuiFlexItem>
   );

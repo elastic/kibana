@@ -27,20 +27,21 @@ $controlMinWidth: $euiSize * 14;
     cursor: grabbing !important; // prevents cursor flickering while dragging the clone
   }
 
-  .draggableButton {
+  .controlFrame--draggable {
     cursor: grabbing;
     height: $euiButtonHeight;
     align-items: center;
-    padding-right: 4px;
     border-radius: 6px;
     @include euiFontSizeS;
-    @include euiFormControlDefaultShadow;
     font-weight: $euiFontWeightSemiBold;
+    box-shadow:
+      #{$euiFormControlBoxShadow},
+      inset 0 0 0 1px $euiFormBorderColor;
     background-color: $euiFormInputGroupLabelBackground;
     min-width: $controlMinWidth;
   }
 
-  .controlFrame--formControlLayout, .draggableButton {
+  .controlFrame--formControlLayout, .controlFrame--draggable {
     &-clone {
       box-shadow: 0 0 0 1px $euiShadowColor,
         0 1px 6px 0 $euiShadowColor;
