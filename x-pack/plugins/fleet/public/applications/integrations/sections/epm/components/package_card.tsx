@@ -10,19 +10,9 @@ import styled from 'styled-components';
 import { EuiCard } from '@elastic/eui';
 
 import { CardIcon } from '../../../../../components/package_icon';
-import type { PackageSpecIcon } from '../../../../../../common/types/models';
+import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
 
-interface PackageCardProps {
-  uiInternalPathUrl: string;
-  betaBadgeLabel?: string;
-  betaBadgeLabelTooltipContent?: string;
-  description: string;
-  name: string;
-  title: string;
-  version: string;
-  icons: PackageSpecIcon[];
-  integration: string;
-}
+type PackageCardProps = IntegrationCardItem;
 
 // adding the `href` causes EuiCard to use a `a` instead of a `button`
 // `a` tags use `euiLinkColor` which results in blueish Badge text
@@ -30,19 +20,17 @@ const Card = styled(EuiCard)`
   color: inherit;
 `;
 
-export function PackageCard(props: PackageCardProps) {
-  const {
-    description,
-    name,
-    title,
-    version,
-    icons,
-    integration,
-    uiInternalPathUrl,
-    betaBadgeLabel,
-    betaBadgeLabelTooltipContent,
-  } = props;
-
+export function PackageCard({
+  description,
+  name,
+  title,
+  version,
+  icons,
+  integration,
+  uiInternalPathUrl,
+  betaBadgeLabel,
+  betaBadgeLabelTooltipContent,
+}: PackageCardProps) {
   return (
     <Card
       title={title || ''}

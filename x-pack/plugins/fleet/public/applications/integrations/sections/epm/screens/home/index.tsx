@@ -34,8 +34,10 @@ import type { PackageListItem } from '../../../../types';
 
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 
-import { CategoryFacets } from './category_facets';
+import type { IntegrationCardItem } from '../../../../../../../common/types/models';
+
 import { mergeAndReplaceCategoryCounts } from './util';
+import { CategoryFacets } from './category_facets';
 
 export interface CategoryParams {
   category?: string;
@@ -53,7 +55,11 @@ function categoryExists(category: string, categories: CategorySummaryItem[]) {
   return categories.some((c) => c.id === category);
 }
 
-function mapToCard(getAbsolutePath, getHref, item: CustomIntegration | PackageListItem) {
+function mapToCard(
+  getAbsolutePath: (p: string) => string,
+  getHref: (p: string, o: Record<string, string>) => string,
+  item: CustomIntegration | PackageListItem
+): IntegrationCardItem {
   let uiInternalPathUrl;
   if (item.type === 'ui_link') {
     uiInternalPathUrl = getAbsolutePath(item.uiInternalPath);
@@ -73,16 +79,22 @@ function mapToCard(getAbsolutePath, getHref, item: CustomIntegration | PackageLi
     item.type !== 'ui_link' && item.release && item.release !== 'ga'
       ? RELEASE_BADGE_LABEL[item.release]
       : undefined;
-  const betaBadgeTooltipContent =
+  const betaBadgeLabelTooltipContent =
     item.type !== 'ui_link' && item.release && item.release !== 'ga'
       ? RELEASE_BADGE_DESCRIPTION[item.release]
       : undefined;
 
   return {
+    id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}-${item.id}`,
+    description: item.description,
+    icons: item.icons || [],
+    integration: item.integration || '',
+    name: item.name,
+    title: item.title,
+    version: item.version || '',
     uiInternalPathUrl,
     betaBadgeLabel,
-    betaBadgeTooltipContent,
-    ...item,
+    betaBadgeLabelTooltipContent,
   };
 }
 

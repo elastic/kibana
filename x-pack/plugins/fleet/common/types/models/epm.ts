@@ -362,6 +362,19 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
 };
 
+export interface IntegrationCardItem {
+  uiInternalPathUrl: string;
+  betaBadgeLabel?: string;
+  betaBadgeLabelTooltipContent?: string;
+  description: string;
+  name: string;
+  title: string;
+  version: string;
+  icons: PackageSpecIcon[];
+  integration: string;
+  id: string;
+}
+
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
