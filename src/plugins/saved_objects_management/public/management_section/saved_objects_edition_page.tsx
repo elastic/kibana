@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import './saved_objects_edition_page.scss';
 import React, { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
@@ -48,7 +48,10 @@ const SavedObjectsEditionPage = ({
   }, [setBreadcrumbs, type]);
 
   return (
-    <RedirectAppLinks application={coreStart.application} style={{ height: '100%' }}>
+    <RedirectAppLinks
+      application={coreStart.application}
+      className={'savedObjectsManagementEditionPage'}
+    >
       <SavedObjectEdition
         id={id}
         savedObjectType={type}
