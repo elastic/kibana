@@ -22,6 +22,7 @@ import { registerResultSettingsRoutes } from './result_settings';
 import { registerRoleMappingsRoutes } from './role_mappings';
 import { registerSchemaRoutes } from './schema';
 import { registerSearchRoutes } from './search';
+import { registerSearchRelevanceInsightsRoutes } from './search_relevance_insights';
 import { registerSearchSettingsRoutes } from './search_settings';
 import { registerSearchUIRoutes } from './search_ui';
 import { registerSettingsRoutes } from './settings';
@@ -50,4 +51,5 @@ export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerCrawlerEntryPointRoutes(dependencies);
   registerCrawlerCrawlRulesRoutes(dependencies);
   registerCrawlerSitemapRoutes(dependencies);
+  registerSearchRelevanceInsightsRoutes(dependencies);
 };
