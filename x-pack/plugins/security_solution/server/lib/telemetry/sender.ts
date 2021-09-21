@@ -404,8 +404,8 @@ export class TelemetryEventsSender {
 
   /**
    * This function sends events to the elastic telemetry channel. Caution is required
-   * because it does no allowlist filtering. The caller is responsible for making sure
-   * that there is no sensitive material or PII in the records that are sent upstream.
+   * because it does no allowlist filtering at send time. The function call site is
+   * responsible for ensuring sure no sensitive material is in telemetry events.
    *
    * @param channel the elastic telemetry channel
    * @param toSend telemetry events
