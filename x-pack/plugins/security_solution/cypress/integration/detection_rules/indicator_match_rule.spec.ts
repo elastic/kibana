@@ -40,7 +40,6 @@ import {
   INDICATOR_INDEX_PATTERNS,
   INDICATOR_INDEX_QUERY,
   INDICATOR_MAPPING,
-  INDICATOR_INDEX_QUERY_DEFAULT_VALUE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -109,6 +108,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { goBackToAllRulesTable } from '../../tasks/rule_details';
 
 import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
+import { DEFAULT_THREAT_MATCH_QUERY } from '../../../common/constants';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -181,8 +181,8 @@ describe('indicator match', () => {
       });
 
       describe('custom indicator query input', () => {
-        it(`Has a default set of ${INDICATOR_INDEX_QUERY_DEFAULT_VALUE}`, () => {
-          getCustomIndicatorQueryInput().should('have.text', INDICATOR_INDEX_QUERY_DEFAULT_VALUE);
+        it(`Has a default set of ${DEFAULT_THREAT_MATCH_QUERY}`, () => {
+          getCustomIndicatorQueryInput().should('have.text', DEFAULT_THREAT_MATCH_QUERY);
         });
 
         it('Shows invalidation text if text is removed', () => {
