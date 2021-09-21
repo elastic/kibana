@@ -48,11 +48,9 @@ const emptyUser = { username: '', email: '' } as ElasticsearchUser;
 interface RoleMappingsActions extends RoleMappingsBaseActions {
   setRoleMapping(roleMapping: ASRoleMapping): { roleMapping: ASRoleMapping };
   setSingleUserRoleMapping(data?: UserMapping): { singleUserRoleMapping: UserMapping };
-  setRoleMappings({
-    roleMappings,
-  }: {
+  setRoleMappings({ roleMappings }: { roleMappings: ASRoleMapping[] }): {
     roleMappings: ASRoleMapping[];
-  }): { roleMappings: ASRoleMapping[] };
+  };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   handleAccessAllEnginesChange(selected: boolean): { selected: boolean };
   handleEngineSelectionChange(engineNames: string[]): { engineNames: string[] };
