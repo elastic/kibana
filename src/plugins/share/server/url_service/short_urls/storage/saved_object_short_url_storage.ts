@@ -60,7 +60,7 @@ const createShortUrlData = <P extends SerializableRecord = SerializableRecord>(
 
   if (!!attributes.url) {
     const { url, ...rest } = attributes;
-    const state = ({ url } as unknown) as P;
+    const state = { url } as unknown as P;
 
     return {
       id: savedObject.id,

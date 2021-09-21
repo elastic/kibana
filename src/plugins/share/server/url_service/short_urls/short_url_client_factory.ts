@@ -26,7 +26,8 @@ export interface ServerShortUrlClientFactoryCreateParams {
 }
 
 export class ServerShortUrlClientFactory
-  implements IShortUrlClientFactory<ServerShortUrlClientFactoryCreateParams> {
+  implements IShortUrlClientFactory<ServerShortUrlClientFactoryCreateParams>
+{
   constructor(private readonly dependencies: ServerShortUrlClientFactoryDependencies) {}
 
   public get({ savedObjects }: ServerShortUrlClientFactoryCreateParams): ServerShortUrlClient {
