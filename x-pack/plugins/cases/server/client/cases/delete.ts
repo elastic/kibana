@@ -168,7 +168,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
             'settings',
             OWNER_FIELD,
             'comment',
-            ...(ENABLE_CASE_CONNECTOR ? ['sub_case' as const] : []),
+            ...(ENABLE_CASE_CONNECTOR ? ['sub_case'] : []),
           ],
           owner: caseInfo.attributes.owner,
         })

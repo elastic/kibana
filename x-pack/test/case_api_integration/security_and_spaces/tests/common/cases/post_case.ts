@@ -114,8 +114,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const { new_value, ...rest } = creationUserAction as CaseUserActionResponse;
         const parsedNewValue = JSON.parse(new_value!);
 
-        const { id: connectorId, ...restCaseConnector } = postedCase.connector;
-
         expect(rest).to.eql({
           action_field: [
             'description',
@@ -129,9 +127,6 @@ export default ({ getService }: FtrProviderContext): void => {
           action: 'create',
           action_by: defaultUser,
           old_value: null,
-          old_val_connector_id: null,
-          // the connector id will be null here because it the connector is none
-          new_val_connector_id: null,
           case_id: `${postedCase.id}`,
           comment_id: null,
           sub_case_id: '',
@@ -143,7 +138,7 @@ export default ({ getService }: FtrProviderContext): void => {
           description: postedCase.description,
           title: postedCase.title,
           tags: postedCase.tags,
-          connector: restCaseConnector,
+          connector: postedCase.connector,
           settings: postedCase.settings,
           owner: postedCase.owner,
         });

@@ -241,7 +241,7 @@ export const push = async (
             actionBy: { username, full_name, email },
             caseId,
             fields: ['pushed'],
-            newValue: externalService,
+            newValue: JSON.stringify(externalService),
             owner: myCase.attributes.owner,
           }),
         ],
