@@ -26,7 +26,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function () {
-      this.tags(['ciGroup13', 'skipFirefox']);
+      this.tags(['ciGroup3', 'skipFirefox']);
       loadTestFile(require.resolve('./smokescreen'));
     });
 
