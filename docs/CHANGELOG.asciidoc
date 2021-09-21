@@ -354,7 +354,7 @@ Enterprise Search::
 For the Elastic Enterprise Search 7.15.0 release information, refer to {enterprise-search-ref}/release-notes-7.15.0.html[7.15.0 release notes].
 Fleet::
 * Updates Package Policy UI to support upgrading package policies {kibana-pull}107171[#107171]
-* Removes subseconds from event.ingested {kibana-pull}104044[#104044]
+* Removes subseconds from `event.ingested` {kibana-pull}104044[#104044]
 * Adds package policy upgrade API {kibana-pull}103017[#103017]
 Kibana Home & Add Data::
 * Use *Lens* in ecommerce data {kibana-pull}106039[#106039]
