@@ -25,7 +25,7 @@ export const useLoadSnapshots = (query: SnapshotListParams) =>
     path: `${API_BASE_PATH}snapshots`,
     method: 'get',
     initialData: [],
-    query: (query as unknown) as HttpFetchQuery,
+    query: query as unknown as HttpFetchQuery,
   });
 
 export const useLoadSnapshot = (repositoryName: string, snapshotId: string) =>
