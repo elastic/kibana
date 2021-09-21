@@ -21,7 +21,7 @@ import {
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { isVisSeriesData } from '../../../../../../../src/plugins/vis_type_timeseries/server';
+import { isVisSeriesData } from '../../../../../../../src/plugins/vis_types/timeseries/server';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   private framework: KibanaFramework;
