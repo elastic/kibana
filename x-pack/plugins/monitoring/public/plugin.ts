@@ -41,7 +41,8 @@ const HASH_CHANGE = 'hashchange';
 
 export class MonitoringPlugin
   implements
-    Plugin<void, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies> {
+    Plugin<void, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies>
+{
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
   public async setup(

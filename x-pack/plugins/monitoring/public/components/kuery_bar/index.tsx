@@ -92,5 +92,7 @@ export const KueryBar = ({
   );
 };
 
-const defaultCurryLoadSuggestions: CurryLoadSuggestionsType = (loadSuggestions) => (...args) =>
-  loadSuggestions(...args);
+const defaultCurryLoadSuggestions: CurryLoadSuggestionsType =
+  (loadSuggestions) =>
+  (...args) =>
+    loadSuggestions(...args);
