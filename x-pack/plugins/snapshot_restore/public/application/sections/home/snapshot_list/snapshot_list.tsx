@@ -81,7 +81,6 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
       const { repository, policy } = parsedParams;
 
       if (policy) {
-        // setQuery(Query.parse(`policyName="${String(policy)}"`));
         setListParams((prev: SnapshotListParams) => ({
           ...prev,
           searchField: 'policyName',
@@ -91,7 +90,6 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         }));
         history.replace(`${BASE_PATH}/snapshots`);
       } else if (repository) {
-        // setQuery(Query.parse(`repository="${String(repository)}"`));
         setListParams((prev: SnapshotListParams) => ({
           ...prev,
           searchField: 'repository',
