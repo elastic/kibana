@@ -14,14 +14,16 @@ export const permissionsSuccess = createAction('LICENSE_MANAGEMENT_PERMISSIONS_S
 
 export const permissionsError = createAction('LICENSE_MANAGEMENT_PERMISSIONS_ERROR');
 
-export const loadPermissions = () => async (dispatch, getState, { http }) => {
-  dispatch(permissionsLoading(true));
-  try {
-    const permissions = await getPermissions(http);
-    dispatch(permissionsLoading(false));
-    dispatch(permissionsSuccess(permissions.hasPermission));
-  } catch (e) {
-    dispatch(permissionsLoading(false));
-    dispatch(permissionsError(e));
-  }
-};
+export const loadPermissions =
+  () =>
+  async (dispatch, getState, { http }) => {
+    dispatch(permissionsLoading(true));
+    try {
+      const permissions = await getPermissions(http);
+      dispatch(permissionsLoading(false));
+      dispatch(permissionsSuccess(permissions.hasPermission));
+    } catch (e) {
+      dispatch(permissionsLoading(false));
+      dispatch(permissionsError(e));
+    }
+  };
