@@ -23,11 +23,11 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
-  const [clusters, setClusters] = useState([] as any);
   const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
-  });
+  }) as any;
+
   const [data, setData] = useState(null);
 
   const title = i18n.translate('xpack.monitoring.beats.overview.routeTitle', {
@@ -39,12 +39,12 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   });
 
   useEffect(() => {
-    if (clusters && clusters.length > 0) {
-      generateBreadcrumbs(clusters[0].cluster_name, {
+    if (cluster) {
+      generateBreadcrumbs(cluster.cluster_name, {
         inBeats: true,
       });
     }
-  }, [clusters, generateBreadcrumbs]);
+  }, [cluster, generateBreadcrumbs]);
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
