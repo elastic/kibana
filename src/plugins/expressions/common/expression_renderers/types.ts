@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export interface ExpressionRenderDefinition<Config = unknown> {
+export interface ExpressionRenderDefinition<Config = unknown, Variables = unknown> {
   /**
    * Technical name of the renderer, used as ID to identify renderer in
    * expression renderer registry. This must match the name of the expression
@@ -42,7 +42,7 @@ export interface ExpressionRenderDefinition<Config = unknown> {
   render: (
     domNode: HTMLElement,
     config: Config,
-    handlers: IInterpreterRenderHandlers
+    handlers: IInterpreterRenderHandlers<Variables>
   ) => void | Promise<void>;
 }
 
@@ -59,7 +59,7 @@ export type AnyExpressionRenderDefinition = ExpressionRenderDefinition<any>;
  */
 export type RenderMode = 'edit' | 'preview' | 'view';
 
-export interface IInterpreterRenderHandlers {
+export interface IInterpreterRenderHandlers<Variables = Record<string, any>> {
   /**
    * Done increments the number of rendering successes
    */
@@ -71,7 +71,7 @@ export interface IInterpreterRenderHandlers {
   hasCompatibleActions?: (event: any) => Promise<boolean>;
   getRenderMode: () => RenderMode;
   updateVariables?: (variables: IInterpreterRenderHandlers['variables']) => void;
-  variables?: Record<string, any>;
+  variables?: Variables;
   /**
    * The chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing.
    */

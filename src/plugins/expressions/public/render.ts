@@ -31,7 +31,7 @@ export interface ExpressionRendererEvent {
   data: any;
 }
 
-interface UpdateValue {
+export interface UpdateValue {
   newExpression?: string | ExpressionAstExpression;
   newParams: IExpressionLoaderParams;
 }
@@ -97,7 +97,8 @@ export class ExpressionRenderHandler {
       },
       updateVariables: (newVariables: UpdateValue['newParams']['variables']) => {
         const { newParams = {}, newExpression = '' } = this.updateSubject.getValue() ?? {};
-        this.updateSubject.next({
+
+        this.handlers.update({
           newExpression,
           newParams: {
             ...newParams,

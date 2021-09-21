@@ -29,7 +29,7 @@ export {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from './react_expression_renderer';
-export { ExpressionRenderHandler, ExpressionRendererEvent } from './render';
+export { ExpressionRenderHandler, ExpressionRendererEvent, UpdateValue } from './render';
 export {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,

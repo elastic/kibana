@@ -120,3 +120,12 @@ export interface VisConfig {
   isVislibVis?: boolean;
   xDomain?: XDomainOutput;
 }
+
+export interface XyVariables {
+  uiState: {
+    vis?: {
+      legendOpen: boolean;
+      colors: Record<string, string>;
+    };
+  };
+}

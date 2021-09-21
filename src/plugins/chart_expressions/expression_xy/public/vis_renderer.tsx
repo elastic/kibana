@@ -19,6 +19,15 @@ import { EXPRESSION_NAME } from '../common';
 import type { VisComponentType } from './vis_component';
 import { VisTypeXyRenderConfig } from '../common/types';
 
+export interface XyVariables {
+  uiState: {
+    vis?: {
+      legendOpen: boolean;
+      colors: Record<string, string>;
+    };
+  };
+}
+
 // @ts-ignore
 const VisComponent = lazy<VisComponentType>(() => import('./vis_component'));
 
@@ -29,7 +38,7 @@ function shouldShowNoResultsMessage(visData: any, visType: XyVisType): boolean {
   return Boolean(isZeroHits);
 }
 
-export const xyVisRenderer: ExpressionRenderDefinition<VisTypeXyRenderConfig> = {
+export const xyVisRenderer: ExpressionRenderDefinition<VisTypeXyRenderConfig, XyVariables> = {
   name: EXPRESSION_NAME,
   displayName: 'XY visualization',
   reuseDomNode: true,
@@ -37,6 +46,7 @@ export const xyVisRenderer: ExpressionRenderDefinition<VisTypeXyRenderConfig> = 
     const showNoResult = shouldShowNoResultsMessage(visData, visType);
 
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
+
     render(
       <I18nProvider>
         <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>

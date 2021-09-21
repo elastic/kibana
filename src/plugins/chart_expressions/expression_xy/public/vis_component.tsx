@@ -54,7 +54,7 @@ import {
   getXAccessor,
 } from '../common/utils/accessors';
 import { ChartSplitter } from './chart_splitter';
-import { VisTypeXyConfig } from '../common/types';
+import { VisTypeXyConfig, XyVariables } from '../common/types';
 
 export interface VisComponentProps {
   visParams: VisTypeXyConfig;
@@ -63,19 +63,30 @@ export interface VisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   syncColors: boolean;
-  updateVariables: IInterpreterRenderHandlers['updateVariables'];
-  variables: IInterpreterRenderHandlers['variables'];
+  updateVariables: IInterpreterRenderHandlers<XyVariables>['updateVariables'];
+  variables: IInterpreterRenderHandlers<XyVariables>['variables'];
 }
 
 export type VisComponentType = typeof VisComponent;
 
 const VisComponent = (props: VisComponentProps) => {
+  const { variables, updateVariables } = props;
+  const updateUiStateVariable = useCallback(
+    (uiStateVars: Record<string, unknown>) => {
+      updateVariables?.({
+        uiState: { vis: { ...(variables?.uiState.vis ?? {}), ...uiStateVars } },
+      });
+    },
+    [updateVariables, variables?.uiState.vis]
+  );
+
   const [showLegend, setShowLegend] = useState<boolean>(() => {
     // @TODO: Check when this bwc can safely be removed
     const bwcLegendStateDefault =
       props.visParams.addLegend == null ? true : props.visParams.addLegend;
-    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
+    return props.variables?.uiState?.vis?.legendOpen ?? bwcLegendStateDefault;
   });
+
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
   const chartRef = useRef<Chart>(null);
 
@@ -181,29 +192,24 @@ const VisComponent = (props: VisComponentProps) => {
   const toggleLegend = useCallback(() => {
     setShowLegend((value) => {
       const newValue = !value;
-      if (props.uiState?.set) {
-        props.uiState.set('vis.legendOpen', newValue);
-      }
+      updateUiStateVariable({ legendOpen: newValue });
       return newValue;
     });
-  }, [props.uiState]);
+  }, [updateUiStateVariable]);
 
   const setColor = useCallback(
     (newColor: string | null, seriesLabel: string | number) => {
-      const colors = props.uiState?.get('vis.colors') || {};
+      const colors = variables?.uiState.vis?.colors || {};
       if (colors[seriesLabel] === newColor || !newColor) {
         delete colors[seriesLabel];
       } else {
         colors[seriesLabel] = newColor;
       }
 
-      if (props.uiState?.set) {
-        props.uiState.setSilent('vis.colors', null);
-        props.uiState.set('vis.colors', colors);
-        props.uiState.emit('colorChanged');
-      }
+      updateUiStateVariable({ colors: colors ?? null });
+      props.renderComplete();
     },
-    [props.uiState]
+    [props, updateUiStateVariable, variables?.uiState.vis?.colors]
   );
 
   const { visData, visParams, syncColors } = props;
@@ -246,10 +252,7 @@ const VisComponent = (props: VisComponentProps) => {
       if (!seriesName) {
         return null;
       }
-      const overwriteColors: Record<string, string> = props.uiState?.get
-        ? props.uiState.get('vis.colors', {})
-        : {};
-
+      const overwriteColors = props.variables?.uiState?.vis?.colors ?? {};
       if (Object.keys(overwriteColors).includes(seriesName)) {
         return overwriteColors[seriesName];
       }
@@ -276,7 +279,7 @@ const VisComponent = (props: VisComponentProps) => {
       allSeries,
       config.aspects.y,
       getSeriesName,
-      props.uiState,
+      props.variables,
       splitAccessors,
       syncColors,
       visParams.palette.name,

@@ -33,6 +33,7 @@ import {
   ExpressionsStart,
   ExpressionRenderError,
   ExpressionAstExpression,
+  UpdateValue,
 } from '../../../../plugins/expressions/public';
 import { Vis, SerializedVis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
@@ -143,6 +144,7 @@ export class VisualizeEmbeddable
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
+
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
 
@@ -356,6 +358,7 @@ export class VisualizeEmbeddable
 
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
+    this.subscriptions.push(this.handler.update$.subscribe(this.onVariablesUpdate.bind(this)));
 
     this.updateHandler();
   }
@@ -375,6 +378,14 @@ export class VisualizeEmbeddable
   public reload = async () => {
     await this.handleVisUpdate();
   };
+
+  private async onVariablesUpdate(params: UpdateValue | null) {
+    const uiState = params?.newParams.variables?.uiState ?? {};
+    Object.keys(uiState)
+      .filter((key) => uiState.hasOwnProperty(key))
+      .forEach((key) => this.vis.uiState.set(key, uiState[key]));
+    this.updateHandler();
+  }
 
   private async updateHandler() {
     const context = {
