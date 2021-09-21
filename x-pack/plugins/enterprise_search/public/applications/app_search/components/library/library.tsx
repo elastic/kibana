@@ -238,6 +238,27 @@ export const Library: React.FC = () => {
           <EuiSpacer />
 
           <EuiTitle size="s">
+            <h3>With a document position</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <Result
+            {...{
+              ...props,
+              showResultPosition: true,
+              resultPosition: 3,
+              result: {
+                ...props.result,
+                _meta: {
+                  id: '1',
+                  score: 100,
+                  engine: 'my-engine',
+                },
+              },
+            }}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
             <h3>With an id and a score and an engine</h3>
           </EuiTitle>
           <EuiSpacer />

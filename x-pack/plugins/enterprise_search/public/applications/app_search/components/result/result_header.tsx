@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { ResultActions } from './result_actions';
 import { ResultHeaderItem } from './result_header_item';
@@ -21,14 +21,18 @@ interface Props {
   resultMeta: ResultMeta;
   actions: ResultAction[];
   documentLink?: string;
+  showResultPosition?: boolean;
+  resultPosition?: number;
 }
 
 export const ResultHeader: React.FC<Props> = ({
+  showResultPosition,
   showScore,
   resultMeta,
   isMetaEngine,
   actions,
   documentLink,
+  resultPosition,
 }) => {
   return (
     <header className="appSearchResultHeader">
@@ -39,6 +43,11 @@ export const ResultHeader: React.FC<Props> = ({
         responsive={false}
         wrap
       >
+        {showResultPosition && resultPosition && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">#{resultPosition}</EuiBadge>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow>
           <ResultHeaderItem
             href={documentLink}
