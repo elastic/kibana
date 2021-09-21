@@ -131,10 +131,7 @@ export function getConnectionStats({
               : null,
           timeseries: mergedStats.timeseries.map((point) => ({
             x: point.x,
-            y:
-              point.count > 0
-                ? calculateThroughput({ start, end, value: point.count })
-                : null,
+            y: point.count, // sparklines only shows trend (no axis)
           })),
         },
         errorRate: {

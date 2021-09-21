@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { memoize } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { asDecimalOrInteger, asInteger, asDecimal } from './formatters';
+import {
+  asDecimalOrInteger,
+  asInteger,
+  asDecimal,
+  asPreciseDecimal,
+} from './formatters';
 import { TimeUnit } from './datetime';
 import { Maybe } from '../../../typings/common';
 import { isFiniteNumber } from '../is_finite_number';
@@ -185,7 +190,10 @@ export function asTransactionRate(value: Maybe<number>) {
 export function asExactTransactionRate(value: number, unit: ThroughputUnit) {
   return i18n.translate('xpack.apm.exactTransactionRateLabel', {
     defaultMessage: `{value} { unit, select, minute {tpm} other {tps} }`,
-    values: { value: asDecimalOrInteger(value), unit },
+    values: {
+      value: value >= 1 ? asDecimalOrInteger(value) : asPreciseDecimal(value),
+      unit,
+    },
   });
 }
 

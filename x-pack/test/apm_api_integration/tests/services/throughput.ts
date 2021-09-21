@@ -52,7 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Throughput when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
-      describe('when querying without kql filter', () => {
+      describe('with kql filter to force metrics-based UI', () => {
         before(async () => {
           const response = await apmApiSupertest({
             endpoint: 'GET /api/apm/services/{serviceName}/throughput',
@@ -65,7 +65,61 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end: metadata.end,
                 transactionType: 'request',
                 environment: 'ENVIRONMENT_ALL',
-                kuery: '',
+                kuery: 'processor.event : "metric"',
+              },
+            },
+          });
+          throughputResponse = response.body;
+        });
+
+        it('returns some data', () => {
+          expect(throughputResponse.currentPeriod.length).to.be.greaterThan(0);
+          expect(throughputResponse.previousPeriod.length).not.to.be.greaterThan(0);
+
+          const nonNullDataPoints = throughputResponse.currentPeriod.filter(({ y }) =>
+            isFiniteNumber(y)
+          );
+
+          expect(nonNullDataPoints.length).to.be.greaterThan(0);
+        });
+
+        it('has the correct start date', () => {
+          expectSnapshot(
+            new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
+          ).toMatchInline(`"2021-08-03T06:50:00.000Z"`);
+        });
+
+        it('has the correct end date', () => {
+          expectSnapshot(
+            new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
+          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
+        });
+
+        it('has the correct number of buckets', () => {
+          expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`31`);
+        });
+
+        it('has the correct throughput in tpm', () => {
+          expect(throughputResponse.throughputUnit).equal('minute');
+          const avg = mean(throughputResponse.currentPeriod.map((d) => d.y));
+          expectSnapshot(avg).toMatchInline(`7.2258064516129`);
+        });
+      });
+
+      describe('with kql filter to force transaction-based UI', () => {
+        before(async () => {
+          const response = await apmApiSupertest({
+            endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+            params: {
+              path: {
+                serviceName: 'opbeans-java',
+              },
+              query: {
+                kuery: 'processor.event : "transaction"',
+                start: metadata.start,
+                end: metadata.end,
+                transactionType: 'request',
+                environment: 'ENVIRONMENT_ALL',
               },
             },
           });
@@ -99,30 +153,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`61`);
         });
 
-        it('has the correct throughput in tpm', () => {
+        it('has the correct throughput in tps', () => {
+          expect(throughputResponse.throughputUnit).equal('second');
           const avg = mean(throughputResponse.currentPeriod.map((d) => d.y));
           expectSnapshot(avg).toMatchInline(`0.124043715846995`);
-        });
-      });
-
-      describe('with kql filter to force transaction-based UI', () => {
-        before(async () => {
-          const response = await apmApiSupertest({
-            endpoint: 'GET /api/apm/services/{serviceName}/throughput',
-            params: {
-              path: {
-                serviceName: 'opbeans-java',
-              },
-              query: {
-                kuery: 'processor.event : "transaction"',
-                start: metadata.start,
-                end: metadata.end,
-                transactionType: 'request',
-                environment: 'ENVIRONMENT_ALL',
-              },
-            },
-          });
-          throughputResponse = response.body;
         });
       });
     }

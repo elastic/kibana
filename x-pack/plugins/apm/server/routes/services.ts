@@ -45,6 +45,7 @@ import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previ
 import { getServicesDetailedStatistics } from '../lib/services/get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from '../lib/services/get_service_dependencies_breakdown';
 import { getBucketSizeForAggregatedTransactions } from '../lib/helpers/get_bucket_size_for_aggregated_transactions';
+import { getThroughputUnit } from '../lib/helpers/calculate_throughput';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services',
@@ -474,11 +475,14 @@ const serviceThroughputRoute = createApmServerRoute({
     });
 
     const { start, end } = setup;
-    const { intervalString } = getBucketSizeForAggregatedTransactions({
-      start,
-      end,
-      searchAggregatedTransactions,
-    });
+    const { intervalString, bucketSize } =
+      getBucketSizeForAggregatedTransactions({
+        start,
+        end,
+        searchAggregatedTransactions,
+      });
+
+    const throughputUnit = getThroughputUnit(bucketSize);
 
     const commonProps = {
       environment,
@@ -488,6 +492,8 @@ const serviceThroughputRoute = createApmServerRoute({
       setup,
       transactionType,
       intervalString,
+      bucketSize,
+      throughputUnit,
     };
 
     const [currentPeriod, previousPeriod] = await Promise.all([
@@ -511,7 +517,7 @@ const serviceThroughputRoute = createApmServerRoute({
         currentPeriodTimeseries: currentPeriod,
         previousPeriodTimeseries: previousPeriod,
       }),
-      throughputUnit: 'minute',
+      throughputUnit,
     };
   },
 });

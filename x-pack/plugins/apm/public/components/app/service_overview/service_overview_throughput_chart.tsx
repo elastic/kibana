@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { asTransactionRate } from '../../../../common/utils/formatters';
+import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -157,7 +157,7 @@ export function ServiceOverviewThroughputChart({
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
-        yLabelFormat={asTransactionRate}
+        yLabelFormat={(y) => asExactTransactionRate(y, data.throughputUnit)}
         customTheme={comparisonChartTheme}
       />
     </EuiPanel>

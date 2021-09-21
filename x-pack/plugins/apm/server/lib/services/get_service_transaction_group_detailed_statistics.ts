@@ -6,6 +6,7 @@
  */
 
 import { keyBy } from 'lodash';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -14,9 +15,8 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../typings/timeseries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -30,7 +30,6 @@ import {
 } from '../helpers/latency_aggregation_type';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { calculateFailedTransactionRate } from '../helpers/transaction_error_rate';
-import { calculateThroughput } from '../helpers/calculate_throughput';
 
 export async function getServiceTransactionGroupDetailedStatistics({
   environment,
@@ -156,7 +155,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     }));
     const throughput = bucket.timeseries.buckets.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,
-      y: calculateThroughput({ start, end, value: timeseriesBucket.doc_count }),
+      y: timeseriesBucket.doc_count, // sparklines only shows trend (no axis)
     }));
     const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,

@@ -22,7 +22,6 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { calculateThroughput } from '../../helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
@@ -154,11 +153,7 @@ export async function getServiceTransactionDetailedStatistics({
         throughput: topTransactionTypeBucket.timeseries.buckets.map(
           (dateBucket) => ({
             x: dateBucket.key + offsetInMs,
-            y: calculateThroughput({
-              start,
-              end,
-              value: dateBucket.doc_count,
-            }),
+            y: dateBucket.doc_count, // sparklines only shows trend (no axis)
           })
         ),
       };
