@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   CoreSetup,
   CoreStart,
@@ -70,6 +71,7 @@ export interface ReportingPublicPluginSetupDendencies {
 
 export interface ReportingPublicPluginStartDendencies {
   home: HomePublicPluginStart;
+  data: DataPublicPluginStart;
   management: ManagementStart;
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
@@ -114,8 +116,11 @@ export class ReportingPublicPlugin
     return this.contract;
   }
 
-  public setup(core: CoreSetup, setupDeps: ReportingPublicPluginSetupDendencies) {
-    const { http, getStartServices, uiSettings } = core;
+  public setup(
+    core: CoreSetup<ReportingPublicPluginStartDendencies>,
+    setupDeps: ReportingPublicPluginSetupDendencies
+  ) {
+    const { getStartServices, http, uiSettings } = core;
     const {
       home,
       management,
@@ -175,7 +180,7 @@ export class ReportingPublicPlugin
 
     uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      new ReportingCsvPanelAction({ core, startServices$, license$, usesUiCapabilities })
+      new ReportingCsvPanelAction({ core, apiClient, startServices$, license$, usesUiCapabilities })
     );
 
     const reportingStart = this.getContract(core);
