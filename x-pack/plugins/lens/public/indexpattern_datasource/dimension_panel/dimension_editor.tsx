@@ -193,10 +193,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
     };
   });
 
-  const currentFieldIsInvalid = useMemo(() => fieldIsInvalid(selectedColumn, currentIndexPattern), [
-    selectedColumn,
-    currentIndexPattern,
-  ]);
+  const currentFieldIsInvalid = useMemo(
+    () => fieldIsInvalid(selectedColumn, currentIndexPattern),
+    [selectedColumn, currentIndexPattern]
+  );
 
   const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
     ({ operationType, compatibleWithCurrentField, disabledStatus }) => {

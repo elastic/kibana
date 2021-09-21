@@ -86,9 +86,8 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
   const { isUsingRollover } = useConfiguration();
   const globalFields = useGlobalFields();
 
-  const { setValue: setMillisecondValue } = globalFields[
-    `${phase}MinAgeMilliSeconds` as 'coldMinAgeMilliSeconds'
-  ];
+  const { setValue: setMillisecondValue } =
+    globalFields[`${phase}MinAgeMilliSeconds` as 'coldMinAgeMilliSeconds'];
   const [formData] = useFormData({ watch: [minAgeValuePath, minAgeUnitPath] });
   const minAgeValue = get(formData, minAgeValuePath);
   const minAgeUnit = get(formData, minAgeUnitPath);
@@ -153,9 +152,8 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                   <EuiFlexItem grow={true} style={{ minWidth: 165 }}>
                     <UseField path={minAgeUnitPath}>
                       {(unitField) => {
-                        const { isInvalid: isUnitFieldInvalid } = getFieldValidityAndErrorMessage(
-                          unitField
-                        );
+                        const { isInvalid: isUnitFieldInvalid } =
+                          getFieldValidityAndErrorMessage(unitField);
                         const icon = (
                           <>
                             {/* This element is rendered for testing purposes only */}
@@ -167,11 +165,10 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             />
                           </>
                         );
-                        const selectAppendValue: Array<
-                          string | React.ReactElement
-                        > = isUsingRollover
-                          ? [i18nTexts.minAgeUnitFieldSuffix, icon]
-                          : [i18nTexts.minAgeUnitFieldSuffix];
+                        const selectAppendValue: Array<string | React.ReactElement> =
+                          isUsingRollover
+                            ? [i18nTexts.minAgeUnitFieldSuffix, icon]
+                            : [i18nTexts.minAgeUnitFieldSuffix];
                         return (
                           <EuiSelect
                             compressed
