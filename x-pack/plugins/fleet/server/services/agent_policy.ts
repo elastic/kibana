@@ -21,6 +21,7 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../constants';
 import type {
   PackagePolicy,
@@ -825,7 +826,7 @@ class AgentPolicyService {
       permissions._elastic_agent_checks.indices = [
         {
           names,
-          privileges: ['auto_configure', 'create_doc'],
+          privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
         },
       ];
     }
