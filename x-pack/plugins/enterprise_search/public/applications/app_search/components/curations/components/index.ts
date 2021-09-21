@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { CurationsTable } from './curations_table';
 export { EmptyState } from './empty_state';
