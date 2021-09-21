@@ -18163,10 +18163,10 @@ listr@^0.14.1, listr@^0.14.3:
     p-map "^2.0.0"
     rxjs "^6.3.3"
 
-lmdb-store@^1.6.6:
-  version "1.6.6"
-  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-1.6.6.tgz#fe06abafd260008c76b21572ceac7c4ca1d3479f"
-  integrity sha512-mqcpJQ7n8WKoo+N4PijDfOcWyFZbKUAI5Ys9hvEnFPNwLoXC8x6SzoIKMvaCmxXkQeUogLecGo7bMYitnZxRkg==
+lmdb-store@^1.6.8:
+  version "1.6.8"
+  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-1.6.8.tgz#f57c1fa4a8e8e7a73d58523d2bfbcee96782311f"
+  integrity sha512-Ltok13VVAfgO5Fdj/jVzXjPJZjefl1iENEHerZyAfAlzFUhvOrA73UdKItqmEPC338U29mm56ZBQr5NJQiKXow==
   dependencies:
     mkdirp "^1.0.4"
     nan "^2.14.2"
@@ -19606,9 +19606,9 @@ ms@^2.1.3:
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
 msgpackr-extract@^1.0.13:
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/msgpackr-extract/-/msgpackr-extract-1.0.13.tgz#39f1958d9cf1c436e18cc544aacec1af62b661d1"
-  integrity sha512-JlQPllMLETiuQ5Vv3IAz+4uOpd1GZPOoCHv9P5ka5P5gkTssm/ejv0WwS4xAfB9B3vDwrExRwuU8v3HRQtJk2Q==
+  version "1.0.14"
+  resolved "https://registry.yarnpkg.com/msgpackr-extract/-/msgpackr-extract-1.0.14.tgz#87d3fe825d226e7f3d9fe136375091137f958561"
+  integrity sha512-t8neMf53jNZRF+f0H9VvEUVvtjGZ21odSBRmFfjZiyxr9lKYY0mpY3kSWZAIc7YWXtCZGOvDQVx2oqcgGiRBrw==
   dependencies:
     nan "^2.14.2"
     node-gyp-build "^4.2.3"
