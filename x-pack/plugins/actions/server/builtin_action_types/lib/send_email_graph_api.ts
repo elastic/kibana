@@ -42,9 +42,8 @@ export async function sendEmailGraphApi(
     configurationUtilities,
     validateStatus: () => true,
   });
-  console.log(res);
   if (res.status === 202) {
-    return res;
+    return res.data;
   }
   const errString = stringify(res.data);
   logger.warn(

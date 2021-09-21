@@ -273,4 +273,48 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
   });
+
+  test('should display only exchange form fields, when selected service is "exchange_server"', () => {
+    const actionConnector = {
+      secrets: {
+        clientSecret: 'user',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'exchange email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+        service: 'exchange_server',
+        clientId: '123',
+        tenantId: '1234',
+      },
+    } as EmailActionConnector;
+    const wrapper = mountWithIntl(
+      <EmailActionConnectorFields
+        action={actionConnector}
+        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="emailFromInput"]').first().prop('value')).toBe(
+      'test@test.com'
+    );
+    expect(wrapper.find('[data-test-subj="emailServiceSelectInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('select[data-test-subj="emailServiceSelectInput"]').prop('value')).toEqual(
+      'exchange_server'
+    );
+
+    expect(wrapper.find('[data-test-subj="emailHostInput"]').length > 0).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeFalsy();
+
+    expect(wrapper.find('[data-test-subj="emailClientSecret"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="emailClientId"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="emailTenantId"]').length > 0).toBeTruthy();
+  });
 });

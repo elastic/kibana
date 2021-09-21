@@ -96,7 +96,6 @@ async function sendEmailWithExchange(
     Authorization: `${tokenResult.tokenType} ${tokenResult.accessToken}`,
   };
 
-  console.log(tokenResult);
   return await sendEmailGraphApi(
     {
       options,
