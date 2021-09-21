@@ -130,7 +130,7 @@ describe('GetCsvReportPanelAction', () => {
     };
 
     const panel = new ReportingCsvPanelAction({
-      ore,
+      core,
       license$: mockLicense$(),
       startServices$: mockStartServices$,
       usesUiCapabilities: true,
