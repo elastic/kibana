@@ -18,7 +18,7 @@ import {
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
 import { createExternalService } from './service';
-import { api } from './api';
+import { api as commonAPI } from './api';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 import {
@@ -30,6 +30,8 @@ import {
   ExecutorSubActionCommonFieldsParams,
   ServiceNowExecutorResultData,
   ExecutorSubActionGetChoicesParams,
+  ServiceFactory,
+  ExternalServiceAPI,
 } from './types';
 import {
   ServiceNowITSMActionTypeId,
@@ -38,6 +40,8 @@ import {
   serviceNowSIRTable,
   snExternalServiceConfig,
 } from './config';
+import { createExternalServiceSIR } from './service_sir';
+import { apiSIR } from './api_sir';
 
 export {
   ServiceNowITSMActionTypeId,
@@ -87,9 +91,9 @@ export function getServiceNowITSMActionType(params: GetActionTypeParams): Servic
     executor: curry(executor)({
       logger,
       configurationUtilities,
-      table: serviceNowITSMTable,
-      commentFieldKey: 'work_notes',
       actionTypeId: ServiceNowITSMActionTypeId,
+      createService: createExternalService,
+      api: commonAPI,
     }),
   };
 }
@@ -112,9 +116,9 @@ export function getServiceNowSIRActionType(params: GetActionTypeParams): Service
     executor: curry(executor)({
       logger,
       configurationUtilities,
-      table: serviceNowSIRTable,
-      commentFieldKey: 'work_notes',
       actionTypeId: ServiceNowSIRActionTypeId,
+      createService: createExternalServiceSIR,
+      api: apiSIR,
     }),
   };
 }
@@ -125,15 +129,15 @@ async function executor(
   {
     logger,
     configurationUtilities,
-    table,
     actionTypeId,
-    commentFieldKey = 'comments',
+    createService,
+    api,
   }: {
     logger: Logger;
     configurationUtilities: ActionsConfigurationUtilities;
-    table: string;
     actionTypeId: string;
-    commentFieldKey?: string;
+    createService: ServiceFactory;
+    api: ExternalServiceAPI;
   },
   execOptions: ServiceNowActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
@@ -142,7 +146,7 @@ async function executor(
   const externalServiceConfig = snExternalServiceConfig[actionTypeId];
   let data: ServiceNowExecutorResultData | null = null;
 
-  const externalService = createExternalService(
+  const externalService = createService(
     {
       config,
       secrets,
@@ -171,7 +175,7 @@ async function executor(
       params: pushToServiceParams,
       secrets,
       logger,
-      commentFieldKey,
+      commentFieldKey: externalServiceConfig.commentFieldKey,
     });
 
     logger.debug(`response push to service for incident id: ${data.id}`);

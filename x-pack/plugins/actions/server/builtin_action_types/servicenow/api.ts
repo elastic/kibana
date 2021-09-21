@@ -6,7 +6,7 @@
  */
 
 import {
-  ExternalServiceApi,
+  ExternalServiceAPI,
   GetChoicesHandlerArgs,
   GetChoicesResponse,
   GetCommonFieldsHandlerArgs,
@@ -89,7 +89,7 @@ const getChoicesHandler = async ({
   return res;
 };
 
-export const api: ExternalServiceApi = {
+export const api: ExternalServiceAPI = {
   getChoices: getChoicesHandler,
   getFields: getFieldsHandler,
   getIncident: getIncidentHandler,

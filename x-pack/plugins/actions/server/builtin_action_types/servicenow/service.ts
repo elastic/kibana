@@ -15,34 +15,21 @@ import {
   ImportSetApiResponse,
   ImportSetApiResponseError,
   ServiceNowIncident,
-  Incident,
   GetApplicationInfoResponse,
-  PartialIncident,
   SNProductsConfigValue,
+  ServiceFactory,
 } from './types';
 
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
-import {
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
-  ResponseError,
-} from './types';
-import { request, getErrorMessage, addTimeZoneToDate } from '../lib/axios_utils';
+import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
+import { request } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { FIELD_PREFIX } from './config';
-
-const prepareIncident = (useOldApi: boolean, incident: PartialIncident): PartialIncident =>
-  useOldApi
-    ? incident
-    : Object.entries(incident).reduce(
-        (acc, [key, value]) => ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }),
-        {} as Incident
-      );
+import { createServiceError, getPushedDate, prepareIncident } from './utils';
 
 export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;
 
-export const createExternalService = (
+export const createExternalService: ServiceFactory = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
@@ -99,15 +86,6 @@ export const createExternalService = (
     }
   };
 
-  const createErrorMessage = (errorResponse: ResponseError): string => {
-    if (errorResponse == null) {
-      return 'unknown';
-    }
-
-    const { error } = errorResponse;
-    return error != null ? `${error?.message}: ${error?.detail}` : 'unknown';
-  };
-
   const isImportSetApiResponseAnError = (
     data: ImportSetApiResponse['result'][0]
   ): data is ImportSetApiResponseError['result'][0] => data.status === 'error';
@@ -142,14 +120,17 @@ export const createExternalService = (
 
       return { ...res.data.result };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.SERVICENOW,
-          `Unable to get application version. Error: ${error.message} Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
+      throw createServiceError(error, 'Unable to get application version');
+    }
+  };
+
+  const logApplicationInfo = (scope: string, version: string) =>
+    logger.debug(`Create incident: Application scope: ${scope}: Application version${version}`);
+
+  const checkIfApplicationIsInstalled = async () => {
+    if (!useOldApi) {
+      const { version, scope } = await getApplicationInformation();
+      logApplicationInfo(scope, version);
     }
   };
 
@@ -166,14 +147,7 @@ export const createExternalService = (
 
       return { ...res.data.result };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.SERVICENOW,
-          `Unable to get incident with id ${id}. Error: ${
-            error.message
-          } Reason: ${createErrorMessage(error.response?.data)}`
-        )
-      );
+      throw createServiceError(error, `Unable to get incident with id ${id}`);
     }
   };
 
@@ -189,23 +163,15 @@ export const createExternalService = (
       checkInstance(res);
       return res.data.result.length > 0 ? { ...res.data.result } : undefined;
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.SERVICENOW,
-          `Unable to find incidents by query. Error: ${error.message} Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
+      throw createServiceError(error, 'Unable to find incidents by query');
     }
   };
 
+  const getUrl = () => urlWithoutTrailingSlash;
+
   const createIncident = async ({ incident }: ExternalServiceParamsCreate) => {
     try {
-      if (!useOldApi) {
-        const { version } = await getApplicationInformation();
-        logger.debug(`Create incident: Current elastic application version: ${version}`);
-      }
+      await checkIfApplicationIsInstalled();
 
       const res = await request({
         axios: axiosInstance,
@@ -228,27 +194,17 @@ export const createExternalService = (
       return {
         title: insertedIncident.number,
         id: insertedIncident.sys_id,
-        pushedDate: new Date(addTimeZoneToDate(insertedIncident.sys_created_on)).toISOString(),
+        pushedDate: getPushedDate(insertedIncident.sys_created_on),
         url: getIncidentViewURL(insertedIncident.sys_id),
       };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.SERVICENOW,
-          `Unable to create incident. Error: ${error.message} Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
+      throw createServiceError(error, 'Unable to create incident');
     }
   };
 
   const updateIncident = async ({ incidentId, incident }: ExternalServiceParamsUpdate) => {
     try {
-      if (!useOldApi) {
-        const { version } = await getApplicationInformation();
-        logger.debug(`Create incident: Current elastic application version: ${version}`);
-      }
+      await checkIfApplicationIsInstalled();
 
       const res = await request({
         axios: axiosInstance,
@@ -276,18 +232,11 @@ export const createExternalService = (
       return {
         title: updatedIncident.number,
         id: updatedIncident.sys_id,
-        pushedDate: new Date(addTimeZoneToDate(updatedIncident.sys_updated_on)).toISOString(),
+        pushedDate: getPushedDate(updatedIncident.sys_updated_on),
         url: getIncidentViewURL(updatedIncident.sys_id),
       };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.SERVICENOW,
-          `Unable to update incident with id ${incidentId}. Error: ${
-            error.message
-          } Reason: ${createErrorMessage(error.response?.data)}`
-        )
-      );
+      throw createServiceError(error, `Unable to update incident with id ${incidentId}`);
     }
   };
 
@@ -304,14 +253,7 @@ export const createExternalService = (
 
       return res.data.result.length > 0 ? res.data.result : [];
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.SERVICENOW,
-          `Unable to get fields. Error: ${error.message} Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
+      throw createServiceError(error, 'Unable to get fields');
     }
   };
 
@@ -326,14 +268,7 @@ export const createExternalService = (
       checkInstance(res);
       return res.data.result;
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.SERVICENOW,
-          `Unable to get choices. Error: ${error.message} Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
+      throw createServiceError(error, 'Unable to get choices');
     }
   };
 
@@ -344,5 +279,9 @@ export const createExternalService = (
     getIncident,
     updateIncident,
     getChoices,
+    getUrl,
+    checkInstance,
+    getApplicationInformation,
+    checkIfApplicationIsInstalled,
   };
 };

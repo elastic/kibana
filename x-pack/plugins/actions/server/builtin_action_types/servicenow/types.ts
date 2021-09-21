@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { AxiosResponse } from 'axios';
 import { TypeOf } from '@kbn/config-schema';
 import {
   ExecutorParamsSchemaITSM,
@@ -97,6 +98,10 @@ export interface ExternalService {
   createIncident: (params: ExternalServiceParamsCreate) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParamsUpdate) => Promise<ExternalServiceIncidentResponse>;
   findIncidents: (params?: Record<string, string>) => Promise<ServiceNowIncident>;
+  getUrl: () => string;
+  checkInstance: (res: AxiosResponse) => void;
+  getApplicationInformation: () => Promise<GetApplicationInfoResponse>;
+  checkIfApplicationIsInstalled: () => Promise<void>;
 }
 
 export type PushToServiceApiParams = ExecutorSubActionPushParams;
@@ -174,7 +179,7 @@ export interface ServiceNowIncident {
   [x: string]: unknown;
 }
 
-export interface ExternalServiceApi {
+export interface ExternalServiceAPI {
   getChoices: (args: GetChoicesHandlerArgs) => Promise<GetChoicesResponse>;
   getFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
@@ -235,6 +240,41 @@ export interface SNProductsConfigValue {
   appScope: string;
   useImportAPI: boolean;
   importSetTable: string;
+  commentFieldKey: string;
 }
 
 export type SNProductsConfig = Record<string, SNProductsConfigValue>;
+
+export enum ObservableTypes {
+  ip4 = 'ipv4-addr',
+  url = 'URL',
+  sha256 = 'SHA256',
+}
+
+export interface Observable {
+  value: string;
+  type: ObservableTypes;
+}
+
+export interface ObservableResponse {
+  value: string;
+  observable_sys_id: ObservableTypes;
+}
+
+export interface ExternalServiceSIR extends ExternalService {
+  addObservableToIncident: (
+    observable: Observable,
+    incidentID: string
+  ) => Promise<ObservableResponse>;
+  bulkAddObservableToIncident: (
+    observables: Observable[],
+    incidentID: string
+  ) => Promise<ObservableResponse[]>;
+}
+
+export type ServiceFactory = (
+  credentials: ExternalServiceCredentials,
+  logger: Logger,
+  configurationUtilities: ActionsConfigurationUtilities,
+  serviceConfig: SNProductsConfigValue
+) => ExternalServiceSIR | ExternalService;

@@ -59,10 +59,22 @@ export const ExecutorSubActionPushParamsSchemaITSM = schema.object({
 export const ExecutorSubActionPushParamsSchemaSIR = schema.object({
   incident: schema.object({
     ...CommonAttributes,
-    dest_ip: schema.nullable(schema.string()),
-    malware_hash: schema.nullable(schema.string()),
-    malware_url: schema.nullable(schema.string()),
-    source_ip: schema.nullable(schema.string()),
+    dest_ip: schema.oneOf([
+      schema.nullable(schema.string()),
+      schema.nullable(schema.arrayOf(schema.string())),
+    ]),
+    malware_hash: schema.oneOf([
+      schema.nullable(schema.string()),
+      schema.nullable(schema.arrayOf(schema.string())),
+    ]),
+    malware_url: schema.oneOf([
+      schema.nullable(schema.string()),
+      schema.nullable(schema.arrayOf(schema.string())),
+    ]),
+    source_ip: schema.oneOf([
+      schema.nullable(schema.string()),
+      schema.nullable(schema.arrayOf(schema.string())),
+    ]),
     priority: schema.nullable(schema.string()),
   }),
   comments: CommentsSchema,
