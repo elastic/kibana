@@ -34,7 +34,7 @@ import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
-import { TimeseriesVisData } from '../../../../../../../src/plugins/vis_type_timeseries/server';
+import { TimeseriesVisData } from '../../../../../../../src/plugins/vis_types/timeseries/server';
 import { InfraServerPluginStartDeps } from './adapter_types';
 
 export class KibanaFramework {
