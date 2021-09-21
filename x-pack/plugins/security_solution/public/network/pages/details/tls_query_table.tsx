@@ -25,19 +25,17 @@ export const TlsQueryTable = ({
   startDate,
   type,
 }: TlsQueryTableComponentProps) => {
-  const [
-    loading,
-    { id, inspect, isInspected, tls, totalCount, pageInfo, loadPage, refetch },
-  ] = useNetworkTls({
-    endDate,
-    filterQuery,
-    flowTarget,
-    indexNames,
-    ip,
-    skip,
-    startDate,
-    type,
-  });
+  const [loading, { id, inspect, isInspected, tls, totalCount, pageInfo, loadPage, refetch }] =
+    useNetworkTls({
+      endDate,
+      filterQuery,
+      flowTarget,
+      indexNames,
+      ip,
+      skip,
+      startDate,
+      type,
+    });
 
   return (
     <TlsTableManage

@@ -84,9 +84,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const { search } = useLocation();
   const history = useHistory();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const agentPolicyIdFromParams = useMemo(() => queryParams.get('addAgentToPolicyId'), [
-    queryParams,
-  ]);
+  const agentPolicyIdFromParams = useMemo(
+    () => queryParams.get('addAgentToPolicyId'),
+    [queryParams]
+  );
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string | null>(
     agentPolicyIdFromParams
   );
@@ -94,7 +95,11 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
-  const { data, isLoading, resendRequest: refreshPolicies } = usePackagePoliciesWithAgentPolicy({
+  const {
+    data,
+    isLoading,
+    resendRequest: refreshPolicies,
+  } = usePackagePoliciesWithAgentPolicy({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,

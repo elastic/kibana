@@ -118,16 +118,16 @@ const NetworkDetailsComponent: React.FC = () => {
     skip: isInitializing,
   });
 
-  const headerDraggableArguments = useMemo(() => ({ field: `${flowTarget}.ip`, value: ip }), [
-    flowTarget,
-    ip,
-  ]);
+  const headerDraggableArguments = useMemo(
+    () => ({ field: `${flowTarget}.ip`, value: ip }),
+    [flowTarget, ip]
+  );
 
   // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
-  const shouldSkip = useMemo(() => isInitializing || filterQuery === undefined, [
-    isInitializing,
-    filterQuery,
-  ]);
+  const shouldSkip = useMemo(
+    () => isInitializing || filterQuery === undefined,
+    [isInitializing, filterQuery]
+  );
 
   return (
     <div data-test-subj="network-details-page">
@@ -273,7 +273,7 @@ const NetworkDetailsComponent: React.FC = () => {
             <TlsQueryTable
               endDate={to}
               filterQuery={filterQuery}
-              flowTarget={(flowTarget as unknown) as FlowTargetSourceDest}
+              flowTarget={flowTarget as unknown as FlowTargetSourceDest}
               indexNames={selectedPatterns}
               ip={ip}
               setQuery={setQuery}
