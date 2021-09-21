@@ -375,7 +375,17 @@ describe('Overview - Fix deprecation logs step', () => {
   });
 
   describe('Privileges check', () => {
-    test(`It doesn't show analyze and resolve logs if it doesn't have the right privileges`, async () => {
+    test(`permissions warning callout is hidden if user has the right privileges`, async () => {
+      const { exists } = testBed;
+
+      // Index privileges warning callout should not be shown
+      expect(exists('noIndexPermissionsCallout')).toBe(false);
+      // Analyze logs and Resolve logs sections should be shown
+      expect(exists('externalLinksTitle')).toBe(true);
+      expect(exists('deprecationsCountTitle')).toBe(true);
+    });
+
+    test(`doesn't show analyze and resolve logs if it doesn't have the right privileges`, async () => {
       await act(async () => {
         testBed = await setupOverviewPage({
           privileges: {

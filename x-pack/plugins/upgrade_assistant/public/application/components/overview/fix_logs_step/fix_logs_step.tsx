@@ -56,9 +56,12 @@ const i18nTexts = {
     }
   ),
   deniedPrivilegeDescription: (privilegesMissing: MissingPrivileges) => (
+    // NOTE: hardcoding the missing privilege because the WithPrivileges HOC
+    // doesnt provide a way to retrieve which specific privileges an index
+    // is missing.
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeDescription"
-      defaultMessage="To be able to analyze deprecation logs, you must have {privilegesCount, plural, one {this index privilege} other {these index privileges}}: {missingPrivileges}"
+      defaultMessage="To analyze deprecation logs, you need the read index {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}"
       values={{
         missingPrivileges: (
           <EuiCode transparentBackground={true}>{privilegesMissing?.index?.join(', ')}</EuiCode>

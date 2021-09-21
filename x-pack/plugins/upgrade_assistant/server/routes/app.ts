@@ -20,7 +20,11 @@ const extractMissingPrivileges = (
     return privileges;
   }, []);
 
-export function registerAppRoutes({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerAppRoutes({
+  router,
+  lib: { handleEsError },
+  config: { isSecurityEnabled },
+}: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/privileges`,
@@ -42,6 +46,10 @@ export function registerAppRoutes({ router, lib: { handleEsError } }: RouteDepen
             index: [],
           },
         };
+
+        if (!isSecurityEnabled()) {
+          return response.ok({ body: privilegesResult });
+        }
 
         try {
           const {

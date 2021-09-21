@@ -9,7 +9,7 @@
 import { convertPrivilegesToArray } from './with_privileges';
 
 describe('convertPrivilegesToArray', () => {
-  test('it knows how to corretly extract section and privilege', () => {
+  test('extracts section and privilege', () => {
     expect(convertPrivilegesToArray('index.index_name')).toEqual([['index', 'index_name']]);
     expect(convertPrivilegesToArray(['index.index_name', 'cluster.management'])).toEqual([
       ['index', 'index_name'],
@@ -20,7 +20,7 @@ describe('convertPrivilegesToArray', () => {
     ]);
   });
 
-  test('it throws when it cannot extract section and privilege', () => {
+  test('throws when it cannot extract section and privilege', () => {
     expect(() => {
       convertPrivilegesToArray('bad_privilege_string');
     }).toThrow('Required privilege must have the format "section.privilege"');

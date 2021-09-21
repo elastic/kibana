@@ -32,15 +32,15 @@ const toArray = (value: Privileges): string[] =>
 
 export const convertPrivilegesToArray = (privileges: Privileges): Privilege[] => {
   return toArray(privileges).map((p) => {
-    // Since an privilege can contain a dot in it's name:
+    // Since an privilege can contain a dot in its name:
     //  * `section` needs to be extracted from the beginning of the string until the first dot
     //  * `privilege` should be everything after the dot
-    const [section, privilege] = p.replace(/\./, '&').split('&');
-    if (!privilege) {
-      // Oh! we forgot to use the dot "." notation.
+    const indexOfFirstPeriod = p.indexOf('.');
+    if (indexOfFirstPeriod === -1) {
       throw new Error('Required privilege must have the format "section.privilege"');
     }
-    return [section, privilege];
+
+    return [p.slice(0, indexOfFirstPeriod), p.slice(indexOfFirstPeriod + 1)];
   });
 };
 
