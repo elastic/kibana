@@ -12,12 +12,6 @@ import { REPO_ROOT } from '@kbn/dev-utils';
 
 const INVALID_CONFIG_PATH = require.resolve('./__fixtures__/invalid_config.yml');
 
-interface LogEntry {
-  message: string;
-  tags?: string[];
-  type: string;
-}
-
 describe('cli invalid config support', function () {
   it(
     'exits with statusCode 64 and logs a single line when config is invalid',
@@ -32,20 +26,13 @@ describe('cli invalid config support', function () {
         }
       );
 
-      let fatalLogLine;
+      let fatalLogLines;
       try {
-        [fatalLogLine] = stdout
+        fatalLogLines = stdout
           .toString('utf8')
           .split('\n')
           .filter(Boolean)
-          .map((line) => JSON.parse(line) as LogEntry)
-          .filter((line) => line.tags?.includes('fatal'))
-          .map((obj) => ({
-            ...obj,
-            pid: '## PID ##',
-            '@timestamp': '## @timestamp ##',
-            error: '## Error with stack trace ##',
-          }));
+          .filter((line) => line.includes('[FATAL]'));
       } catch (e) {
         throw new Error(
           `error parsing log output:\n\n${e.stack}\n\nstdout: \n${stdout}\n\nstderr:\n${stderr}`
@@ -53,19 +40,14 @@ describe('cli invalid config support', function () {
       }
 
       expect(error).toBe(undefined);
+      expect(fatalLogLines).toHaveLength(1);
 
-      if (!fatalLogLine) {
-        throw new Error(
-          `cli did not log the expected fatal error message:\n\nstdout: \n${stdout}\n\nstderr:\n${stderr}`
-        );
-      }
+      const fatalLogLine = fatalLogLines[0];
 
-      expect(fatalLogLine.message).toContain(
+      expect(fatalLogLine).toContain(
         'Error: Unknown configuration key(s): "unknown.key", "other.unknown.key", "other.third", "some.flat.key", ' +
           '"some.array". Check for spelling errors and ensure that expected plugins are installed.'
       );
-      expect(fatalLogLine.tags).toEqual(['fatal', 'root']);
-      expect(fatalLogLine.type).toEqual('log');
 
       expect(status).toBe(64);
     },
