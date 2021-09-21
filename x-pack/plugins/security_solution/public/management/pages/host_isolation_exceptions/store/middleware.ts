@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { CoreStart, HttpStart } from 'kibana/public';
 import { matchPath } from 'react-router-dom';
 import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
@@ -12,10 +13,13 @@ import { ImmutableMiddleware, ImmutableMiddlewareAPI } from '../../../../common/
 import { AppAction } from '../../../../common/store/actions';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../common/constants';
 import { parseQueryFilterToKQL } from '../../../common/utils';
-import { createLoadedResourceState } from '../../../state/async_resource_builders';
+import {
+  createFailedResourceState,
+  createLoadedResourceState,
+} from '../../../state/async_resource_builders';
 import { getHostIsolationExceptionsList } from '../service';
 import { HostIsolationExceptionsPageState } from '../types';
-import { getCurrentLocation } from './selector';
+import { getCurrentListPageDataState, getCurrentLocation } from './selector';
 
 export const SEARCHABLE_FIELDS: Readonly<string[]> = [`name`, `description`, `entries.value`];
 
@@ -58,8 +62,11 @@ async function loadHostIsolationExceptionsList(
     dispatch({
       type: 'hostIsolationExceptionsPageDataChanged',
       payload: {
+        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+        // @ts-ignore
         type: 'LoadingResourceState',
-        previousState: { type: 'UninitialisedResourceState' },
+        // @ts-ignore
+        previousState: getCurrentListPageDataState(store.getState()),
       },
     });
 
@@ -68,11 +75,10 @@ async function loadHostIsolationExceptionsList(
       payload: createLoadedResourceState(entries),
     });
   } catch (error) {
-    // TODO handle error
-    // dispatch({
-    // type: 'hostIsolationExceptionsPageDataChanged',
-    // payload: createFailedResourceState(false),
-    // });
+    dispatch({
+      type: 'hostIsolationExceptionsPageDataChanged',
+      payload: createFailedResourceState<FoundExceptionListItemSchema>(error.body ?? error),
+    });
   }
 }
 

@@ -44,9 +44,24 @@ export const HostIsolationExceptions = () => {
 
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
 
-  const handleItemEdit = useCallback(() => {}, []);
-  const handleItemDelete = useCallback(() => {}, []);
+  const handleItemEdit = useCallback(() => {
+    // TODO - Will be implemented in a follow up PR
+  }, []);
+  const handleItemDelete = useCallback(() => {
+    // TODO - Will be implemented in a follow up PR
+  }, []);
 
+  const handleAddButtonClick = () => {
+    // TODO - Will be implemented in a follow up PR
+  };
+  const handleOnSearch = useCallback(
+    (query: string) => {
+      // TODO
+      // dispatch({ type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } });
+      navigateCallback({ filter: query });
+    },
+    [navigateCallback]
+  );
   const handleItemComponentProps: HostIsolationExceptionPaginatedContent['itemComponentProps'] =
     useCallback(
       (exceptionItem) => ({
@@ -72,18 +87,6 @@ export const HostIsolationExceptions = () => {
       },
       [navigateCallback]
     );
-
-  const handleAddButtonClick = () => {
-    console.log('add host isolation exception');
-  };
-  const handleOnSearch = useCallback(
-    (query: string) => {
-      // TODO
-      // dispatch({ type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } });
-      navigateCallback({ filter: query });
-    },
-    [navigateCallback]
-  );
   const showFlyout = false;
 
   return (
