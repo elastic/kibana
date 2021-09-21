@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import type { OverviewStepProps } from '../../types';
-import { ElasticsearchDeprecationStats, KibanaDeprecationStats } from './components';
+import { EsDeprecationIssuesPanel, KibanaDeprecationIssuesPanel } from './components';
 
 const i18nTexts = {
   reviewStepTitle: i18n.translate('xpack.upgradeAssistant.overview.fixIssuesStepTitle', {
@@ -43,11 +43,11 @@ const FixIssuesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <ElasticsearchDeprecationStats setIsFixed={setIsEsFixed} />
+        <EsDeprecationIssuesPanel setIsFixed={setIsEsFixed} />
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <KibanaDeprecationStats setIsFixed={setIsKibanaFixed} />
+        <KibanaDeprecationIssuesPanel setIsFixed={setIsKibanaFixed} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -124,9 +124,11 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
         });
       });
 
-      const { component, exists } = testBed;
+      const { component, find } = testBed;
       component.update();
-      expect(exists('kibanaRequestErrorIconTip')).toBe(true);
+      expect(find('loadingIssuesError').text()).toBe(
+        'Could not retrieve Kibana deprecation issues.'
+      );
     });
   });
 });

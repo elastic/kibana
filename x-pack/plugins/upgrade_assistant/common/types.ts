@@ -8,6 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
+export type DeprecationSource = 'Kibana' | 'Elasticsearch';
+
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.
   created = 0,

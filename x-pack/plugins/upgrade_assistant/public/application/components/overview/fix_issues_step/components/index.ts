@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ElasticsearchDeprecationStats } from './es_stats';
-export { KibanaDeprecationStats } from './kibana_stats';
+export { EsDeprecationIssuesPanel } from './es_deprecation_issues_panel';
+export { KibanaDeprecationIssuesPanel } from './kibana_deprecation_issues_panel';
