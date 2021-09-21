@@ -111,7 +111,8 @@ export default function ({ getService, getPageObjects }) {
 
           const comparedHeaders = headers.map(function compareHead(header, i) {
             return header.getVisibleText().then(function (text) {
-              expect(text).to.be(expectedHeaders[i]);
+              const visibleText = text.split('\n')[1];
+              expect(visibleText).to.be(expectedHeaders[i]);
             });
           });
 

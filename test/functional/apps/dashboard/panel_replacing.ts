@@ -65,8 +65,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       const panelTitles = await PageObjects.dashboard.getPanelTitles();
-      expect(panelTitles.length).to.be(2);
-      expect(panelTitles[0]).to.be(AREA_CHART_VIS_NAME);
+      const visiblePanelTitles = panelTitles.map((title) => title.split('\n')[1]);
+      expect(visiblePanelTitles.length).to.be(2);
+      expect(visiblePanelTitles[0]).to.be(AREA_CHART_VIS_NAME);
     });
 
     it('replaced panel with saved search', async () => {
