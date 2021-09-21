@@ -34,62 +34,61 @@ export function RumHome() {
 
   const envStyle = isSmall ? {} : { maxWidth: 500 };
 
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] =
-    !rumHasData?.hasData
-      ? {
-          solution: i18n.translate('xpack.apm.ux.overview.solutionName', {
-            defaultMessage: 'Observability',
-          }),
-          actions: {
-            beats: {
-              title: i18n.translate('xpack.apm.ux.overview.beatsCard.title', {
-                defaultMessage: 'Add RUM data',
-              }),
-              description: i18n.translate(
-                'xpack.apm.ux.overview.beatsCard.description',
-                {
-                  defaultMessage:
-                    'Use the RUM (JS) agent to collect user experience data.',
-                }
-              ),
-              href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
-            },
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !rumHasData?.hasData
+    ? {
+        solution: i18n.translate('xpack.apm.ux.overview.solutionName', {
+          defaultMessage: 'Observability',
+        }),
+        actions: {
+          beats: {
+            title: i18n.translate('xpack.apm.ux.overview.beatsCard.title', {
+              defaultMessage: 'Add RUM data',
+            }),
+            description: i18n.translate(
+              'xpack.apm.ux.overview.beatsCard.description',
+              {
+                defaultMessage:
+                  'Use the RUM (JS) agent to collect user experience data.',
+              }
+            ),
+            href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
           },
-          docsLink: core.docLinks.links.observability.guide,
-        }
-      : undefined;
+        },
+        docsLink: core.docLinks.links.observability.guide,
+      }
+    : undefined;
 
   const isLoading = status === 'loading';
 
   return (
     <Fragment>
-      {isLoading && <EmptyStateLoading />}
-      <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
-        <CsmSharedContextProvider>
-          <PageTemplateComponent
-            noDataConfig={noDataConfig}
-            pageHeader={
-              isXXL
-                ? {
-                    pageTitle: i18n.translate('xpack.apm.ux.overview', {
-                      defaultMessage: 'Dashboard',
-                    }),
-                    rightSideItems: [
-                      <DatePicker />,
-                      <div style={envStyle}>
-                        <UxEnvironmentFilter />
-                      </div>,
-                      <UserPercentile />,
-                      <WebApplicationSelect />,
-                    ],
-                  }
-                : { children: <PageHeader /> }
-            }
-          >
+      <CsmSharedContextProvider>
+        <PageTemplateComponent
+          noDataConfig={isLoading ? undefined : noDataConfig}
+          pageHeader={
+            isXXL
+              ? {
+                  pageTitle: i18n.translate('xpack.apm.ux.overview', {
+                    defaultMessage: 'Dashboard',
+                  }),
+                  rightSideItems: [
+                    <DatePicker />,
+                    <div style={envStyle}>
+                      <UxEnvironmentFilter />
+                    </div>,
+                    <UserPercentile />,
+                    <WebApplicationSelect />,
+                  ],
+                }
+              : { children: <PageHeader /> }
+          }
+        >
+          {isLoading && <EmptyStateLoading />}
+          <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
             <RumOverview />
-          </PageTemplateComponent>
-        </CsmSharedContextProvider>
-      </div>
+          </div>
+        </PageTemplateComponent>
+      </CsmSharedContextProvider>
     </Fragment>
   );
 }
