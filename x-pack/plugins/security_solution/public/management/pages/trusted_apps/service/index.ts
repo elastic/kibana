@@ -18,7 +18,7 @@ import {
 
 import {
   DeleteTrustedAppsRequestParams,
-  GetTrustedListAppsResponse,
+  GetTrustedAppsListResponse,
   GetTrustedAppsListRequest,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
@@ -35,7 +35,7 @@ import { sendGetEndpointSpecificPackagePolicies } from '../../policy/store/servi
 
 export interface TrustedAppsService {
   getTrustedApp(params: GetOneTrustedAppRequestParams): Promise<GetOneTrustedAppResponse>;
-  getTrustedAppsList(request: GetTrustedAppsListRequest): Promise<GetTrustedListAppsResponse>;
+  getTrustedAppsList(request: GetTrustedAppsListRequest): Promise<GetTrustedAppsListResponse>;
   deleteTrustedApp(request: DeleteTrustedAppsRequestParams): Promise<void>;
   createTrustedApp(request: PostTrustedAppCreateRequest): Promise<PostTrustedAppCreateResponse>;
   updateTrustedApp(
@@ -57,7 +57,7 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   }
 
   async getTrustedAppsList(request: GetTrustedAppsListRequest) {
-    return this.http.get<GetTrustedListAppsResponse>(TRUSTED_APPS_LIST_API, {
+    return this.http.get<GetTrustedAppsListResponse>(TRUSTED_APPS_LIST_API, {
       query: request,
     });
   }
