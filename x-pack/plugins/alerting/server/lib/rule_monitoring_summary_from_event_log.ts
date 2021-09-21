@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mean, xor } from 'lodash';
+import { mean, sum, xor } from 'lodash';
 import {
   SanitizedAlert as SanitizedRule,
   RuleMonitoringSummary,
@@ -42,6 +42,13 @@ export function ruleMonitoringSummaryFromEventLog(
     actions: [],
     avg_delay: 0,
     avg_duration: 0,
+    avg_action_delay: 0,
+    avg_action_duration: 0,
+    num_successful_executions: 0,
+    num_failed_executions: 0,
+    num_successful_actions: 0,
+    num_failed_actions: 0,
+    num_alerts: 0,
   };
 
   // loop through the events
@@ -128,6 +135,13 @@ export function ruleMonitoringSummaryFromEventLog(
     execution.num_active_alerts -= execution.num_new_alerts;
     execution.active_alert_ids = xor(execution.active_alert_ids, execution.new_alert_ids);
   }
+
+  summary.num_alerts = sum(
+    summary.executions.flatMap((execution) => [
+      execution.num_new_alerts,
+      execution.num_active_alerts,
+    ])
+  );
 
   const summarizedExecutions = getSummarizedStats(summary.executions);
   summary.avg_duration = summarizedExecutions.avgDuration;

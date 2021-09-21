@@ -12,6 +12,7 @@ import {
   dateFormatAliases,
   EuiBasicTable,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
@@ -23,17 +24,20 @@ import {
 } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { chunk, padStart } from 'lodash';
+import { chunk, sortBy, padStart } from 'lodash';
 import {
   Axis,
   BarSeries,
   Chart,
+  CurveType,
+  Fit,
+  LineSeries,
   niceTimeFormatByDay,
   Settings,
   timeFormatter,
 } from '@elastic/charts';
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { RuleExecutionSummary } from '../../../../../../alerting/common';
+import { RuleExecutionSummary, ActionExecutionSummary } from '../../../../../../alerting/common';
 import {
   Alert as Rule,
   RuleMonitoringSummary as RuleMonitoringSummaryInterface,
@@ -81,6 +85,38 @@ function formatNanoseconds(nanos: string) {
   }
 }
 
+function formatBarChart(executions: RuleExecutionSummary[], actions: ActionExecutionSummary[]) {
+  let barData = [];
+  for (const execution of executions) {
+    if (execution.outcome === 'success') {
+      barData.push({
+        key: execution.start,
+        successfulExecution: execution.duration,
+      });
+    } else if (execution.outcome === 'failure') {
+      barData.push({
+        key: execution.start,
+        failedExecution: execution.duration,
+      });
+    }
+  }
+
+  for (const action of actions) {
+    if (action.outcome === 'success') {
+      barData.push({
+        key: action.start,
+        successfulAction: action.duration,
+      });
+    } else if (action.outcome === 'failure') {
+      barData.push({
+        key: action.start,
+        failedAction: action.duration,
+      });
+    }
+  }
+  barData = sortBy(barData, ['key']);
+  return barData;
+}
 export function RuleMonitoringSummary({
   rule,
   ruleType,
@@ -98,81 +134,111 @@ export function RuleMonitoringSummary({
 
   const pageOfExecutions = getPage(ruleMonitoringSummary.executions, executionPagination);
   const pageOfActions = getPage(ruleMonitoringSummary.actions, actionPagination);
+  const formattedData = formatBarChart(
+    ruleMonitoringSummary.executions,
+    ruleMonitoringSummary.actions
+  );
 
   return (
     <>
-      <EuiFlexGrid gutterSize="l" columns={4}>
-        <EuiFlexItem>
-          <EuiPanel hasBorder={true}>
+      <EuiFlexGroup gutterSize="l">
+        <EuiFlexItem grow={1}>
+          <EuiPanel hasBorder={true} grow={false}>
             <EuiStat
-              title={formatNanoseconds(ruleMonitoringSummary.avg_duration.toString())}
-              description="Average execution duration"
+              title={ruleMonitoringSummary.num_successful_executions.toString()}
+              description="# Successful Executions"
             />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel hasBorder={true}>
-            <EuiStat
-              title={formatNanoseconds(ruleMonitoringSummary.avg_delay.toString())}
-              description="Average execution delay"
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel hasBorder={true}>
-            <EuiStat
-              title={formatNanoseconds(ruleMonitoringSummary.avg_action_duration.toString())}
-              description="Average action duration"
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel hasBorder={true}>
-            <EuiStat
-              title={formatNanoseconds(ruleMonitoringSummary.avg_action_delay.toString())}
-              description="Average action delay"
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-      <EuiSpacer size="xl" />
-      <EuiFlexGrid gutterSize="l" columns={2}>
-        <EuiFlexItem>
-          <EuiPanel hasBorder={true}>
-            <EuiTitle size="s">
-              <h3>Execution Duration and Delay</h3>
-            </EuiTitle>
-            <EuiHorizontalRule />
             <EuiSpacer size="s" />
-            <EuiFlexGrid gutterSize="s" columns={2}>
-              <EuiFlexItem>
-                <EuiStat
-                  title={formatNanoseconds(ruleMonitoringSummary.avg_duration.toString())}
-                  description="Average execution duration"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiStat
-                  title={formatNanoseconds(ruleMonitoringSummary.avg_delay.toString())}
-                  description="Average execution delay"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiStat
-                  title={formatNanoseconds(ruleMonitoringSummary.avg_action_duration.toString())}
-                  description="Average action duration"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiStat
-                  title={formatNanoseconds(ruleMonitoringSummary.avg_action_delay.toString())}
-                  description="Average action delay"
-                />
-              </EuiFlexItem>
-            </EuiFlexGrid>
+            <EuiStat
+              title={ruleMonitoringSummary.num_failed_executions.toString()}
+              description="# Failed Executions"
+            />
           </EuiPanel>
         </EuiFlexItem>
-      </EuiFlexGrid>
+        <EuiFlexItem grow={1}>
+          <EuiPanel hasBorder={true} grow={false}>
+            <EuiStat
+              title={ruleMonitoringSummary.num_successful_actions.toString()}
+              description="# Successful Actions"
+            />
+            <EuiSpacer size="s" />
+            <EuiStat
+              title={ruleMonitoringSummary.num_failed_actions.toString()}
+              description="# Failed Actions"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiPanel hasBorder={true} grow={false}>
+            <EuiStat title={ruleMonitoringSummary.num_alerts.toString()} description="# Alerts" />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={4}>
+          <EuiPanel hasBorder={true}>
+            <EuiBasicTable
+              items={[
+                {
+                  lastDateTitle: 'Last successful execution',
+                  lastDateTime:
+                    ruleMonitoringSummary.executions.find(
+                      (execution: RuleExecutionSummary) => execution.outcome === 'success'
+                    )?.start ?? '--',
+                },
+                {
+                  lastDateTitle: 'Last failed execution',
+                  lastDateTime:
+                    ruleMonitoringSummary.executions.find(
+                      (execution: RuleExecutionSummary) => execution.outcome === 'failure'
+                    )?.start ?? '--',
+                },
+                {
+                  lastDateTitle: 'Last successful action',
+                  lastDateTime:
+                    ruleMonitoringSummary.actions.find(
+                      (action: ActionExecutionSummary) => action.outcome === 'success'
+                    )?.start ?? '--',
+                },
+                {
+                  lastDateTitle: 'Last failed execution',
+                  lastDateTime:
+                    ruleMonitoringSummary.actions.find(
+                      (action: ActionExecutionSummary) => action.outcome === 'success'
+                    )?.start ?? '--',
+                },
+              ]}
+              rowProps={() => ({
+                'data-test-subj': 'action-row',
+              })}
+              cellProps={() => ({
+                'data-test-subj': 'cell',
+              })}
+              columns={[
+                {
+                  field: 'lastDateTitle',
+                  name: '',
+                  sortable: false,
+                  truncateText: true,
+                  render: (value: string) => {
+                    return <span>{value}</span>;
+                  },
+                },
+                {
+                  field: 'lastDateTime',
+                  name: '',
+                  render: (value: string) => {
+                    return <span>{value}</span>;
+                  },
+                  sortable: false,
+                },
+              ]}
+              tableLayout="fixed"
+              className="executionSummaryList"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xl" />
+      <EuiFlexGrid gutterSize="l" columns={4} />
       <EuiSpacer size="xl" />
       <EuiFlexGrid gutterSize="l" columns={1}>
         <EuiFlexItem>
@@ -186,42 +252,38 @@ export function RuleMonitoringSummary({
               <BarSeries
                 id="rule_success"
                 name="Rule executions (success)"
-                data={ruleMonitoringSummary.executions
-                  .filter((execution) => execution.outcome === 'success')
-                  .map((execution) => [execution.start, execution.duration])}
+                data={formattedData}
                 xScaleType="time"
-                xAccessor={0}
-                yAccessors={[1]}
+                xAccessor={'key'}
+                yAccessors={['successfulExecution']}
+                yScaleType="linear"
               />
               <BarSeries
                 id="rule_failure"
                 name="Rule executions (failed)"
-                data={ruleMonitoringSummary.executions
-                  .filter((execution) => execution.outcome === 'failure')
-                  .map((execution) => [execution.start, execution.duration])}
+                data={formattedData}
                 xScaleType="time"
-                xAccessor={0}
-                yAccessors={[1]}
+                xAccessor={'key'}
+                yAccessors={['failedExecution']}
+                yScaleType="linear"
               />
               <BarSeries
                 id="action_success"
                 name="Action executions (success)"
-                data={ruleMonitoringSummary.actions
-                  .filter((action) => action.outcome === 'success')
-                  .map((action) => [action.start, action.duration])}
+                data={formattedData}
                 xScaleType="time"
-                xAccessor={0}
-                yAccessors={[1]}
+                xAccessor={'key'}
+                yAccessors={['successfulAction']}
+                yScaleType="linear"
               />
               <BarSeries
                 id="action_failure"
                 name="Action executions (failed)"
-                data={ruleMonitoringSummary.actions
-                  .filter((action) => action.outcome === 'failure')
-                  .map((action) => [action.start, action.duration])}
+                data={formattedData}
                 xScaleType="time"
-                xAccessor={0}
-                yAccessors={[1]}
+                xAccessor={'key'}
+                yAccessors={['failedAction']}
+                yScaleType="linear"
               />
               <Axis
                 title={formatDate(Date.now(), dateFormatAliases.date)}
@@ -254,6 +316,58 @@ export function RuleMonitoringSummary({
                     title={formatNanoseconds(ruleMonitoringSummary.avg_duration.toString())}
                     description="Average execution duration"
                   />
+                  <EuiSpacer size="l" />
+                  <Chart size={{ height: 200 }}>
+                    <Settings
+                      theme={{
+                        areaSeriesStyle: {
+                          point: {
+                            visible: false,
+                          },
+                        },
+                        lineSeriesStyle: {
+                          point: {
+                            visible: false,
+                          },
+                        },
+                      }}
+                    />
+                    <LineSeries
+                      id="rule_duration"
+                      xScaleType="time"
+                      yScaleType="linear"
+                      xAccessor={0}
+                      yAccessors={[1]}
+                      data={ruleMonitoringSummary.executions
+                        .reverse()
+                        .map((execution) => [execution.start, execution.duration])}
+                      fit={Fit.Linear}
+                      curve={CurveType.CURVE_NATURAL}
+                    />
+                    <LineSeries
+                      id="rule_duration_avg"
+                      xScaleType="time"
+                      yScaleType="linear"
+                      xAccessor={0}
+                      yAccessors={[1]}
+                      data={ruleMonitoringSummary.executions
+                        .reverse()
+                        .map((execution) => [execution.start, ruleMonitoringSummary.avg_duration])}
+                      curve={CurveType.CURVE_NATURAL}
+                    />
+                    <Axis
+                      title={formatDate(Date.now(), dateFormatAliases.date)}
+                      id="bottom-axis"
+                      position="bottom"
+                      tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+                    />
+                    <Axis
+                      id="left-axis"
+                      position="left"
+                      showGridLines
+                      tickFormat={(d) => formatNanoseconds(d)}
+                    />
+                  </Chart>
                 </EuiPanel>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -262,6 +376,58 @@ export function RuleMonitoringSummary({
                     title={formatNanoseconds(ruleMonitoringSummary.avg_delay.toString())}
                     description="Average execution delay"
                   />
+                  <EuiSpacer size="l" />
+                  <Chart size={{ height: 200 }}>
+                    <Settings
+                      theme={{
+                        areaSeriesStyle: {
+                          point: {
+                            visible: false,
+                          },
+                        },
+                        lineSeriesStyle: {
+                          point: {
+                            visible: false,
+                          },
+                        },
+                      }}
+                    />
+                    <LineSeries
+                      id="rule_delay"
+                      xScaleType="time"
+                      yScaleType="linear"
+                      xAccessor={0}
+                      yAccessors={[1]}
+                      data={ruleMonitoringSummary.executions
+                        .reverse()
+                        .map((execution) => [execution.start, execution.delay])}
+                      fit={Fit.Linear}
+                      curve={CurveType.CURVE_NATURAL}
+                    />
+                    <LineSeries
+                      id="rule_duration_avg"
+                      xScaleType="time"
+                      yScaleType="linear"
+                      xAccessor={0}
+                      yAccessors={[1]}
+                      data={ruleMonitoringSummary.executions
+                        .reverse()
+                        .map((execution) => [execution.start, ruleMonitoringSummary.avg_delay])}
+                      curve={CurveType.CURVE_NATURAL}
+                    />
+                    <Axis
+                      title={formatDate(Date.now(), dateFormatAliases.date)}
+                      id="bottom-axis"
+                      position="bottom"
+                      tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+                    />
+                    <Axis
+                      id="left-axis"
+                      position="left"
+                      showGridLines
+                      tickFormat={(d) => formatNanoseconds(d)}
+                    />
+                  </Chart>
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGrid>
@@ -394,6 +560,58 @@ export function RuleMonitoringSummary({
                     title={formatNanoseconds(ruleMonitoringSummary.avg_action_duration.toString())}
                     description="Average action duration"
                   />
+                  <EuiSpacer size="l" />
+                  <Chart size={{ height: 200 }}>
+                    <Settings
+                      theme={{
+                        areaSeriesStyle: {
+                          point: {
+                            visible: false,
+                          },
+                        },
+                        lineSeriesStyle: {
+                          point: {
+                            visible: false,
+                          },
+                        },
+                      }}
+                    />
+                    <LineSeries
+                      id="action_duration"
+                      xScaleType="time"
+                      yScaleType="linear"
+                      xAccessor={0}
+                      yAccessors={[1]}
+                      data={ruleMonitoringSummary.actions
+                        .reverse()
+                        .map((action) => [action.start, action.duration])}
+                      fit={Fit.Linear}
+                      curve={CurveType.CURVE_NATURAL}
+                    />
+                    <LineSeries
+                      id="action_duration_avg"
+                      xScaleType="time"
+                      yScaleType="linear"
+                      xAccessor={0}
+                      yAccessors={[1]}
+                      data={ruleMonitoringSummary.actions
+                        .reverse()
+                        .map((action) => [action.start, ruleMonitoringSummary.avg_action_duration])}
+                      curve={CurveType.CURVE_NATURAL}
+                    />
+                    <Axis
+                      title={formatDate(Date.now(), dateFormatAliases.date)}
+                      id="bottom-axis"
+                      position="bottom"
+                      tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+                    />
+                    <Axis
+                      id="left-axis"
+                      position="left"
+                      showGridLines
+                      tickFormat={(d) => formatNanoseconds(d)}
+                    />
+                  </Chart>
                 </EuiPanel>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -402,6 +620,58 @@ export function RuleMonitoringSummary({
                     title={formatNanoseconds(ruleMonitoringSummary.avg_action_delay.toString())}
                     description="Average action delay"
                   />
+                  <EuiSpacer size="l" />
+                  <Chart size={{ height: 200 }}>
+                    <Settings
+                      theme={{
+                        areaSeriesStyle: {
+                          point: {
+                            visible: false,
+                          },
+                        },
+                        lineSeriesStyle: {
+                          point: {
+                            visible: false,
+                          },
+                        },
+                      }}
+                    />
+                    <LineSeries
+                      id="action_delay"
+                      xScaleType="time"
+                      yScaleType="linear"
+                      xAccessor={0}
+                      yAccessors={[1]}
+                      data={ruleMonitoringSummary.actions
+                        .reverse()
+                        .map((action) => [action.start, action.delay])}
+                      fit={Fit.Linear}
+                      curve={CurveType.CURVE_NATURAL}
+                    />
+                    <LineSeries
+                      id="action_delay_avg"
+                      xScaleType="time"
+                      yScaleType="linear"
+                      xAccessor={0}
+                      yAccessors={[1]}
+                      data={ruleMonitoringSummary.actions
+                        .reverse()
+                        .map((action) => [action.start, ruleMonitoringSummary.avg_action_delay])}
+                      curve={CurveType.CURVE_NATURAL}
+                    />
+                    <Axis
+                      title={formatDate(Date.now(), dateFormatAliases.date)}
+                      id="bottom-axis"
+                      position="bottom"
+                      tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+                    />
+                    <Axis
+                      id="left-axis"
+                      position="left"
+                      showGridLines
+                      tickFormat={(d) => formatNanoseconds(d)}
+                    />
+                  </Chart>
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGrid>

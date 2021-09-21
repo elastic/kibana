@@ -52,6 +52,7 @@ export interface RuleMonitoringSummary {
   num_failed_executions: number;
   num_successful_actions: number;
   num_failed_actions: number;
+  num_alerts: number;
   executions: RuleExecutionSummary[];
   actions: ActionExecutionSummary[];
 }
