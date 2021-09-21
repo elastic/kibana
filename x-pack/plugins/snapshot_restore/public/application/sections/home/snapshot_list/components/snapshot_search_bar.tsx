@@ -28,7 +28,7 @@ const searchSchema: SchemaType = {
   strict: true,
   fields: {
     snapshot: {
-      type: 'string,',
+      type: 'string',
     },
     repository: {
       type: 'string',

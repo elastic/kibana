@@ -47,9 +47,23 @@ const sortFieldToESParams = {
   'shards.failed': 'failed_shard_count',
 };
 
-const convertSearchToWildcard = (value: string, match?: string, operator?: string) => {
+const convertSearchToWildcard = (value: string, match?: string, operator?: string): string => {
   const wildcard = operator === 'exact' ? '' : '*';
   return match === 'must_not' ? `*,-${value}${wildcard}` : `${value}${wildcard}`;
+};
+
+const isSearchingForNonExistentRepository = (
+  repositories: string[],
+  value: string,
+  match?: string,
+  operator?: string
+): boolean => {
+  // only check if searching for an exact match (repository=test)
+  if (match === 'must' && operator === 'exact') {
+    return !(repositories || []).includes(value);
+  }
+  // otherwise we will use a wildcard, so allow the request
+  return false;
 };
 
 export function registerSnapshotsRoutes({
@@ -102,6 +116,23 @@ export function registerSnapshotsRoutes({
         return handleEsError({ error: e, response: res });
       }
 
+      // if the search is for a repository name with exact match (repository=test)
+      // and that repository doesn't exist, ES request throws an error
+      // that is why we return an empty snapshots array instead of sending an ES request
+      if (
+        searchField === 'repository' &&
+        isSearchingForNonExistentRepository(repositories, searchValue!, searchMatch, searchOperator)
+      ) {
+        return res.ok({
+          body: {
+            snapshots: [],
+            policies,
+            repositories,
+            errors: [],
+            total: 0,
+          },
+        });
+      }
       try {
         // If any of these repositories 504 they will cost the request significant time.
         const { body: fetchedSnapshots } = await clusterClient.asCurrentUser.snapshot.get({
