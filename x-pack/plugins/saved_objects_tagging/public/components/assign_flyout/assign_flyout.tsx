@@ -75,8 +75,9 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
           [getKey(result)]: getObjectStatus(result, tagIds),
         };
       }, {} as AssignmentStatusMap);
-      const assignedCount = Object.values(fetchedStatus).filter((status) => status !== 'none')
-        .length;
+      const assignedCount = Object.values(fetchedStatus).filter(
+        (status) => status !== 'none'
+      ).length;
 
       setResults(sortByStatusAndTitle(fetched, fetchedStatus));
       setOverrides({});

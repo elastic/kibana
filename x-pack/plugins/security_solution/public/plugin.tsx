@@ -336,22 +336,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): Promise<SecurityAppStore> {
     if (!this._store) {
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      const [
-        { createStore, createInitialState },
-        kibanaIndexPatterns,
-        configIndexPatterns,
-      ] = await Promise.all([
-        this.lazyApplicationDependencies(),
-        startPlugins.data.indexPatterns.getIdsWithTitle(),
-        startPlugins.data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
-            {
-              strategy: 'indexFields',
-            }
-          )
-          .toPromise(),
-      ]);
+      const [{ createStore, createInitialState }, kibanaIndexPatterns, configIndexPatterns] =
+        await Promise.all([
+          this.lazyApplicationDependencies(),
+          startPlugins.data.indexPatterns.getIdsWithTitle(),
+          startPlugins.data.search
+            .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+              { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
+              {
+                strategy: 'indexFields',
+              }
+            )
+            .toPromise(),
+        ]);
 
       let signal: { name: string | null } = { name: null };
       try {
@@ -391,11 +388,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       };
 
       const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
-      const timelineReducer = (reduceReducers(
+      const timelineReducer = reduceReducers(
         timelineInitialState.timeline,
         tGridReducer,
         subPlugins.timelines.store.reducer.timeline
-      ) as unknown) as Reducer<TimelineState, AnyAction>;
+      ) as unknown as Reducer<TimelineState, AnyAction>;
 
       this._store = createStore(
         createInitialState(

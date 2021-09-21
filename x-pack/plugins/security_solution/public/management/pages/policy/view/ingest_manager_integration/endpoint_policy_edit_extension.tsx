@@ -97,7 +97,7 @@ const WrappedPolicyDetailsForm = memo<{
           // ensure we don't override it.
           updatedPolicy: {
             // Casting is needed due to the use of `Immutable<>` in our store data
-            inputs: (updatedPolicy.inputs as unknown) as NewPackagePolicy['inputs'],
+            inputs: updatedPolicy.inputs as unknown as NewPackagePolicy['inputs'],
           },
         });
       }

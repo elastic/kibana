@@ -21,7 +21,7 @@ export async function createFailureIssue(buildUrl: string, failure: TestFailure,
       failure.failure,
       '```',
       '',
-      `First failure: [Jenkins Build](${buildUrl})`,
+      `First failure: [CI Build](${buildUrl})`,
     ].join('\n'),
     {
       'test.class': failure.classname,
@@ -41,7 +41,7 @@ export async function updateFailureIssue(buildUrl: string, issue: GithubIssueMin
   });
 
   await api.editIssueBodyAndEnsureOpen(issue.number, newBody);
-  await api.addIssueComment(issue.number, `New failure: [Jenkins Build](${buildUrl})`);
+  await api.addIssueComment(issue.number, `New failure: [CI Build](${buildUrl})`);
 
   return newCount;
 }

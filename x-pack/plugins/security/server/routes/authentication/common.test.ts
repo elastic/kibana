@@ -38,11 +38,11 @@ describe('Common authentication routes', () => {
     authc = authenticationServiceMock.createStart();
     routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 
-    mockContext = ({
+    mockContext = {
       licensing: {
         license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
       },
-    } as unknown) as SecurityRequestHandlerContext;
+    } as unknown as SecurityRequestHandlerContext;
 
     defineCommonRoutes(routeParamsMock);
   });

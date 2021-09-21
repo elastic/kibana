@@ -9,7 +9,7 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { ILicense } from '../../../../../../../licensing/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../common/license/policy_config';
-import { PolicyDetailsState } from '../../types';
+import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../../types';
 import {
   Immutable,
   NewPolicyData,
@@ -80,6 +80,13 @@ export const needsToRefresh = (state: Immutable<PolicyDetailsState>): boolean =>
   return !state.policyItem && !state.apiError;
 };
 
+/**
+ * Returns current artifacts location
+ */
+export const getCurrentArtifactsLocation = (
+  state: Immutable<PolicyDetailsState>
+): Immutable<PolicyDetailsArtifactsPageLocation> => state.artifacts.location;
+
 /** Returns a boolean of whether the user is on the policy form page or not */
 export const isOnPolicyFormPage = (state: Immutable<PolicyDetailsState>) => {
   return (
@@ -138,9 +145,8 @@ export const fullPolicy: (s: Immutable<PolicyDetailsState>) => PolicyConfig = cr
   }
 );
 
-const fullWindowsPolicySettings: (
-  s: PolicyDetailsState
-) => PolicyConfig['windows'] = createSelector(fullPolicy, (policy) => policy?.windows);
+const fullWindowsPolicySettings: (s: PolicyDetailsState) => PolicyConfig['windows'] =
+  createSelector(fullPolicy, (policy) => policy?.windows);
 
 const fullMacPolicySettings: (s: PolicyDetailsState) => PolicyConfig['mac'] = createSelector(
   fullPolicy,
