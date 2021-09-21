@@ -36,6 +36,11 @@ interface UpdateValue {
   newParams: IExpressionLoaderParams;
 }
 
+interface RenderOptions {
+  uiState?: any;
+  variables?: ExpressionRenderHandlerParams['variables'];
+}
+
 export class ExpressionRenderHandler {
   render$: Observable<number>;
   update$: Observable<UpdateValue | null>;
@@ -117,13 +122,7 @@ export class ExpressionRenderHandler {
     };
   }
 
-  render = async (
-    value: any,
-    {
-      uiState,
-      variables,
-    }: { uiState?: any; variables?: ExpressionRenderHandlerParams['variables'] }
-  ) => {
+  render = async (value: any, options: RenderOptions = {}) => {
     if (!value || typeof value !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
@@ -148,8 +147,7 @@ export class ExpressionRenderHandler {
         .get(value.as)!
         .render(this.element, value.value, {
           ...this.handlers,
-          uiState,
-          variables,
+          ...options,
         } as any);
     } catch (e: any) {
       return this.handleRenderError(e);
