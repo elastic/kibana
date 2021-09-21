@@ -24,7 +24,7 @@ const AdminQueryBar = styled.div`
 
 export const AdminSearchBar = memo(() => {
   const history = useHistory();
-  const queryParams = useEndpointSelector(selectors.uiQueryParams);
+  const { admin_query: _, ...queryParams } = useEndpointSelector(selectors.uiQueryParams);
   const searchBarIndexPatterns = useEndpointSelector(selectors.patterns);
   const searchBarQuery = useEndpointSelector(selectors.searchBarQuery);
   const clonedIndexPatterns = useMemo(
