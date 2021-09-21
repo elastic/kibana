@@ -51,10 +51,7 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
         pageSize,
         filters,
         query,
-        // this is added to make typescript happy,
-        // this sort of reassignment used to be further downstream but I've moved it here
-        // because this code is going to be decomissioned soon
-        statusFilter: statusFilter || undefined,
+        statusFilter,
       });
 
       return result;
