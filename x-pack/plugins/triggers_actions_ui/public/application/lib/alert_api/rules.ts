@@ -36,6 +36,7 @@ export async function loadAlerts({
   perPage: number;
   total: number;
   data: Alert[];
+  aggregations: { ruleType: { buckets: any[] } };
 }> {
   const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
   const res = await http.get(`${BASE_ALERTING_API_PATH}/rules/_find`, {
@@ -55,5 +56,6 @@ export async function loadAlerts({
     perPage: res.per_page,
     total: res.total,
     data: rewriteResponseRes(res.data),
+    aggregations: res.aggregations,
   };
 }

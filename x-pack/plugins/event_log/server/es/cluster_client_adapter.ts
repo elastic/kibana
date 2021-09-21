@@ -50,6 +50,14 @@ interface QueryOptionsEventsBySavedObjectFilter {
   legacyIds?: string[];
 }
 
+interface SummarizeOptionsEventsBySavedObjectFilter {
+  index: string;
+  namespace: string | undefined;
+  type: string;
+  ids: string[];
+  aggs: Record<string, estypes.AggregationsAggregationContainer>;
+  filter?: string;
+}
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AliasAny = any;
 
@@ -545,6 +553,132 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     } catch (err) {
       throw new Error(
         `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
+      );
+    }
+  }
+
+  public async summarizeEventsBySavedObjectIds<T>(
+    summarizeOptions: SummarizeOptionsEventsBySavedObjectFilter
+  ): Promise<Record<string, estypes.AggregationsAggregate> | undefined> {
+    const { index, namespace, type, ids, aggs, filter } = summarizeOptions;
+
+    const defaultNamespaceQuery = {
+      bool: {
+        must_not: {
+          exists: {
+            field: 'kibana.saved_objects.namespace',
+          },
+        },
+      },
+    };
+    const namedNamespaceQuery = {
+      term: {
+        'kibana.saved_objects.namespace': {
+          value: namespace,
+        },
+      },
+    };
+    const namespaceQuery = namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
+
+    const esClient = await this.elasticsearchClientPromise;
+
+    let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
+    try {
+      dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : [];
+    } catch (err) {
+      this.debug(`Invalid kuery syntax for the filter (${filter}) error:`, {
+        message: err.message,
+        statusCode: err.statusCode,
+      });
+      throw err;
+    }
+
+    const savedObjectsQueryMust: estypes.QueryDslQueryContainer[] = [
+      {
+        term: {
+          'kibana.saved_objects.rel': {
+            value: SAVED_OBJECT_REL_PRIMARY,
+          },
+        },
+      },
+      {
+        term: {
+          'kibana.saved_objects.type': {
+            value: type,
+          },
+        },
+      },
+      // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
+      namespaceQuery,
+    ];
+
+    const musts: estypes.QueryDslQueryContainer[] = [
+      {
+        nested: {
+          path: 'kibana.saved_objects',
+          query: {
+            bool: {
+              must: reject(savedObjectsQueryMust, isUndefined),
+            },
+          },
+        },
+      },
+    ];
+
+    const shouldQuery = [];
+
+    shouldQuery.push({
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      terms: {
+                        // default maximum of 65,536 terms, configurable by index.max_terms_count
+                        'kibana.saved_objects.id': ids,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    musts.push({
+      bool: {
+        should: shouldQuery,
+      },
+    });
+
+    const body: estypes.SearchRequest['body'] = {
+      size: 0,
+      query: {
+        bool: {
+          filter: dslFilterQuery,
+          must: reject(musts, isUndefined),
+        },
+      },
+      aggs,
+    };
+
+    try {
+      const {
+        body: { aggregations },
+      } = await esClient.search({
+        index,
+        body,
+      });
+      return aggregations;
+    } catch (err) {
+      throw new Error(
+        `querying for Event Log saved objects summaries by ids "${ids}" failed with: ${err.message}`
       );
     }
   }

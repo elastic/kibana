@@ -149,6 +149,7 @@ export interface FindResult<Params extends AlertTypeParams> {
   perPage: number;
   total: number;
   data: Array<SanitizedAlert<Params>>;
+  aggregations: unknown;
 }
 
 export interface CreateOptions<Params extends AlertTypeParams> {
@@ -592,6 +593,68 @@ export class RulesClient {
     });
   }
 
+  public async getMonitoringOverview({ dateStart }) {
+    // Get rules that user has access to
+    const { data: rules } = await this.find({ options: { perPage: 10000 } });
+    const ruleIds = (rules ?? []).map(({ id }) => id);
+
+    const dateNow = new Date();
+
+    // default duration of monitoring is 7 days
+    const defaultDateStart = new Date(dateNow.valueOf() - 7 * 24 * 60 * 60 * 1000);
+    const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    this.logger.debug(`getMonitoringOverview(): search the event log for rules ${ruleIds}`);
+    let overviewByRuleType: Record<string, estypes.AggregationsAggregate> | unknown;
+    try {
+      overviewByRuleType = await eventLogClient.aggregateEventsBySavedObjectIds(
+        'alert',
+        ruleIds,
+        {
+          ruleType: {
+            terms: {
+              field: 'rule.category',
+              size: 10,
+            },
+            aggs: {
+              averageDuration: {
+                avg: {
+                  field: 'event.duration',
+                },
+              },
+              maxDuration: {
+                max: {
+                  field: 'event.duration',
+                },
+              },
+              averageDelay: {
+                avg: {
+                  field: 'kibana.task.schedule_delay',
+                },
+              },
+              outcome: {
+                terms: {
+                  field: 'event.outcome',
+                },
+              },
+            },
+          },
+        },
+        'event.provider:alerting AND event.action:execute'
+      );
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getAlertInstanceSummary(): error searching event log for rules ${ruleIds}: ${err.message}`
+      );
+    }
+
+    return {
+      ...(overviewByRuleType ? { overviewByRuleType } : {}),
+    };
+  }
+
   public async find<Params extends AlertTypeParams = never>({
     options: { fields, ...options } = {},
   }: { options?: FindOptions } = {}): Promise<FindResult<Params>> {
@@ -621,6 +684,7 @@ export class RulesClient {
       per_page: perPage,
       total,
       saved_objects: data,
+      aggregations,
     } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
       ...options,
       sortField: mapSortField(options.sortField),
@@ -633,6 +697,13 @@ export class RulesClient {
           : authorizationFilter) ?? options.filter,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
+      aggs: {
+        ruleType: {
+          terms: {
+            field: 'alert.attributes.alertTypeId',
+          },
+        },
+      },
     });
 
     const authorizedData = data.map(({ id, attributes, references }) => {
@@ -676,6 +747,7 @@ export class RulesClient {
       perPage,
       total,
       data: authorizedData,
+      aggregations,
     };
   }
 
