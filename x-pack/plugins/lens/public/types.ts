@@ -652,7 +652,9 @@ export interface Visualization<T = unknown> {
   /**
    * For consistency across different visualizations, the dimension configuration UI is standardized
    */
-  getConfiguration: (props: VisualizationConfigProps<T>) => {
+  getConfiguration: (
+    props: VisualizationConfigProps<T>
+  ) => {
     groups: VisualizationDimensionGroupConfig[];
     supportStaticValue?: boolean;
   };
@@ -756,7 +758,7 @@ export interface LensBrushEvent {
 }
 
 // Use same technique as TriggerContext
-interface LensEditContextMapping {
+export interface LensEditContextMapping {
   [LENS_EDIT_SORT_ACTION]: LensSortActionData;
   [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
   [LENS_TOGGLE_ACTION]: LensToggleActionData;

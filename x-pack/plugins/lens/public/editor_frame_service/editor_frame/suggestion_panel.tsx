@@ -33,7 +33,7 @@ import {
   DatasourceMap,
   VisualizationMap,
 } from '../../types';
-import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
+import { getSuggestions } from './suggestion_helpers';
 import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
@@ -55,6 +55,7 @@ import {
   selectActiveDatasourceId,
   selectActiveData,
   selectDatasourceStates,
+  switchVisualization,
 } from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
@@ -392,7 +393,7 @@ export function SuggestionPanel({
                   rollbackToCurrentVisualization();
                 } else {
                   setLastSelectedSuggestion(index);
-                  switchToSuggestion(dispatchLens, suggestion);
+                  dispatchLens(switchVisualization(suggestion));
                 }
               }}
               selected={index === lastSelectedSuggestion}

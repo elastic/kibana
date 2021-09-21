@@ -25,10 +25,11 @@ export const {
   updateState,
   updateDatasourceState,
   updateVisualizationState,
+  editVisualizationAction,
   updateLayer,
+  insertLayer,
   initEmpty,
   switchVisualization,
-  selectSuggestion,
   rollbackSuggestion,
   submitSuggestion,
   switchDatasource,
@@ -52,7 +53,7 @@ export const makeConfigureStore = (
     middleware.push(
       createLogger({
         // @ts-ignore
-        predicate: () => window.ELASTIC_LENS_LOGGER,
+        // predicate: () => window.ELASTIC_LENS_LOGGER,
       })
     );
   }

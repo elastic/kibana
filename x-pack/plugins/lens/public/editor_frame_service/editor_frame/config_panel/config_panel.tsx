@@ -74,8 +74,7 @@ export function LayerPanels(
       dispatchLens(
         updateVisualizationState({
           visualizationId: activeVisualization.id,
-          updater: newState,
-          clearStagedPreview: false,
+          newState,
         })
       );
     },
@@ -88,7 +87,6 @@ export function LayerPanels(
           updater: (prevState: unknown) =>
             typeof newState === 'function' ? newState(prevState) : newState,
           datasourceId,
-          clearStagedPreview: false,
         })
       );
     },

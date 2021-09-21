@@ -16,7 +16,7 @@ import { SuggestionPanelWrapper } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { EditorFrameStartPlugins } from '../service';
-import { getTopSuggestionForField, switchToSuggestion, Suggestion } from './suggestion_helpers';
+import { getTopSuggestionForField, Suggestion } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import {
   useLensSelector,
@@ -26,6 +26,7 @@ import {
   selectActiveDatasourceId,
   selectDatasourceStates,
   selectVisualization,
+  switchVisualization,
 } from '../../state_management';
 import type { LensInspector } from '../../lens_inspector_service';
 
@@ -76,7 +77,7 @@ export function EditorFrame(props: EditorFrameProps) {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
         trackUiEvent('drop_onto_workspace');
-        switchToSuggestion(dispatchLens, suggestion, 'SWITCH_VISUALIZATION');
+        dispatchLens(switchVisualization(suggestion));
       }
     },
     [getSuggestionForField, dispatchLens]

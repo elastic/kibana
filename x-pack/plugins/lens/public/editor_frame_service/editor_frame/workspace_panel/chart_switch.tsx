@@ -27,11 +27,10 @@ import {
   VisualizationMap,
   DatasourceMap,
 } from '../../../types';
-import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
+import { getSuggestions, Suggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 import {
-  updateLayer,
   removeLayers,
   useLensDispatch,
   useLensSelector,
@@ -40,6 +39,8 @@ import {
   selectActiveDatasourceId,
   selectVisualization,
   selectDatasourceStates,
+  insertLayer,
+  switchVisualization,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator/id_generator';
 
@@ -124,14 +125,11 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
     setFlyoutOpen(false);
 
     trackUiEvent(`chart_switch`);
-
-    switchToSuggestion(
-      dispatchLens,
-      {
+    dispatchLens(
+      switchVisualization({
         ...selection,
         visualizationState: selection.getVisualizationState(),
-      },
-      'SWITCH_VISUALIZATION'
+      })
     );
 
     if (
@@ -196,10 +194,9 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
     function addNewLayer() {
       const newLayerId = generateId();
       dispatchLens(
-        updateLayer({
+        insertLayer({
           datasourceId: activeDatasourceId!,
           layerId: newLayerId,
-          updater: props.datasourceMap[activeDatasourceId!].insertLayer,
         })
       );
 

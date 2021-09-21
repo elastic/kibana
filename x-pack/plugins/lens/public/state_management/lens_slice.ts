@@ -18,6 +18,7 @@ import {
   getVisualizeFieldSuggestions,
   Suggestion,
 } from '../editor_frame_service/editor_frame/suggestion_helpers';
+import { LensEditContextMapping, LensEditEvent } from '../types';
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -76,6 +77,20 @@ export const getPreloadedState = ({
 };
 
 export const setState = createAction<Partial<LensAppState>>('setState');
+
+export const initEmpty = createAction(
+  'initEmpty',
+  function prepare({
+    newState,
+    initialContext,
+  }: {
+    newState: Partial<LensAppState>;
+    initialContext?: VisualizeFieldContext;
+  }) {
+    return { payload: { layerId: generateId(), newState, initialContext } };
+  }
+);
+
 export const onActiveDataChange = createAction<TableInspectorAdapter>('onActiveDataChange');
 export const setSaveable = createAction<boolean>('setSaveable');
 export const removeLayers = createAction<void>('removeLayers');
@@ -89,40 +104,32 @@ export const updateDatasourceState = createAction<{
   clearStagedPreview?: boolean;
 }>('updateDatasourceState');
 export const updateVisualizationState = createAction<{
-  subType: string;
-  updater: (prevState: LensAppState) => LensAppState;
+  visualizationId: string;
+  newState: unknown;
 }>('updateVisualizationState');
+
+export const editVisualizationAction = createAction<{
+  visualizationId: string;
+  event: LensEditEvent<keyof LensEditContextMapping>;
+}>('editVisualizationAction');
+
 export const updateLayer = createAction<{
   layerId: string;
   datasourceId: string;
   updater: (state: unknown, layerId: string) => unknown;
 }>('updateLayer');
-
-export const initEmpty = createAction<Partial<LensAppState>>(
-  'initEmpty',
-  function prepare({
-    newState,
-    initialContext,
-  }: {
-    newState: Partial<LensAppState>;
-    initialContext?: VisualizeFieldContext;
-  }) {
-    return { payload: { layerId: generateId(), newState, initialContext } };
-  }
-);
+export const insertLayer = createAction<{
+  layerId: string;
+  datasourceId: string;
+}>('insertLayer');
 
 export const switchVisualization = createAction<{
-  newVisualizationId: string;
-  initialState: unknown;
+  visualizationId: string;
+  visualizationState: unknown;
   datasourceState?: unknown;
   datasourceId?: string;
+  shouldStagePreview?: boolean;
 }>('switchVisualization');
-export const selectSuggestion = createAction<{
-  newVisualizationId: string;
-  initialState: unknown;
-  datasourceState: unknown;
-  datasourceId: string;
-}>('selectSuggestion');
 export const rollbackSuggestion = createAction<void>('rollbackSuggestion');
 export const setToggleFullscreen = createAction<void>('setToggleFullscreen');
 export const submitSuggestion = createAction<void>('submitSuggestion');
@@ -144,11 +151,12 @@ export const lensActions = {
   updateState,
   updateDatasourceState,
   updateVisualizationState,
+  editVisualizationAction,
   removeLayers,
   updateLayer,
+  insertLayer,
   initEmpty,
   switchVisualization,
-  selectSuggestion,
   rollbackSuggestion,
   setToggleFullscreen,
   submitSuggestion,
@@ -223,8 +231,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }: {
         payload: {
           visualizationId: string;
-          updater: unknown | ((state: unknown) => unknown);
-          clearStagedPreview?: boolean;
+          newState: unknown;
         };
       }
     ) => {
@@ -241,12 +248,38 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...state,
         visualization: {
           ...state.visualization,
-          state:
-            typeof payload.updater === 'function'
-              ? payload.updater(current(state.visualization.state))
-              : payload.updater,
+          state: payload.newState,
         },
-        stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
+      };
+    },
+    [editVisualizationAction.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          visualizationId: string;
+          event: LensEditEvent<keyof LensEditContextMapping>;
+        };
+      }
+    ) => {
+      if (!state.visualization.activeId) {
+        throw new Error('Invariant: visualization state got updated without active visualization');
+      }
+      // This is a safeguard that prevents us from accidentally updating the
+      // wrong visualization. This occurs in some cases due to the uncoordinated
+      // way we manage state across plugins.
+      if (state.visualization.activeId !== payload.visualizationId) {
+        return state;
+      }
+      const activeVisualization = visualizationMap[payload.visualizationId];
+
+      return {
+        ...state,
+        visualization: {
+          ...state.visualization,
+          state: activeVisualization.onEditAction!(state.visualization.state, payload.event),
+        },
       };
     },
     [updateLayer.type]: (
@@ -268,6 +301,33 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           [payload.datasourceId]: {
             ...state.datasourceStates[payload.datasourceId],
             state: payload.updater(
+              current(state).datasourceStates[payload.datasourceId].state,
+              payload.layerId
+            ),
+          },
+        },
+      };
+    },
+
+    [insertLayer.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          layerId: string;
+          datasourceId: string;
+        };
+      }
+    ) => {
+      const updater = datasourceMap[payload.datasourceId].insertLayer;
+      return {
+        ...state,
+        datasourceStates: {
+          ...state.datasourceStates,
+          [payload.datasourceId]: {
+            ...state.datasourceStates[payload.datasourceId],
+            state: updater(
               current(state).datasourceStates[payload.datasourceId].state,
               payload.layerId
             ),
@@ -328,14 +388,17 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       if (visualization.state === null && activeVisualization) {
         const activeDatasourceId = getInitialDatasourceId(datasourceMap)!;
         const newVisState = activeVisualization.initialize(() => payload.layerId);
-        const updater = datasourceMap[activeDatasourceId].insertLayer;
+        const activeDatasource = datasourceMap[activeDatasourceId];
         return {
           ...newState,
           datasourceStates: {
             ...newState.datasourceStates,
             [activeDatasourceId]: {
               ...newState.datasourceStates[activeDatasourceId],
-              state: updater(newState.datasourceStates[activeDatasourceId].state, payload.layerId),
+              state: activeDatasource.insertLayer(
+                newState.datasourceStates[activeDatasourceId].state,
+                payload.layerId
+              ),
             },
           },
           visualization: {
@@ -353,10 +416,11 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         payload,
       }: {
         payload: {
-          newVisualizationId: string;
-          initialState: unknown;
+          visualizationId: string;
+          visualizationState: unknown;
           datasourceState?: unknown;
           datasourceId?: string;
+          shouldStagePreview?: boolean;
         };
       }
     ) => {
@@ -374,46 +438,15 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             : state.datasourceStates,
         visualization: {
           ...state.visualization,
-          activeId: payload.newVisualizationId,
-          state: payload.initialState,
+          activeId: payload.visualizationId,
+          state: payload.visualizationState,
         },
-        stagedPreview: undefined,
-      };
-    },
-    [selectSuggestion.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          newVisualizationId: string;
-          initialState: unknown;
-          datasourceState: unknown;
-          datasourceId: string;
-        };
-      }
-    ) => {
-      return {
-        ...state,
-        datasourceStates:
-          'datasourceId' in payload && payload.datasourceId
-            ? {
-                ...state.datasourceStates,
-                [payload.datasourceId]: {
-                  ...state.datasourceStates[payload.datasourceId],
-                  state: payload.datasourceState,
-                },
-              }
-            : state.datasourceStates,
-        visualization: {
-          ...state.visualization,
-          activeId: payload.newVisualizationId,
-          state: payload.initialState,
-        },
-        stagedPreview: state.stagedPreview || {
-          datasourceStates: state.datasourceStates,
-          visualization: state.visualization,
-        },
+        stagedPreview: payload.shouldStagePreview
+          ? undefined
+          : state.stagedPreview || {
+              datasourceStates: state.datasourceStates,
+              visualization: state.visualization,
+            },
       };
     },
     [rollbackSuggestion.type]: (state) => {

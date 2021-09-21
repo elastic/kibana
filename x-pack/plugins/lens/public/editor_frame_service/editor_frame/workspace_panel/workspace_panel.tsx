@@ -39,7 +39,7 @@ import {
   DatasourceFixAction,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
-import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
+import { Suggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
@@ -52,7 +52,7 @@ import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expre
 import {
   onActiveDataChange,
   useLensDispatch,
-  updateVisualizationState,
+  editVisualizationAction,
   updateDatasourceState,
   setSaveable,
   useLensSelector,
@@ -62,6 +62,7 @@ import {
   selectDatasourceStates,
   selectActiveDatasourceId,
   selectSearchSessionId,
+  switchVisualization,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 
@@ -251,9 +252,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       }
       if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
         dispatchLens(
-          updateVisualizationState({
+          editVisualizationAction({
             visualizationId: activeVisualization.id,
-            updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
+            event,
           })
         );
       }
@@ -275,7 +276,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
       trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
-      switchToSuggestion(dispatchLens, suggestionForDraggedField, 'SWITCH_VISUALIZATION');
+      dispatchLens(switchVisualization(suggestionForDraggedField));
     }
   }, [suggestionForDraggedField, expressionExists, dispatchLens]);
 
