@@ -21,4 +21,5 @@ export const createKibanaContextForPlugin = (core: CoreStart, pluginsStart: Infr
     ...pluginsStart,
   });
 
-export const useKibanaContextForPlugin = useKibana as () => KibanaReactContextValue<PluginKibanaContextValue>;
+export const useKibanaContextForPlugin =
+  useKibana as () => KibanaReactContextValue<PluginKibanaContextValue>;

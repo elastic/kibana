@@ -76,10 +76,9 @@ type KeysWithOptionalValues<T extends { [key: string]: unknown }> = {
  */
 type OptionalKeyWhenValueAcceptsUndefined<T extends { [key: string]: unknown }> = {
   [K in Exclude<keyof T, KeysWithOptionalValues<T>>]: T[K];
-} &
-  {
-    [K in KeysWithOptionalValues<T>]?: Exclude<T[K], undefined>;
-  };
+} & {
+  [K in KeysWithOptionalValues<T>]?: Exclude<T[K], undefined>;
+};
 
 /**
  * Validate that `value` is an object with string keys. The value at each key is tested against its own validator.
@@ -99,11 +98,9 @@ export function object<
 >(validatorDictionary: ValidatorDictionary) {
   return function (
     value: unknown
-  ): value is /** If a key can point to `undefined`, then instead make the key optional and exclude `undefined` from the value type. */ OptionalKeyWhenValueAcceptsUndefined<
-    {
-      [K in keyof ValidatorDictionary]: TypeOf<ValidatorDictionary[K]>;
-    }
-  > {
+  ): value is /** If a key can point to `undefined`, then instead make the key optional and exclude `undefined` from the value type. */ OptionalKeyWhenValueAcceptsUndefined<{
+    [K in keyof ValidatorDictionary]: TypeOf<ValidatorDictionary[K]>;
+  }> {
     // This only validates non-null objects
     if (typeof value !== 'object' || value === null) {
       return false;
